@@ -67,7 +67,7 @@ services:
     volumes:
       - db_data:/data/db
     healthcheck:
-      test: [ "CMD-SHELL", "echo 'db.runCommand({ ping: 1 })' | mongosh --quiet" ]
+      test: ['CMD-SHELL', "echo 'db.runCommand({ ping: 1 })' | mongosh --quiet"]
       interval: 10s
       timeout: 10s
       retries: 5
