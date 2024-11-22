@@ -56,8 +56,7 @@ services:
         protocol: udp
 
   database:
-    image: mongo:${DB_VERSION}
-    container_name: mongo_database
+    image: mongo:6.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -67,9 +66,9 @@ services:
     volumes:
       - db_data:/data/db
     healthcheck:
-      test: ['CMD-SHELL', "echo 'db.runCommand({ ping: 1 })' | mongosh --quiet"]
+      test: [ "CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 }).ok" ]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 5
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
