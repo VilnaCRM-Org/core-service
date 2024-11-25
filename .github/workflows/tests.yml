@@ -1,0 +1,41 @@
+name: Unit and Integration testing
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  tests:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ vars.PHP_VERSION }}
+
+      - name: Install dependencies
+        run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
+
+      - name: Start application
+        run: make start
+
+      - name: Setup test db
+        run: make setup-test-db
+
+      - name: Execute Unit and Integration tests
+        run: make tests-with-coverage
+
+      - name: Copy coverage report to host
+        run: docker cp php-service-template-php-1:/coverage/coverage.xml /tmp
+
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: /tmp/coverage.xml
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true

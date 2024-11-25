@@ -1,0 +1,13 @@
+default:
+    suites:
+        default:
+            contexts:
+                - App\Tests\Behat\DemoContext
+        health_check:
+            contexts:
+                - App\Tests\Behat\HealthCheckContext\HealthCheckContext
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: 'tests/bootstrap.php'
+            kernel:
+                class: App\Shared\Kernel
