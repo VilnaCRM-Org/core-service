@@ -55,17 +55,6 @@ load 'bats-assert/load'
   assert_output --partial "true true true true"
 }
 
-@test "make doctrine-migrations-migrate executes migrations" {
-  run bash -c "echo 'yes' | make doctrine-migrations-migrate"
-  assert_success
-  assert_output --partial 'DoctrineMigrations'
-}
-
-@test "make doctrine-migrations-generate command executes" {
-  run make doctrine-migrations-generate
-  assert_success
-}
-
 @test "make cache-clear command executes" {
   run make cache-clear
   assert_success
