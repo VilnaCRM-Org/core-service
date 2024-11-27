@@ -1,8 +1,5 @@
 default:
     suites:
-        default:
-            contexts:
-                - App\Tests\Behat\DemoContext
         health_check:
             contexts:
                 - App\Tests\Behat\HealthCheckContext\HealthCheckContext
