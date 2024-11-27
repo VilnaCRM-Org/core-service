@@ -74,7 +74,6 @@ final class HealthCheckContext extends KernelTestCase implements Context
         $container->set(CacheInterface::class, $cacheMock);
     }
 
-
     /**
      * @Given the message broker is not available
      */
