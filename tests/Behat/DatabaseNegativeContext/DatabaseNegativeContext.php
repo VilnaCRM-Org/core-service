@@ -20,7 +20,8 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
     public function __construct()
     {
         parent::__construct();
-        $this->container = (new ConfigurableContainerFactory())->create([__DIR__ . '/config/doctrine.yaml']);
+        $this->container = (new ConfigurableContainerFactory())
+            ->create([__DIR__ . '/config/doctrine.yaml']);
     }
 
     /**
@@ -51,13 +52,5 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
             $responseContent,
             "The response body does not contain the expected text: '{$text}'."
         );
-    }
-
-    /**
-     * @Given negative the database is not available
-     */
-    public function theDatabaseIsNotAvailable(): void
-    {
-
     }
 }

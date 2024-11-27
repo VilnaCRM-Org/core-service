@@ -9,6 +9,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class ConfigurableContainerFactory
 {
+    /**
+     * @param iterable<string> $configs
+     */
     public function create(array $configs): ContainerInterface
     {
         $kernel = new AppKernel('test', true, $configs);
