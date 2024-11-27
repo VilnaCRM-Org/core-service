@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Generate openapi spec
-        run: make generate-openapi-spec
+        run: php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
