@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat\DatabaseNegativeContext;
 
-use App\Tests\ConfigurableContainerFactory;
+use App\Tests\Behat\Factory\ConfigurableContainerFactory;
 use Behat\Behat\Context\Context;
 use PHPUnit\Framework\Assert;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
