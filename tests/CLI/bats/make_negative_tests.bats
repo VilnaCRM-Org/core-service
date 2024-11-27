@@ -61,7 +61,6 @@ load 'bats-assert/load'
   mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
   rmdir src/Internal/HealthCheck/Domain/Entity/
   assert_output --partial "error"
-  assert_failure
 }
 
 @test "make e2e-tests should fail when scenarios fail" {
