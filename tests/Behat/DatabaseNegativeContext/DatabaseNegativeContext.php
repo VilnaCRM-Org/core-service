@@ -53,7 +53,6 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
         );
     }
 
-
     /**
      * @Given negative the database is not available
      */
@@ -61,5 +60,4 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
     {
 
     }
-
 }
