@@ -2,7 +2,6 @@ parameters:
   paths:
     - './src'
   exclude_files:
-    - './DataFixtures/.*'
     - './Shared/Kernel/.*'
     - '.*test.*'
   layers:

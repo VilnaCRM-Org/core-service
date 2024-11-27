@@ -177,14 +177,6 @@ stop: ## Stop docker and the Symfony binary server
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
-load-fixtures: ## Build the DB, control the schema validity, load fixtures and check the migration status
-	@$(SYMFONY) doctrine:cache:clear-metadata
-	@$(SYMFONY) doctrine:database:create --if-not-exists
-	@$(SYMFONY) doctrine:schema:drop --force
-	@$(SYMFONY) doctrine:schema:create
-	@$(SYMFONY) doctrine:schema:validate
-	@$(SYMFONY) d:f:l
-
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
 
