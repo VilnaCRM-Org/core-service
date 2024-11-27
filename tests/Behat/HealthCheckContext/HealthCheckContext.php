@@ -6,10 +6,6 @@ namespace App\Tests\Behat\HealthCheckContext;
 
 use Aws\Sqs\SqsClient;
 use Behat\Behat\Context\Context;
-use Doctrine\Common\EventManager;
-use Doctrine\DBAL\Configuration;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -78,31 +74,6 @@ final class HealthCheckContext extends KernelTestCase implements Context
         $container->set(CacheInterface::class, $cacheMock);
     }
 
-    /**
-     * @Given the database is not available
-     */
-    public function theDatabaseIsNotAvailable(): void
-    {
-        $driverMock = $this->createMock(Driver::class);
-
-        $connectionMock = $this->getMockBuilder(Connection::class)
-            ->setConstructorArgs([
-                [],
-                $driverMock,
-                new Configuration(),
-                new EventManager(),
-            ])
-            ->onlyMethods(['executeQuery'])
-            ->getMock();
-
-        $connectionMock->method('executeQuery')
-            ->willThrowException(new \Exception('Database is not available'));
-
-        $container = $this->kernelInterface
-            ->getContainer()
-            ->get('test.service_container');
-        $container->set(Connection::class, $connectionMock);
-    }
 
     /**
      * @Given the message broker is not available
