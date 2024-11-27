@@ -1,5 +1,5 @@
 {
-  "name": "vilnacrm/php-serice-template",
+  "name": "vilnacrm/core-service",
   "description": "Microservices template for modern PHP applications",
   "type": "project",
   "license": "proprietary",
