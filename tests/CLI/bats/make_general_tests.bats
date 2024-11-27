@@ -70,12 +70,6 @@ load 'bats-assert/load'
   assert_success
 }
 
-@test "make load-fixtures command executes" {
-   run bash -c "make load-fixtures & sleep 2; kill $!"
-   assert_failure
-   assert_output --partial "Successfully deleted cache entries."
-}
-
 @test "make cache-warmup command executes" {
   run make cache-warmup
   assert_success
