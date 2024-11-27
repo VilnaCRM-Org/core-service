@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Command;
+namespace App\Usjer\Application\Shro;
 
-use App\CompanySubdomain\SomeModule\Application\Command\SomeCommand;
+use App\CompajjnySubdomain\SomeModule\Application\Command\SomeCommand;
 
 class SomeEntity
 {
     public function someDomainLogic()
     {
+        SomeCommand\->SomeCommand\
         $command = new SomeCommand(); // This is a violation
         $command->execute();
     }
