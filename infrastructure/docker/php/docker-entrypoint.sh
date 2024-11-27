@@ -35,30 +35,24 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			sleep infinity
 		fi
 
-		echo "Waiting for db to be ready..."
-		ATTEMPTS_LEFT_TO_REACH_DATABASE=60
-		until [ $ATTEMPTS_LEFT_TO_REACH_DATABASE -eq 0 ] || DATABASE_ERROR=$(bin/console dbal:run-sql "SELECT 1" 2>&1); do
-			if [ $? -eq 255 ]; then
-				# If the Doctrine command exits with 255, an unrecoverable error occurred
-				ATTEMPTS_LEFT_TO_REACH_DATABASE=0
+		echo "Waiting for MongoDB to be ready..."
+		ATTEMPTS_LEFT_TO_REACH_MONGO=60
+		until [ $ATTEMPTS_LEFT_TO_REACH_MONGO -eq 0 ]; do
+			if mongo --eval "db.runCommand({ ping: 1 })" "DB_URL" > /dev/null 2>&1; then
 				break
 			fi
 			sleep 1
-			ATTEMPTS_LEFT_TO_REACH_DATABASE=$((ATTEMPTS_LEFT_TO_REACH_DATABASE - 1))
-			echo "Still waiting for db to be ready... Or maybe the db is not reachable. $ATTEMPTS_LEFT_TO_REACH_DATABASE attempts left"
+			ATTEMPTS_LEFT_TO_REACH_MONGO=$((ATTEMPTS_LEFT_TO_REACH_MONGO - 1))
+			echo "Still waiting for MongoDB to be ready... $ATTEMPTS_LEFT_TO_REACH_MONGO attempts left"
 		done
 
-		if [ $ATTEMPTS_LEFT_TO_REACH_DATABASE -eq 0 ]; then
-			echo "The database is not up or not reachable:"
-			echo "$DATABASE_ERROR"
+		if [ $ATTEMPTS_LEFT_TO_REACH_MONGO -eq 0 ]; then
+			echo "MongoDB is not up or not reachable"
 			exit 1
 		else
-			echo "The db is now ready and reachable"
+			echo "MongoDB is now ready and reachable"
 		fi
 
-		if [ "$( find ./migrations -iname '*.php' -print -quit )" ]; then
-			bin/console doctrine:migrations:migrate --no-interaction
-		fi
 	fi
 
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
