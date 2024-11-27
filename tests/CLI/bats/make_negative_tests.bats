@@ -53,13 +53,13 @@ load 'bats-assert/load'
 }
 
 @test "make deptrac should fail when there are dependency violations" {
-  mkdir src/Internal/HealthCheck/Domain/Entity/
-  mv tests/CLI/bats/php/SomeEntity.php src/Internal/HealthCheck/Domain/Entity/
+  mkdir src/Internal/HealthCheck/Domain/Event/
+  mv tests/CLI/bats/php/SomeEntity.php src/Internal/HealthCheck/Domain/Event/
 
   run make deptrac
 
-  mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
-  rmdir src/Internal/HealthCheck/Domain/Entity/
+  mv src/Internal/HealthCheck/Domain/Event/SomeEntity.php tests/CLI/bats/php/
+  rmdir src/Internal/HealthCheck/Domain/Event/
   assert_output --partial "error"
   assert_failure
 }
@@ -79,7 +79,7 @@ load 'bats-assert/load'
   mv temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The style score is too low"
+  assert_output --partial "The code quality score is too low"
 }
 
 @test "make unit-tests should fail if tests fail" {
