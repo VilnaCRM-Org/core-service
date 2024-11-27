@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Behat\Factory;
 
-use App\Shared\AppKernel;
+use App\Tests\Behat\Kernel\AppKernel;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class ConfigurableContainerFactory
