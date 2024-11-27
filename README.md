@@ -76,7 +76,6 @@ coverage                     Create the code coverage report with PHPUnit
 down                         Stop the docker hub
 install                      Install vendors according to the current composer.lock file
 update                       update vendors according to the current composer.json file
-load-fixtures                Build the DB, control the schema validity, load fixtures and check the migration status
 logs                         Show all logs
 new-logs                     Show live logs
 phpcsfixer                   A tool to automatically fix PHP Coding Standards issues
