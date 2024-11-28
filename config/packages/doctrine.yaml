@@ -11,6 +11,6 @@ doctrine_mongodb:
       mappings:
         App:
           is_bundle: false
-          dir: '%kernel.project_dir%/src/Shared/Domain/Document'
-          prefix: 'App\Shared\Domain\Document'
+          dir: '%kernel.project_dir%/src/Shared/Domain/Entity'
+          prefix: 'App\Shared\Domain\Entity'
           alias: App
