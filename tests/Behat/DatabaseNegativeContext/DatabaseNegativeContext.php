@@ -25,7 +25,7 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
     }
 
     /**
-     * @When :method negative request is sent to :path
+     * @When :method negative database request is sent to :path
      */
     public function sendRequestTo(string $method, string $path): void
     {
@@ -34,7 +34,7 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
     }
 
     /**
-     * @Then negative the response status code should be :statusCode
+     * @Then negative database the response status code should be :statusCode
      */
     public function theResponseStatusCodeShouldBe(string $statusCode): void
     {
@@ -42,7 +42,7 @@ final class DatabaseNegativeContext extends KernelTestCase implements Context
     }
 
     /**
-     * @Then negative the response body should contain :text
+     * @Then negative database the response body should contain :text
      */
     public function theResponseBodyShouldContain(string $text): void
     {
