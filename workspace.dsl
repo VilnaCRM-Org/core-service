@@ -8,7 +8,7 @@ workspace {
         }
 
         softwareSystem = softwareSystem "VilnaCRM" {
-            webApplication = container "PHP Service Template" {
+            webApplication = container "Core Service" {
 
                 group "Application" {
                     healthCheckController = component "HealthCheckController" "Handles health check requests" "Controller" {
@@ -49,7 +49,7 @@ workspace {
                     }
                 }
 
-                database = component "Database" "Stores application data" "PostgreSQL" {
+                database = component "Database" "Stores application data" "MongoDB" {
                     tags "Database"
                 }
                 cache = component "Cache" "Caches application data" "Redis" {
