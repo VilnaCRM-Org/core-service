@@ -19,9 +19,9 @@ parameters:
     - name: Domain
       collectors:
         - type: className
-          regex: '.*\\Domain\\(Aggregate|Document|ValueObject|Event|Exception|Factory|Repository|Collection).*'
+          regex: '.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
         - type: className
-          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Document|ValueObject|Event|Exception|Factory|Repository|Collection).*'
+          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
         - type: className
           regex: '.*\\Shared\\Domain\\Bus\\(Command|Event).*'
 
