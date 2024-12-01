@@ -1,0 +1,10 @@
+framework:
+  messenger:
+    transports:
+      dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+when@test:
+  framework:
+    messenger:
+      transports:
+        - in-memory
