@@ -25,7 +25,7 @@
 ## Why you might need it
 
 The Core Service is the backbone of the VilnaCRM ecosystem, providing essential functionalities that power all components of the CRM system.
-With a robust API interface, the Core Service ensures seamless integration and scalability across the VilnaCRM platform,
+With a robust API, the Core Service ensures seamless integration and scalability across the VilnaCRM platform,
 enabling efficient operations and consistent user experiences across all services.
 
 ## License
@@ -67,7 +67,7 @@ check-requirements           Checks requirements for running Symfony and gives u
 check-security               Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 commands                     List all Symfony commands
 composer-validate            The validate command validates a given composer.json and composer.lock
-coverage-xml                 Create the code coverage report with PHPUnit
+coverage-xml                 Create the code coverage report in XML format with PHPUnit
 down                         Stop the docker hub
 install                      Install vendors according to the current composer.lock file
 update                       update vendors according to the current composer.json file
