@@ -55,6 +55,17 @@ load 'bats-assert/load'
   assert_output --partial "true true true true"
 }
 
+@test "make doctrine-migrations-migrate executes migrations" {
+  run bash -c "echo 'yes' | make doctrine-migrations-migrate"
+  assert_success
+  assert_output --partial 'DoctrineMigrations'
+}
+
+@test "make doctrine-migrations-generate command executes" {
+  run make doctrine-migrations-generate
+  assert_success
+}
+
 @test "make cache-clear command executes" {
   run make cache-clear
   assert_success
@@ -68,6 +79,12 @@ load 'bats-assert/load'
 @test "make update command executes" {
   run make update
   assert_success
+}
+
+@test "make load-fixtures command executes" {
+   run bash -c "make load-fixtures & sleep 2; kill $!"
+   assert_failure
+   assert_output --partial "Successfully deleted cache entries."
 }
 
 @test "make cache-warmup command executes" {
