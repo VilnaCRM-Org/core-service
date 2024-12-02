@@ -1,12 +1,11 @@
 default:
     suites:
-        database_negative:
+        default:
             contexts:
-                - App\Tests\Behat\DatabaseNegativeContext\DatabaseNegativeContext
+                - App\Tests\Behat\DemoContext
         health_check:
             contexts:
                 - App\Tests\Behat\HealthCheckContext\HealthCheckContext
-
     extensions:
         FriendsOfBehat\SymfonyExtension:
             bootstrap: 'tests/bootstrap.php'
