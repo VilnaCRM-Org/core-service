@@ -19,4 +19,5 @@ api_platform:
     jsonproblem: ['application/problem+json']
 
   resource_class_directories:
+    - '%kernel.project_dir%/src/Customer/Domain/Entity'
     - '%kernel.project_dir%/src/Internal/HealthCheck/Domain/ValueObject'
