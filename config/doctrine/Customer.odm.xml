@@ -1,0 +1,24 @@
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="App\Customer\Domain\Entity\Customer" collection="customers">
+        <field name="id" type="string" id="true" />
+        <field name="initials" type="string" />
+        <field name="email" type="string" />
+        <field name="phone" type="string" />
+        <field name="leadSource" type="string" />
+        <field name="type" type="string" />
+        <field name="status" type="string" />
+        <field name="dateCreated" type="date" />
+        <field name="lastModifiedDate" type="date" />
+        <field name="confirmed" type="boolean" />
+
+        <indexes>
+            <index>
+                <key name="email" order="asc"/>
+            </index>
+        </indexes>
+    </document>
+</doctrine-mongo-mapping>
