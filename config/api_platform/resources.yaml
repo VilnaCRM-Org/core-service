@@ -1,4 +1,6 @@
 resources:
+  App\Customer\Domain\Entity\Customer:
+
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:
       ApiPlatform\Metadata\Get:
