@@ -2,7 +2,7 @@
 include .env.test
 
 # Parameters
-PROJECT       = core-service
+PROJECT       = php-service-template
 GIT_AUTHOR    = Kravalg
 
 # Executables: local only
@@ -108,7 +108,9 @@ e2e-tests: ## Run end-to-end tests
 
 setup-test-db: ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
+	$(SYMFONY_TEST_ENV) doctrine:database:drop --force --if-exists
+	$(SYMFONY_TEST_ENV) doctrine:database:create
+	$(SYMFONY_TEST_ENV) doctrine:migrations:migrate --no-interaction
 
 all-tests: unit-tests integration-tests e2e-tests ## Run unit, integration and e2e tests
 
@@ -135,6 +137,12 @@ infection: ## Run mutations test.
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
+
+doctrine-migrations-migrate: ## Executes a migration to a specified version or the latest available version
+	$(SYMFONY) d:m:m
+
+doctrine-migrations-generate: ## Generates a blank migration class
+	$(SYMFONY) d:m:g
 
 cache-clear: ## Clears and warms up the application cache for a given environment and debug mode
 	$(SYMFONY) c:c
@@ -176,6 +184,14 @@ stop: ## Stop docker and the Symfony binary server
 
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
+
+load-fixtures: ## Build the DB, control the schema validity, load fixtures and check the migration status
+	@$(SYMFONY) doctrine:cache:clear-metadata
+	@$(SYMFONY) doctrine:database:create --if-not-exists
+	@$(SYMFONY) doctrine:schema:drop --force
+	@$(SYMFONY) doctrine:schema:create
+	@$(SYMFONY) doctrine:schema:validate
+	@$(SYMFONY) d:f:l
 
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html

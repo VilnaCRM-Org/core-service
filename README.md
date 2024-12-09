@@ -73,9 +73,12 @@ check-security               Checks security issues in project dependencies. Wit
 commands                     List all Symfony commands
 composer-validate            The validate command validates a given composer.json and composer.lock
 coverage                     Create the code coverage report with PHPUnit
+doctrine-migrations-generate Generates a blank migration class
+doctrine-migrations-migrate  Executes a migration to a specified version or the latest available version
 down                         Stop the docker hub
 install                      Install vendors according to the current composer.lock file
 update                       update vendors according to the current composer.json file
+load-fixtures                Build the DB, control the schema validity, load fixtures and check the migration status
 logs                         Show all logs
 new-logs                     Show live logs
 phpcsfixer                   A tool to automatically fix PHP Coding Standards issues
