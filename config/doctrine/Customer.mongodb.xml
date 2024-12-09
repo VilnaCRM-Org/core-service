@@ -3,8 +3,8 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <document name="App\Customer\Domain\Entity\Customer" collection="customers">
-        <field name="id" type="string" id="true" />
+    <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
+        <id type="string" strategy="none"/>
         <field name="initials" type="string" />
         <field name="email" type="string" />
         <field name="phone" type="string" />
@@ -16,8 +16,8 @@
         <field name="confirmed" type="boolean" />
 
         <indexes>
-            <index>
-                <key name="email" order="asc"/>
+            <index unique="true">
+                <key name="email"/>
             </index>
         </indexes>
     </document>
