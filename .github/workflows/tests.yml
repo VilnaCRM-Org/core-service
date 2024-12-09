@@ -29,7 +29,7 @@ jobs:
         run: make tests-with-coverage
 
       - name: Copy coverage report to host
-        run: docker cp core-service-php-1:/coverage/coverage.xml /tmp
+        run: docker cp php-service-template-php-1:/coverage/coverage.xml /tmp
 
       - name: Upload code coverage to Codecov
         uses: codecov/codecov-action@v3
