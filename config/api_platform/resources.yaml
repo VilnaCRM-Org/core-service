@@ -1,5 +1,10 @@
 resources:
   App\Customer\Domain\Entity\Customer:
+    operations:
+      ApiPlatform\Metadata\GetCollection: ~
+      create_http:
+        class: 'ApiPlatform\Metadata\Post'
+        input: 'App\Customer\Application\DTO\CustomerRegisterDto'
 
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:
