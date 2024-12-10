@@ -2,6 +2,8 @@
 
 # Core Service
 
+[![CodeScene Code Health](https://img.shields.io/badge/CodeScene%20%7C%20Hotspot%20Code%20Health-9.7-brightgreen)](https://codescene.io/projects/39797)
+[![CodeScene System Mastery](https://img.shields.io/badge/CodeScene%20%7C%20Average%20Code%20Health-9.8-brightgreen)](https://codescene.io/projects/39797)
 [![codecov](https://codecov.io/gh/VilnaCRM-Org/core-service/branch/main/graph/badge.svg?token=FgXtmFulVd)](https://app.codecov.io/gh/VilnaCRM-Org/core-service)
 ![PHPInsights code](https://img.shields.io/badge/PHPInsights%20%7C%20Code%20-100.0%25-success.svg)
 ![PHPInsights style](https://img.shields.io/badge/PHPInsights%20%7C%20Style%20-100.0%25-success.svg)
