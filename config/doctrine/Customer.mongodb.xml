@@ -4,7 +4,7 @@
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
-        <id type="string" strategy="none"/>
+        <id type="domain_uuid" strategy="none"/>
         <field name="initials" type="string" />
         <field name="email" type="string" />
         <field name="phone" type="string" />
