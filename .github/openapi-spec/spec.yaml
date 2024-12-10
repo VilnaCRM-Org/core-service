@@ -8,6 +8,64 @@ servers:
     url: /
     description: ''
 paths:
+  /api/customers:
+    get:
+      operationId: api_customers_get_collection
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: 'Customer collection'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+      summary: 'Retrieves the collection of Customer resources.'
+      description: 'Retrieves the collection of Customer resources.'
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'The collection page number'
+          required: false
+          deprecated: false
+          allowEmptyValue: true
+          schema:
+            type: integer
+            default: 1
+          style: form
+          explode: false
+          allowReserved: false
+      deprecated: false
+    post:
+      operationId: create_http
+      tags:
+        - Customer
+      responses:
+        '201':
+          description: 'Customer resource created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Creates a Customer resource.'
+      description: 'Creates a Customer resource.'
+      parameters: []
+      requestBody:
+        description: 'The new Customer resource'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer.CustomerRegisterDto'
+        required: true
+      deprecated: false
   /api/health:
     get:
       operationId: api_health_get
@@ -24,7 +82,81 @@ paths:
       deprecated: false
 components:
   schemas:
+    Customer:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UuidInterface'
+        initials:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        leadSource:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        dateCreated:
+          type: string
+          format: date-time
+        lastModifiedDate:
+          type: string
+          format: date-time
+        confirmed:
+          type: boolean
+    Customer.CustomerRegisterDto:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        initials:
+          type:
+            - string
+            - 'null'
+        email:
+          type:
+            - string
+            - 'null'
+        phone:
+          type:
+            - string
+            - 'null'
+        leadSource:
+          type:
+            - string
+            - 'null'
+        type:
+          type:
+            - string
+            - 'null'
+        status:
+          type:
+            - string
+            - 'null'
+        dateCreated:
+          type:
+            - string
+            - 'null'
+          format: date-time
+        lastModifiedDate:
+          type:
+            - string
+            - 'null'
+          format: date-time
+        confirmed:
+          type:
+            - boolean
+            - 'null'
     HealthCheck:
+      type: object
+      description: ''
+      deprecated: false
+    UuidInterface:
       type: object
       description: ''
       deprecated: false
