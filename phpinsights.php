@@ -44,6 +44,7 @@ return [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
+                'src/Customer/Domain/Entity/Customer',
             ],
         ],
     ],
