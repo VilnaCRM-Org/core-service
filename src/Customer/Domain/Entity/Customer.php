@@ -9,6 +9,9 @@ use DateTime;
 
 class Customer
 {
+    private ?DateTime $dateCreated;
+    private ?DateTime $lastModifiedDate;
+
     public function __construct(
         private UuidInterface $id,
         private string $initials,
@@ -17,12 +20,10 @@ class Customer
         private string $leadSource,
         private string $type,
         private string $status,
-        private ?DateTime $dateCreated = null,
-        private ?DateTime $lastModifiedDate = null,
-        private bool $confirmed = false
+        private ?bool $confirmed = false
     ) {
-        $this->dateCreated ??= new DateTime();
-        $this->lastModifiedDate ??= new DateTime();
+        $this->dateCreated = new DateTime();
+        $this->lastModifiedDate = new DateTime();
     }
 
     public function getId(): UuidInterface
