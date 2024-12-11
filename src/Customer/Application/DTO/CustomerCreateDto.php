@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Customer\Application\DTO;
 
-final readonly class CustomerRegisterDto
+final readonly class CustomerCreateDto
 {
     public function __construct(
         public ?string $initials = null,
@@ -11,9 +13,6 @@ final readonly class CustomerRegisterDto
         public ?string $leadSource = null,
         public ?string $type = null,
         public ?string $status = null,
-        public ?\DateTime $dateCreated = null,
-        public ?\DateTime $lastModifiedDate = null,
-        public ?bool $confirmed = null,
     ) {
     }
 }
