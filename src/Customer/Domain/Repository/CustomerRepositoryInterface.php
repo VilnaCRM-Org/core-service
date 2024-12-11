@@ -14,9 +14,9 @@ interface CustomerRepositoryInterface
     public function save(object $customer): void;
 
     /**
-     * @param Customer $user
+     * @param Customer $customer
      */
-    public function delete(object $user): void;
+    public function delete(object $customer): void;
 
     /**
      * @param string $id
