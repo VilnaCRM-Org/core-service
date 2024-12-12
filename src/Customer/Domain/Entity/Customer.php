@@ -7,7 +7,7 @@ namespace App\Customer\Domain\Entity;
 use App\Shared\Domain\ValueObject\UuidInterface;
 use DateTime;
 
-class Customer
+class Customer implements CustomerInterface
 {
     private ?DateTime $dateCreated;
     private ?DateTime $lastModifiedDate;

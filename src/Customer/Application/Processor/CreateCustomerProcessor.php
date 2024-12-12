@@ -34,5 +34,15 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         array $context = []
     ): Customer {
 
+        $command = $this->createCustomerCommandFactory->create(
+            $data->initials,
+            $data->email,
+            $data->phone,
+            $data->leadSource,
+            $data->type,
+            $data->status
+        );
+        $this->commandBus->dispatch($command);
+
     }
 }
