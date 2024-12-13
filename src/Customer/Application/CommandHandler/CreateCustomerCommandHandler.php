@@ -24,15 +24,15 @@ class CreateCustomerCommandHandler implements CommandHandlerInterface
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        $user = $this->transformer->transformToCustomer($command);
+        $customer = $this->transformer->transformToCustomer($command);
 
 
-        $this->customerRepository->save($user);
-        $command->setResponse(new CreateCustomerCommandResponse($user));
+        $this->customerRepository->save($customer);
+        $command->setResponse(new CreateCustomerCommandResponse($customer));
 
         $this->eventBus->publish(
             $this->customerCreatedEventFactory->create(
-                $user,
+                $customer,
                 (string) $this->uuidFactory->create()
             )
         );
