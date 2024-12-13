@@ -13,15 +13,15 @@ use Symfony\Component\Uid\Factory\UuidFactory;
 final readonly class CreateCustomerTransformer
 {
     public function __construct(
-        private CustomerFactoryInterface $userFactory,
-        private UuidTransformer $transformer,
-        private UuidFactory $uuidFactory,
+        private CustomerFactoryInterface $customerFactory,
+        private UuidTransformer          $transformer,
+        private UuidFactory              $uuidFactory,
     ) {
     }
 
     public function transformToCustomer(CreateCustomerCommand $command): Customer
     {
-        return $this->userFactory->create(
+        return $this->customerFactory->create(
             $this->transformer->transformFromSymfonyUuid(
                 $this->uuidFactory->create()
             ),
