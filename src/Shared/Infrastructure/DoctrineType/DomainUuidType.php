@@ -16,13 +16,7 @@ final class DomainUuidType extends Type
 
     public function convertToDatabaseValue($value): ?string
     {
-        if ($value instanceof UuidInterface) {
-            return $value->toBinary();
-        }
-
-        $uuid = new Uuid($value);
-
-        return $uuid->toBinary();
+        return (string) $value;
     }
 
     public function convertToPHPValue($value): ?Uuid
