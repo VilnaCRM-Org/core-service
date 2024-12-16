@@ -33,7 +33,6 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-
         $command = $this->createCustomerCommandFactory->create(
             $data->initials,
             $data->email,
