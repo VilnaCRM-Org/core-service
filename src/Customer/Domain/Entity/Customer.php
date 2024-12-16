@@ -26,9 +26,9 @@ class Customer implements CustomerInterface
         $this->lastModifiedDate = new DateTime();
     }
 
-    public function getId(): UuidInterface
+    public function getId(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function setId(UuidInterface $id): void
