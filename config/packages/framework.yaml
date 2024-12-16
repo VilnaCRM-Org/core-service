@@ -3,6 +3,9 @@ framework:
   secret: '%env(APP_SECRET)%'
   #csrf_protection: true
   http_method_override: false
+  serializer:
+    mapping:
+      paths: [ '%kernel.project_dir%/config/serialization' ]
   #esi: true
   #fragments: true
   php_errors:

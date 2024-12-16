@@ -1,5 +1,7 @@
 resources:
   App\Customer\Domain\Entity\Customer:
+    normalizationContext:
+      groups: [ 'output' ]
     operations:
       ApiPlatform\Metadata\GetCollection: ~
       create_http:
