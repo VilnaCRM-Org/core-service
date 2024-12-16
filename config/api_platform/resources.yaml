@@ -3,7 +3,8 @@ resources:
     normalizationContext:
       groups: [ 'output' ]
     operations:
-      ApiPlatform\Metadata\GetCollection: ~
+      ApiPlatform\Metadata\GetCollection:
+        paginationClientItemsPerPage: true
       create_http:
         class: 'ApiPlatform\Metadata\Post'
         input: 'App\Customer\Application\DTO\CustomerCreateDto'
