@@ -44,5 +44,6 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         );
         $this->commandBus->dispatch($command);
 
+        return $command->getResponse()->createdCustomer;
     }
 }
