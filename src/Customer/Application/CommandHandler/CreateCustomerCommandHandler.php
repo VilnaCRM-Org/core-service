@@ -26,15 +26,7 @@ class CreateCustomerCommandHandler implements CommandHandlerInterface
     {
         $customer = $this->transformer->transformToCustomer($command);
 
-
         $this->customerRepository->save($customer);
         $command->setResponse(new CreateCustomerCommandResponse($customer));
-
-        $this->eventBus->publish(
-            $this->customerCreatedEventFactory->create(
-                $customer,
-                (string) $this->uuidFactory->create()
-            )
-        );
     }
 }

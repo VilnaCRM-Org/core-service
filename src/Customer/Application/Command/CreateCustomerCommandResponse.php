@@ -11,5 +11,6 @@ class CreateCustomerCommandResponse implements CommandResponseInterface
 {
     public function __construct(public CustomerInterface $createdCustomer)
     {
+
     }
 }
