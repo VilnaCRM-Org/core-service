@@ -1,0 +1,10 @@
+App\Customer\Domain\Entity\Customer:
+  attributes:
+    id:
+      groups: ['output']
+    email:
+      groups: ['output']
+    initials:
+      groups: ['output']
+    confirmed:
+      groups: ['output']
