@@ -5,6 +5,9 @@ resources:
     operations:
       ApiPlatform\Metadata\GetCollection:
         paginationClientItemsPerPage: true
+      ApiPlatform\Metadata\Put:
+        input: 'App\Customer\Application\DTO\CustomerPutDto'
+        processor: 'App\Customer\Application\Processor\PutCustomerProcessor'
       create_http:
         class: 'ApiPlatform\Metadata\Post'
         input: 'App\Customer\Application\DTO\CustomerCreateDto'
