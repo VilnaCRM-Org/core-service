@@ -8,3 +8,13 @@ App\Customer\Domain\Entity\Customer:
       groups: ['output']
     confirmed:
       groups: ['output']
+    leadSource:
+      groups: ['output']
+    type:
+      groups: ['output']
+    status:
+      groups: ['output']
+    dateCreated:
+      groups: ['output']
+    lastModifiedDate:
+      groups: ['output']
