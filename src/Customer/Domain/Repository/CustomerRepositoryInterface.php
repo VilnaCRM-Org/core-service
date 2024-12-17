@@ -23,9 +23,5 @@ interface CustomerRepositoryInterface
      *
      * @return Customer
      */
-    public function find(
-        mixed $id,
-        ?int $lockMode = null,
-        ?int $lockVersion = null
-    ): ?object;
+    public function find(string $id, int $lockMode, ?int $lockVersion = null): ?object;
 }
