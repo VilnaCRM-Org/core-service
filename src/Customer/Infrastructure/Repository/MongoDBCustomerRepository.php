@@ -39,13 +39,4 @@ class MongoDBCustomerRepository extends ServiceDocumentRepository implements Cus
         $this->documentManager->flush();
     }
 
-    /**
-     * @param string $id
-     *
-     * @return Customer|null
-     */
-    public function find(mixed $id, ?int $lockMode = null, ?int $lockVersion = null): ?object
-    {
-        return $this->find($id);
-    }
 }
