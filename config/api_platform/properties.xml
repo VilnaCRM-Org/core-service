@@ -9,7 +9,7 @@
         <openapiContext>
             <values>
                 <value name="type">string</value>
-                <value name="format">string</value>
+                <value name="format">uuid</value>
             </values>
         </openapiContext>
     </property>
