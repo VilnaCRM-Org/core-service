@@ -14,7 +14,7 @@ App\Customer\Domain\Entity\Customer:
       groups: ['output']
     status:
       groups: ['output']
-    dateCreated:
+    createdAt:
       groups: ['output']
-    lastModifiedDate:
+    updatedAt:
       groups: ['output']
