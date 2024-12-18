@@ -9,8 +9,8 @@ use DateTime;
 
 class Customer implements CustomerInterface
 {
-    private ?DateTime $dateCreated;
-    private ?DateTime $lastModifiedDate;
+    private ?DateTime $createdAt;
+    private ?DateTime $updatedAt;
 
     public function __construct(
         private UuidInterface $id,
@@ -22,8 +22,8 @@ class Customer implements CustomerInterface
         private string $status,
         private ?bool $confirmed = false
     ) {
-        $this->dateCreated = new DateTime();
-        $this->lastModifiedDate = new DateTime();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     public function getId(): string
@@ -96,24 +96,24 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getDateCreated(): DateTime
+    public function getCreatedAt(): DateTime
     {
-        return $this->dateCreated;
+        return $this->createdAt;
     }
 
-    public function setDateCreated(DateTime $dateCreated): void
+    public function setCreatedAt(DateTime $createdAt): void
     {
-        $this->dateCreated = $dateCreated;
+        $this->createdAt = $createdAt;
     }
 
-    public function getLastModifiedDate(): DateTime
+    public function getUpdatedAt(): DateTime
     {
-        return $this->lastModifiedDate;
+        return $this->updatedAt;
     }
 
-    public function setLastModifiedDate(DateTime $lastModifiedDate): void
+    public function setUpdatedAt(DateTime $updatedAt): void
     {
-        $this->lastModifiedDate = $lastModifiedDate;
+        $this->updatedAt = $updatedAt;
     }
 
     public function isConfirmed(): bool
