@@ -15,7 +15,7 @@ services:
   app.customer.value_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments:
-      - 'status.value': 'exact'
+      [ { initials: exact, email: exact, phone: exact, leadSource: exact, type.value: exact, status.value: exact } ]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.customer_filter' }
   # default configuration for services in *this* file
