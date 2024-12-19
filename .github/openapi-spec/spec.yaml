@@ -38,9 +38,165 @@ paths:
           style: form
           explode: false
           allowReserved: false
+        -
+          name: initials
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'initials[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+        -
+          name: email
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'email[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+        -
+          name: phone
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'phone[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+        -
+          name: leadSource
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'leadSource[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+        -
+          name: type.value
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'type.value[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+        -
+          name: status.value
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'status.value[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
       deprecated: false
     post:
-      operationId: create_http
+      operationId: api_customers_post
       tags:
         - Customer
       responses:
@@ -63,7 +219,453 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Customer.CustomerRegisterDto'
+              $ref: '#/components/schemas/Customer'
+        required: true
+      deprecated: false
+  '/api/customers/{id}':
+    get:
+      operationId: api_customers_id_get
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: 'Customer resource'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+      summary: 'Retrieves a Customer resource.'
+      description: 'Retrieves a Customer resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Customer identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    delete:
+      operationId: api_customers_id_delete
+      tags:
+        - Customer
+      responses:
+        '204':
+          description: 'Customer resource deleted'
+      summary: 'Removes the Customer resource.'
+      description: 'Removes the Customer resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Customer identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    patch:
+      operationId: api_customers_id_patch
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: 'Customer resource updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Updates the Customer resource.'
+      description: 'Updates the Customer resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Customer identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      requestBody:
+        description: 'The updated Customer resource'
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+        required: true
+      deprecated: false
+  /api/customer_statuses:
+    get:
+      operationId: api_customer_statuses_get_collection
+      tags:
+        - CustomerStatus
+      responses:
+        '200':
+          description: 'CustomerStatus collection'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerStatus'
+      summary: 'Retrieves the collection of CustomerStatus resources.'
+      description: 'Retrieves the collection of CustomerStatus resources.'
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'The collection page number'
+          required: false
+          deprecated: false
+          allowEmptyValue: true
+          schema:
+            type: integer
+            default: 1
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: value
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'value[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+      deprecated: false
+    post:
+      operationId: api_customer_statuses_post
+      tags:
+        - CustomerStatus
+      responses:
+        '201':
+          description: 'CustomerStatus resource created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerStatus'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Creates a CustomerStatus resource.'
+      description: 'Creates a CustomerStatus resource.'
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  example: Active
+        required: false
+      deprecated: false
+  '/api/customer_statuses/{id}':
+    get:
+      operationId: api_customer_statuses_id_get
+      tags:
+        - CustomerStatus
+      responses:
+        '200':
+          description: 'CustomerStatus resource'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerStatus'
+      summary: 'Retrieves a CustomerStatus resource.'
+      description: 'Retrieves a CustomerStatus resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerStatus identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    delete:
+      operationId: api_customer_statuses_id_delete
+      tags:
+        - CustomerStatus
+      responses:
+        '204':
+          description: 'CustomerStatus resource deleted'
+      summary: 'Removes the CustomerStatus resource.'
+      description: 'Removes the CustomerStatus resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerStatus identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    patch:
+      operationId: api_customer_statuses_id_patch
+      tags:
+        - CustomerStatus
+      responses:
+        '200':
+          description: 'CustomerStatus resource updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerStatus'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Updates the CustomerStatus resource.'
+      description: 'Updates the CustomerStatus resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerStatus identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      requestBody:
+        description: 'The updated CustomerStatus resource'
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/CustomerStatus'
+        required: true
+      deprecated: false
+  /api/customer_types:
+    get:
+      operationId: api_customer_types_get_collection
+      tags:
+        - CustomerType
+      responses:
+        '200':
+          description: 'CustomerType collection'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerType'
+      summary: 'Retrieves the collection of CustomerType resources.'
+      description: 'Retrieves the collection of CustomerType resources.'
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'The collection page number'
+          required: false
+          deprecated: false
+          allowEmptyValue: true
+          schema:
+            type: integer
+            default: 1
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: value
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'value[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          allowReserved: false
+      deprecated: false
+    post:
+      operationId: api_customer_types_post
+      tags:
+        - CustomerType
+      responses:
+        '201':
+          description: 'CustomerType resource created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerType'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Creates a CustomerType resource.'
+      description: 'Creates a CustomerType resource.'
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  example: Prospect
+        required: false
+      deprecated: false
+  '/api/customer_types/{id}':
+    get:
+      operationId: api_customer_types_id_get
+      tags:
+        - CustomerType
+      responses:
+        '200':
+          description: 'CustomerType resource'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerType'
+      summary: 'Retrieves a CustomerType resource.'
+      description: 'Retrieves a CustomerType resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerType identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    delete:
+      operationId: api_customer_types_id_delete
+      tags:
+        - CustomerType
+      responses:
+        '204':
+          description: 'CustomerType resource deleted'
+      summary: 'Removes the CustomerType resource.'
+      description: 'Removes the CustomerType resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerType identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      deprecated: false
+    patch:
+      operationId: api_customer_types_id_patch
+      tags:
+        - CustomerType
+      responses:
+        '200':
+          description: 'CustomerType resource updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerType'
+          links: {  }
+        '400':
+          description: 'Invalid input'
+        '422':
+          description: 'Unprocessable entity'
+      summary: 'Updates the CustomerType resource.'
+      description: 'Updates the CustomerType resource.'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'CustomerType identifier'
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+          allowReserved: false
+      requestBody:
+        description: 'The updated CustomerType resource'
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/CustomerType'
         required: true
       deprecated: false
   /api/health:
@@ -87,8 +689,12 @@ components:
       description: ''
       deprecated: false
       properties:
-        id:
-          $ref: '#/components/schemas/UuidInterface'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
         initials:
           type: string
         email:
@@ -99,64 +705,36 @@ components:
           type: string
         type:
           type: string
+          format: iri-reference
+          example: 'https://example.com/'
         status:
           type: string
-        dateCreated:
-          type: string
-          format: date-time
-        lastModifiedDate:
-          type: string
-          format: date-time
+          format: iri-reference
+          example: 'https://example.com/'
         confirmed:
           type: boolean
-    Customer.CustomerRegisterDto:
+        id:
+          type: string
+          format: uuid
+    CustomerStatus:
       type: object
       description: ''
       deprecated: false
       properties:
-        initials:
-          type:
-            - string
-            - 'null'
-        email:
-          type:
-            - string
-            - 'null'
-        phone:
-          type:
-            - string
-            - 'null'
-        leadSource:
-          type:
-            - string
-            - 'null'
-        type:
-          type:
-            - string
-            - 'null'
-        status:
-          type:
-            - string
-            - 'null'
-        dateCreated:
-          type:
-            - string
-            - 'null'
-          format: date-time
-        lastModifiedDate:
-          type:
-            - string
-            - 'null'
-          format: date-time
-        confirmed:
-          type:
-            - boolean
-            - 'null'
-    HealthCheck:
+        value:
+          type: string
+        id:
+          type: string
+    CustomerType:
       type: object
       description: ''
       deprecated: false
-    UuidInterface:
+      properties:
+        value:
+          type: string
+        id:
+          type: string
+    HealthCheck:
       type: object
       description: ''
       deprecated: false
