@@ -13,14 +13,14 @@ class Customer implements CustomerInterface
     private ?DateTime $updatedAt;
 
     public function __construct(
-        private UuidInterface $id,
-        private string $initials,
-        private string $email,
-        private string $phone,
-        private string $leadSource,
-        private string $type,
-        private string $status,
-        private ?bool $confirmed = false
+        private string         $initials,
+        private string         $email,
+        private string         $phone,
+        private string         $leadSource,
+        private CustomerType   $type,
+        private CustomerStatus $status,
+        private ?bool          $confirmed = false,
+        private ?string $id = null,
     ) {
         $this->createdAt = new DateTime();
         $this->updatedAt = new DateTime();
@@ -76,22 +76,22 @@ class Customer implements CustomerInterface
         $this->leadSource = $leadSource;
     }
 
-    public function getType(): string
+    public function getType(): CustomerType
     {
         return $this->type;
     }
 
-    public function setType(string $type): void
+    public function setType(CustomerType $type): void
     {
         $this->type = $type;
     }
 
-    public function getStatus(): string
+    public function getStatus(): CustomerStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): void
+    public function setStatus(CustomerStatus $status): void
     {
         $this->status = $status;
     }

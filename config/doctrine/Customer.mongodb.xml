@@ -5,17 +5,18 @@
 
     <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
 
-        <id type="domain_uuid" strategy="none"/>
+        <id type="uuid" strategy="AUTO"/>
         <field name="initials" type="string" />
         <field name="email" type="string" />
         <field name="phone" type="string" />
         <field name="leadSource" type="string" />
-        <field name="type" type="string" />
-        <field name="status" type="string" />
         <field name="createdAt" type="date" />
         <field name="updatedAt" type="date" />
         <field name="confirmed" type="boolean" />
-
+        <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus" field="status">
+        </reference-one>
+        <reference-one target-document="App\Customer\Domain\Entity\CustomerType" field="type">
+        </reference-one>
         <indexes>
             <index unique="true">
                 <key name="email"/>
