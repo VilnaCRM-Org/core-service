@@ -14,8 +14,14 @@
         <field name="updatedAt" type="date" />
         <field name="confirmed" type="boolean" />
         <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus" field="status">
+            <cascade>
+                <all />
+            </cascade>
         </reference-one>
         <reference-one target-document="App\Customer\Domain\Entity\CustomerType" field="type">
+            <cascade>
+                <all />
+            </cascade>
         </reference-one>
         <indexes>
             <index unique="true">
