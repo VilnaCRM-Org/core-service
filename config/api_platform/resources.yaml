@@ -1,6 +1,11 @@
 resources:
   App\Customer\Domain\Entity\CustomerStatus:
     operations:
+      ApiPlatform\Metadata\GetCollection:
+        filters: ['customer_value.mongodb.value_filter']
+      ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Patch:
+      ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
         openapi:
           requestBody:
@@ -12,10 +17,14 @@ resources:
                     value:
                       type: string
                       example: 'Active'
+
   App\Customer\Domain\Entity\CustomerType:
     operations:
-      ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\GetCollection:
+        filters: ['customer_value.mongodb.value_filter']
+      ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Patch:
+      ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
         openapi:
           requestBody:
@@ -29,8 +38,13 @@ resources:
                       example: 'Prospect'
 
   App\Customer\Domain\Entity\Customer:
-
-
+    operations:
+      ApiPlatform\Metadata\GetCollection:
+        filters: [ 'customer.mongodb.customer_filter' ]
+      ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Patch:
+      ApiPlatform\Metadata\Delete:
+      ApiPlatform\Metadata\Post:
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:
       ApiPlatform\Metadata\Get:
