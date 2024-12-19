@@ -2,11 +2,9 @@
 
 namespace App\Customer\Domain\Entity;
 
-use App\Shared\Domain\ValueObject\UuidInterface;
-
 class CustomerType
 {
-    public function __construct(private string $id, private string $value)
+    public function __construct(private string $value, private ?string $id = null)
     {
     }
 
