@@ -11,23 +11,25 @@ resources:
                   properties:
                     value:
                       type: string
+                      example: 'Active'
+  App\Customer\Domain\Entity\CustomerType:
+    operations:
+      ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\GetCollection:
+      ApiPlatform\Metadata\Post:
+        openapi:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    value:
+                      type: string
                       example: 'Prospect'
 
   App\Customer\Domain\Entity\Customer:
-    normalizationContext:
-      groups: [ 'output' ]
-    operations:
-      ApiPlatform\Metadata\GetCollection:
-        paginationClientItemsPerPage: true
-      ApiPlatform\Metadata\Put:
-        input: 'App\Customer\Application\DTO\CustomerPutDto'
-        processor: 'App\Customer\Application\Processor\PutCustomerProcessor'
-      ApiPlatform\Metadata\Delete:
-        processor: 'App\Customer\Application\Processor\Delete'
-      create_http:
-        class: 'ApiPlatform\Metadata\Post'
-        input: 'App\Customer\Application\DTO\CustomerCreateDto'
-        processor: 'App\Customer\Application\Processor\CreateCustomerProcessor'
+
 
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:
