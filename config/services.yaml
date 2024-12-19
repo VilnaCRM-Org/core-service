@@ -6,6 +6,18 @@
 parameters:
 
 services:
+  app.customer_type.value_search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments:
+      - 'value': 'exact'
+    tags:
+      - { name: 'api_platform.filter', id: 'customer_value.mongodb.value_filter' }
+  app.customer.value_search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments:
+      - 'status.value': 'exact'
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.customer_filter' }
   # default configuration for services in *this* file
   _defaults:
     autowire: true # Automatically injects dependencies in your services.
