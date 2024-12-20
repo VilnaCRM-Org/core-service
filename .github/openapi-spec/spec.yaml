@@ -219,7 +219,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Customer'
+              $ref: '#/components/schemas/Customer-input'
         required: true
       deprecated: false
   '/api/customers/{id}':
@@ -309,7 +309,7 @@ paths:
         content:
           application/merge-patch+json:
             schema:
-              $ref: '#/components/schemas/Customer'
+              $ref: '#/components/schemas/Customer-input'
         required: true
       deprecated: false
   /api/customer_statuses:
@@ -716,6 +716,27 @@ components:
         id:
           type: string
           format: uuid
+    Customer-input:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        initials:
+          type: string
+        email:
+          type: string
+        leadSource:
+          type: string
+        type:
+          type: string
+          format: iri-reference
+          example: 'https://example.com/'
+        status:
+          type: string
+          format: iri-reference
+          example: 'https://example.com/'
+        confirmed:
+          type: boolean
     CustomerStatus:
       type: object
       description: ''
