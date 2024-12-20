@@ -38,6 +38,8 @@ resources:
                       example: 'Prospect'
 
   App\Customer\Domain\Entity\Customer:
+    denormalizationContext:
+      groups: [ 'input' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters: [ 'customer.mongodb.customer_filter' ]
