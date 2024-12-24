@@ -7,7 +7,6 @@ use App\Customer\Application\Command\CreateCustomerCommandResponse;
 use App\Customer\Application\Transformer\CreateCustomerTransformer;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
-use Symfony\Component\Uid\Factory\UuidFactory;
 
 class CreateCustomerCommandHandler implements CommandHandlerInterface
 {
