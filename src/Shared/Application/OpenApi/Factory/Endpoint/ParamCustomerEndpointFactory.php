@@ -6,23 +6,29 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
-use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamUserEndpointFactory implements AbstractEndpointFactory
+final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers/{id}';
 
     private Parameter $uuidWithExamplePathParam;
 
+    private Response $customerReturnedResponse;
+
     public function __construct(
-        private UuidUriParameterFactory $parameterFactory,
+        private UuidUriParameterFactory         $parameterFactory,
+        private CustomerReturnedResponseFactory $customerReturnedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
+
+        $this->customerReturnedResponse =
+            $this->customerReturnedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -66,11 +72,23 @@ final class ParamUserEndpointFactory implements AbstractEndpointFactory
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withGet(
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
+                ->withResponses($this->getGetResponses())
             ));
+
     }
 
     private function getPathItem(OpenApi $openApi): PathItem
     {
         return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
+    }
+
+    /**
+     * @return array<int,Response>
+     */
+    private function getGetResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_OK => $this->customerReturnedResponse,
+        ];
     }
 }
