@@ -1,22 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Shared\Application\OpenApi\Factory\Response;
 
-use App\Shared\Application\OpenApi\Builder\Parameter;
-use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use ApiPlatform\OpenApi\Model\Response;
+use App\Shared\Application\OpenApi\Builder\Parameter;
+use App\Shared\Application\OpenApi\Builder\ResponseBuilderInterface;
 
 abstract class AbstractCustomerResponseFactory implements AbstractResponseFactory
 {
-    public function __construct(protected ResponseBuilder $responseBuilder)
-    {
-    }
+    abstract protected function getResponseBuilder(): ResponseBuilderInterface;
 
     abstract protected function getTitle(): string;
 
     public function getResponse(): Response
     {
-        return $this->responseBuilder->build(
+        return $this->getResponseBuilder()->build(
             $this->getTitle(),
             $this->getDefaultParameters(),
             []
