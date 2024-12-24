@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Builder;
 use ApiPlatform\OpenApi\Model;
 use ApiPlatform\OpenApi\Model\Response;
 
-final class ResponseBuilder
+final class ResponseBuilder implements ResponseBuilderInterface
 {
     public function __construct(private ContextBuilder $contextBuilder)
     {
