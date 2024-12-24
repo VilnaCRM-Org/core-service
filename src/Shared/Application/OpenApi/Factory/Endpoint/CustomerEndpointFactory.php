@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerCreatedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerReturnedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomersReturnedResponseFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerEndpointFactory implements AbstractEndpointFactory
@@ -20,7 +20,7 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
 
     public function __construct(
         private CustomerCreatedResponseFactory  $customerCreatedResponseFactory,
-        private CustomerReturnedResponseFactory $customerReturnedResponseFactory,
+        private CustomersReturnedResponseFactory $customerReturnedResponseFactory,
     ) {
         $this->customerCreatedResponse =
             $this->customerCreatedResponseFactory->getResponse();
