@@ -4,63 +4,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\Response;
 
-use ApiPlatform\OpenApi\Model\Response;
-use App\Shared\Application\OpenApi\Builder\Parameter;
-use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
-
-final class CustomerReturnedResponseFactory implements AbstractResponseFactory
+final class CustomerReturnedResponseFactory extends AbstractCustomerResponseFactory
 {
-    public function __construct(private ResponseBuilder $responseBuilder)
+    protected function getTitle(): string
     {
-    }
-
-    public function getResponse(): Response
-    {
-        return $this->responseBuilder->build(
-            'Customer returned',
-            [
-                $this->getConfirmedParam(),
-                $this->getEmailParam(),
-                $this->getInitialsParam(),
-                $this->getIdParam(),
-            ],
-            []
-        );
-    }
-
-    public function getConfirmedParam(): Parameter
-    {
-        return new Parameter(
-            'confirmed',
-            'boolean',
-            true
-        );
-    }
-
-    public function getEmailParam(): Parameter
-    {
-        return new Parameter(
-            'email',
-            'string',
-            'customer@example.com'
-        );
-    }
-
-    public function getInitialsParam(): Parameter
-    {
-        return new Parameter(
-            'initials',
-            'string',
-            'Name Surname'
-        );
-    }
-
-    public function getIdParam(): Parameter
-    {
-        return new Parameter(
-            'id',
-            'string',
-            '018dd6ba-e901-7a8c-b27d-65d122caca6b'
-        );
+        return 'Customer returned';
     }
 }
