@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilderInterface;
 
-abstract class AbstractCustomerResponseFactory implements AbstractResponseFactory
+abstract class AbstractCustomerResponseFactory implements AbstractResponseFactoryInterface
 {
     abstract protected function getResponseBuilder(): ResponseBuilderInterface;
 
@@ -71,12 +71,20 @@ abstract class AbstractCustomerResponseFactory implements AbstractResponseFactor
 
     protected function getTypeParam(): Parameter
     {
-        return new Parameter('type', 'iri-reference', '/api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447');
+        return new Parameter(
+            'type',
+            'iri-reference',
+            '/api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447'
+        );
     }
 
     protected function getStatusParam(): Parameter
     {
-        return new Parameter('status', 'iri-reference', '/api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7');
+        return new Parameter(
+            'status',
+            'iri-reference',
+            '/api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7'
+        );
     }
 
     protected function getInitialsParam(): Parameter
