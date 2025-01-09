@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\Endpoint;
 
+use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerCreatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomersReturnedResponseFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -18,14 +20,20 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
 
     private Response $customersReturnedResponse;
 
+    private RequestBody $createCustomerRequest;
+
     public function __construct(
-        private CustomerCreatedResponseFactory  $customerCreatedResponseFactory,
+        private CustomerCreatedResponseFactory   $customerCreatedResponseFactory,
         private CustomersReturnedResponseFactory $customerReturnedResponseFactory,
+        private CustomerRequestFactory           $createCustomerRequestFactory,
     ) {
         $this->customerCreatedResponse =
             $this->customerCreatedResponseFactory->getResponse();
         $this->customersReturnedResponse =
             $this->customerReturnedResponseFactory->getResponse();
+        $this->createCustomerRequest =
+            $this->createCustomerRequestFactory->getRequest();
+
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -38,6 +46,7 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
             ->withPost(
                 $operationPost
                     ->withResponses($this->getPostResponses())
+                    ->withRequestBody($this->createCustomerRequest)
             )
             ->withGet($operationGet->withResponses(
                 $this->getGetResponses()
