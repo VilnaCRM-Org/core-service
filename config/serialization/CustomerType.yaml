@@ -1,0 +1,6 @@
+App\Customer\Domain\Entity\CustomerType:
+  attributes:
+    id:
+      groups: ['read:customerType']
+    value:
+      groups: ['read:customerType', 'write:customerType']
