@@ -19,6 +19,6 @@ final class CustomersReturnedResponseFactory extends AbstractCustomerResponseFac
 
     protected function getTitle(): string
     {
-        return 'Customers created';
+        return 'Customers returned';
     }
 }

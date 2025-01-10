@@ -19,6 +19,6 @@ class CustomerUpdatedResponseFactory extends AbstractCustomerResponseFactory
 
     protected function getTitle(): string
     {
-        return 'User updated';
+        return 'Customer updated';
     }
 }
