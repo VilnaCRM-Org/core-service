@@ -10,8 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Request\UpdateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerUpdatedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -26,12 +29,19 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private RequestBody $updateCustomerRequest;
 
     private Response $customerUpdatedResponse;
+    private Response $validationErrorResponse;
+    private Response $badRequestResponse;
+    private Response $customerNotFoundResponse;
+
 
     public function __construct(
         private UuidUriParameterFactory         $parameterFactory,
         private CustomerReturnedResponseFactory $customerReturnedResponseFactory,
         private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
         private CustomerUpdatedResponseFactory  $customerUpdatedResponseFactory,
+        private ValidationErrorFactory          $validationErrorResponseFactory,
+        private BadRequestResponseFactory       $badRequestResponseFactory,
+        private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -44,6 +54,15 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
 
         $this->customerUpdatedResponse =
             $this->customerUpdatedResponseFactory->getResponse();
+
+        $this->validationErrorResponse =
+            $this->validationErrorResponseFactory->getResponse();
+
+        $this->badRequestResponse =
+            $this->badRequestResponseFactory->getResponse();
+
+        $this->customerNotFoundResponse =
+            $this->customerNotFoundResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -104,6 +123,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_OK => $this->customerReturnedResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
         ];
     }
 
@@ -114,6 +134,9 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_OK => $this->customerUpdatedResponse,
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
         ];
     }
 }
