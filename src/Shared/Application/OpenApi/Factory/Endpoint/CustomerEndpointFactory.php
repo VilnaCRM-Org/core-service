@@ -10,7 +10,6 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerCreatedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomersReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
