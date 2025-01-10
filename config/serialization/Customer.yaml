@@ -3,17 +3,19 @@ App\Customer\Domain\Entity\Customer:
     id:
       groups: ['output']
     email:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
+    phone:
+      groups: ['output', 'write:customer']
     initials:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
     confirmed:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
     leadSource:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
     type:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
     status:
-      groups: ['output', 'input']
+      groups: ['output', 'write:customer']
     createdAt:
       groups: ['output']
     updatedAt:
