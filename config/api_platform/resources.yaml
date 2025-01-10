@@ -1,5 +1,7 @@
 resources:
   App\Customer\Domain\Entity\CustomerStatus:
+    denormalizationContext:
+      groups: [ 'write:customerStatus' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters: ['customer_value.mongodb.value_filter']
@@ -19,6 +21,8 @@ resources:
                       example: 'Active'
 
   App\Customer\Domain\Entity\CustomerType:
+    denormalizationContext:
+      groups: [ 'write:customerType' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters: ['customer_value.mongodb.value_filter']
@@ -39,7 +43,7 @@ resources:
 
   App\Customer\Domain\Entity\Customer:
     denormalizationContext:
-      groups: [ 'input' ]
+      groups: [ 'write:customer' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters: [ 'customer.mongodb.customer_filter' ]
