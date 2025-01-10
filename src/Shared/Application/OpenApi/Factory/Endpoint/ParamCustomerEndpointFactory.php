@@ -33,7 +33,6 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private Response $badRequestResponse;
     private Response $customerNotFoundResponse;
 
-
     public function __construct(
         private UuidUriParameterFactory         $parameterFactory,
         private CustomerReturnedResponseFactory $customerReturnedResponseFactory,
