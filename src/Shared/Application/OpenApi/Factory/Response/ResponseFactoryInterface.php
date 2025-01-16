@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Response;
 
 use ApiPlatform\OpenApi\Model\Response;
 
-interface AbstractResponseFactoryInterface
+interface ResponseFactoryInterface
 {
     public function getResponse(): Response;
 }

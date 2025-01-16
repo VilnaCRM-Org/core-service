@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilderInterface;
 
-abstract class AbstractCustomerResponseFactory implements AbstractResponseFactoryInterface
+abstract class CustomerResponseFactory implements ResponseFactoryInterface
 {
     abstract protected function getResponseBuilder(): ResponseBuilderInterface;
 

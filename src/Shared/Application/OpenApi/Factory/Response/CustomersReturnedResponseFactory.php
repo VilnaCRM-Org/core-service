@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Response;
 
 use App\Shared\Application\OpenApi\Builder\ArrayResponseBuilder;
 
-final class CustomersReturnedResponseFactory extends AbstractCustomerResponseFactory
+final class CustomersReturnedResponseFactory extends CustomerResponseFactory
 {
     public function __construct(private ArrayResponseBuilder $responseBuilder)
     {
