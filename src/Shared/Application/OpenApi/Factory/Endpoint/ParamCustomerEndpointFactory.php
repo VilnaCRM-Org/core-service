@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Request\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerUpdatedResponseFactory;
@@ -32,6 +33,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
     private Response $customerNotFoundResponse;
+    private Response $customerDeletedResponse;
 
     public function __construct(
         private UuidUriParameterFactory         $parameterFactory,
@@ -41,6 +43,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
         private ValidationErrorFactory          $validationErrorResponseFactory,
         private BadRequestResponseFactory       $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
+        private CustomerDeletedResponseFactory $deletedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -62,6 +65,9 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
 
         $this->customerNotFoundResponse =
             $this->customerNotFoundResponseFactory->getResponse();
+
+        $this->customerDeletedResponse =
+            $this->deletedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -95,6 +101,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
             ->withDelete(
                 $operationDelete
                     ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withResponses($this->getDeleteResponses())
             ));
     }
 
@@ -113,6 +120,17 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private function getPathItem(OpenApi $openApi): PathItem
     {
         return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
+    }
+
+    /**
+     * @return array<int,Response>
+     */
+    private function getDeleteResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_NO_CONTENT => $this->customerDeletedResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
+        ];
     }
 
     /**
