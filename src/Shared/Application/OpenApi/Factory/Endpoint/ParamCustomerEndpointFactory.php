@@ -9,6 +9,7 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerDeletedResponseFactory;
@@ -34,6 +35,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private Response $badRequestResponse;
     private Response $customerNotFoundResponse;
     private Response $customerDeletedResponse;
+    private RequestBody $replaceCustomerRequest;
 
     public function __construct(
         private UuidUriParameterFactory         $parameterFactory,
@@ -43,7 +45,8 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
         private ValidationErrorFactory          $validationErrorResponseFactory,
         private BadRequestResponseFactory       $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory $deletedResponseFactory,
+        private CustomerDeletedResponseFactory  $deletedResponseFactory,
+        private CustomerRequestFactory          $replaceCustomerRequestFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -68,13 +71,30 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
 
         $this->customerDeletedResponse =
             $this->deletedResponseFactory->getResponse();
+
+        $this->replaceCustomerRequest =
+            $this->replaceCustomerRequestFactory->getRequest();
     }
 
     public function createEndpoint(OpenApi $openApi): void
     {
+        $this->setPutOperation($openApi);
         $this->setPatchOperation($openApi);
         $this->setGetOperation($openApi);
         $this->setDeleteOperation($openApi);
+    }
+
+    private function setPutOperation(OpenApi $openApi): void
+    {
+        $pathItem = $this->getPathItem($openApi);
+        $operationPut = $pathItem->getPut();
+        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
+            ->withPut(
+                $operationPut
+                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withResponses($this->getUpdateResponses())
+                    ->withRequestBody($this->replaceCustomerRequest)
+            ));
     }
 
     private function setPatchOperation(OpenApi $openApi): void
