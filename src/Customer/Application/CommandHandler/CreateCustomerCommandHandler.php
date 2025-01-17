@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Customer\Application\CommandHandler;
 
 use App\Customer\Application\Command\CreateCustomerCommand;
