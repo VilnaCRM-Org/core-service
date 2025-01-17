@@ -48,6 +48,7 @@ resources:
       ApiPlatform\Metadata\GetCollection:
         filters: [ 'customer.mongodb.customer_filter' ]
       ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
