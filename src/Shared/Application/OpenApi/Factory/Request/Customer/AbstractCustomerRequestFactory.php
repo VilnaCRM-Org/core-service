@@ -45,7 +45,7 @@ abstract class AbstractCustomerRequestFactory implements AbstractRequestFactoryI
 
     protected function getPhoneParam(): Parameter
     {
-        return new Parameter('phone', 'string', '0123456789, 255');
+        return new Parameter('phone', 'string', '0123456789', 255);
     }
 
     protected function getLeadSourceParam(): Parameter
