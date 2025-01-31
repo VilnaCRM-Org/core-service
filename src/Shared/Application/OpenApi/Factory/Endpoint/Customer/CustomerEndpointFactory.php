@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Endpoint;
+namespace App\Shared\Application\OpenApi\Factory\Endpoint\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerCreatedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomersReturnedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerCreatedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomersReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 

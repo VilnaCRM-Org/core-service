@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Endpoint;
+namespace App\Shared\Application\OpenApi\Factory\Endpoint\Customer;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\UpdateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerNotFoundResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerReturnedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerUpdatedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerReturnedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerUpdatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
