@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Response;
+namespace App\Shared\Application\OpenApi\Factory\Response\Customer;
 
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 
-final class CustomerReturnedResponseFactory extends CustomerResponseFactory
+final class CustomerCreatedResponseFactory extends CustomerResponseFactory
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
@@ -19,6 +19,6 @@ final class CustomerReturnedResponseFactory extends CustomerResponseFactory
 
     protected function getTitle(): string
     {
-        return 'Customer returned';
+        return 'Customer created';
     }
 }

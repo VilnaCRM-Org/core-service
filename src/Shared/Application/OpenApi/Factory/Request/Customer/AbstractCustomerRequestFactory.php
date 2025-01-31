@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Request;
+namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
 
 abstract class AbstractCustomerRequestFactory implements AbstractRequestFactoryInterface
 {

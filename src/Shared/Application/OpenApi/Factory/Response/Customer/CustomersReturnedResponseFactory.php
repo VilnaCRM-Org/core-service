@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Response;
+namespace App\Shared\Application\OpenApi\Factory\Response\Customer;
 
 use App\Shared\Application\OpenApi\Builder\ArrayResponseBuilder;
 
