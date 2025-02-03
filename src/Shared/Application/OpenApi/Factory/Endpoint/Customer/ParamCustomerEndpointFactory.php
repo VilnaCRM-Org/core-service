@@ -18,7 +18,7 @@ use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundRes
 use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerUpdatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
@@ -39,7 +39,7 @@ final class ParamCustomerEndpointFactory implements AbstractEndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UuidUriParameterFactory         $parameterFactory,
+        private UuidUriCustomerFactory $parameterFactory,
         private CustomerReturnedResponseFactory $customerReturnedResponseFactory,
         private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
         private CustomerUpdatedResponseFactory  $customerUpdatedResponseFactory,

@@ -18,7 +18,7 @@ use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNot
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeUpdatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerTypeFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class ParamCustomerTypeEndpointFactory implements AbstractEndpointFactory
@@ -39,7 +39,7 @@ class ParamCustomerTypeEndpointFactory implements AbstractEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriParameterFactory             $parameterFactory,
+        private UuidUriCustomerTypeFactory     $parameterFactory,
         private CustomerTypeReturnedResponseFactory $customerTypeReturnedResponseFactory,
         private UpdateCustomerTypeRequestFactory    $updateCustomerTypeRequestFactory,
         private CustomerTypeUpdatedResponseFactory  $customerTypeUpdatedResponseFactory,
