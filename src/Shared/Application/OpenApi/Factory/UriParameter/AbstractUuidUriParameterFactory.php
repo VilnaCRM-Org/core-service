@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\UriParameter;
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
 
-final class UuidUriParameterFactory implements AbstractUriParameterFactory
+abstract class AbstractUuidUriParameterFactory implements UriParameterFactoryInterface
 {
     public function __construct(private UriParameterBuilder $parameterBuilder)
     {
@@ -17,10 +17,15 @@ final class UuidUriParameterFactory implements AbstractUriParameterFactory
     {
         return $this->parameterBuilder->build(
             'id',
-            'Customer identifier',
+            $this->getDescription(),
             true,
             '2b10b7a3-67f0-40ea-a367-44263321592a',
             'string'
         );
+    }
+
+    protected function getDescription(): string
+    {
+        return 'Customer identifier';
     }
 }

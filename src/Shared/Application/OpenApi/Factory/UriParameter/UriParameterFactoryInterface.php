@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 
-interface AbstractUriParameterFactory
+interface UriParameterFactoryInterface
 {
     public function getParameter(): Parameter;
 }

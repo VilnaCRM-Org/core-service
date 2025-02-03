@@ -18,7 +18,7 @@ use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatu
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusUpdatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriParameterFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
@@ -39,7 +39,7 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriParameterFactory               $parameterFactory,
+        private UuidUriCustomerStatusFactory       $parameterFactory,
         private CustomerStatusReturnedResponseFactory $customerStatusReturnedResponseFactory,
         private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
         private CustomerStatusUpdatedResponseFactory  $customerStatusUpdatedResponseFactory,
