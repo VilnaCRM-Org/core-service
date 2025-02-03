@@ -53,7 +53,7 @@ final class CustomerTypeNotFoundResponseFactory implements ResponseFactoryInterf
         return new Parameter(
             'detail',
             'string',
-            'Customer not found'
+            'CustomerType not found'
         );
     }
 
