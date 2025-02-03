@@ -6,19 +6,10 @@ resources:
       ApiPlatform\Metadata\GetCollection:
         filters: ['customer_value.mongodb.value_filter']
       ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
-        openapi:
-          requestBody:
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    value:
-                      type: string
-                      example: 'Active'
 
   App\Customer\Domain\Entity\CustomerType:
     denormalizationContext:
@@ -27,19 +18,10 @@ resources:
       ApiPlatform\Metadata\GetCollection:
         filters: ['customer_value.mongodb.value_filter']
       ApiPlatform\Metadata\Get:
+      ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
-        openapi:
-          requestBody:
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    value:
-                      type: string
-                      example: 'Prospect'
 
   App\Customer\Domain\Entity\Customer:
     denormalizationContext:
@@ -52,6 +34,7 @@ resources:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
+
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:
       ApiPlatform\Metadata\Get:
