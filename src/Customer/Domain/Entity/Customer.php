@@ -4,13 +4,25 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
+use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Odm\Filter\RangeFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
 use App\Shared\Domain\ValueObject\UuidInterface;
 use DateTime;
+use Symfony\Component\Uid\Ulid;
 
+#[ApiResource(paginationPartial: true,
+    paginationItemsPerPage: 1,
+    paginationViaCursor: [['field' => 'ulid', 'direction' => 'DESC']])]
+#[ApiFilter(RangeFilter::class, properties: ["ulid"])]
+#[ApiFilter(OrderFilter::class, properties: ["ulid" => "DESC"])]
 class Customer implements CustomerInterface
 {
     private ?DateTime $createdAt;
     private ?DateTime $updatedAt;
+
+    private Ulid $ulid;
 
     public function __construct(
         private string         $initials,
@@ -20,10 +32,21 @@ class Customer implements CustomerInterface
         private CustomerType   $type,
         private CustomerStatus $status,
         private ?bool          $confirmed = false,
-        private ?string $id = null,
+        private ?string               $id = null,
     ) {
         $this->createdAt = new DateTime();
         $this->updatedAt = new DateTime();
+        $this->ulid = new Ulid();
+    }
+
+    public function getUlid(): Ulid
+    {
+        return $this->ulid;
+    }
+
+    public function setUlid(Ulid $ulid): void
+    {
+        $this->ulid = $ulid;
     }
 
     public function getId(): string
@@ -96,9 +119,9 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getCreatedAt(): DateTime
+    public function getCreatedAt(): ?string
     {
-        return $this->createdAt;
+        return (string) $this->createdAt?->getTimestamp();
     }
 
     public function setCreatedAt(DateTime $createdAt): void
