@@ -53,7 +53,7 @@ final class CustomerStatusNotFoundResponseFactory implements ResponseFactoryInte
         return new Parameter(
             'detail',
             'string',
-            'Customer not found'
+            'CustomerStatus not found'
         );
     }
 
