@@ -6,6 +6,7 @@
     <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
 
         <id type="uuid" strategy="AUTO"/>
+        <field name="ulid" type="ulid" />
         <field name="initials" type="string" />
         <field name="email" type="string" />
         <field name="phone" type="string" />
@@ -26,6 +27,9 @@
         <indexes>
             <index unique="true">
                 <key name="email"/>
+            </index>
+            <index>
+                <key name="ulid" order="desc"/>
             </index>
         </indexes>
     </document>
