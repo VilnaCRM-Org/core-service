@@ -3,6 +3,7 @@ doctrine_mongodb:
   auto_generate_hydrator_classes: true
   types:
     domain_uuid: 'App\Shared\Infrastructure\DoctrineType\DomainUuidType'
+    ulid: 'App\Shared\Infrastructure\DoctrineType\UlidType'
   connections:
     default:
       server: '%env(DB_URL)%'
