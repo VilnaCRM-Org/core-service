@@ -6,6 +6,17 @@
 parameters:
 
 services:
+  app.customer.mongodb.order_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+    arguments: [ { 'ulid': 'desc' } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.order' }
+
+  app.customer.mongodb.range_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.range_filter'
+    arguments: [ { 'ulid': ~ } ]
+    tags: ['api_platform.filter']
+
   app.customer_type.value_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments:
