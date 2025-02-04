@@ -13,7 +13,7 @@ use DateTime;
 use Symfony\Component\Uid\Ulid;
 
 #[ApiResource(paginationPartial: true,
-    paginationItemsPerPage: 1,
+    paginationType: 'cursor',
     paginationViaCursor: [['field' => 'ulid', 'direction' => 'DESC']])]
 #[ApiFilter(RangeFilter::class, properties: ["ulid"])]
 #[ApiFilter(OrderFilter::class, properties: ["ulid" => "DESC"])]
@@ -44,9 +44,9 @@ class Customer implements CustomerInterface
         return $this->ulid;
     }
 
-    public function setUlid(Ulid $ulid): void
+    public function setUlid(?string $ulid): void
     {
-        $this->ulid = $ulid;
+        $this->ulid = new Ulid($ulid);
     }
 
     public function getId(): string
@@ -119,9 +119,9 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): DateTime
     {
-        return (string) $this->createdAt?->getTimestamp();
+        return $this->createdAt;
     }
 
     public function setCreatedAt(DateTime $createdAt): void

@@ -20,3 +20,5 @@ App\Customer\Domain\Entity\Customer:
       groups: ['output']
     updatedAt:
       groups: ['output']
+    ulid:
+      groups: ['output']
