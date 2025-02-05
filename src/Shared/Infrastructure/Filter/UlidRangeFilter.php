@@ -31,22 +31,20 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
 
         foreach ($operators as $operator => $filterValue) {
             if (
-                (('ulid' === $denormalizedProperty) || (substr($denormalizedProperty, -4) === 'ulid'))
+                (('ulid' === $denormalizedProperty) || (str_ends_with($denormalizedProperty, 'ulid')))
                 && \is_string($filterValue)
             ) {
                 try {
-                    $ulid = new Ulid($filterValue);
-                    $filterValue = $ulid->toString();
+                    $filterValue = new Ulid($filterValue);
                 } catch (\InvalidArgumentException $e) {
                     continue;
                 }
             }
 
-            // Obtain a match stage from the aggregation builder.
             $matchStage = $aggregationBuilder->match();
             switch ($operator) {
                 case 'lt':
-                    $matchStage->field('confirmed')->lt(true);
+                    $matchStage->field($denormalizedProperty)->lt($filterValue);
                     break;
                 case 'lte':
                     $matchStage->field($denormalizedProperty)->lte($filterValue);
@@ -61,14 +59,13 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
                     // For "between", we expect an array with exactly two elements.
                     if (\is_array($filterValue) && \count($filterValue) === 2) {
                         [$min, $max] = $filterValue;
-                        if (('ulid' === $denormalizedProperty) || (substr($denormalizedProperty, -4) === 'ulid')) {
+                        if (('ulid' === $denormalizedProperty) || (str_ends_with($denormalizedProperty, 'ulid'))) {
                             try {
                                 $minUlid = new Ulid($min);
                                 $maxUlid = new Ulid($max);
                                 $min = $minUlid->toString();
                                 $max = $maxUlid->toString();
                             } catch (\InvalidArgumentException $e) {
-                                // Skip the "between" operator if conversion fails.
                                 continue 2;
                             }
                         }
@@ -76,15 +73,11 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
                     }
                     break;
                 default:
-                    // Unknown operator—skip it.
                     continue 2;
             }
         }
     }
 
-    /**
-     * Returns the description for this filter.
-     */
     public function getDescription(string $resourceClass): array
     {
         if (null === $this->properties) {

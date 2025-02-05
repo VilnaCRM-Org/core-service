@@ -14,6 +14,7 @@ services:
 
   app.customer.mongodb.range_filter:
     parent: 'api_platform.doctrine_mongodb.odm.range_filter'
+    class: App\Shared\Infrastructure\Filter\UlidRangeFilter
     arguments: [ { 'ulid': ~ } ]
     tags: ['api_platform.filter']
 
