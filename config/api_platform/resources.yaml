@@ -25,6 +25,7 @@ resources:
 
   App\Customer\Domain\Entity\Customer:
     paginationPartial: true,
+    paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
