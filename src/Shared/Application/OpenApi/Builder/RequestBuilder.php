@@ -18,7 +18,7 @@ final class RequestBuilder
     public function build(
         array $params,
         bool $required = true,
-        string $contentType = 'application/json'
+        string $contentType = 'application/ld+json'
     ): RequestBody {
         $content = $this->contextBuilder->build($params, $contentType);
 
