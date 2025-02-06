@@ -4,19 +4,10 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
-use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
-use ApiPlatform\Doctrine\Odm\Filter\RangeFilter;
-use ApiPlatform\Metadata\ApiFilter;
-use ApiPlatform\Metadata\ApiResource;
 use App\Shared\Domain\ValueObject\UuidInterface;
 use DateTime;
 use Symfony\Component\Uid\Ulid;
 
-#[ApiResource(paginationPartial: true,
-    paginationType: 'cursor',
-    paginationViaCursor: [['field' => 'ulid', 'direction' => 'DESC']])]
-#[ApiFilter(RangeFilter::class, properties: ["ulid"])]
-#[ApiFilter(OrderFilter::class, properties: ["ulid" => "DESC"])]
 class Customer implements CustomerInterface
 {
     private ?DateTime $createdAt;
