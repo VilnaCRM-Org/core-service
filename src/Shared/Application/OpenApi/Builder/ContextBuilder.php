@@ -11,7 +11,7 @@ final class ContextBuilder
      */
     public function build(
         array $params,
-        string $contentType = 'application/json'
+        string $contentType = 'application/ld+json'
     ): \ArrayObject {
         $content = new \ArrayObject([
             $contentType => [
