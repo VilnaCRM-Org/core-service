@@ -12,7 +12,7 @@ final class ArrayContextBuilder
     public function build(array $params): \ArrayObject
     {
         $content = new \ArrayObject([
-            'application/json' => [
+            'application/ld+json' => [
                 'example' => [''],
             ],
         ]);
@@ -59,7 +59,7 @@ final class ArrayContextBuilder
         array $required
     ): \ArrayObject {
         return new \ArrayObject([
-            'application/json' => [
+            'application/ld+json' => [
                 'schema' => [
                     'type' => 'array',
                     'items' => ['properties' => $items],
