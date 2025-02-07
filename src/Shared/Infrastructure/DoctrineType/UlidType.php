@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Shared\Infrastructure\DoctrineType;
 
-
+use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Doctrine\ODM\MongoDB\Types\Type;
-use Symfony\Component\Uid\Ulid;
 
 class UlidType extends Type
 {
@@ -12,23 +13,24 @@ class UlidType extends Type
 
     public function convertToDatabaseValue($value)
     {
-        return $value instanceof Ulid ? $value->toString() : null;
+        return (new UlidTransformer())->transformFromSymfonyUlid($value);
     }
 
     public function convertToPHPValue($value)
     {
-        return $value ? new Ulid($value) : null;
+        return (new UlidTransformer())->transformFromString($value);
     }
 
     public function closureToMongo(): string
     {
-        return '$return = $value instanceof \Symfony\Component\Uid\Ulid ? $value->toRfc4122() : null;';
+        return '$return = $value instanceof \Symfony\Component\Uid\Ulid ? $value->toBinary() : null;';
     }
 
     public function closureToPHP(): string
     {
-        return '$return = $value ? new \Symfony\Component\Uid\Ulid($value) : null;';
+        return '$return = $value ? \Symfony\Component\Uid\Ulid::fromString($value) : null;';
     }
+
     public function getName(): string
     {
         return self::NAME;
