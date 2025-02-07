@@ -11,7 +11,6 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustomerTypeRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;

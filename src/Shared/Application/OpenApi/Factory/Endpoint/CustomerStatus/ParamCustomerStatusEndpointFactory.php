@@ -11,7 +11,6 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
