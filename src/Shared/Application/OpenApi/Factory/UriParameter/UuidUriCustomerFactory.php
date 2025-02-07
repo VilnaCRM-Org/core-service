@@ -8,6 +8,6 @@ class UuidUriCustomerFactory extends AbstractUuidUriParameterFactory
 {
     protected function getDescription(): string
     {
-        return 'CustomerStatus identifier';
+        return 'Customer identifier';
     }
 }

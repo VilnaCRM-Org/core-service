@@ -29,8 +29,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
 
     private Response $customerStatusReturnedResponse;
 
-    private RequestBody $updateCustomerStatusRequest;
-
     private Response $customerStatusUpdatedResponse;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
@@ -41,7 +39,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     public function __construct(
         private UuidUriCustomerStatusFactory       $parameterFactory,
         private CustomerStatusReturnedResponseFactory $customerStatusReturnedResponseFactory,
-        private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
         private CustomerStatusUpdatedResponseFactory  $customerStatusUpdatedResponseFactory,
         private ValidationErrorFactory                $validationErrorResponseFactory,
         private BadRequestResponseFactory             $badRequestResponseFactory,
@@ -55,8 +52,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
         $this->customerStatusReturnedResponse =
             $this->customerStatusReturnedResponseFactory->getResponse();
 
-        $this->updateCustomerStatusRequest =
-            $this->updateCustomerStatusRequestFactory->getRequest();
 
         $this->customerStatusUpdatedResponse =
             $this->customerStatusUpdatedResponseFactory->getResponse();
@@ -80,7 +75,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     public function createEndpoint(OpenApi $openApi): void
     {
         $this->setPutOperation($openApi);
-        $this->setPatchOperation($openApi);
         $this->setGetOperation($openApi);
         $this->setDeleteOperation($openApi);
     }
@@ -96,22 +90,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
                     ->withResponses($this->getUpdateResponses())
                     ->withRequestBody($this->replaceCustomerStatusRequest)
             ));
-    }
-
-    private function setPatchOperation(OpenApi $openApi): void
-    {
-        $pathItem = $this->getPathItem($openApi);
-        $operationPatch = $pathItem->getPatch();
-        $openApi->getPaths()->addPath(
-            self::ENDPOINT_URI,
-            $pathItem
-                ->withPatch(
-                    $operationPatch
-                        ->withParameters([$this->uuidWithExamplePathParam])
-                        ->withRequestBody($this->updateCustomerStatusRequest)
-                        ->withResponses($this->getUpdateResponses())
-                )
-        );
     }
 
     private function setDeleteOperation(OpenApi $openApi): void
