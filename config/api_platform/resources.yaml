@@ -7,7 +7,6 @@ resources:
         filters: ['customer_value.mongodb.value_filter']
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
-      ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
 
@@ -19,7 +18,6 @@ resources:
         filters: ['customer_value.mongodb.value_filter']
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
-      ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
 
