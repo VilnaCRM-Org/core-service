@@ -14,21 +14,16 @@ use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatus
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusReturnedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusUpdatedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
+class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
 {
-    private const ENDPOINT_URI = '/api/customer_statuses/{id}';
+    private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
 
     private Parameter $uuidWithExamplePathParam;
 
-    private Response $customerStatusReturnedResponse;
-
-    private Response $customerStatusUpdatedResponse;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
     private Response $customerStatusNotFoundResponse;
@@ -37,8 +32,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
 
     public function __construct(
         private UuidUriCustomerStatusFactory       $parameterFactory,
-        private CustomerStatusReturnedResponseFactory $customerStatusReturnedResponseFactory,
-        private CustomerStatusUpdatedResponseFactory  $customerStatusUpdatedResponseFactory,
         private ValidationErrorFactory                $validationErrorResponseFactory,
         private BadRequestResponseFactory             $badRequestResponseFactory,
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
@@ -47,13 +40,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
-
-        $this->customerStatusReturnedResponse =
-            $this->customerStatusReturnedResponseFactory->getResponse();
-
-
-        $this->customerStatusUpdatedResponse =
-            $this->customerStatusUpdatedResponseFactory->getResponse();
 
         $this->validationErrorResponse =
             $this->validationErrorResponseFactory->getResponse();
@@ -82,11 +68,12 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPut = $pathItem->getPut();
+        $mergedResponses = $this->mergeResponses($operationPut->getResponses(), $this->getUpdateResponses());
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPut(
                 $operationPut
                     ->withParameters([$this->uuidWithExamplePathParam])
-                    ->withResponses($this->getUpdateResponses())
+                    ->withResponses($mergedResponses)
                     ->withRequestBody($this->replaceCustomerStatusRequest)
             ));
     }
@@ -107,10 +94,14 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationGet = $pathItem->getGet();
+        $mergedResponses = $this->mergeResponses(
+            $operationGet->getResponses(),
+            $this->getGetResponses()
+        );
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withGet(
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
-                    ->withResponses($this->getGetResponses())
+                    ->withResponses($mergedResponses)
             ));
 
     }
@@ -137,7 +128,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     private function getGetResponses(): array
     {
         return [
-            HttpResponse::HTTP_OK => $this->customerStatusReturnedResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
         ];
     }
@@ -148,7 +138,6 @@ class ParamCustomerStatusEndpointFactory implements AbstractEndpointFactory
     private function getUpdateResponses(): array
     {
         return [
-            HttpResponse::HTTP_OK => $this->customerStatusUpdatedResponse,
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
