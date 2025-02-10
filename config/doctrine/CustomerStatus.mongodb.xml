@@ -5,7 +5,7 @@
 
     <document name="App\Customer\Domain\Entity\CustomerStatus" db="app" collection="customer_statuses">
 
-        <id type="string" strategy="AUTO" />
+        <id type="ulid" field-name="ulid" strategy="NONE"/>
         <field name="value" type="string" />
 
     </document>
