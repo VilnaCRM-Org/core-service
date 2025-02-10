@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
-use App\Shared\Domain\ValueObject\UuidInterface;
 use DateTime;
 use Symfony\Component\Uid\Ulid;
 
@@ -23,7 +22,6 @@ class Customer implements CustomerInterface
         private CustomerType   $type,
         private CustomerStatus $status,
         private ?bool          $confirmed = false,
-        private ?string               $id = null,
     ) {
         $this->createdAt = new DateTime();
         $this->updatedAt = new DateTime();
@@ -40,15 +38,6 @@ class Customer implements CustomerInterface
         $this->ulid = new Ulid($ulid);
     }
 
-    public function getId(): string
-    {
-        return (string) $this->id;
-    }
-
-    public function setId(UuidInterface $id): void
-    {
-        $this->id = $id;
-    }
 
     public function getInitials(): string
     {
