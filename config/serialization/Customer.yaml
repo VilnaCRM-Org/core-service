@@ -1,7 +1,5 @@
 App\Customer\Domain\Entity\Customer:
   attributes:
-    id:
-      groups: ['output']
     email:
       groups: ['output', 'write:customer']
     phone:
