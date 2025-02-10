@@ -38,7 +38,6 @@ class Customer implements CustomerInterface
         $this->ulid = new Ulid($ulid);
     }
 
-
     public function getInitials(): string
     {
         return $this->initials;

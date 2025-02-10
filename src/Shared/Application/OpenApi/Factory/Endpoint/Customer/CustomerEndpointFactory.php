@@ -10,35 +10,22 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerCreatedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomersReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerEndpointFactory implements AbstractEndpointFactory
+final class CustomerEndpointFactory extends AbstractEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers';
-
-    private Response $customerCreatedResponse;
-
-    private Response $customersReturnedResponse;
 
     private RequestBody $createCustomerRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
 
     public function __construct(
-        private CustomerCreatedResponseFactory   $customerCreatedResponseFactory,
-        private CustomersReturnedResponseFactory $customerReturnedResponseFactory,
         private CustomerRequestFactory           $createCustomerRequestFactory,
         private ValidationErrorFactory          $validationErrorResponseFactory,
         private BadRequestResponseFactory       $badRequestResponseFactory,
     ) {
-        $this->customerCreatedResponse =
-            $this->customerCreatedResponseFactory->getResponse();
-
-        $this->customersReturnedResponse =
-            $this->customerReturnedResponseFactory->getResponse();
 
         $this->createCustomerRequest =
             $this->createCustomerRequestFactory->getRequest();
@@ -55,15 +42,22 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
         $pathItem = $openApi->getPaths()->getPath(self::ENDPOINT_URI);
         $operationPost = $pathItem->getPost();
         $operationGet = $pathItem->getGet();
-
+        $mergedGet = $this->mergeResponses(
+            $operationGet->getResponses(),
+            $this->getGetResponses()
+        );
+        $mergedPost = $this->mergeResponses(
+            $operationPost->getResponses(),
+            $this->getPostResponses()
+        );
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPost(
                 $operationPost
-                    ->withResponses($this->getPostResponses())
+                    ->withResponses($mergedPost)
                     ->withRequestBody($this->createCustomerRequest)
             )
             ->withGet($operationGet->withResponses(
-                $this->getGetResponses()
+                $mergedGet
             )));
     }
 
@@ -73,7 +67,6 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
     private function getPostResponses(): array
     {
         return [
-            HttpResponse::HTTP_CREATED => $this->customerCreatedResponse,
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
         ];
@@ -85,7 +78,6 @@ final class CustomerEndpointFactory implements AbstractEndpointFactory
     private function getGetResponses(): array
     {
         return [
-            HttpResponse::HTTP_OK => $this->customersReturnedResponse,
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
         ];
     }

@@ -10,36 +10,22 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusCreatedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusesReturnedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerStatusEndpointFactory implements AbstractEndpointFactory
+final class CustomerStatusEndpointFactory extends AbstractEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_statuses';
-
-    private Response $customerStatusCreatedResponse;
-
-    private Response $customerStatusesReturnedResponse;
 
     private RequestBody $createCustomerStatusRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
 
     public function __construct(
-        private CustomerStatusCreatedResponseFactory    $customerStatusCreatedResponseFactory,
-        private CustomerStatusesReturnedResponseFactory $customerStatusReturnedResponseFactory,
         private CustomerStatusRequestFactory            $createCustomerStatusRequestFactory,
         private ValidationErrorFactory                  $validationErrorResponseFactory,
         private BadRequestResponseFactory               $badRequestResponseFactory,
     ) {
-        $this->customerStatusCreatedResponse =
-            $this->customerStatusCreatedResponseFactory->getResponse();
-
-        $this->customerStatusesReturnedResponse =
-            $this->customerStatusReturnedResponseFactory->getResponse();
-
         $this->createCustomerStatusRequest =
             $this->createCustomerStatusRequestFactory->getRequest();
 
@@ -55,15 +41,22 @@ final class CustomerStatusEndpointFactory implements AbstractEndpointFactory
         $pathItem = $openApi->getPaths()->getPath(self::ENDPOINT_URI);
         $operationPost = $pathItem->getPost();
         $operationGet = $pathItem->getGet();
-
+        $mergedGet = $this->mergeResponses(
+            $operationGet->getResponses(),
+            $this->getGetResponses()
+        );
+        $mergedPost = $this->mergeResponses(
+            $operationPost->getResponses(),
+            $this->getPostResponses()
+        );
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPost(
                 $operationPost
-                    ->withResponses($this->getPostResponses())
+                    ->withResponses($mergedPost)
                     ->withRequestBody($this->createCustomerStatusRequest)
             )
             ->withGet($operationGet->withResponses(
-                $this->getGetResponses()
+                $mergedGet
             )));
     }
 
@@ -73,7 +66,6 @@ final class CustomerStatusEndpointFactory implements AbstractEndpointFactory
     private function getPostResponses(): array
     {
         return [
-            HttpResponse::HTTP_CREATED => $this->customerStatusCreatedResponse,
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
         ];
@@ -85,7 +77,6 @@ final class CustomerStatusEndpointFactory implements AbstractEndpointFactory
     private function getGetResponses(): array
     {
         return [
-            HttpResponse::HTTP_OK => $this->customerStatusesReturnedResponse,
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
         ];
     }
