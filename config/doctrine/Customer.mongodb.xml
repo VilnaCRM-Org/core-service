@@ -5,8 +5,7 @@
 
     <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
 
-        <id type="uuid" strategy="AUTO"/>
-        <field name="ulid" type="ulid" />
+        <id type="ulid" field-name="ulid" strategy="NONE"/>
         <field name="initials" type="string" />
         <field name="email" type="string" />
         <field name="phone" type="string" />
@@ -15,14 +14,8 @@
         <field name="updatedAt" type="date" />
         <field name="confirmed" type="boolean" />
         <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus" field="status">
-            <cascade>
-                <all />
-            </cascade>
         </reference-one>
         <reference-one target-document="App\Customer\Domain\Entity\CustomerType" field="type">
-            <cascade>
-                <all />
-            </cascade>
         </reference-one>
         <indexes>
             <index unique="true">
