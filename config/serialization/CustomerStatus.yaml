@@ -1,6 +1,6 @@
 App\Customer\Domain\Entity\CustomerStatus:
   attributes:
-    id:
+    ulid:
       groups: ['read:customerStatus']
     value:
       groups: ['read:customerStatus', 'write:customerStatus']

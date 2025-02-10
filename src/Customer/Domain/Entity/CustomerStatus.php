@@ -1,16 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Customer\Domain\Entity;
+
+use Symfony\Component\Uid\Ulid;
 
 class CustomerStatus
 {
-    public function __construct(private string $value, private ?string $id = null)
+    private Ulid $ulid;
+
+    public function __construct(private string $value)
     {
+        $this->ulid = new Ulid();
     }
 
-    public function getId(): string
+    public function getUlid(): Ulid
     {
-        return $this->id;
+        return $this->ulid;
     }
 
     public function getValue(): string
