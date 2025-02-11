@@ -10,6 +10,9 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
+use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -20,11 +23,17 @@ final class CustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $createCustomerStatusRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
+    private Response $internalErrorResponse;
+    private Response $unauthorizedResponse;
+    private Response $forbiddenResponse;
 
     public function __construct(
         private CustomerStatusRequestFactory            $createCustomerStatusRequestFactory,
         private ValidationErrorFactory                  $validationErrorResponseFactory,
         private BadRequestResponseFactory               $badRequestResponseFactory,
+        private InternalErrorFactory                    $internalErrorFactory,
+        private ForbiddenResponseFactory                $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory             $unauthorizedResponseFactory,
     ) {
         $this->createCustomerStatusRequest =
             $this->createCustomerStatusRequestFactory->getRequest();
@@ -34,6 +43,15 @@ final class CustomerStatusEndpointFactory extends AbstractEndpointFactory
 
         $this->badRequestResponse =
             $this->badRequestResponseFactory->getResponse();
+
+        $this->internalErrorResponse =
+            $this->internalErrorFactory->getResponse();
+
+        $this->forbiddenResponse =
+            $this->forbiddenResponseFactory->getResponse();
+
+        $this->unauthorizedResponse =
+            $this->unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -67,7 +85,10 @@ final class CustomerStatusEndpointFactory extends AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
 
@@ -78,6 +99,9 @@ final class CustomerStatusEndpointFactory extends AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
 }
