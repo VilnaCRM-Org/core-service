@@ -14,6 +14,9 @@ use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatus
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
+use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -28,6 +31,9 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private Response $badRequestResponse;
     private Response $customerStatusNotFoundResponse;
     private Response $customerStatusDeletedResponse;
+    private Response $internalErrorResponse;
+    private Response $unauthorizedResponse;
+    private Response $forbiddenResponse;
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
@@ -37,6 +43,9 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
         private CustomerStatusDeletedResponseFactory  $deletedResponseFactory,
         private CustomerStatusRequestFactory          $replaceCustomerRequestFactory,
+        private InternalErrorFactory                  $internalErrorFactory,
+        private ForbiddenResponseFactory              $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory           $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -55,6 +64,15 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
 
         $this->replaceCustomerStatusRequest =
             $this->replaceCustomerRequestFactory->getRequest();
+
+        $this->internalErrorResponse =
+            $this->internalErrorFactory->getResponse();
+
+        $this->forbiddenResponse =
+            $this->forbiddenResponseFactory->getResponse();
+
+        $this->unauthorizedResponse =
+            $this->unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -118,7 +136,10 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_NO_CONTENT => $this->customerStatusDeletedResponse,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
 
@@ -128,7 +149,10 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private function getGetResponses(): array
     {
         return [
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
 
@@ -139,8 +163,11 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
 }
