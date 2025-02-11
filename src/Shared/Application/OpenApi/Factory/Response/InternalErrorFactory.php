@@ -10,7 +10,7 @@ use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class InternalErrorFactory implements
-    AbstractResponseFactory
+    ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
