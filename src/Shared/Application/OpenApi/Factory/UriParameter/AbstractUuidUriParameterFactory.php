@@ -16,10 +16,10 @@ abstract class AbstractUuidUriParameterFactory implements UriParameterFactoryInt
     public function getParameter(): Parameter
     {
         return $this->parameterBuilder->build(
-            'id',
+            'ulid',
             $this->getDescription(),
             true,
-            '2b10b7a3-67f0-40ea-a367-44263321592a',
+            '01JKX8XGHVDZ46MWYMZT94YER4',
             'string'
         );
     }
