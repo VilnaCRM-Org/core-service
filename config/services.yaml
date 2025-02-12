@@ -6,9 +6,19 @@
 parameters:
 
 services:
+
   app.customer.mongodb.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [ { 'ulid': 'desc' } ]
+    arguments: [ {
+      'ulid': 'desc',
+      'createdAt': 'desc',
+      'updatedAt': 'desc',
+      'email': 'asc',
+      'phone': 'asc',
+      'leadSource': 'asc',
+      'type.value': 'asc',
+      'status.value': 'asc'
+    } ]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.order' }
 
@@ -16,7 +26,29 @@ services:
     parent: 'api_platform.doctrine_mongodb.odm.range_filter'
     class: App\Shared\Infrastructure\Filter\UlidRangeFilter
     arguments: [ { 'ulid': ~ } ]
-    tags: ['api_platform.filter']
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.range' }
+
+  app.customer.mongodb.date_range_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.range_filter'
+    arguments: [ { 'createdAt': ~, 'updatedAt': ~ } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.date_range' }
+
+  app.customer.mongodb.search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments:
+      [ {
+        initials: 'exact',
+        email: 'exact',
+        phone: 'exact',
+        leadSource: 'exact',
+        'type.value': 'exact',
+        'status.value': 'exact',
+        confirmed: 'exact'
+      } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.search' }
 
   app.customer_type.value_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
@@ -24,12 +56,6 @@ services:
       - 'value': 'exact'
     tags:
       - { name: 'api_platform.filter', id: 'customer_value.mongodb.value_filter' }
-  app.customer.value_search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments:
-      [ { initials: exact, email: exact, phone: exact, leadSource: exact, type.value: exact, status.value: exact } ]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.customer_filter' }
   # default configuration for services in *this* file
   _defaults:
     autowire: true # Automatically injects dependencies in your services.
