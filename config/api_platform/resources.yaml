@@ -30,7 +30,12 @@ resources:
       groups: [ 'write:customer' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: [ 'app.customer.mongodb.range_filter', 'customer.mongodb.order', 'customer.mongodb.customer_filter']
+        filters: [
+          'customer.mongodb.search',
+          'customer.mongodb.order',
+          'customer.mongodb.date_range',
+          'customer.mongodb.range'
+        ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
