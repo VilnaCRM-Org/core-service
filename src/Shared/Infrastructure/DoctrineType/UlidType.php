@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\DoctrineType;
 
-use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Doctrine\ODM\MongoDB\Types\Type;
+use MongoDB\BSON\Binary;
+use Symfony\Component\Uid\Ulid;
 
 class UlidType extends Type
 {
@@ -13,22 +14,40 @@ class UlidType extends Type
 
     public function convertToDatabaseValue($value)
     {
-        return (new UlidTransformer())->transformFromSymfonyUlid($value);
+        if (!$value) {
+            return null;
+        }
+        if ($value instanceof Binary) {
+            return $value;
+        }
+        if (!$value instanceof Ulid) {
+            $value = Ulid::fromString($value);
+        }
+        return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
     }
 
     public function convertToPHPValue($value)
     {
-        return (new UlidTransformer())->transformFromString($value);
+        if (!$value) {
+            return null;
+        }
+        if ($value instanceof Ulid) {
+            return $value;
+        }
+        $data = $value instanceof Binary ? $value->getData() : $value;
+        return Ulid::fromString($data);
     }
 
     public function closureToMongo(): string
     {
-        return '$return = $value instanceof \Symfony\Component\Uid\Ulid ? $value->toBinary() : null;';
+        return '$return = $value instanceof \Symfony\Component\Uid\Ulid
+        ? new \MongoDB\BSON\Binary($value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC)
+        : null;';
     }
 
     public function closureToPHP(): string
     {
-        return '$return = $value ? \Symfony\Component\Uid\Ulid::fromString($value) : null;';
+        return '$return = $value ? ($value instanceof \MongoDB\BSON\Binary ? \Symfony\Component\Uid\Ulid::fromString($value->getData()) : \Symfony\Component\Uid\Ulid::fromString($value)) : null;';
     }
 
     public function getName(): string
