@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\DoctrineType;
 
+use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Doctrine\ODM\MongoDB\Types\Type;
-use MongoDB\BSON\Binary;
-use Symfony\Component\Uid\Ulid;
 
 class UlidType extends Type
 {
@@ -14,28 +13,12 @@ class UlidType extends Type
 
     public function convertToDatabaseValue($value)
     {
-        if (!$value) {
-            return null;
-        }
-        if ($value instanceof Binary) {
-            return $value;
-        }
-        if (!$value instanceof Ulid) {
-            $value = Ulid::fromString($value);
-        }
-        return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
+        return (new UlidTransformer())->toDatabase($value);
     }
 
     public function convertToPHPValue($value)
     {
-        if (!$value) {
-            return null;
-        }
-        if ($value instanceof Ulid) {
-            return $value;
-        }
-        $data = $value instanceof Binary ? $value->getData() : $value;
-        return Ulid::fromString($data);
+        return (new UlidTransformer())->toPHP($value);
     }
 
     public function closureToMongo(): string
