@@ -1,5 +1,9 @@
 resources:
   App\Customer\Domain\Entity\CustomerStatus:
+    paginationPartial: true,
+    paginationClientItemsPerPage: true
+    paginationViaCursor:
+      - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
       groups: [ 'write:customerStatus' ]
     operations:
@@ -15,6 +19,10 @@ resources:
       ApiPlatform\Metadata\Post:
 
   App\Customer\Domain\Entity\CustomerType:
+    paginationPartial: true,
+    paginationClientItemsPerPage: true
+    paginationViaCursor:
+      - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
       groups: [ 'write:customerType' ]
     operations:
