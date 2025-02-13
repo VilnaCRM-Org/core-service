@@ -27,7 +27,7 @@ services:
     class: App\Shared\Infrastructure\Filter\UlidRangeFilter
     arguments: [ { 'ulid': ~ } ]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.range' }
+      - { name: 'api_platform.filter', id: 'mongodb.range' }
 
   app.customer.mongodb.date_range_filter:
     parent: 'api_platform.doctrine_mongodb.odm.range_filter'
@@ -50,12 +50,31 @@ services:
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.search' }
 
-  app.customer_type.value_search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments:
-      - 'value': 'exact'
+  app.customer_type.order_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+    arguments: [ { 'ulid': 'desc', 'value': 'asc' } ]
     tags:
-      - { name: 'api_platform.filter', id: 'customer_value.mongodb.value_filter' }
+      - { name: 'api_platform.filter', id: 'customer.mongodb.type.order' }
+
+  app.customer_type.partial_search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments: [ { 'value': 'partial' } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.type.partial_search' }
+
+
+  app.customer_status.order_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+    arguments: [ { 'ulid': 'desc', 'value': 'asc' } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.status.order' }
+
+  app.customer_status.partial_search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments: [ { 'value': 'partial' } ]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search' }
+
   # default configuration for services in *this* file
   _defaults:
     autowire: true # Automatically injects dependencies in your services.

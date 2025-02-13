@@ -4,7 +4,11 @@ resources:
       groups: [ 'write:customerStatus' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: ['customer_value.mongodb.value_filter']
+        filters: [
+          'customer.mongodb.status.order',
+          'customer.mongodb.status.partial_search',
+          'mongodb.range'
+        ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Delete:
@@ -15,7 +19,11 @@ resources:
       groups: [ 'write:customerType' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: ['customer_value.mongodb.value_filter']
+        filters: [
+          'customer.mongodb.type.order',
+          'customer.mongodb.type.partial_search',
+          'mongodb.range'
+        ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Delete:
@@ -34,7 +42,7 @@ resources:
           'customer.mongodb.search',
           'customer.mongodb.order',
           'customer.mongodb.date_range',
-          'customer.mongodb.range'
+          'mongodb.range'
         ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
