@@ -13,10 +13,8 @@
         <field name="createdAt" type="date" />
         <field name="updatedAt" type="date" />
         <field name="confirmed" type="boolean" />
-        <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus" field="status">
-        </reference-one>
-        <reference-one target-document="App\Customer\Domain\Entity\CustomerType" field="type">
-        </reference-one>
+        <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus" field="status" store-as="id"/>
+        <reference-one target-document="App\Customer\Domain\Entity\CustomerType" field="type" store-as="id"/>
         <indexes>
             <index unique="true">
                 <key name="email"/>
