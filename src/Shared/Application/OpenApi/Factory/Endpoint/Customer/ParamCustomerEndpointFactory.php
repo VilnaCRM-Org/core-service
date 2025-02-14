@@ -50,7 +50,6 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
         private InternalErrorFactory            $internalErrorFactory,
         private ForbiddenResponseFactory        $forbiddenResponseFactory,
         private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
-
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
