@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Builder;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 
-final class RequestBuilder implements RequestBuilderInterface
+final class RequestPatchBuilder implements RequestBuilderInterface
 {
     public function __construct(private ContextBuilder $contextBuilder)
     {
@@ -18,7 +18,7 @@ final class RequestBuilder implements RequestBuilderInterface
     public function build(
         array $params,
         bool $required = true,
-        string $contentType = 'application/ld+json'
+        string $contentType = 'application/merge-patch+json'
     ): RequestBody {
         $content = $this->contextBuilder->build($params, $contentType);
 
