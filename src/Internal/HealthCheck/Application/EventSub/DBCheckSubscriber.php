@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace App\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\DBAL\Connection;
 
 final class DBCheckSubscriber extends BaseHealthCheckSubscriber
 {
-    private DocumentManager $documentManager;
+    private Connection $connection;
 
-    public function __construct(DocumentManager $documentManager)
+    public function __construct(Connection $connection)
     {
-        $this->documentManager = $documentManager;
+        $this->connection = $connection;
     }
 
     public function onHealthCheck(HealthCheckEvent $event): void
     {
-        $client = $this->documentManager->getClient();
-        $client->listDatabases();
+        $this->connection->executeQuery('SELECT 1');
     }
 }
