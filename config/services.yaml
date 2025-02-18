@@ -29,11 +29,11 @@ services:
     tags:
       - { name: 'api_platform.filter', id: 'mongodb.range' }
 
-  app.customer.mongodb.date_range_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.range_filter'
+  app.customer.mongodb.date_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.date_filter'
     arguments: [ { 'createdAt': ~, 'updatedAt': ~ } ]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.date_range' }
+      - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
 
   app.customer.mongodb.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
