@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
@@ -27,6 +28,7 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
 
     private Parameter $uuidWithExamplePathParam;
 
+    private RequestBody $updateCustomerStatusRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
     private Response $customerStatusNotFoundResponse;
@@ -37,7 +39,8 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustomerStatusFactory       $parameterFactory,
+        private UuidUriCustomerStatusFactory          $parameterFactory,
+        private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
         private ValidationErrorFactory                $validationErrorResponseFactory,
         private BadRequestResponseFactory             $badRequestResponseFactory,
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
@@ -49,6 +52,9 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
+
+        $this->updateCustomerStatusRequest =
+            $this->updateCustomerStatusRequestFactory->getRequest();
 
         $this->validationErrorResponse =
             $this->validationErrorResponseFactory->getResponse();
@@ -77,9 +83,27 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
 
     public function createEndpoint(OpenApi $openApi): void
     {
+        $this->setPatchOperation($openApi);
         $this->setPutOperation($openApi);
         $this->setGetOperation($openApi);
         $this->setDeleteOperation($openApi);
+    }
+
+    private function setPatchOperation(OpenApi $openApi): void
+    {
+        $pathItem = $this->getPathItem($openApi);
+        $operationPatch = $pathItem->getPatch();
+        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem
+                ->withPatch(
+                    $operationPatch
+                        ->withParameters([$this->uuidWithExamplePathParam])
+                        ->withRequestBody($this->updateCustomerStatusRequest)
+                        ->withResponses($mergedResponses)
+                )
+        );
     }
 
     private function setPutOperation(OpenApi $openApi): void
@@ -121,7 +145,6 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
-
     }
 
     private function getPathItem(OpenApi $openApi): PathItem
