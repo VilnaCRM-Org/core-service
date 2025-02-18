@@ -15,6 +15,7 @@ resources:
         ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
+      ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
 
@@ -34,6 +35,7 @@ resources:
         ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
+      ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
 
@@ -49,7 +51,7 @@ resources:
         filters: [
           'customer.mongodb.search',
           'customer.mongodb.order',
-          'customer.mongodb.date_range',
+          'customer.mongodb.date',
           'mongodb.range'
         ]
       ApiPlatform\Metadata\Get:

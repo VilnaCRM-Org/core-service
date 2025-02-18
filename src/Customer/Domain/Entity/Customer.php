@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Customer\Domain\Entity;
 
 use DateTime;
+use DateTimeInterface;
 use Symfony\Component\Uid\Ulid;
 
 class Customer implements CustomerInterface
 {
-    private ?DateTime $createdAt;
-    private ?DateTime $updatedAt;
+    private ?DateTimeInterface $createdAt;
+    private ?DateTimeInterface $updatedAt;
 
     private Ulid $ulid;
 
