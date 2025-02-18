@@ -6,12 +6,12 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
-use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
 
 abstract class AbstractCustomerTypeRequestFactory implements AbstractRequestFactoryInterface
 {
-    abstract protected function getRequestBuilder(): RequestBuilder;
+    abstract protected function getRequestBuilder(): RequestBuilderInterface;
 
     public function getRequest(): RequestBody
     {

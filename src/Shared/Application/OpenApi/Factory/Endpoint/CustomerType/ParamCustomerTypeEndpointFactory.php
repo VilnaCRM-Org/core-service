@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
@@ -27,6 +28,7 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
 
     private Parameter $uuidWithExamplePathParam;
 
+    private RequestBody $updateCustomerTypeRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
     private Response $customerTypeNotFoundResponse;
@@ -37,7 +39,8 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriCustomerTypeFactory     $parameterFactory,
+        private UuidUriCustomerTypeFactory          $parameterFactory,
+        private UpdateCustomerTypeRequestFactory    $updateCustomerTypeRequestFactory,
         private ValidationErrorFactory              $validationErrorResponseFactory,
         private BadRequestResponseFactory           $badRequestResponseFactory,
         private CustomerTypeNotFoundResponseFactory $customerTypeNotFoundResponseFactory,
@@ -49,6 +52,9 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
+
+        $this->updateCustomerTypeRequest =
+            $this->updateCustomerTypeRequestFactory->getRequest();
 
         $this->validationErrorResponse =
             $this->validationErrorResponseFactory->getResponse();
@@ -77,9 +83,27 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
 
     public function createEndpoint(OpenApi $openApi): void
     {
+        $this->setPatchOperation($openApi);
         $this->setPutOperation($openApi);
         $this->setGetOperation($openApi);
         $this->setDeleteOperation($openApi);
+    }
+
+    private function setPatchOperation(OpenApi $openApi): void
+    {
+        $pathItem = $this->getPathItem($openApi);
+        $operationPatch = $pathItem->getPatch();
+        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem
+                ->withPatch(
+                    $operationPatch
+                        ->withParameters([$this->uuidWithExamplePathParam])
+                        ->withRequestBody($this->updateCustomerTypeRequest)
+                        ->withResponses($mergedResponses)
+                )
+        );
     }
 
     private function setPutOperation(OpenApi $openApi): void
