@@ -6,72 +6,75 @@
 parameters:
 
 services:
-
   app.customer.mongodb.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [ {
-      'ulid': 'desc',
-      'createdAt': 'desc',
-      'updatedAt': 'desc',
-      'email': 'asc',
-      'phone': 'asc',
-      'leadSource': 'asc',
-      'type.value': 'asc',
-      'status.value': 'asc'
-    } ]
+    arguments:
+      [
+        {
+          'ulid': 'desc',
+          'createdAt': 'desc',
+          'updatedAt': 'desc',
+          'email': 'asc',
+          'phone': 'asc',
+          'leadSource': 'asc',
+          'type.value': 'asc',
+          'status.value': 'asc',
+        },
+      ]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.order' }
 
   app.customer.mongodb.range_filter:
     parent: 'api_platform.doctrine_mongodb.odm.range_filter'
     class: App\Shared\Infrastructure\Filter\UlidRangeFilter
-    arguments: [ { 'ulid': ~ } ]
+    arguments: [{ 'ulid': ~ }]
     tags:
       - { name: 'api_platform.filter', id: 'mongodb.range' }
 
   app.customer.mongodb.date_filter:
     parent: 'api_platform.doctrine_mongodb.odm.date_filter'
-    arguments: [ { 'createdAt': ~, 'updatedAt': ~ } ]
+    arguments: [{ 'createdAt': ~, 'updatedAt': ~ }]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
 
   app.customer.mongodb.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments:
-      [ {
-        initials: 'exact',
-        email: 'exact',
-        phone: 'exact',
-        leadSource: 'exact',
-        'type.value': 'exact',
-        'status.value': 'exact',
-        confirmed: 'exact'
-      } ]
+      [
+        {
+          initials: 'exact',
+          email: 'exact',
+          phone: 'exact',
+          leadSource: 'exact',
+          'type.value': 'exact',
+          'status.value': 'exact',
+          confirmed: 'exact',
+        },
+      ]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.search' }
 
   app.customer_type.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [ { 'ulid': 'desc', 'value': 'asc' } ]
+    arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.type.order' }
 
   app.customer_type.partial_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments: [ { 'value': 'partial' } ]
+    arguments: [{ 'value': 'partial' }]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.type.partial_search' }
 
-
   app.customer_status.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [ { 'ulid': 'desc', 'value': 'asc' } ]
+    arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.status.order' }
 
   app.customer_status.partial_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments: [ { 'value': 'partial' } ]
+    arguments: [{ 'value': 'partial' }]
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search' }
 
@@ -96,7 +99,7 @@ services:
     App\Shared\Domain\Bus\Command\CommandHandlerInterface:
       tags: ['app.command_handler']
     App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory:
-      tags: [ 'app.openapi_endpoint_factory' ]
+      tags: ['app.openapi_endpoint_factory']
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
@@ -118,5 +121,5 @@ services:
   App\Shared\Application\OpenApi\OpenApiFactory:
     decorates: 'api_platform.openapi.factory'
     arguments:
-      [ '@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory ]
+      ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
     autoconfigure: false
