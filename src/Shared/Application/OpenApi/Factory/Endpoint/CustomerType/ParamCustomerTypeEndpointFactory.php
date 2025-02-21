@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeReqFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
@@ -45,7 +45,7 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
         private BadRequestResponseFactory          $badRequestResponseFactory,
         private TypeNotFoundResponseFactory        $customerTypeNotFoundResponseFactory,
         private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
-        private CustTypeReqFactory                 $replaceCustomerRequestFactory,
+        private CustTypeCreateReqFactory           $replaceCustomerRequestFactory,
         private InternalErrorFactory               $internalErrorFactory,
         private ForbiddenResponseFactory           $forbiddenResponseFactory,
         private UnauthorizedResponseFactory        $unauthorizedResponseFactory,

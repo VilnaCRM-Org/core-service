@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeReqFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -28,7 +28,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CustTypeReqFactory          $createCustomerTypeRequestFactory,
+        private CustTypeCreateReqFactory    $createCustomerTypeRequestFactory,
         private ValidationErrorFactory      $validationErrorResponseFactory,
         private BadRequestResponseFactory   $badRequestResponseFactory,
         private InternalErrorFactory        $internalErrorFactory,
