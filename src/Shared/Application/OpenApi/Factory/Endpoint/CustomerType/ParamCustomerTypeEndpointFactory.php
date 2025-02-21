@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeReqFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TypeNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -39,16 +39,16 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriCustomerTypeFactory $parameterFactory,
-        private UpdateCustomerTypeRequestFactory $updateCustomerTypeRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private CustomerTypeNotFoundResponseFactory $customerTypeNotFoundResponseFactory,
+        private UuidUriCustomerTypeFactory         $parameterFactory,
+        private UpdateCustomerTypeRequestFactory   $updateCustomerTypeRequestFactory,
+        private ValidationErrorFactory             $validationErrorResponseFactory,
+        private BadRequestResponseFactory          $badRequestResponseFactory,
+        private TypeNotFoundResponseFactory        $customerTypeNotFoundResponseFactory,
         private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
-        private CustomerTypeRequestFactory $replaceCustomerRequestFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        private CustTypeReqFactory                 $replaceCustomerRequestFactory,
+        private InternalErrorFactory               $internalErrorFactory,
+        private ForbiddenResponseFactory           $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory        $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
