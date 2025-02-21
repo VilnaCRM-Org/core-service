@@ -21,7 +21,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
     private const ENDPOINT_URI = '/api/customer_types';
 
     private RequestBody $createCustomerTypeRequest;
-    private Response $validationErrorResponse;
+    private Response $validErrorResponse;
     private Response $badRequestResponse;
     private Response $internalErrorResponse;
     private Response $unauthorizedResponse;
@@ -38,7 +38,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
         $this->createCustomerTypeRequest =
             $this->createCustomerTypeRequestFactory->getRequest();
 
-        $this->validationErrorResponse =
+        $this->validErrorResponse =
             $this->validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
@@ -87,7 +87,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validErrorResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }
