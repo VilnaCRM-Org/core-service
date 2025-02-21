@@ -9,24 +9,9 @@ use Symfony\Component\Uid\Ulid;
 
 final readonly class UlidTransformer
 {
-    private function isEmpty(mixed $value): bool
-    {
-        return empty($value);
-    }
-
-    private function convertToUlid(mixed $value): Ulid
-    {
-        if ($value instanceof Ulid) {
-            return $value;
-        }
-
-        $string = $value instanceof Binary ? $value->getData() : $value;
-        return Ulid::fromString($string);
-    }
-
     public function toDatabase(mixed $value): ?Binary
     {
-        if ($this->isEmpty($value)) {
+        if ($value === null || $value === '') {
             return null;
         }
 
@@ -40,7 +25,7 @@ final readonly class UlidTransformer
 
     public function toPHP(mixed $value): ?Ulid
     {
-        if ($this->isEmpty($value)) {
+        if ($value === null || $value === '') {
             return null;
         }
 
@@ -49,5 +34,15 @@ final readonly class UlidTransformer
         }
 
         return $this->convertToUlid($value);
+    }
+
+    private function convertToUlid(mixed $value): Ulid
+    {
+        if ($value instanceof Ulid) {
+            return $value;
+        }
+
+        $string = $value instanceof Binary ? $value->getData() : $value;
+        return Ulid::fromString($string);
     }
 }
