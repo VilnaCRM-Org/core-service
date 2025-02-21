@@ -39,16 +39,16 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriCustomerTypeFactory          $parameterFactory,
-        private UpdateCustomerTypeRequestFactory    $updateCustomerTypeRequestFactory,
-        private ValidationErrorFactory              $validationErrorResponseFactory,
-        private BadRequestResponseFactory           $badRequestResponseFactory,
+        private UuidUriCustomerTypeFactory $parameterFactory,
+        private UpdateCustomerTypeRequestFactory $updateCustomerTypeRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
         private CustomerTypeNotFoundResponseFactory $customerTypeNotFoundResponseFactory,
-        private CustomerTypeDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerTypeRequestFactory          $replaceCustomerRequestFactory,
-        private InternalErrorFactory                $internalErrorFactory,
-        private ForbiddenResponseFactory            $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory         $unauthorizedResponseFactory,
+        private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
+        private CustomerTypeRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -93,7 +93,10 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPatch = $pathItem->getPatch();
-        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPatch->getResponses(),
+            $this->getUpdateResponses()
+        );
         $openApi->getPaths()->addPath(
             self::ENDPOINT_URI,
             $pathItem
@@ -148,7 +151,6 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
-
     }
 
     private function getPathItem(OpenApi $openApi): PathItem
