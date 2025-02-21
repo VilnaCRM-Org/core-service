@@ -20,6 +20,9 @@ abstract class AbstractCustomerRequestFactory implements AbstractRequestFactoryI
         );
     }
 
+    /**
+     * @return Parameter[]
+     */
     protected function getDefaultParameters(): array
     {
         return [
