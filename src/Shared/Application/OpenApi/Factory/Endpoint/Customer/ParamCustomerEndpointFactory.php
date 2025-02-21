@@ -41,15 +41,15 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
 
     public function __construct(
         private UuidUriCustomerFactory $parameterFactory,
-        private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
-        private ValidationErrorFactory          $validationErrorResponseFactory,
-        private BadRequestResponseFactory       $badRequestResponseFactory,
+        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerRequestFactory          $replaceCustomerRequestFactory,
-        private InternalErrorFactory            $internalErrorFactory,
-        private ForbiddenResponseFactory        $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
+        private CustomerDeletedResponseFactory $deletedResponseFactory,
+        private CustomerRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -147,7 +147,6 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
-
     }
 
     private function getPathItem(OpenApi $openApi): PathItem
