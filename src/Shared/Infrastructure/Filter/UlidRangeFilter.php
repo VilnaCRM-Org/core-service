@@ -13,18 +13,28 @@ use Symfony\Component\Uid\Ulid;
 
 final class UlidRangeFilter extends AbstractFilter implements FilterInterface, RangeFilterInterface
 {
+    /**
+     * Filters a property based on the provided operator and ULID value(s).
+     *
+     * @param string|object $value
+     * @param array<string, string> $context
+     */
     protected function filterProperty(
-        string     $property,
+        string $property,
         $value,
-        Builder    $aggregationBuilder,
-        string     $resourceClass,
+        Builder $aggregationBuilder,
+        string $resourceClass,
         ?Operation $operation = null,
-        array      &$context = []
+        array &$context = []
     ): void {
         $denormalizedProperty = $this->denormalizePropertyName($property);
         if (
             !$this->isPropertyEnabled($denormalizedProperty, $resourceClass) ||
-            !$this->isPropertyMapped($denormalizedProperty, $resourceClass, true)
+            !$this->isPropertyMapped(
+                $denormalizedProperty,
+                $resourceClass,
+                true
+            )
         ) {
             return;
         }
@@ -32,8 +42,9 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
 
         foreach ($operators as $operator => $filterValue) {
             if (
-                (($denormalizedProperty === 'ulid') || (str_ends_with($denormalizedProperty, 'ulid')))
-                && \is_string($filterValue)
+                ($denormalizedProperty === 'ulid' ||
+                    str_ends_with($denormalizedProperty, 'ulid')) &&
+                \is_string($filterValue)
             ) {
                 if (str_contains($filterValue, '..')) {
                     $parts = explode('..', $filterValue, 2);
@@ -56,21 +67,26 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
                 $matchStage = $aggregationBuilder->match();
                 switch ($operator) {
                     case 'lt':
-                        $matchStage->field($denormalizedProperty)->lt($filterValue);
+                        $matchStage->field($denormalizedProperty)
+                            ->lt($filterValue);
                         break;
                     case 'lte':
-                        $matchStage->field($denormalizedProperty)->lte($filterValue);
+                        $matchStage->field($denormalizedProperty)
+                            ->lte($filterValue);
                         break;
                     case 'gt':
-                        $matchStage->field($denormalizedProperty)->gt($filterValue);
+                        $matchStage->field($denormalizedProperty)
+                            ->gt($filterValue);
                         break;
                     case 'gte':
-                        $matchStage->field($denormalizedProperty)->gte($filterValue);
+                        $matchStage->field($denormalizedProperty)
+                            ->gte($filterValue);
                         break;
                     case 'between':
                         if (\is_array($filterValue)) {
                             [$min, $max] = $filterValue;
-                            $matchStage->field($denormalizedProperty)->gte($min)->lte($max);
+                            $matchStage->field($denormalizedProperty)
+                                ->gte($min)->lte($max);
                         }
                         break;
                     default:
@@ -80,6 +96,9 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
         }
     }
 
+    /**
+     * @return array<string, array<string, string|bool>>
+     */
     public function getDescription(string $resourceClass): array
     {
         if ($this->properties === null) {
@@ -92,7 +111,11 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
                     'property' => $property,
                     'type' => 'string',
                     'required' => false,
-                    'description' => sprintf('Filter on the %s property using the %s operator', $property, $operator),
+                    'description' => sprintf(
+                        'Filter on the %s property using the %s operator',
+                        $property,
+                        $operator
+                    ),
                 ];
             }
         }
