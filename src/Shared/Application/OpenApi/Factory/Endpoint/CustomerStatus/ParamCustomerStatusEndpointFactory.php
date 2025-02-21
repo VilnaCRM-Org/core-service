@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerCreateStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
@@ -39,16 +39,16 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustomerStatusFactory $parameterFactory,
-        private UpdateCustomerStatusRequestFactory $updateCustomerStatusRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
+        private UuidUriCustomerStatusFactory          $parameterFactory,
+        private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
+        private ValidationErrorFactory                $validationErrorResponseFactory,
+        private BadRequestResponseFactory             $badRequestResponseFactory,
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
-        private CustomerStatusDeletedResponseFactory $deletedResponseFactory,
-        private CustomerStatusRequestFactory $replaceCustomerRequestFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        private CustomerStatusDeletedResponseFactory  $deletedResponseFactory,
+        private CustomerCreateStatusRequestFactory    $replaceCustomerRequestFactory,
+        private InternalErrorFactory                  $internalErrorFactory,
+        private ForbiddenResponseFactory              $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory           $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();

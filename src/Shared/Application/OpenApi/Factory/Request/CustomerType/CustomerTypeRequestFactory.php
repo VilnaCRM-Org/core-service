@@ -9,7 +9,7 @@ use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
 
-abstract class AbstractCustomerTypeRequestFactory implements AbstractRequestFactoryInterface
+abstract class CustomerTypeRequestFactory implements AbstractRequestFactoryInterface
 {
     abstract protected function getRequestBuilder(): RequestBuilderInterface;
 
