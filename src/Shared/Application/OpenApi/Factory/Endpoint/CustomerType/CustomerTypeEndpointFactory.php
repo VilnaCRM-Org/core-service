@@ -28,12 +28,12 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CustomerTypeRequestFactory           $createCustomerTypeRequestFactory,
-        private ValidationErrorFactory               $validationErrorResponseFactory,
-        private BadRequestResponseFactory            $badRequestResponseFactory,
-        private InternalErrorFactory                 $internalErrorFactory,
-        private ForbiddenResponseFactory             $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory          $unauthorizedResponseFactory,
+        private CustomerTypeRequestFactory $createCustomerTypeRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerTypeRequest =
             $this->createCustomerTypeRequestFactory->getRequest();
