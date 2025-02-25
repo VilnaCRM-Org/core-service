@@ -5,7 +5,7 @@ framework:
   http_method_override: false
   serializer:
     mapping:
-      paths: [ '%kernel.project_dir%/config/serialization' ]
+      paths: ['%kernel.project_dir%/config/serialization']
   #esi: true
   #fragments: true
   php_errors:

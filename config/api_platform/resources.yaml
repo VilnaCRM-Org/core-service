@@ -5,14 +5,15 @@ resources:
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
-      groups: [ 'write:customerStatus' ]
+      groups: ['write:customerStatus']
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: [
-          'customer.mongodb.status.order',
-          'customer.mongodb.status.partial_search',
-          'mongodb.range'
-        ]
+        filters:
+          [
+            'customer.mongodb.status.order',
+            'customer.mongodb.status.partial_search',
+            'mongodb.range',
+          ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
@@ -25,14 +26,11 @@ resources:
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
-      groups: [ 'write:customerType' ]
+      groups: ['write:customerType']
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: [
-          'customer.mongodb.type.order',
-          'customer.mongodb.type.partial_search',
-          'mongodb.range'
-        ]
+        filters:
+          ['customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range']
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
@@ -45,15 +43,16 @@ resources:
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
-      groups: [ 'write:customer' ]
+      groups: ['write:customer']
     operations:
       ApiPlatform\Metadata\GetCollection:
-        filters: [
-          'customer.mongodb.search',
-          'customer.mongodb.order',
-          'customer.mongodb.date',
-          'mongodb.range'
-        ]
+        filters:
+          [
+            'customer.mongodb.search',
+            'customer.mongodb.order',
+            'customer.mongodb.date',
+            'mongodb.range',
+          ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
