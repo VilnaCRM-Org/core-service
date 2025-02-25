@@ -44,6 +44,10 @@ resources:
       - { field: 'ulid', direction: 'DESC' }
     denormalizationContext:
       groups: ['write:customer']
+    graphQlOperations:
+      - class: ApiPlatform\Metadata\GraphQl\Query
+      - class: ApiPlatform\Metadata\GraphQl\QueryCollection
+        filters: [ 'customer.mongodb.search', 'customer.mongodb.order', 'customer.mongodb.date', 'mongodb.range' ]
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
