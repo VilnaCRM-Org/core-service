@@ -32,7 +32,9 @@ resources:
         name: create
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: update
-      - class: ApiPlatform\Metadata\GraphQl\Mutation
+      - class: ApiPlatform\Metadata\GraphQl\DeleteMutation
+        normalizationContext:
+          groups: [ ]
         name: delete
 
   App\Customer\Domain\Entity\CustomerType:
@@ -68,7 +70,9 @@ resources:
         name: create
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: update
-      - class: ApiPlatform\Metadata\GraphQl\Mutation
+      - class: ApiPlatform\Metadata\GraphQl\DeleteMutation
+        normalizationContext:
+          groups: [ ]
         name: delete
 
   App\Customer\Domain\Entity\Customer:
