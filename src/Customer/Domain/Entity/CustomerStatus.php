@@ -24,4 +24,14 @@ class CustomerStatus
     {
         return $this->value;
     }
+
+    public function setUlid(?string $ulid): void
+    {
+        $this->ulid = new Ulid($ulid);
+    }
+
+    public function setValue(string $value): void
+    {
+        $this->value = $value;
+    }
 }
