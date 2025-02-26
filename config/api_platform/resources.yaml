@@ -12,7 +12,7 @@ resources:
           [
             'customer.mongodb.status.order',
             'customer.mongodb.status.partial_search',
-            'mongodb.range'
+            'mongodb.range',
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
@@ -26,7 +26,7 @@ resources:
           [
             'customer.mongodb.status.order',
             'customer.mongodb.status.partial_search',
-            'mongodb.range'
+            'mongodb.range',
           ]
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: create
@@ -47,11 +47,7 @@ resources:
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
-          [
-            'customer.mongodb.type.order',
-            'customer.mongodb.type.partial_search',
-            'mongodb.range'
-          ]
+          ['customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range']
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
@@ -61,11 +57,7 @@ resources:
       - class: ApiPlatform\Metadata\GraphQl\Query
       - class: ApiPlatform\Metadata\GraphQl\QueryCollection
         filters:
-          [
-            'customer.mongodb.type.order',
-            'customer.mongodb.type.partial_search',
-            'mongodb.range'
-          ]
+          ['customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range']
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: create
       - class: ApiPlatform\Metadata\GraphQl\Mutation
@@ -89,7 +81,7 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
-            'mongodb.range'
+            'mongodb.range',
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
@@ -104,7 +96,7 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
-            'mongodb.range'
+            'mongodb.range',
           ]
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: create
