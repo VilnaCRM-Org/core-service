@@ -38,22 +38,42 @@ abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
 
     protected function getConfirmedParam(): Parameter
     {
-        return new Parameter('confirmed', 'boolean', true);
+        return new Parameter(
+            'confirmed',
+            'boolean',
+            true
+        );
     }
 
     protected function getEmailParam(): Parameter
     {
-        return new Parameter('email', 'string', 'customer@example.com', 255, 'email');
+        return new Parameter(
+            'email',
+            'string',
+            'customer@example.com',
+            255,
+            'email'
+        );
     }
 
     protected function getPhoneParam(): Parameter
     {
-        return new Parameter('phone', 'string', '0123456789', 255);
+        return new Parameter(
+            'phone',
+            'string',
+            '0123456789',
+            255
+        );
     }
 
     protected function getLeadSourceParam(): Parameter
     {
-        return new Parameter('leadSource', 'string', 'Google', 255);
+        return new Parameter(
+            'leadSource',
+            'string',
+            'Google',
+            255
+        );
     }
 
     protected function getTypeParam(): Parameter
@@ -78,6 +98,11 @@ abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
 
     protected function getInitialsParam(): Parameter
     {
-        return new Parameter('initials', 'string', 'Name Surname', 255);
+        return new Parameter(
+            'initials',
+            'string',
+            'Name Surname',
+            255
+        );
     }
 }

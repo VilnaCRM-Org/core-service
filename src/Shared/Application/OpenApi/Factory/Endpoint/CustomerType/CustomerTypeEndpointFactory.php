@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
@@ -16,35 +16,35 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
+final class CustomerTypeEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types';
 
     private RequestBody $createCustomerTypeRequest;
-    private Response $validationResponse;
+    private Response $validResponse;
     private Response $badRequestResponse;
-    private Response $internalErrorResponse;
+    private Response $internalResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CustTypeCreateReqFactory    $createCustomerTypeRequestFactory,
-        private ValidationErrorFactory      $validationErrorResponseFactory,
-        private BadRequestResponseFactory   $badRequestResponseFactory,
-        private InternalErrorFactory        $internalErrorFactory,
-        private ForbiddenResponseFactory    $forbiddenResponseFactory,
+        private CustTypeCreateReqFactory $createCustomerTypeRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerTypeRequest =
             $this->createCustomerTypeRequestFactory->getRequest();
 
-        $this->validationResponse =
+        $this->validResponse =
             $this->validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
             $this->badRequestResponseFactory->getResponse();
 
-        $this->internalErrorResponse =
+        $this->internalResponse =
             $this->internalErrorFactory->getResponse();
 
         $this->forbiddenResponse =
@@ -87,8 +87,8 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
@@ -101,7 +101,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 }

@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint\Customer;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
@@ -16,7 +16,7 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerEndpointFactory extends AbstractEndpointFactory
+final class CustomerEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers';
 
@@ -29,11 +29,11 @@ final class CustomerEndpointFactory extends AbstractEndpointFactory
 
     public function __construct(
         private CustomerCreateRequestFactory $createCustomerRequestFactory,
-        private ValidationErrorFactory       $validationErrorResponseFactory,
-        private BadRequestResponseFactory    $badRequestResponseFactory,
-        private InternalErrorFactory         $internalErrorFactory,
-        private ForbiddenResponseFactory     $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory  $unauthorizedResponseFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerRequest =
             $this->createCustomerRequestFactory->getRequest();

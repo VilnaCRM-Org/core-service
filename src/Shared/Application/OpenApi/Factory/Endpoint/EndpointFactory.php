@@ -6,11 +6,12 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint;
 
 use ApiPlatform\OpenApi\Model\Response;
 
-abstract class AbstractEndpointFactory implements AbstractEndpointFactoryInterface
+abstract class EndpointFactory implements EndpointFactoryInterface
 {
     /**
      * @param array<int,Response> $baseResponses
      * @param array<int,Response> $overrideResponses
+     *
      * @return array<int,Response>
      */
     public function mergeResponses(

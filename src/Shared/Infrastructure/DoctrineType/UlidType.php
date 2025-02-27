@@ -7,7 +7,7 @@ namespace App\Shared\Infrastructure\DoctrineType;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Doctrine\ODM\MongoDB\Types\Type;
 
-class UlidType extends Type
+final class UlidType extends Type
 {
     public const NAME = 'ulid';
 
@@ -23,14 +23,22 @@ class UlidType extends Type
 
     public function closureToMongo(): string
     {
-        return '$return = $value instanceof \Symfony\Component\Uid\Ulid
-        ? new \MongoDB\BSON\Binary($value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC)
-        : null;';
+        return <<<'PHP'
+        $return = $value instanceof \Symfony\Component\Uid\Ulid
+            ? new \MongoDB\BSON\Binary($value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC)
+            : null;
+        PHP;
     }
 
     public function closureToPHP(): string
     {
-        return '$return = $value ? ($value instanceof \MongoDB\BSON\Binary ? \Symfony\Component\Uid\Ulid::fromString($value->getData()) : \Symfony\Component\Uid\Ulid::fromString($value)) : null;';
+        return <<<'PHP'
+        $return = $value 
+        ? ($value instanceof \MongoDB\BSON\Binary 
+            ? \Symfony\Component\Uid\Ulid::fromString($value->getData()) 
+            : \Symfony\Component\Uid\Ulid::fromString($value)) 
+        : null;
+        PHP;
     }
 
     public function getName(): string

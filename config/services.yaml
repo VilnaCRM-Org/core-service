@@ -98,7 +98,7 @@ services:
       tags: ['app.event_subscriber']
     App\Shared\Domain\Bus\Command\CommandHandlerInterface:
       tags: ['app.command_handler']
-    App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory:
+    App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory:
       tags: ['app.openapi_endpoint_factory']
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:

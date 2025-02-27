@@ -9,12 +9,12 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerCreateStatusRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusUpdateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -22,7 +22,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
+class ParamCustomerStatusEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
 
@@ -39,16 +39,16 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustomerStatusFactory          $parameterFactory,
-        private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
-        private ValidationErrorFactory                $validationErrorResponseFactory,
-        private BadRequestResponseFactory             $badRequestResponseFactory,
-        private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
-        private CustomerStatusDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerCreateStatusRequestFactory    $replaceCustomerRequestFactory,
-        private InternalErrorFactory                  $internalErrorFactory,
-        private ForbiddenResponseFactory              $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory           $unauthorizedResponseFactory,
+        private UuidUriCustomerStatusFactory $parameterFactory,
+        private CustomerStatusUpdateFactory $updateCustomerStatusRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
+        private CustomerStatusNotFoundFactory $customerStatusNotFoundResponseFactory,
+        private CustomerStatusDeletedFactory $deletedResponseFactory,
+        private CustomerCreateStatusRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();

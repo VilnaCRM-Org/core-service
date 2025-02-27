@@ -9,7 +9,7 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
@@ -22,7 +22,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
+final class ParamCustomerEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers/{ulid}';
 
@@ -30,26 +30,26 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
 
     private RequestBody $updateCustomerRequest;
 
-    private Response $validationErrorResponse;
+    private Response $validResponse;
     private Response $badRequestResponse;
     private Response $customerNotFoundResponse;
     private Response $customerDeletedResponse;
-    private Response $internalErrorResponse;
+    private Response $internalResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UuidUriCustomerFactory          $parameterFactory,
-        private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
-        private ValidationErrorFactory          $validationErrorResponseFactory,
-        private BadRequestResponseFactory       $badRequestResponseFactory,
+        private UuidUriCustomerFactory $parameterFactory,
+        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerCreateRequestFactory    $replaceCustomerRequestFactory,
-        private InternalErrorFactory            $internalErrorFactory,
-        private ForbiddenResponseFactory        $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
+        private CustomerDeletedResponseFactory $deletedResponseFactory,
+        private CustomerCreateRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -57,7 +57,7 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
         $this->updateCustomerRequest =
             $this->updateCustomerRequestFactory->getRequest();
 
-        $this->validationErrorResponse =
+        $this->validResponse =
             $this->validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
@@ -72,7 +72,7 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
         $this->replaceCustomerRequest =
             $this->replaceCustomerRequestFactory->getRequest();
 
-        $this->internalErrorResponse =
+        $this->internalResponse =
             $this->internalErrorFactory->getResponse();
 
         $this->forbiddenResponse =
@@ -165,7 +165,7 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
@@ -178,7 +178,7 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
@@ -192,8 +192,8 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 }
