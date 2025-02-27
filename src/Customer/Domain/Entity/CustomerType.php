@@ -15,19 +15,14 @@ class CustomerType
         $this->ulid = new Ulid();
     }
 
-    public function getUlid(): Ulid
+    public function getUlid(): string
     {
-        return $this->ulid;
+        return (string) $this->ulid;
     }
 
     public function getValue(): string
     {
         return $this->value;
-    }
-
-    public function setUlid(?string $ulid): void
-    {
-        $this->ulid = new Ulid($ulid);
     }
 
     public function setValue(string $value): void
