@@ -8,7 +8,7 @@ use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 
-class UpdateCustomerRequestFactory extends AbstractCustomerRequestFactory
+class UpdateCustomerRequestFactory extends CustomerRequestFactory
 {
     public function __construct(private RequestPatchBuilder $requestBuilder)
     {
@@ -21,22 +21,46 @@ class UpdateCustomerRequestFactory extends AbstractCustomerRequestFactory
 
     protected function getConfirmedParam(): Parameter
     {
-        return new Parameter('confirmed', 'boolean', true, required: false);
+        return new Parameter(
+            'confirmed',
+            'boolean',
+            true,
+            required: false
+        );
     }
 
     protected function getEmailParam(): Parameter
     {
-        return new Parameter('email', 'string', 'customer@example.com', 255, 'email', required: false);
+        return new Parameter(
+            'email',
+            'string',
+            'customer@example.com',
+            255,
+            'email',
+            required: false
+        );
     }
 
     protected function getPhoneParam(): Parameter
     {
-        return new Parameter('phone', 'string', '0123456789', 255, required: false);
+        return new Parameter(
+            'phone',
+            'string',
+            '0123456789',
+            255,
+            required: false
+        );
     }
 
     protected function getLeadSourceParam(): Parameter
     {
-        return new Parameter('leadSource', 'string', 'Google', 255, required: false);
+        return new Parameter(
+            'leadSource',
+            'string',
+            'Google',
+            255,
+            required: false
+        );
     }
 
     protected function getTypeParam(): Parameter
@@ -63,6 +87,12 @@ class UpdateCustomerRequestFactory extends AbstractCustomerRequestFactory
 
     protected function getInitialsParam(): Parameter
     {
-        return new Parameter('initials', 'string', 'Name Surname', 255, required: false);
+        return new Parameter(
+            'initials',
+            'string',
+            'Name Surname',
+            255,
+            required: false
+        );
     }
 }

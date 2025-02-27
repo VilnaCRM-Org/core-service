@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -21,24 +21,24 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
     private const ENDPOINT_URI = '/api/customer_types';
 
     private RequestBody $createCustomerTypeRequest;
-    private Response $validationErrorResponse;
+    private Response $validationResponse;
     private Response $badRequestResponse;
     private Response $internalErrorResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CustomerTypeRequestFactory           $createCustomerTypeRequestFactory,
-        private ValidationErrorFactory               $validationErrorResponseFactory,
-        private BadRequestResponseFactory            $badRequestResponseFactory,
-        private InternalErrorFactory                 $internalErrorFactory,
-        private ForbiddenResponseFactory             $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory          $unauthorizedResponseFactory,
+        private CustTypeCreateReqFactory    $createCustomerTypeRequestFactory,
+        private ValidationErrorFactory      $validationErrorResponseFactory,
+        private BadRequestResponseFactory   $badRequestResponseFactory,
+        private InternalErrorFactory        $internalErrorFactory,
+        private ForbiddenResponseFactory    $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerTypeRequest =
             $this->createCustomerTypeRequestFactory->getRequest();
 
-        $this->validationErrorResponse =
+        $this->validationResponse =
             $this->validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
@@ -87,7 +87,7 @@ final class CustomerTypeEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
         ];
     }

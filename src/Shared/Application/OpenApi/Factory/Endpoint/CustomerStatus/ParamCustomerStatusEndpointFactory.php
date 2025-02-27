@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerCreateStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
@@ -31,9 +31,9 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $updateCustomerStatusRequest;
     private Response $validationErrorResponse;
     private Response $badRequestResponse;
-    private Response $customerStatusNotFoundResponse;
+    private Response $notFoundResponse;
     private Response $customerStatusDeletedResponse;
-    private Response $internalErrorResponse;
+    private Response $internalResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerStatusRequest;
@@ -45,7 +45,7 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
         private BadRequestResponseFactory             $badRequestResponseFactory,
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
         private CustomerStatusDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerStatusRequestFactory          $replaceCustomerRequestFactory,
+        private CustomerCreateStatusRequestFactory    $replaceCustomerRequestFactory,
         private InternalErrorFactory                  $internalErrorFactory,
         private ForbiddenResponseFactory              $forbiddenResponseFactory,
         private UnauthorizedResponseFactory           $unauthorizedResponseFactory,
@@ -62,7 +62,7 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
         $this->badRequestResponse =
             $this->badRequestResponseFactory->getResponse();
 
-        $this->customerStatusNotFoundResponse =
+        $this->notFoundResponse =
             $this->customerStatusNotFoundResponseFactory->getResponse();
 
         $this->customerStatusDeletedResponse =
@@ -71,7 +71,7 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
         $this->replaceCustomerStatusRequest =
             $this->replaceCustomerRequestFactory->getRequest();
 
-        $this->internalErrorResponse =
+        $this->internalResponse =
             $this->internalErrorFactory->getResponse();
 
         $this->forbiddenResponse =
@@ -161,8 +161,8 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_NO_CONTENT => $this->customerStatusDeletedResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
@@ -174,8 +174,8 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
         return [
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
@@ -188,9 +188,9 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerStatusNotFoundResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 }

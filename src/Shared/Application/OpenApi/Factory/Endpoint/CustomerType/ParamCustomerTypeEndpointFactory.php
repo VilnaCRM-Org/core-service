@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TypeNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -39,16 +39,16 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriCustomerTypeFactory          $parameterFactory,
-        private UpdateCustomerTypeRequestFactory    $updateCustomerTypeRequestFactory,
-        private ValidationErrorFactory              $validationErrorResponseFactory,
-        private BadRequestResponseFactory           $badRequestResponseFactory,
-        private CustomerTypeNotFoundResponseFactory $customerTypeNotFoundResponseFactory,
-        private CustomerTypeDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerTypeRequestFactory          $replaceCustomerRequestFactory,
-        private InternalErrorFactory                $internalErrorFactory,
-        private ForbiddenResponseFactory            $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory         $unauthorizedResponseFactory,
+        private UuidUriCustomerTypeFactory         $parameterFactory,
+        private UpdateCustomerTypeRequestFactory   $updateCustomerTypeRequestFactory,
+        private ValidationErrorFactory             $validationErrorResponseFactory,
+        private BadRequestResponseFactory          $badRequestResponseFactory,
+        private TypeNotFoundResponseFactory        $customerTypeNotFoundResponseFactory,
+        private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
+        private CustTypeCreateReqFactory           $replaceCustomerRequestFactory,
+        private InternalErrorFactory               $internalErrorFactory,
+        private ForbiddenResponseFactory           $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory        $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
@@ -93,7 +93,10 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPatch = $pathItem->getPatch();
-        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPatch->getResponses(),
+            $this->getUpdateResponses()
+        );
         $openApi->getPaths()->addPath(
             self::ENDPOINT_URI,
             $pathItem
@@ -148,7 +151,6 @@ class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
-
     }
 
     private function getPathItem(OpenApi $openApi): PathItem

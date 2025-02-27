@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
@@ -40,13 +40,13 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UuidUriCustomerFactory $parameterFactory,
+        private UuidUriCustomerFactory          $parameterFactory,
         private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
         private ValidationErrorFactory          $validationErrorResponseFactory,
         private BadRequestResponseFactory       $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
         private CustomerDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerRequestFactory          $replaceCustomerRequestFactory,
+        private CustomerCreateRequestFactory    $replaceCustomerRequestFactory,
         private InternalErrorFactory            $internalErrorFactory,
         private ForbiddenResponseFactory        $forbiddenResponseFactory,
         private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
@@ -147,7 +147,6 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
                 $operationGet->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
-
     }
 
     private function getPathItem(OpenApi $openApi): PathItem

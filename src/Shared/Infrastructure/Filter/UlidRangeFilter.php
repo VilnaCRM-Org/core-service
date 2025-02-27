@@ -21,7 +21,7 @@ final class UlidRangeFilter extends AbstractFilter implements FilterInterface, R
      */
     protected function filterProperty(
         string $property,
-               $value,
+        $value,
         Builder $aggregationBuilder,
         string $resourceClass,
         ?Operation $operation = null,

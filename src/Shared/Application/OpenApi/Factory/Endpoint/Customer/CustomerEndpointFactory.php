@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -28,12 +28,12 @@ final class CustomerEndpointFactory extends AbstractEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CustomerRequestFactory          $createCustomerRequestFactory,
-        private ValidationErrorFactory          $validationErrorResponseFactory,
-        private BadRequestResponseFactory       $badRequestResponseFactory,
-        private InternalErrorFactory            $internalErrorFactory,
-        private ForbiddenResponseFactory        $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
+        private CustomerCreateRequestFactory $createCustomerRequestFactory,
+        private ValidationErrorFactory       $validationErrorResponseFactory,
+        private BadRequestResponseFactory    $badRequestResponseFactory,
+        private InternalErrorFactory         $internalErrorFactory,
+        private ForbiddenResponseFactory     $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory  $unauthorizedResponseFactory,
     ) {
         $this->createCustomerRequest =
             $this->createCustomerRequestFactory->getRequest();
