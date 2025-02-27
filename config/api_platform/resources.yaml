@@ -81,6 +81,7 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
+            'customer.mongodb.boolean',
             'mongodb.range',
           ]
       ApiPlatform\Metadata\Get:
@@ -96,13 +97,14 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
+            'customer.mongodb.boolean',
             'mongodb.range',
           ]
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: create
       - class: ApiPlatform\Metadata\GraphQl\Mutation
         name: update
-      - class: ApiPlatform\Metadata\GraphQl\Mutation
+      - class: ApiPlatform\Metadata\GraphQl\DeleteMutation
         name: delete
 
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
