@@ -34,7 +34,7 @@ resources:
         name: update
       - class: ApiPlatform\Metadata\GraphQl\DeleteMutation
         normalizationContext:
-          groups: [ ]
+          groups: []
         name: delete
 
   App\Customer\Domain\Entity\CustomerType:
@@ -64,7 +64,7 @@ resources:
         name: update
       - class: ApiPlatform\Metadata\GraphQl\DeleteMutation
         normalizationContext:
-          groups: [ ]
+          groups: []
         name: delete
 
   App\Customer\Domain\Entity\Customer:
