@@ -3583,9 +3583,9 @@ components:
           readOnly: true
           type: string
         ulid:
-          readOnly: true
-          type: string
-          format: ulid
+          type:
+            - string
+            - 'null'
         value:
           type: string
     CustomerStatus.jsonld-write.customerStatus:
@@ -3631,9 +3631,9 @@ components:
           readOnly: true
           type: string
         ulid:
-          readOnly: true
-          type: string
-          format: ulid
+          type:
+            - string
+            - 'null'
         value:
           type: string
     CustomerType.jsonld-write.customerType:
