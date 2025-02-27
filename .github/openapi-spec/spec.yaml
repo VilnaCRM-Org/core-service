@@ -302,32 +302,6 @@ paths:
           explode: true
           allowReserved: false
         -
-          name: confirmed
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: boolean
-          style: form
-          explode: false
-          allowReserved: false
-        -
-          name: 'confirmed[]'
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: array
-            items:
-              type: boolean
-          style: form
-          explode: true
-          allowReserved: false
-        -
           name: 'order[ulid]'
           in: query
           description: ''
@@ -377,6 +351,22 @@ paths:
           allowReserved: false
         -
           name: 'order[email]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: 'order[initials]'
           in: query
           description: ''
           required: false
@@ -548,6 +538,18 @@ paths:
           allowEmptyValue: false
           schema:
             type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: confirmed
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: boolean
           style: form
           explode: false
           allowReserved: false
@@ -3583,9 +3585,8 @@ components:
           readOnly: true
           type: string
         ulid:
-          type:
-            - string
-            - 'null'
+          readOnly: true
+          type: string
         value:
           type: string
     CustomerStatus.jsonld-write.customerStatus:
@@ -3631,9 +3632,8 @@ components:
           readOnly: true
           type: string
         ulid:
-          type:
-            - string
-            - 'null'
+          readOnly: true
+          type: string
         value:
           type: string
     CustomerType.jsonld-write.customerType:
