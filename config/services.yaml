@@ -15,6 +15,7 @@ services:
           'createdAt': 'desc',
           'updatedAt': 'desc',
           'email': 'asc',
+          'initials': 'asc',
           'phone': 'asc',
           'leadSource': 'asc',
           'type.value': 'asc',
@@ -37,6 +38,12 @@ services:
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
 
+  app.customer.mongodb.boolean_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
+    arguments: [{ 'confirmed': ~ }]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.boolean' }
+
   app.customer.mongodb.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments:
@@ -48,7 +55,6 @@ services:
           leadSource: 'exact',
           'type.value': 'exact',
           'status.value': 'exact',
-          confirmed: 'exact',
         },
       ]
     tags:
