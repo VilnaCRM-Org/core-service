@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\UriParameter;
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
 
-abstract class AbstractUuidUriParameterFactory implements UriParameterFactoryInterface
+abstract class UuidUriParameterFactory implements UriParameterFactoryInterface
 {
     public function __construct(private UriParameterBuilder $parameterBuilder)
     {

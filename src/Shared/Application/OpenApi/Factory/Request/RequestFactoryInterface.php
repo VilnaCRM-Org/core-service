@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Request;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 
-interface AbstractRequestFactoryInterface
+interface RequestFactoryInterface
 {
     public function getRequest(): RequestBody;
 }

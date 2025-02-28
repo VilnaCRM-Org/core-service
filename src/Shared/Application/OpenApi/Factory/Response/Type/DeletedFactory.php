@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Response\CustomerStatus;
+namespace App\Shared\Application\OpenApi\Factory\Response\Type;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
 
-final class CustomerStatusDeletedFactory implements ResponseFactoryInterface
+final class DeletedFactory implements ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
@@ -17,7 +17,7 @@ final class CustomerStatusDeletedFactory implements ResponseFactoryInterface
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(
-            'CustomerStatus resource deleted',
+            'CustomerType resource deleted',
             [],
             []
         );

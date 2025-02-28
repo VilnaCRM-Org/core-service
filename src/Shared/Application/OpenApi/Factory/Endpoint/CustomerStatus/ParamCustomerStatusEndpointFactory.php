@@ -10,42 +10,42 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerCreateStatusRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerStatusUpdateFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Status\StatusCreateFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Status\StatusUpdateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Status\DeletedFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Status\NotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-class ParamCustomerStatusEndpointFactory extends EndpointFactory
+final class ParamCustomerStatusEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
 
     private Parameter $uuidWithExamplePathParam;
 
     private RequestBody $updateCustomerStatusRequest;
-    private Response $validationErrorResponse;
+    private Response $validResponse;
     private Response $badRequestResponse;
     private Response $notFoundResponse;
-    private Response $customerStatusDeletedResponse;
+    private Response $statusDeletedResponse;
     private Response $internalResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustomerStatusFactory $parameterFactory,
-        private CustomerStatusUpdateFactory $updateCustomerStatusRequestFactory,
+        private CustomerStatusFactory $parameterFactory,
+        private StatusUpdateFactory $updateCustomerStatusRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CustomerStatusNotFoundFactory $customerStatusNotFoundResponseFactory,
-        private CustomerStatusDeletedFactory $deletedResponseFactory,
-        private CustomerCreateStatusRequestFactory $replaceCustomerRequestFactory,
+        private NotFoundFactory $customerStatusNotFoundFactory,
+        private DeletedFactory $deletedResponseFactory,
+        private StatusCreateFactory $replaceCustomerFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
@@ -56,20 +56,20 @@ class ParamCustomerStatusEndpointFactory extends EndpointFactory
         $this->updateCustomerStatusRequest =
             $this->updateCustomerStatusRequestFactory->getRequest();
 
-        $this->validationErrorResponse =
+        $this->validResponse =
             $this->validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
             $this->badRequestResponseFactory->getResponse();
 
         $this->notFoundResponse =
-            $this->customerStatusNotFoundResponseFactory->getResponse();
+            $this->customerStatusNotFoundFactory->getResponse();
 
-        $this->customerStatusDeletedResponse =
+        $this->statusDeletedResponse =
             $this->deletedResponseFactory->getResponse();
 
         $this->replaceCustomerStatusRequest =
-            $this->replaceCustomerRequestFactory->getRequest();
+            $this->replaceCustomerFactory->getRequest();
 
         $this->internalResponse =
             $this->internalErrorFactory->getResponse();
@@ -93,7 +93,10 @@ class ParamCustomerStatusEndpointFactory extends EndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPatch = $pathItem->getPatch();
-        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPatch->getResponses(),
+            $this->getUpdateResponses()
+        );
         $openApi->getPaths()->addPath(
             self::ENDPOINT_URI,
             $pathItem
@@ -110,7 +113,10 @@ class ParamCustomerStatusEndpointFactory extends EndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPut = $pathItem->getPut();
-        $mergedResponses = $this->mergeResponses($operationPut->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPut->getResponses(),
+            $this->getUpdateResponses()
+        );
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPut(
                 $operationPut
@@ -158,7 +164,7 @@ class ParamCustomerStatusEndpointFactory extends EndpointFactory
     private function getDeleteResponses(): array
     {
         return [
-            HttpResponse::HTTP_NO_CONTENT => $this->customerStatusDeletedResponse,
+            HttpResponse::HTTP_NO_CONTENT => $this->statusDeletedResponse,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
@@ -189,7 +195,7 @@ class ParamCustomerStatusEndpointFactory extends EndpointFactory
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationErrorResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }

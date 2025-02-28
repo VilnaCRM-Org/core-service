@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
+namespace App\Shared\Application\OpenApi\Factory\Request\Type;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 
-class UpdateCustomerTypeRequestFactory extends CustomerTypeRequestFactory
+final class TypeUpdateFactory extends CustomerTypeRequestFactory
 {
     public function __construct(private RequestPatchBuilder $requestBuilder)
     {

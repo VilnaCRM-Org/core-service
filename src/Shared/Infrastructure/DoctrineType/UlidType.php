@@ -25,7 +25,9 @@ final class UlidType extends Type
     {
         return <<<'PHP'
         $return = $value instanceof \Symfony\Component\Uid\Ulid
-            ? new \MongoDB\BSON\Binary($value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC)
+            ? new \MongoDB\BSON\Binary(
+            $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
+            )
             : null;
         PHP;
     }

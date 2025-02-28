@@ -10,16 +10,16 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\DeletedFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\NotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerEndpointFactory extends EndpointFactory
@@ -40,13 +40,13 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UuidUriCustomerFactory $parameterFactory,
-        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
+        private CustomerFactory $parameterFactory,
+        private UpdateFactory $updateCustomerRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory $deletedResponseFactory,
-        private CustomerCreateRequestFactory $replaceCustomerRequestFactory,
+        private NotFoundFactory $customerNotFoundFactory,
+        private DeletedFactory $deletedResponseFactory,
+        private CreateFactory $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
@@ -64,7 +64,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
             $this->badRequestResponseFactory->getResponse();
 
         $this->customerNotFoundResponse =
-            $this->customerNotFoundResponseFactory->getResponse();
+            $this->customerNotFoundFactory->getResponse();
 
         $this->customerDeletedResponse =
             $this->deletedResponseFactory->getResponse();
@@ -94,7 +94,10 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPut = $pathItem->getPut();
-        $mergedResponses = $this->mergeResponses($operationPut->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPut->getResponses(),
+            $this->getUpdateResponses()
+        );
 
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPut(
@@ -109,7 +112,10 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationPatch = $pathItem->getPatch();
-        $mergedResponses = $this->mergeResponses($operationPatch->getResponses(), $this->getUpdateResponses());
+        $mergedResponses = $this->mergeResponses(
+            $operationPatch->getResponses(),
+            $this->getUpdateResponses()
+        );
         $openApi->getPaths()->addPath(
             self::ENDPOINT_URI,
             $pathItem

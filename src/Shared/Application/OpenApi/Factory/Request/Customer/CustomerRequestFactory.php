@@ -7,18 +7,18 @@ namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
-abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
+abstract class CustomerRequestFactory implements RequestFactoryInterface
 {
-    abstract protected function getRequestBuilder(): RequestBuilderInterface;
-
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(
             $this->getDefaultParameters()
         );
     }
+
+    abstract protected function getRequestBuilder(): RequestBuilderInterface;
 
     /**
      * @return array<Parameter>
