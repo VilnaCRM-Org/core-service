@@ -6,17 +6,19 @@ namespace App\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Doctrine\ODM\MongoDB\Types\Type;
+use MongoDB\BSON\Binary;
+use Symfony\Component\Uid\Ulid;
 
 final class UlidType extends Type
 {
     public const NAME = 'ulid';
 
-    public function convertToDatabaseValue($value)
+    public function convertToDatabaseValue(mixed $value): ?Binary
     {
         return (new UlidTransformer())->toDatabase($value);
     }
 
-    public function convertToPHPValue($value)
+    public function convertToPHPValue(mixed $value): ?Ulid
     {
         return (new UlidTransformer())->toPHP($value);
     }
