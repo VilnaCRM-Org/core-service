@@ -168,8 +168,8 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     {
         return [
             HttpResponse::HTTP_NO_CONTENT => $this->customerDeletedResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
@@ -181,8 +181,8 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     private function getGetResponses(): array
     {
         return [
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
@@ -195,8 +195,8 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,

@@ -85,8 +85,8 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
@@ -99,8 +99,8 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     {
         return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }

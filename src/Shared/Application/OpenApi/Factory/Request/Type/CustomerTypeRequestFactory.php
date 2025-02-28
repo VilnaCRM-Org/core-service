@@ -11,8 +11,6 @@ use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
 abstract class CustomerTypeRequestFactory implements RequestFactoryInterface
 {
-    abstract protected function getRequestBuilder(): RequestBuilderInterface;
-
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(
@@ -20,6 +18,9 @@ abstract class CustomerTypeRequestFactory implements RequestFactoryInterface
         );
     }
 
+    /**
+     * @return array<Parameter>
+     */
     protected function getDefaultParameters(): array
     {
         return [
@@ -31,4 +32,6 @@ abstract class CustomerTypeRequestFactory implements RequestFactoryInterface
     {
         return new Parameter('value', 'string', 'Prospect', 255);
     }
+
+    abstract protected function getRequestBuilder(): RequestBuilderInterface;
 }
