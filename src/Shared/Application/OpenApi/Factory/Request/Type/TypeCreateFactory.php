@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Factory\Request\Type;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 
 final class TypeCreateFactory extends CustomerTypeRequestFactory
 {
@@ -12,7 +13,7 @@ final class TypeCreateFactory extends CustomerTypeRequestFactory
     {
     }
 
-    protected function getRequestBuilder(): RequestBuilder
+    protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;
     }

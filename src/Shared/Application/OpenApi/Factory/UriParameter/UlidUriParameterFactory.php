@@ -24,8 +24,5 @@ abstract class UlidUriParameterFactory implements UriParameterFactoryInterface
         );
     }
 
-    protected function getDescription(): string
-    {
-        return 'Customer identifier';
-    }
+    abstract protected function getDescription(): string;
 }

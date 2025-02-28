@@ -9,7 +9,7 @@ use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 
 final class CreateFactory extends CustomerRequestFactory
 {
-    public function __construct(private RequestBuilder $requestBuilder)
+    public function __construct(private readonly RequestBuilder $requestBuilder)
     {
     }
 
