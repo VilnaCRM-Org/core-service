@@ -8,8 +8,9 @@ use App\Shared\Application\OpenApi\Builder\RequestBuilder;
 
 final class StatusCreateFactory extends CustomerStatusRequestFactory
 {
-    public function __construct(private RequestBuilder $requestBuilder)
-    {
+    public function __construct(
+        private readonly RequestBuilder $requestBuilder
+    ) {
     }
 
     protected function getRequestBuilder(): RequestBuilder
