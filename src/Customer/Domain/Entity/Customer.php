@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
-use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Symfony\Component\Uid\Ulid;
 
 class Customer implements CustomerInterface
 {
-    private ?DateTimeInterface $createdAt;
-    private ?DateTimeInterface $updatedAt;
 
     private Ulid $ulid;
 
@@ -23,9 +21,9 @@ class Customer implements CustomerInterface
         private CustomerType $type,
         private CustomerStatus $status,
         private ?bool $confirmed = false,
+        private DateTimeInterface $createdAt = new DateTimeImmutable(),
+        private DateTimeInterface $updatedAt = new DateTimeImmutable(),
     ) {
-        $this->createdAt = new DateTime();
-        $this->updatedAt = new DateTime();
         $this->ulid = new Ulid();
     }
 
@@ -114,7 +112,7 @@ class Customer implements CustomerInterface
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(DateTime $updatedAt): void
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
