@@ -10,7 +10,6 @@ use Symfony\Component\Uid\Ulid;
 
 class Customer implements CustomerInterface
 {
-
     private Ulid $ulid;
 
     public function __construct(
