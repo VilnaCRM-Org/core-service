@@ -4,11 +4,26 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Transformer;
 
+use App\Shared\Domain\Factory\UlidFactoryInterface;
+use App\Shared\Domain\ValueObject\Uuid;
 use MongoDB\BSON\Binary;
+use Symfony\Component\Uid\AbstractUid as SymfonyUuid;
 use Symfony\Component\Uid\Ulid;
 
 final readonly class UlidTransformer
 {
+
+    public function __construct(
+        private UlidFactoryInterface $uuidFactory,
+    )
+    {
+    }
+
+    public function transformFromSymfonyUuid(SymfonyUuid $symfonyUuid): \App\Shared\Domain\ValueObject\Ulid
+    {
+        return $this->createUlid((string) $symfonyUuid);
+    }
+
     public function toDatabase(mixed $value): ?Binary
     {
         if ($value === null || $value === '') {
@@ -44,5 +59,10 @@ final readonly class UlidTransformer
 
         $string = $value instanceof Binary ? $value->getData() : $value;
         return Ulid::fromString($string);
+    }
+
+    private function createUlid(string $uuid): \App\Shared\Domain\ValueObject\Ulid
+    {
+        return $this->uuidFactory->create($uuid);
     }
 }

@@ -4,23 +4,13 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Factory;
 
-namespace App\Customer\Domain\Factory;
-
 use App\Customer\Domain\Entity\CustomerType;
-use Symfony\Component\Uid\Ulid;
+use App\Shared\Domain\ValueObject\UlidInterface;
 
-class CustomerTypeFactory
+final class CustomerTypeFactory implements CustomerTypeFactoryInterface
 {
-    /**
-     * Create a new CustomerType with a specific Ulid.
-     *
-     * @param string $value
-     * @param Ulid|null $ulid Optionally pass a pre-generated Ulid
-     * @return CustomerType
-     */
-    public function create(string $value, ?Ulid $ulid = null): CustomerType
+    public function create(string $value, UlidInterface $ulid): CustomerType
     {
-        $ulid = $ulid ?? new Ulid();
         return new CustomerType($value, $ulid);
     }
 }

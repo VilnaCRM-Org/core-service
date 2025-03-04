@@ -6,12 +6,20 @@ namespace App\Customer\Infrastructure\Repository;
 
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Repository\CustomerTypeRepositoryInterface;
+use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 class MongoDBCustomerTypeRepository extends ServiceDocumentRepository implements CustomerTypeRepositoryInterface
 {
     private DocumentManager $documentManager;
+
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Customer::class);
+        $this->documentManager = $this->getDocumentManager();
+    }
+
 
     /**
      * @param CustomerType $customerType

@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
-use Symfony\Component\Uid\Ulid;
+use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType
 {
-    private Ulid $ulid;
 
-    public function __construct(private string $value)
+    public function __construct(private string $value, private UlidInterface $ulid)
     {
-        $this->ulid = new Ulid();
     }
 
-    public function getUlid(): Ulid
+    public function getUlid(): UlidInterface
     {
         return $this->ulid;
     }

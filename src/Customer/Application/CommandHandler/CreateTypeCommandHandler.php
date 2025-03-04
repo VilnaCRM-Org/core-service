@@ -6,6 +6,7 @@ namespace App\Customer\Application\CommandHandler;
 
 use App\Customer\Domain\Repository\CustomerTypeRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 
 class CreateTypeCommandHandler implements CommandHandlerInterface
 {
