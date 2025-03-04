@@ -3496,12 +3496,6 @@ components:
         '@type':
           readOnly: true
           type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
         ulid:
           type:
             - string
@@ -3524,6 +3518,12 @@ components:
           example: 'https://example.com/'
         confirmed:
           type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     Customer.jsonld-write.customer:
       type: object
       description: ''
@@ -3630,12 +3630,10 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          readOnly: true
-          type: string
-          format: ulid
         value:
           type: string
+        ulid:
+          $ref: '#/components/schemas/UlidInterface.jsonld'
     CustomerType.jsonld-write.customerType:
       type: object
       description: ''
@@ -3644,6 +3642,34 @@ components:
         value:
           type: string
     HealthCheck.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        '@context':
+          readOnly: true
+          oneOf:
+            -
+              type: string
+            -
+              type: object
+              properties:
+                '@vocab':
+                  type: string
+                hydra:
+                  type: string
+                  enum: ['http://www.w3.org/ns/hydra/core#']
+              required:
+                - '@vocab'
+                - hydra
+              additionalProperties: true
+        '@id':
+          readOnly: true
+          type: string
+        '@type':
+          readOnly: true
+          type: string
+    UlidInterface.jsonld:
       type: object
       description: ''
       deprecated: false
