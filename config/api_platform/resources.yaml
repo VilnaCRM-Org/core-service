@@ -4,8 +4,6 @@ resources:
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
-    denormalizationContext:
-      groups: ['write:customerStatus']
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
@@ -19,6 +17,8 @@ resources:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
+        input: 'App\Customer\Application\DTO\CustomerStatusCreateDto'
+        processor: 'App\Customer\Application\Processor\CreateCustomerStatusProcessor'
 
   App\Customer\Domain\Entity\CustomerType:
     normalizationContext:
@@ -35,9 +35,8 @@ resources:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
-      create_http:
-        class: 'ApiPlatform\Metadata\Post'
-        input: 'App\Customer\Application\DTO\CustomerCreateDto'
+      ApiPlatform\Metadata\Post:
+        input: 'App\Customer\Application\DTO\CustomerTypeCreateDto'
         processor: 'App\Customer\Application\Processor\CreateCustomerTypeProcessor'
 
 
@@ -46,8 +45,6 @@ resources:
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
-    denormalizationContext:
-      groups: ['write:customer']
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
@@ -62,6 +59,8 @@ resources:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
+        input: 'App\Customer\Application\DTO\CustomerCreateDto'
+        processor: 'App\Customer\Application\Processor\CreateCustomerProcessor'
 
   App\Internal\HealthCheck\Domain\ValueObject\HealthCheck:
     operations:

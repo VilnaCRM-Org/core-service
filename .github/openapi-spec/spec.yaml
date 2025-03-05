@@ -2686,7 +2686,7 @@ paths:
           allowReserved: false
       deprecated: false
     post:
-      operationId: api_customer_types_post
+      operationId: create_http
       tags:
         - CustomerType
       responses:
@@ -3595,13 +3595,24 @@ components:
       properties:
         value:
           type: string
-    CustomerType-write.customerType:
+    CustomerType:
       type: object
       description: ''
       deprecated: false
       properties:
         value:
           type: string
+        ulid:
+          $ref: '#/components/schemas/UlidInterface'
+    CustomerType.CustomerCreateDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
+          type:
+            - string
+            - 'null'
     CustomerType.jsonld:
       type: object
       description: ''
@@ -3634,13 +3645,6 @@ components:
           type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld'
-    CustomerType.jsonld-write.customerType:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        value:
-          type: string
     HealthCheck.jsonld:
       type: object
       description: ''
@@ -3669,6 +3673,10 @@ components:
         '@type':
           readOnly: true
           type: string
+    UlidInterface:
+      type: object
+      description: ''
+      deprecated: false
     UlidInterface.jsonld:
       type: object
       description: ''
