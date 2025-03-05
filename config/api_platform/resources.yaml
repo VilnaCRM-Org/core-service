@@ -25,8 +25,6 @@ resources:
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
-    denormalizationContext:
-      groups: ['write:customerType']
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
@@ -35,7 +33,10 @@ resources:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
-      ApiPlatform\Metadata\Post:
+      create_http:
+        class: 'ApiPlatform\Metadata\Post'
+        input: 'App\Customer\Application\DTO\CustomerCreateDto'
+        processor: 'App\Customer\Application\Processor\CreateCustomerTypeProcessor'
 
   App\Customer\Domain\Entity\Customer:
     paginationPartial: true,

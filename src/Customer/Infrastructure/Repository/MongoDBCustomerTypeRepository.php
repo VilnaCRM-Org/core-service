@@ -16,10 +16,9 @@ class MongoDBCustomerTypeRepository extends ServiceDocumentRepository implements
 
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Customer::class);
+        parent::__construct($registry, CustomerType::class);
         $this->documentManager = $this->getDocumentManager();
     }
-
 
     /**
      * @param CustomerType $customerType

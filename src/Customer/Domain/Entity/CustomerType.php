@@ -8,7 +8,6 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType
 {
-
     public function __construct(private string $value, private UlidInterface $ulid)
     {
     }

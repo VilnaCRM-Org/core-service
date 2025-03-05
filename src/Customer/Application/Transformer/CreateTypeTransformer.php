@@ -18,6 +18,7 @@ final class CreateTypeTransformer
         private UlidFactory $uuidFactory,
     ) {
     }
+
     public function transformToType(CreateCustomerTypeCommand $command): CustomerType
     {
         return $this->userFactory->create(
