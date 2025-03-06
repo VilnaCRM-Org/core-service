@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
-use Symfony\Component\Uid\Ulid;
+use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerStatus
 {
-    private Ulid $ulid;
-
-    public function __construct(private string $value)
-    {
-        $this->ulid = new Ulid();
+    public function __construct(
+        private string $value,
+        private UlidInterface $ulid
+    ) {
     }
 
-    public function getUlid(): Ulid
+    public function getUlid(): string
     {
-        return $this->ulid;
+        return (string) $this->ulid;
     }
 
     public function getValue(): string
