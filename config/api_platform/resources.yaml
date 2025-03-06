@@ -21,14 +21,16 @@ resources:
       ApiPlatform\Metadata\Post:
 
   App\Customer\Domain\Entity\CustomerType:
-    paginationPartial: true,
+    normalizationContext:
+      groups: ['output']
+    paginationPartial: true
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
     operations:
       ApiPlatform\Metadata\GetCollection:
         filters:
-          ['customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range']
+          [ 'customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range' ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
       ApiPlatform\Metadata\Patch:
@@ -37,6 +39,7 @@ resources:
         class: 'ApiPlatform\Metadata\Post'
         input: 'App\Customer\Application\DTO\CustomerCreateDto'
         processor: 'App\Customer\Application\Processor\CreateCustomerTypeProcessor'
+
 
   App\Customer\Domain\Entity\Customer:
     paginationPartial: true,

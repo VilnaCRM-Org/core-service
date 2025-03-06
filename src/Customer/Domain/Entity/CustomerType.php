@@ -8,17 +8,24 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType
 {
-    public function __construct(private string $value, private UlidInterface $ulid)
-    {
+    public function __construct(
+        private string $value,
+        private UlidInterface $ulid
+    ) {
     }
 
-    public function getUlid(): UlidInterface
+    public function getUlid(): string
     {
-        return $this->ulid;
+        return (string) $this->ulid;
     }
 
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    public function setUlid(UlidInterface $ulid): void
+    {
+        $this->ulid = $ulid;
     }
 }
