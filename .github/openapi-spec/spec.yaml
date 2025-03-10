@@ -2686,7 +2686,7 @@ paths:
           allowReserved: false
       deprecated: false
     post:
-      operationId: create_http
+      operationId: api_customer_types_post
       tags:
         - CustomerType
       responses:
@@ -3445,7 +3445,7 @@ paths:
       deprecated: false
 components:
   schemas:
-    Customer-write.customer:
+    Customer:
       type: object
       description: ''
       deprecated: false
@@ -3468,6 +3468,37 @@ components:
           example: 'https://example.com/'
         confirmed:
           type: boolean
+        ulid:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Customer.CustomerCreateDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        initials:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        leadSource:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        confirmed:
+          type:
+            - boolean
+            - 'null'
     Customer.jsonld:
       type: object
       description: ''
@@ -3496,10 +3527,6 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          type:
-            - string
-            - 'null'
         initials:
           type: string
         email:
@@ -3518,42 +3545,34 @@ components:
           example: 'https://example.com/'
         confirmed:
           type: boolean
+        ulid:
+          type:
+            - string
+            - 'null'
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
-    Customer.jsonld-write.customer:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        initials:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-        leadSource:
-          type: string
-        type:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
-        status:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
-        confirmed:
-          type: boolean
-    CustomerStatus-write.customerStatus:
+    CustomerStatus:
       type: object
       description: ''
       deprecated: false
       properties:
         value:
           type: string
+        ulid:
+          type: string
+    CustomerStatus.CustomerStatusCreateDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
+          type:
+            - string
+            - 'null'
     CustomerStatus.jsonld:
       type: object
       description: ''
@@ -3586,13 +3605,6 @@ components:
           readOnly: true
           type: string
           format: ulid
-        value:
-          type: string
-    CustomerStatus.jsonld-write.customerStatus:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
         value:
           type: string
     CustomerType:
