@@ -19,9 +19,6 @@ final class UlidType extends Type
         return self::NAME;
     }
 
-    /**
-     * Converts the given value to a MongoDB Binary for storage.
-     */
     public function convertToDatabaseValue(mixed $value): Binary
     {
         if ($value instanceof Binary) {
@@ -33,13 +30,13 @@ final class UlidType extends Type
         return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    /**
-     * Converts the stored MongoDB value back into our Domain Ulid.
-     */
     public function convertToPHPValue(mixed $value): ?Ulid
     {
         $ulidTransformer = new UlidTransformer(new UlidFactory());
         $binary = $value instanceof Binary ? $value->getData() : $value;
+        if ($binary instanceof Ulid) {
+            return $binary;
+        }
         if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
             $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
         }

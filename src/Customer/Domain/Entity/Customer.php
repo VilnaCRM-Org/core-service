@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Customer\Domain\Entity;
 
+use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Symfony\Component\Uid\Ulid;
 
 class Customer implements CustomerInterface
 {
-    private Ulid $ulid;
-
     public function __construct(
         private string $initials,
         private string $email,
@@ -19,16 +18,16 @@ class Customer implements CustomerInterface
         private string $leadSource,
         private CustomerType $type,
         private CustomerStatus $status,
-        private ?bool $confirmed = false,
+        private ?bool $confirmed,
+        private UlidInterface $ulid,
         private DateTimeInterface $createdAt = new DateTimeImmutable(),
         private DateTimeInterface $updatedAt = new DateTimeImmutable(),
     ) {
-        $this->ulid = new Ulid();
     }
 
-    public function getUlid(): Ulid
+    public function getUlid(): string
     {
-        return $this->ulid;
+        return (string) $this->ulid;
     }
 
     public function setUlid(?string $ulid): void

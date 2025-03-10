@@ -13,18 +13,18 @@ use Symfony\Component\Uid\Factory\UlidFactory;
 final class CreateTypeTransformer
 {
     public function __construct(
-        private CustomerTypeFactoryInterface $userFactory,
+        private CustomerTypeFactoryInterface $typeFactory,
         private UlidTransformer $transformer,
-        private UlidFactory $uuidFactory,
+        private UlidFactory $ulidFactory,
     ) {
     }
 
     public function transformToType(CreateCustomerTypeCommand $command): CustomerType
     {
-        return $this->userFactory->create(
+        return $this->typeFactory->create(
             $command->value,
             $this->transformer->transformFromSymfonyUuid(
-                $this->uuidFactory->create()
+                $this->ulidFactory->create()
             )
         );
     }

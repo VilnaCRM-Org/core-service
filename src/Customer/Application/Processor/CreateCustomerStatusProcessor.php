@@ -18,7 +18,7 @@ final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateStatusCommandFactoryInterface $createStatusCommandFactory
+        private CreateStatusCommandFactoryInterface $createCustomerCommandFactory
     ) {
     }
 
@@ -33,7 +33,8 @@ final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ) {
-        $command = $this->createStatusCommandFactory->create(
+
+        $command = $this->createCustomerCommandFactory->create(
             $data->value
         );
         $this->commandBus->dispatch($command);
