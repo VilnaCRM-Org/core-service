@@ -7,7 +7,7 @@ namespace App\Shared\Domain\Bus\Command;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 
-class CreateCustomerCommand implements CommandInterface
+final class CreateCustomerCommand implements CommandInterface
 {
     private CommandResponseInterface $response;
 

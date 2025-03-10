@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Customer\Infrastructure\Repository;
 
 use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Repository\CustomerTypeRepositoryInterface;
+use App\Customer\Domain\Repository\TypeRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-class MongoDBCustomerTypeRepository extends ServiceDocumentRepository implements CustomerTypeRepositoryInterface
+final class MongoDBCustomerTypeRepository extends ServiceDocumentRepository implements TypeRepositoryInterface
 {
     private DocumentManager $documentManager;
 

@@ -6,15 +6,15 @@ namespace App\Customer\Application\CommandHandler;
 
 use App\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Customer\Application\Transformer\CreateTypeTransformer;
-use App\Customer\Domain\Repository\CustomerTypeRepositoryInterface;
+use App\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 use App\Shared\Domain\Bus\Command\CreateCustomerTypeCommand;
 
-class CreateTypeCommandHandler implements CommandHandlerInterface
+final class CreateTypeCommandHandler implements CommandHandlerInterface
 {
     public function __construct(
         private CreateTypeTransformer $transformer,
-        private CustomerTypeRepositoryInterface $repository
+        private TypeRepositoryInterface $repository
     ) {
     }
 

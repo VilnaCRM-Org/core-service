@@ -19,8 +19,9 @@ final class CreateCustomerTransformer
     ) {
     }
 
-    public function transformToCustomer(CreateCustomerCommand $command): Customer
-    {
+    public function transformToCustomer(
+        CreateCustomerCommand $command
+    ): Customer {
         return $this->customerFactory->create(
             $command->initials,
             $command->email,

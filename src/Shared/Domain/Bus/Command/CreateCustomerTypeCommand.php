@@ -6,7 +6,7 @@ namespace App\Shared\Domain\Bus\Command;
 
 use App\Customer\Application\Command\CreateTypeCommandResponse;
 
-class CreateCustomerTypeCommand implements CommandInterface
+final class CreateCustomerTypeCommand implements CommandInterface
 {
     private CreateTypeCommandResponse $response;
 

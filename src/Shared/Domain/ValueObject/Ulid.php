@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\ValueObject;
 
-class Ulid implements UlidInterface
+final class Ulid implements UlidInterface
 {
     private string $uid;
 
@@ -20,7 +20,11 @@ class Ulid implements UlidInterface
 
     public function toBinary(): string
     {
-        $ulid = strtr($this->uid, 'ABCDEFGHJKMNPQRSTVWXYZ', 'abcdefghijklmnopqrstuv');
+        $ulid = strtr(
+            $this->uid,
+            'ABCDEFGHJKMNPQRSTVWXYZ',
+            'abcdefghijklmnopqrstuv'
+        );
 
         $ulid = sprintf(
             '%02s%05s%05s%05s%05s%05s%05s',

@@ -7,7 +7,7 @@ namespace App\Customer\Application\Command;
 use App\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 
-class CreateCustomerCommandResponse implements CommandResponseInterface
+final class CreateCustomerCommandResponse implements CommandResponseInterface
 {
     public function __construct(public Customer $customer)
     {

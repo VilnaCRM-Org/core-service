@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Bus\Command;
 
-class CreateCustomerStatusCommand implements CommandInterface
+final class CreateCustomerStatusCommand implements CommandInterface
 {
     private CommandResponseInterface $response;
 

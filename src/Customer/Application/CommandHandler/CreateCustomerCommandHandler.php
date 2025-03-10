@@ -10,7 +10,7 @@ use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 use App\Shared\Domain\Bus\Command\CreateCustomerCommand;
 
-class CreateCustomerCommandHandler implements CommandHandlerInterface
+final class CreateCustomerCommandHandler implements CommandHandlerInterface
 {
     public function __construct(
         private CreateCustomerTransformer $transformer,

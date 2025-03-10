@@ -9,6 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Customer\Application\Command\CreateTypeCommandFactoryInterface;
 use App\Customer\Application\DTO\CustomerTypeCreateDto;
 use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
@@ -32,7 +33,7 @@ final readonly class CreateCustomerTypeProcessor implements ProcessorInterface
         Operation $operation,
         array $uriVariables = [],
         array $context = []
-    ) {
+    ): CustomerType {
         $command = $this->createTypeCommandFactory->create(
             $data->value
         );

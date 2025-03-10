@@ -8,7 +8,7 @@ use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CreateCustomerCommand;
 
-class CreateCustomerCommandFactory implements CreateCustomerCommandFactoryInterface
+final class CreateCustomerCommandFactory implements CreateCustomerCommandFactoryInterface
 {
     public function create(
         string $initials,

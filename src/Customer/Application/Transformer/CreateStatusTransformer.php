@@ -19,8 +19,9 @@ final class CreateStatusTransformer
     ) {
     }
 
-    public function transformToStatus(CreateCustomerStatusCommand $command): CustomerStatus
-    {
+    public function transformToStatus(
+        CreateCustomerStatusCommand $command
+    ): CustomerStatus {
         return $this->statusFactory->create(
             $command->value,
             $this->transformer->transformFromSymfonyUuid(

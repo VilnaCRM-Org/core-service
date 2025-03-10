@@ -21,6 +21,15 @@ final class CustomerFactory implements CustomerFactoryInterface
         bool $confirmed,
         UlidInterface $ulid
     ): Customer {
-        return new Customer($initials, $email, $phone, $leadSource, $type, $status, $confirmed, $ulid);
+        return new Customer(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            $confirmed,
+            $ulid
+        );
     }
 }

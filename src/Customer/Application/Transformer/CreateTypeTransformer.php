@@ -19,8 +19,9 @@ final class CreateTypeTransformer
     ) {
     }
 
-    public function transformToType(CreateCustomerTypeCommand $command): CustomerType
-    {
+    public function transformToType(
+        CreateCustomerTypeCommand $command
+    ): CustomerType {
         return $this->typeFactory->create(
             $command->value,
             $this->transformer->transformFromSymfonyUuid(

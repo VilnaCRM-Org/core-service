@@ -19,7 +19,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateCustomerCommandFactoryInterface $createStatusCommandFactory,
+        private CreateCustomerCommandFactoryInterface $statusCommandFactory,
         private IriConverterInterface $iriConverter,
     ) {
     }
@@ -34,10 +34,13 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         Operation $operation,
         array $uriVariables = [],
         array $context = []
-    ) {
-        $customerStatusEntity = $this->iriConverter->getResourceFromIri($data->status);
-        $customerTypeEntity = $this->iriConverter->getResourceFromIri($data->type);
-        $command = $this->createStatusCommandFactory->create(
+    ): Customer {
+        $customerStatusEntity = $this->iriConverter
+            ->getResourceFromIri($data->status);
+        $customerTypeEntity = $this->iriConverter
+            ->getResourceFromIri($data->type);
+
+        $command = $this->statusCommandFactory->create(
             $data->initials,
             $data->email,
             $data->phone,
