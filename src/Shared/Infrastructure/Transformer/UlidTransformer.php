@@ -32,7 +32,6 @@ final readonly class UlidTransformer
             return $value;
         }
 
-
         $ulid = $this->convertToUlid($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
