@@ -4,66 +4,39 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Transformer;
 
-use App\Shared\Domain\Factory\UlidFactoryInterface;
+use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\AbstractUid as SymfonyUuid;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final readonly class UlidTransformer
 {
-    public function __construct(
-        private UlidFactoryInterface $uuidFactory,
-    ) {
+    public function __construct(private UlidFactory $ulidFactory)
+    {
     }
 
-    public function transformFromSymfonyUuid(SymfonyUuid $symfonyUuid): \App\Shared\Domain\ValueObject\Ulid
+    public function toDatabaseValue(mixed $value): Binary
     {
-        $ulid = $this->createUlid((string) $symfonyUuid);
-        return $ulid;
-    }
-
-    public function toDatabase(mixed $value): ?Binary
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        if ($value instanceof Binary) {
-            return $value;
-        }
-
-        $ulid = $this->convertToUlid($value);
+        $ulid = $value instanceof Ulid ? $value : new Ulid($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPHP(mixed $value): ?Ulid
+    public function toPhpValue(mixed $binary): ?Ulid
     {
-        if ($value === null || $value === '') {
-            return null;
+        if (!$binary instanceof SymfonyUlid) {
+            $binary = SymfonyUlid::fromBinary($binary);
         }
-
-        return $this->convertToUlid($value);
+        return $this->transformFromSymfonyUuid($binary);
     }
 
-    private function convertToUlid(mixed $value): Ulid
+    public function transformFromSymfonyUuid(SymfonyUuid $symfonyUuid): Ulid
     {
-        if ($value instanceof Ulid) {
-            return $value;
-        }
-
-        $string = $value instanceof Binary ? $value->getData() : $value;
-        $ulid = Ulid::fromString($string);
-
-        return $ulid;
+        return $this->createUlid((string) $symfonyUuid);
     }
 
-    private function createUlid(string $uuid): \App\Shared\Domain\ValueObject\Ulid
+    private function createUlid(string $uuid): Ulid
     {
-        return $this->uuidFactory->create($uuid);
-    }
-
-    public function transformFromString(string $uuid): \App\Shared\Domain\ValueObject\Ulid
-    {
-        return $this->createUlid($uuid);
+        return $this->ulidFactory->create($uuid);
     }
 }

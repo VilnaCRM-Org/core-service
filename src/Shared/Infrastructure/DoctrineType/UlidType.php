@@ -24,31 +24,30 @@ final class UlidType extends Type
         if ($value instanceof Binary) {
             return $value;
         }
-        if (!$value instanceof Ulid) {
-            $value = new Ulid($value);
-        }
-        return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
+        return (new UlidTransformer(new UlidFactory()))
+            ->toDatabaseValue($value);
     }
 
     public function convertToPHPValue(mixed $value): ?Ulid
     {
-        $ulidTransformer = new UlidTransformer(new UlidFactory());
+        if ($value === null) {
+            return null;
+        }
+        if ($value instanceof Ulid) {
+            return $value;
+        }
         $binary = $value instanceof Binary ? $value->getData() : $value;
-        if ($binary instanceof Ulid) {
-            return $binary;
-        }
-        if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
-            $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
-        }
-        $ulid = $ulidTransformer->transformFromSymfonyUuid($binary);
-        return $ulid;
+        return (new UlidTransformer(new UlidFactory()))
+            ->toPhpValue($binary);
     }
 
     public function closureToMongo(): string
     {
         return <<<'PHP'
     $return = $value instanceof \App\Shared\Domain\ValueObject\Ulid
-        ? new \MongoDB\BSON\Binary($value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC)
+        ? new \MongoDB\BSON\Binary(
+        $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
+        )
         : null;
     PHP;
     }
@@ -57,12 +56,15 @@ final class UlidType extends Type
     {
         return <<<'PHP'
 $return = $value ? (function($value) {
-    $ulidTransformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(new \App\Shared\Infrastructure\Factory\UlidFactory());
-    $binary = $value instanceof \MongoDB\BSON\Binary ? $value->getData() : $value;
+    $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
+    new \App\Shared\Infrastructure\Factory\UlidFactory()
+    );
+    $binary = $value instanceof \MongoDB\BSON\Binary ? $value
+    ->getData() : $value;
     if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
         $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
     }
-    return $ulidTransformer->transformFromSymfonyUuid($binary);
+    return $transformer->transformFromSymfonyUuid($binary);
 })($value) : null;
 PHP;
     }
