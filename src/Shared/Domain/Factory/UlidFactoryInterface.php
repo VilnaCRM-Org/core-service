@@ -8,5 +8,5 @@ use App\Shared\Domain\ValueObject\Ulid;
 
 interface UlidFactoryInterface
 {
-    public function create(string $uuid): Ulid;
+    public function create(string $ulid): Ulid;
 }

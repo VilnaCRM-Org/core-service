@@ -9,9 +9,6 @@ use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
 final class UlidFilterProcessor
 {
-    /**
-     * Process a ULID filter condition.
-     */
     public function process(
         string $property,
         string $operator,
@@ -29,12 +26,9 @@ final class UlidFilterProcessor
 
     private function isUlidProperty(string $property): bool
     {
-        return $property === 'ulid' || str_ends_with($property, 'ulid');
+        return str_ends_with($property, 'ulid');
     }
 
-    /**
-     * Parses a ULID string or range.
-     */
     private function parseUlidValue(string $value): Ulid|array|null
     {
         if (str_contains($value, '..')) {
@@ -46,9 +40,6 @@ final class UlidFilterProcessor
         return new Ulid($value);
     }
 
-    /**
-     * Applies the operator strategy.
-     */
     private function applyOperator(
         string $operator,
         Ulid|array $filterValue,

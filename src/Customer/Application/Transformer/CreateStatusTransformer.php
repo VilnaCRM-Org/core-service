@@ -24,7 +24,7 @@ final class CreateStatusTransformer
     ): CustomerStatus {
         return $this->statusFactory->create(
             $command->value,
-            $this->transformer->transformFromSymfonyUuid(
+            $this->transformer->transformFromSymfonyUlid(
                 $this->uuidFactory->create()
             )
         );

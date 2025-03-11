@@ -7,7 +7,6 @@ namespace App\Shared\Infrastructure\Transformer;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use MongoDB\BSON\Binary;
-use Symfony\Component\Uid\AbstractUid as SymfonyUuid;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final readonly class UlidTransformer
@@ -27,16 +26,16 @@ final readonly class UlidTransformer
         if (!$binary instanceof SymfonyUlid) {
             $binary = SymfonyUlid::fromBinary($binary);
         }
-        return $this->transformFromSymfonyUuid($binary);
+        return $this->transformFromSymfonyUlid($binary);
     }
 
-    public function transformFromSymfonyUuid(SymfonyUuid $symfonyUuid): Ulid
+    public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
-        return $this->createUlid((string) $symfonyUuid);
+        return $this->createUlid((string) $symfonyUlid);
     }
 
-    private function createUlid(string $uuid): Ulid
+    private function createUlid(string $ulid): Ulid
     {
-        return $this->ulidFactory->create($uuid);
+        return $this->ulidFactory->create($ulid);
     }
 }

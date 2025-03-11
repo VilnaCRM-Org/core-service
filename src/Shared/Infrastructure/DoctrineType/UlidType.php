@@ -64,7 +64,7 @@ $return = $value ? (function($value) {
     if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
         $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
     }
-    return $transformer->transformFromSymfonyUuid($binary);
+    return $transformer->transformFromSymfonyUlid($binary);
 })($value) : null;
 PHP;
     }

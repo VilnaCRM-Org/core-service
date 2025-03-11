@@ -9,8 +9,8 @@ use App\Shared\Domain\ValueObject\Ulid;
 
 final class UlidFactory implements UlidFactoryInterface
 {
-    public function create(string $uuid): Ulid
+    public function create(string $ulid): Ulid
     {
-        return new Ulid($uuid);
+        return new Ulid($ulid);
     }
 }

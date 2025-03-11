@@ -24,7 +24,7 @@ final class CreateTypeTransformer
     ): CustomerType {
         return $this->typeFactory->create(
             $command->value,
-            $this->transformer->transformFromSymfonyUuid(
+            $this->transformer->transformFromSymfonyUlid(
                 $this->ulidFactory->create()
             )
         );

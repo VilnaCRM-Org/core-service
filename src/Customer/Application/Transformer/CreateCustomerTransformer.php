@@ -30,7 +30,7 @@ final class CreateCustomerTransformer
             $command->type,
             $command->status,
             $command->confirmed,
-            $this->transformer->transformFromSymfonyUuid(
+            $this->transformer->transformFromSymfonyUlid(
                 $this->uuidFactory->create()
             )
         );
