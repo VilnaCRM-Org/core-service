@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\CommandHandler;
 
+use App\Customer\Application\Command\CreateCustomerTypeCommand;
 use App\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Customer\Application\Transformer\CreateTypeTransformer;
 use App\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
-use App\Shared\Domain\Bus\Command\CreateCustomerTypeCommand;
 
 final class CreateTypeCommandHandler implements CommandHandlerInterface
 {

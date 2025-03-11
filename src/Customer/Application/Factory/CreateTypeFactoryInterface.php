@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Customer\Application\Command;
+namespace App\Customer\Application\Factory;
 
-use App\Shared\Domain\Bus\Command\CreateCustomerTypeCommand;
+use App\Customer\Application\Command\CreateCustomerTypeCommand;
 
 interface CreateTypeFactoryInterface
 {

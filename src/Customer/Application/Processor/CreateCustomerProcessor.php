@@ -7,8 +7,8 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\Command\CreateCustomerFactoryInterface;
 use App\Customer\Application\DTO\CustomerCreateDto;
+use App\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 

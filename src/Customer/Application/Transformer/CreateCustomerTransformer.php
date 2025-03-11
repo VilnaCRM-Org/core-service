@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\Transformer;
 
+use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Factory\CustomerFactoryInterface;
-use App\Shared\Domain\Bus\Command\CreateCustomerCommand;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory;
 

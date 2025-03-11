@@ -7,7 +7,6 @@ namespace App\Customer\Domain\Entity;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
-use Symfony\Component\Uid\Ulid;
 
 class Customer implements CustomerInterface
 {
@@ -30,9 +29,9 @@ class Customer implements CustomerInterface
         return (string) $this->ulid;
     }
 
-    public function setUlid(?string $ulid): void
+    public function setUlid(UlidInterface $ulid): void
     {
-        $this->ulid = new Ulid($ulid);
+        $this->ulid = $ulid;
     }
 
     public function getInitials(): string

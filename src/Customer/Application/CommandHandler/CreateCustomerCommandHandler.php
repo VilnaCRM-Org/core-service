@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\CommandHandler;
 
+use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Application\Command\CreateCustomerCommandResponse;
 use App\Customer\Application\Transformer\CreateCustomerTransformer;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
-use App\Shared\Domain\Bus\Command\CreateCustomerCommand;
 
 final class CreateCustomerCommandHandler implements CommandHandlerInterface
 {

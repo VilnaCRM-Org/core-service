@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain\Bus\Command;
+namespace App\Customer\Application\Command;
 
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
+use App\Shared\Domain\Bus\Command\CommandInterface;
+use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 
 final class CreateCustomerCommand implements CommandInterface
 {

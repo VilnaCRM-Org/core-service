@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain\Bus\Command;
+namespace App\Customer\Application\Command;
 
-use App\Customer\Application\Command\CreateTypeCommandResponse;
+use App\Shared\Domain\Bus\Command\CommandInterface;
 
 final class CreateCustomerTypeCommand implements CommandInterface
 {

@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain\Bus\Command;
+namespace App\Customer\Application\Command;
+
+use App\Shared\Domain\Bus\Command\CommandInterface;
+use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 
 final class CreateCustomerStatusCommand implements CommandInterface
 {

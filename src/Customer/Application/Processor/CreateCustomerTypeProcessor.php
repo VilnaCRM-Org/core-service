@@ -6,8 +6,8 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\Command\CreateTypeFactoryInterface;
 use App\Customer\Application\DTO\CustomerTypeCreateDto;
+use App\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Customer\Application\Command;
+namespace App\Customer\Application\Factory;
 
+use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
-use App\Shared\Domain\Bus\Command\CreateCustomerCommand;
 
 interface CreateCustomerFactoryInterface
 {
