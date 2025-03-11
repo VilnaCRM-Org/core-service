@@ -6,7 +6,7 @@ namespace App\Customer\Application\Command;
 
 use App\Shared\Domain\Bus\Command\CreateCustomerTypeCommand;
 
-interface CreateTypeCommandFactoryInterface
+interface CreateTypeFactoryInterface
 {
     public function create(
         string $value

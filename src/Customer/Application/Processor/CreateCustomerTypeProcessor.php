@@ -6,7 +6,7 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\Command\CreateTypeCommandFactoryInterface;
+use App\Customer\Application\Command\CreateTypeFactoryInterface;
 use App\Customer\Application\DTO\CustomerTypeCreateDto;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerType;
@@ -19,7 +19,7 @@ final readonly class CreateCustomerTypeProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateTypeCommandFactoryInterface $createTypeCommandFactory
+        private CreateTypeFactoryInterface $createTypeCommandFactory
     ) {
     }
 

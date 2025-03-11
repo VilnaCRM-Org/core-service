@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace App\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-final class MongoDBCustomerTypeRepository extends ServiceDocumentRepository implements TypeRepositoryInterface
+final class MongoCustomerRepository extends ServiceDocumentRepository implements
+    CustomerRepositoryInterface
 {
     private DocumentManager $documentManager;
 
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, CustomerType::class);
+        parent::__construct($registry, Customer::class);
         $this->documentManager = $this->getDocumentManager();
     }
 
     /**
-     * @param CustomerType $customerType
+     * @param Customer $customer
      */
-    public function save(object $customerType): void
+    public function save(object $customer): void
     {
-        $this->documentManager->persist($customerType);
+        $this->documentManager->persist($customer);
         $this->documentManager->flush();
     }
 }

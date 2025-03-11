@@ -6,7 +6,7 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\Command\CreateStatusCommandFactoryInterface;
+use App\Customer\Application\Command\CreateStatusFactoryInterface;
 use App\Customer\Application\DTO\CustomerStatusCreateDto;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -19,7 +19,7 @@ final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateStatusCommandFactoryInterface $createCustomerCommandFactory
+        private CreateStatusFactoryInterface $statusCommandFactory
     ) {
     }
 
@@ -34,8 +34,7 @@ final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerStatus {
-
-        $command = $this->createCustomerCommandFactory->create(
+        $command = $this->statusCommandFactory->create(
             $data->value
         );
         $this->commandBus->dispatch($command);

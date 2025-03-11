@@ -6,7 +6,7 @@ namespace App\Customer\Application\Command;
 
 use App\Shared\Domain\Bus\Command\CreateCustomerStatusCommand;
 
-final class CreateStatusCommandFactory implements CreateStatusCommandFactoryInterface
+final class CreateStatusFactory implements CreateStatusFactoryInterface
 {
     public function create(string $value): CreateCustomerStatusCommand
     {

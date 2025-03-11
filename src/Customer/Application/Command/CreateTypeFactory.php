@@ -6,7 +6,7 @@ namespace App\Customer\Application\Command;
 
 use App\Shared\Domain\Bus\Command\CreateCustomerTypeCommand;
 
-final class CreateTypeCommandFactory implements CreateTypeCommandFactoryInterface
+final class CreateTypeFactory implements CreateTypeFactoryInterface
 {
     public function create(string $value): CreateCustomerTypeCommand
     {
