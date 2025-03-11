@@ -2456,7 +2456,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -2695,7 +2695,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerType.jsonld'
+                $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -2843,7 +2843,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerType.jsonld'
+                $ref: '#/components/schemas/CustomerType.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -2959,7 +2959,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerType.jsonld'
+                $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -3257,7 +3257,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerType.jsonld'
+                $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -3469,9 +3469,7 @@ components:
         confirmed:
           type: boolean
         ulid:
-          type:
-            - string
-            - 'null'
+          $ref: '#/components/schemas/UlidInterface'
         createdAt:
           type: string
           format: date-time
@@ -3546,9 +3544,7 @@ components:
         confirmed:
           type: boolean
         ulid:
-          type:
-            - string
-            - 'null'
+          $ref: '#/components/schemas/UlidInterface.jsonld'
         createdAt:
           type: string
           format: date-time
@@ -3601,11 +3597,9 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          readOnly: true
-          type: string
-          format: ulid
         value:
+          type: string
+        ulid:
           type: string
     CustomerType:
       type: object
@@ -3616,7 +3610,7 @@ components:
           type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface'
-    CustomerType.CustomerCreateDto.jsonld:
+    CustomerType.CustomerTypeCreateDto.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3626,6 +3620,15 @@ components:
             - string
             - 'null'
     CustomerType.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
+          type: string
+        ulid:
+          $ref: '#/components/schemas/UlidInterface.jsonld'
+    CustomerType.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3656,7 +3659,7 @@ components:
         value:
           type: string
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld'
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
     HealthCheck.jsonld:
       type: object
       description: ''
@@ -3690,6 +3693,34 @@ components:
       description: ''
       deprecated: false
     UlidInterface.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        '@context':
+          readOnly: true
+          oneOf:
+            -
+              type: string
+            -
+              type: object
+              properties:
+                '@vocab':
+                  type: string
+                hydra:
+                  type: string
+                  enum: ['http://www.w3.org/ns/hydra/core#']
+              required:
+                - '@vocab'
+                - hydra
+              additionalProperties: true
+        '@id':
+          readOnly: true
+          type: string
+        '@type':
+          readOnly: true
+          type: string
+    UlidInterface.jsonld-output:
       type: object
       description: ''
       deprecated: false
