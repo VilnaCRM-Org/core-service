@@ -8,8 +8,8 @@ use ApiPlatform\Doctrine\Common\Filter\RangeFilterInterface;
 use ApiPlatform\Doctrine\Odm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Odm\Filter\FilterInterface;
 use ApiPlatform\Metadata\Operation;
+use App\Shared\Domain\ValueObject\Ulid;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
-use Symfony\Component\Uid\Ulid;
 
 final class UlidRangeFilter extends AbstractFilter implements
     FilterInterface,
@@ -24,11 +24,12 @@ final class UlidRangeFilter extends AbstractFilter implements
             return [];
         }
         $operators = ['lt', 'lte', 'gt', 'gte', 'between'];
+        $keys = array_keys($this->properties);
         return array_merge(
             ...array_map(
                 static fn (string $property): array =>
                 self::buildDescriptionForProperty($property, $operators),
-                array_keys($this->properties)
+                $keys
             )
         );
     }
@@ -141,31 +142,10 @@ final class UlidRangeFilter extends AbstractFilter implements
         string $field,
         Builder $builder
     ): void {
-        $operatorFuncs = [
-            'lt' => static fn () => $builder->match()->field($field)
-                ->lt($filterValue),
-            'lte' => static fn () => $builder->match()->field($field)
-                ->lte($filterValue),
-            'gt' => static fn () => $builder->match()->field($field)
-                ->gt($filterValue),
-            'gte' => static fn () => $builder->match()->field($field)
-                ->gte($filterValue),
-            'between' => static function () use (
-                $filterValue,
-                $field,
-                $builder
-            ): void {
-                if (is_array($filterValue)) {
-                    [$min, $max] = $filterValue;
-                    $builder->match()->field($field)
-                        ->gte($min)
-                        ->lte($max);
-                }
-            },
-        ];
+        $class = __NAMESPACE__ . '\\' . ucfirst($operator);
+        /** @var OperatorStrategyInterface $operatorStrategy */
+        $operatorStrategy = new $class();
 
-        if (isset($operatorFuncs[$operator])) {
-            $operatorFuncs[$operator]();
-        }
+        $operatorStrategy->apply($builder, $field, $filterValue);
     }
 }
