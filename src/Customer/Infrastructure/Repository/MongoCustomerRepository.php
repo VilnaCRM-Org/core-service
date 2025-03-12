@@ -10,6 +10,9 @@ use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
+/**
+ * @extends ServiceDocumentRepository<Customer>
+ */
 final class MongoCustomerRepository extends ServiceDocumentRepository implements
     CustomerRepositoryInterface
 {

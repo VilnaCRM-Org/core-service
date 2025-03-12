@@ -11,6 +11,9 @@ use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
+/**
+ * @extends ServiceDocumentRepository<CustomerStatus>
+ */
 final class MongoDBStatusRepository extends ServiceDocumentRepository implements
     CustomerStatusRepositoryInterface
 {
