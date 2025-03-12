@@ -12,4 +12,8 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <enableExtensions>
+        <extension name="mongodb"/>
+    </enableExtensions>
 <plugins><pluginClass class="Psalm\PhpUnitPlugin\Plugin"/></plugins></psalm>
