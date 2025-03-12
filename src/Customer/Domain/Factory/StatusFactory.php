@@ -7,7 +7,7 @@ namespace App\Customer\Domain\Factory;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
-final class CustomerStatusFactory implements CustomerStatusFactoryInterface
+final class StatusFactory implements StatusFactoryInterface
 {
     public function create(string $value, UlidInterface $ulid): CustomerStatus
     {

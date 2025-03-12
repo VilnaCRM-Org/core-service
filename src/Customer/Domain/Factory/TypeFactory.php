@@ -7,7 +7,7 @@ namespace App\Customer\Domain\Factory;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
-final class CustomerTypeFactory implements CustomerTypeFactoryInterface
+final class TypeFactory implements TypeFactoryInterface
 {
     public function create(string $value, UlidInterface $ulid): CustomerType
     {

@@ -17,8 +17,8 @@ resources:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
-        input: 'App\Customer\Application\DTO\CustomerStatusCreateDto'
-        processor: 'App\Customer\Application\Processor\CreateCustomerStatusProcessor'
+        input: 'App\Customer\Application\DTO\StatusCreateDto'
+        processor: 'App\Customer\Application\Processor\CreateStatusProcessor'
 
   App\Customer\Domain\Entity\CustomerType:
     normalizationContext:
@@ -36,8 +36,8 @@ resources:
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
-        input: 'App\Customer\Application\DTO\CustomerTypeCreateDto'
-        processor: 'App\Customer\Application\Processor\CreateCustomerTypeProcessor'
+        input: 'App\Customer\Application\DTO\TypeCreateDto'
+        processor: 'App\Customer\Application\Processor\CreateTypeProcessor'
 
   App\Customer\Domain\Entity\Customer:
     paginationPartial: true,

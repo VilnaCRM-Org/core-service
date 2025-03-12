@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\Factory;
 
-use App\Customer\Application\Command\CreateCustomerStatusCommand;
+use App\Customer\Application\Command\CreateStatusCommand;
 
 final class CreateStatusFactory implements CreateStatusFactoryInterface
 {
-    public function create(string $value): CreateCustomerStatusCommand
+    public function create(string $value): CreateStatusCommand
     {
-        return new CreateCustomerStatusCommand($value);
+        return new CreateStatusCommand($value);
     }
 }

@@ -6,25 +6,24 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerStatusCreateDto;
-use App\Customer\Application\Factory\CreateStatusFactoryInterface;
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerStatus;
+use App\Customer\Application\DTO\TypeCreateDto;
+use App\Customer\Application\Factory\CreateTypeFactoryInterface;
+use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<CustomerStatusCreateDto, Customer>
+ * @implements ProcessorInterface<TypeCreateDto, CustomerType>
  */
-final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
+final readonly class CreateTypeProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateStatusFactoryInterface $statusCommandFactory
+        private CreateTypeFactoryInterface $createTypeCommandFactory
     ) {
     }
 
     /**
-     * @param CustomerStatusCreateDto $data
+     * @param TypeCreateDto $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */
@@ -33,8 +32,8 @@ final readonly class CreateCustomerStatusProcessor implements ProcessorInterface
         Operation $operation,
         array $uriVariables = [],
         array $context = []
-    ): CustomerStatus {
-        $command = $this->statusCommandFactory->create(
+    ): CustomerType {
+        $command = $this->createTypeCommandFactory->create(
             $data->value
         );
         $this->commandBus->dispatch($command);

@@ -24,10 +24,7 @@ final class MongoCustomerRepository extends ServiceDocumentRepository implements
         $this->documentManager = $this->getDocumentManager();
     }
 
-    /**
-     * @param Customer $customer
-     */
-    public function save(object $customer): void
+    public function save(Customer $customer): void
     {
         $this->documentManager->persist($customer);
         $this->documentManager->flush();

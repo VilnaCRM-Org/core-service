@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\CreateCustomerTypeCommand;
+use App\Customer\Application\Command\CreateTypeCommand;
 use App\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Customer\Application\Transformer\CreateTypeTransformer;
 use App\Customer\Domain\Repository\TypeRepositoryInterface;
@@ -18,7 +18,7 @@ final class CreateTypeCommandHandler implements CommandHandlerInterface
     ) {
     }
 
-    public function __invoke(CreateCustomerTypeCommand $command): void
+    public function __invoke(CreateTypeCommand $command): void
     {
         $customerType = $this->transformer->transformToType($command);
         $this->repository->save($customerType);

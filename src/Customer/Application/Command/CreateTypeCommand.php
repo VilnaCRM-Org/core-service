@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace App\Customer\Application\Command;
 
 use App\Shared\Domain\Bus\Command\CommandInterface;
-use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 
-final class CreateCustomerStatusCommand implements CommandInterface
+final class CreateTypeCommand implements CommandInterface
 {
-    private CommandResponseInterface $response;
+    private CreateTypeCommandResponse $response;
 
     public function __construct(
         public readonly string $value,
     ) {
     }
 
-    public function getResponse(): CommandResponseInterface
+    public function getResponse(): CreateTypeCommandResponse
     {
         return $this->response;
     }
 
-    public function setResponse(CommandResponseInterface $response): void
+    public function setResponse(CreateTypeCommandResponse $response): void
     {
         $this->response = $response;
     }
