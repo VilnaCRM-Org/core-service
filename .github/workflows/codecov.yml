@@ -17,8 +17,6 @@ jobs:
         run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
       - name: Start Application
         run: make start
-      - name: Setup Test Database
-        run: make setup-test-db
       - name: Execute Unit and Integration tests
         run: make coverage-xml
       - name: Copy coverage report to host

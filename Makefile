@@ -106,10 +106,6 @@ tests-with-coverage: ## Run tests with coverage
 e2e-tests: ## Run end-to-end tests
 	$(EXEC_ENV) $(BEHAT)
 
-setup-test-db: ## Create database for testing purposes
-	$(SYMFONY_TEST_ENV) c:c
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
-
 all-tests: unit-tests integration-tests e2e-tests ## Run unit, integration and e2e tests
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
