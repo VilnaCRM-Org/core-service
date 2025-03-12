@@ -12,8 +12,11 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
-
-    <enableExtensions>
-        <extension name="mongodb"/>
-    </enableExtensions>
+    <issueHandlers>
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="MongoDB\BSON\Binary" />
+            </errorLevel>
+        </UndefinedClass>
+    </issueHandlers>
 <plugins><pluginClass class="Psalm\PhpUnitPlugin\Plugin"/></plugins></psalm>
