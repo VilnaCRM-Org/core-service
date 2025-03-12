@@ -3596,7 +3596,7 @@ components:
           type: string
         ulid:
           type: string
-    CustomerStatus.CustomerStatusCreateDto.jsonld:
+    CustomerStatus.StatusCreateDto.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3646,7 +3646,7 @@ components:
           type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface'
-    CustomerType.CustomerTypeCreateDto.jsonld:
+    CustomerType.TypeCreateDto.jsonld:
       type: object
       description: ''
       deprecated: false
