@@ -13,6 +13,7 @@
     "ext-mbstring": "*",
     "ext-simplexml": "*",
     "ext-xml": "*",
+    "ext-mongodb": "*",
     "api-platform/core": "^4.0",
     "api-platform/doctrine-odm": "*",
     "aws/aws-sdk-php": "^3.317.1",
