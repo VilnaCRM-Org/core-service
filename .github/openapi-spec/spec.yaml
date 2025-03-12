@@ -3445,6 +3445,42 @@ paths:
       deprecated: false
 components:
   schemas:
+    ConstraintViolation-json:
+      type: object
+      description: 'Unprocessable entity'
+      deprecated: false
+      properties:
+        status:
+          default: 422
+          example: 422
+          type: integer
+        violations:
+          type: array
+          items:
+            type: object
+            properties:
+              propertyPath:
+                type: string
+                description: 'The property path of the violation'
+              message:
+                type: string
+                description: 'The message associated with the violation'
+        detail:
+          readOnly: true
+          type: string
+        type:
+          readOnly: true
+          type: string
+        title:
+          readOnly: true
+          type:
+            - string
+            - 'null'
+        instance:
+          readOnly: true
+          type:
+            - string
+            - 'null'
     Customer:
       type: object
       description: ''
@@ -3660,6 +3696,37 @@ components:
           type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld-output'
+    Error:
+      type: object
+      description: 'A representation of common errors.'
+      deprecated: false
+      properties:
+        title:
+          readOnly: true
+          description: 'A short, human-readable summary of the problem.'
+          type:
+            - string
+            - 'null'
+        detail:
+          readOnly: true
+          description: 'A human-readable explanation specific to this occurrence of the problem.'
+          type:
+            - string
+            - 'null'
+        status:
+          type: number
+          example: 404
+          default: 400
+        instance:
+          readOnly: true
+          description: 'A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.'
+          type:
+            - string
+            - 'null'
+        type:
+          readOnly: true
+          description: 'A URI reference that identifies the problem type'
+          type: string
     HealthCheck.jsonld:
       type: object
       description: ''
@@ -3755,5 +3822,13 @@ components:
   headers: {  }
   securitySchemes: {  }
 security: []
-tags: []
+tags:
+  -
+    name: CustomerStatus
+  -
+    name: CustomerType
+  -
+    name: Customer
+  -
+    name: HealthCheck
 webhooks: {  }
