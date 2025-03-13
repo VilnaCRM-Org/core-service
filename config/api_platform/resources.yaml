@@ -10,7 +10,7 @@ resources:
           [
             'customer.mongodb.status.order',
             'customer.mongodb.status.partial_search',
-            'mongodb.range'
+            'mongodb.range',
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
@@ -51,7 +51,7 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
-            'mongodb.range'
+            'mongodb.range',
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
