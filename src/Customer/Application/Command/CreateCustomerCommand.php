@@ -20,7 +20,7 @@ final class CreateCustomerCommand implements CommandInterface
         public readonly string $leadSource,
         public readonly CustomerType $type,
         public readonly CustomerStatus $status,
-        public readonly bool $confirmed = false,
+        public readonly bool $confirmed,
     ) {
     }
 

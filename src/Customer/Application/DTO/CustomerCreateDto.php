@@ -13,7 +13,7 @@ final readonly class CustomerCreateDto
         public string $leadSource,
         public string $type,
         public string $status,
-        public ?bool $confirmed = false
+        public bool $confirmed
     ) {
     }
 }
