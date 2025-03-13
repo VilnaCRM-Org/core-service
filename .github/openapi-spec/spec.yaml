@@ -3530,9 +3530,7 @@ components:
         status:
           type: string
         confirmed:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
     Customer.jsonld:
       type: object
       description: ''
@@ -3602,9 +3600,7 @@ components:
       deprecated: false
       properties:
         value:
-          type:
-            - string
-            - 'null'
+          type: string
     CustomerStatus.jsonld:
       type: object
       description: ''
@@ -3652,9 +3648,7 @@ components:
       deprecated: false
       properties:
         value:
-          type:
-            - string
-            - 'null'
+          type: string
     CustomerType.jsonld:
       type: object
       description: ''
