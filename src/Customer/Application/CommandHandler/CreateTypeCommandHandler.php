@@ -20,7 +20,7 @@ final class CreateTypeCommandHandler implements CommandHandlerInterface
 
     public function __invoke(CreateTypeCommand $command): void
     {
-        $customerType = $this->transformer->transformToType($command);
+        $customerType = $this->transformer->transform($command);
         $this->repository->save($customerType);
         $command->setResponse(new CreateTypeCommandResponse($customerType));
     }

@@ -20,7 +20,7 @@ final class CreateStatusCommandHandler implements CommandHandlerInterface
 
     public function __invoke(CreateStatusCommand $command): void
     {
-        $customerStatus = $this->transformer->transformToStatus($command);
+        $customerStatus = $this->transformer->transform($command);
         $this->repository->save($customerStatus);
         $command->setResponse(new CreateStatusCommandResponse($customerStatus));
     }

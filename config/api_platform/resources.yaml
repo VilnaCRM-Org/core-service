@@ -1,6 +1,6 @@
 resources:
   App\Customer\Domain\Entity\CustomerStatus:
-    paginationPartial: true,
+    paginationPartial: true
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
@@ -10,7 +10,7 @@ resources:
           [
             'customer.mongodb.status.order',
             'customer.mongodb.status.partial_search',
-            'mongodb.range',
+            'mongodb.range'
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
@@ -40,7 +40,7 @@ resources:
         processor: 'App\Customer\Application\Processor\CreateTypeProcessor'
 
   App\Customer\Domain\Entity\Customer:
-    paginationPartial: true,
+    paginationPartial: true
     paginationClientItemsPerPage: true
     paginationViaCursor:
       - { field: 'ulid', direction: 'DESC' }
@@ -51,7 +51,7 @@ resources:
             'customer.mongodb.search',
             'customer.mongodb.order',
             'customer.mongodb.date',
-            'mongodb.range',
+            'mongodb.range'
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:

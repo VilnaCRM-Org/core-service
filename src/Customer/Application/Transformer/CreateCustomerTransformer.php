@@ -15,11 +15,11 @@ final class CreateCustomerTransformer
     public function __construct(
         private CustomerFactoryInterface $customerFactory,
         private UlidTransformer $transformer,
-        private UlidFactory $uuidFactory,
+        private UlidFactory $ulidFactory,
     ) {
     }
 
-    public function transformToCustomer(
+    public function transform(
         CreateCustomerCommand $command
     ): Customer {
         return $this->customerFactory->create(
@@ -31,7 +31,7 @@ final class CreateCustomerTransformer
             $command->status,
             $command->confirmed,
             $this->transformer->transformFromSymfonyUlid(
-                $this->uuidFactory->create()
+                $this->ulidFactory->create()
             )
         );
     }

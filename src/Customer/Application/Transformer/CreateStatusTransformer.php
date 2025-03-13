@@ -15,17 +15,17 @@ final class CreateStatusTransformer
     public function __construct(
         private StatusFactoryInterface $statusFactory,
         private UlidTransformer $transformer,
-        private UlidFactory $uuidFactory,
+        private UlidFactory $ulidFactory,
     ) {
     }
 
-    public function transformToStatus(
+    public function transform(
         CreateStatusCommand $command
     ): CustomerStatus {
         return $this->statusFactory->create(
             $command->value,
             $this->transformer->transformFromSymfonyUlid(
-                $this->uuidFactory->create()
+                $this->ulidFactory->create()
             )
         );
     }

@@ -19,7 +19,7 @@ final class CreateTypeTransformer
     ) {
     }
 
-    public function transformToType(
+    public function transform(
         CreateTypeCommand $command
     ): CustomerType {
         return $this->typeFactory->create(

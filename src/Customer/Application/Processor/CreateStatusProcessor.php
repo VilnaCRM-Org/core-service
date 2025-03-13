@@ -13,7 +13,7 @@ use App\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<StatusCreateDto, Customer>
+ * @implements ProcessorInterface<StatusCreateDto, CustomerStatus>
  */
 final readonly class CreateStatusProcessor implements ProcessorInterface
 {
@@ -39,6 +39,6 @@ final readonly class CreateStatusProcessor implements ProcessorInterface
         );
         $this->commandBus->dispatch($command);
 
-        return $command->getResponse()->customerType;
+        return $command->getResponse()->customerStatus;
     }
 }

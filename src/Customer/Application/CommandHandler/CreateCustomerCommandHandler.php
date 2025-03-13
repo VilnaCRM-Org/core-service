@@ -20,7 +20,7 @@ final class CreateCustomerCommandHandler implements CommandHandlerInterface
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        $customer = $this->transformer->transformToCustomer($command);
+        $customer = $this->transformer->transform($command);
         $this->repository->save($customer);
         $command->setResponse(new CreateCustomerCommandResponse($customer));
     }

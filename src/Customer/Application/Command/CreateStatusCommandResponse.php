@@ -9,7 +9,7 @@ use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 
 final class CreateStatusCommandResponse implements CommandResponseInterface
 {
-    public function __construct(public CustomerStatus $customerType)
+    public function __construct(public CustomerStatus $customerStatus)
     {
     }
 }
