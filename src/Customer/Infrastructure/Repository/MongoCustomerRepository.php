@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Customer\Infrastructure\Repository;
 
 use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Entity\CustomerInterface;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
@@ -28,5 +29,11 @@ final class MongoCustomerRepository extends ServiceDocumentRepository implements
     {
         $this->documentManager->persist($customer);
         $this->documentManager->flush();
+    }
+
+
+    public function findByEmail(string $email): ?CustomerInterface
+    {
+        return $this->findOneBy(['email' => $email]);
     }
 }
