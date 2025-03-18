@@ -31,7 +31,6 @@ final class MongoCustomerRepository extends ServiceDocumentRepository implements
         $this->documentManager->flush();
     }
 
-
     public function findByEmail(string $email): ?CustomerInterface
     {
         return $this->findOneBy(['email' => $email]);

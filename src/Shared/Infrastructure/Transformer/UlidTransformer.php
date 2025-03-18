@@ -17,7 +17,8 @@ final readonly class UlidTransformer
 
     public function toDatabaseValue(mixed $value): Binary
     {
-        $ulid = $value instanceof Ulid ? $value : new Ulid($value);
+        $ulid = $value instanceof
+        Ulid ? $value : $this->ulidFactory->create($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\Validator;
 
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Contracts\Translation\TranslatorInterface;
