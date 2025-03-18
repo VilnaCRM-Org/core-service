@@ -1,4 +1,3 @@
-
 App\Customer\Application\DTO\CustomerCreateDto:
   properties:
     initials:
@@ -25,4 +24,4 @@ App\Customer\Application\DTO\CustomerCreateDto:
     status:
       - NotBlank: { message: 'not.blank' }
     confirmed:
-      - Type: { type: "bool", message: "This value should be a boolean." }
+      - Type: { type: 'bool', message: 'This value should be a boolean.' }
