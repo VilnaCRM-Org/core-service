@@ -3516,14 +3516,28 @@ components:
       type: object
       description: ''
       deprecated: false
+      required:
+        - initials
+        - email
+        - phone
+        - leadSource
+        - type
+        - status
       properties:
         initials:
+          maxLength: 255
           type: string
         email:
+          format: email
+          maxLength: 255
+          externalDocs:
+            url: 'https://schema.org/email'
           type: string
         phone:
+          maxLength: 255
           type: string
         leadSource:
+          maxLength: 255
           type: string
         type:
           type: string
