@@ -31,7 +31,6 @@ final class UnauthorizedResponseFactory implements ResponseFactoryInterface
 
     public function getTypeParam(): Parameter
     {
-        // RFC2616 Section 10.4.2 describes the 401 Unauthorized status.
         return new Parameter(
             'type',
             'string',
