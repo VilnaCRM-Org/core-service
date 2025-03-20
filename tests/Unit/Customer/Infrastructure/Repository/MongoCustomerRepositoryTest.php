@@ -9,6 +9,7 @@ use App\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
 {
@@ -16,7 +17,7 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
 
     private DocumentManager $documentManager;
 
-    private MongoCustomerRepository $repository;
+    private MongoCustomerRepository|MockObject $repository;
 
     protected function setUp(): void
     {
@@ -30,7 +31,10 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->with(Customer::class)
             ->willReturn($this->documentManager);
 
-        $this->repository = new MongoCustomerRepository($this->registry);
+        $this->repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findOneBy'])
+            ->getMock();
     }
 
     public function testSave(): void
@@ -45,5 +49,34 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->method('flush');
 
         $this->repository->save($customer);
+    }
+
+    public function testFindByEmail(): void
+    {
+        $email = $this->faker->email();
+        $customer = $this->createMock(Customer::class);
+
+        $this->repository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['email' => $email])
+            ->willReturn($customer);
+
+        $result = $this->repository->findByEmail($email);
+
+        $this->assertSame($customer, $result);
+    }
+
+    public function testFindByEmailReturnsNullWhenNotFound(): void
+    {
+        $email = $this->faker->email();
+
+        $this->repository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['email' => $email])
+            ->willReturn(null);
+
+        $result = $this->repository->findByEmail($email);
+
+        $this->assertNull($result);
     }
 }
