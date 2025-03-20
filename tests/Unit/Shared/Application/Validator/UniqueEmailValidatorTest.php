@@ -55,7 +55,6 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $status = $customerStatus;
         $confirmed = true;
 
-        $email = $this->faker->email();
         $errorMessage = $this->faker->word();
         $user = $this->userFactory->create(
             $initials,

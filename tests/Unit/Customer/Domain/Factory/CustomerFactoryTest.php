@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Customer\Domain\Factory;
+
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Entity\CustomerStatus;
+use App\Customer\Domain\Entity\CustomerType;
+use App\Customer\Domain\Factory\CustomerFactory;
+use App\Customer\Domain\Factory\CustomerFactoryInterface;
+use App\Shared\Domain\ValueObject\UlidInterface;
+use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\TestCase;
+
+final class CustomerFactoryTest extends UnitTestCase
+{
+    public function testCreateReturnsCustomerInstance(): void
+    {
+        $initials = $this->faker->name();
+        $email = $this->faker->email();
+        $phone = $this->faker->phoneNumber();
+        $leadSource = $this->faker->name();
+        $confirmed = true;
+
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $ulid = $this->createMock(UlidInterface::class);
+
+        $factory = new CustomerFactory();
+
+        $customer = $factory->create($initials, $email, $phone, $leadSource, $type, $status, $confirmed, $ulid);
+
+        $this->assertInstanceOf(Customer::class, $customer);
+    }
+}
