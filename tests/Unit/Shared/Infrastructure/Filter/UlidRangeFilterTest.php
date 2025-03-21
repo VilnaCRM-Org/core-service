@@ -18,13 +18,9 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 final class UlidRangeFilterTest extends TestCase
 {
     private ManagerRegistry|MockObject $managerRegistry;
-
     private LoggerInterface|MockObject $logger;
-
     private NameConverterInterface|MockObject $nameConverter;
-
     private Builder|MockObject $builder;
-
     private MatchStage|MockObject $matchStage;
 
     protected function setUp(): void
@@ -38,13 +34,7 @@ final class UlidRangeFilterTest extends TestCase
 
     public function testGetDescription(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
-
+        $filter = $this->createFilter(['ulid' => null]);
         $description = $filter->getDescription(Customer::class);
 
         $this->assertArrayHasKey('ulid[lt]', $description);
@@ -53,23 +43,41 @@ final class UlidRangeFilterTest extends TestCase
         $this->assertArrayHasKey('ulid[gte]', $description);
         $this->assertArrayHasKey('ulid[between]', $description);
 
-        $ltDescription = $description['ulid[lt]'];
-        $this->assertEquals('ulid', $ltDescription['property']);
-        $this->assertEquals('string', $ltDescription['type']);
-        $this->assertFalse($ltDescription['required']);
-        $this->assertEquals('Filter on the ulid property using the lt operator', $ltDescription['description']);
+        $this->assertDescriptionContent($description['ulid[lt]']);
+    }
+
+    /**
+     * @param array<string, string|bool> $description
+     */
+    private function assertDescriptionContent(array $description): void
+    {
+        $this->assertEquals('ulid', $description['property']);
+        $this->assertEquals('string', $description['type']);
+        $this->assertFalse($description['required']);
+        $this->assertEquals(
+            'Filter on the ulid property using the lt operator',
+            $description['description']
+        );
     }
 
     public function testGetDescriptionWithNoProperties(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            [],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter([]);
         $description = $filter->getDescription(Customer::class);
         $this->assertEmpty($description);
+    }
+
+    /**
+     * @param array<string, null> $properties
+     */
+    private function createFilter(array $properties): UlidRangeFilter
+    {
+        return new UlidRangeFilter(
+            $this->managerRegistry,
+            $this->logger,
+            $properties,
+            $this->nameConverter
+        );
     }
 
     /**
@@ -84,7 +92,11 @@ final class UlidRangeFilterTest extends TestCase
                 $properties,
                 $this->nameConverter,
             ])
-            ->onlyMethods(['isPropertyEnabled', 'isPropertyMapped', 'denormalizePropertyName'])
+            ->onlyMethods([
+                'isPropertyEnabled',
+                'isPropertyMapped',
+                'denormalizePropertyName',
+            ])
             ->getMock();
 
         $filter->method('denormalizePropertyName')->willReturnArgument(0);
@@ -97,58 +109,33 @@ final class UlidRangeFilterTest extends TestCase
     public function testApplyWithSingleValue(): void
     {
         $filter = $this->createFilterWithMapping(['ulid' => null]);
+        $context = $this->buildContext([
+            'ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
 
-        $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->once())
-            ->method('match')
-            ->willReturn($this->matchStage);
-
-        $this->matchStage->expects($this->once())
-            ->method('field')
-            ->with('ulid')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
+        $this->setupSingleMatchExpectation('ulid', 'lt', '01JKX8XGHVDZ46MWYMZT94YER4');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
+    /**
+     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     */
     private function setupMultipleValuesTest(): array
     {
         $filter = $this->createFilterWithMapping(['ulid' => null]);
-
         $value = [
             'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
-            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3'
+            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
         ];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
+        $context = $this->buildContext(['ulid' => $value]);
 
         return [$filter, $context];
     }
 
     private function setupMultipleValuesExpectations(): void
     {
-        $this->builder->expects($this->exactly(2))
-            ->method('match')
-            ->willReturn($this->matchStage);
-
-        $this->matchStage->expects($this->exactly(2))
-            ->method('field')
-            ->with('ulid')
-            ->willReturnSelf();
+        $this->setupMatchExpectations(2, 'ulid');
 
         $this->matchStage->expects($this->once())
             ->method('lt')
@@ -163,38 +150,40 @@ final class UlidRangeFilterTest extends TestCase
 
     public function testApplyWithMultipleValues(): void
     {
-        list($filter, $context) = $this->setupMultipleValuesTest();
+        [$filter, $context] = $this->setupMultipleValuesTest();
         $this->setupMultipleValuesExpectations();
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
-    public function testApplyWithAllOperators(): void
+    /**
+     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     */
+    private function setupAllOperatorsTest(): array
     {
         $filter = $this->createFilterWithMapping(['ulid' => null]);
-
         $value = [
             'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
             'lte' => '01JKX8XGHVDZ46MWYMZT94YER5',
             'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
             'gte' => '01JKX8XGHVDZ46MWYMZT94YER2',
-            'between' => '01JKX8XGHVDZ46MWYMZT94YER1..01JKX8XGHVDZ46MWYMZT94YER6'
+            'between' => '01JKX8XGHVDZ46MWYMZT94YER1..01JKX8XGHVDZ46MWYMZT94YER6',
         ];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
+        $context = $this->buildContext(['ulid' => $value]);
 
-        $this->builder->expects($this->exactly(5))
-            ->method('match')
-            ->willReturn($this->matchStage);
+        return [$filter, $context];
+    }
 
-        $this->matchStage->expects($this->exactly(5))
-            ->method('field')
-            ->with('ulid')
-            ->willReturnSelf();
+    private function setupAllOperatorsExpectations(): void
+    {
+        $this->setupMatchExpectations(5, 'ulid');
+        $this->setupLtGtExpectations();
+        $this->setupLteExpectations();
+        $this->setupGteExpectations();
+    }
 
+    private function setupLtGtExpectations(): void
+    {
         $this->matchStage->expects($this->once())
             ->method('lt')
             ->with('01JKX8XGHVDZ46MWYMZT94YER4')
@@ -204,7 +193,10 @@ final class UlidRangeFilterTest extends TestCase
             ->method('gt')
             ->with('01JKX8XGHVDZ46MWYMZT94YER3')
             ->willReturnSelf();
+    }
 
+    private function setupLteExpectations(): void
+    {
         $this->matchStage->expects($this->exactly(2))
             ->method('lte')
             ->withConsecutive(
@@ -212,7 +204,10 @@ final class UlidRangeFilterTest extends TestCase
                 ['01JKX8XGHVDZ46MWYMZT94YER6']
             )
             ->willReturnSelf();
+    }
 
+    private function setupGteExpectations(): void
+    {
         $this->matchStage->expects($this->exactly(2))
             ->method('gte')
             ->withConsecutive(
@@ -220,84 +215,52 @@ final class UlidRangeFilterTest extends TestCase
                 ['01JKX8XGHVDZ46MWYMZT94YER1']
             )
             ->willReturnSelf();
+    }
+
+    public function testApplyWithAllOperators(): void
+    {
+        [$filter, $context] = $this->setupAllOperatorsTest();
+        $this->setupAllOperatorsExpectations();
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithNonFilterableProperty(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext(['email' => ['lt' => 'test@example.com']]);
 
-        $value = ['lt' => 'test@example.com'];
-        $context = [
-            'filters' => [
-                'email' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithNonArrayValue(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext(['ulid' => '01JKX8XGHVDZ46MWYMZT94YER4']);
 
-        $value = '01JKX8XGHVDZ46MWYMZT94YER4';
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithEmptyContext(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
-
+        $filter = $this->createFilter(['ulid' => null]);
         $context = ['filters' => []];
 
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithEmptyFilters(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
-
+        $filter = $this->createFilter(['ulid' => null]);
         $context = ['filters' => []];
 
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
@@ -305,27 +268,15 @@ final class UlidRangeFilterTest extends TestCase
     public function testApplyWithNestedProperty(): void
     {
         $filter = $this->createFilterWithMapping(['customer.ulid' => null]);
+        $context = $this->buildContext([
+            'customer.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
 
-        $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
-        $context = [
-            'filters' => [
-                'customer.ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->once())
-            ->method('match')
-            ->willReturn($this->matchStage);
-
-        $this->matchStage->expects($this->once())
-            ->method('field')
-            ->with('customer.ulid')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
+        $this->setupSingleMatchExpectation(
+            'customer.ulid',
+            'lt',
+            '01JKX8XGHVDZ46MWYMZT94YER4'
+        );
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
@@ -333,115 +284,57 @@ final class UlidRangeFilterTest extends TestCase
     public function testApplyWithDeeplyNestedProperty(): void
     {
         $filter = $this->createFilterWithMapping(['customer.address.ulid' => null]);
+        $context = $this->buildContext([
+            'customer.address.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
 
-        $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
-        $context = [
-            'filters' => [
-                'customer.address.ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->once())
-            ->method('match')
-            ->willReturn($this->matchStage);
-
-        $this->matchStage->expects($this->once())
-            ->method('field')
-            ->with('customer.address.ulid')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
+        $this->setupSingleMatchExpectation(
+            'customer.address.ulid',
+            'lt',
+            '01JKX8XGHVDZ46MWYMZT94YER4'
+        );
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithInvalidOperator(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext([
+            'ulid' => ['invalid' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
 
-        $value = ['invalid' => '01JKX8XGHVDZ46MWYMZT94YER4'];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithNullValue(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext(['ulid' => ['lt' => null]]);
 
-        $value = ['lt' => null];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithEmptyValue(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext(['ulid' => ['lt' => '']]);
 
-        $value = ['lt' => ''];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithInvalidUlidFormat(): void
     {
-        $filter = new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            ['ulid' => null],
-            $this->nameConverter
-        );
+        $filter = $this->createFilter(['ulid' => null]);
+        $context = $this->buildContext(['ulid' => ['lt' => 'invalid-ulid']]);
 
-        $value = ['lt' => 'invalid-ulid'];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
-
-        $this->builder->expects($this->never())
-            ->method('match');
+        $this->builder->expects($this->never())->method('match');
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
@@ -449,28 +342,12 @@ final class UlidRangeFilterTest extends TestCase
     public function testApplyWithOperation(): void
     {
         $filter = $this->createFilterWithMapping(['ulid' => null]);
-
-        $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
-        $context = [
-            'filters' => [
-                'ulid' => $value,
-            ],
-        ];
+        $context = $this->buildContext([
+            'ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
         $operation = $this->createMock(Operation::class);
 
-        $this->builder->expects($this->once())
-            ->method('match')
-            ->willReturn($this->matchStage);
-
-        $this->matchStage->expects($this->once())
-            ->method('field')
-            ->with('ulid')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
+        $this->setupSingleMatchExpectation('ulid', 'lt', '01JKX8XGHVDZ46MWYMZT94YER4');
 
         $filter->apply($this->builder, Customer::class, $operation, $context);
     }
@@ -478,14 +355,18 @@ final class UlidRangeFilterTest extends TestCase
     public function testApplyWithMultipleProperties(): void
     {
         $filter = $this->createFilterWithMapping(['ulid' => null, 'customer.ulid' => null]);
+        $context = $this->buildContext([
+            'ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+            'customer.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+        ]);
 
-        $context = [
-            'filters' => [
-                'ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
-                'customer.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
-            ],
-        ];
+        $this->setupMultiplePropertiesExpectations();
 
+        $filter->apply($this->builder, Customer::class, null, $context);
+    }
+
+    private function setupMultiplePropertiesExpectations(): void
+    {
         $this->builder->expects($this->exactly(2))
             ->method('match')
             ->willReturn($this->matchStage);
@@ -499,7 +380,39 @@ final class UlidRangeFilterTest extends TestCase
             ->method('lt')
             ->with('01JKX8XGHVDZ46MWYMZT94YER4')
             ->willReturnSelf();
+    }
 
-        $filter->apply($this->builder, Customer::class, null, $context);
+    /**
+     * @param array<string, array<string, string|null>|string> $filters
+     * @return array<string, array<string, array<string, string|null>|string>>
+     */
+    private function buildContext(array $filters): array
+    {
+        return ['filters' => $filters];
+    }
+
+    private function setupMatchExpectations(int $times, string $field): void
+    {
+        $this->builder->expects($this->exactly($times))
+            ->method('match')
+            ->willReturn($this->matchStage);
+
+        $this->matchStage->expects($this->exactly($times))
+            ->method('field')
+            ->with($field)
+            ->willReturnSelf();
+    }
+
+    private function setupSingleMatchExpectation(
+        string $field,
+        string $operator,
+        string $value
+    ): void {
+        $this->setupMatchExpectations(1, $field);
+
+        $this->matchStage->expects($this->once())
+            ->method($operator)
+            ->with($value)
+            ->willReturnSelf();
     }
 }

@@ -48,7 +48,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
         $this->setupRequestAndResponseMocks();
         $this->setupOpenApiMocks();
     }
-    
+
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this->createMock(StatusCreateFactory::class);
@@ -58,7 +58,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
         $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
         $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
     }
-    
+
     private function setupRequestAndResponseMocks(): void
     {
         $this->createCustomerStatusRequest = $this->createMock(RequestBody::class);
@@ -68,7 +68,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
         $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
     }
-    
+
     private function setupOpenApiMocks(): void
     {
         $this->openApi = $this->createMock(OpenApi::class);
@@ -82,11 +82,11 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
     {
         $this->setupFactoryReturnValues();
         $this->setExpectations();
-        
+
         $factory = $this->createFactory();
         $factory->createEndpoint($this->openApi);
     }
-    
+
     private function setupFactoryReturnValues(): void
     {
         $this->createFactory->method('getRequest')->willReturn($this->createCustomerStatusRequest);
@@ -96,7 +96,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
         $this->forbiddenResponseFactory->method('getResponse')->willReturn($this->forbiddenResponse);
         $this->unauthorizedResponseFactory->method('getResponse')->willReturn($this->unauthorizedResponse);
     }
-    
+
     private function createFactory(): CustomerStatusEndpointFactory
     {
         return new CustomerStatusEndpointFactory(
@@ -117,7 +117,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
         $this->setupOperationsWithResponses();
         $this->setupPathItemWithOperations();
     }
-    
+
     private function setupOpenApiAndPathsExpectations(): void
     {
         $this->openApi->method('getPaths')->willReturn($this->paths);
@@ -126,7 +126,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->with('/api/customer_statuses')
             ->willReturn($this->pathItem);
     }
-    
+
     private function setupPathItemExpectations(): void
     {
         $this->pathItem->expects($this->once())
@@ -136,7 +136,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('getGet')
             ->willReturn($this->operationGet);
     }
-    
+
     private function setupOperationResponsesExpectations(): void
     {
         $this->operationPost->expects($this->once())
@@ -146,12 +146,12 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('getResponses')
             ->willReturn([]);
     }
-    
+
     private function setupOperationsWithResponses(): void
     {
         $expectedPostResponses = $this->getPostExpectedResponses();
         $expectedGetResponses = $this->getGetExpectedResponses();
-        
+
         $this->operationPost->expects($this->once())
             ->method('withResponses')
             ->with($expectedPostResponses)
@@ -160,13 +160,13 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('withRequestBody')
             ->with($this->createCustomerStatusRequest)
             ->willReturnSelf();
-            
+
         $this->operationGet->expects($this->once())
             ->method('withResponses')
             ->with($expectedGetResponses)
             ->willReturnSelf();
     }
-    
+
     private function setupPathItemWithOperations(): void
     {
         $this->pathItem->expects($this->once())
@@ -177,12 +177,12 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('withGet')
             ->with($this->operationGet)
             ->willReturnSelf();
-            
+
         $this->paths->expects($this->once())
             ->method('addPath')
             ->with('/api/customer_statuses', $this->pathItem);
     }
-    
+
     private function getPostExpectedResponses(): array
     {
         return [
@@ -193,7 +193,7 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
-    
+
     private function getGetExpectedResponses(): array
     {
         return [

@@ -57,6 +57,13 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->setupFactoryMocks();
+        $this->setupResponseMocks();
+        $this->setupOpenApiMocks();
+    }
+
+    private function setupFactoryMocks(): void
+    {
         $this->parameterFactory = $this->createMock(CustomerFactory::class);
         $this->updateCustomerRequestFactory = $this->createMock(UpdateFactory::class);
         $this->validationErrorFactory = $this->createMock(ValidationErrorFactory::class);
@@ -67,7 +74,10 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->internalErrorFactory = $this->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
         $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
+    }
 
+    private function setupResponseMocks(): void
+    {
         $this->ulidParam = $this->createMock(Parameter::class);
         $this->updateCustomerRequest = $this->createMock(RequestBody::class);
         $this->replaceCustomerRequest = $this->createMock(RequestBody::class);
@@ -78,7 +88,10 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+    }
 
+    private function setupOpenApiMocks(): void
+    {
         $this->openApi = $this->createMock(OpenApi::class);
         $this->paths = $this->createMock(Paths::class);
         $this->pathItem = $this->createMock(PathItem::class);
@@ -90,6 +103,15 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
 
     public function testCreateEndpoint(): void
     {
+        $this->setupFactoryReturnValues();
+        $this->setExpectations();
+
+        $factory = $this->createFactory();
+        $factory->createEndpoint($this->openApi);
+    }
+
+    private function setupFactoryReturnValues(): void
+    {
         $this->parameterFactory->method('getParameter')->willReturn($this->ulidParam);
         $this->updateCustomerRequestFactory->method('getRequest')->willReturn($this->updateCustomerRequest);
         $this->validationErrorFactory->method('getResponse')->willReturn($this->validResponse);
@@ -100,10 +122,11 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->internalErrorFactory->method('getResponse')->willReturn($this->internalResponse);
         $this->forbiddenResponseFactory->method('getResponse')->willReturn($this->forbiddenResponse);
         $this->unauthorizedResponseFactory->method('getResponse')->willReturn($this->unauthorizedResponse);
+    }
 
-        $this->setExpectations();
-
-        $factory = new ParamCustomerEndpointFactory(
+    private function createFactory(): ParamCustomerEndpointFactory
+    {
+        return new ParamCustomerEndpointFactory(
             $this->parameterFactory,
             $this->updateCustomerRequestFactory,
             $this->validationErrorFactory,
@@ -115,10 +138,22 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
             $this->forbiddenResponseFactory,
             $this->unauthorizedResponseFactory
         );
-        $factory->createEndpoint($this->openApi);
     }
 
     private function setExpectations(): void
+    {
+        $this->setupOpenApiAndPathsExpectations();
+        $this->setupOperationResponses();
+        
+        $this->setupPutOperationExpectations();
+        $this->setupPatchOperationExpectations();
+        $this->setupGetOperationExpectations();
+        $this->setupDeleteOperationExpectations();
+        
+        $this->setupPathsAddPathExpectations();
+    }
+
+    private function setupOpenApiAndPathsExpectations(): void
     {
         $this->openApi->method('getPaths')->willReturn($this->paths);
         $this->paths->expects($this->exactly(4))
@@ -130,12 +165,18 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->pathItem->expects($this->once())->method('getPatch')->willReturn($this->operationPatch);
         $this->pathItem->expects($this->once())->method('getGet')->willReturn($this->operationGet);
         $this->pathItem->expects($this->once())->method('getDelete')->willReturn($this->operationDelete);
+    }
 
+    private function setupOperationResponses(): void
+    {
         $this->operationPut->expects($this->once())->method('getResponses')->willReturn([]);
         $this->operationPatch->expects($this->once())->method('getResponses')->willReturn([]);
         $this->operationGet->expects($this->once())->method('getResponses')->willReturn([]);
+    }
 
-        $expectedUpdateResponses = [
+    private function getUpdateResponses(): array
+    {
+        return [
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
@@ -143,52 +184,75 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
-        $expectedDeleteResponses = [
+    }
+
+    private function getDeleteResponses(): array
+    {
+        return [
             HttpResponse::HTTP_NO_CONTENT => $this->customerDeletedResponse,
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
-        $expectedGetResponses = [
+    }
+
+    private function getGetResponses(): array
+    {
+        return [
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
             HttpResponse::HTTP_NOT_FOUND => $this->customerNotFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
+    }
 
+    private function setupPutOperationExpectations(): void
+    {
         $this->operationPut->expects($this->once())
             ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
         $this->operationPut->expects($this->once())
-            ->method('withResponses')->with($expectedUpdateResponses)->willReturnSelf();
+            ->method('withResponses')->with($this->getUpdateResponses())->willReturnSelf();
         $this->operationPut->expects($this->once())
             ->method('withRequestBody')->with($this->replaceCustomerRequest)->willReturnSelf();
         $this->pathItem->expects($this->once())
             ->method('withPut')->with($this->operationPut)->willReturnSelf();
+    }
 
+    private function setupPatchOperationExpectations(): void
+    {
         $this->operationPatch->expects($this->once())
             ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
         $this->operationPatch->expects($this->once())
             ->method('withRequestBody')->with($this->updateCustomerRequest)->willReturnSelf();
         $this->operationPatch->expects($this->once())
-            ->method('withResponses')->with($expectedUpdateResponses)->willReturnSelf();
+            ->method('withResponses')->with($this->getUpdateResponses())->willReturnSelf();
         $this->pathItem->expects($this->once())
             ->method('withPatch')->with($this->operationPatch)->willReturnSelf();
+    }
 
+    private function setupGetOperationExpectations(): void
+    {
         $this->operationGet->expects($this->once())
             ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
         $this->operationGet->expects($this->once())
-            ->method('withResponses')->with($expectedGetResponses)->willReturnSelf();
+            ->method('withResponses')->with($this->getGetResponses())->willReturnSelf();
         $this->pathItem->expects($this->once())
             ->method('withGet')->with($this->operationGet)->willReturnSelf();
+    }
 
+    private function setupDeleteOperationExpectations(): void
+    {
         $this->operationDelete->expects($this->once())
             ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
         $this->operationDelete->expects($this->once())
-            ->method('withResponses')->with($expectedDeleteResponses)->willReturnSelf();
+            ->method('withResponses')->with($this->getDeleteResponses())->willReturnSelf();
         $this->pathItem->expects($this->once())
             ->method('withDelete')->with($this->operationDelete)->willReturnSelf();
+    }
 
+    private function setupPathsAddPathExpectations(): void
+    {
         $this->paths->expects($this->exactly(4))
             ->method('addPath')
             ->with('/api/customers/{ulid}', $this->pathItem);
