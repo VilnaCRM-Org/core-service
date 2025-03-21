@@ -64,6 +64,15 @@ final class ParamCustomerStatusEndpointFactoryTest extends TestCase
         $this->setupOpenApiMocks();
     }
 
+    public function testCreateEndpoint(): void
+    {
+        $this->setupFactoryReturnValues();
+        $this->setExpectations();
+
+        $factory = $this->createFactory();
+        $factory->createEndpoint($this->openApi);
+    }
+
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this->createMock(CustomerStatusFactory::class);
@@ -101,15 +110,6 @@ final class ParamCustomerStatusEndpointFactoryTest extends TestCase
         $this->operationPut = $this->createMock(Operation::class);
         $this->operationGet = $this->createMock(Operation::class);
         $this->operationDelete = $this->createMock(Operation::class);
-    }
-
-    public function testCreateEndpoint(): void
-    {
-        $this->setupFactoryReturnValues();
-        $this->setExpectations();
-
-        $factory = $this->createFactory();
-        $factory->createEndpoint($this->openApi);
     }
 
     private function setupFactoryReturnValues(): void

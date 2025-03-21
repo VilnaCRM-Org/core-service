@@ -43,6 +43,22 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->initialize($this->context);
     }
 
+    public function testValidate(): void
+    {
+        $email = $this->faker->email();
+        $user = $this->createCustomer($email);
+
+        $this->setupValidationExpectations($email, $user);
+
+        $this->validator->validate($email, new UniqueEmail());
+    }
+
+    public function testNull(): void
+    {
+        $this->context->expects($this->never())->method('buildViolation');
+        $this->validator->validate(null, new UniqueEmail());
+    }
+
     private function createCustomer(string $email): object
     {
         $customerType = $this->createMock(CustomerType::class);
@@ -78,21 +94,5 @@ final class UniqueEmailValidatorTest extends UnitTestCase
             ->with($errorMessage);
 
         return $errorMessage;
-    }
-
-    public function testValidate(): void
-    {
-        $email = $this->faker->email();
-        $user = $this->createCustomer($email);
-
-        $this->setupValidationExpectations($email, $user);
-
-        $this->validator->validate($email, new UniqueEmail());
-    }
-
-    public function testNull(): void
-    {
-        $this->context->expects($this->never())->method('buildViolation');
-        $this->validator->validate(null, new UniqueEmail());
     }
 }

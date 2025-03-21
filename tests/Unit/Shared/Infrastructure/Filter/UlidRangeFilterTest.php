@@ -46,64 +46,11 @@ final class UlidRangeFilterTest extends TestCase
         $this->assertDescriptionContent($description['ulid[lt]']);
     }
 
-    /**
-     * @param array<string, string|bool> $description
-     */
-    private function assertDescriptionContent(array $description): void
-    {
-        $this->assertEquals('ulid', $description['property']);
-        $this->assertEquals('string', $description['type']);
-        $this->assertFalse($description['required']);
-        $this->assertEquals(
-            'Filter on the ulid property using the lt operator',
-            $description['description']
-        );
-    }
-
     public function testGetDescriptionWithNoProperties(): void
     {
         $filter = $this->createFilter([]);
         $description = $filter->getDescription(Customer::class);
         $this->assertEmpty($description);
-    }
-
-    /**
-     * @param array<string, null> $properties
-     */
-    private function createFilter(array $properties): UlidRangeFilter
-    {
-        return new UlidRangeFilter(
-            $this->managerRegistry,
-            $this->logger,
-            $properties,
-            $this->nameConverter
-        );
-    }
-
-    /**
-     * @param array<string, null> $properties
-     */
-    private function createFilterWithMapping(array $properties): UlidRangeFilter
-    {
-        $filter = $this->getMockBuilder(UlidRangeFilter::class)
-            ->setConstructorArgs([
-                $this->managerRegistry,
-                $this->logger,
-                $properties,
-                $this->nameConverter,
-            ])
-            ->onlyMethods([
-                'isPropertyEnabled',
-                'isPropertyMapped',
-                'denormalizePropertyName',
-            ])
-            ->getMock();
-
-        $filter->method('denormalizePropertyName')->willReturnArgument(0);
-        $filter->method('isPropertyEnabled')->willReturn(true);
-        $filter->method('isPropertyMapped')->willReturn(true);
-
-        return $filter;
     }
 
     public function testApplyWithSingleValue(): void
@@ -118,103 +65,12 @@ final class UlidRangeFilterTest extends TestCase
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
-    /**
-     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
-     */
-    private function setupMultipleValuesTest(): array
-    {
-        $filter = $this->createFilterWithMapping(['ulid' => null]);
-        $value = [
-            'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
-            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
-        ];
-        $context = $this->buildContext(['ulid' => $value]);
-
-        return [$filter, $context];
-    }
-
-    private function setupMultipleValuesExpectations(): void
-    {
-        $this->setupMatchExpectations(2, 'ulid');
-
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('gt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER3')
-            ->willReturnSelf();
-    }
-
     public function testApplyWithMultipleValues(): void
     {
         [$filter, $context] = $this->setupMultipleValuesTest();
         $this->setupMultipleValuesExpectations();
 
         $filter->apply($this->builder, Customer::class, null, $context);
-    }
-
-    /**
-     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
-     */
-    private function setupAllOperatorsTest(): array
-    {
-        $filter = $this->createFilterWithMapping(['ulid' => null]);
-        $value = [
-            'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
-            'lte' => '01JKX8XGHVDZ46MWYMZT94YER5',
-            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
-            'gte' => '01JKX8XGHVDZ46MWYMZT94YER2',
-            'between' => '01JKX8XGHVDZ46MWYMZT94YER1..01JKX8XGHVDZ46MWYMZT94YER6',
-        ];
-        $context = $this->buildContext(['ulid' => $value]);
-
-        return [$filter, $context];
-    }
-
-    private function setupAllOperatorsExpectations(): void
-    {
-        $this->setupMatchExpectations(5, 'ulid');
-        $this->setupLtGtExpectations();
-        $this->setupLteExpectations();
-        $this->setupGteExpectations();
-    }
-
-    private function setupLtGtExpectations(): void
-    {
-        $this->matchStage->expects($this->once())
-            ->method('lt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
-            ->willReturnSelf();
-
-        $this->matchStage->expects($this->once())
-            ->method('gt')
-            ->with('01JKX8XGHVDZ46MWYMZT94YER3')
-            ->willReturnSelf();
-    }
-
-    private function setupLteExpectations(): void
-    {
-        $this->matchStage->expects($this->exactly(2))
-            ->method('lte')
-            ->withConsecutive(
-                ['01JKX8XGHVDZ46MWYMZT94YER5'],
-                ['01JKX8XGHVDZ46MWYMZT94YER6']
-            )
-            ->willReturnSelf();
-    }
-
-    private function setupGteExpectations(): void
-    {
-        $this->matchStage->expects($this->exactly(2))
-            ->method('gte')
-            ->withConsecutive(
-                ['01JKX8XGHVDZ46MWYMZT94YER2'],
-                ['01JKX8XGHVDZ46MWYMZT94YER1']
-            )
-            ->willReturnSelf();
     }
 
     public function testApplyWithAllOperators(): void
@@ -363,6 +219,150 @@ final class UlidRangeFilterTest extends TestCase
         $this->setupMultiplePropertiesExpectations();
 
         $filter->apply($this->builder, Customer::class, null, $context);
+    }
+
+    /**
+     * @param array<string, string|bool> $description
+     */
+    private function assertDescriptionContent(array $description): void
+    {
+        $this->assertEquals('ulid', $description['property']);
+        $this->assertEquals('string', $description['type']);
+        $this->assertFalse($description['required']);
+        $this->assertEquals(
+            'Filter on the ulid property using the lt operator',
+            $description['description']
+        );
+    }
+
+    /**
+     * @param array<string, null> $properties
+     */
+    private function createFilter(array $properties): UlidRangeFilter
+    {
+        return new UlidRangeFilter(
+            $this->managerRegistry,
+            $this->logger,
+            $properties,
+            $this->nameConverter
+        );
+    }
+
+    /**
+     * @param array<string, null> $properties
+     */
+    private function createFilterWithMapping(array $properties): UlidRangeFilter
+    {
+        $filter = $this->getMockBuilder(UlidRangeFilter::class)
+            ->setConstructorArgs([
+                $this->managerRegistry,
+                $this->logger,
+                $properties,
+                $this->nameConverter,
+            ])
+            ->onlyMethods([
+                'isPropertyEnabled',
+                'isPropertyMapped',
+                'denormalizePropertyName',
+            ])
+            ->getMock();
+
+        $filter->method('denormalizePropertyName')->willReturnArgument(0);
+        $filter->method('isPropertyEnabled')->willReturn(true);
+        $filter->method('isPropertyMapped')->willReturn(true);
+
+        return $filter;
+    }
+
+    /**
+     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     */
+    private function setupMultipleValuesTest(): array
+    {
+        $filter = $this->createFilterWithMapping(['ulid' => null]);
+        $value = [
+            'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
+            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
+        ];
+        $context = $this->buildContext(['ulid' => $value]);
+
+        return [$filter, $context];
+    }
+
+    private function setupMultipleValuesExpectations(): void
+    {
+        $this->setupMatchExpectations(2, 'ulid');
+
+        $this->matchStage->expects($this->once())
+            ->method('lt')
+            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
+            ->willReturnSelf();
+
+        $this->matchStage->expects($this->once())
+            ->method('gt')
+            ->with('01JKX8XGHVDZ46MWYMZT94YER3')
+            ->willReturnSelf();
+    }
+
+    /**
+     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     */
+    private function setupAllOperatorsTest(): array
+    {
+        $filter = $this->createFilterWithMapping(['ulid' => null]);
+        $value = [
+            'lt' => '01JKX8XGHVDZ46MWYMZT94YER4',
+            'lte' => '01JKX8XGHVDZ46MWYMZT94YER5',
+            'gt' => '01JKX8XGHVDZ46MWYMZT94YER3',
+            'gte' => '01JKX8XGHVDZ46MWYMZT94YER2',
+            'between' => '01JKX8XGHVDZ46MWYMZT94YER1..01JKX8XGHVDZ46MWYMZT94YER6',
+        ];
+        $context = $this->buildContext(['ulid' => $value]);
+
+        return [$filter, $context];
+    }
+
+    private function setupAllOperatorsExpectations(): void
+    {
+        $this->setupMatchExpectations(5, 'ulid');
+        $this->setupLtGtExpectations();
+        $this->setupLteExpectations();
+        $this->setupGteExpectations();
+    }
+
+    private function setupLtGtExpectations(): void
+    {
+        $this->matchStage->expects($this->once())
+            ->method('lt')
+            ->with('01JKX8XGHVDZ46MWYMZT94YER4')
+            ->willReturnSelf();
+
+        $this->matchStage->expects($this->once())
+            ->method('gt')
+            ->with('01JKX8XGHVDZ46MWYMZT94YER3')
+            ->willReturnSelf();
+    }
+
+    private function setupLteExpectations(): void
+    {
+        $this->matchStage->expects($this->exactly(2))
+            ->method('lte')
+            ->withConsecutive(
+                ['01JKX8XGHVDZ46MWYMZT94YER5'],
+                ['01JKX8XGHVDZ46MWYMZT94YER6']
+            )
+            ->willReturnSelf();
+    }
+
+    private function setupGteExpectations(): void
+    {
+        $this->matchStage->expects($this->exactly(2))
+            ->method('gte')
+            ->withConsecutive(
+                ['01JKX8XGHVDZ46MWYMZT94YER2'],
+                ['01JKX8XGHVDZ46MWYMZT94YER1']
+            )
+            ->willReturnSelf();
     }
 
     private function setupMultiplePropertiesExpectations(): void

@@ -60,8 +60,17 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
     protected function setUp(): void
     {
         $this->setupFactoryMocks();
-        $this->setupRequestAndResponseMocks();
+        $this->setupResponseMocks();
         $this->setupOpenApiMocks();
+    }
+
+    public function testCreateEndpoint(): void
+    {
+        $this->setupFactoryReturnValues();
+        $this->setExpectations();
+
+        $factory = $this->createFactory();
+        $factory->createEndpoint($this->openApi);
     }
 
     private function setupFactoryMocks(): void
@@ -78,7 +87,7 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
         $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
     }
 
-    private function setupRequestAndResponseMocks(): void
+    private function setupResponseMocks(): void
     {
         $this->ulidParam = $this->createMock(Parameter::class);
         $this->updateRequest = $this->createMock(RequestBody::class);
@@ -102,15 +111,6 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
         $this->operationPut = $this->createMock(Operation::class);
         $this->operationGet = $this->createMock(Operation::class);
         $this->operationDelete = $this->createMock(Operation::class);
-    }
-
-    public function testCreateEndpoint(): void
-    {
-        $this->setupFactoryReturnValues();
-        $this->setExpectations();
-
-        $factory = $this->createFactory();
-        $factory->createEndpoint($this->openApi);
     }
 
     private function setupFactoryReturnValues(): void

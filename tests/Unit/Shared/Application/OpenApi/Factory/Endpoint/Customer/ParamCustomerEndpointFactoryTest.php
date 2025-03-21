@@ -62,6 +62,15 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->setupOpenApiMocks();
     }
 
+    public function testCreateEndpoint(): void
+    {
+        $this->setupFactoryReturnValues();
+        $this->setExpectations();
+
+        $factory = $this->createFactory();
+        $factory->createEndpoint($this->openApi);
+    }
+
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this->createMock(CustomerFactory::class);
@@ -101,15 +110,6 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->operationDelete = $this->createMock(Operation::class);
     }
 
-    public function testCreateEndpoint(): void
-    {
-        $this->setupFactoryReturnValues();
-        $this->setExpectations();
-
-        $factory = $this->createFactory();
-        $factory->createEndpoint($this->openApi);
-    }
-
     private function setupFactoryReturnValues(): void
     {
         $this->parameterFactory->method('getParameter')->willReturn($this->ulidParam);
@@ -144,12 +144,12 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     {
         $this->setupOpenApiAndPathsExpectations();
         $this->setupOperationResponses();
-        
+
         $this->setupPutOperationExpectations();
         $this->setupPatchOperationExpectations();
         $this->setupGetOperationExpectations();
         $this->setupDeleteOperationExpectations();
-        
+
         $this->setupPathsAddPathExpectations();
     }
 

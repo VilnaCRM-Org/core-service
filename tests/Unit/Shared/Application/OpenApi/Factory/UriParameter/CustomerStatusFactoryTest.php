@@ -25,6 +25,12 @@ final class CustomerStatusFactoryTest extends TestCase
         $this->factory = new CustomerStatusFactory($this->parameterBuilder);
     }
 
+    public function testGetParameterReturnsCorrectParameter(): void
+    {
+        $actualParameter = $this->factory->getParameter();
+        $this->assertSame($this->expectedParameter, $actualParameter);
+    }
+
     private function setupExpectedParameter(): void
     {
         $this->expectedParameter = new Parameter(
@@ -53,11 +59,5 @@ final class CustomerStatusFactoryTest extends TestCase
                 'string'
             )
             ->willReturn($this->expectedParameter);
-    }
-
-    public function testGetParameterReturnsCorrectParameter(): void
-    {
-        $actualParameter = $this->factory->getParameter();
-        $this->assertSame($this->expectedParameter, $actualParameter);
     }
 }

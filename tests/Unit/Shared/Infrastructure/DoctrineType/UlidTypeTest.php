@@ -12,12 +12,6 @@ use ReflectionClass;
 
 final class UlidTypeTest extends TestCase
 {
-    private function getUlidTypeInstance(): UlidType
-    {
-        $reflection = new ReflectionClass(UlidType::class);
-        return $reflection->newInstanceWithoutConstructor();
-    }
-
     public function testGetName(): void
     {
         $ulidType = $this->getUlidTypeInstance();
@@ -90,5 +84,11 @@ final class UlidTypeTest extends TestCase
 
         $this->assertStringContainsString('new \App\Shared\Infrastructure\Transformer\UlidTransformer', $closureCode);
         $this->assertStringContainsString('transformFromSymfonyUlid', $closureCode);
+    }
+
+    private function getUlidTypeInstance(): UlidType
+    {
+        $reflection = new ReflectionClass(UlidType::class);
+        return $reflection->newInstanceWithoutConstructor();
     }
 }
