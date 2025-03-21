@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
+use ApiPlatform\Metadata\Operation;
 use App\Customer\Domain\Entity\Customer;
 use App\Shared\Infrastructure\Filter\UlidRangeFilter;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
@@ -16,20 +17,15 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 final class UlidRangeFilterTest extends TestCase
 {
-    /** @var ManagerRegistry|MockObject */
-    private $managerRegistry;
+    private ManagerRegistry|MockObject $managerRegistry;
 
-    /** @var LoggerInterface|MockObject */
-    private $logger;
+    private LoggerInterface|MockObject $logger;
 
-    /** @var NameConverterInterface|MockObject */
-    private $nameConverter;
+    private NameConverterInterface|MockObject $nameConverter;
 
-    /** @var Builder|MockObject */
-    private $builder;
+    private Builder|MockObject $builder;
 
-    /** @var MatchStage|MockObject */
-    private $matchStage;
+    private MatchStage|MockObject $matchStage;
 
     protected function setUp(): void
     {
@@ -42,7 +38,6 @@ final class UlidRangeFilterTest extends TestCase
 
     public function testGetDescription(): void
     {
-        // Use the real filter instance for description tests.
         $filter = new UlidRangeFilter(
             $this->managerRegistry,
             $this->logger,
@@ -78,10 +73,7 @@ final class UlidRangeFilterTest extends TestCase
     }
 
     /**
-     * Helper to create a partial mock of UlidRangeFilter that always considers properties filterable.
-     *
      * @param array<string, mixed> $properties
-     * @return UlidRangeFilter
      */
     private function createFilterWithMapping(array $properties): UlidRangeFilter
     {
@@ -95,9 +87,7 @@ final class UlidRangeFilterTest extends TestCase
             ->onlyMethods(['isPropertyEnabled', 'isPropertyMapped', 'denormalizePropertyName'])
             ->getMock();
 
-        // Return the property unchanged.
         $filter->method('denormalizePropertyName')->willReturnArgument(0);
-        // Always consider the property enabled and mapped.
         $filter->method('isPropertyEnabled')->willReturn(true);
         $filter->method('isPropertyMapped')->willReturn(true);
 
@@ -146,7 +136,6 @@ final class UlidRangeFilterTest extends TestCase
             ]
         ];
 
-        // Now expect match() to be called for each operator (2 times).
         $this->builder->expects($this->exactly(2))
             ->method('match')
             ->willReturn($this->matchStage);
@@ -186,18 +175,15 @@ final class UlidRangeFilterTest extends TestCase
             ]
         ];
 
-        // We expect one match() call per operator (5 total)
         $this->builder->expects($this->exactly(5))
             ->method('match')
             ->willReturn($this->matchStage);
 
-        // Each operator triggers a field() call.
         $this->matchStage->expects($this->exactly(5))
             ->method('field')
             ->with('ulid')
             ->willReturnSelf();
 
-        // Expect lt and gt to be called once.
         $this->matchStage->expects($this->once())
             ->method('lt')
             ->with('01JKX8XGHVDZ46MWYMZT94YER4')
@@ -208,7 +194,6 @@ final class UlidRangeFilterTest extends TestCase
             ->with('01JKX8XGHVDZ46MWYMZT94YER3')
             ->willReturnSelf();
 
-        // For lte: one call from the explicit 'lte' operator and one from the 'between' operator.
         $this->matchStage->expects($this->exactly(2))
             ->method('lte')
             ->withConsecutive(
@@ -217,7 +202,6 @@ final class UlidRangeFilterTest extends TestCase
             )
             ->willReturnSelf();
 
-        // For gte: one call from the explicit 'gte' operator and one from the 'between' operator.
         $this->matchStage->expects($this->exactly(2))
             ->method('gte')
             ->withConsecutive(
@@ -226,13 +210,11 @@ final class UlidRangeFilterTest extends TestCase
             )
             ->willReturnSelf();
 
-        // Remove any expectation for a "range" call, since "between" now triggers gte and lte calls.
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
     public function testApplyWithNonFilterableProperty(): void
     {
-        // Using the default filter instance (without overriding) so that the property is not filterable.
         $filter = new UlidRangeFilter(
             $this->managerRegistry,
             $this->logger,
@@ -463,7 +445,7 @@ final class UlidRangeFilterTest extends TestCase
                 'ulid' => $value
             ]
         ];
-        $operation = $this->createMock(\ApiPlatform\Metadata\Operation::class);
+        $operation = $this->createMock(Operation::class);
 
         $this->builder->expects($this->once())
             ->method('match')
@@ -493,7 +475,6 @@ final class UlidRangeFilterTest extends TestCase
             ]
         ];
 
-        // Expect two match() calls (one per property).
         $this->builder->expects($this->exactly(2))
             ->method('match')
             ->willReturn($this->matchStage);
