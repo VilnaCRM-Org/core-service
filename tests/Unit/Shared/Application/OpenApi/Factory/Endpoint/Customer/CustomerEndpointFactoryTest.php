@@ -87,29 +87,33 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
 
     private function setExpectations(): void
     {
+        $this->setupPaths();
+        $this->setupOperations();
+        $this->setupResponses();
+        $this->setupPathItemWithOperations();
+    }
+
+    private function setupPaths(): void
+    {
         $this->openApi->method('getPaths')->willReturn($this->paths);
         $this->paths->expects($this->once())
             ->method('getPath')
             ->with('/api/customers')
             ->willReturn($this->pathItem);
+    }
+
+    private function setupOperations(): void
+    {
         $this->pathItem->expects($this->once())->method('getPost')->willReturn($this->operationPost);
         $this->pathItem->expects($this->once())->method('getGet')->willReturn($this->operationGet);
         $this->operationPost->expects($this->once())->method('getResponses')->willReturn([]);
         $this->operationGet->expects($this->once())->method('getResponses')->willReturn([]);
+    }
 
-        $postResponses = [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
-        ];
-        $getResponses = [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
-        ];
+    private function setupResponses(): void
+    {
+        $postResponses = $this->getPostResponses();
+        $getResponses = $this->getGetResponses();
 
         $this->operationPost->expects($this->once())
             ->method('withResponses')
@@ -123,6 +127,10 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
             ->method('withResponses')
             ->with($getResponses)
             ->willReturnSelf();
+    }
+
+    private function setupPathItemWithOperations(): void
+    {
         $this->pathItem->expects($this->once())
             ->method('withPost')
             ->with($this->operationPost)
@@ -134,5 +142,26 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
         $this->paths->expects($this->once())
             ->method('addPath')
             ->with('/api/customers', $this->pathItem);
+    }
+
+    private function getPostResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
+        ];
+    }
+
+    private function getGetResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
+        ];
     }
 }

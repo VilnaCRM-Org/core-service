@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
 use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerStatusFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class CustomerStatusFactoryTest extends TestCase
+final class CustomerStatusFactoryTest extends UnitTestCase
 {
     private UriParameterBuilder $parameterBuilder;
     private Parameter $expectedParameter;
@@ -42,7 +42,7 @@ final class CustomerStatusFactoryTest extends TestCase
             false,
             [
                 'default' => '01JKX8XGHVDZ46MWYMZT94YER4',
-                'type' => 'string'
+                'type' => 'string',
             ]
         );
     }

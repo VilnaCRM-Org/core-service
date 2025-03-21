@@ -6,12 +6,12 @@ namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\Gte;
+use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 
-final class GteTest extends TestCase
+final class GteTest extends UnitTestCase
 {
     private Gte $operator;
     private Builder|MockObject $builder;

@@ -6,11 +6,11 @@ namespace App\Tests\Unit\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\DoctrineType\UlidType;
+use App\Tests\Unit\UnitTestCase;
 use MongoDB\BSON\Binary;
-use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-final class UlidTypeTest extends TestCase
+final class UlidTypeTest extends UnitTestCase
 {
     public function testGetName(): void
     {

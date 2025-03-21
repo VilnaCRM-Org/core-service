@@ -23,20 +23,8 @@ final class CreateCustomerFactoryTest extends UnitTestCase
         $confirmed = $this->faker->boolean();
 
         $ulidTransformer = new UlidTransformer(new UlidFactory());
-
-        $typeValue = $this->faker->word();
-        $typeUlidString = $this->faker->ulid();
-        $customerType = new CustomerType(
-            $typeValue,
-            $ulidTransformer->transformFromSymfonyUlid($typeUlidString)
-        );
-
-        $statusValue = $this->faker->word();
-        $statusUlidString = $this->faker->ulid();
-        $customerStatus = new CustomerStatus(
-            $statusValue,
-            $ulidTransformer->transformFromSymfonyUlid($statusUlidString)
-        );
+        $customerType = $this->createCustomerType($ulidTransformer);
+        $customerStatus = $this->createCustomerStatus($ulidTransformer);
 
         $factory = new CreateCustomerFactory();
         $command = $factory->create(
@@ -50,5 +38,27 @@ final class CreateCustomerFactoryTest extends UnitTestCase
         );
 
         $this->assertInstanceOf(CreateCustomerCommand::class, $command);
+    }
+
+    private function createCustomerType(UlidTransformer $ulidTransformer): CustomerType
+    {
+        $typeValue = $this->faker->word();
+        $typeUlidString = $this->faker->ulid();
+
+        return new CustomerType(
+            $typeValue,
+            $ulidTransformer->transformFromSymfonyUlid($typeUlidString)
+        );
+    }
+
+    private function createCustomerStatus(UlidTransformer $ulidTransformer): CustomerStatus
+    {
+        $statusValue = $this->faker->word();
+        $statusUlidString = $this->faker->ulid();
+
+        return new CustomerStatus(
+            $statusValue,
+            $ulidTransformer->transformFromSymfonyUlid($statusUlidString)
+        );
     }
 }

@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Type;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeCreateFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class TypeCreateFactoryTest extends TestCase
+final class TypeCreateFactoryTest extends UnitTestCase
 {
     public function testGetRequest(): void
     {

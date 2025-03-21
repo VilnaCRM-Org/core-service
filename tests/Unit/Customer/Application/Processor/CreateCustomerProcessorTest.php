@@ -48,6 +48,19 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $command = $this->createMock(CreateCustomerCommand::class);
         $customer = $this->createMock(Customer::class);
 
+        $this->setupIriConverter($dto, $type, $status);
+        $this->setupFactoryAndCommandBus($dto, $type, $status, $command, $customer);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customer, $result);
+    }
+
+    private function setupIriConverter(
+        CustomerCreateDto $dto,
+        CustomerType $type,
+        CustomerStatus $status
+    ): void {
         $this->iriConverter->expects($this->exactly(2))
             ->method('getResourceFromIri')
             ->willReturnCallback(static function (string $iri) use ($type, $status, $dto) {
@@ -57,7 +70,15 @@ final class CreateCustomerProcessorTest extends UnitTestCase
                     default => throw new \InvalidArgumentException('Unexpected IRI')
                 };
             });
+    }
 
+    private function setupFactoryAndCommandBus(
+        CustomerCreateDto $dto,
+        CustomerType $type,
+        CustomerStatus $status,
+        CreateCustomerCommand $command,
+        Customer $customer
+    ): void {
         $this->factory->expects($this->once())
             ->method('create')
             ->with(
@@ -78,10 +99,6 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $command->expects($this->once())
             ->method('getResponse')
             ->willReturn(new CreateCustomerCommandResponse($customer));
-
-        $result = $this->processor->process($dto, $operation);
-
-        $this->assertSame($customer, $result);
     }
 
     private function createDto(): CustomerCreateDto

@@ -22,10 +22,10 @@ use App\Shared\Application\OpenApi\Factory\Response\Type\NotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerTypeFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerTypeEndpointFactoryTest extends TestCase
+final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 {
     private CustomerTypeFactory $parameterFactory;
     private TypeUpdateFactory $updateFactory;
@@ -224,6 +224,9 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
             ->method('withDelete')->with($this->operationDelete)->willReturnSelf();
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getUpdateExpectedResponses(): array
     {
         return [
@@ -236,6 +239,9 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getGetExpectedResponses(): array
     {
         return [
@@ -246,6 +252,9 @@ final class ParamCustomerTypeEndpointFactoryTest extends TestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getDeleteExpectedResponses(): array
     {
         return [

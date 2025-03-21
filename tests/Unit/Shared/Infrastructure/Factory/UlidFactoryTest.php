@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Infrastructure\Factory;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class UlidFactoryTest extends TestCase
+final class UlidFactoryTest extends UnitTestCase
 {
     public function testCreateReturnsUlidInstance(): void
     {

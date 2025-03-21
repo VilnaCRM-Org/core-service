@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class UpdateFactoryTest extends TestCase
+final class UpdateFactoryTest extends UnitTestCase
 {
     public function testGetRequest(): void
     {

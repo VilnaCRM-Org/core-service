@@ -22,10 +22,10 @@ use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerEndpointFactoryTest extends TestCase
+final class ParamCustomerEndpointFactoryTest extends UnitTestCase
 {
     private CustomerFactory $parameterFactory;
     private UpdateFactory $updateCustomerRequestFactory;
@@ -87,16 +87,33 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
 
     private function setupResponseMocks(): void
     {
+        $this->setupRequestMocks();
+        $this->setupApiResponseMocks();
+    }
+
+    private function setupRequestMocks(): void
+    {
         $this->ulidParam = $this->createMock(Parameter::class);
         $this->updateCustomerRequest = $this->createMock(RequestBody::class);
         $this->replaceCustomerRequest = $this->createMock(RequestBody::class);
-        $this->validResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->badRequestResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->customerNotFoundResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->customerDeletedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+    }
+
+    private function setupApiResponseMocks(): void
+    {
+        $this->validResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->badRequestResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->customerNotFoundResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->customerDeletedResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->internalResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->forbiddenResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->unauthorizedResponse = $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()->getMock();
     }
 
     private function setupOpenApiMocks(): void

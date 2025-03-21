@@ -7,15 +7,15 @@ namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Domain\Entity\Customer;
 use App\Shared\Infrastructure\Filter\UlidRangeFilter;
+use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
-final class UlidRangeFilterTest extends TestCase
+final class UlidRangeFilterTest extends UnitTestCase
 {
     private ManagerRegistry|MockObject $managerRegistry;
     private LoggerInterface|MockObject $logger;
@@ -203,7 +203,11 @@ final class UlidRangeFilterTest extends TestCase
         ]);
         $operation = $this->createMock(Operation::class);
 
-        $this->setupSingleMatchExpectation('ulid', 'lt', '01JKX8XGHVDZ46MWYMZT94YER4');
+        $this->setupSingleMatchExpectation(
+            'ulid',
+            'lt',
+            '01JKX8XGHVDZ46MWYMZT94YER4'
+        );
 
         $filter->apply($this->builder, Customer::class, $operation, $context);
     }
@@ -384,6 +388,7 @@ final class UlidRangeFilterTest extends TestCase
 
     /**
      * @param array<string, array<string, string|null>|string> $filters
+     *
      * @return array<string, array<string, array<string, string|null>|string>>
      */
     private function buildContext(array $filters): array

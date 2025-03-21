@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Status;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 use App\Shared\Application\OpenApi\Factory\Request\Status\StatusUpdateFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class StatusUpdateFactoryTest extends TestCase
+final class StatusUpdateFactoryTest extends UnitTestCase
 {
     public function testGetRequest(): void
     {

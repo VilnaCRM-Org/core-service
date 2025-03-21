@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Type;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeUpdateFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class TypeUpdateFactoryTest extends TestCase
+final class TypeUpdateFactoryTest extends UnitTestCase
 {
     public function testGetRequest(): void
     {

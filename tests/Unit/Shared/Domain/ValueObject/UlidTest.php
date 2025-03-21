@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Domain\ValueObject;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class UlidTest extends TestCase
+final class UlidTest extends UnitTestCase
 {
     public function testToStringReturnsOriginalUid(): void
     {
-        $uid = '01ABCDEFGHJKMNPQRSTVWXYZAB';
+        $uid = (string) $this->faker->ulid();
         $ulid = new Ulid($uid);
         $this->assertSame($uid, (string) $ulid, 'The __toString() method should return the original UID.');
     }
 
     public function testToBinaryReturns16Bytes(): void
     {
-        $uid = '01ABCDEFGHJKMNPQRSTVWXYZAB';
+        $uid = (string) $this->faker->ulid();
         $ulid = new Ulid($uid);
         $binary = $ulid->toBinary();
 
@@ -28,7 +28,7 @@ final class UlidTest extends TestCase
 
     public function testBinaryHexRepresentationIs32CharactersLong(): void
     {
-        $uid = '01ABCDEFGHJKMNPQRSTVWXYZAB';
+        $uid = (string) $this->faker->ulid();
         $ulid = new Ulid($uid);
         $binary = $ulid->toBinary();
         $hex = bin2hex($binary);

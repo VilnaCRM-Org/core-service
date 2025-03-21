@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\ContextBuilder;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class RequestPatchBuilderTest extends TestCase
+final class RequestPatchBuilderTest extends UnitTestCase
 {
     public function testBuild(): void
     {

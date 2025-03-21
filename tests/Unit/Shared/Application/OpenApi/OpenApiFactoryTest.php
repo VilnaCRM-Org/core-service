@@ -8,9 +8,9 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\OpenApiFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class OpenApiFactoryTest extends TestCase
+final class OpenApiFactoryTest extends UnitTestCase
 {
     public function testConstructor(): void
     {

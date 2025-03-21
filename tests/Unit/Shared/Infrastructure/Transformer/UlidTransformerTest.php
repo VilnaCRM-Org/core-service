@@ -7,11 +7,11 @@ namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Tests\Unit\UnitTestCase;
 use MongoDB\BSON\Binary;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
-final class UlidTransformerTest extends TestCase
+final class UlidTransformerTest extends UnitTestCase
 {
     private UlidFactory $ulidFactory;
     private UlidTransformer $ulidTransformer;

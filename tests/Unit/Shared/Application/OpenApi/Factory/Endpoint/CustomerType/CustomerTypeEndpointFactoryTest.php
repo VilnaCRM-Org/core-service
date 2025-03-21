@@ -17,10 +17,10 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerTypeEndpointFactoryTest extends TestCase
+final class CustomerTypeEndpointFactoryTest extends UnitTestCase
 {
     private TypeCreateFactory $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
@@ -186,6 +186,9 @@ final class CustomerTypeEndpointFactoryTest extends TestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getGetExpectedResponses(): array
     {
         return [

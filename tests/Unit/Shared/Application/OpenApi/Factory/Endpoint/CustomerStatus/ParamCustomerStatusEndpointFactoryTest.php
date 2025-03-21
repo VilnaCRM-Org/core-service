@@ -22,10 +22,10 @@ use App\Shared\Application\OpenApi\Factory\Response\Status\NotFoundFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerStatusFactory;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerStatusEndpointFactoryTest extends TestCase
+final class ParamCustomerStatusEndpointFactoryTest extends UnitTestCase
 {
     private CustomerStatusFactory $parameterFactory;
     private StatusUpdateFactory $updateFactory;

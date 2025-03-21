@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
 use App\Shared\Infrastructure\Filter\UlidFilterProcessor;
+use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 
-final class UlidFilterProcessorTest extends TestCase
+final class UlidFilterProcessorTest extends UnitTestCase
 {
     private UlidFilterProcessor $processor;
     private Builder|MockObject $builder;
