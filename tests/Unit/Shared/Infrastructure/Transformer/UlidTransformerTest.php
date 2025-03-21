@@ -102,7 +102,8 @@ final class UlidTransformerTest extends TestCase
             ->with((string) $symfonyUlid)
             ->willReturn($ulid);
 
-        $result = $this->ulidTransformer->transformFromSymfonyUlid($symfonyUlid);
+        $result = $this->ulidTransformer
+            ->transformFromSymfonyUlid($symfonyUlid);
 
         $this->assertInstanceOf(Ulid::class, $result);
     }

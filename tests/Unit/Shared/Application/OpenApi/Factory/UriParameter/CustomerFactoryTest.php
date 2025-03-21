@@ -18,13 +18,13 @@ final class CustomerFactoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
         $this->setupParameterBuilderMock();
         $this->factory = new CustomerFactory($this->parameterBuilder);
     }
-    
+
     private function setupExpectedParameter(): void
     {
         $this->expectedParameter = new Parameter(
@@ -40,7 +40,7 @@ final class CustomerFactoryTest extends TestCase
             ]
         );
     }
-    
+
     private function setupParameterBuilderMock(): void
     {
         $this->parameterBuilder->expects($this->once())

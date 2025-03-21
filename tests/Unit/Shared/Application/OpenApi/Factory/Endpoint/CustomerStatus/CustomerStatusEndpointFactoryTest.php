@@ -44,20 +44,33 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->setupFactoryMocks();
+        $this->setupRequestAndResponseMocks();
+        $this->setupOpenApiMocks();
+    }
+    
+    private function setupFactoryMocks(): void
+    {
         $this->createFactory = $this->createMock(StatusCreateFactory::class);
         $this->validationErrorFactory = $this->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this->createMock(BadRequestResponseFactory::class);
         $this->internalErrorFactory = $this->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
         $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
-
+    }
+    
+    private function setupRequestAndResponseMocks(): void
+    {
         $this->createCustomerStatusRequest = $this->createMock(RequestBody::class);
         $this->validResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->badRequestResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
         $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-
+    }
+    
+    private function setupOpenApiMocks(): void
+    {
         $this->openApi = $this->createMock(OpenApi::class);
         $this->paths = $this->createMock(Paths::class);
         $this->pathItem = $this->createMock(PathItem::class);
@@ -67,16 +80,26 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
 
     public function testCreateEndpoint(): void
     {
+        $this->setupFactoryReturnValues();
+        $this->setExpectations();
+        
+        $factory = $this->createFactory();
+        $factory->createEndpoint($this->openApi);
+    }
+    
+    private function setupFactoryReturnValues(): void
+    {
         $this->createFactory->method('getRequest')->willReturn($this->createCustomerStatusRequest);
         $this->validationErrorFactory->method('getResponse')->willReturn($this->validResponse);
         $this->badRequestResponseFactory->method('getResponse')->willReturn($this->badRequestResponse);
         $this->internalErrorFactory->method('getResponse')->willReturn($this->internalResponse);
         $this->forbiddenResponseFactory->method('getResponse')->willReturn($this->forbiddenResponse);
         $this->unauthorizedResponseFactory->method('getResponse')->willReturn($this->unauthorizedResponse);
-
-        $this->setExpectations();
-
-        $factory = new CustomerStatusEndpointFactory(
+    }
+    
+    private function createFactory(): CustomerStatusEndpointFactory
+    {
+        return new CustomerStatusEndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,
@@ -84,43 +107,51 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             $this->forbiddenResponseFactory,
             $this->unauthorizedResponseFactory
         );
-        $factory->createEndpoint($this->openApi);
     }
 
     private function setExpectations(): void
+    {
+        $this->setupOpenApiAndPathsExpectations();
+        $this->setupPathItemExpectations();
+        $this->setupOperationResponsesExpectations();
+        $this->setupOperationsWithResponses();
+        $this->setupPathItemWithOperations();
+    }
+    
+    private function setupOpenApiAndPathsExpectations(): void
     {
         $this->openApi->method('getPaths')->willReturn($this->paths);
         $this->paths->expects($this->once())
             ->method('getPath')
             ->with('/api/customer_statuses')
             ->willReturn($this->pathItem);
+    }
+    
+    private function setupPathItemExpectations(): void
+    {
         $this->pathItem->expects($this->once())
             ->method('getPost')
             ->willReturn($this->operationPost);
         $this->pathItem->expects($this->once())
             ->method('getGet')
             ->willReturn($this->operationGet);
+    }
+    
+    private function setupOperationResponsesExpectations(): void
+    {
         $this->operationPost->expects($this->once())
             ->method('getResponses')
             ->willReturn([]);
         $this->operationGet->expects($this->once())
             ->method('getResponses')
             ->willReturn([]);
-
-        $expectedPostResponses = [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
-        ];
-        $expectedGetResponses = [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
-        ];
-
+    }
+    
+    private function setupOperationsWithResponses(): void
+    {
+        $expectedPostResponses = $this->getPostExpectedResponses();
+        $expectedGetResponses = $this->getGetExpectedResponses();
+        
         $this->operationPost->expects($this->once())
             ->method('withResponses')
             ->with($expectedPostResponses)
@@ -129,10 +160,15 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('withRequestBody')
             ->with($this->createCustomerStatusRequest)
             ->willReturnSelf();
+            
         $this->operationGet->expects($this->once())
             ->method('withResponses')
             ->with($expectedGetResponses)
             ->willReturnSelf();
+    }
+    
+    private function setupPathItemWithOperations(): void
+    {
         $this->pathItem->expects($this->once())
             ->method('withPost')
             ->with($this->operationPost)
@@ -141,8 +177,30 @@ final class CustomerStatusEndpointFactoryTest extends TestCase
             ->method('withGet')
             ->with($this->operationGet)
             ->willReturnSelf();
+            
         $this->paths->expects($this->once())
             ->method('addPath')
             ->with('/api/customer_statuses', $this->pathItem);
+    }
+    
+    private function getPostExpectedResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
+        ];
+    }
+    
+    private function getGetExpectedResponses(): array
+    {
+        return [
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
+            HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
+            HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
+        ];
     }
 }

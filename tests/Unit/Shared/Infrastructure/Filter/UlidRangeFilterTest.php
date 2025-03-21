@@ -101,8 +101,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->once())
@@ -132,8 +132,8 @@ final class UlidRangeFilterTest extends TestCase
         ];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         return [$filter, $context];
@@ -182,8 +182,8 @@ final class UlidRangeFilterTest extends TestCase
         ];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->exactly(5))
@@ -236,8 +236,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => 'test@example.com'];
         $context = [
             'filters' => [
-                'email' => $value
-            ]
+                'email' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
@@ -258,8 +258,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = '01JKX8XGHVDZ46MWYMZT94YER4';
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
@@ -309,8 +309,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
         $context = [
             'filters' => [
-                'customer.ulid' => $value
-            ]
+                'customer.ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->once())
@@ -337,8 +337,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
         $context = [
             'filters' => [
-                'customer.address.ulid' => $value
-            ]
+                'customer.address.ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->once())
@@ -370,8 +370,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['invalid' => '01JKX8XGHVDZ46MWYMZT94YER4'];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
@@ -392,8 +392,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => null];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
@@ -414,8 +414,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => ''];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
