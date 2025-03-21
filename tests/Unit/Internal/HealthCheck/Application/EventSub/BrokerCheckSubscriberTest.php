@@ -49,22 +49,15 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
     public function testOnHealthCheckHandlesQueueAlreadyExistsException(): void
     {
         $command = $this->createMock(CommandInterface::class);
+        $exception = $this->createQueueExistsException($command);
 
         $this->sqsClient->expects($this->once())
             ->method('__call')
             ->with(
-                $this->equalTo(
-                    'createQueue'
-                ),
+                $this->equalTo('createQueue'),
                 $this->equalTo([['QueueName' => 'health-check-queue']])
             )
-            ->willThrowException(new AwsException(
-                'Queue already exists',
-                $command,
-                [
-                    'code' => 'QueueAlreadyExists',
-                ]
-            ));
+            ->willThrowException($exception);
 
         try {
             $event = new HealthCheckEvent();
@@ -80,6 +73,16 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
         $this->assertSame(
             [HealthCheckEvent::class => 'onHealthCheck'],
             BrokerCheckSubscriber::getSubscribedEvents()
+        );
+    }
+
+    private function createQueueExistsException(
+        CommandInterface $command
+    ): AwsException {
+        return new AwsException(
+            'Queue already exists',
+            $command,
+            ['code' => 'QueueAlreadyExists']
         );
     }
 }

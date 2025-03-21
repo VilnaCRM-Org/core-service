@@ -105,16 +105,11 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
 
     private function setupOpenApiMocks(): void
     {
-        $this->openApi = $this
-            ->createMock(OpenApi::class);
-        $this->paths = $this
-            ->createMock(Paths::class);
-        $this->pathItem = $this
-            ->createMock(PathItem::class);
-        $this->operationPost = $this
-            ->createMock(Operation::class);
-        $this->operationGet = $this
-            ->createMock(Operation::class);
+        $this->openApi = $this->createMock(OpenApi::class);
+        $this->paths = $this->createMock(Paths::class);
+        $this->pathItem = $this->createMock(PathItem::class);
+        $this->operationPost = $this->createMock(Operation::class);
+        $this->operationGet = $this->createMock(Operation::class);
     }
 
     private function setupFactoryReturnValues(): void
