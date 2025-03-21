@@ -17,7 +17,7 @@ final class UpdateFactoryTest extends TestCase
 
         $requestBuilderMock->expects($this->once())
             ->method('build')
-            ->with($this->callback(function ($params) {
+            ->with($this->callback(static function ($params) {
                 return is_array($params) && count($params) === 7;
             }))
             ->willReturn($this->createMock(RequestBody::class));

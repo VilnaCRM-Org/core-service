@@ -43,29 +43,26 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->initialize($this->context);
     }
 
-    public function testValidate(): void
+    private function createCustomer(string $email): object
     {
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
-        $initials = $this->faker->name();
-        $email = $this->faker->email();
-        $phone = $this->faker->phoneNumber();
-        $leadSource = $this->faker->name();
-        $type = $customerType;
-        $status = $customerStatus;
-        $confirmed = true;
 
-        $errorMessage = $this->faker->word();
-        $user = $this->userFactory->create(
-            $initials,
+        return $this->userFactory->create(
+            $this->faker->name(),
             $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
+            $this->faker->phoneNumber(),
+            $this->faker->name(),
+            $customerType,
+            $customerStatus,
+            true,
             $this->transformer->transformFromSymfonyUlid($this->faker->ulid()),
         );
+    }
+
+    private function setupValidationExpectations(string $email, object $user): string
+    {
+        $errorMessage = $this->faker->word();
 
         $this->userRepository->expects($this->once())
             ->method('findByEmail')
@@ -79,6 +76,16 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->context->expects($this->once())
             ->method('buildViolation')
             ->with($errorMessage);
+
+        return $errorMessage;
+    }
+
+    public function testValidate(): void
+    {
+        $email = $this->faker->email();
+        $user = $this->createCustomer($email);
+
+        $this->setupValidationExpectations($email, $user);
 
         $this->validator->validate($email, new UniqueEmail());
     }

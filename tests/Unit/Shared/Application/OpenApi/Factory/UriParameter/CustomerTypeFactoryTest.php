@@ -11,11 +11,23 @@ use PHPUnit\Framework\TestCase;
 
 final class CustomerTypeFactoryTest extends TestCase
 {
-    public function testGetParameterReturnsCorrectParameter(): void
-    {
-        $parameterBuilder = $this->createMock(UriParameterBuilder::class);
+    private UriParameterBuilder $parameterBuilder;
+    private Parameter $expectedParameter;
+    private CustomerTypeFactory $factory;
 
-        $expectedParameter = new Parameter(
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
+        $this->setupExpectedParameter();
+        $this->setupParameterBuilderMock();
+        $this->factory = new CustomerTypeFactory($this->parameterBuilder);
+    }
+
+    private function setupExpectedParameter(): void
+    {
+        $this->expectedParameter = new Parameter(
             'ulid',
             'query',
             'CustomerType identifier',
@@ -27,8 +39,11 @@ final class CustomerTypeFactoryTest extends TestCase
                 'type' => 'string'
             ]
         );
+    }
 
-        $parameterBuilder->expects($this->once())
+    private function setupParameterBuilderMock(): void
+    {
+        $this->parameterBuilder->expects($this->once())
             ->method('build')
             ->with(
                 'ulid',
@@ -37,11 +52,12 @@ final class CustomerTypeFactoryTest extends TestCase
                 '01JKX8XGHVDZ46MWYMZT94YER4',
                 'string'
             )
-            ->willReturn($expectedParameter);
+            ->willReturn($this->expectedParameter);
+    }
 
-        $factory = new CustomerTypeFactory($parameterBuilder);
-        $actualParameter = $factory->getParameter();
-
-        $this->assertSame($expectedParameter, $actualParameter);
+    public function testGetParameterReturnsCorrectParameter(): void
+    {
+        $actualParameter = $this->factory->getParameter();
+        $this->assertSame($this->expectedParameter, $actualParameter);
     }
 }

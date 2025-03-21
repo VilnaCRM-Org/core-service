@@ -50,7 +50,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 
         $this->iriConverter->expects($this->exactly(2))
             ->method('getResourceFromIri')
-            ->willReturnCallback(function (string $iri) use ($type, $status, $dto) {
+            ->willReturnCallback(static function (string $iri) use ($type, $status, $dto) {
                 return match ($iri) {
                     $dto->type => $type,
                     $dto->status => $status,

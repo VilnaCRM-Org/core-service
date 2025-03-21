@@ -73,7 +73,7 @@ final class UlidRangeFilterTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $properties
+     * @param array<string, null> $properties
      */
     private function createFilterWithMapping(array $properties): UlidRangeFilter
     {
@@ -122,7 +122,7 @@ final class UlidRangeFilterTest extends TestCase
         $filter->apply($this->builder, Customer::class, null, $context);
     }
 
-    public function testApplyWithMultipleValues(): void
+    private function setupMultipleValuesTest(): array
     {
         $filter = $this->createFilterWithMapping(['ulid' => null]);
 
@@ -136,6 +136,11 @@ final class UlidRangeFilterTest extends TestCase
             ]
         ];
 
+        return [$filter, $context];
+    }
+
+    private function setupMultipleValuesExpectations(): void
+    {
         $this->builder->expects($this->exactly(2))
             ->method('match')
             ->willReturn($this->matchStage);
@@ -154,6 +159,12 @@ final class UlidRangeFilterTest extends TestCase
             ->method('gt')
             ->with('01JKX8XGHVDZ46MWYMZT94YER3')
             ->willReturnSelf();
+    }
+
+    public function testApplyWithMultipleValues(): void
+    {
+        list($filter, $context) = $this->setupMultipleValuesTest();
+        $this->setupMultipleValuesExpectations();
 
         $filter->apply($this->builder, Customer::class, null, $context);
     }
@@ -425,8 +436,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => 'invalid-ulid'];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
 
         $this->builder->expects($this->never())
@@ -442,8 +453,8 @@ final class UlidRangeFilterTest extends TestCase
         $value = ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'];
         $context = [
             'filters' => [
-                'ulid' => $value
-            ]
+                'ulid' => $value,
+            ],
         ];
         $operation = $this->createMock(Operation::class);
 
@@ -471,8 +482,8 @@ final class UlidRangeFilterTest extends TestCase
         $context = [
             'filters' => [
                 'ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
-                'customer.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4']
-            ]
+                'customer.ulid' => ['lt' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+            ],
         ];
 
         $this->builder->expects($this->exactly(2))

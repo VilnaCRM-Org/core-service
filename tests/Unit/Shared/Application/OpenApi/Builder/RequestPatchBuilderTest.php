@@ -9,9 +9,9 @@ use App\Shared\Application\OpenApi\Builder\ContextBuilder;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 use PHPUnit\Framework\TestCase;
 
-class RequestPatchBuilderTest extends TestCase
+final class RequestPatchBuilderTest extends TestCase
 {
-    public function testBuild()
+    public function testBuild(): void
     {
         $contextBuilderMock = $this->createMock(ContextBuilder::class);
 
