@@ -23,7 +23,8 @@ final class CustomerTest extends UnitTestCase
         parent::setUp();
 
         $this->ulidTransformer = new UlidTransformer(new UlidFactory());
-        $ulid = $this->ulidTransformer->transformFromSymfonyUlid($this->faker->ulid());
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
 
         $type = $this->createMock(CustomerType::class);
         $status = $this->createMock(CustomerStatus::class);
@@ -43,7 +44,8 @@ final class CustomerTest extends UnitTestCase
     public function testGetAndSetUlid(): void
     {
         $ulidString = $this->faker->ulid();
-        $ulidObject = $this->ulidTransformer->transformFromSymfonyUlid($ulidString);
+        $ulidObject = $this->ulidTransformer
+            ->transformFromSymfonyUlid($ulidString);
         $this->customer->setUlid($ulidObject);
         $this->assertEquals($ulidString, $this->customer->getUlid());
     }

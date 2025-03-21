@@ -31,12 +31,16 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->customerFactory = $this->createMock(CustomerFactoryInterface::class);
+        $this->customerFactory = $this
+            ->createMock(CustomerFactoryInterface::class);
         $this->transformer = new UlidTransformer(new UlidFactoryInterface());
         $this->symfonyUlidFactory = new UlidFactory();
-        $this->ulidTransformerMock = $this->createMock(UlidTransformer::class);
-        $this->ulidFactoryMock = $this->createMock(UlidFactory::class);
-        $this->customerFactoryMock = $this->createMock(CustomerFactoryInterface::class);
+        $this->ulidTransformerMock = $this
+            ->createMock(UlidTransformer::class);
+        $this->ulidFactoryMock = $this
+            ->createMock(UlidFactory::class);
+        $this->customerFactoryMock = $this
+            ->createMock(CustomerFactoryInterface::class);
         $this->createCustomerTransformer = new CreateCustomerTransformer(
             $this->customerFactoryMock,
             $this->ulidTransformerMock,
@@ -57,8 +61,9 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     /**
      * @param array<string, string|bool|CustomerType|CustomerStatus|Customer> $testData
      */
-    private function createCommandFromTestData(array $testData): CreateCustomerCommand
-    {
+    private function createCommandFromTestData(
+        array $testData
+    ): CreateCustomerCommand {
         return $this->createCommand(
             $testData['initials'],
             $testData['email'],

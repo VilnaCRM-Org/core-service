@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\CustomerEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\EndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
@@ -42,39 +42,17 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->createFactory = $this->createMock(CreateFactory::class);
-        $this->validationErrorFactory = $this->createMock(ValidationErrorFactory::class);
-        $this->badRequestResponseFactory = $this->createMock(BadRequestResponseFactory::class);
-        $this->internalErrorFactory = $this->createMock(InternalErrorFactory::class);
-        $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
-        $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
-
-        $this->createCustomerRequest = $this->createMock(RequestBody::class);
-        $this->validResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->badRequestResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-
-        $this->openApi = $this->createMock(OpenApi::class);
-        $this->paths = $this->createMock(Paths::class);
-        $this->pathItem = $this->createMock(PathItem::class);
-        $this->operationPost = $this->createMock(Operation::class);
-        $this->operationGet = $this->createMock(Operation::class);
+        $this->setupFactoryMocks();
+        $this->setupRequestAndResponseMocks();
+        $this->setupOpenApiMocks();
     }
 
     public function testCreateEndpoint(): void
     {
-        $this->createFactory->method('getRequest')->willReturn($this->createCustomerRequest);
-        $this->validationErrorFactory->method('getResponse')->willReturn($this->validResponse);
-        $this->badRequestResponseFactory->method('getResponse')->willReturn($this->badRequestResponse);
-        $this->internalErrorFactory->method('getResponse')->willReturn($this->internalResponse);
-        $this->forbiddenResponseFactory->method('getResponse')->willReturn($this->forbiddenResponse);
-        $this->unauthorizedResponseFactory->method('getResponse')->willReturn($this->unauthorizedResponse);
-
+        $this->setupFactoryReturnValues();
         $this->setExpectations();
 
-        $factory = new CustomerEndpointFactory(
+        $factory = new EndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,
@@ -82,7 +60,77 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
             $this->forbiddenResponseFactory,
             $this->unauthorizedResponseFactory
         );
+
         $factory->createEndpoint($this->openApi);
+    }
+
+    private function setupFactoryMocks(): void
+    {
+        $this->createFactory = $this
+            ->createMock(CreateFactory::class);
+        $this->validationErrorFactory = $this
+            ->createMock(ValidationErrorFactory::class);
+        $this->badRequestResponseFactory = $this
+            ->createMock(BadRequestResponseFactory::class);
+        $this->internalErrorFactory = $this
+            ->createMock(InternalErrorFactory::class);
+        $this->forbiddenResponseFactory = $this
+            ->createMock(ForbiddenResponseFactory::class);
+        $this->unauthorizedResponseFactory = $this
+            ->createMock(UnauthorizedResponseFactory::class);
+    }
+
+    private function setupRequestAndResponseMocks(): void
+    {
+        $this->createCustomerRequest = $this
+            ->createMock(RequestBody::class);
+        $this->setupResponseMocks();
+    }
+
+    private function setupResponseMocks(): void
+    {
+        $this->validResponse = $this->createResponseMock();
+        $this->badRequestResponse = $this->createResponseMock();
+        $this->internalResponse = $this->createResponseMock();
+        $this->forbiddenResponse = $this->createResponseMock();
+        $this->unauthorizedResponse = $this->createResponseMock();
+    }
+
+    private function createResponseMock(): Response
+    {
+        return $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function setupOpenApiMocks(): void
+    {
+        $this->openApi = $this
+            ->createMock(OpenApi::class);
+        $this->paths = $this
+            ->createMock(Paths::class);
+        $this->pathItem = $this
+            ->createMock(PathItem::class);
+        $this->operationPost = $this
+            ->createMock(Operation::class);
+        $this->operationGet = $this
+            ->createMock(Operation::class);
+    }
+
+    private function setupFactoryReturnValues(): void
+    {
+        $this->createFactory->method('getRequest')
+            ->willReturn($this->createCustomerRequest);
+        $this->validationErrorFactory->method('getResponse')
+            ->willReturn($this->validResponse);
+        $this->badRequestResponseFactory->method('getResponse')
+            ->willReturn($this->badRequestResponse);
+        $this->internalErrorFactory->method('getResponse')
+            ->willReturn($this->internalResponse);
+        $this->forbiddenResponseFactory->method('getResponse')
+            ->willReturn($this->forbiddenResponse);
+        $this->unauthorizedResponseFactory->method('getResponse')
+            ->willReturn($this->unauthorizedResponse);
     }
 
     private function setExpectations(): void
@@ -104,10 +152,18 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
 
     private function setupOperations(): void
     {
-        $this->pathItem->expects($this->once())->method('getPost')->willReturn($this->operationPost);
-        $this->pathItem->expects($this->once())->method('getGet')->willReturn($this->operationGet);
-        $this->operationPost->expects($this->once())->method('getResponses')->willReturn([]);
-        $this->operationGet->expects($this->once())->method('getResponses')->willReturn([]);
+        $this->pathItem->expects($this->once())
+            ->method('getPost')
+            ->willReturn($this->operationPost);
+        $this->pathItem->expects($this->once())
+            ->method('getGet')
+            ->willReturn($this->operationGet);
+        $this->operationPost->expects($this->once())
+            ->method('getResponses')
+            ->willReturn([]);
+        $this->operationGet->expects($this->once())
+            ->method('getResponses')
+            ->willReturn([]);
     }
 
     private function setupResponses(): void

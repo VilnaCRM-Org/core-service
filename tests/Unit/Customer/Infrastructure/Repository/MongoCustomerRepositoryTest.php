@@ -23,15 +23,18 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->registry = $this->createMock(ManagerRegistry::class);
-        $this->documentManager = $this->createMock(DocumentManager::class);
+        $this->registry = $this
+            ->createMock(ManagerRegistry::class);
+        $this->documentManager = $this
+            ->createMock(DocumentManager::class);
 
         $this->registry->expects($this->any())
             ->method('getManagerForClass')
             ->with(Customer::class)
             ->willReturn($this->documentManager);
 
-        $this->repository = $this->getMockBuilder(MongoCustomerRepository::class)
+        $this->repository = $this
+            ->getMockBuilder(MongoCustomerRepository::class)
             ->setConstructorArgs([$this->registry])
             ->onlyMethods(['findOneBy'])
             ->getMock();

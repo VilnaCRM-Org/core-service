@@ -53,8 +53,10 @@ final class CreateStatusTransformerTest extends UnitTestCase
         $this->assertSame($status, $result);
     }
 
-    private function setExpectations(CustomerStatus $status, string $value): void
-    {
+    private function setExpectations(
+        CustomerStatus $status,
+        string $value
+    ): void {
         $ulidObject = $this->createMock(Ulid::class);
 
         $this->ulidFactoryMock->expects($this->once())

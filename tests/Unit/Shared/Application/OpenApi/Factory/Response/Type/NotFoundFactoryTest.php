@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\CustomerType;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\Type;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;

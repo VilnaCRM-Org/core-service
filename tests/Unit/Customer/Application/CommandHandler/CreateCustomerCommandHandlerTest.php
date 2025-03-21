@@ -25,8 +25,10 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->transformer = $this->createMock(CreateCustomerTransformer::class);
-        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->transformer = $this
+            ->createMock(CreateCustomerTransformer::class);
+        $this->repository = $this
+            ->createMock(CustomerRepositoryInterface::class);
         $this->handler = new CreateCustomerCommandHandler(
             $this->transformer,
             $this->repository

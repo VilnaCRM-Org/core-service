@@ -40,8 +40,9 @@ final class CreateCustomerFactoryTest extends UnitTestCase
         $this->assertInstanceOf(CreateCustomerCommand::class, $command);
     }
 
-    private function createCustomerType(UlidTransformer $ulidTransformer): CustomerType
-    {
+    private function createCustomerType(
+        UlidTransformer $ulidTransformer
+    ): CustomerType {
         $typeValue = $this->faker->word();
         $typeUlidString = $this->faker->ulid();
 
@@ -51,8 +52,9 @@ final class CreateCustomerFactoryTest extends UnitTestCase
         );
     }
 
-    private function createCustomerStatus(UlidTransformer $ulidTransformer): CustomerStatus
-    {
+    private function createCustomerStatus(
+        UlidTransformer $ulidTransformer
+    ): CustomerStatus {
         $statusValue = $this->faker->word();
         $statusUlidString = $this->faker->ulid();
 

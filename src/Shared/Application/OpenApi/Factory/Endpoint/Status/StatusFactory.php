@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Endpoint\Customer;
+namespace App\Shared\Application\OpenApi\Factory\Endpoint\Status;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\BaseEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Status\StatusCreateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -16,11 +16,11 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerEndpointFactory extends EndpointFactory
+final class StatusFactory extends BaseEndpointFactory
 {
-    private const ENDPOINT_URI = '/api/customers';
+    private const ENDPOINT_URI = '/api/customer_statuses';
 
-    private RequestBody $createCustomerRequest;
+    private RequestBody $createCustomerStatusRequest;
     private Response $validResponse;
     private Response $badRequestResponse;
     private Response $internalResponse;
@@ -28,15 +28,15 @@ final class CustomerEndpointFactory extends EndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CreateFactory $createCustomerRequestFactory,
+        private StatusCreateFactory $createCustomerStatusRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->createCustomerRequest =
-            $this->createCustomerRequestFactory->getRequest();
+        $this->createCustomerStatusRequest =
+            $this->createCustomerStatusRequestFactory->getRequest();
 
         $this->validResponse =
             $this->validationErrorResponseFactory->getResponse();
@@ -71,7 +71,7 @@ final class CustomerEndpointFactory extends EndpointFactory
             ->withPost(
                 $operationPost
                     ->withResponses($mergedPost)
-                    ->withRequestBody($this->createCustomerRequest)
+                    ->withRequestBody($this->createCustomerStatusRequest)
             )
             ->withGet($operationGet->withResponses(
                 $mergedGet

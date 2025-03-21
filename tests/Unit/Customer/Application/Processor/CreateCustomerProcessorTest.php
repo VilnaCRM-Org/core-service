@@ -29,9 +29,12 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(CreateCustomerFactoryInterface::class);
-        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->commandBus = $this
+            ->createMock(CommandBusInterface::class);
+        $this->factory = $this
+            ->createMock(CreateCustomerFactoryInterface::class);
+        $this->iriConverter = $this
+            ->createMock(IriConverterInterface::class);
         $this->processor = new CreateCustomerProcessor(
             $this->commandBus,
             $this->factory,
@@ -69,11 +72,15 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     ): void {
         $this->iriConverter->expects($this->exactly(2))
             ->method('getResourceFromIri')
-            ->willReturnCallback(static function (string $iri) use ($type, $status, $dto) {
+            ->willReturnCallback(static function (
+                string $iri
+            ) use ($type, $status, $dto) {
                 return match ($iri) {
                     $dto->type => $type,
                     $dto->status => $status,
-                    default => throw new \InvalidArgumentException('Unexpected IRI')
+                    default => throw new \InvalidArgumentException(
+                        'Unexpected IRI'
+                    )
                 };
             });
     }

@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint;
 
 use ApiPlatform\OpenApi\Model\Response;
 
-abstract class EndpointFactory implements EndpointFactoryInterface
+abstract class BaseEndpointFactory implements EndpointFactoryInterface
 {
     /**
      * @param array<int,Response> $baseResponses

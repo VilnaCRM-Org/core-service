@@ -33,6 +33,23 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with($context)
             ->willReturn($openApi);
 
+        $endpointFactories = $this->createEndpointFactories($openApi);
+
+        $factory = new OpenApiFactory(
+            $decoratedFactory,
+            $endpointFactories
+        );
+
+        $result = $factory->__invoke($context);
+
+        $this->assertSame($openApi, $result);
+    }
+
+    /**
+     * @return array<EndpointFactoryInterface>
+     */
+    private function createEndpointFactories(OpenApi $openApi): array
+    {
         $endpointFactory1 = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory1->expects($this->once())
             ->method('createEndpoint')
@@ -43,13 +60,6 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->method('createEndpoint')
             ->with($openApi);
 
-        $factory = new OpenApiFactory(
-            $decoratedFactory,
-            [$endpointFactory1, $endpointFactory2]
-        );
-
-        $result = $factory->__invoke($context);
-
-        $this->assertSame($openApi, $result);
+        return [$endpointFactory1, $endpointFactory2];
     }
 }

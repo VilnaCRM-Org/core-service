@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
+namespace App\Shared\Application\OpenApi\Factory\Endpoint\Type;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\BaseEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeCreateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
@@ -16,7 +16,7 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerTypeEndpointFactory extends EndpointFactory
+final class TypeFactory extends BaseEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types';
 

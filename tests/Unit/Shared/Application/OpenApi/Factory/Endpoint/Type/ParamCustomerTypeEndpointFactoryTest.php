@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Endpoint\Type;
 
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\ParamCustomerTypeEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\Type\ParamFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeCreateFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeUpdateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
@@ -99,31 +99,33 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 
     private function setupResponseMocks(): void
     {
+        $this->setupRequestMocks();
+        $this->setupResponseObjectMocks();
+    }
+
+    private function setupRequestMocks(): void
+    {
         $this->ulidParam = $this->createMock(Parameter::class);
         $this->updateRequest = $this->createMock(RequestBody::class);
         $this->replaceRequest = $this->createMock(RequestBody::class);
+    }
 
-        $this->validResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->badResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->notFoundResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->deletedResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->internalResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->forbiddenResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
-        $this->unauthorizedResponse = $this->getMockBuilder(
-            Response::class
-        )->disableOriginalConstructor()->getMock();
+    private function setupResponseObjectMocks(): void
+    {
+        $this->validResponse = $this->createResponseMock();
+        $this->badResponse = $this->createResponseMock();
+        $this->notFoundResponse = $this->createResponseMock();
+        $this->deletedResponse = $this->createResponseMock();
+        $this->internalResponse = $this->createResponseMock();
+        $this->forbiddenResponse = $this->createResponseMock();
+        $this->unauthorizedResponse = $this->createResponseMock();
+    }
+
+    private function createResponseMock(): Response
+    {
+        return $this->getMockBuilder(Response::class)
+            ->disableOriginalConstructor()
+            ->getMock();
     }
 
     private function setupOpenApiMocks(): void
@@ -139,10 +141,22 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 
     private function setupFactoryReturnValues(): void
     {
+        $this->setupParameterAndRequestMocks();
+        $this->setupResponseMockReturnValues();
+    }
+
+    private function setupParameterAndRequestMocks(): void
+    {
         $this->parameterFactory->method('getParameter')
             ->willReturn($this->ulidParam);
         $this->updateFactory->method('getRequest')
             ->willReturn($this->updateRequest);
+        $this->replaceFactory->method('getRequest')
+            ->willReturn($this->replaceRequest);
+    }
+
+    private function setupResponseMockReturnValues(): void
+    {
         $this->validationErrorFactory->method('getResponse')
             ->willReturn($this->validResponse);
         $this->badRequestResponseFactory->method('getResponse')
@@ -151,20 +165,17 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->notFoundResponse);
         $this->deletedFactory->method('getResponse')
             ->willReturn($this->deletedResponse);
-        $this->replaceFactory->method('getRequest')
-            ->willReturn($this->replaceRequest);
         $this->internalErrorFactory->method('getResponse')
             ->willReturn($this->internalResponse);
-        $this->forbiddenResponseFactory
-            ->method('getResponse')->willReturn($this->forbiddenResponse);
-        $this->unauthorizedResponseFactory
-            ->method('getResponse')
+        $this->forbiddenResponseFactory->method('getResponse')
+            ->willReturn($this->forbiddenResponse);
+        $this->unauthorizedResponseFactory->method('getResponse')
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): ParamCustomerTypeEndpointFactory
+    private function createFactory(): ParamFactory
     {
-        return new ParamCustomerTypeEndpointFactory(
+        return new ParamFactory(
             $this->parameterFactory,
             $this->updateFactory,
             $this->validationErrorFactory,
