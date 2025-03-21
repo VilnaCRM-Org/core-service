@@ -27,7 +27,10 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
 
         $this->transformer = $this->createMock(CreateCustomerTransformer::class);
         $this->repository = $this->createMock(CustomerRepositoryInterface::class);
-        $this->handler = new CreateCustomerCommandHandler($this->transformer, $this->repository);
+        $this->handler = new CreateCustomerCommandHandler(
+            $this->transformer,
+            $this->repository
+        );
     }
 
     public function testInvokeCreatesAndSavesCustomer(): void
@@ -47,7 +50,10 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
         $this->handler->__invoke($command);
 
         $response = $command->getResponse();
-        $this->assertInstanceOf(CreateCustomerCommandResponse::class, $response);
+        $this->assertInstanceOf(
+            CreateCustomerCommandResponse::class,
+            $response
+        );
         $this->assertSame($customer, $response->customer);
     }
 

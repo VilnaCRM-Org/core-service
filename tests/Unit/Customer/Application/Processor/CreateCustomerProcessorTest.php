@@ -49,7 +49,13 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $customer = $this->createMock(Customer::class);
 
         $this->setupIriConverter($dto, $type, $status);
-        $this->setupFactoryAndCommandBus($dto, $type, $status, $command, $customer);
+        $this->setupFactoryAndCommandBus(
+            $dto,
+            $type,
+            $status,
+            $command,
+            $customer
+        );
 
         $result = $this->processor->process($dto, $operation);
 

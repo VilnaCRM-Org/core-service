@@ -43,7 +43,10 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->method('createEndpoint')
             ->with($openApi);
 
-        $factory = new OpenApiFactory($decoratedFactory, [$endpointFactory1, $endpointFactory2]);
+        $factory = new OpenApiFactory(
+            $decoratedFactory,
+            [$endpointFactory1, $endpointFactory2]
+        );
 
         $result = $factory->__invoke($context);
 

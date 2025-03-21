@@ -75,16 +75,26 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 
     private function setupFactoryMocks(): void
     {
-        $this->parameterFactory = $this->createMock(CustomerTypeFactory::class);
-        $this->updateFactory = $this->createMock(TypeUpdateFactory::class);
-        $this->validationErrorFactory = $this->createMock(ValidationErrorFactory::class);
-        $this->badRequestResponseFactory = $this->createMock(BadRequestResponseFactory::class);
-        $this->notFoundFactory = $this->createMock(NotFoundFactory::class);
-        $this->deletedFactory = $this->createMock(DeletedFactory::class);
-        $this->replaceFactory = $this->createMock(TypeCreateFactory::class);
-        $this->internalErrorFactory = $this->createMock(InternalErrorFactory::class);
-        $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
-        $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
+        $this->parameterFactory = $this
+            ->createMock(CustomerTypeFactory::class);
+        $this->updateFactory = $this
+            ->createMock(TypeUpdateFactory::class);
+        $this->validationErrorFactory = $this
+            ->createMock(ValidationErrorFactory::class);
+        $this->badRequestResponseFactory = $this
+            ->createMock(BadRequestResponseFactory::class);
+        $this->notFoundFactory = $this
+            ->createMock(NotFoundFactory::class);
+        $this->deletedFactory = $this
+            ->createMock(DeletedFactory::class);
+        $this->replaceFactory = $this
+            ->createMock(TypeCreateFactory::class);
+        $this->internalErrorFactory = $this
+            ->createMock(InternalErrorFactory::class);
+        $this->forbiddenResponseFactory = $this
+            ->createMock(ForbiddenResponseFactory::class);
+        $this->unauthorizedResponseFactory = $this
+            ->createMock(UnauthorizedResponseFactory::class);
     }
 
     private function setupResponseMocks(): void
@@ -93,13 +103,27 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
         $this->updateRequest = $this->createMock(RequestBody::class);
         $this->replaceRequest = $this->createMock(RequestBody::class);
 
-        $this->validResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->badResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->notFoundResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->deletedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->validResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->badResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->notFoundResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->deletedResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->internalResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->forbiddenResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
+        $this->unauthorizedResponse = $this->getMockBuilder(
+            Response::class
+        )->disableOriginalConstructor()->getMock();
     }
 
     private function setupOpenApiMocks(): void
@@ -115,16 +139,27 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 
     private function setupFactoryReturnValues(): void
     {
-        $this->parameterFactory->method('getParameter')->willReturn($this->ulidParam);
-        $this->updateFactory->method('getRequest')->willReturn($this->updateRequest);
-        $this->validationErrorFactory->method('getResponse')->willReturn($this->validResponse);
-        $this->badRequestResponseFactory->method('getResponse')->willReturn($this->badResponse);
-        $this->notFoundFactory->method('getResponse')->willReturn($this->notFoundResponse);
-        $this->deletedFactory->method('getResponse')->willReturn($this->deletedResponse);
-        $this->replaceFactory->method('getRequest')->willReturn($this->replaceRequest);
-        $this->internalErrorFactory->method('getResponse')->willReturn($this->internalResponse);
-        $this->forbiddenResponseFactory->method('getResponse')->willReturn($this->forbiddenResponse);
-        $this->unauthorizedResponseFactory->method('getResponse')->willReturn($this->unauthorizedResponse);
+        $this->parameterFactory->method('getParameter')
+            ->willReturn($this->ulidParam);
+        $this->updateFactory->method('getRequest')
+            ->willReturn($this->updateRequest);
+        $this->validationErrorFactory->method('getResponse')
+            ->willReturn($this->validResponse);
+        $this->badRequestResponseFactory->method('getResponse')
+            ->willReturn($this->badResponse);
+        $this->notFoundFactory->method('getResponse')
+            ->willReturn($this->notFoundResponse);
+        $this->deletedFactory->method('getResponse')
+            ->willReturn($this->deletedResponse);
+        $this->replaceFactory->method('getRequest')
+            ->willReturn($this->replaceRequest);
+        $this->internalErrorFactory->method('getResponse')
+            ->willReturn($this->internalResponse);
+        $this->forbiddenResponseFactory
+            ->method('getResponse')->willReturn($this->forbiddenResponse);
+        $this->unauthorizedResponseFactory
+            ->method('getResponse')
+            ->willReturn($this->unauthorizedResponse);
     }
 
     private function createFactory(): ParamCustomerTypeEndpointFactory
@@ -166,16 +201,20 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
         $this->pathItem->expects($this->once())
             ->method('getPatch')
             ->willReturn($this->operationPatch);
-        $this->operationPatch->expects($this->once())->method('getResponses')->willReturn([]);
         $this->operationPatch->expects($this->once())
-            ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
+            ->method('getResponses')->willReturn([]);
         $this->operationPatch->expects($this->once())
-            ->method('withRequestBody')->with($this->updateRequest)->willReturnSelf();
+            ->method('withParameters')
+            ->with([$this->ulidParam])->willReturnSelf();
+        $this->operationPatch->expects($this->once())
+            ->method('withRequestBody')
+            ->with($this->updateRequest)->willReturnSelf();
         $expectedUpdate = $this->getUpdateExpectedResponses();
         $this->operationPatch->expects($this->once())
             ->method('withResponses')->with($expectedUpdate)->willReturnSelf();
         $this->pathItem->expects($this->once())
-            ->method('withPatch')->with($this->operationPatch)->willReturnSelf();
+            ->method('withPatch')
+            ->with($this->operationPatch)->willReturnSelf();
     }
 
     private function setupPutOperation(): void
@@ -183,14 +222,17 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
         $this->pathItem->expects($this->once())
             ->method('getPut')
             ->willReturn($this->operationPut);
-        $this->operationPut->expects($this->once())->method('getResponses')->willReturn([]);
         $this->operationPut->expects($this->once())
-            ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
+            ->method('getResponses')->willReturn([]);
+        $this->operationPut->expects($this->once())
+            ->method('withParameters')
+            ->with([$this->ulidParam])->willReturnSelf();
         $expectedUpdate = $this->getUpdateExpectedResponses();
         $this->operationPut->expects($this->once())
             ->method('withResponses')->with($expectedUpdate)->willReturnSelf();
         $this->operationPut->expects($this->once())
-            ->method('withRequestBody')->with($this->replaceRequest)->willReturnSelf();
+            ->method('withRequestBody')
+            ->with($this->replaceRequest)->willReturnSelf();
         $this->pathItem->expects($this->once())
             ->method('withPut')->with($this->operationPut)->willReturnSelf();
     }
@@ -200,14 +242,18 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
         $this->pathItem->expects($this->once())
             ->method('getGet')
             ->willReturn($this->operationGet);
-        $this->operationGet->expects($this->once())->method('getResponses')->willReturn([]);
+        $this->operationGet->expects($this->once())
+            ->method('getResponses')->willReturn([]);
         $expectedGet = $this->getGetExpectedResponses();
         $this->operationGet->expects($this->once())
-            ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
+            ->method('withParameters')
+            ->with([$this->ulidParam])->willReturnSelf();
         $this->operationGet->expects($this->once())
-            ->method('withResponses')->with($expectedGet)->willReturnSelf();
+            ->method('withResponses')
+            ->with($expectedGet)->willReturnSelf();
         $this->pathItem->expects($this->once())
-            ->method('withGet')->with($this->operationGet)->willReturnSelf();
+            ->method('withGet')
+            ->with($this->operationGet)->willReturnSelf();
     }
 
     private function setupDeleteOperation(): void
@@ -216,12 +262,15 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
             ->method('getDelete')
             ->willReturn($this->operationDelete);
         $this->operationDelete->expects($this->once())
-            ->method('withParameters')->with([$this->ulidParam])->willReturnSelf();
+            ->method('withParameters')
+            ->with([$this->ulidParam])->willReturnSelf();
         $expectedDelete = $this->getDeleteExpectedResponses();
         $this->operationDelete->expects($this->once())
-            ->method('withResponses')->with($expectedDelete)->willReturnSelf();
+            ->method('withResponses')
+            ->with($expectedDelete)->willReturnSelf();
         $this->pathItem->expects($this->once())
-            ->method('withDelete')->with($this->operationDelete)->willReturnSelf();
+            ->method('withDelete')
+            ->with($this->operationDelete)->willReturnSelf();
     }
 
     /**

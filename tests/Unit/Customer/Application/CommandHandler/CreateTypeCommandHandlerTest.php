@@ -25,7 +25,10 @@ final class CreateTypeCommandHandlerTest extends UnitTestCase
 
         $this->transformer = $this->createMock(CreateTypeTransformer::class);
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
-        $this->handler = new CreateTypeCommandHandler($this->transformer, $this->repository);
+        $this->handler = new CreateTypeCommandHandler(
+            $this->transformer,
+            $this->repository
+        );
     }
 
     public function testInvokeCreatesAndSavesType(): void

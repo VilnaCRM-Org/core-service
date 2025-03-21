@@ -77,8 +77,10 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         );
     }
 
-    private function setupValidationExpectations(string $email, object $user): string
-    {
+    private function setupValidationExpectations(
+        string $email,
+        object $user
+    ): string {
         $errorMessage = $this->faker->word();
 
         $this->userRepository->expects($this->once())

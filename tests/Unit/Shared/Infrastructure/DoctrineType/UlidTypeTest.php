@@ -64,7 +64,9 @@ final class UlidTypeTest extends UnitTestCase
         if ($result !== null) {
             $this->assertInstanceOf(Ulid::class, $result);
         } else {
-            $this->markTestIncomplete('Ulid transformation logic not fully implemented for testing.');
+            $this->markTestIncomplete(
+                'Ulid transformation logic not fully implemented for testing.'
+            );
         }
     }
 
@@ -82,7 +84,10 @@ final class UlidTypeTest extends UnitTestCase
         $ulidType = $this->getUlidTypeInstance();
         $closureCode = $ulidType->closureToPHP();
 
-        $this->assertStringContainsString('new \App\Shared\Infrastructure\Transformer\UlidTransformer', $closureCode);
+        $this->assertStringContainsString(
+            'new \App\Shared\Infrastructure\Transformer\UlidTransformer',
+            $closureCode
+        );
         $this->assertStringContainsString(
             'transformFromSymfonyUlid',
             $closureCode

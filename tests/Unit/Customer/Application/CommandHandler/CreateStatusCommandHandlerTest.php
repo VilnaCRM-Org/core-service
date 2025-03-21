@@ -25,7 +25,10 @@ final class CreateStatusCommandHandlerTest extends UnitTestCase
 
         $this->transformer = $this->createMock(CreateStatusTransformer::class);
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
-        $this->handler = new CreateStatusCommandHandler($this->transformer, $this->repository);
+        $this->handler = new CreateStatusCommandHandler(
+            $this->transformer,
+            $this->repository
+        );
     }
 
     public function testInvokeCreatesAndSavesStatus(): void

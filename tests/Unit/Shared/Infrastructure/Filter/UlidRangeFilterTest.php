@@ -398,7 +398,7 @@ final class UlidRangeFilterTest extends UnitTestCase
 
     private function setupMultipleValuesExpectations(): void
     {
-        [,, $ulidValue1, $ulidValue2] = $this->multipleValuesTestSetup;
+        [, , $ulidValue1, $ulidValue2] = $this->multipleValuesTestSetup;
 
         $this->setupMatchExpectations(2, 'ulid');
 

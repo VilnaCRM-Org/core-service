@@ -13,7 +13,11 @@ final class UlidTest extends UnitTestCase
     {
         $uid = (string) $this->faker->ulid();
         $ulid = new Ulid($uid);
-        $this->assertSame($uid, (string) $ulid, 'The __toString() method should return the original UID.');
+        $this->assertSame(
+            $uid,
+            (string) $ulid,
+            'The __toString() method should return the original UID.'
+        );
     }
 
     public function testToBinaryReturns16Bytes(): void
@@ -23,7 +27,11 @@ final class UlidTest extends UnitTestCase
         $binary = $ulid->toBinary();
 
         $this->assertIsString($binary, 'toBinary() should return a string.');
-        $this->assertEquals(16, strlen($binary), 'The binary representation should be 16 bytes.');
+        $this->assertEquals(
+            16,
+            strlen($binary),
+            'The binary representation should be 16 bytes.'
+        );
     }
 
     public function testBinaryHexRepresentationIs32CharactersLong(): void

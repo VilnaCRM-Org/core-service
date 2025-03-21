@@ -27,7 +27,16 @@ final class CustomerFactoryTest extends UnitTestCase
 
         $factory = new CustomerFactory();
 
-        $customer = $factory->create($initials, $email, $phone, $leadSource, $type, $status, $confirmed, $ulid);
+        $customer = $factory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            $confirmed,
+            $ulid
+        );
 
         $this->assertInstanceOf(Customer::class, $customer);
     }
