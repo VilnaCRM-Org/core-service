@@ -6,11 +6,11 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
+use App\Customer\Application\Command\CreateCustomerCommand;
+use App\Customer\Application\Command\CreateCustomerCommandResponse;
 use App\Customer\Application\DTO\CustomerCreateDto;
 use App\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Customer\Application\Processor\CreateCustomerProcessor;
-use App\Customer\Application\Command\CreateCustomerCommand;
-use App\Customer\Application\Command\CreateCustomerCommandResponse;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
@@ -96,4 +96,4 @@ final class CreateCustomerProcessorTest extends UnitTestCase
             $this->faker->boolean()
         );
     }
-} 
+}

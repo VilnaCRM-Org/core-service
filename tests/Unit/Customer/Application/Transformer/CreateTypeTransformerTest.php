@@ -12,8 +12,8 @@ use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
-use Symfony\Component\Uid\Factory\UlidFactory;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\Uid\Factory\UlidFactory;
 
 final class CreateTypeTransformerTest extends UnitTestCase
 {
@@ -70,4 +70,4 @@ final class CreateTypeTransformerTest extends UnitTestCase
             ->with($value, $ulidObject)
             ->willReturn($type);
     }
-} 
+}

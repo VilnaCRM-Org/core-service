@@ -6,10 +6,8 @@ namespace App\Tests\Unit\Customer\Domain\Factory;
 
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Factory\StatusFactory;
-use App\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\TestCase;
 
 final class StatusFactoryTest extends UnitTestCase
 {

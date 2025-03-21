@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus;
 
-use ApiPlatform\OpenApi\OpenApi;
-use ApiPlatform\OpenApi\Model\RequestBody;
-use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
+use ApiPlatform\OpenApi\Model\RequestBody;
+use ApiPlatform\OpenApi\Model\Response;
+use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\CustomerStatusEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Status\StatusCreateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;

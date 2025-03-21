@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
+use App\Customer\Application\Command\CreateStatusCommand;
+use App\Customer\Application\Command\CreateStatusCommandResponse;
 use App\Customer\Application\DTO\StatusCreateDto;
 use App\Customer\Application\Factory\CreateStatusFactoryInterface;
 use App\Customer\Application\Processor\CreateStatusProcessor;
-use App\Customer\Application\Command\CreateStatusCommand;
-use App\Customer\Application\Command\CreateStatusCommandResponse;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -64,4 +64,4 @@ final class CreateStatusProcessorTest extends UnitTestCase
             $this->faker->word()
         );
     }
-} 
+}

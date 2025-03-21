@@ -8,8 +8,8 @@ use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\Lt;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 final class LtTest extends TestCase
 {
@@ -45,4 +45,4 @@ final class LtTest extends TestCase
 
         $this->operator->apply($this->builder, $field, $filterValue);
     }
-} 
+}

@@ -22,6 +22,6 @@ final class CustomerStatusTest extends UnitTestCase
         $customerStatus = new CustomerStatus($expectedValue, $ulid);
 
         $this->assertSame($expectedValue, $customerStatus->getValue());
-        $this->assertSame((string)$expectedUlid, $customerStatus->getUlid());
+        $this->assertSame((string) $expectedUlid, $customerStatus->getUlid());
     }
 }

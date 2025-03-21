@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
+use App\Customer\Application\Command\CreateTypeCommand;
+use App\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Customer\Application\DTO\TypeCreateDto;
 use App\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Customer\Application\Processor\CreateTypeProcessor;
-use App\Customer\Application\Command\CreateTypeCommand;
-use App\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -64,4 +64,4 @@ final class CreateTypeProcessorTest extends UnitTestCase
             $this->faker->word()
         );
     }
-} 
+}

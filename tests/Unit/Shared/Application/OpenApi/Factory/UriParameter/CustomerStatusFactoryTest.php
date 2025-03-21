@@ -24,7 +24,7 @@ final class CustomerStatusFactoryTest extends TestCase
             false,
             [
                 'default' => '01JKX8XGHVDZ46MWYMZT94YER4',
-                'type'    => 'string'
+                'type' => 'string'
             ]
         );
 

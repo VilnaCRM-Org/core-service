@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
-use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\UlidFilterProcessor;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 final class UlidFilterProcessorTest extends TestCase
 {
@@ -68,4 +67,4 @@ final class UlidFilterProcessorTest extends TestCase
         $this->processor->process('ulid', 'gt', $ulid, $this->builder);
         $this->processor->process('ulid', 'gte', $ulid, $this->builder);
     }
-} 
+}

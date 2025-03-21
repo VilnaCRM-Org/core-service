@@ -74,4 +74,4 @@ final class NotFoundFactoryTest extends UnitTestCase
             HttpResponse::HTTP_NOT_FOUND
         );
     }
-} 
+}

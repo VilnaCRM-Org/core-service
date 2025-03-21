@@ -8,10 +8,8 @@ use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Factory\CustomerFactory;
-use App\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\TestCase;
 
 final class CustomerFactoryTest extends UnitTestCase
 {

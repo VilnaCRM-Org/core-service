@@ -18,6 +18,6 @@ final class UlidFactoryTest extends TestCase
         $ulid = $factory->create($ulidString);
 
         $this->assertInstanceOf(Ulid::class, $ulid, 'The created object should be an instance of Ulid.');
-        $this->assertSame($ulidString, (string)$ulid, 'The Ulid string should match the input.');
+        $this->assertSame($ulidString, (string) $ulid, 'The Ulid string should match the input.');
     }
 }

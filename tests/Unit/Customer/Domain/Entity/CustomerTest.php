@@ -8,12 +8,10 @@ use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
-use App\Shared\Domain\ValueObject\UlidInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
 use DateTimeImmutable;
-use DateTimeInterface;
 
 final class CustomerTest extends UnitTestCase
 {

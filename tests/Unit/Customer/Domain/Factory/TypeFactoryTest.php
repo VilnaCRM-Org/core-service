@@ -6,10 +6,8 @@ namespace App\Tests\Unit\Customer\Domain\Factory;
 
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Factory\TypeFactory;
-use App\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\TestCase;
 
 final class TypeFactoryTest extends UnitTestCase
 {

@@ -22,7 +22,7 @@ final class CustomerTypeTest extends UnitTestCase
         $customerType = new CustomerType($expectedValue, $ulid);
 
         $this->assertSame($expectedValue, $customerType->getValue());
-        $this->assertSame((string)$expectedUlid, $customerType->getUlid());
+        $this->assertSame((string) $expectedUlid, $customerType->getUlid());
     }
 
     public function testSetUlid(): void
@@ -40,6 +40,6 @@ final class CustomerTypeTest extends UnitTestCase
 
         $customerType->setUlid($newUlid);
 
-        $this->assertSame((string)$newUlidString, $customerType->getUlid());
+        $this->assertSame((string) $newUlidString, $customerType->getUlid());
     }
 }

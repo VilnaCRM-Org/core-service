@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
+
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Shared\Application\OpenApi\Builder\ContextBuilder;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 use PHPUnit\Framework\TestCase;
-use App\Shared\Application\OpenApi\Builder\ContextBuilder;
+
 class RequestPatchBuilderTest extends TestCase
 {
     public function testBuild()

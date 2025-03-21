@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
 
-use ApiPlatform\OpenApi\OpenApi;
-use ApiPlatform\OpenApi\Model\RequestBody;
-use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
+use ApiPlatform\OpenApi\Model\RequestBody;
+use ApiPlatform\OpenApi\Model\Response;
+use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\CustomerTypeEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Type\TypeCreateFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;

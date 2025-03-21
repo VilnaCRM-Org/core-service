@@ -6,7 +6,6 @@ namespace App\Tests\Unit\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\DoctrineType\UlidType;
-use Doctrine\ODM\MongoDB\Types\Type;
 use MongoDB\BSON\Binary;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
