@@ -25,7 +25,12 @@ final class UlidFilterProcessorTest extends UnitTestCase
 
     public function testProcessWithNonUlidProperty(): void
     {
-        $this->processor->process('email', 'lt', 'test@example.com', $this->builder);
+        $this->processor->process(
+            'email',
+            'lt',
+            'test@example.com',
+            $this->builder
+        );
         $this->builder->expects($this->never())->method('match');
     }
 

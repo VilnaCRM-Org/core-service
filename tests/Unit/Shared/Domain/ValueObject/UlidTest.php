@@ -33,6 +33,10 @@ final class UlidTest extends UnitTestCase
         $binary = $ulid->toBinary();
         $hex = bin2hex($binary);
 
-        $this->assertEquals(32, strlen($hex), 'The hexadecimal representation should be 32 characters long.');
+        $this->assertEquals(
+            32,
+            strlen($hex),
+            'The hexadecimal representation should be 32 characters long.'
+        );
     }
 }

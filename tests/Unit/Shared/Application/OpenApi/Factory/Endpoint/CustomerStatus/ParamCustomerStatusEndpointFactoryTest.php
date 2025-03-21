@@ -215,6 +215,9 @@ final class ParamCustomerStatusEndpointFactoryTest extends UnitTestCase
             ->method('withDelete')->with($this->operationDelete)->willReturnSelf();
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getUpdateExpectedResponses(): array
     {
         return [
@@ -227,6 +230,9 @@ final class ParamCustomerStatusEndpointFactoryTest extends UnitTestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getGetExpectedResponses(): array
     {
         return [
@@ -237,6 +243,9 @@ final class ParamCustomerStatusEndpointFactoryTest extends UnitTestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getDeleteExpectedResponses(): array
     {
         return [

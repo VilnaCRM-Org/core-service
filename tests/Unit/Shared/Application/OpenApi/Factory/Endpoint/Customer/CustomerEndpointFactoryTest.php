@@ -144,6 +144,9 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
             ->with('/api/customers', $this->pathItem);
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getPostResponses(): array
     {
         return [
@@ -155,6 +158,9 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
         ];
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getGetResponses(): array
     {
         return [

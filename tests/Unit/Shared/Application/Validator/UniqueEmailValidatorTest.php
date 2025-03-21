@@ -35,6 +35,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->userRepository =
             $this->createMock(CustomerRepositoryInterface::class);
         $this->context = $this->createMock(ExecutionContext::class);
+
         $this->translator = $this->createMock(TranslatorInterface::class);
         $this->validator = new UniqueEmailValidator(
             $this->userRepository,

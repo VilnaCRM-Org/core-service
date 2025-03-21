@@ -83,7 +83,10 @@ final class UlidTypeTest extends UnitTestCase
         $closureCode = $ulidType->closureToPHP();
 
         $this->assertStringContainsString('new \App\Shared\Infrastructure\Transformer\UlidTransformer', $closureCode);
-        $this->assertStringContainsString('transformFromSymfonyUlid', $closureCode);
+        $this->assertStringContainsString(
+            'transformFromSymfonyUlid',
+            $closureCode
+        );
     }
 
     private function getUlidTypeInstance(): UlidType

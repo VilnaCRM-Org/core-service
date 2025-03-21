@@ -54,6 +54,9 @@ final class CreateCustomerTransformerTest extends UnitTestCase
         $this->assertSame($testData['customer'], $result);
     }
 
+    /**
+     * @param array<string, string|bool|CustomerType|CustomerStatus|Customer> $testData
+     */
     private function createCommandFromTestData(array $testData): CreateCustomerCommand
     {
         return $this->createCommand(
@@ -67,6 +70,9 @@ final class CreateCustomerTransformerTest extends UnitTestCase
         );
     }
 
+    /**
+     * @param array<string, string|bool|CustomerType|CustomerStatus|Customer> $testData
+     */
     private function setExpectationsFromTestData(array $testData): void
     {
         $this->setExpectations(

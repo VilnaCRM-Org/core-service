@@ -60,22 +60,34 @@ final class CustomerTypeEndpointFactoryTest extends UnitTestCase
 
     private function setupFactoryMocks(): void
     {
-        $this->createFactory = $this->createMock(TypeCreateFactory::class);
-        $this->validationErrorFactory = $this->createMock(ValidationErrorFactory::class);
-        $this->badRequestResponseFactory = $this->createMock(BadRequestResponseFactory::class);
-        $this->internalErrorFactory = $this->createMock(InternalErrorFactory::class);
-        $this->forbiddenResponseFactory = $this->createMock(ForbiddenResponseFactory::class);
-        $this->unauthorizedResponseFactory = $this->createMock(UnauthorizedResponseFactory::class);
+        $this->createFactory = $this
+            ->createMock(TypeCreateFactory::class);
+        $this->validationErrorFactory = $this
+            ->createMock(ValidationErrorFactory::class);
+        $this->badRequestResponseFactory = $this
+            ->createMock(BadRequestResponseFactory::class);
+        $this->internalErrorFactory = $this
+            ->createMock(InternalErrorFactory::class);
+        $this->forbiddenResponseFactory = $this
+            ->createMock(ForbiddenResponseFactory::class);
+        $this->unauthorizedResponseFactory = $this
+            ->createMock(UnauthorizedResponseFactory::class);
     }
 
     private function setupRequestAndResponseMocks(): void
     {
-        $this->createCustomerTypeRequest = $this->createMock(RequestBody::class);
-        $this->validResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->badRequestResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->internalResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->forbiddenResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
-        $this->unauthorizedResponse = $this->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->createCustomerTypeRequest = $this
+            ->createMock(RequestBody::class);
+        $this->validResponse = $this
+            ->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->badRequestResponse = $this
+            ->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->internalResponse = $this
+            ->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->forbiddenResponse = $this
+            ->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
+        $this->unauthorizedResponse = $this
+            ->getMockBuilder(Response::class)->disableOriginalConstructor()->getMock();
     }
 
     private function setupOpenApiMocks(): void
@@ -175,6 +187,9 @@ final class CustomerTypeEndpointFactoryTest extends UnitTestCase
             ->with('/api/customer_types', $this->pathItem);
     }
 
+    /**
+     * @return array<int, Response>
+     */
     private function getPostExpectedResponses(): array
     {
         return [
