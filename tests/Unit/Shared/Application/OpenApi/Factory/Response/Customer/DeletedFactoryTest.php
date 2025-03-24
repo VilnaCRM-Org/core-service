@@ -19,8 +19,6 @@ final class DeletedFactoryTest extends UnitTestCase
             ->method('build')
             ->with(
                 'Customer resource deleted',
-                [],
-                []
             )
             ->willReturn($this->createStub(Response::class));
 

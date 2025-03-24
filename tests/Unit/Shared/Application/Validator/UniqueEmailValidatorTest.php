@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Validator;
 
+use App\Customer\Domain\Entity\CustomerInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Factory\CustomerFactory;
@@ -60,7 +61,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->validate(null, new UniqueEmail());
     }
 
-    private function createCustomer(string $email): object
+    private function createCustomer(string $email): CustomerInterface
     {
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
@@ -79,7 +80,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
 
     private function setupValidationExpectations(
         string $email,
-        object $user
+        CustomerInterface $user
     ): string {
         $errorMessage = $this->faker->word();
 

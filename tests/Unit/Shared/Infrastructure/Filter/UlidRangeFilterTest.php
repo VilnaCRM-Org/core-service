@@ -119,7 +119,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     {
         $filter = $this->createFilter(['ulid' => null]);
         $context = $this
-            ->buildContext(['email' => ['lt' => 'test@example.com']]);
+            ->buildContext(['email' => ['lt' => $this->faker->email()]]);
 
         $this->builder->expects($this->never())->method('match');
 
@@ -224,7 +224,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     {
         $filter = $this->createFilter(['ulid' => null]);
         $context = $this->buildContext([
-            'ulid' => ['invalid' => '01JKX8XGHVDZ46MWYMZT94YER4'],
+            'ulid' => ['invalid' => (string) $this->faker->ulid()],
         ]);
 
         $this->builder->expects($this->never())->method('match');
@@ -270,7 +270,8 @@ final class UlidRangeFilterTest extends UnitTestCase
     public function testApplyWithInvalidUlidFormat(): void
     {
         $filter = $this->createFilter(['ulid' => null]);
-        $context = $this->buildContext(['ulid' => ['lt' => 'invalid-ulid']]);
+        $context = $this
+            ->buildContext(['ulid' => ['lt' => $this->faker->word()]]);
 
         $this->builder->expects($this->never())->method('match');
 

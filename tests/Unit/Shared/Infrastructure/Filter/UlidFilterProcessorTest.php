@@ -18,6 +18,8 @@ final class UlidFilterProcessorTest extends UnitTestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->processor = new UlidFilterProcessor();
         $this->builder = $this->createMock(Builder::class);
         $this->matchStage = $this->createMock(MatchStage::class);
@@ -25,24 +27,24 @@ final class UlidFilterProcessorTest extends UnitTestCase
 
     public function testProcessWithNonUlidProperty(): void
     {
+        $this->builder->expects($this->never())->method('match');
         $this->processor->process(
             'email',
             'lt',
-            'test@example.com',
+            $this->faker->email(),
             $this->builder
         );
-        $this->builder->expects($this->never())->method('match');
     }
 
     public function testProcessWithNonStringValue(): void
     {
-        $this->processor->process('ulid', 'lt', 123, $this->builder);
         $this->builder->expects($this->never())->method('match');
+        $this->processor->process('ulid', 'lt', 123, $this->builder);
     }
 
     public function testProcessWithValidUlid(): void
     {
-        $ulid = '01JKX8XGHVDZ46MWYMZT94YER4';
+        $ulid = (string) $this->faker->ulid();
         $this->builder->expects($this->once())
             ->method('match')
             ->willReturn($this->matchStage);
@@ -52,7 +54,9 @@ final class UlidFilterProcessorTest extends UnitTestCase
 
     public function testProcessWithUlidRange(): void
     {
-        $range = '01JKX8XGHVDZ46MWYMZT94YER4..01JKX8XGHVDZ46MWYMZT94YER5';
+        $ulid1 = (string) $this->faker->ulid();
+        $ulid2 = (string) $this->faker->ulid();
+        $range = sprintf('%s..%s', $ulid1, $ulid2);
         $this->builder->expects($this->once())
             ->method('match')
             ->willReturn($this->matchStage);
@@ -62,7 +66,7 @@ final class UlidFilterProcessorTest extends UnitTestCase
 
     public function testProcessWithDifferentOperators(): void
     {
-        $ulid = '01JKX8XGHVDZ46MWYMZT94YER4';
+        $ulid = (string) $this->faker->ulid();
         $this->builder->expects($this->exactly(4))
             ->method('match')
             ->willReturn($this->matchStage);
