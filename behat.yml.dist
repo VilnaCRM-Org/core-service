@@ -1,11 +1,4 @@
 default:
-    suites:
-        database_negative:
-            contexts:
-                - App\Tests\Behat\DatabaseNegativeContext\DatabaseNegativeContext
-        health_check:
-            contexts:
-                - App\Tests\Behat\HealthCheckContext\HealthCheckContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
