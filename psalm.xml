@@ -18,7 +18,13 @@
         <UndefinedClass>
             <errorLevel type="suppress">
                 <referencedClass name="MongoDB\BSON\Binary" />
+                <referencedClass name="MongoDB\Driver\Exception\ConnectionException" />
             </errorLevel>
         </UndefinedClass>
+        <UndefinedDocblockClass>
+            <errorLevel type="suppress">
+                <referencedClass name="MongoDB\BSON\Binary" />
+            </errorLevel>
+        </UndefinedDocblockClass>
     </issueHandlers>
 <plugins><pluginClass class="Psalm\PhpUnitPlugin\Plugin"/></plugins></psalm>
