@@ -48,14 +48,14 @@ final class CustomerTypeTest extends UnitTestCase
     {
         $initialValue = $this->faker->word();
         $newValue = $this->faker->word();
-        
+
         $ulid = $this->createMock(Ulid::class);
         $customerType = new CustomerType($initialValue, $ulid);
-        
+
         $this->assertSame($initialValue, $customerType->getValue());
-        
+
         $customerType->setValue($newValue);
-        
+
         $this->assertSame($newValue, $customerType->getValue());
     }
 }

@@ -30,14 +30,14 @@ final class CustomerStatusTest extends UnitTestCase
     {
         $initialValue = $this->faker->word();
         $newValue = $this->faker->word();
-        
+
         $ulid = $this->createMock(Ulid::class);
         $customerStatus = new CustomerStatus($initialValue, $ulid);
-        
+
         $this->assertSame($initialValue, $customerStatus->getValue());
-        
+
         $customerStatus->setValue($newValue);
-        
+
         $this->assertSame($newValue, $customerStatus->getValue());
     }
 }

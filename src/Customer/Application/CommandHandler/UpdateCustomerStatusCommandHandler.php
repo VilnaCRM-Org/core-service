@@ -8,7 +8,8 @@ use App\Customer\Application\Command\UpdateCustomerStatusCommand;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 
-final readonly class UpdateCustomerStatusCommandHandler implements CommandHandlerInterface
+final readonly class UpdateCustomerStatusCommandHandler implements
+    CommandHandlerInterface
 {
     public function __construct(
         private StatusRepositoryInterface $repository,

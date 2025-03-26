@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerStatusCommand;
 use App\Customer\Application\DTO\CustomerStatusPutDto;
-use App\Customer\Application\Factory\UpdateCustomerStatusCommandFactoryInterface;
+use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerStatusPutProcessor;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Exception\CustomerStatusNotFoundException;
@@ -22,7 +22,7 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
 {
     private StatusRepositoryInterface|MockObject $repository;
     private CommandBusInterface|MockObject $commandBus;
-    private UpdateCustomerStatusCommandFactoryInterface|MockObject $factory;
+    private UpdateStatusCommandFactoryInterface|MockObject $factory;
     private UlidFactory|MockObject $ulidFactory;
     private CustomerStatusPutProcessor $processor;
 
@@ -32,7 +32,7 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
 
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateCustomerStatusCommandFactoryInterface::class);
+        $this->factory = $this->createMock(UpdateStatusCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerStatusPutProcessor(
@@ -49,7 +49,8 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
         $operation = $this->createMock(Operation::class);
         $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
         $customerStatus = $this->createMock(CustomerStatus::class);
-        $command = $this->createMock(UpdateCustomerStatusCommand::class);
+        $command = $this
+            ->createMock(UpdateCustomerStatusCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($ulid, $customerStatus, $ulidMock);

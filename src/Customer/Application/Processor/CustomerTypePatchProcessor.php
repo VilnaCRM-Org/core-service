@@ -23,7 +23,7 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
     public function __construct(
         private TypeRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerTypeCommandFactoryInterface $updateCustomerTypeCommandFactory,
+        private UpdateCustomerTypeCommandFactoryInterface $commandFactory,
         private UlidFactory $ulidTransformer,
     ) {
     }
@@ -51,15 +51,19 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         return $customerType;
     }
 
-    private function getNewValue(?string $newValue, string $defaultValue): string
-    {
+    private function getNewValue(
+        ?string $newValue,
+        string $defaultValue
+    ): string {
         return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
     }
 
-    private function dispatchCommand(CustomerType $customerType, string $newValue): void
-    {
+    private function dispatchCommand(
+        CustomerType $customerType,
+        string $newValue
+    ): void {
         $this->commandBus->dispatch(
-            $this->updateCustomerTypeCommandFactory->create(
+            $this->commandFactory->create(
                 $customerType,
                 new CustomerTypeUpdate($newValue)
             )

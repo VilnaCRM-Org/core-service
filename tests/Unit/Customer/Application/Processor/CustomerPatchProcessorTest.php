@@ -16,8 +16,6 @@ use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Uid\Ulid;
@@ -99,9 +97,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $command = $this->createMock(UpdateCustomerCommand::class);
 
         $exData = [
-            'initials'  => 'Original Name',
-            'email'     => 'original@example.com',
-            'phone'     => '+123456789',
+            'initials' => 'Original Name',
+            'email' => 'original@example.com',
+            'phone' => '+123456789',
             'leadSource' => 'Original Source',
             'confirmed' => true,
         ];
@@ -166,9 +164,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $command = $this->createMock(UpdateCustomerCommand::class);
 
         $exData = [
-            'initials'  => 'Original Name',
-            'email'     => 'original@example.com',
-            'phone'     => '+123456789',
+            'initials' => 'Original Name',
+            'email' => 'original@example.com',
+            'phone' => '+123456789',
             'leadSource' => 'Original Source',
             'confirmed' => true,
         ];
@@ -267,7 +265,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             $this->iriConverter->expects($this->atLeastOnce())
                 ->method('getResourceFromIri')
                 ->willReturnCallback(
-                    fn(string $iri) => $this->resolveIri(
+                    fn (string $iri) => $this->resolveIri(
                         $iri,
                         $dto,
                         $type,
@@ -288,7 +286,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             ->method('create')
             ->with(
                 $customer,
-                $this->callback(fn($update) => $this->isUpdateValid(
+                $this->callback(fn ($update) => $this->isUpdateValid(
                     $update,
                     $dto,
                     $type,
@@ -328,12 +326,12 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         Customer $customer
     ): bool {
         $expected = [
-            'newInitials'  => $dto->initials ?? $customer->getInitials(),
-            'newEmail'     => $dto->email ?? $customer->getEmail(),
-            'newPhone'     => $dto->phone ?? $customer->getPhone(),
+            'newInitials' => $dto->initials ?? $customer->getInitials(),
+            'newEmail' => $dto->email ?? $customer->getEmail(),
+            'newPhone' => $dto->phone ?? $customer->getPhone(),
             'newLeadSource' => $dto->leadSource ?? $customer->getLeadSource(),
-            'newType'      => $dto->type !== null ? $type : $customer->getType(),
-            'newStatus'    => $dto->status !== null ? $status : $customer->getStatus(),
+            'newType' => $dto->type !== null ? $type : $customer->getType(),
+            'newStatus' => $dto->status !== null ? $status : $customer->getStatus(),
             'newConfirmed' => $dto->confirmed ?? $customer->isConfirmed(),
         ];
         foreach ($expected as $prop => $value) {

@@ -26,16 +26,16 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     public function __construct(
         private CustomerRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerCommandFactoryInterface $updateCustomerCommandFactory,
+        private UpdateCustomerCommandFactoryInterface $commandFactory,
         private IriConverterInterface $iriConverter,
         private UlidFactory $ulidTransformer,
     ) {
     }
 
     /**
-     * @param CustomerPatchDto $data
-     * @param array<string,string> $context
-     * @param array<string,string> $uriVariables
+     * @param CustomerPatchDto       $data
+     * @param array<string,string>   $context
+     * @param array<string,string>   $uriVariables
      */
     public function process(
         mixed $data,
@@ -43,75 +43,131 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $ulid = $uriVariables['ulid'];
-        $customer = $this->repository->find(
-            $this->ulidTransformer->create($ulid)
-        ) ?? throw new CustomerNotFoundException();
-
-        $newInitials = $this->getNewValue($data->initials, $customer
-            ->getInitials());
-        $newEmail = $this->getNewValue($data->email, $customer->getEmail());
-        $newPhone = $this->getNewValue($data->phone, $customer->getPhone());
-        $newLeadSource = $this
-            ->getNewValue($data->leadSource, $customer->getLeadSource());
-        $newType = $data->type ? $this
-            ->getCustomerType($data->type) : $customer->getType();
-        $newStatus = $data->status ? $this
-            ->getCustomerStatus($data->status) : $customer->getStatus();
-        $newConfirmed = $data->confirmed ?? $customer->isConfirmed();
-
-        $this->dispatchCommand(
-            $customer,
-            $newInitials,
-            $newEmail,
-            $newPhone,
-            $newLeadSource,
-            $newType,
-            $newStatus,
-            $newConfirmed
-        );
-
+        $customer = $this->retrieveCustomer($uriVariables);
+        $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
+        $this->dispatchUpdateCommand($customer, $customerUpdate);
         return $customer;
     }
 
-    private function getNewValue(?string $newValue, string $defaultValue): string
+    /**
+     * @param array<string,string> $uriVariables
+     */
+    private function retrieveCustomer(array $uriVariables): Customer
     {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
+        $ulid = $uriVariables['ulid'];
+        return $this->repository->find(
+            $this->ulidTransformer->create($ulid)
+        ) ?? throw new CustomerNotFoundException();
     }
 
-    private function getCustomerType(string $typeIri): CustomerType
-    {
+    private function prepareCustomerUpdate(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): CustomerUpdate {
+        $newInitials = $this->updateInitials($data, $customer);
+        $newEmail = $this->updateEmail($data, $customer);
+        $newPhone = $this->updatePhone($data, $customer);
+        $newLeadSource = $this->updateLeadSource($data, $customer);
+        $newType = $this->updateType($data, $customer);
+        $newStatus = $this->updateStatus($data, $customer);
+        $newConfirmed = $data->confirmed ?? $customer->isConfirmed();
+
+        return new CustomerUpdate(
+            newInitials: $newInitials,
+            newEmail: $newEmail,
+            newPhone: $newPhone,
+            newLeadSource: $newLeadSource,
+            newType: $newType,
+            newStatus: $newStatus,
+            newConfirmed: $newConfirmed
+        );
+    }
+
+    private function updateInitials(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): string {
+        return $this->getNewValue(
+            $data->initials,
+            $customer->getInitials()
+        );
+    }
+
+    private function updateEmail(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): string {
+        return $this->getNewValue(
+            $data->email,
+            $customer->getEmail()
+        );
+    }
+
+    private function updatePhone(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): string {
+        return $this->getNewValue(
+            $data->phone,
+            $customer->getPhone()
+        );
+    }
+
+    private function updateLeadSource(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): string {
+        return $this->getNewValue(
+            $data->leadSource,
+            $customer->getLeadSource()
+        );
+    }
+
+    private function updateType(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): CustomerType {
+        return $data->type
+            ? $this->getCustomerType($data->type)
+            : $customer->getType();
+    }
+
+    private function updateStatus(
+        CustomerPatchDto $data,
+        Customer $customer
+    ): CustomerStatus {
+        return $data->status
+            ? $this->getCustomerStatus($data->status)
+            : $customer->getStatus();
+    }
+
+    private function dispatchUpdateCommand(
+        Customer $customer,
+        CustomerUpdate $update
+    ): void {
+        $this->commandBus->dispatch(
+            $this->commandFactory->create($customer, $update)
+        );
+    }
+
+    private function getNewValue(
+        ?string $newValue,
+        string $defaultValue
+    ): string {
+        return strlen(trim($newValue ?? '')) > 0
+            ? $newValue
+            : $defaultValue;
+    }
+
+    private function getCustomerType(
+        string $typeIri
+    ): CustomerType {
         return $this->iriConverter->getResourceFromIri($typeIri);
     }
 
-    private function getCustomerStatus(string $statusIri): CustomerStatus
-    {
+    private function getCustomerStatus(
+        string $statusIri
+    ): CustomerStatus {
         return $this->iriConverter->getResourceFromIri($statusIri);
-    }
-
-    private function dispatchCommand(
-        Customer $customer,
-        string $newInitials,
-        string $newEmail,
-        string $newPhone,
-        string $newLeadSource,
-        CustomerType $newType,
-        CustomerStatus $newStatus,
-        bool $newConfirmed
-    ): void {
-        $this->commandBus->dispatch(
-            $this->updateCustomerCommandFactory->create(
-                $customer,
-                new CustomerUpdate(
-                    newInitials: $newInitials,
-                    newEmail: $newEmail,
-                    newPhone: $newPhone,
-                    newLeadSource: $newLeadSource,
-                    newType: $newType,
-                    newStatus: $newStatus,
-                    newConfirmed: $newConfirmed,
-                )
-            )
-        );
     }
 }

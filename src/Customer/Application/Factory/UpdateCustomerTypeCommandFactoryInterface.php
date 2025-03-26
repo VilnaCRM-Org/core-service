@@ -10,5 +10,8 @@ use App\Customer\Domain\ValueObject\CustomerTypeUpdate;
 
 interface UpdateCustomerTypeCommandFactoryInterface
 {
-    public function create(CustomerType $customerType, CustomerTypeUpdate $update): UpdateCustomerTypeCommand;
+    public function create(
+        CustomerType $customerType,
+        CustomerTypeUpdate $update
+    ): UpdateCustomerTypeCommand;
 }

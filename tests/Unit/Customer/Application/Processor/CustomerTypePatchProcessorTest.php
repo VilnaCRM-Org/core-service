@@ -153,4 +153,4 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
             ->method('dispatch')
             ->with($command);
     }
-} 
+}

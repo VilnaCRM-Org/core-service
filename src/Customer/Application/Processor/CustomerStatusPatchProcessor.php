@@ -7,7 +7,7 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Customer\Application\DTO\CustomerStatusPatchDto;
-use App\Customer\Application\Factory\UpdateCustomerStatusCommandFactoryInterface;
+use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Exception\CustomerStatusNotFoundException;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
@@ -23,7 +23,7 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
     public function __construct(
         private StatusRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerStatusCommandFactoryInterface $commandFactory,
+        private UpdateStatusCommandFactoryInterface $commandFactory,
         private UlidFactory $ulidFactory,
     ) {
     }
@@ -44,20 +44,25 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
             $this->ulidFactory->create($ulid)
         ) ?? throw new CustomerStatusNotFoundException();
 
-        $newValue = $this->getNewValue($data->value, $customerStatus->getValue());
+        $newValue = $this
+            ->getNewValue($data->value, $customerStatus->getValue());
 
         $this->dispatchCommand($customerStatus, $newValue);
 
         return $customerStatus;
     }
 
-    private function getNewValue(?string $newValue, string $defaultValue): string
-    {
+    private function getNewValue(
+        ?string $newValue,
+        string $defaultValue
+    ): string {
         return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
     }
 
-    private function dispatchCommand(CustomerStatus $customerStatus, string $value): void
-    {
+    private function dispatchCommand(
+        CustomerStatus $customerStatus,
+        string $value
+    ): void {
         $this->commandBus->dispatch(
             $this->commandFactory->create(
                 $customerStatus,

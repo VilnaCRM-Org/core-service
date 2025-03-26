@@ -120,4 +120,4 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
             ->method('dispatch')
             ->with($command);
     }
-} 
+}

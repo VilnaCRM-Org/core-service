@@ -8,7 +8,10 @@ use App\Customer\Application\Command\UpdateCustomerStatusCommand;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
 
-interface UpdateCustomerStatusCommandFactoryInterface
+interface UpdateStatusCommandFactoryInterface
 {
-    public function create(CustomerStatus $customerStatus, CustomerStatusUpdate $update): UpdateCustomerStatusCommand;
+    public function create(
+        CustomerStatus $customerStatus,
+        CustomerStatusUpdate $update
+    ): UpdateCustomerStatusCommand;
 }

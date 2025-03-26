@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerStatusCommand;
 use App\Customer\Application\DTO\CustomerStatusPatchDto;
-use App\Customer\Application\Factory\UpdateCustomerStatusCommandFactoryInterface;
+use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerStatusPatchProcessor;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Exception\CustomerStatusNotFoundException;
@@ -22,7 +22,7 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 {
     private StatusRepositoryInterface|MockObject $repository;
     private CommandBusInterface|MockObject $commandBus;
-    private UpdateCustomerStatusCommandFactoryInterface|MockObject $factory;
+    private UpdateStatusCommandFactoryInterface|MockObject $factory;
     private UlidFactory|MockObject $ulidFactory;
     private CustomerStatusPatchProcessor $processor;
 
@@ -32,7 +32,7 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateCustomerStatusCommandFactoryInterface::class);
+        $this->factory = $this->createMock(UpdateStatusCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerStatusPatchProcessor(

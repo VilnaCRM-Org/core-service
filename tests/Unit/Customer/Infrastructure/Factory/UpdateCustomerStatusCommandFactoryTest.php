@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Infrastructure\Factory;
 
 use App\Customer\Application\Command\UpdateCustomerStatusCommand;
-use App\Customer\Application\Factory\UpdateCustomerStatusCommandFactoryInterface;
+use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
-use App\Customer\Infrastructure\Factory\UpdateCustomerStatusCommandFactory;
+use App\Customer\Infrastructure\Factory\UpdateStatusCommandFactory;
 use App\Tests\Unit\UnitTestCase;
 use Faker\Factory;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class UpdateCustomerStatusCommandFactoryTest extends UnitTestCase
 {
-    private UpdateCustomerStatusCommandFactoryInterface $factory;
+    private UpdateStatusCommandFactoryInterface $factory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->factory = new UpdateCustomerStatusCommandFactory();
+        $this->factory = new UpdateStatusCommandFactory();
     }
 
     public function testCreate(): void

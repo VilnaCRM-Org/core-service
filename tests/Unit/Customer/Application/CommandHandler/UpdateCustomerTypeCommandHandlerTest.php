@@ -53,4 +53,4 @@ final class UpdateCustomerTypeCommandHandlerTest extends UnitTestCase
             $this->handler
         );
     }
-} 
+}

@@ -12,8 +12,10 @@ use App\Customer\Domain\ValueObject\CustomerTypeUpdate;
 final readonly class UpdateCustomerTypeCommandFactory implements
     UpdateCustomerTypeCommandFactoryInterface
 {
-    public function create(CustomerType $customerType, CustomerTypeUpdate $update): UpdateCustomerTypeCommand
-    {
+    public function create(
+        CustomerType $customerType,
+        CustomerTypeUpdate $update
+    ): UpdateCustomerTypeCommand {
         return new UpdateCustomerTypeCommand($customerType, $update);
     }
 }

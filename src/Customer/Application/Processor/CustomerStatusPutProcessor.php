@@ -7,7 +7,7 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Customer\Application\DTO\CustomerStatusPutDto;
-use App\Customer\Application\Factory\UpdateCustomerStatusCommandFactoryInterface;
+use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Exception\CustomerStatusNotFoundException;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
@@ -23,7 +23,7 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
     public function __construct(
         private StatusRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerStatusCommandFactoryInterface $commandFactory,
+        private UpdateStatusCommandFactoryInterface $commandFactory,
         private UlidFactory $ulidFactory,
     ) {
     }
@@ -49,8 +49,10 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
         return $customerStatus;
     }
 
-    private function dispatchCommand(CustomerStatus $customerStatus, string $value): void
-    {
+    private function dispatchCommand(
+        CustomerStatus $customerStatus,
+        string $value
+    ): void {
         $this->commandBus->dispatch(
             $this->commandFactory->create(
                 $customerStatus,
