@@ -23,8 +23,8 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
     public function __construct(
         private StatusRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerStatusCommandFactoryInterface $updateCustomerStatusCommandFactory,
-        private UlidFactory $ulidTransformer,
+        private UpdateCustomerStatusCommandFactoryInterface $commandFactory,
+        private UlidFactory $ulidFactory,
     ) {
     }
 
@@ -41,7 +41,7 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
     ): CustomerStatus {
         $ulid = $uriVariables['ulid'];
         $customerStatus = $this->repository->find(
-            $this->ulidTransformer->create($ulid)
+            $this->ulidFactory->create($ulid)
         ) ?? throw new CustomerStatusNotFoundException();
 
         $this->dispatchCommand($customerStatus, $data->value);
@@ -52,7 +52,7 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
     private function dispatchCommand(CustomerStatus $customerStatus, string $value): void
     {
         $this->commandBus->dispatch(
-            $this->updateCustomerStatusCommandFactory->create(
+            $this->commandFactory->create(
                 $customerStatus,
                 new CustomerStatusUpdate($value)
             )

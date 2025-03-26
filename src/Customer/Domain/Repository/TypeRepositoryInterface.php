@@ -9,4 +9,15 @@ use App\Customer\Domain\Entity\CustomerType;
 interface TypeRepositoryInterface
 {
     public function save(CustomerType $customerType): void;
+
+    /**
+     * @param string $id
+     *
+     * @return CustomerType
+     */
+    public function find(
+        mixed $id,
+        int $lockMode = 0,
+        ?int $lockVersion = null
+    ): ?object;
 }
