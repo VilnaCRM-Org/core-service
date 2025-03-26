@@ -16,4 +16,4 @@ final readonly class CustomerPatchDto
         public ?bool $confirmed = null,
     ) {
     }
-} 
+}

@@ -14,7 +14,11 @@ resources:
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
+        input: App\Customer\Application\DTO\CustomerStatusPutDto
+        processor: App\Customer\Application\Processor\CustomerStatusPutProcessor
       ApiPlatform\Metadata\Patch:
+        input: App\Customer\Application\DTO\CustomerStatusPatchDto
+        processor: App\Customer\Application\Processor\CustomerStatusPatchProcessor
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
         input: 'App\Customer\Application\DTO\StatusCreateDto'
@@ -33,7 +37,11 @@ resources:
           ['customer.mongodb.type.order', 'customer.mongodb.type.partial_search', 'mongodb.range']
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
+        input: App\Customer\Application\DTO\CustomerTypePutDto
+        processor: App\Customer\Application\Processor\CustomerTypePutProcessor
       ApiPlatform\Metadata\Patch:
+        input: App\Customer\Application\DTO\CustomerTypePatchDto
+        processor: App\Customer\Application\Processor\CustomerTypePatchProcessor
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
         input: 'App\Customer\Application\DTO\TypeCreateDto'

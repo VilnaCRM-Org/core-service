@@ -17,7 +17,6 @@ use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidTransformer;
 
 /**
  * @implements ProcessorInterface<CustomerPatchDto, Customer>

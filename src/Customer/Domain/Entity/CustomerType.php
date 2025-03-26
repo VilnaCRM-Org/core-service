@@ -28,4 +28,9 @@ class CustomerType
     {
         $this->ulid = $ulid;
     }
+
+    public function setValue(string $value): void
+    {
+        $this->value = $value;
+    }
 }
