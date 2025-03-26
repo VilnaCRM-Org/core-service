@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Customer\Application\Processor;
+
+use ApiPlatform\Metadata\IriConverterInterface;
+use ApiPlatform\Metadata\Operation;
+use App\Customer\Application\Command\UpdateCustomerCommand;
+use App\Customer\Application\DTO\CustomerPutDto;
+use App\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
+use App\Customer\Application\Processor\CustomerPutProcessor;
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Entity\CustomerStatus;
+use App\Customer\Domain\Entity\CustomerType;
+use App\Customer\Domain\Exception\CustomerNotFoundException;
+use App\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Shared\Domain\Bus\Command\CommandBusInterface;
+use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\Uid\Ulid;
+
+final class CustomerPutProcessorTest extends UnitTestCase
+{
+    private CommandBusInterface|MockObject $commandBus;
+    private UpdateCustomerCommandFactoryInterface|MockObject $factory;
+    private IriConverterInterface|MockObject $iriConverter;
+    private CustomerRepositoryInterface|MockObject $repository;
+    private CustomerPutProcessor $processor;
+    private UlidTransformer $ulidTransformer;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->commandBus = $this->createMock(CommandBusInterface::class);
+        $this->factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->ulidTransformer = new UlidTransformer(new UlidFactory());
+        $this->processor = new CustomerPutProcessor(
+            $this->repository,
+            $this->commandBus,
+            $this->factory,
+            $this->iriConverter,
+        );
+    }
+
+    public function testProcessUpdatesAndDispatchesCommand(): void
+    {
+        $dto = $this->createDto();
+        $operation = $this->createMock(Operation::class);
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+        $uriVariables = ['ulid' => $ulidString];
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $customer = $this->createMock(Customer::class);
+        $command = $this->createMock(UpdateCustomerCommand::class);
+
+        $this->setupRepository($ulid, $customer);
+        $this->setupIriConverter($dto, $type, $status);
+        $this->setupFactoryAndCommandBus($dto, $type, $status, $customer, $command);
+
+        $result = $this->processor->process($dto, $operation, $uriVariables);
+
+        $this->assertSame($customer, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenCustomerNotFound(): void
+    {
+        $dto = $this->createDto();
+        $operation = $this->createMock(Operation::class);
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+        $uriVariables = ['ulid' => $ulidString];
+
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
+            ->willReturn(null);
+
+        $this->expectException(CustomerNotFoundException::class);
+        $this->processor->process($dto, $operation, $uriVariables);
+    }
+
+    private function setupRepository(Ulid $ulid, Customer $customer): void
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
+            ->willReturn($customer);
+    }
+
+    private function setupIriConverter(
+        CustomerPutDto $dto,
+        CustomerType $type,
+        CustomerStatus $status
+    ): void {
+        $this->iriConverter
+            ->expects($this->exactly(2))
+            ->method('getResourceFromIri')
+            ->willReturnCallback(static function (string $iri) use ($type, $status, $dto) {
+                return match ($iri) {
+                    $dto->type => $type,
+                    $dto->status => $status,
+                    default => throw new \InvalidArgumentException('Unexpected IRI'),
+                };
+            });
+    }
+
+    private function setupFactoryAndCommandBus(
+        CustomerPutDto $dto,
+        CustomerType $type,
+        CustomerStatus $status,
+        Customer $customer,
+        UpdateCustomerCommand $command
+    ): void {
+        $this->factory
+            ->expects($this->once())
+            ->method('create')
+            ->with(
+                $customer,
+                $this->callback(function ($update) use ($dto, $type, $status) {
+                    return $update->newInitials === $dto->initials
+                        && $update->newEmail === $dto->email
+                        && $update->newPhone === $dto->phone
+                        && $update->newLeadSource === $dto->leadSource
+                        && $update->newType === $type
+                        && $update->newStatus === $status
+                        && $update->newConfirmed === $dto->confirmed;
+                })
+            )
+            ->willReturn($command);
+
+        $this->commandBus
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with($command);
+    }
+
+    private function createDto(): CustomerPutDto
+    {
+        return new CustomerPutDto(
+            initials: $this->faker->name(),
+            email: $this->faker->email(),
+            phone: $this->faker->phoneNumber(),
+            leadSource: $this->faker->word(),
+            type: '/api/customer_types/' . $this->faker->ulid(),
+            status: '/api/customer_statuses/' . $this->faker->ulid(),
+            confirmed: $this->faker->boolean(),
+        );
+    }
+}
