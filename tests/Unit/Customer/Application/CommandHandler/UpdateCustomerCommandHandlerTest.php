@@ -11,9 +11,9 @@ use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
-use App\Shared\Infrastructure\Factory\UlidFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class UpdateCustomerCommandHandlerTest extends UnitTestCase
@@ -26,7 +26,8 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->repository = $this
+            ->createMock(CustomerRepositoryInterface::class);
         $this->ulidTransformer = new UlidTransformer(new UlidFactory());
         $this->handler = new UpdateCustomerCommandHandler($this->repository);
     }
@@ -90,4 +91,4 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
 
         $this->handler->__invoke($command);
     }
-} 
+}

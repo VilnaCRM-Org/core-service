@@ -22,7 +22,9 @@ final class CustomerUpdateTest extends UnitTestCase
         parent::setUp();
 
         $this->ulidFactory = new UlidFactory();
-        $this->ulidTransformer = new UlidTransformer(new UlidFactoryInterface());
+        $this->ulidTransformer = new UlidTransformer(
+            new UlidFactoryInterface()
+        );
     }
 
     public function testCreateCustomerUpdate(): void
@@ -55,4 +57,4 @@ final class CustomerUpdateTest extends UnitTestCase
         $this->assertSame($customerStatus, $update->newStatus);
         $this->assertTrue($update->newConfirmed);
     }
-} 
+}

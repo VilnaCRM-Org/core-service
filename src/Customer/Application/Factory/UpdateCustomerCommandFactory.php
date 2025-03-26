@@ -8,7 +8,8 @@ use App\Customer\Application\Command\UpdateCustomerCommand;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\ValueObject\CustomerUpdate;
 
-final class UpdateCustomerCommandFactory implements UpdateCustomerCommandFactoryInterface
+final class UpdateCustomerCommandFactory implements
+    UpdateCustomerCommandFactoryInterface
 {
     public function create(
         Customer $customer,

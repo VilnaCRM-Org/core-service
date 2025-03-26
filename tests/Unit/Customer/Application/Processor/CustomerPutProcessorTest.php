@@ -35,10 +35,14 @@ final class CustomerPutProcessorTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->iriConverter = $this->createMock(IriConverterInterface::class);
-        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->commandBus = $this
+            ->createMock(CommandBusInterface::class);
+        $this->factory = $this
+            ->createMock(UpdateCustomerCommandFactoryInterface::class);
+        $this->iriConverter = $this
+            ->createMock(IriConverterInterface::class);
+        $this->repository = $this
+            ->createMock(CustomerRepositoryInterface::class);
         $this->ulidTransformer = new UlidTransformer(new UlidFactory());
         $this->processor = new CustomerPutProcessor(
             $this->repository,
@@ -62,7 +66,13 @@ final class CustomerPutProcessorTest extends UnitTestCase
 
         $this->setupRepository($ulid, $customer);
         $this->setupIriConverter($dto, $type, $status);
-        $this->setupFactoryAndCommandBus($dto, $type, $status, $customer, $command);
+        $this->setupFactoryAndCommandBus(
+            $dto,
+            $type,
+            $status,
+            $customer,
+            $command
+        );
 
         $result = $this->processor->process($dto, $operation, $uriVariables);
 
@@ -104,13 +114,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $this->iriConverter
             ->expects($this->exactly(2))
             ->method('getResourceFromIri')
-            ->willReturnCallback(static function (string $iri) use ($type, $status, $dto) {
-                return match ($iri) {
-                    $dto->type => $type,
-                    $dto->status => $status,
-                    default => throw new \InvalidArgumentException('Unexpected IRI'),
-                };
-            });
+            ->willReturnCallback(fn (
+                string $iri
+            ) => $this->resolveIri($iri, $dto, $type, $status));
     }
 
     private function setupFactoryAndCommandBus(
@@ -125,15 +131,14 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->method('create')
             ->with(
                 $customer,
-                $this->callback(function ($update) use ($dto, $type, $status) {
-                    return $update->newInitials === $dto->initials
-                        && $update->newEmail === $dto->email
-                        && $update->newPhone === $dto->phone
-                        && $update->newLeadSource === $dto->leadSource
-                        && $update->newType === $type
-                        && $update->newStatus === $status
-                        && $update->newConfirmed === $dto->confirmed;
-                })
+                $this->callback(
+                    fn ($update) => $this->isUpdateValid(
+                        $update,
+                        $dto,
+                        $type,
+                        $status
+                    )
+                )
             )
             ->willReturn($command);
 
@@ -141,6 +146,55 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->expects($this->once())
             ->method('dispatch')
             ->with($command);
+    }
+
+    /**
+     * Resolves the IRI to the corresponding resource using a mapping array.
+     *
+     * @throws \InvalidArgumentException if the IRI is unexpected.
+     */
+    private function resolveIri(
+        string $iri,
+        CustomerPutDto $dto,
+        CustomerType $type,
+        CustomerStatus $status
+    ): CustomerType|CustomerStatus {
+        $mapping = [
+            $dto->type => $type,
+            $dto->status => $status,
+        ];
+
+        if (isset($mapping[$iri])) {
+            return $mapping[$iri];
+        }
+        throw new \InvalidArgumentException('Unexpected IRI');
+    }
+
+    /**
+     * Validates that the update data matches the DTO and expected type and status using a loop.
+     */
+    private function isUpdateValid(
+        $update,
+        CustomerPutDto $dto,
+        CustomerType $type,
+        CustomerStatus $status
+    ): bool {
+        $expected = [
+            'newInitials' => $dto->initials,
+            'newEmail' => $dto->email,
+            'newPhone' => $dto->phone,
+            'newLeadSource' => $dto->leadSource,
+            'newType' => $type,
+            'newStatus' => $status,
+            'newConfirmed' => $dto->confirmed,
+        ];
+
+        foreach ($expected as $property => $value) {
+            if ($update->{$property} !== $value) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function createDto(): CustomerPutDto

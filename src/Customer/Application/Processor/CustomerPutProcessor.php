@@ -23,7 +23,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     public function __construct(
         private CustomerRepositoryInterface $customerRepository,
         private CommandBusInterface $commandBus,
-        private UpdateCustomerCommandFactoryInterface $updateCustomerCommandFactory,
+        private UpdateCustomerCommandFactoryInterface $updateCommandFactory,
         private IriConverterInterface $iriConverter,
     ) {
     }
@@ -39,28 +39,49 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customerId = $uriVariables['ulid'];
-        $customer = $this->customerRepository->find($customerId)
-            ?? throw new CustomerNotFoundException();
-
-        $customerType = $this->iriConverter->getResourceFromIri($data->type);
-        $customerStatus = $this->iriConverter->getResourceFromIri($data->status);
-
-        $this->commandBus->dispatch(
-            $this->updateCustomerCommandFactory->create(
-                $customer,
-                new CustomerUpdate(
-                    $data->initials,
-                    $data->email,
-                    $data->phone,
-                    $data->leadSource,
-                    $customerType,
-                    $customerStatus,
-                    $data->confirmed,
-                )
-            )
+        $customer = $this->retrieveCustomer($uriVariables['ulid']);
+        $customerType = $this->convertResource($data->type);
+        $customerStatus = $this->convertResource($data->status);
+        $this->executeUpdateCommand(
+            $customer,
+            $data,
+            $customerType,
+            $customerStatus
         );
-
         return $customer;
+    }
+
+    private function retrieveCustomer(string $customerId): Customer
+    {
+        $customer = $this->customerRepository->find($customerId);
+        if (!$customer) {
+            throw new CustomerNotFoundException();
+        }
+        return $customer;
+    }
+
+    private function convertResource(string $iri): object
+    {
+        return $this->iriConverter->getResourceFromIri($iri);
+    }
+
+    private function executeUpdateCommand(
+        Customer $customer,
+        CustomerPutDto $data,
+        object $customerType,
+        object $customerStatus
+    ): void {
+        $customerUpdate = new CustomerUpdate(
+            $data->initials,
+            $data->email,
+            $data->phone,
+            $data->leadSource,
+            $customerType,
+            $customerStatus,
+            $data->confirmed
+        );
+        $command = $this->updateCommandFactory
+            ->create($customer, $customerUpdate);
+        $this->commandBus->dispatch($command);
     }
 }
