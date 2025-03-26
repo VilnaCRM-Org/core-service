@@ -55,6 +55,8 @@ resources:
           ]
       ApiPlatform\Metadata\Get:
       ApiPlatform\Metadata\Put:
+        input: 'App\Customer\Application\DTO\CustomerPutDto'
+        processor: 'App\Customer\Application\Processor\CustomerPutProcessor'
       ApiPlatform\Metadata\Patch:
       ApiPlatform\Metadata\Delete:
       ApiPlatform\Metadata\Post:
