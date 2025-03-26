@@ -6,7 +6,6 @@ namespace App\Customer\Domain\Repository;
 
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerInterface;
-use Doctrine\ODM\MongoDB\LockMode;
 
 interface CustomerRepositoryInterface
 {
@@ -21,7 +20,7 @@ interface CustomerRepositoryInterface
      */
     public function find(
         mixed $id,
-        int $lockMode = LockMode::NONE,
+        int $lockMode = 0,
         ?int $lockVersion = null
     ): ?object;
 }
