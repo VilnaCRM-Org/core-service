@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use Aws\Sqs\SqsClient;
 use Symfony\Component\Cache\Exception\CacheException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 
-final class HealthCheckIntegrationTest extends ApiTestCase
+final class HealthCheckIntegrationTest extends BaseIntegrationTest
 {
     public function testNormalHealthCheck(): void
     {
@@ -57,7 +56,8 @@ final class HealthCheckIntegrationTest extends ApiTestCase
         $testContainer = $client->getContainer()->get('test.service_container');
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
-            ->addMethods(['createQueue', 'reset'])->getMock();
+            ->addMethods(['createQueue', 'reset'])
+            ->getMock();
         $sqsClientMock->expects($this->once())
             ->method('createQueue')
             ->willThrowException(new \Exception(
@@ -82,7 +82,9 @@ final class HealthCheckIntegrationTest extends ApiTestCase
         $client = self::createClient();
         $testContainer = $client->getContainer()->get('test.service_container');
 
-        $dbSubscriberMock = $this->getMockBuilder(DBCheckSubscriber::class)
+        $dbSubscriberMock = $this->getMockBuilder(
+            DBCheckSubscriber::class
+        )
             ->disableOriginalConstructor()
             ->getMock();
         $dbSubscriberMock->method('onHealthCheck')

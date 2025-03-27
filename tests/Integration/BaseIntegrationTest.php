@@ -21,10 +21,10 @@ abstract class BaseIntegrationTest extends ApiTestCase
     }
 
     /**
-     * @param array  $payload Request body to be JSON encoded (if any)
+     * @param array  $payload Request body (if any)
      * @param array  $headers Optional additional headers
      *
-     * @return array The response data as an array
+     * @return array Response data decoded from JSON
      */
     protected function jsonRequest(
         string $method,
@@ -38,21 +38,24 @@ abstract class BaseIntegrationTest extends ApiTestCase
             'Content-Type' => 'application/ld+json',
         ];
         $headers = array_merge($defaultHeaders, $headers);
-        $body = empty($payload) ? null : json_encode($payload);
+        $body = count($payload) === 0 ? null : json_encode($payload);
 
-        $response = $client->request(
-            $method,
-            $uri,
-            [
-                'headers' => $headers,
-                'body' => $body,
-            ]
-        );
+        $response = $client->request($method, $uri, [
+            'headers' => $headers,
+            'body' => $body,
+        ]);
+
         return $response->toArray();
     }
 
-    protected function assertCreatedResponse(array $payload, array $responseData): void
-    {
+    /**
+     * @param array<string, string> $payload
+     * @param array<string, string> $responseData
+     */
+    protected function assertCreatedResponse(
+        array $payload,
+        array $responseData
+    ): void {
         $this->assertResponseStatusCodeSame(201);
         $this->assertResponseHeaderSame(
             'content-type',
@@ -65,10 +68,19 @@ abstract class BaseIntegrationTest extends ApiTestCase
     }
 
     /**
-     * @param array $payload
+     * Create an entity by sending a POST request.
+     *
+     * @param string      $uri          API endpoint to call
+     * @param array       $payload      Request payload
+     * @param string|null $expectedType Optional expected @type value
+     *
+     * @return string The created entity’s @id
      */
-    protected function createEntity(string $uri, array $payload, ?string $expectedType = null): string
-    {
+    protected function createEntity(
+        string $uri,
+        array $payload,
+        ?string $expectedType = null
+    ): string {
         $data = $this->jsonRequest('POST', $uri, $payload);
         $this->assertResponseStatusCodeSame(201);
         if ($expectedType !== null) {

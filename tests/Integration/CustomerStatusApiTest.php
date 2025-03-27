@@ -4,30 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\Tests\Unit\UlidProvider;
-use Faker\Factory;
-use Faker\Generator;
-
-final class CustomerStatusApiTest extends ApiTestCase
+final class CustomerStatusApiTest extends BaseIntegrationTest
 {
-    private Generator $faker;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->faker = Factory::create();
-        $this->faker->addProvider(new UlidProvider($this->faker));
-    }
-
     public function testGetCustomerStatusesCollection(): void
     {
         $this->createCustomerStatus();
         $client = self::createClient();
-        $response = $client->request(
-            'GET',
-            '/api/customer_statuses'
-        );
+        $response = $client->request('GET', '/api/customer_statuses');
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
         $this->assertArrayHasKey('member', $data);
@@ -36,30 +19,19 @@ final class CustomerStatusApiTest extends ApiTestCase
 
     public function testGetCustomerStatusNotFound(): void
     {
-        $client = self::createClient();
         $ulid = (string) $this->faker->ulid();
-        $client->request(
-            'GET',
-            "/api/customer_statuses/{$ulid}"
-        );
+        $client = self::createClient();
+        $client->request('GET', "/api/customer_statuses/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
     }
 
     public function testCreateCustomerStatusSuccess(): void
     {
         $payload = $this->getStatusPayload();
+        $iri = $this->createEntity('/api/customer_statuses', $payload);
         $client = self::createClient();
-        $response = $client->request(
-            'POST',
-            '/api/customer_statuses',
-            [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
-                'body' => json_encode($payload),
-            ]
-        );
-        $this->assertResponseStatusCodeSame(201);
+        $response = $client->request('GET', $iri);
+        $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
         $this->assertArrayHasKey('@id', $data);
         $this->assertSame('Active', $data['value']);
@@ -67,16 +39,13 @@ final class CustomerStatusApiTest extends ApiTestCase
 
     public function testCreateCustomerStatusFailure(): void
     {
-        $payload = [];
         $client = self::createClient();
         $client->request(
             'POST',
             '/api/customer_statuses',
             [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
-                'body' => json_encode($payload),
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode([]),
             ]
         );
         $this->assertResponseStatusCodeSame(422);
@@ -85,38 +54,33 @@ final class CustomerStatusApiTest extends ApiTestCase
     public function testReplaceCustomerStatusSuccess(): void
     {
         $orig = $this->getStatusPayload();
-        $iri = $this->createCustomerStatus($orig);
-        $upd = ['value' => 'Inactive',];
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+        $upd = ['value' => 'Inactive'];
         $client = self::createClient();
-        $response = $client->request(
+        $client->request(
             'PUT',
             $iri,
             [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
+                'headers' => ['Content-Type' => 'application/ld+json'],
                 'body' => json_encode($upd),
             ]
         );
         $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
+        $data = (self::createClient()->request('GET', $iri))->toArray();
         $this->assertSame('Inactive', $data['value']);
     }
 
     public function testReplaceCustomerStatusFailure(): void
     {
         $orig = $this->getStatusPayload('Active');
-        $iri = $this->createCustomerStatus($orig);
-        $upd = [];
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
         $client = self::createClient();
         $client->request(
             'PUT',
             $iri,
             [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
-                'body' => json_encode($upd),
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode([]),
             ]
         );
         $this->assertResponseStatusCodeSame(422);
@@ -125,15 +89,13 @@ final class CustomerStatusApiTest extends ApiTestCase
     public function testReplaceCustomerStatusNotFound(): void
     {
         $ulid = (string) $this->faker->ulid();
-        $upd = ['value' => 'Inactive',];
+        $upd = ['value' => 'Inactive'];
         $client = self::createClient();
         $client->request(
             'PUT',
             "/api/customer_statuses/{$ulid}",
             [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
+                'headers' => ['Content-Type' => 'application/ld+json'],
                 'body' => json_encode($upd),
             ]
         );
@@ -143,39 +105,33 @@ final class CustomerStatusApiTest extends ApiTestCase
     public function testPatchCustomerStatusSuccess(): void
     {
         $orig = $this->getStatusPayload();
-        $iri = $this->createCustomerStatus($orig);
-        $patch = ['value' => 'Pending',];
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+        $patch = ['value' => 'Pending'];
         $client = self::createClient();
-        $response = $client->request(
+        $client->request(
             'PATCH',
             $iri,
             [
-                'headers' => [
-                    'Content-Type' =>
-                        'application/merge-patch+json',
-                ],
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
                 'body' => json_encode($patch),
             ]
         );
         $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
+        $data = (self::createClient()->request('GET', $iri))->toArray();
         $this->assertSame('Pending', $data['value']);
     }
 
     public function testPatchCustomerStatusFailure(): void
     {
         $orig = $this->getStatusPayload();
-        $iri = $this->createCustomerStatus($orig);
-        $patch = ['value' => '',];
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+        $patch = ['value' => ''];
         $client = self::createClient();
         $client->request(
             'PATCH',
             $iri,
             [
-                'headers' => [
-                    'Content-Type' =>
-                        'application/merge-patch+json',
-                ],
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
                 'body' => json_encode($patch),
             ]
         );
@@ -184,17 +140,14 @@ final class CustomerStatusApiTest extends ApiTestCase
 
     public function testPatchCustomerStatusNotFound(): void
     {
-        $client = self::createClient();
         $ulid = (string) $this->faker->ulid();
-        $patch = ['value' => 'Pending',];
+        $patch = ['value' => 'Pending'];
+        $client = self::createClient();
         $client->request(
             'PATCH',
             "/api/customer_statuses/{$ulid}",
             [
-                'headers' => [
-                    'Content-Type' =>
-                        'application/merge-patch+json',
-                ],
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
                 'body' => json_encode($patch),
             ]
         );
@@ -204,7 +157,7 @@ final class CustomerStatusApiTest extends ApiTestCase
     public function testDeleteCustomerStatusSuccess(): void
     {
         $orig = $this->getStatusPayload();
-        $iri = $this->createCustomerStatus($orig);
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
         $client = self::createClient();
         $client->request('DELETE', $iri);
         $this->assertResponseStatusCodeSame(204);
@@ -214,8 +167,8 @@ final class CustomerStatusApiTest extends ApiTestCase
 
     public function testDeleteCustomerStatusNotFound(): void
     {
-        $client = self::createClient();
         $ulid = (string) $this->faker->ulid();
+        $client = self::createClient();
         $client->request(
             'DELETE',
             "/api/customer_statuses/{$ulid}"
@@ -223,31 +176,16 @@ final class CustomerStatusApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
-    private function getStatusPayload(
-        string $value = 'Active'
-    ): array {
-        return [
-            'value' => $value,
-        ];
+    private function getStatusPayload(string $value = 'Active'): array
+    {
+        return ['value' => $value];
     }
 
-    private function createCustomerStatus(
-        array $payload = null
-    ): string {
-        $payload = $payload ?? $this->getStatusPayload();
-        $client = self::createClient();
-        $response = $client->request(
-            'POST',
+    private function createCustomerStatus(): string
+    {
+        return $this->createEntity(
             '/api/customer_statuses',
-            [
-                'headers' => [
-                    'Content-Type' => 'application/ld+json',
-                ],
-                'body' => json_encode($payload),
-            ]
+            $this->getStatusPayload()
         );
-        $this->assertResponseStatusCodeSame(201);
-        $data = $response->toArray();
-        return (string) $data['@id'];
     }
 }
