@@ -21,10 +21,10 @@ abstract class BaseIntegrationTest extends ApiTestCase
     }
 
     /**
-     * @param array  $payload Request body (if any)
-     * @param array  $headers Optional additional headers
+     * @param array<string, int|string|float|bool|array|null> $payload
+     * @param array<string, string> $headers
      *
-     * @return array Response data decoded from JSON
+     * @return array<string, int|string|float|bool|array|null>
      */
     protected function jsonRequest(
         string $method,
@@ -68,13 +68,7 @@ abstract class BaseIntegrationTest extends ApiTestCase
     }
 
     /**
-     * Create an entity by sending a POST request.
-     *
-     * @param string      $uri          API endpoint to call
-     * @param array       $payload      Request payload
-     * @param string|null $expectedType Optional expected @type value
-     *
-     * @return string The created entity’s @id
+     * @param array<string, int|string|float|bool|array|null> $payload
      */
     protected function createEntity(
         string $uri,

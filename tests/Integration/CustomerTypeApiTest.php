@@ -8,7 +8,6 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
 {
     public function testGetCustomerTypesCollection(): void
     {
-        // Ensure at least one type exists
         $this->createCustomerType();
         $client = self::createClient();
         $response = $client->request('GET', '/api/customer_types');
@@ -174,8 +173,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(404);
     }
 
-    // Helper methods specific to Customer Type API
-
+    /**
+     * @return array<string, string>
+     */
     private function getTypePayload(string $value = 'Prospect'): array
     {
         return ['value' => $value];

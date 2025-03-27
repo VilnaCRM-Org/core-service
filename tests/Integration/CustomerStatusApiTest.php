@@ -176,6 +176,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(404);
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function getStatusPayload(string $value = 'Active'): array
     {
         return ['value' => $value];

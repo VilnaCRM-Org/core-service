@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use App\Customer\Domain\Entity\CustomerStatus;
+use App\Customer\Domain\Entity\CustomerType;
+
 final class CustomerApiTest extends BaseIntegrationTest
 {
     public function testGetCustomersCollection(): void
@@ -30,7 +33,6 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         $payload = $this->getCustomerPayload('John Doe');
         $iri = $this->createEntity('/api/customers', $payload);
-        // Verify creation by fetching the entity
         $client = self::createClient();
         $response = $client->request('GET', $iri);
         $this->assertResponseIsSuccessful();
@@ -225,6 +227,9 @@ final class CustomerApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(404);
     }
 
+    /**
+     * @return array<string, string|bool|CustomerType|CustomerStatus>
+     */
     private function getCustomerPayload(string $name = 'Test Customer'): array
     {
         return [

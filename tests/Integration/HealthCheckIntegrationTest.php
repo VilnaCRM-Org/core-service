@@ -56,8 +56,7 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         $testContainer = $client->getContainer()->get('test.service_container');
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
-            ->addMethods(['createQueue', 'reset'])
-            ->getMock();
+            ->addMethods(['createQueue', 'reset'])->getMock();
         $sqsClientMock->expects($this->once())
             ->method('createQueue')
             ->willThrowException(new \Exception(
