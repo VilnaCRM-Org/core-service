@@ -25,3 +25,89 @@ App\Customer\Application\DTO\CustomerCreateDto:
       - NotBlank: { message: 'not.blank' }
     confirmed:
       - Type: { type: 'bool', message: 'This value should be a boolean.' }
+
+App\Customer\Application\DTO\CustomerPatchDto:
+  properties:
+    initials:
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials:
+          optional: true
+    email:
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - Length:
+          max: 255
+    leadSource:
+      - Length:
+          max: 255
+    type:
+      - NotBlank: { message: 'not.blank', optional: true }
+    status:
+      - NotBlank: { message: 'not.blank', optional: true }
+    confirmed:
+      - Type:
+          type: 'bool'
+          message: 'This value should be a boolean.'
+          optional: true
+
+App\Customer\Application\DTO\CustomerPutDto:
+  properties:
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials: ~
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+    leadSource:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+    type:
+      - NotBlank: { message: 'not.blank' }
+    status:
+      - NotBlank: { message: 'not.blank' }
+    confirmed:
+      - Type:
+          type: 'bool'
+          message: 'This value should be a boolean.'
+
+App\Customer\Application\DTO\CustomerTypePatchDto:
+  properties:
+    name:
+      - Length:
+          max: 255
+      - NotBlank: { message: 'not.blank', optional: true }
+
+App\Customer\Application\DTO\CustomerTypePutDto:
+  properties:
+    name:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Customer\Application\DTO\CustomerStatusPatchDto:
+  properties:
+    name:
+      - Length:
+          max: 255
+      - NotBlank: { message: 'not.blank', optional: true }
+
+App\Customer\Application\DTO\CustomerStatusPutDto:
+  properties:
+    name:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
