@@ -7,13 +7,13 @@ namespace App\Customer\Application\DTO;
 final readonly class CustomerCreateDto
 {
     public function __construct(
-        public string $initials,
-        public string $email,
-        public string $phone,
-        public string $leadSource,
-        public string $type,
-        public string $status,
-        public bool $confirmed
+        public ?string $initials = null,
+        public ?string $email = null,
+        public ?string $phone = null,
+        public ?string $leadSource = null,
+        public ?string $type = null,
+        public ?string $status = null,
+        public ?bool $confirmed = null,
     ) {
     }
 }

@@ -32,7 +32,6 @@ App\Customer\Application\DTO\CustomerPatchDto:
       - Length:
           max: 255
       - App\Shared\Application\Validator\Initials:
-          optional: true
     email:
       - Email: { message: 'email.invalid' }
       - Length:
@@ -44,15 +43,10 @@ App\Customer\Application\DTO\CustomerPatchDto:
     leadSource:
       - Length:
           max: 255
-    type:
-      - NotBlank: { message: 'not.blank', optional: true }
-    status:
-      - NotBlank: { message: 'not.blank', optional: true }
     confirmed:
       - Type:
           type: 'bool'
           message: 'This value should be a boolean.'
-          optional: true
 
 App\Customer\Application\DTO\CustomerPutDto:
   properties:
@@ -86,28 +80,41 @@ App\Customer\Application\DTO\CustomerPutDto:
 
 App\Customer\Application\DTO\CustomerTypePatchDto:
   properties:
-    name:
+    value:
       - Length:
           max: 255
-      - NotBlank: { message: 'not.blank', optional: true }
+      - NotBlank: { message: 'not.blank' }
 
 App\Customer\Application\DTO\CustomerTypePutDto:
   properties:
-    name:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Customer\Application\DTO\TypeCreateDto:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+App\Customer\Application\DTO\StatusCreateDto:
+  properties:
+    value:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
 
 App\Customer\Application\DTO\CustomerStatusPatchDto:
   properties:
-    name:
+    value:
       - Length:
           max: 255
-      - NotBlank: { message: 'not.blank', optional: true }
+      - NotBlank: { message: 'not.blank' }
 
 App\Customer\Application\DTO\CustomerStatusPutDto:
   properties:
-    name:
+    value:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255

@@ -7,7 +7,7 @@ namespace App\Customer\Application\DTO;
 final readonly class TypeCreateDto
 {
     public function __construct(
-        public string $value,
+        public ?string $value = null,
     ) {
     }
 }

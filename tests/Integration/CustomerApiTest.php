@@ -20,9 +20,6 @@ final class CustomerApiTest extends ApiTestCase
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
 
-    /**
-     * Positive: Retrieve the customers collection.
-     */
     public function testGetCustomersCollection(): void
     {
         $client = self::createClient();
@@ -34,313 +31,291 @@ final class CustomerApiTest extends ApiTestCase
         $this->assertArrayHasKey('totalItems', $data);
     }
 
-    /**
-     * Negative: Invalid query parameter (non-integer value for page).
-     */
     public function testGetCustomersCollectionInvalidQuery(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/api/customers', [
-            'query' => ['page' => 'invalid']
-        ]);
+        $client->request(
+            'GET',
+            '/api/customers',
+            [
+                'query' => [
+                    'page' => 'invalid',
+                ],
+            ]
+        );
         $this->assertResponseStatusCodeSame(400);
     }
 
-    /**
-     * Positive: Create a new customer.
-     */
-    public function testCreateCustomer(): void
+    public function testCreateCustomerSuccess(): void
     {
         $client = self::createClient();
-        $payload = [
-            'email' => $this->faker->unique()->email(),
-            'phone' => '0123456789',
-            'initials' => 'Name Surname',
-            'leadSource' => 'Google',
-            'type' => $this->createCustomerType(),
-            'status' => $this->createCustomerStatus(),
-            'confirmed' => true,
-        ];
-
-        $response = $client->request('POST', '/api/customers', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
-
-        $this->assertSuccessfulCreation($payload, $response->toArray());
+        $payload = $this->getCustomerPayload('John Doe');
+        $response = $client->request(
+            'POST',
+            '/api/customers',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($payload),
+            ]
+        );
+        $this->assertSuccessfulCreation(
+            $payload,
+            $response->toArray()
+        );
     }
 
-    /**
-     * Negative: Create customer with missing required fields (e.g. email).
-     */
-    public function testCreateCustomerMissingFields(): void
+    public function testCreateCustomerFailure(): void
     {
         $client = self::createClient();
         $payload = [
-            // 'email' is intentionally missing
             'phone' => '0123456789',
-            'initials' => 'Missing Email',
+            'initials' => 'No Email',
             'leadSource' => 'Google',
-            'type' => $this->createCustomerType(),
-            'status' => $this->createCustomerStatus(),
             'confirmed' => true,
         ];
-
-        $client->request('POST', '/api/customers', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
+        $client->request(
+            'POST',
+            '/api/customers',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($payload),
+            ]
+        );
         $this->assertResponseStatusCodeSame(422);
     }
 
-    /**
-     * Negative: Create customer with an invalid email format.
-     */
-    public function testCreateCustomerInvalidEmail(): void
+    public function testGetCustomerSuccess(): void
     {
+        $payload = $this->getCustomerPayload('Test Get');
+        $iri = $this->createCustomer($payload);
         $client = self::createClient();
-        $payload = [
-            'email' => 'not-an-email',
-            'phone' => '0123456789',
-            'initials' => 'Invalid Email',
-            'leadSource' => 'Google',
-            'type' => $this->createCustomerType(),
-            'status' => $this->createCustomerStatus(),
-            'confirmed' => true,
-        ];
-
-        $client->request('POST', '/api/customers', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
-        $this->assertResponseStatusCodeSame(422);
-    }
-
-    /**
-     * Positive: Get a single customer.
-     */
-    public function testGetCustomer(): void
-    {
-        $payload = $this->createCustomerPayload('Get Customer');
-        $customerIri = $this->createCustomer($payload);
-        $client = self::createClient();
-        $response = $client->request('GET', $customerIri);
+        $response = $client->request('GET', $iri);
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
         $this->assertSame($payload['email'], $data['email']);
     }
 
-    /**
-     * Negative: Get a non-existent customer.
-     */
     public function testGetCustomerNotFound(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/api/customers/non-existent-ulid');
+        $ulid = (string) $this->faker->ulid();
+        $client->request('GET', "/api/customers/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
     }
 
-    /**
-     * Positive: Replace an existing customer using PUT.
-     */
-    public function testReplaceCustomer(): void
+    public function testReplaceCustomerSuccess(): void
     {
-        $payload = $this->createCustomerPayload('Replace Customer');
-        $customerIri = $this->createCustomer($payload);
-
+        $payload = $this->getCustomerPayload('Replace Test');
+        $iri = $this->createCustomer($payload);
         $updatedPayload = [
             'email' => $this->faker->unique()->email(),
             'phone' => '1112223333',
-            'initials' => 'Replaced Customer',
+            'initials' => 'Replaced',
             'leadSource' => 'Yahoo',
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
             'confirmed' => false,
         ];
-
         $client = self::createClient();
-        $response = $client->request('PUT', $customerIri, [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($updatedPayload),
-        ]);
-
+        $response = $client->request(
+            'PUT',
+            $iri,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($updatedPayload),
+            ]
+        );
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        $this->assertSame($updatedPayload['email'], $data['email']);
+        $this->assertSame(
+            $updatedPayload['email'],
+            $data['email']
+        );
     }
 
-    /**
-     * Negative: Replace customer with missing required field (e.g. email).
-     */
-    public function testReplaceCustomerMissingField(): void
+    public function testReplaceCustomerFailure(): void
     {
-        $payload = $this->createCustomerPayload('Replace Missing Field');
-        $customerIri = $this->createCustomer($payload);
-
-        $updatedPayload = [
-            // Omitting the email field
+        $payload = $this->getCustomerPayload('Missing Email');
+        $iri = $this->createCustomer($payload);
+        $updated = [
             'phone' => '1112223333',
-            'initials' => 'Replaced Customer',
+            'initials' => 'No Email Updated',
             'leadSource' => 'Yahoo',
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
             'confirmed' => false,
         ];
-
         $client = self::createClient();
-        $client->request('PUT', $customerIri, [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($updatedPayload),
-        ]);
+        $client->request(
+            'PUT',
+            $iri,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($updated),
+            ]
+        );
         $this->assertResponseStatusCodeSame(422);
     }
 
-    /**
-     * Negative: Replace a non-existent customer.
-     */
     public function testReplaceCustomerNotFound(): void
     {
-        $client = self::createClient();
-
-        $updatedPayload = [
+        $ulid = (string) $this->faker->ulid();
+        $updated = [
             'email' => $this->faker->unique()->email(),
             'phone' => '1112223333',
-            'initials' => 'Non-existent Customer',
+            'initials' => 'Nonexistent',
             'leadSource' => 'Yahoo',
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
             'confirmed' => false,
         ];
-
-        $client->request('PUT', '/api/customers/non-existent-ulid', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($updatedPayload),
-        ]);
+        $client = self::createClient();
+        $client->request(
+            'PUT',
+            "/api/customers/{$ulid}",
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($updated),
+            ]
+        );
         $this->assertResponseStatusCodeSame(404);
     }
 
-    /**
-     * Positive: Partially update a customer using PATCH.
-     */
-    public function testPatchCustomer(): void
+    public function testPatchCustomerSuccess(): void
     {
-        $payload = $this->createCustomerPayload('Patch Customer');
-        $customerIri = $this->createCustomer($payload);
-        $patchPayload = ['email' => $this->faker->unique()->email()];
-
+        $payload = $this->getCustomerPayload('Patch Test');
+        $iri = $this->createCustomer($payload);
+        $patch = [
+            'email' => $this->faker->unique()->email(),
+        ];
         $client = self::createClient();
-        $response = $client->request('PATCH', $customerIri, [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'body' => json_encode($patchPayload),
-        ]);
-
+        $response = $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => [
+                    'Content-Type' =>
+                        'application/merge-patch+json',
+                ],
+                'body' => json_encode($patch),
+            ]
+        );
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        $this->assertSame($patchPayload['email'], $data['email']);
+        $this->assertSame($patch['email'], $data['email']);
     }
 
-    /**
-     * Negative: Partial update with an invalid email.
-     */
-    public function testPatchCustomerInvalidEmail(): void
+    public function testPatchCustomerFailure(): void
     {
-        $payload = $this->createCustomerPayload('Patch Invalid Email');
-        $customerIri = $this->createCustomer($payload);
-        $patchPayload = ['email' => 'invalid-email'];
-
+        $payload = $this->getCustomerPayload('Patch Fail');
+        $iri = $this->createCustomer($payload);
+        $patch = [
+            'email' => 'invalid-email',
+        ];
         $client = self::createClient();
-        $client->request('PATCH', $customerIri, [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'body' => json_encode($patchPayload),
-        ]);
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => [
+                    'Content-Type' =>
+                        'application/merge-patch+json',
+                ],
+                'body' => json_encode($patch),
+            ]
+        );
         $this->assertResponseStatusCodeSame(422);
     }
 
-    /**
-     * Negative: Partial update on a non-existent customer.
-     */
     public function testPatchCustomerNotFound(): void
     {
+        $ulid = (string) $this->faker->ulid();
         $client = self::createClient();
-        $patchPayload = ['email' => $this->faker->unique()->email()];
-        $client->request('PATCH', '/api/customers/non-existent-ulid', [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'body' => json_encode($patchPayload),
-        ]);
+        $patch = [
+            'email' => $this->faker->unique()->email(),
+        ];
+        $client->request(
+            'PATCH',
+            "/api/customers/{$ulid}",
+            [
+                'headers' => [
+                    'Content-Type' =>
+                        'application/merge-patch+json',
+                ],
+                'body' => json_encode($patch),
+            ]
+        );
         $this->assertResponseStatusCodeSame(404);
     }
 
-    /**
-     * Positive: Delete a customer.
-     */
-    public function testDeleteCustomer(): void
+    public function testDeleteCustomerSuccess(): void
     {
-        $payload = $this->createCustomerPayload('Delete Customer');
-        $customerIri = $this->createCustomer($payload);
+        $payload = $this->getCustomerPayload('Delete Test');
+        $iri = $this->createCustomer($payload);
         $client = self::createClient();
-
-        $client->request('DELETE', $customerIri);
+        $client->request('DELETE', $iri);
         $this->assertResponseStatusCodeSame(204);
-
-        // Verify that the customer has been removed.
-        $client->request('GET', $customerIri);
+        $client->request('GET', $iri);
         $this->assertResponseStatusCodeSame(404);
     }
 
-    /**
-     * Negative: Delete a non-existent customer.
-     */
     public function testDeleteCustomerNotFound(): void
     {
         $client = self::createClient();
-        $client->request('DELETE', '/api/customers/non-existent-ulid');
+        $ulid = (string) $this->faker->ulid();
+        $client->request('DELETE', "/api/customers/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
     }
 
-    /*
-     * Helper Methods below (similar to your original tests)
-     */
-
-    /**
-     * Asserts that a customer was successfully created.
-     *
-     * @param array<string, mixed> $payload The customer creation payload
-     * @param array<string, mixed> $data    The API response data
-     */
-    private function assertSuccessfulCreation(array $payload, array $data): void
-    {
+    private function assertSuccessfulCreation(
+        array $payload,
+        array $data
+    ): void {
         $this->assertResponseStatusCodeSame(201);
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-        $this->assertArrayHasKey('@id', $data, "Response should include '@id' key");
+        $this->assertResponseHeaderSame(
+            'content-type',
+            'application/ld+json; charset=utf-8'
+        );
+        $this->assertArrayHasKey('@id', $data);
         $this->assertSame($payload['email'], $data['email']);
     }
 
-    /**
-     * Creates a customer resource.
-     *
-     * @param array<string, mixed> $payload
-     */
-    private function createCustomer(array $payload): string
-    {
+    private function createCustomer(
+        array $payload
+    ): string {
         $client = self::createClient();
-        $response = $client->request('POST', '/api/customers', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
+        $response = $client->request(
+            'POST',
+            '/api/customers',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($payload),
+            ]
+        );
         $this->assertResponseStatusCodeSame(201);
         $data = $response->toArray();
-        return $data['@id'];
+        return (string) $data['@id'];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function createCustomerPayload(string $initials = 'Test Customer'): array
-    {
+    private function getCustomerPayload(
+        string $name = 'Test Customer'
+    ): array {
         return [
             'email' => $this->faker->unique()->email(),
             'phone' => '0123456789',
-            'initials' => $initials,
+            'initials' => $name,
             'leadSource' => 'Google',
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
@@ -348,37 +323,53 @@ final class CustomerApiTest extends ApiTestCase
         ];
     }
 
-    /**
-     * Creates a customer status and returns its IRI.
-     */
     private function createCustomerStatus(): string
     {
         $client = self::createClient();
-        $payload = ['value' => 'Active'];
-        $response = $client->request('POST', '/api/customer_statuses', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
+        $payload = [
+            'value' => 'Active',
+        ];
+        $response = $client->request(
+            'POST',
+            '/api/customer_statuses',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($payload),
+            ]
+        );
         $this->assertResponseStatusCodeSame(201);
         $data = $response->toArray();
-        $this->assertSame('CustomerStatus', $data['@type']);
-        return $data['@id'];
+        $this->assertSame(
+            'CustomerStatus',
+            (string) $data['@type']
+        );
+        return (string) $data['@id'];
     }
 
-    /**
-     * Creates a customer type and returns its IRI.
-     */
     private function createCustomerType(): string
     {
         $client = self::createClient();
-        $payload = ['value' => 'Prospect'];
-        $response = $client->request('POST', '/api/customer_types', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'body' => json_encode($payload),
-        ]);
+        $payload = [
+            'value' => 'Prospect',
+        ];
+        $response = $client->request(
+            'POST',
+            '/api/customer_types',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/ld+json',
+                ],
+                'body' => json_encode($payload),
+            ]
+        );
         $this->assertResponseStatusCodeSame(201);
         $data = $response->toArray();
-        $this->assertSame('CustomerType', $data['@type']);
-        return $data['@id'];
+        $this->assertSame(
+            'CustomerType',
+            (string) $data['@type']
+        );
+        return (string) $data['@id'];
     }
 }

@@ -31,7 +31,6 @@ final class ForbiddenResponseFactory implements ResponseFactoryInterface
 
     public function getTypeParam(): Parameter
     {
-        // RFC2616 Section 10.4.4 describes the 403 Forbidden status.
         return new Parameter(
             'type',
             'string',
