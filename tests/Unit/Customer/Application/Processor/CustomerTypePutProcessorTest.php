@@ -116,7 +116,7 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
             ->expects($this->once())
             ->method('create')
             ->with($customerType, $this
-                ->callback(function ($update) use ($value) {
+                ->callback(static function ($update) use ($value) {
                     return $update->value === $value;
                 }))
             ->willReturn($command);

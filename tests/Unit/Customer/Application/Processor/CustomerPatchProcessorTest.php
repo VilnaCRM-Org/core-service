@@ -33,16 +33,14 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->commandBus = $this
-            ->createMock(CommandBusInterface::class);
-        $this->factory = $this
+        $this->commandBus   = $this->createMock(CommandBusInterface::class);
+        $this->factory      = $this
             ->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->iriConverter = $this
-            ->createMock(IriConverterInterface::class);
-        $this->repository = $this
+        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->repository   = $this
             ->createMock(CustomerRepositoryInterface::class);
-        $this->ulidFactory = new UlidFactory();
-        $this->processor = new CustomerPatchProcessor(
+        $this->ulidFactory  = new UlidFactory();
+        $this->processor    = new CustomerPatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
@@ -53,15 +51,15 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessUpdatesAndDispatchesCommand(): void
     {
-        $dto = $this->createDto();
+        $dto       = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulidStr = (string) $this->faker->ulid();
-        $ulid = new Ulid($ulidStr);
-        $uriVars = ['ulid' => $ulidStr];
-        $type = $this->createMock(CustomerType::class);
-        $status = $this->createMock(CustomerStatus::class);
-        $customer = $this->createMock(Customer::class);
-        $command = $this->createMock(UpdateCustomerCommand::class);
+        $ulidStr   = (string) $this->faker->ulid();
+        $ulid      = new Ulid($ulidStr);
+        $uriVars   = ['ulid' => $ulidStr];
+        $type      = $this->createMock(CustomerType::class);
+        $status    = $this->createMock(CustomerStatus::class);
+        $customer  = $this->createMock(Customer::class);
+        $command   = $this->createMock(UpdateCustomerCommand::class);
 
         $this->setupCustomer(
             $customer,
@@ -73,13 +71,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         );
         $this->setupRepository($ulid, $customer);
         $this->setupIriConverter($dto, $type, $status);
-        $this->setupFactoryAndCommandBus(
-            $dto,
-            $type,
-            $status,
-            $customer,
-            $command
-        );
+        $this->setupDependencies($dto, $type, $status, $customer, $command);
 
         $result = $this->processor->process($dto, $operation, $uriVars);
         $this->assertSame($customer, $result);
@@ -87,22 +79,22 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessPreservesExistingValuesWhenNull(): void
     {
-        $dto = $this->createEmptyDto();
+        $dto       = $this->createEmptyDto();
         $operation = $this->createMock(Operation::class);
-        $ulidStr = (string) $this->faker->ulid();
-        $ulid = new Ulid($ulidStr);
-        $uriVars = ['ulid' => $ulidStr];
-        $exType = $this->createMock(CustomerType::class);
-        $exStatus = $this->createMock(CustomerStatus::class);
-        $customer = $this->createMock(Customer::class);
-        $command = $this->createMock(UpdateCustomerCommand::class);
+        $ulidStr   = (string) $this->faker->ulid();
+        $ulid      = new Ulid($ulidStr);
+        $uriVars   = ['ulid' => $ulidStr];
+        $exType    = $this->createMock(CustomerType::class);
+        $exStatus  = $this->createMock(CustomerStatus::class);
+        $customer  = $this->createMock(Customer::class);
+        $command   = $this->createMock(UpdateCustomerCommand::class);
 
         $exData = [
-            'initials' => 'Original Name',
-            'email' => 'original@example.com',
-            'phone' => '+123456789',
+            'initials'   => 'Original Name',
+            'email'      => 'original@example.com',
+            'phone'      => '+123456789',
             'leadSource' => 'Original Source',
-            'confirmed' => true,
+            'confirmed'  => true,
         ];
 
         $this->setupCustomer(
@@ -121,20 +113,16 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             ->method('create')
             ->with(
                 $customer,
-                $this->callback(function ($update) use (
-                    $exData,
-                    $exType,
-                    $exStatus
-                ) {
-                    return $update->newInitials === $exData['initials'] &&
-                           $update->newEmail === $exData['email'] &&
-                           $update->newPhone === $exData['phone'] &&
-                           $update->newLeadSource === $exData['leadSource'] &&
-                           $update->newType === $exType &&
-                           $update->newStatus === $exStatus &&
-                           $update->newConfirmed === $exData['confirmed'];
-                })
-            )->willReturn($command);
+                $this->callback(fn ($update) => $this
+                    ->isUpdateValid(
+                        $update,
+                        $dto,
+                        $exType,
+                        $exStatus,
+                        $customer
+                    ))
+            )
+            ->willReturn($command);
 
         $this->commandBus->expects($this->once())
             ->method('dispatch')
@@ -156,20 +144,20 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             confirmed: null
         );
         $operation = $this->createMock(Operation::class);
-        $ulidStr = (string) $this->faker->ulid();
-        $ulid = new Ulid($ulidStr);
-        $uriVars = ['ulid' => $ulidStr];
-        $exType = $this->createMock(CustomerType::class);
-        $exStatus = $this->createMock(CustomerStatus::class);
-        $customer = $this->createMock(Customer::class);
-        $command = $this->createMock(UpdateCustomerCommand::class);
+        $ulidStr   = (string) $this->faker->ulid();
+        $ulid      = new Ulid($ulidStr);
+        $uriVars   = ['ulid' => $ulidStr];
+        $exType    = $this->createMock(CustomerType::class);
+        $exStatus  = $this->createMock(CustomerStatus::class);
+        $customer  = $this->createMock(Customer::class);
+        $command   = $this->createMock(UpdateCustomerCommand::class);
 
         $exData = [
-            'initials' => 'Original Name',
-            'email' => 'original@example.com',
-            'phone' => '+123456789',
+            'initials'   => 'Original Name',
+            'email'      => 'original@example.com',
+            'phone'      => '+123456789',
             'leadSource' => 'Original Source',
-            'confirmed' => true,
+            'confirmed'  => true,
         ];
 
         $this->setupCustomer(
@@ -188,20 +176,16 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             ->method('create')
             ->with(
                 $customer,
-                $this->callback(function ($update) use (
-                    $exData,
-                    $exType,
-                    $exStatus
-                ) {
-                    return $update->newInitials === 'New Name' &&
-                           $update->newEmail === $exData['email'] &&
-                           $update->newPhone === $exData['phone'] &&
-                           $update->newLeadSource === 'New Source' &&
-                           $update->newType === $exType &&
-                           $update->newStatus === $exStatus &&
-                           $update->newConfirmed === $exData['confirmed'];
-                })
-            )->willReturn($command);
+                $this->callback(fn ($update) => $this
+                    ->isUpdateValid(
+                        $update,
+                        $partial,
+                        $exType,
+                        $exStatus,
+                        $customer
+                    ))
+            )
+            ->willReturn($command);
 
         $this->commandBus->expects($this->once())
             ->method('dispatch')
@@ -213,15 +197,16 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessThrowsExceptionWhenCustomerNotFound(): void
     {
-        $dto = $this->createDto();
+        $dto       = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulidStr = (string) $this->faker->ulid();
-        $ulid = new Ulid($ulidStr);
-        $uriVars = ['ulid' => $ulidStr];
+        $ulidStr   = (string) $this->faker->ulid();
+        $ulid      = new Ulid($ulidStr);
+        $uriVars   = ['ulid' => $ulidStr];
 
         $this->repository->expects($this->once())
             ->method('find')
-            ->with((string) $ulid)->willReturn(null);
+            ->with((string) $ulid)
+            ->willReturn(null);
 
         $this->expectException(CustomerNotFoundException::class);
         $this->processor->process($dto, $operation, $uriVars);
@@ -231,7 +216,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     {
         $this->repository->expects($this->once())
             ->method('find')
-            ->with((string) $ulid)->willReturn($customer);
+            ->with((string) $ulid)
+            ->willReturn($customer);
     }
 
     private function setupCustomer(
@@ -249,12 +235,17 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $customer->method('getPhone')->willReturn($phone);
         $customer->method('getLeadSource')->willReturn($leadSource);
         $customer->method('isConfirmed')->willReturn($confirmed);
-        if ($type !== null) {
-            $customer->method('getType')->willReturn($type);
-        }
-        if ($status !== null) {
-            $customer->method('getStatus')->willReturn($status);
-        }
+        array_map(
+            static fn(array $cfg) => $customer
+                ->method($cfg['method'])->willReturn($cfg['value']),
+            array_filter(
+                [
+                    ['value' => $type, 'method' => 'getType'],
+                    ['value' => $status, 'method' => 'getStatus'],
+                ],
+                static fn(array $cfg) => $cfg['value'] !== null
+            )
+        );
     }
 
     private function setupIriConverter(
@@ -262,21 +253,50 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         CustomerType $type,
         CustomerStatus $status
     ): void {
-        if ($dto->type !== null || $dto->status !== null) {
-            $this->iriConverter->expects($this->atLeastOnce())
-                ->method('getResourceFromIri')
-                ->willReturnCallback(
-                    fn (string $iri) => $this->resolveIri(
-                        $iri,
-                        $dto,
-                        $type,
-                        $status
-                    )
-                );
-        }
+        $this->iriConverter->expects($this->atLeastOnce())
+            ->method('getResourceFromIri')
+            ->willReturnCallback(fn (string $iri) => $this
+                ->resolveIri($iri, $dto, $type, $status));
     }
 
-    private function setupFactoryAndCommandBus(
+    private function resolveIri(
+        string $iri,
+        CustomerPatchDto $dto,
+        CustomerType $type,
+        CustomerStatus $status
+    ): CustomerType|CustomerStatus {
+        $mapping = array_filter(
+            [
+                $dto->type   => $type,
+                $dto->status => $status,
+            ],
+            static fn($_, $key) => $key !== null,
+            ARRAY_FILTER_USE_BOTH
+        );
+        return $mapping[$iri] ??
+            throw new \InvalidArgumentException('Unexpected IRI');
+    }
+
+    private function isUpdateValid(
+        object $update,
+        CustomerPatchDto $dto,
+        CustomerType $type,
+        CustomerStatus $status,
+        Customer $customer
+    ): bool {
+        $expected = [
+            'newInitials'   => $dto->initials   ?? $customer->getInitials(),
+            'newEmail'      => $dto->email      ?? $customer->getEmail(),
+            'newPhone'      => $dto->phone      ?? $customer->getPhone(),
+            'newLeadSource' => $dto->leadSource ?? $customer->getLeadSource(),
+            'newType'       => $dto->type ? $type : $customer->getType(),
+            'newStatus'     => $dto->status ? $status : $customer->getStatus(),
+            'newConfirmed'  => $dto->confirmed  ?? $customer->isConfirmed(),
+        ];
+        return get_object_vars($update) === $expected;
+    }
+
+    private function setupDependencies(
         CustomerPatchDto $dto,
         CustomerType $type,
         CustomerStatus $status,
@@ -287,61 +307,13 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             ->method('create')
             ->with(
                 $customer,
-                $this->callback(fn ($update) => $this->isUpdateValid(
-                    $update,
-                    $dto,
-                    $type,
-                    $status,
-                    $customer
-                ))
-            )->willReturn($command);
+                $this->callback(fn ($update) => $this
+                    ->isUpdateValid($update, $dto, $type, $status, $customer))
+            )
+            ->willReturn($command);
         $this->commandBus->expects($this->once())
             ->method('dispatch')
             ->with($command);
-    }
-
-    private function resolveIri(
-        string $iri,
-        CustomerPatchDto $dto,
-        CustomerType $type,
-        CustomerStatus $status
-    ): CustomerType|CustomerStatus {
-        $mapping = [];
-        if ($dto->type !== null) {
-            $mapping[$dto->type] = $type;
-        }
-        if ($dto->status !== null) {
-            $mapping[$dto->status] = $status;
-        }
-        if (isset($mapping[$iri])) {
-            return $mapping[$iri];
-        }
-        throw new \InvalidArgumentException('Unexpected IRI');
-    }
-
-    private function isUpdateValid(
-        $update,
-        CustomerPatchDto $dto,
-        CustomerType $type,
-        CustomerStatus $status,
-        Customer $customer
-    ): bool {
-        $expected = [
-            'newInitials' => $dto->initials ?? $customer->getInitials(),
-            'newEmail' => $dto->email ?? $customer->getEmail(),
-            'newPhone' => $dto->phone ?? $customer->getPhone(),
-            'newLeadSource' => $dto->leadSource ?? $customer->getLeadSource(),
-            'newType' => $dto->type !== null ? $type : $customer->getType(),
-            'newStatus' => $dto->status !== null ? $status : $customer
-                ->getStatus(),
-            'newConfirmed' => $dto->confirmed ?? $customer->isConfirmed(),
-        ];
-        foreach ($expected as $prop => $value) {
-            if ($update->{$prop} !== $value) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private function createDto(): CustomerPatchDto
@@ -353,7 +325,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             leadSource: $this->faker->word(),
             type: '/api/customer_types/' . $this->faker->ulid(),
             status: '/api/customer_statuses/' . $this->faker->ulid(),
-            confirmed: $this->faker->boolean(),
+            confirmed: $this->faker->boolean()
         );
     }
 
@@ -366,7 +338,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             leadSource: null,
             type: null,
             status: null,
-            confirmed: null,
+            confirmed: null
         );
     }
 }

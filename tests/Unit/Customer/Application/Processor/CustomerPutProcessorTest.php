@@ -170,11 +170,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
         throw new \InvalidArgumentException('Unexpected IRI');
     }
 
-    /**
-     * Validates that the update data matches the DTO and expected type and status using a loop.
-     */
     private function isUpdateValid(
-        $update,
+        object $update,
         CustomerPutDto $dto,
         CustomerType $type,
         CustomerStatus $status

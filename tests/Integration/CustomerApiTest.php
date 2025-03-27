@@ -333,9 +333,6 @@ final class CustomerApiTest extends ApiTestCase
     }
 
     /**
-     * Returns a payload for creating a customer.
-     *
-     * @param string $initials
      * @return array<string, mixed>
      */
     private function createCustomerPayload(string $initials = 'Test Customer'): array
