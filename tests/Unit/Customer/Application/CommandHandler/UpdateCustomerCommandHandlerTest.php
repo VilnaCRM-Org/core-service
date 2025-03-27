@@ -32,6 +32,16 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         $this->handler = new UpdateCustomerCommandHandler($this->repository);
     }
 
+    public function createCommand(
+        Customer $customer,
+        CustomerUpdate $updateData
+    ): void {
+        $command = new UpdateCustomerCommand($customer, $updateData);
+
+        $this->expectCustomerSetters($customer, $updateData);
+        $this->executeCommand($command, $customer);
+    }
+
     public function testInvokeUpdatesAndSavesCustomer(): void
     {
         $typeUlid = $this->ulidTransformer->transformFromSymfonyUlid(
@@ -55,40 +65,38 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
             newConfirmed: $this->faker->boolean(),
         );
 
-        $command = new UpdateCustomerCommand($customer, $updateData);
+        $this->createCommand($customer, $updateData);
+    }
+
+    private function expectCustomerSetters(
+        Customer $customer,
+        CustomerUpdate $updateData
+    ): void {
+        $customer->expects($this->once())
+            ->method('setInitials')->with($updateData->newInitials);
+        $customer->expects($this->once())
+            ->method('setEmail')->with($updateData->newEmail);
+        $customer->expects($this->once())
+            ->method('setPhone')->with($updateData->newPhone);
 
         $customer->expects($this->once())
-            ->method('setInitials')
-            ->with($updateData->newInitials);
+            ->method('setLeadSource')->with($updateData->newLeadSource);
 
         $customer->expects($this->once())
-            ->method('setEmail')
-            ->with($updateData->newEmail);
+            ->method('setType')->with($updateData->newType);
 
         $customer->expects($this->once())
-            ->method('setPhone')
-            ->with($updateData->newPhone);
-
+            ->method('setStatus')->with($updateData->newStatus);
         $customer->expects($this->once())
-            ->method('setLeadSource')
-            ->with($updateData->newLeadSource);
+            ->method('setConfirmed')->with($updateData->newConfirmed);
+    }
 
-        $customer->expects($this->once())
-            ->method('setType')
-            ->with($updateData->newType);
-
-        $customer->expects($this->once())
-            ->method('setStatus')
-            ->with($updateData->newStatus);
-
-        $customer->expects($this->once())
-            ->method('setConfirmed')
-            ->with($updateData->newConfirmed);
-
+    private function executeCommand(
+        UpdateCustomerCommand $command,
+        Customer $customer
+    ): void {
         $this->repository->expects($this->once())
-            ->method('save')
-            ->with($customer);
-
+            ->method('save')->with($customer);
         $this->handler->__invoke($command);
     }
 }

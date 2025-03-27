@@ -29,16 +29,28 @@ final class CustomerUpdateTest extends UnitTestCase
 
     public function testCreateCustomerUpdate(): void
     {
-        $typeUlid = $this->ulidTransformer->transformFromSymfonyUlid(
-            $this->ulidFactory->create()
-        );
-        $statusUlid = $this->ulidTransformer->transformFromSymfonyUlid(
-            $this->ulidFactory->create()
-        );
+        $data = $this->createCustomerUpdate();
+        $update = $data['update'];
+        $this->assertEquals('John Doe', $update->newInitials);
+        $this->assertEquals('john@example.com', $update->newEmail);
+        $this->assertEquals('+1234567890', $update->newPhone);
+        $this->assertEquals('website', $update->newLeadSource);
+        $this->assertSame($data['customerType'], $update->newType);
+        $this->assertSame($data['customerStatus'], $update->newStatus);
+        $this->assertTrue($update->newConfirmed);
+    }
 
+    /**
+     * @return array<CustomerType, CustomerStatus, CustomerUpdate>
+     */
+    private function createCustomerUpdate(): array
+    {
+        $typeUlid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->ulidFactory->create());
+        $statusUlid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->ulidFactory->create());
         $customerType = new CustomerType('individual', $typeUlid);
         $customerStatus = new CustomerStatus('active', $statusUlid);
-
         $update = new CustomerUpdate(
             newInitials: 'John Doe',
             newEmail: 'john@example.com',
@@ -48,13 +60,10 @@ final class CustomerUpdateTest extends UnitTestCase
             newStatus: $customerStatus,
             newConfirmed: true,
         );
-
-        $this->assertEquals('John Doe', $update->newInitials);
-        $this->assertEquals('john@example.com', $update->newEmail);
-        $this->assertEquals('+1234567890', $update->newPhone);
-        $this->assertEquals('website', $update->newLeadSource);
-        $this->assertSame($customerType, $update->newType);
-        $this->assertSame($customerStatus, $update->newStatus);
-        $this->assertTrue($update->newConfirmed);
+        return [
+            'update' => $update,
+            'customerType' => $customerType,
+            'customerStatus' => $customerStatus,
+        ];
     }
 }
