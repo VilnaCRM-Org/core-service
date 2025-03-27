@@ -16,6 +16,7 @@ use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Uid\Ulid;
@@ -27,7 +28,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerRepositoryInterface|MockObject $repository;
     private CustomerPatchProcessor $processor;
-    private \App\Shared\Infrastructure\Factory\UlidFactory $ulidFactory;
+    private UlidFactory $ulidFactory;
 
     protected function setUp(): void
     {
@@ -40,8 +41,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             ->createMock(IriConverterInterface::class);
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
-        $this->ulidFactory = new \App\Shared\Infrastructure\Factory\UlidFactory();
-        $this->processor = new \App\Customer\Application\Processor\CustomerPatchProcessor(
+        $this->ulidFactory = new UlidFactory();
+        $this->processor = new CustomerPatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
@@ -331,7 +332,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             'newPhone' => $dto->phone ?? $customer->getPhone(),
             'newLeadSource' => $dto->leadSource ?? $customer->getLeadSource(),
             'newType' => $dto->type !== null ? $type : $customer->getType(),
-            'newStatus' => $dto->status !== null ? $status : $customer->getStatus(),
+            'newStatus' => $dto->status !== null ? $status : $customer
+                ->getStatus(),
             'newConfirmed' => $dto->confirmed ?? $customer->isConfirmed(),
         ];
         foreach ($expected as $prop => $value) {

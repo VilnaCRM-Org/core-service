@@ -32,7 +32,8 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
 
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateCustomerTypeCommandFactoryInterface::class);
+        $this->factory = $this
+            ->createMock(UpdateCustomerTypeCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerTypePutProcessor(
@@ -56,7 +57,8 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         $this->setupUlidFactory($ulid, $ulidMock);
         $this->setupFactoryAndCommandBus($customerType, $dto->value, $command);
 
-        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerType, $result);
     }
@@ -84,8 +86,11 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         );
     }
 
-    private function setupRepository(string $ulid, ?CustomerType $customerType, Ulid $ulidMock): void
-    {
+    private function setupRepository(
+        string $ulid,
+        ?CustomerType $customerType,
+        Ulid $ulidMock
+    ): void {
         $this->repository
             ->expects($this->once())
             ->method('find')
@@ -110,9 +115,10 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         $this->factory
             ->expects($this->once())
             ->method('create')
-            ->with($customerType, $this->callback(function ($update) use ($value) {
-                return $update->value === $value;
-            }))
+            ->with($customerType, $this
+                ->callback(function ($update) use ($value) {
+                    return $update->value === $value;
+                }))
             ->willReturn($command);
 
         $this->commandBus

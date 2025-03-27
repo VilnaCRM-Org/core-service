@@ -32,7 +32,8 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateCustomerTypeCommandFactoryInterface::class);
+        $this->factory = $this
+            ->createMock(UpdateCustomerTypeCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerTypePatchProcessor(
@@ -54,10 +55,11 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
         $this->setupRepository($ulid, $customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupFactoryAndCommandBus($customerType, $dto->value, $command);
+        $this->setupDependencies($customerType, $dto->value, $command);
         $this->setupCustomerType($customerType, $dto->value);
 
-        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerType, $result);
     }
@@ -69,15 +71,17 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $operation = $this->createMock(Operation::class);
         $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
         $customerType = $this->createMock(CustomerType::class);
-        $command = $this->createMock(UpdateCustomerTypeCommand::class);
+        $command = $this
+            ->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($ulid, $customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupFactoryAndCommandBus($customerType, $existingValue, $command);
+        $this->setupDependencies($customerType, $existingValue, $command);
         $this->setupCustomerType($customerType, $existingValue);
 
-        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerType, $result);
     }
@@ -110,8 +114,11 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         return new CustomerTypePatchDto('');
     }
 
-    private function setupRepository(string $ulid, ?CustomerType $customerType, Ulid $ulidMock): void
-    {
+    private function setupRepository(
+        string $ulid,
+        ?CustomerType $customerType,
+        Ulid $ulidMock
+    ): void {
         $this->repository
             ->expects($this->once())
             ->method('find')
@@ -128,14 +135,16 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
             ->willReturn($ulidMock);
     }
 
-    private function setupCustomerType(CustomerType $customerType, string $value): void
-    {
+    private function setupCustomerType(
+        CustomerType $customerType,
+        string $value
+    ): void {
         $customerType
             ->method('getValue')
             ->willReturn($value);
     }
 
-    private function setupFactoryAndCommandBus(
+    private function setupDependencies(
         CustomerType $customerType,
         string $value,
         UpdateCustomerTypeCommand $command
@@ -143,9 +152,10 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->factory
             ->expects($this->once())
             ->method('create')
-            ->with($customerType, $this->callback(function ($update) use ($value) {
-                return $update->value === $value;
-            }))
+            ->with($customerType, $this
+                ->callback(function ($update) use ($value) {
+                    return $update->value === $value;
+                }))
             ->willReturn($command);
 
         $this->commandBus

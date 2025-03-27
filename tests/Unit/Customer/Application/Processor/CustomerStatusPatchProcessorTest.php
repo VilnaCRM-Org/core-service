@@ -32,7 +32,8 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
-        $this->factory = $this->createMock(UpdateStatusCommandFactoryInterface::class);
+        $this->factory = $this
+            ->createMock(UpdateStatusCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerStatusPatchProcessor(
@@ -54,10 +55,11 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
         $this->setupRepository($ulid, $customerStatus, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupFactoryAndCommandBus($customerStatus, $dto->value, $command);
+        $this->setupDependencies($customerStatus, $dto->value, $command);
         $this->setupCustomerStatus($customerStatus, $dto->value);
 
-        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerStatus, $result);
     }
@@ -74,10 +76,11 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
         $this->setupRepository($ulid, $customerStatus, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupFactoryAndCommandBus($customerStatus, $existingValue, $command);
+        $this->setupDependencies($customerStatus, $existingValue, $command);
         $this->setupCustomerStatus($customerStatus, $existingValue);
 
-        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerStatus, $result);
     }
@@ -110,8 +113,11 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         return new CustomerStatusPatchDto('');
     }
 
-    private function setupRepository(string $ulid, ?CustomerStatus $customerStatus, Ulid $ulidMock): void
-    {
+    private function setupRepository(
+        string $ulid,
+        ?CustomerStatus $customerStatus,
+        Ulid $ulidMock
+    ): void {
         $this->repository
             ->expects($this->once())
             ->method('find')
@@ -128,14 +134,16 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
             ->willReturn($ulidMock);
     }
 
-    private function setupCustomerStatus(CustomerStatus $customerStatus, string $value): void
-    {
+    private function setupCustomerStatus(
+        CustomerStatus $customerStatus,
+        string $value
+    ): void {
         $customerStatus
             ->method('getValue')
             ->willReturn($value);
     }
 
-    private function setupFactoryAndCommandBus(
+    private function setupDependencies(
         CustomerStatus $customerStatus,
         string $value,
         UpdateCustomerStatusCommand $command
@@ -143,9 +151,10 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->factory
             ->expects($this->once())
             ->method('create')
-            ->with($customerStatus, $this->callback(function ($update) use ($value) {
-                return $update->value === $value;
-            }))
+            ->with($customerStatus, $this
+                ->callback(function ($update) use ($value) {
+                    return $update->value === $value;
+                }))
             ->willReturn($command);
 
         $this->commandBus

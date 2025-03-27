@@ -25,7 +25,9 @@ final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
 
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
 
-        $this->handler = new UpdateCustomerStatusCommandHandler($this->repository);
+        $this->handler = new UpdateCustomerStatusCommandHandler(
+            $this->repository
+        );
     }
 
     public function testInvoke(): void

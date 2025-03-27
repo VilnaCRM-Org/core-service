@@ -23,7 +23,9 @@ final class UpdateCustomerTypeCommandHandlerTest extends UnitTestCase
         parent::setUp();
 
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
-        $this->handler = new UpdateCustomerTypeCommandHandler($this->repository);
+        $this->handler = new UpdateCustomerTypeCommandHandler(
+            $this->repository
+        );
     }
 
     public function testInvoke(): void
