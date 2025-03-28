@@ -99,6 +99,8 @@ behat: ## A php framework for autotesting business expectations
 
 integration-tests: ## Run integration tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Integration
+negative: ## Run integration tests
+	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
 
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
