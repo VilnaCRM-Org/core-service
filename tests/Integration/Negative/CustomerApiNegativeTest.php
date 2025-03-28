@@ -7,7 +7,7 @@ namespace App\Tests\Integration\Negative;
 use App\Tests\Integration\Negative\Kernel\NegativeKernel;
 use Symfony\Component\HttpFoundation\Response;
 
-class CustomerApiNegativeTest extends BaseNegativeApiTest
+final class CustomerApiNegativeTest extends BaseNegativeApiTest
 {
     protected static function getKernelClass(): string
     {
