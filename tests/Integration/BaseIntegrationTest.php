@@ -8,14 +8,18 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Tests\Unit\UlidProvider;
 use Faker\Factory;
 use Faker\Generator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class BaseIntegrationTest extends ApiTestCase
 {
     protected Generator $faker;
 
+    protected ContainerInterface $container;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->container = $this->getContainer();
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
     }

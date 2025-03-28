@@ -83,27 +83,10 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         $payload = $this->getCustomerPayload('Replace Test');
         $iri = $this->createEntity('/api/customers', $payload);
-        $updatedPayload = [
-            'email' => $this->faker->unique()->email(),
-            'phone' => '1112223333',
-            'initials' => 'Replaced',
-            'leadSource' => 'Yahoo',
-            'type' => $this->createCustomerType(),
-            'status' => $this->createCustomerStatus(),
-            'confirmed' => false,
-        ];
-        $client = self::createClient();
-        $client->request(
-            'PUT',
-            $iri,
-            [
-                'headers' => ['Content-Type' => 'application/ld+json'],
-                'body' => json_encode($updatedPayload),
-            ]
-        );
-        $this->assertResponseIsSuccessful();
-        $data = (self::createClient()->request('GET', $iri))->toArray();
-        $this->assertSame($updatedPayload['email'], $data['email']);
+
+        $updatedPayload = $this->getUpdatedCustomerPayload();
+        $this->updateCustomer($iri, $updatedPayload);
+        $this->verifyCustomerUpdate($iri, $updatedPayload);
     }
 
     public function testReplaceCustomerFailure(): void
@@ -225,6 +208,48 @@ final class CustomerApiTest extends BaseIntegrationTest
         $client = self::createClient();
         $client->request('DELETE', "/api/customers/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
+    }
+
+    /**
+     * @return array<string, CustomerStatus, CustomerType, string, bool>
+     */
+    private function getUpdatedCustomerPayload(): array
+    {
+        return [
+            'email' => $this->faker->unique()->email(),
+            'phone' => '1112223333',
+            'initials' => 'Replaced',
+            'leadSource' => 'Yahoo',
+            'type' => $this->createCustomerType(),
+            'status' => $this->createCustomerStatus(),
+            'confirmed' => false,
+        ];
+    }
+
+    /**
+     * @param array<string, string> $payload
+     */
+    private function updateCustomer(string $iri, array $payload): void
+    {
+        $client = self::createClient();
+        $client->request(
+            'PUT',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode($payload),
+            ]
+        );
+        $this->assertResponseIsSuccessful();
+    }
+
+    /**
+     * @param array<string, CustomerStatus, CustomerType, string, bool> $payload
+     */
+    private function verifyCustomerUpdate(string $iri, array $payload): void
+    {
+        $data = (self::createClient()->request('GET', $iri))->toArray();
+        $this->assertSame($payload['email'], $data['email']);
     }
 
     /**
