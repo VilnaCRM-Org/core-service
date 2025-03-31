@@ -1,13 +1,29 @@
 openapi: 3.1.0
 info:
-  title: 'Core Service API'
-  description: 'This API provides endpoints to manage core service data within a VilnaCRM.'
+  title: 'PHP Service Template API'
+  description: 'This API provides endpoints to manage php service template data within a VilnaCRM.'
   version: 1.0.0
 servers:
   -
     url: /
     description: ''
 paths:
+  /api/example_api_resources:
+    get:
+      operationId: api_example_api_resources_get
+      tags:
+        - ExampleApiResource
+      responses:
+        '200':
+          description: 'ExampleApiResource resource'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExampleApiResource'
+      summary: 'Retrieves a ExampleApiResource resource.'
+      description: 'Retrieves a ExampleApiResource resource.'
+      parameters: []
+      deprecated: false
   /api/health:
     get:
       operationId: api_health_get
@@ -24,6 +40,10 @@ paths:
       deprecated: false
 components:
   schemas:
+    ExampleApiResource:
+      type: object
+      description: ''
+      deprecated: false
     HealthCheck:
       type: object
       description: ''
@@ -35,5 +55,9 @@ components:
   headers: {  }
   securitySchemes: {  }
 security: []
-tags: []
+tags:
+  -
+    name: ExampleApiResource
+  -
+    name: HealthCheck
 webhooks: {  }
