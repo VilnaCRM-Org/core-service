@@ -28,10 +28,7 @@ final class CustomerStatusApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest(
             'POST',
             '/api/customer_statuses',
-            $payload,
-            [],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
-            'application/ld+json'
+            $payload
         );
     }
 
@@ -45,10 +42,7 @@ final class CustomerStatusApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest(
             'PUT',
             "/api/customer_statuses/{$statusId}",
-            $payload,
-            [],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
-            'application/ld+json'
+            $payload
         );
     }
 

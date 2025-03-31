@@ -28,10 +28,7 @@ final class CustomerTypeApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest(
             'POST',
             '/api/customer_types',
-            $payload,
-            [],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
-            'application/ld+json'
+            $payload
         );
     }
 
@@ -45,10 +42,7 @@ final class CustomerTypeApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest(
             'PUT',
             "/api/customer_types/{$typeId}",
-            $payload,
-            [],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
-            'application/ld+json'
+            $payload
         );
     }
 
