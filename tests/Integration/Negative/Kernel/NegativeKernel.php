@@ -9,34 +9,30 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
-class NegativeKernel extends BaseKernel
+final class NegativeKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
     public const CONFIG_EXTS = '.{php,xml,yaml,yml}';
+    private const CONFIG_DOCTRINE_YAML = '/config/doctrine.yaml';
 
     /**
      * @var iterable<string>
      */
     private array $extraConfigs;
 
-    /**
-     * @param iterable<string> $extraConfigs
-     */
     public function __construct(
         string $environment,
         bool $debug,
-        array $extraConfigs = []
     ) {
         parent::__construct($environment, $debug);
-        $this->extraConfigs = [__DIR__ . '/config/doctrine.yaml'];
+        $this->extraConfigs = [__DIR__ . self::CONFIG_DOCTRINE_YAML];
     }
 
     public function configureContainer(
         ContainerBuilder $container,
         LoaderInterface $loader
     ): void {
-
         $confDir = $this->getProjectDir() . '/config';
         $configFiles = [
             $confDir . '/packages/*' . self::CONFIG_EXTS,

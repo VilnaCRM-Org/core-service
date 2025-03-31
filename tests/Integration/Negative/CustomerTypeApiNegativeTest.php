@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Negative;
 
-use App\Tests\Integration\Negative\Kernel\NegativeKernel;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CustomerTypeApiNegativeTest extends BaseNegativeApiTest
 {
-    protected static function getKernelClass(): string
-    {
-        return NegativeKernel::class;
-    }
-
     public function testGetCustomerTypesCollection500Error(): void
     {
         $this->sendRequest('GET', '/api/customer_types');

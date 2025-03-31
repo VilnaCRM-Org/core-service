@@ -28,6 +28,10 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         return NegativeKernel::class;
     }
 
+    /**
+     * @param array<string, string> $payload
+     * @param array<string, string> $headers
+     */
     protected function sendRequest(
         string $method,
         string $uri,
@@ -47,7 +51,7 @@ abstract class BaseNegativeApiTest extends ApiTestCase
             ),
         ];
 
-        if (!empty($payload)) {
+        if (count($payload) > 0) {
             $options['json'] = $payload;
         }
 
