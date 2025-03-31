@@ -72,7 +72,7 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
 
     public function testReplaceCustomerStatusFailure(): void
     {
-        $orig = $this->getStatusPayload('Active');
+        $orig = $this->getStatusPayload();
         $iri = $this->createEntity('/api/customer_statuses', $orig);
         $client = self::createClient();
         $client->request(

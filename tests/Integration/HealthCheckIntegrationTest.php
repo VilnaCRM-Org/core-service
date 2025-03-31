@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use Aws\Sqs\SqsClient;
 use Symfony\Component\Cache\Exception\CacheException;
@@ -28,25 +29,14 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         $client = self::createClient();
         $testContainer = $client->getContainer()->get('test.service_container');
 
-        $cacheMock = $this->getMockForAbstractClass(
-            CacheInterface::class,
-            [],
-            '',
-            false,
-            true,
-            true,
-            ['reset']
-        );
-        $cacheMock->method('get')
-            ->willThrowException(new CacheException('Cache is not working'));
-        $cacheMock->method('reset')->willReturn(null);
-
+        $cacheMock = $this->createCacheMock();
         $testContainer->set(CacheInterface::class, $cacheMock);
 
-        $response = $client->request('GET', '/api/health');
-        $content = $response->getContent(false);
-        $this->assertEquals(500, $response->getStatusCode());
-        $this->assertStringContainsString('Cache is not working', $content);
+        $this->assertFailedHealthCheck(
+            $client,
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            'Cache is not working'
+        );
     }
 
     public function testHealthCheckWithBrokerFailure(): void
@@ -54,24 +44,14 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         self::ensureKernelShutdown();
         $client = self::createClient();
         $testContainer = $client->getContainer()->get('test.service_container');
-        $sqsClientMock = $this->getMockBuilder(SqsClient::class)
-            ->disableOriginalConstructor()
-            ->addMethods(['createQueue', 'reset'])->getMock();
-        $sqsClientMock->expects($this->once())
-            ->method('createQueue')
-            ->willThrowException(new \Exception(
-                'Message broker is not available'
-            ));
-        $sqsClientMock->method('reset')->willReturn(null);
 
+        $sqsClientMock = $this->createSqsClientMock();
         $testContainer->set(SqsClient::class, $sqsClientMock);
 
-        $response = $client->request('GET', '/api/health');
-        $content = $response->getContent(false);
-        $this->assertEquals(500, $response->getStatusCode());
-        $this->assertStringContainsString(
-            'Message broker is not available',
-            $content
+        $this->assertFailedHealthCheck(
+            $client,
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            'Message broker is not available'
         );
     }
 
@@ -93,7 +73,55 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
 
         $response = $client->request('GET', '/api/health');
         $content = $response->getContent(false);
-        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            $response->getStatusCode()
+        );
         $this->assertStringContainsString('Database error', $content);
+    }
+
+    private function assertFailedHealthCheck(
+        Client $client,
+        int $expectedStatusCode,
+        string $expectedErrorMessage
+    ): void {
+        $response = $client->request('GET', '/api/health');
+        $content = $response->getContent(false);
+        $this->assertEquals($expectedStatusCode, $response->getStatusCode());
+        $this->assertStringContainsString($expectedErrorMessage, $content);
+    }
+
+    private function createCacheMock(): CacheInterface
+    {
+        $cacheMock = $this->getMockForAbstractClass(
+            CacheInterface::class,
+            [],
+            '',
+            false,
+            true,
+            true,
+            ['reset']
+        );
+        $cacheMock->method('get')
+            ->willThrowException(new CacheException('Cache is not working'));
+        $cacheMock->method('reset')->willReturn(null);
+
+        return $cacheMock;
+    }
+
+    private function createSqsClientMock(): SqsClient
+    {
+        $sqsClientMock = $this->getMockBuilder(SqsClient::class)
+            ->disableOriginalConstructor()
+            ->addMethods(['createQueue', 'reset'])
+            ->getMock();
+        $sqsClientMock->expects($this->once())
+            ->method('createQueue')
+            ->willThrowException(new \Exception(
+                'Message broker is not available'
+            ));
+        $sqsClientMock->method('reset')->willReturn(null);
+
+        return $sqsClientMock;
     }
 }

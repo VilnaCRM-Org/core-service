@@ -31,39 +31,109 @@ final class CustomerUpdateTest extends UnitTestCase
     {
         $data = $this->createCustomerUpdate();
         $update = $data['update'];
-        $this->assertEquals('John Doe', $update->newInitials);
-        $this->assertEquals('john@example.com', $update->newEmail);
-        $this->assertEquals('+1234567890', $update->newPhone);
-        $this->assertEquals('website', $update->newLeadSource);
+
+        $this->assertEquals($data['initials'], $update->newInitials);
+        $this->assertEquals($data['email'], $update->newEmail);
+        $this->assertEquals($data['phone'], $update->newPhone);
+        $this->assertEquals($data['leadSource'], $update->newLeadSource);
         $this->assertSame($data['customerType'], $update->newType);
         $this->assertSame($data['customerStatus'], $update->newStatus);
         $this->assertTrue($update->newConfirmed);
     }
 
     /**
-     * @return array<CustomerType, CustomerStatus, CustomerUpdate>
+     * @return array{
+     *     update: CustomerUpdate,
+     *     customerType: CustomerType,
+     *     customerStatus: CustomerStatus,
+     *     initials: string,
+     *     email: string,
+     *     phone: string,
+     *     leadSource: string
+     * }
      */
     private function createCustomerUpdate(): array
     {
-        $typeUlid = $this->ulidTransformer
-            ->transformFromSymfonyUlid($this->ulidFactory->create());
-        $statusUlid = $this->ulidTransformer
-            ->transformFromSymfonyUlid($this->ulidFactory->create());
-        $customerType = new CustomerType('individual', $typeUlid);
-        $customerStatus = new CustomerStatus('active', $statusUlid);
+        $customerType = $this->createCustomerType();
+        $customerStatus = $this->createCustomerStatus();
+        $customerData = $this->generateCustomerData();
+
         $update = new CustomerUpdate(
-            newInitials: 'John Doe',
-            newEmail: 'john@example.com',
-            newPhone: '+1234567890',
-            newLeadSource: 'website',
+            newInitials: $customerData['initials'],
+            newEmail: $customerData['email'],
+            newPhone: $customerData['phone'],
+            newLeadSource: $customerData['leadSource'],
             newType: $customerType,
             newStatus: $customerStatus,
             newConfirmed: true,
         );
+
+        return $this->createUpdateData(
+            $update,
+            $customerType,
+            $customerStatus,
+            $customerData
+        );
+    }
+
+    /**
+     * @param array{initials: string, email: string, phone: string, leadSource: string} $customerData
+     *
+     * @return array{
+     *     update: CustomerUpdate,
+     *     customerType: CustomerType,
+     *     customerStatus: CustomerStatus,
+     *     initials: string,
+     *     email: string,
+     *     phone: string,
+     *     leadSource: string
+     * }
+     */
+    private function createUpdateData(
+        CustomerUpdate $update,
+        CustomerType $customerType,
+        CustomerStatus $customerStatus,
+        array $customerData
+    ): array {
         return [
             'update' => $update,
             'customerType' => $customerType,
             'customerStatus' => $customerStatus,
+            'initials' => $customerData['initials'],
+            'email' => $customerData['email'],
+            'phone' => $customerData['phone'],
+            'leadSource' => $customerData['leadSource'],
+        ];
+    }
+
+    private function createCustomerType(): CustomerType
+    {
+        $typeUlid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->ulidFactory->create());
+
+        return new CustomerType('individual', $typeUlid);
+    }
+
+    private function createCustomerStatus(): CustomerStatus
+    {
+        $statusUlid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->ulidFactory->create());
+
+        return new CustomerStatus('active', $statusUlid);
+    }
+
+    /**
+     * @return array{initials: string, email: string, phone: string, leadSource: string}
+     */
+    private function generateCustomerData(): array
+    {
+        return [
+            'initials' => $this->faker->name(),
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'leadSource' => $this->faker->randomElement(
+                ['website', 'referral', 'social']
+            ),
         ];
     }
 }
