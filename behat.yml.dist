@@ -1,7 +1,17 @@
 default:
-
-    extensions:
-        FriendsOfBehat\SymfonyExtension:
-            bootstrap: 'tests/bootstrap.php'
-            kernel:
-                class: App\Shared\Kernel
+  testers:
+    stop_on_failure: true
+    strict: true
+  autoload:
+    '': "%paths.base%/tests/Acceptance"
+  extensions:
+    TwentytwoLabs\BehatOpenApiExtension:
+      schemaFile: "file:///srv/app/.github/openapi-spec/spec.yaml"
+    Behat\MinkExtension:
+      sessions:
+        default:
+          browserkit_http: ~
+  suites:
+    default:
+      paths: [ "%paths.base%/tests/Acceptance" ]
+      contexts:
