@@ -45,7 +45,7 @@ final class CreateTypeCommandHandlerTest extends UnitTestCase
             ->method('save')
             ->with($type);
 
-        $this->handler->__invoke($command);
+        ($this->handler)($command);
 
         $response = $command->getResponse();
         $this->assertInstanceOf(CreateTypeCommandResponse::class, $response);

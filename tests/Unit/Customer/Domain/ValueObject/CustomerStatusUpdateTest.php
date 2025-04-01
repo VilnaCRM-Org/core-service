@@ -6,14 +6,12 @@ namespace App\Tests\Unit\Customer\Domain\ValueObject;
 
 use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Tests\Unit\UnitTestCase;
-use Faker\Factory;
 
 final class CustomerStatusUpdateTest extends UnitTestCase
 {
     public function testConstruct(): void
     {
-        $faker = Factory::create();
-        $value = $faker->word();
+        $value = $this->faker->word();
 
         $update = new CustomerStatusUpdate($value);
 

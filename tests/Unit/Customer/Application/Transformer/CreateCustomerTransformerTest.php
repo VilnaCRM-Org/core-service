@@ -12,15 +12,12 @@ use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Uid\Factory\UlidFactory;
 
 final class CreateCustomerTransformerTest extends UnitTestCase
 {
-    private CustomerFactoryInterface $customerFactory;
-    private UlidTransformer $transformer;
     private UlidFactory $symfonyUlidFactory;
     private UlidTransformer $ulidTransformerMock;
     private UlidFactory $ulidFactoryMock;
@@ -31,9 +28,6 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->customerFactory = $this
-            ->createMock(CustomerFactoryInterface::class);
-        $this->transformer = new UlidTransformer(new UlidFactoryInterface());
         $this->symfonyUlidFactory = new UlidFactory();
         $this->ulidTransformerMock = $this
             ->createMock(UlidTransformer::class);

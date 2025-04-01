@@ -186,12 +186,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
             'newConfirmed' => $dto->confirmed,
         ];
 
-        foreach ($expected as $property => $value) {
-            if ($update->{$property} !== $value) {
-                return false;
-            }
-        }
-        return true;
+        return get_object_vars($update) === $expected;
     }
 
     private function createDto(): CustomerPutDto

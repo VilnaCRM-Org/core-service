@@ -10,7 +10,6 @@ use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Customer\Infrastructure\Factory\UpdateStatusCommandFactory;
 use App\Tests\Unit\UnitTestCase;
-use Faker\Factory;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class UpdateCustomerStatusCommandFactoryTest extends UnitTestCase
@@ -26,8 +25,7 @@ final class UpdateCustomerStatusCommandFactoryTest extends UnitTestCase
 
     public function testCreate(): void
     {
-        $faker = Factory::create();
-        $value = $faker->word();
+        $value = $this->faker->word();
         $customerStatus = $this->createMock(CustomerStatus::class);
         $update = new CustomerStatusUpdate($value);
 

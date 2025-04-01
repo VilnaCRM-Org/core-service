@@ -9,7 +9,6 @@ use App\Customer\Application\Transformer\CreateStatusTransformer;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -18,7 +17,6 @@ use Symfony\Component\Uid\Factory\UlidFactory;
 final class CreateStatusTransformerTest extends UnitTestCase
 {
     private StatusFactoryInterface|MockObject $statusFactory;
-    private UlidTransformer $transformer;
     private UlidFactory $symfonyUlidFactory;
     private UlidTransformer|MockObject $ulidTransformerMock;
     private UlidFactory|MockObject $ulidFactoryMock;
@@ -29,7 +27,6 @@ final class CreateStatusTransformerTest extends UnitTestCase
         parent::setUp();
 
         $this->statusFactory = $this->createMock(StatusFactoryInterface::class);
-        $this->transformer = new UlidTransformer(new UlidFactoryInterface());
         $this->symfonyUlidFactory = new UlidFactory();
         $this->ulidTransformerMock = $this->createMock(UlidTransformer::class);
         $this->ulidFactoryMock = $this->createMock(UlidFactory::class);

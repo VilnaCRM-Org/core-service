@@ -10,8 +10,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InitialsValidator extends ConstraintValidator
 {
-    private const MAX_INITIALS_LENGTH = 255;
-
     public function __construct(
         private readonly TranslatorInterface $translator
     ) {
@@ -19,7 +17,8 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($this->isNull($value) ||
+        if (
+            $this->isNull($value) ||
             ($constraint->isOptional() && $this->isEmpty($value))
         ) {
             return;

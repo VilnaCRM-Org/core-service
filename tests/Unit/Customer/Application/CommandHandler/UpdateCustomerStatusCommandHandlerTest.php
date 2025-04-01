@@ -11,7 +11,6 @@ use App\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 use App\Tests\Unit\UnitTestCase;
-use Faker\Factory;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
@@ -32,8 +31,7 @@ final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
 
     public function testInvoke(): void
     {
-        $faker = Factory::create();
-        $value = $faker->word();
+        $value = $this->faker->word();
         $customerStatus = $this->createMock(CustomerStatus::class);
         $update = new CustomerStatusUpdate($value);
         $command = new UpdateCustomerStatusCommand($customerStatus, $update);
@@ -48,7 +46,7 @@ final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
             ->method('setValue')
             ->with($value);
 
-        $this->handler->__invoke($command);
+        ($this->handler)($command);
     }
 
     public function testImplementsCommandHandlerInterface(): void

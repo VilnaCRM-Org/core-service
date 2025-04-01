@@ -89,6 +89,7 @@ final class UlidTransformerTest extends UnitTestCase
         $result = $this->ulidTransformer->toPhpValue($symfonyUlid);
 
         $this->assertInstanceOf(Ulid::class, $result);
+        $this->assertSame($ulid, $result);
     }
 
     public function testTransformFromSymfonyUlid(): void

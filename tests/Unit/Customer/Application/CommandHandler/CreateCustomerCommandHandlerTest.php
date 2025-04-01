@@ -49,7 +49,7 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
             ->method('save')
             ->with($customer);
 
-        $this->handler->__invoke($command);
+        ($this->handler)($command);
 
         $response = $command->getResponse();
         $this->assertInstanceOf(

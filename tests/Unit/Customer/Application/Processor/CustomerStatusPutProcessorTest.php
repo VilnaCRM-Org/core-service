@@ -48,13 +48,13 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
+        $ulid = (string) $this->faker->ulid();
         $customerStatus = $this->createMock(CustomerStatus::class);
         $command = $this
             ->createMock(UpdateCustomerStatusCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($ulid, $customerStatus, $ulidMock);
+        $this->setupRepository($customerStatus, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
         $this->setupDependencies($customerStatus, $dto->value, $command);
 
@@ -68,10 +68,10 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
+        $ulid = (string) $this->faker->ulid();
         $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($ulid, null, $ulidMock);
+        $this->setupRepository(null, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
 
         $this->expectException(CustomerStatusNotFoundException::class);
@@ -88,7 +88,6 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
     }
 
     private function setupRepository(
-        string $ulid,
         ?CustomerStatus $customerStatus,
         Ulid $ulidMock
     ): void {

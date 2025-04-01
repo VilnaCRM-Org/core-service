@@ -48,12 +48,12 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
+        $ulid = (string) $this->faker->ulid();
         $customerType = $this->createMock(CustomerType::class);
         $command = $this->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($ulid, $customerType, $ulidMock);
+        $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
         $this->setupDependencies($customerType, $dto->value, $command);
         $this->setupCustomerType($customerType, $dto->value);
@@ -69,13 +69,13 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $existingValue = $this->faker->word();
         $dto = $this->createDtoWithEmptyValue();
         $operation = $this->createMock(Operation::class);
-        $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
+        $ulid = (string) $this->faker->ulid();
         $customerType = $this->createMock(CustomerType::class);
         $command = $this
             ->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($ulid, $customerType, $ulidMock);
+        $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
         $this->setupDependencies($customerType, $existingValue, $command);
         $this->setupCustomerType($customerType, $existingValue);
@@ -90,10 +90,10 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $ulid = '01HX5Z5Y5Z5Y5Z5Y5Z5Y5Z5Y5Z';
+        $ulid = (string) $this->faker->ulid();
         $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($ulid, null, $ulidMock);
+        $this->setupRepository(null, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
 
         $this->expectException(CustomerTypeNotFoundException::class);
@@ -115,7 +115,6 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     }
 
     private function setupRepository(
-        string $ulid,
         ?CustomerType $customerType,
         Ulid $ulidMock
     ): void {

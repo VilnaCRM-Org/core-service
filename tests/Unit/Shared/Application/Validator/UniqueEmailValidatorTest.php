@@ -20,9 +20,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class UniqueEmailValidatorTest extends UnitTestCase
 {
-    private CustomerFactoryInterface $userFactory;
+    private CustomerFactoryInterface $customerFactory;
     private UlidTransformer $transformer;
-    private CustomerRepositoryInterface $userRepository;
+    private CustomerRepositoryInterface $customerRepository;
     private ExecutionContext $context;
     private TranslatorInterface $translator;
     private UniqueEmailValidator $validator;
@@ -31,15 +31,15 @@ final class UniqueEmailValidatorTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->userFactory = new CustomerFactory();
+        $this->customerFactory = new CustomerFactory();
         $this->transformer = new UlidTransformer(new UlidFactory());
-        $this->userRepository =
+        $this->customerRepository =
             $this->createMock(CustomerRepositoryInterface::class);
         $this->context = $this->createMock(ExecutionContext::class);
 
         $this->translator = $this->createMock(TranslatorInterface::class);
         $this->validator = new UniqueEmailValidator(
-            $this->userRepository,
+            $this->customerRepository,
             $this->translator
         );
         $this->validator->initialize($this->context);
@@ -48,9 +48,9 @@ final class UniqueEmailValidatorTest extends UnitTestCase
     public function testValidate(): void
     {
         $email = $this->faker->email();
-        $user = $this->createCustomer($email);
+        $customer = $this->createCustomer($email);
 
-        $this->setupValidationExpectations($email, $user);
+        $this->setupValidationExpectations($email, $customer);
 
         $this->validator->validate($email, new UniqueEmail());
     }
@@ -66,7 +66,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
 
-        return $this->userFactory->create(
+        return $this->customerFactory->create(
             $this->faker->name(),
             $email,
             $this->faker->phoneNumber(),
@@ -80,14 +80,14 @@ final class UniqueEmailValidatorTest extends UnitTestCase
 
     private function setupValidationExpectations(
         string $email,
-        CustomerInterface $user
+        CustomerInterface $customer
     ): string {
         $errorMessage = $this->faker->word();
 
-        $this->userRepository->expects($this->once())
+        $this->customerRepository->expects($this->once())
             ->method('findByEmail')
             ->with($email)
-            ->willReturn($user);
+            ->willReturn($customer);
 
         $this->translator->expects($this->once())
             ->method('trans')

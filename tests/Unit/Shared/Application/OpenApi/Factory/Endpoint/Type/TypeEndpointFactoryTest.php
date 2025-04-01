@@ -42,6 +42,18 @@ final class TypeEndpointFactoryTest extends UnitTestCase
     private Operation $operationPost;
     private Operation $operationGet;
 
+    /**
+     * Properties to capture the final responses passed into the operations.
+     *
+     * @var array<int, Response>
+     */
+    private array $postReponses = [];
+
+    /**
+     * @var array<int, Response>
+     */
+    private array $responses = [];
+
     protected function setUp(): void
     {
         $this->setupFactoryMocks();
@@ -56,6 +68,20 @@ final class TypeEndpointFactoryTest extends UnitTestCase
 
         $factory = $this->createFactory();
         $factory->createEndpoint($this->openApi);
+
+        $expectedPostResponses = $this->getPostExpectedResponses();
+        $expectedGetResponses = $this->getGetExpectedResponses();
+
+        $this->assertEquals(
+            $expectedPostResponses,
+            $this->postReponses,
+            'Post operation responses do not match the expected values.'
+        );
+        $this->assertEquals(
+            $expectedGetResponses,
+            $this->responses,
+            'Get operation responses do not match the expected values.'
+        );
     }
 
     private function setupFactoryMocks(): void
@@ -152,32 +178,35 @@ final class TypeEndpointFactoryTest extends UnitTestCase
 
     private function setupPathItemExpectations(): void
     {
-        $this->pathItem->expects(
-            $this->once()
-        )->method('getPost')->willReturn($this->operationPost);
-        $this->pathItem->expects(
-            $this->once()
-        )->method('getGet')->willReturn($this->operationGet);
+        $this->pathItem->expects($this->once())
+            ->method('getPost')
+            ->willReturn($this->operationPost);
+        $this->pathItem->expects($this->once())
+            ->method('getGet')
+            ->willReturn($this->operationGet);
     }
 
     private function setupOperationResponsesExpectations(): void
     {
-        $this->operationPost->expects(
-            $this->once()
-        )->method('getResponses')->willReturn([]);
-        $this->operationGet->expects(
-            $this->once()
-        )->method('getResponses')->willReturn([]);
+        $this->operationPost->expects($this->once())
+            ->method('getResponses')
+            ->willReturn([]);
+        $this->operationGet->expects($this->once())
+            ->method('getResponses')
+            ->willReturn([]);
     }
 
     private function setupOperationsWithResponses(): void
     {
-        $expectedPostResponses = $this->getPostExpectedResponses();
-        $expectedGetResponses = $this->getGetExpectedResponses();
+        $postExpected = $this->getPostExpectedResponses();
+        $getExpected = $this->getGetExpectedResponses();
 
         $this->operationPost->expects($this->once())
             ->method('withResponses')
-            ->with($expectedPostResponses)
+            ->with($this->callback(function ($responses) use ($postExpected) {
+                $this->postReponses = $responses;
+                return $responses === $postExpected;
+            }))
             ->willReturnSelf();
         $this->operationPost->expects($this->once())
             ->method('withRequestBody')
@@ -186,7 +215,10 @@ final class TypeEndpointFactoryTest extends UnitTestCase
 
         $this->operationGet->expects($this->once())
             ->method('withResponses')
-            ->with($expectedGetResponses)
+            ->with($this->callback(function ($responses) use ($getExpected) {
+                $this->responses = $responses;
+                return $responses === $getExpected;
+            }))
             ->willReturnSelf();
     }
 

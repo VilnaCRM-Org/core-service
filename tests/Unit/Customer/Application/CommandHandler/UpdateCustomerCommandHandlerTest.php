@@ -97,6 +97,6 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
     ): void {
         $this->repository->expects($this->once())
             ->method('save')->with($customer);
-        $this->handler->__invoke($command);
+        ($this->handler)($command);
     }
 }

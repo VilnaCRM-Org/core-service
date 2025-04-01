@@ -45,7 +45,7 @@ final class CreateStatusCommandHandlerTest extends UnitTestCase
             ->method('save')
             ->with($status);
 
-        $this->handler->__invoke($command);
+        ($this->handler)($command);
 
         $response = $command->getResponse();
         $this->assertInstanceOf(CreateStatusCommandResponse::class, $response);

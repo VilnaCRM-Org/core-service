@@ -17,7 +17,7 @@ final class RequestPatchBuilderTest extends UnitTestCase
 
         $params = [];
         $expectedContent = new \ArrayObject([
-            'application/ld+json' => [
+            'application/merge-patch+json' => [
                 'schema' => [
                     'type' => 'object',
                     'properties' => [],
