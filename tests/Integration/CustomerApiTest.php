@@ -43,9 +43,9 @@ final class CustomerApiTest extends BaseIntegrationTest
     public function testCreateCustomerFailure(): void
     {
         $payload = [
-            'phone' => '0123456789',
+            'phone' => $this->faker->phoneNumber,
             'initials' => 'No Email',
-            'leadSource' => 'Google',
+            'leadSource' => $this->faker->word(),
             'confirmed' => true,
         ];
         $client = self::createClient();
@@ -259,9 +259,9 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         return [
             'email' => $this->faker->unique()->email(),
-            'phone' => '0123456789',
+            'phone' => $this->faker->phoneNumber,
             'initials' => $name,
-            'leadSource' => 'Google',
+            'leadSource' => $this->faker->word(),
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
             'confirmed' => true,
@@ -272,7 +272,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         return $this->createEntity(
             '/api/customer_statuses',
-            ['value' => 'Active'],
+            ['value' => $this->faker->word()],
             'CustomerStatus'
         );
     }
@@ -281,7 +281,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         return $this->createEntity(
             '/api/customer_types',
-            ['value' => 'Prospect'],
+            ['value' => $this->faker->word()],
             'CustomerType'
         );
     }

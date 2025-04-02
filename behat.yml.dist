@@ -8,10 +8,14 @@ default:
     TwentytwoLabs\BehatOpenApiExtension:
       schemaFile: "file:///srv/app/.github/openapi-spec/spec.yaml"
     Behat\MinkExtension:
+      base_url: "https://caddy"
       sessions:
         default:
           browserkit_http: ~
   suites:
     default:
-      paths: [ "%paths.base%/tests/Acceptance" ]
       contexts:
+        - TwentytwoLabs\BehatOpenApiExtension\Context\DebugContext: ~
+        - TwentytwoLabs\BehatOpenApiExtension\Context\RestContext: ~
+        - TwentytwoLabs\BehatOpenApiExtension\Context\JsonContext: ~
+        - TwentytwoLabs\BehatOpenApiExtension\Context\OpenApiContext: ~
