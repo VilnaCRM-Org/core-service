@@ -284,9 +284,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @param array<CustomerPatchDto> $exData
+     * @param array<string, string|bool> $exData
      *
-     * @return array<CustomerPatchDto, string>
+     * @return array{CustomerPatchDto, Operation, array<string, string>, Customer}
      */
     private function prepareProcessPreserveData(
         CustomerPatchDto $dto,
@@ -312,7 +312,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @return array<Operation, Ulid, string>
+     * @return array{Operation, array<string, string>, Ulid}
      */
     private function createOperationContext(): array
     {

@@ -15,10 +15,10 @@ use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Uid\Factory\UlidFactory;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class CreateCustomerTransformerTest extends UnitTestCase
 {
-    private UlidFactory $symfonyUlidFactory;
     private UlidTransformer $ulidTransformerMock;
     private UlidFactory $ulidFactoryMock;
     private CustomerFactoryInterface $customerFactoryMock;
@@ -28,7 +28,6 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->symfonyUlidFactory = new UlidFactory();
         $this->ulidTransformerMock = $this
             ->createMock(UlidTransformer::class);
         $this->ulidFactoryMock = $this
@@ -152,7 +151,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         $this->ulidFactoryMock->expects($this->once())
             ->method('create')
-            ->willReturn($this->symfonyUlidFactory->create());
+            ->willReturn($this->createMock(SymfonyUlid::class));
 
         $this->ulidTransformerMock->expects($this->once())
             ->method('transformFromSymfonyUlid')

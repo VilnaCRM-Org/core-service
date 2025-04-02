@@ -47,7 +47,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
      *
      * @var array<int, Response>
      */
-    private array $postReponses = [];
+    private array $postResponses = [];
 
     /**
      * @var array<int, Response>
@@ -74,7 +74,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
 
         $this->assertEquals(
             $expectedPostResponses,
-            $this->postReponses,
+            $this->postResponses,
             'Post operation responses do not match the expected values.'
         );
         $this->assertEquals(
@@ -204,7 +204,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
         $this->operationPost->expects($this->once())
             ->method('withResponses')
             ->with($this->callback(function ($responses) use ($postExpected) {
-                $this->postReponses = $responses;
+                $this->postResponses = $responses;
                 return $responses === $postExpected;
             }))
             ->willReturnSelf();

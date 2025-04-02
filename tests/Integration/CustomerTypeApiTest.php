@@ -27,14 +27,15 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
 
     public function testCreateCustomerTypeSuccess(): void
     {
-        $payload = $this->getTypePayload('Retail');
+        $value = $this->faker->word();
+        $payload = $this->getTypePayload($value);
         $iri = $this->createEntity('/api/customer_types', $payload);
         $client = self::createClient();
         $response = $client->request('GET', $iri);
         $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
         $this->assertArrayHasKey('@id', $data);
-        $this->assertSame('Retail', $data['value']);
+        $this->assertSame($value, $data['value']);
     }
 
     public function testCreateCustomerTypeFailure(): void
@@ -66,7 +67,8 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
             ]
         );
         $this->assertResponseIsSuccessful();
-        $data = (self::createClient()->request('GET', $iri))->toArray();
+        $response = $client->request('GET', $iri);
+        $data = $response->toArray();
         $this->assertSame('Wholesale', $data['value']);
     }
 
@@ -117,7 +119,8 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
             ]
         );
         $this->assertResponseIsSuccessful();
-        $data = (self::createClient()->request('GET', $iri))->toArray();
+        $response = $client->request('GET', $iri);
+        $data = $response->toArray();
         $this->assertSame('VIP', $data['value']);
     }
 
