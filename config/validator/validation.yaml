@@ -98,6 +98,7 @@ App\Customer\Application\DTO\TypeCreateDto:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
+
 App\Customer\Application\DTO\StatusCreateDto:
   properties:
     value:

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Behat\CustomerContext;
 
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -18,7 +20,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 
-class CustomerContext implements Context
+final class CustomerContext implements Context
 {
     private Generator $faker;
 
@@ -41,9 +43,8 @@ class CustomerContext implements Context
      */
     public function customerWithIdExists(string $id): void
     {
-
-        $type = $this->getCustomerType((string)$this->faker->ulid());
-        $status = $this->getStatus((string)$this->faker->ulid());
+        $type = $this->getCustomerType((string) $this->faker->ulid());
+        $status = $this->getStatus((string) $this->faker->ulid());
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
 
@@ -87,7 +88,6 @@ class CustomerContext implements Context
                 $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
             );
     }
-
 
     public function getStatus(string $id): CustomerStatus
     {
