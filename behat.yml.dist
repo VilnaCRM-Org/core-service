@@ -5,16 +5,22 @@ default:
   autoload:
     '': "%paths.base%/tests/Acceptance"
   extensions:
+    FriendsOfBehat\SymfonyExtension:
+      bootstrap: 'tests/bootstrap.php'
+      kernel:
+        environment: test
+        class: App\Shared\Kernel
     TwentytwoLabs\BehatOpenApiExtension:
       schemaFile: "file:///srv/app/.github/openapi-spec/spec.yaml"
     Behat\MinkExtension:
-      base_url: "https://caddy"
+      base_url: "http://caddy"
       sessions:
         default:
           browserkit_http: ~
   suites:
     default:
       contexts:
+        - App\Tests\Behat\CustomerContext\CustomerContext
         - TwentytwoLabs\BehatOpenApiExtension\Context\DebugContext: ~
         - TwentytwoLabs\BehatOpenApiExtension\Context\RestContext: ~
         - TwentytwoLabs\BehatOpenApiExtension\Context\JsonContext: ~
