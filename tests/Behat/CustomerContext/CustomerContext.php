@@ -12,27 +12,29 @@ use App\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Customer\Domain\Repository\TypeRepositoryInterface;
-use App\Shared\Domain\Factory\UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;
+use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 
-final class CustomerContext implements Context
+final class CustomerContext implements Context, SnippetAcceptingContext
 {
     private Generator $faker;
+
+    private array $createdCustomerIds = [];
 
     public function __construct(
         private TypeRepositoryInterface $typeRepository,
         private StatusRepositoryInterface $statusRepository,
-        private UlidFactoryInterface $ulidFactory,
         private UlidTransformer $ulidTransformer,
         private CustomerRepositoryInterface $customerRepository,
         private CustomerFactoryInterface $customerFactory,
         private StatusFactoryInterface $statusFactory,
-        private TypeFactoryInterface $typeFactory,
+        private TypeFactoryInterface $typeFactory
     ) {
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
@@ -43,23 +45,27 @@ final class CustomerContext implements Context
      */
     public function customerWithIdExists(string $id): void
     {
-        $type = $this->getCustomerType((string) $this->faker->ulid());
-        $status = $this->getStatus((string) $this->faker->ulid());
+        $type = $this->getCustomerType((string)$this->faker->ulid());
+        $status = $this->getStatus((string)$this->faker->ulid());
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
 
-        $user = $this->customerRepository->find($id) ??
-            $this->customerFactory->create(
-                $this->faker->name(),
-                $this->faker->email(),
-                $this->faker->phoneNumber(),
-                $this->faker->name(),
-                $type,
-                $status,
-                true,
-                $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-            );
-        $this->customerRepository->save($user);
+        $initials = $this->faker->lexify('??');
+        $email = $this->faker->email();
+        $phone = $this->faker->phoneNumber();
+        $leadSource = $this->faker->word();
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
     }
 
     /**
@@ -80,6 +86,152 @@ final class CustomerContext implements Context
         $this->statusRepository->save($status);
     }
 
+    /**
+     * @Given customer with initials :initials exists
+     */
+    public function customerWithInitialsExists(string $initials): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $email = "customer_" . strtolower($initials) . "@example.com";
+        $phone = "0123456789";
+        $leadSource = "defaultSource";
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
+     * @Given customer with email :email exists
+     */
+    public function customerWithEmailExists(string $email): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $initials = substr($email, 0, 2);
+        $phone = "0123456789";
+        $leadSource = "defaultSource";
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
+     * @Given customer with phone :phone exists
+     */
+    public function customerWithPhoneExists(string $phone): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $initials = "TP";
+        $email = "customer_" . preg_replace('/\D/', '', $phone) . "@example.com";
+        $leadSource = "defaultSource";
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
+     * @Given customer with leadSource :leadSource exists
+     */
+    public function customerWithLeadSourceExists(string $leadSource): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $initials = "LS";
+        $email = "customer_" . strtolower($leadSource) . "@example.com";
+        $phone = "0123456789";
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        if (method_exists($customer, 'setLeadSource')) {
+            $customer->setLeadSource($leadSource);
+        }
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
+     * @Given customer with type value :typeValue and status value :statusValue exists
+     */
+    public function customerWithTypeAndStatusExists(string $typeValue, string $statusValue): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $type->setValue($typeValue);
+        $status->setValue($statusValue);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $initials = "TS";
+        $email = "customer_" . strtolower($typeValue) . "_" . strtolower($statusValue) . "@example.com";
+        $phone = "0123456789";
+        $leadSource = "defaultSource";
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
     public function getCustomerType(string $id): CustomerType
     {
         return $this->typeRepository->find($id) ??
@@ -96,5 +248,19 @@ final class CustomerContext implements Context
                 $this->faker->word(),
                 $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
             );
+    }
+
+    /**
+     * @AfterScenario
+     */
+    public function cleanupCreatedCustomers(AfterScenarioScope $scope): void
+    {
+        foreach ($this->createdCustomerIds as $id) {
+            $customer = $this->customerRepository->find($id);
+            if ($customer !== null) {
+                $this->customerRepository->delete($customer);
+            }
+        }
+        $this->createdCustomerIds = [];
     }
 }

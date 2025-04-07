@@ -23,4 +23,6 @@ interface CustomerRepositoryInterface
         int $lockMode = 0,
         ?int $lockVersion = null
     ): ?object;
+
+    public function delete(Customer $customer): void;
 }
