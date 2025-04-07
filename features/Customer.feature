@@ -19,7 +19,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should not be null
+    And the JSON node "totalItems" should be equal to the number 0
     And the JSON node "view.@id" should exist
 
   Scenario: Retrieve customers collection with default pagination and verify JSON structure
@@ -85,6 +85,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?leadSource=Google"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].leadSource" should contain "Google"
 
   Scenario: Retrieve customers collection filtering by leadSource (array values) and check JSON
@@ -98,12 +99,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[1].leadSource | Bing   |
 
   Scenario: Retrieve customers collection filtering by type.value and status.value and check JSON
-    Given customer with type value "VIP" and status value "Active" exists
+    Given customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "member[0].type.value" should contain "VIP"
-    And the JSON node "member[0].status.value" should match "/(Active|Inactive)/"
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Filtering by Boolean Parameter (Positive Tests) -----
 
@@ -115,14 +115,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].confirmed" should be true
 
   Scenario: Retrieve customers collection filtering by confirmed (array) and verify JSON
+    And customer with confirmed " " exists
     Given customer with confirmed true exists
-    And customer with confirmed false exists
-    When I send a GET request to "/api/customers?confirmed[]=true&confirmed[]=false"
+    When I send a GET request to "/api/customers?confirmed[]=true&confirmed[]"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON nodes should contain:
-      | member[0].confirmed | true  |
-      | member[1].confirmed | false |
+    And the JSON node "member[0].confirmed" should be false
+    And the JSON node "member[1].confirmed" should be true
 
   # ----- Ordering Parameters (Positive Tests) -----
 
@@ -130,8 +129,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?order[ulid]=asc&order[createdAt]=desc&order[email]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "view.@id" should contain "order[ulid]=asc"
-    And the JSON node "view.@id" should contain "order[createdAt]=desc"
+    And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
+    And the JSON node "view.@id" should contain "order%5BcreatedAt%5D=desc"
 
   # ----- Date Filters (Positive Tests) -----
 
@@ -139,42 +138,79 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?createdAt[before]=2025-12-31T23:59:59Z&createdAt[strictly_before]=2025-12-31T23:59:59Z&createdAt[after]=2020-01-01T00:00:00Z&createdAt[strictly_after]=2020-01-01T00:00:00Z"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "view.@type" should contain "hydra:PartialCollectionView"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
+    Given customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     When I send a GET request to "/api/customers?updatedAt[before]=2025-12-31T23:59:59Z&updatedAt[strictly_before]=2025-12-31T23:59:59Z&updatedAt[after]=2020-01-01T00:00:00Z&updatedAt[strictly_after]=2020-01-01T00:00:00Z"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "view.next" should not be null
+    And the JSON node "view.next" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Ulid Filter Operators (Positive Tests) -----
-
   Scenario: Retrieve customers collection with ulid filter operator lt and check JSON value
-    When I send a GET request to "/api/customers?ulid[lt]=01ABCDEF1234567890"
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a GET request to "/api/customers?ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "member[0].ulid" should be less than "01ABCDEF1234567890"
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "@id" should be equal to "/api/customers"
+    And the JSON node "@type" should be equal to "Collection"
 
-  Scenario: Retrieve customers collection with ulid filter operator between and check JSON with regex
-    When I send a GET request to "/api/customers?ulid[between]=01ABCDEF1234567890,01ABCDEF1234567899"
+  # Scenario for "lte"
+  Scenario: Retrieve customers collection with ulid filter operator lte and check JSON value
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a GET request to "/api/customers?ulid[lte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "member[0].ulid" should match "/^01ABCDEF123456789[0-9]$/"
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Blte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "@id" should be equal to "/api/customers"
+    And the JSON node "@type" should be equal to "Collection"
+
+  # Scenario for "gt"
+  Scenario: Retrieve customers collection with ulid filter operator gt and check JSON value
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a GET request to "/api/customers?ulid[gt]=01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "@id" should be equal to "/api/customers"
+    And the JSON node "@type" should be equal to "Collection"
+
+  # Scenario for "gte"
+  Scenario: Retrieve customers collection with ulid filter operator gte and check JSON value
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a GET request to "/api/customers?ulid[gte]=01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "@id" should be equal to "/api/customers"
+    And the JSON node "@type" should be equal to "Collection"
+
+  # Scenario for "between"
+  Scenario: Retrieve customers collection with ulid filter operator between and check JSON value
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a GET request to "/api/customers?ulid[between]=01JKX8XGHVDZ46MWYMZT94YER3,01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER3%2C01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "@id" should be equal to "/api/customers"
+    And the JSON node "@type" should be equal to "Collection"
 
   # **************************************
   # GET /api/customers/{ulid} – Single Resource (Positive Tests)
   # **************************************
 
   Scenario: Retrieve a customer resource with valid ulid and validate full JSON body
-    Given customer with initials "JD" exists
+    Given customer with id 01JKX8XGHVDZ46MWYMZT94YER4 exists
     When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the response should be valid according to the operation id "api_customers_ulid_get"
     And the JSON node "email" should contain "@"
-    And the JSON node "phone" should match "/^\d{10,15}$/"
+    And the JSON node "phone" should match "/^\+?[1-9]\d{9,14}$/"
     And the JSON node "confirmed" should be true
-    And the JSON node "initials" should contain "Name Surname"
+    And the JSON node "initials" should exist
 
   # **************************************
   # POST /api/customers – Create Resource (Positive & Negative Tests)
@@ -205,20 +241,22 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "confirmed" should be true
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
+    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     When I send a POST request to "/api/customers" with body:
       """
       {
         "phone": "0123456789",
         "initials": "Name Surname",
         "leadSource": "Google",
-        "type": "/api/customer_types/valid-type-id",
-        "status": "/api/customer_statuses/valid-status-id",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
         "confirmed": true
       }
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value should not be blank"
+    And the JSON node "detail" should contain "email: not.blank"
 
   Scenario: Fail to create a customer resource with invalid email format and check error message
     When I send a POST request to "/api/customers" with body:

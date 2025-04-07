@@ -52,7 +52,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
 
         $initials = $this->faker->lexify('??');
         $email = $this->faker->email();
-        $phone = $this->faker->phoneNumber();
+        $phone = $this->faker->e164PhoneNumber();
         $leadSource = $this->faker->word();
         $customer = $this->customerFactory->create(
             $initials,
@@ -202,6 +202,45 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Given customer with type value "VIP" and status value "Active" and id :id exists
+     */
+    public function customerWithVipActiveAndIdExists(string $id): void
+    {
+        // Retrieve or create a customer type and status using the provided id.
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+
+        // Set the desired values.
+        $type->setValue("VIP");
+        $status->setValue("Active");
+
+        // Save these entities so they exist in the database.
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        // Create the customer with fixed initials, email, etc.
+        $initials = "VIP";
+        $email = "vip.active@example.com";
+        $phone = "0123456789";
+        $leadSource = "defaultSource";
+
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+
+        // Save the customer and store the id for later cleanup.
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
      * @Given customer with type value :typeValue and status value :statusValue exists
      */
     public function customerWithTypeAndStatusExists(string $typeValue, string $statusValue): void
@@ -226,6 +265,36 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $type,
             $status,
             true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    /**
+     * @Given customer with confirmed :confirmed exists
+     */
+    public function customerWithConfirmedExists(string $confirmed): void
+    {
+        $id = (string)$this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $initials = "CF";
+        $email = $this->faker->email();
+        $phone = "0123456789";
+        $leadSource = "defaultSource";
+        $boolConfirmed = filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            $boolConfirmed,
             $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
         );
         $this->customerRepository->save($customer);
