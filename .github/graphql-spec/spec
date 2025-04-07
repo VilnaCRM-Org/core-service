@@ -217,6 +217,7 @@ type Mutation {
 "Updates a CustomerStatus."
 input updateCustomerStatusInput {
   id: ID!
+  value: String
   clientMutationId: String
 }
 
@@ -240,6 +241,7 @@ type deleteCustomerStatusPayload {
 
 "Creates a CustomerStatus."
 input createCustomerStatusInput {
+  value: String!
   clientMutationId: String
 }
 
@@ -252,6 +254,7 @@ type createCustomerStatusPayload {
 "Updates a CustomerType."
 input updateCustomerTypeInput {
   id: ID!
+  value: String
   clientMutationId: String
 }
 
@@ -275,6 +278,7 @@ type deleteCustomerTypePayload {
 
 "Creates a CustomerType."
 input createCustomerTypeInput {
+  value: String!
   clientMutationId: String
 }
 
