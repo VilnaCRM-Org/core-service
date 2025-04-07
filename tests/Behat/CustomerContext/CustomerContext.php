@@ -325,11 +325,30 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function cleanupCreatedCustomers(AfterScenarioScope $scope): void
     {
         foreach ($this->createdCustomerIds as $id) {
-            $customer = $this->customerRepository->find($id);
-            if ($customer !== null) {
-                $this->customerRepository->delete($customer);
-            }
+            $this->deleteCustomerById($id);
         }
         $this->createdCustomerIds = [];
+    }
+
+    /**
+     * @Then delete customer with id :id
+     */
+    public function deleteCustomerById(mixed $id): void
+    {
+        $customer = $this->customerRepository->find($id);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
+    }
+
+    /**
+     * @Then delete customer with email :email
+     */
+    public function deleteCustomerByEmail(string $email): void
+    {
+        $customer = $this->customerRepository->findByEmail($email);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
     }
 }

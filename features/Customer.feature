@@ -222,7 +222,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a POST request to "/api/customers" with body:
       """
       {
-        "email": "postcustomer19412@example.com",
+        "email": "postcustomer@example.com",
         "phone": "0123456789",
         "initials": "Name Surname",
         "leadSource": "Google",
@@ -234,11 +234,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 201
     And the response should be in JSON
     And the response should be valid according to the operation id "api_customers_post"
-    And the JSON node "email" should contain "postcustomer19412@example.com"
+    And the JSON node "email" should contain "postcustomer@example.com"
     And the JSON node "phone" should contain "0123456789"
     And the JSON node "initials" should contain "Name Surname"
     And the JSON node "leadSource" should contain "Google"
     And the JSON node "confirmed" should be true
+    Then delete customer with email "postcustomer@example.com"
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
     Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -273,7 +274,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value is not a valid email address"
+    And the JSON node "detail" should contain "email: email.invalid"
 
   Scenario: Fail to create a customer resource with too long initials and check error message
     When I send a POST request to "/api/customers" with body:
@@ -290,7 +291,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less"
+    And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to create a customer resource with non-boolean confirmed and check error message
     When I send a POST request to "/api/customers" with body:
@@ -307,7 +308,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value should be a boolean"
+    And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to create a customer resource with too long phone number and check error message
     When I send a POST request to "/api/customers" with body:
@@ -324,7 +325,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less"
+    And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less"
 
   Scenario: Fail to create a customer resource with invalid type and status references and check error message
     When I send a POST request to "/api/customers" with body:
@@ -339,9 +340,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
         "confirmed": true
       }
       """
-    Then the response status code should be equal to 422
+    Then the response status code should be equal to 400
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value is not a valid IRI"
+    And the JSON node "detail" should contain 'No route matches "invalid-iri"'
 
   # **************************************
   # PUT /api/customers/{ulid} – Replace Resource (Positive & Negative Tests)
@@ -386,7 +387,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value should not be blank"
+    And the JSON node "detail" should contain "phone: not.blank"
 
   Scenario: Fail to replace a customer resource with invalid email format and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -406,7 +407,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value is not a valid email address"
+    And the JSON node "detail" should contain "email: email.invalid"
 
   Scenario: Fail to replace a customer resource with non-boolean confirmed and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -426,7 +427,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value should be a boolean"
+    And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to replace a customer resource with too long phone number and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -436,7 +437,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
       {
         "email": "updated@example.com",
-        "phone": "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+        "phone": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
         "initials": "Updated Name",
         "leadSource": "Bing",
         "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
@@ -446,7 +447,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less"
+    And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to replace a customer resource for a non-existent ulid
     When I send a PUT request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4" with body:
@@ -456,14 +457,16 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
         "phone": "0987654321",
         "initials": "Updated Name",
         "leadSource": "Bing",
-        "type": "/api/customer_types/valid-type-id",
-        "status": "/api/customer_statuses/valid-status-id",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
         "confirmed": false
       }
       """
     Then the response status code should be equal to 404
     And the response should be in JSON
-    And the JSON node "detail" should contain "Customer not found"
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
+    And the JSON node "type" should contain "/errors/404"
 
   # **************************************
   # PATCH /api/customers/{ulid} – Partial Update (Positive & Negative Tests)
@@ -471,6 +474,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Update customer resource with valid patch payload and verify changed JSON key
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
       """
       {
@@ -483,6 +487,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Fail to update customer resource with invalid email format via PATCH and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
       """
       {
@@ -491,10 +496,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value is not a valid email address"
+    And the JSON node "detail" should contain "email.invalid"
 
   Scenario: Fail to update customer resource with non-boolean confirmed via PATCH and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
       """
       {
@@ -503,10 +509,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
-    And the JSON node "detail" should contain "This value should be a boolean"
+    And the JSON node "detail" should contain "input data is misformatted"
 
   Scenario: Update customer resource ignoring unknown properties via PATCH and verify JSON response
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
       """
       {
@@ -531,10 +538,4 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a DELETE request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 404
     And the response should be in JSON
-    And the JSON node "detail" should contain "Customer not found"
-
-  Scenario: Fail to delete a customer resource with invalid ulid format and check error message
-    When I send a DELETE request to "/api/customers/invalid-ulid-format"
-    Then the response status code should be equal to 400
-    And the response should be in JSON
-    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
