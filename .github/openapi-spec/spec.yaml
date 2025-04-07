@@ -3481,37 +3481,6 @@ components:
           type:
             - string
             - 'null'
-    Customer:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        initials:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-        leadSource:
-          type: string
-        type:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
-        status:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
-        confirmed:
-          type: boolean
-        ulid:
-          $ref: '#/components/schemas/UlidInterface'
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     Customer.CustomerCreateDto.jsonld:
       type: object
       description: ''
@@ -3526,25 +3495,126 @@ components:
       properties:
         initials:
           maxLength: 255
-          type: string
+          type:
+            - string
+            - 'null'
         email:
           format: email
           maxLength: 255
           externalDocs:
             url: 'https://schema.org/email'
-          type: string
+          type:
+            - string
+            - 'null'
         phone:
           maxLength: 255
-          type: string
+          type:
+            - string
+            - 'null'
         leadSource:
           maxLength: 255
-          type: string
+          type:
+            - string
+            - 'null'
         type:
-          type: string
+          type:
+            - string
+            - 'null'
         status:
-          type: string
+          type:
+            - string
+            - 'null'
         confirmed:
-          type: boolean
+          type:
+            - boolean
+            - 'null'
+    Customer.CustomerPatchDto:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        initials:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        email:
+          format: email
+          maxLength: 255
+          externalDocs:
+            url: 'https://schema.org/email'
+          type:
+            - string
+            - 'null'
+        phone:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        leadSource:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        type:
+          type:
+            - string
+            - 'null'
+        status:
+          type:
+            - string
+            - 'null'
+        confirmed:
+          type:
+            - boolean
+            - 'null'
+    Customer.CustomerPutDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      required:
+        - initials
+        - email
+        - phone
+        - leadSource
+        - type
+        - status
+      properties:
+        initials:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        email:
+          format: email
+          maxLength: 255
+          externalDocs:
+            url: 'https://schema.org/email'
+          type:
+            - string
+            - 'null'
+        phone:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        leadSource:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        type:
+          type:
+            - string
+            - 'null'
+        status:
+          type:
+            - string
+            - 'null'
+        confirmed:
+          type:
+            - boolean
+            - 'null'
     Customer.jsonld:
       type: object
       description: ''
@@ -3599,22 +3669,42 @@ components:
         updatedAt:
           type: string
           format: date-time
-    CustomerStatus:
+    CustomerStatus.CustomerStatusPatchDto:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
-          type: string
-        ulid:
-          type: string
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+    CustomerStatus.CustomerStatusPutDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      required:
+        - value
+      properties:
+        value:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
     CustomerStatus.StatusCreateDto.jsonld:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
-          type: string
+          maxLength: 255
+          type:
+            - string
+            - 'null'
     CustomerStatus.jsonld:
       type: object
       description: ''
@@ -3647,31 +3737,42 @@ components:
           type: string
         ulid:
           type: string
-    CustomerType:
+    CustomerType.CustomerTypePatchDto:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
-          type: string
-        ulid:
-          $ref: '#/components/schemas/UlidInterface'
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+    CustomerType.CustomerTypePutDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      required:
+        - value
+      properties:
+        value:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
     CustomerType.TypeCreateDto.jsonld:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
-          type: string
-    CustomerType.jsonld:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        value:
-          type: string
-        ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld'
+          maxLength: 255
+          type:
+            - string
+            - 'null'
     CustomerType.jsonld-output:
       type: object
       description: ''
@@ -3763,10 +3864,6 @@ components:
         '@type':
           readOnly: true
           type: string
-    UlidInterface:
-      type: object
-      description: ''
-      deprecated: false
     UlidInterface.jsonld:
       type: object
       description: ''
