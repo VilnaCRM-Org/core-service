@@ -20,4 +20,6 @@ interface StatusRepositoryInterface
         int $lockMode = 0,
         ?int $lockVersion = null
     ): ?object;
+
+    public function delete(CustomerStatus $customerStatus): void;
 }

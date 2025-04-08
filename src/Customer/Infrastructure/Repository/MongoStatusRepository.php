@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Infrastructure\Repository;
 
+use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
@@ -27,6 +28,12 @@ final class MongoStatusRepository extends ServiceDocumentRepository implements
     public function save(CustomerStatus $customerStatus): void
     {
         $this->documentManager->persist($customerStatus);
+        $this->documentManager->flush();
+    }
+
+    public function delete(CustomerStatus $customerStatus): void
+    {
+        $this->documentManager->remove($customerStatus);
         $this->documentManager->flush();
     }
 }

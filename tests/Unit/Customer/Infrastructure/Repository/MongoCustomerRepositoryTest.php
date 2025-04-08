@@ -82,4 +82,18 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
 
         $this->assertNull($result);
     }
+
+    public function testDelete(): void
+    {
+        $customer = $this->createMock(Customer::class);
+
+        $this->documentManager->expects($this->once())
+            ->method('remove')
+            ->with($customer);
+
+        $this->documentManager->expects($this->once())
+            ->method('flush');
+
+        $this->repository->delete($customer);
+    }
 }

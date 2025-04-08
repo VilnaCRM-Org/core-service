@@ -32,4 +32,10 @@ final class MongoTypeRepository extends ServiceDocumentRepository implements
         $this->documentManager->persist($customerType);
         $this->documentManager->flush();
     }
+
+    public function delete(CustomerType $customerType): void
+    {
+        $this->documentManager->remove($customerType);
+        $this->documentManager->flush();
+    }
 }

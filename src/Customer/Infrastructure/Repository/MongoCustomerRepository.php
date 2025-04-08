@@ -31,7 +31,7 @@ final class MongoCustomerRepository extends ServiceDocumentRepository implements
         $this->documentManager->flush();
     }
 
-    public function delete(object $customer): void
+    public function delete(Customer $customer): void
     {
         $this->documentManager->remove($customer);
         $this->documentManager->flush();

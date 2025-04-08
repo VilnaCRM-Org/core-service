@@ -46,4 +46,18 @@ final class MongoStatusRepositoryTest extends UnitTestCase
 
         $this->repository->save($customerStatus);
     }
+
+    public function testDelete(): void
+    {
+        $customerStatus = $this->createMock(CustomerStatus::class);
+
+        $this->documentManager->expects($this->once())
+            ->method('remove')
+            ->with($customerStatus);
+
+        $this->documentManager->expects($this->once())
+            ->method('flush');
+
+        $this->repository->delete($customerStatus);
+    }
 }
