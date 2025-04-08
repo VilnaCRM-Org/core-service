@@ -22,4 +22,6 @@ interface TypeRepositoryInterface
     ): ?object;
 
     public function delete(CustomerType $customerType): void;
+
+    public function deleteByValue(string $value): void;
 }

@@ -25,7 +25,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
 {
     private Generator $faker;
 
+    // Track created customer IDs, status IDs and now type IDs
     private array $createdCustomerIds = [];
+    private array $createdStatusIds = [];
+    private array $createdTypeIds = [];
 
     public function __construct(
         private TypeRepositoryInterface $typeRepository,
@@ -45,6 +48,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithIdExists(string $id): void
     {
+        // Generate a new type and status using new random IDs
         $type = $this->getCustomerType((string) $this->faker->ulid());
         $status = $this->getStatus((string) $this->faker->ulid());
         $this->typeRepository->save($type);
@@ -75,6 +79,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $type = $this->getCustomerType($id);
         $this->typeRepository->save($type);
+        // Record this type as created by the test
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
     }
 
     /**
@@ -84,6 +92,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $status = $this->getStatus($id);
         $this->statusRepository->save($status);
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
     }
 
     /**
@@ -96,6 +107,13 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $email = "customer_" . strtolower($initials) . "@example.com";
         $phone = "0123456789";
@@ -124,6 +142,13 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $initials = substr($email, 0, 2);
         $phone = "0123456789";
@@ -152,9 +177,16 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $initials = "TP";
-        $email = "customer_" . preg_replace('/\D/', '', $phone) . "@example.com";
+        $email = $this->faker->email();
         $leadSource = "defaultSource";
         $customer = $this->customerFactory->create(
             $initials,
@@ -180,9 +212,16 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $initials = "LS";
-        $email = "customer_" . strtolower($leadSource) . "@example.com";
+        $email = $this->faker->email();
         $phone = "0123456789";
         $customer = $this->customerFactory->create(
             $initials,
@@ -206,21 +245,24 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithVipActiveAndIdExists(string $id): void
     {
-        // Retrieve or create a customer type and status using the provided id.
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
 
-        // Set the desired values.
         $type->setValue("VIP");
         $status->setValue("Active");
 
-        // Save these entities so they exist in the database.
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
-        // Create the customer with fixed initials, email, etc.
         $initials = "VIP";
-        $email = "vip.active@example.com";
+        $email = $this->faker->email();
         $phone = "0123456789";
         $leadSource = "defaultSource";
 
@@ -235,7 +277,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
         );
 
-        // Save the customer and store the id for later cleanup.
         $this->customerRepository->save($customer);
         $this->createdCustomerIds[] = $id;
     }
@@ -252,9 +293,15 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status->setValue($statusValue);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $initials = "TS";
-        $email = "customer_" . strtolower($typeValue) . "_" . strtolower($statusValue) . "@example.com";
+        $email = $this->faker->email();
         $phone = "0123456789";
         $leadSource = "defaultSource";
         $customer = $this->customerFactory->create(
@@ -281,6 +328,13 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
+        // Record type and status creation
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+        if (!in_array($id, $this->createdStatusIds, true)) {
+            $this->createdStatusIds[] = $id;
+        }
 
         $initials = "CF";
         $email = $this->faker->email();
@@ -301,33 +355,100 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $this->createdCustomerIds[] = $id;
     }
 
-    public function getCustomerType(string $id): CustomerType
+    /**
+     * @Given customer status with value :value exists
+     */
+    public function customerStatusWithValueExists(string $value): void
     {
-        return $this->typeRepository->find($id) ??
-            $this->typeFactory->create(
-                $this->faker->word(),
+        $id = (string) $this->faker->ulid();
+
+        $status = $this->statusRepository->find($id);
+        if ($status === null) {
+            $status = $this->statusFactory->create(
+                $value,
                 $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
             );
+            $this->createdStatusIds[] = $id;
+        } else {
+            $status->setValue($value);
+        }
+        $this->statusRepository->save($status);
     }
 
-    public function getStatus(string $id): CustomerStatus
+    /**
+     * @Given customer type with value :value exists
+     */
+    public function customerTypeWithValueExists(string $value): void
     {
-        return $this->statusRepository->find($id) ??
-            $this->statusFactory->create(
+        $id = (string) $this->faker->ulid();
+        $type = $this->getCustomerType($id);
+        $type->setValue($value);
+        $this->typeRepository->save($type);
+        if (!in_array($id, $this->createdTypeIds, true)) {
+            $this->createdTypeIds[] = $id;
+        }
+    }
+
+    /**
+     * Helper method to get or create a CustomerType.
+     */
+    public function getCustomerType(string $id): CustomerType
+    {
+        $type = $this->typeRepository->find($id);
+        if ($type === null) {
+            $type = $this->typeFactory->create(
                 $this->faker->word(),
                 $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
             );
+            $this->createdTypeIds[] = $id;
+        }
+        return $type;
+    }
+
+    /**
+     * Helper method to get or create a CustomerStatus.
+     */
+    public function getStatus(string $id): CustomerStatus
+    {
+        $status = $this->statusRepository->find($id);
+        if ($status === null) {
+            $status = $this->statusFactory->create(
+                $this->faker->word(),
+                $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            );
+            $this->createdStatusIds[] = $id;
+        }
+        return $status;
     }
 
     /**
      * @AfterScenario
      */
-    public function cleanupCreatedCustomers(AfterScenarioScope $scope): void
+    public function cleanupCreatedCustomersAndEntities(AfterScenarioScope $scope): void
     {
+        // First, delete all created customers
         foreach ($this->createdCustomerIds as $id) {
             $this->deleteCustomerById($id);
         }
         $this->createdCustomerIds = [];
+
+        // Then, delete all created statuses
+        foreach ($this->createdStatusIds as $id) {
+            $status = $this->statusRepository->find($id);
+            if ($status !== null) {
+                $this->statusRepository->delete($status);
+            }
+        }
+        $this->createdStatusIds = [];
+
+        // Finally, delete all created customer types
+        foreach ($this->createdTypeIds as $id) {
+            $type = $this->typeRepository->find($id);
+            if ($type !== null) {
+                $this->typeRepository->delete($type);
+            }
+        }
+        $this->createdTypeIds = [];
     }
 
     /**
@@ -350,5 +471,21 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         if ($customer !== null) {
             $this->customerRepository->delete($customer);
         }
+    }
+
+    /**
+     * @Then delete status with value :value
+     */
+    public function deleteStatusByValue(string $value): void
+    {
+        $this->statusRepository->deleteByValue($value);
+    }
+
+    /**
+     * @Then delete type with value :value
+     */
+    public function deleteTypeByValue(string $value): void
+    {
+        $this->typeRepository->deleteByValue($value);
     }
 }

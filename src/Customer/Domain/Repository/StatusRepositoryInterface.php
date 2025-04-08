@@ -22,4 +22,6 @@ interface StatusRepositoryInterface
     ): ?object;
 
     public function delete(CustomerStatus $customerStatus): void;
+
+    public function deleteByValue(string $value): void;
 }

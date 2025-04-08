@@ -60,4 +60,29 @@ final class MongoStatusRepositoryTest extends UnitTestCase
 
         $this->repository->delete($customerStatus);
     }
+
+    public function testDeleteByValue(): void
+    {
+        $value = 'active';
+        $customerStatus = $this->createMock(CustomerStatus::class);
+
+        $repository = $this->getMockBuilder(MongoStatusRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findOneBy'])
+            ->getMock();
+
+        $repository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['value' => $value])
+            ->willReturn($customerStatus);
+
+        $this->documentManager->expects($this->once())
+            ->method('remove')
+            ->with($customerStatus);
+
+        $this->documentManager->expects($this->once())
+            ->method('flush');
+
+        $repository->deleteByValue($value);
+    }
 }

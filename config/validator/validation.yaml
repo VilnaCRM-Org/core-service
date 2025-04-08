@@ -83,7 +83,6 @@ App\Customer\Application\DTO\CustomerTypePatchDto:
     value:
       - Length:
           max: 255
-      - NotBlank: { message: 'not.blank' }
 
 App\Customer\Application\DTO\CustomerTypePutDto:
   properties:
@@ -111,7 +110,6 @@ App\Customer\Application\DTO\CustomerStatusPatchDto:
     value:
       - Length:
           max: 255
-      - NotBlank: { message: 'not.blank' }
 
 App\Customer\Application\DTO\CustomerStatusPutDto:
   properties:

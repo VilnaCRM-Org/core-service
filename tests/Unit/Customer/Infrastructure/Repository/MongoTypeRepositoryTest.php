@@ -60,4 +60,29 @@ final class MongoTypeRepositoryTest extends UnitTestCase
 
         $this->repository->delete($customerType);
     }
+
+    public function testDeleteByValue(): void
+    {
+        $value = 'active';
+        $customerStatus = $this->createMock(CustomerType::class);
+
+        $repository = $this->getMockBuilder(MongoTypeRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findOneBy'])
+            ->getMock();
+
+        $repository->expects($this->once())
+            ->method('findOneBy')
+            ->with(['value' => $value])
+            ->willReturn($customerStatus);
+
+        $this->documentManager->expects($this->once())
+            ->method('remove')
+            ->with($customerStatus);
+
+        $this->documentManager->expects($this->once())
+            ->method('flush');
+
+        $repository->deleteByValue($value);
+    }
 }

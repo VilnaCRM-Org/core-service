@@ -35,4 +35,11 @@ final class MongoStatusRepository extends ServiceDocumentRepository implements
         $this->documentManager->remove($customerStatus);
         $this->documentManager->flush();
     }
+
+    public function deleteByValue(string $value): void
+    {
+        $customerStatus = $this->findOneBy(['value' => $value]);
+        $this->documentManager->remove($customerStatus);
+        $this->documentManager->flush();
+    }
 }

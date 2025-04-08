@@ -25,7 +25,7 @@ final class ContextBuilderTest extends UnitTestCase
 
         $this->assertEquals(
             new ArrayObject([
-                'application/ld+json' => [
+                'application/problem+json' => [
                     'example' => '',
                 ],
             ]),
@@ -119,7 +119,7 @@ final class ContextBuilderTest extends UnitTestCase
         array $expectedExample
     ): ArrayObject {
         return new ArrayObject([
-            'application/ld+json' => [
+            'application/problem+json' => [
                 'schema' => $expectedSchema,
                 'example' => $expectedExample,
             ],
