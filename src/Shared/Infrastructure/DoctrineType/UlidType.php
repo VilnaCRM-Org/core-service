@@ -19,7 +19,7 @@ final class UlidType extends Type
         return self::NAME;
     }
 
-    public function convertToDatabaseValue(mixed $value): Binary
+    public function convertToDatabaseValue(mixed $value): ?Binary
     {
         if ($value instanceof Binary) {
             return $value;

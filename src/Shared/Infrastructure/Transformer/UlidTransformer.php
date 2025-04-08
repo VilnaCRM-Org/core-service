@@ -15,8 +15,15 @@ final readonly class UlidTransformer
     {
     }
 
-    public function toDatabaseValue(mixed $value): Binary
+    public function toDatabaseValue(mixed $value): ?Binary
     {
+        if (
+            $value === null || (is_string($value)
+                && !SymfonyUlid::isValid($value))
+        ) {
+            return null;
+        }
+
         $ulid = $value instanceof
         Ulid ? $value : $this->ulidFactory->create($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);

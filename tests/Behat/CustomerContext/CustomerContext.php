@@ -45,8 +45,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithIdExists(string $id): void
     {
-        $type = $this->getCustomerType((string)$this->faker->ulid());
-        $status = $this->getStatus((string)$this->faker->ulid());
+        $type = $this->getCustomerType((string) $this->faker->ulid());
+        $status = $this->getStatus((string) $this->faker->ulid());
         $this->typeRepository->save($type);
         $this->statusRepository->save($status);
 
@@ -91,7 +91,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithInitialsExists(string $initials): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
@@ -119,7 +119,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithEmailExists(string $email): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
@@ -147,7 +147,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithPhoneExists(string $phone): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
@@ -175,7 +175,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithLeadSourceExists(string $leadSource): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);
@@ -245,7 +245,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithTypeAndStatusExists(string $typeValue, string $statusValue): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $type->setValue($typeValue);
@@ -276,7 +276,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithConfirmedExists(string $confirmed): void
     {
-        $id = (string)$this->faker->ulid();
+        $id = (string) $this->faker->ulid();
         $type = $this->getCustomerType($id);
         $status = $this->getStatus($id);
         $this->typeRepository->save($type);

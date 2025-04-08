@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Repository\StatusRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;

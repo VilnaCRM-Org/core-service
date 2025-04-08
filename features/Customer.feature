@@ -7,13 +7,23 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
 
-
   # *******************************
   # GET /api/customers – Collection (Positive Tests)
   # *******************************
+  Scenario: Retrieve customers collection with invalid pagination parameters (non-integer)
+    When I send a GET request to "/api/customers?page=abc&itemsPerPage=50"
+    Then the response status code should be equal to 400
+    And the response should be in JSON
+    And the JSON node "detail" should contain "Page should not be less than 1"
+
+  Scenario: Retrieve customers collection with unsupported query parameter
+    When I send a GET request to "/api/customers?unsupportedParam=value"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member" should exist
+    And the JSON node "totalItems" should exist
 
   Scenario: Retrieve customers collection with valid pagination parameters and check JSON keys and values
-    # (Assume that enough test customers exist in the database.)
     When I send a GET request to "/api/customers?page=2&itemsPerPage=50"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -212,6 +222,20 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "confirmed" should be true
     And the JSON node "initials" should exist
 
+  Scenario: Retrieve a non-existent customer resource with valid ulid and receive 404 error
+    When I send a GET request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 404
+    And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
+    And the JSON node "type" should contain "/errors/404"
+
+  Scenario: Retrieve a customer resource with an invalid ulid format
+    When I send a GET request to "/api/customers/invalid-ulid-format"
+    Then the response status code should be equal to 404
+    And the response should be in JSON
+    And the JSON node "detail" should contain "Not Found"
+
   # **************************************
   # POST /api/customers – Create Resource (Positive & Negative Tests)
   # **************************************
@@ -240,6 +264,48 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "leadSource" should contain "Google"
     And the JSON node "confirmed" should be true
     Then delete customer with email "postcustomer@example.com"
+
+  Scenario: Fail to create a customer resource with duplicate email
+    Given customer with email "duplicate@example.com" exists
+    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a POST request to "/api/customers" with body:
+      """
+      {
+        "email": "duplicate@example.com",
+        "phone": "0123456789",
+        "initials": "Duplicate User",
+        "leadSource": "Referral",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": true
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "email: email.not.unique"
+
+  Scenario: Create a customer resource with additional unrecognized property which should be ignored
+    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a POST request to "/api/customers" with body:
+      """
+      {
+        "email": "extra@example.com",
+        "phone": "0123456789",
+        "initials": "Extra Field",
+        "leadSource": "Google",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": true,
+        "extraField": "Should be ignored"
+      }
+      """
+    Then the response status code should be equal to 201
+    And the response should be in JSON
+    And the JSON node "email" should contain "extra@example.com"
+    And the JSON node "extraField" should not exist
+    Then delete customer with email "extra@example.com"
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
     Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -370,6 +436,45 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should be equal to "0987654321"
     And the JSON node "confirmed" should be false
 
+  Scenario: Fail to replace a customer resource with duplicate email
+    Given customer with email "existing@example.com" exists
+    And customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "email": "existing@example.com",
+        "phone": "0987654321",
+        "initials": "Updated Duplicate",
+        "leadSource": "Bing",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": false
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "email.not.unique"
+
+  Scenario: Replace a customer resource while including an extra field that should be ignored
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "email": "updatedextra@example.com",
+        "phone": "0987654321",
+        "initials": "Updated Extra",
+        "leadSource": "Bing",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": false,
+        "irrelevantField": "should be ignored"
+      }
+      """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "email" should be equal to "updatedextra@example.com"
+    And the JSON node "irrelevantField" should not exist
+
   Scenario: Fail to replace a customer resource with missing required field (phone) and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -449,6 +554,24 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less."
 
+  Scenario: Fail to update customer resource with initials exceeding maximum length via PUT
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "email": "updated@example.com",
+        "phone": "0987654321",
+        "initials": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "leadSource": "Bing",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": false
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
+
   Scenario: Fail to replace a customer resource for a non-existent ulid
     When I send a PUT request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4" with body:
       """
@@ -468,6 +591,24 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "Not Found"
     And the JSON node "type" should contain "/errors/404"
 
+  Scenario: Fail to replace a customer resource with invalid ulid format and check error message
+    When I send a PUT request to "/api/customers/invalid-ulid-format" with body:
+      """
+      {
+        "email": "updated@example.com",
+        "phone": "0987654321",
+        "initials": "Updated Name",
+        "leadSource": "Bing",
+        "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+        "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+        "confirmed": false
+      }
+      """
+    Then the response status code should be equal to 404
+    And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
+
   # **************************************
   # PATCH /api/customers/{ulid} – Partial Update (Positive & Negative Tests)
   # **************************************
@@ -484,6 +625,79 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the JSON node "email" should contain "patched@example.com"
+
+  Scenario: Update customer resource with an empty patch payload (resource remains unchanged)
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      { }
+      """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "@id" should exist
+    And the JSON node "@type" should contain "Customer"
+    And the JSON node "ulid" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "email" should exist
+    And the JSON node "initials" should exist
+    And the JSON node "phone" should exist
+    And the JSON node "leadSource" should exist
+    And the JSON node "type" should exist
+    And the JSON node "status" should exist
+    And the JSON node "createdAt" should exist
+    And the JSON node "updatedAt" should exist
+
+  Scenario: Fail to update customer resource with malformed JSON payload via PATCH
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      { "email": "malformed@example.com",
+      """
+    Then the response status code should be equal to 400
+    And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Syntax error"
+
+  Scenario: Fail to patch a customer resource with duplicate email
+    Given customer with email "existing@example.com" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    And customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "email": "existing@example.com"
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "email.not.unique"
+
+  Scenario: Fail to update customer resource with initials exceeding maximum length via PATCH
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "initials": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
+
+  Scenario: Fail to update customer resource with phone exceeding maximum length via PATCH
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+      """
+      {
+        "phone": "+3790320320320320032032049379032032032032003203204937903203203203200320320493790320320320320032032049379032032032032003203204937903203203203200320320493790320320320320032032049379032032032032003203204937903203203203200320320493790320320320320032032049379032032032032003203204937903203203203200320320493790320032032049"
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the JSON node "detail" should contain "phone: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with invalid email format via PATCH and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -524,6 +738,19 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the JSON node "unknownField" should not exist
 
+  Scenario: Fail to replace a customer resource with invalid ulid format and check error message
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/invalid-ulid-format" with body:
+      """
+      {
+        "confirmed": false
+      }
+      """
+    Then the response status code should be equal to 404
+    And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
+
   # ***************************************
   # DELETE /api/customers/{ulid} – Delete Resource (Positive & Negative Tests)
   # ***************************************
@@ -538,4 +765,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a DELETE request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
+    And the JSON node "detail" should contain "Not Found"
+
+  Scenario: Fail to delete a customer resource with invalid ulid format and check error message
+    When I send a DELETE request to "/api/customers/invalid-ulid-format"
+    Then the response status code should be equal to 404
+    And the response should be in JSON
+    And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
