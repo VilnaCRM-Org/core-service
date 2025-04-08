@@ -30,7 +30,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -52,7 +52,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -74,7 +74,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -96,7 +96,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -627,7 +627,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -649,7 +649,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -677,7 +677,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -699,7 +699,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -721,7 +721,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -810,7 +810,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -832,7 +832,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -854,7 +854,7 @@ paths:
         '404':
           description: 'Customer not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -876,7 +876,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -927,7 +927,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -949,7 +949,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -977,7 +977,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -999,7 +999,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1021,7 +1021,7 @@ paths:
         '404':
           description: 'Customer not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1043,7 +1043,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1138,13 +1138,13 @@ paths:
         '204':
           description: 'Customer resource deleted'
           content:
-            application/ld+json:
+            application/problem+json:
               example: ''
           headers: {  }
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1166,7 +1166,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1188,7 +1188,7 @@ paths:
         '404':
           description: 'Customer not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1210,7 +1210,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1261,7 +1261,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1283,7 +1283,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1311,7 +1311,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1333,7 +1333,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1355,7 +1355,7 @@ paths:
         '404':
           description: 'Customer not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1377,7 +1377,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1479,7 +1479,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1501,7 +1501,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1523,7 +1523,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1545,7 +1545,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1714,7 +1714,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1736,7 +1736,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1764,7 +1764,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1786,7 +1786,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1808,7 +1808,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1861,7 +1861,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1883,7 +1883,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1905,7 +1905,7 @@ paths:
         '404':
           description: 'CustomerStatus not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1927,7 +1927,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -1978,7 +1978,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2000,7 +2000,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2028,7 +2028,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2050,7 +2050,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2072,7 +2072,7 @@ paths:
         '404':
           description: 'CustomerStatus not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2094,7 +2094,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2153,13 +2153,13 @@ paths:
         '204':
           description: 'CustomerStatus resource deleted'
           content:
-            application/ld+json:
+            application/problem+json:
               example: ''
           headers: {  }
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2181,7 +2181,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2203,7 +2203,7 @@ paths:
         '404':
           description: 'CustomerStatus not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2225,7 +2225,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2276,7 +2276,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2298,7 +2298,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2326,7 +2326,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2348,7 +2348,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2370,7 +2370,7 @@ paths:
         '404':
           description: 'CustomerStatus not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2392,7 +2392,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2465,7 +2465,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2487,7 +2487,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2509,7 +2509,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2531,7 +2531,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2700,7 +2700,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2722,7 +2722,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2750,7 +2750,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2772,7 +2772,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2794,7 +2794,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2847,7 +2847,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2869,7 +2869,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2891,7 +2891,7 @@ paths:
         '404':
           description: 'CustomerType not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2913,7 +2913,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2964,7 +2964,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -2986,7 +2986,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3014,7 +3014,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3036,7 +3036,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3058,7 +3058,7 @@ paths:
         '404':
           description: 'CustomerType not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3080,7 +3080,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3139,13 +3139,13 @@ paths:
         '204':
           description: 'CustomerType resource deleted'
           content:
-            application/ld+json:
+            application/problem+json:
               example: ''
           headers: {  }
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3167,7 +3167,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3189,7 +3189,7 @@ paths:
         '404':
           description: 'CustomerType not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3211,7 +3211,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3262,7 +3262,7 @@ paths:
         '400':
           description: 'Bad request'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3284,7 +3284,7 @@ paths:
         '422':
           description: 'Validation error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3312,7 +3312,7 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3334,7 +3334,7 @@ paths:
         '403':
           description: Forbidden
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3356,7 +3356,7 @@ paths:
         '404':
           description: 'CustomerType not found'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3378,7 +3378,7 @@ paths:
         '500':
           description: 'Internal server error'
           content:
-            application/ld+json:
+            application/problem+json:
               schema:
                 type: object
                 properties:
@@ -3673,8 +3673,6 @@ components:
       type: object
       description: ''
       deprecated: false
-      required:
-        - value
       properties:
         value:
           maxLength: 255
@@ -3741,8 +3739,6 @@ components:
       type: object
       description: ''
       deprecated: false
-      required:
-        - value
       properties:
         value:
           maxLength: 255
