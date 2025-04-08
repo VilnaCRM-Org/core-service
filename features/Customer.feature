@@ -14,12 +14,14 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?page=abc&itemsPerPage=50"
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "detail" should contain "Page should not be less than 1"
 
   Scenario: Retrieve customers collection with unsupported query parameter
     When I send a GET request to "/api/customers?unsupportedParam=value"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member" should exist
     And the JSON node "totalItems" should exist
 
@@ -36,6 +38,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member" should exist
     And the JSON node "totalItems" should exist
 
@@ -46,6 +49,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?initials=JD"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should contain "JD"
 
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
@@ -54,6 +58,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?initials[]=AB&initials[]=CD"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
@@ -61,6 +66,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?email=john.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].email" should contain "john.doe@example.com"
 
   Scenario: Retrieve customers collection filtering by email (array values) and validate JSON values
@@ -69,6 +75,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?email[]=john.doe@example.com&email[]=jane.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON nodes should contain:
       | member[0].email | john.doe@example.com |
       | member[1].email | jane.doe@example.com  |
@@ -78,6 +85,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?phone=0123456789"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].phone" should contain "0123456789"
 
   Scenario: Retrieve customers collection filtering by phone (array values) and verify JSON values
@@ -86,6 +94,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?phone[]=0123456789&phone[]=0987654321"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON nodes should contain:
       | member[0].phone | 0123456789 |
       | member[1].phone | 0987654321 |
@@ -95,6 +104,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?leadSource=Google"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].leadSource" should contain "Google"
 
@@ -104,6 +114,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?leadSource[]=Google&leadSource[]=Bing"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON nodes should contain:
       | member[0].leadSource | Google |
       | member[1].leadSource | Bing   |
@@ -113,6 +124,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Filtering by Boolean Parameter (Positive Tests) -----
@@ -122,6 +134,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?confirmed=true"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].confirmed" should be true
 
   Scenario: Retrieve customers collection filtering by confirmed (array) and verify JSON
@@ -130,6 +143,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?confirmed[]=true&confirmed[]"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].confirmed" should be false
     And the JSON node "member[1].confirmed" should be true
 
@@ -139,6 +153,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?order[ulid]=asc&order[createdAt]=desc&order[email]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
     And the JSON node "view.@id" should contain "order%5BcreatedAt%5D=desc"
 
@@ -148,6 +163,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?createdAt[before]=2025-12-31T23:59:59Z&createdAt[strictly_before]=2025-12-31T23:59:59Z&createdAt[after]=2020-01-01T00:00:00Z&createdAt[strictly_after]=2020-01-01T00:00:00Z"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
@@ -155,6 +171,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?updatedAt[before]=2025-12-31T23:59:59Z&updatedAt[strictly_before]=2025-12-31T23:59:59Z&updatedAt[after]=2020-01-01T00:00:00Z&updatedAt[strictly_after]=2020-01-01T00:00:00Z"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.next" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Ulid Filter Operators (Positive Tests) -----
@@ -163,6 +180,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
@@ -173,6 +191,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?ulid[lte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Blte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
@@ -183,6 +202,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?ulid[gt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
@@ -193,6 +213,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?ulid[gte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
@@ -203,6 +224,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?ulid[between]=01JKX8XGHVDZ46MWYMZT94YER3,01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER3%2C01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
@@ -226,6 +248,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_get"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
     And the JSON node "type" should contain "/errors/404"
@@ -234,6 +257,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers/invalid-ulid-format"
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_get"
     And the JSON node "detail" should contain "Not Found"
 
   # **************************************
@@ -267,7 +291,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Fail to create a customer resource with duplicate email
     Given customer with email "duplicate@example.com" exists
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
     When I send a POST request to "/api/customers" with body:
       """
@@ -283,7 +307,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email: email.not.unique"
+    And the response should be valid according to the operation id "api_customers_post"
+    And the JSON node "detail" should contain "email: This email address is already registered"
 
   Scenario: Create a customer resource with additional unrecognized property which should be ignored
     Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -303,9 +328,30 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 201
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "email" should contain "extra@example.com"
     And the JSON node "extraField" should not exist
     Then delete customer with email "extra@example.com"
+
+  Scenario: Create a customer resource with an empty initials field
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a POST request to "/api/customers" with body:
+    """
+    {
+      "email": "extra@example.com",
+      "phone": "0123456789",
+      "initials": "  ",
+      "leadSource": "Google",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+      "confirmed": true
+    }
+    """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
     Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -323,7 +369,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email: not.blank"
+    And the response should be valid according to the operation id "api_customers_post"
+    And the JSON node "detail" should contain "email: This value should not be blank"
 
   Scenario: Fail to create a customer resource with invalid email format and check error message
     When I send a POST request to "/api/customers" with body:
@@ -340,7 +387,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email: email.invalid"
+    And the response should be valid according to the operation id "api_customers_post"
+    And the JSON node "detail" should contain "email: This value is not a valid email address."
 
   Scenario: Fail to create a customer resource with too long initials and check error message
     When I send a POST request to "/api/customers" with body:
@@ -357,6 +405,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to create a customer resource with non-boolean confirmed and check error message
@@ -374,6 +423,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to create a customer resource with too long phone number and check error message
@@ -391,7 +441,25 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less"
+  Scenario: Fail to create a customer resource with not valid email address
+    When I send a POST request to "/api/customers" with body:
+      """
+      {
+        "email": "212213",
+        "phone": "+324312232",
+        "initials": "Name Surname",
+        "leadSource": "Google",
+        "type": "/api/customer_types/valid-type-id",
+        "status": "/api/customer_statuses/valid-status-id",
+        "confirmed": true
+      }
+      """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
+    And the JSON node "detail" should contain "email: This value is not a valid email address"
 
   Scenario: Fail to create a customer resource with invalid type and status references and check error message
     When I send a POST request to "/api/customers" with body:
@@ -408,6 +476,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain 'No route matches "invalid-iri"'
 
   # **************************************
@@ -432,6 +501,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "email" should be equal to "updated9@example.com"
     And the JSON node "phone" should be equal to "0987654321"
     And the JSON node "confirmed" should be false
@@ -453,7 +523,93 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email.not.unique"
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "detail" should contain "email: This email address is already registered"
+
+  Scenario: Replace a customer resource with an empty initials field
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "email": "extra@example.com",
+      "phone": "0123456789",
+      "initials": "  ",
+      "leadSource": "Google",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+      "confirmed": true
+    }
+    """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
+
+  Scenario: Replace a customer resource with updated leadSource and initials
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "email": "updated@example.com",
+      "phone": "0123456789",
+      "initials": "AB",
+      "leadSource": "LinkedIn",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+      "confirmed": true
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "leadSource" should contain "LinkedIn"
+    And the JSON node "initials" should be equal to "AB"
+
+  Scenario: Replace a customer resource with updated email (case normalization)
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "email": "NEW.EMAIL@EXAMPLE.COM",
+      "phone": "0123456789",
+      "initials": "CA",
+      "leadSource": "Google",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+      "confirmed": true
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "email" should contain "new.email@example.com"
+
+  Scenario: Replace a customer resource with all updated fields (verify complete replacement)
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "email": "completelynew@example.com",
+      "phone": "0987654321",
+      "initials": "CN",
+      "leadSource": "Twitter",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
+      "confirmed": false
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "email" should contain "completelynew@example.com"
+    And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "leadSource" should contain "Twitter"
 
   Scenario: Replace a customer resource while including an extra field that should be ignored
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -472,6 +628,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "email" should be equal to "updatedextra@example.com"
     And the JSON node "irrelevantField" should not exist
 
@@ -492,7 +649,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "phone: not.blank"
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "detail" should contain "phone: This value should not be blank"
 
   Scenario: Fail to replace a customer resource with invalid email format and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -512,7 +670,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email: email.invalid"
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "detail" should contain "email: This value is not a valid email address"
 
   Scenario: Fail to replace a customer resource with non-boolean confirmed and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -532,6 +691,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to replace a customer resource with too long phone number and check error message
@@ -552,6 +712,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with initials exceeding maximum length via PUT
@@ -570,6 +731,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to replace a customer resource for a non-existent ulid
@@ -587,6 +749,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
     And the JSON node "type" should contain "/errors/404"
@@ -606,12 +769,94 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
 
   # **************************************
   # PATCH /api/customers/{ulid} – Partial Update (Positive & Negative Tests)
   # **************************************
+
+
+  Scenario: Partially update a customer resource's phone and leadSource
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "phone": "0987654321",
+      "leadSource": "Facebook"
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "leadSource" should contain "Facebook"
+
+  Scenario: Partially update a customer resource's type and status references
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+
+  Scenario: Partially update a customer resource with an empty initials field
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "initials": "  "
+    }
+    """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
+
+  Scenario: Partially update a customer resource and verify unchanged fields remain intact
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "confirmed": false
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "confirmed" should be false
+    And the JSON node "email" should exist
+    And the JSON node "phone" should exist
+
+  Scenario: Partially update a customer resource's email and phone simultaneously
+    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And I add "Content-Type" header equal to "application/merge-patch+json"
+    When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
+    """
+    {
+      "email": "changed@example.com",
+      "phone": "0555123456"
+    }
+    """
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "email" should contain "changed@example.com"
+    And the JSON node "phone" should be equal to "0555123456"
 
   Scenario: Update customer resource with valid patch payload and verify changed JSON key
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -624,6 +869,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "email" should contain "patched@example.com"
 
   Scenario: Update customer resource with an empty patch payload (resource remains unchanged)
@@ -635,6 +881,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "@id" should exist
     And the JSON node "@type" should contain "Customer"
     And the JSON node "ulid" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -656,6 +903,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Syntax error"
 
@@ -671,7 +919,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email.not.unique"
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "detail" should contain "email: This email address is already registered"
 
   Scenario: Fail to update customer resource with initials exceeding maximum length via PATCH
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -684,6 +933,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with phone exceeding maximum length via PATCH
@@ -697,6 +947,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "detail" should contain "phone: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with invalid email format via PATCH and check error message
@@ -710,7 +961,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 422
     And the response should be in JSON
-    And the JSON node "detail" should contain "email.invalid"
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "detail" should contain "email: This value is not a valid email address."
 
   Scenario: Fail to update customer resource with non-boolean confirmed via PATCH and check error message
     Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
@@ -723,6 +975,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 400
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "detail" should contain "input data is misformatted"
 
   Scenario: Update customer resource ignoring unknown properties via PATCH and verify JSON response
@@ -736,9 +989,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "unknownField" should not exist
 
-  Scenario: Fail to replace a customer resource with invalid ulid format and check error message
+  Scenario: Fail to replace a customer resource with invalid ulid format and check error message (PATCH case)
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/invalid-ulid-format" with body:
       """
@@ -748,6 +1002,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       """
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
 
@@ -760,11 +1015,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a DELETE request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 204
     And the response should be empty
+    And the response should be valid according to the operation id "api_customers_ulid_delete"
 
   Scenario: Fail to delete a customer resource for a non-existent ulid and check error message
     When I send a DELETE request to "/api/customers/01JKX8XGXVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_delete"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
 
@@ -772,5 +1029,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a DELETE request to "/api/customers/invalid-ulid-format"
     Then the response status code should be equal to 404
     And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_ulid_delete"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
