@@ -23,10 +23,14 @@ use Symfony\Component\Uid\Ulid;
 
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
-    private Generator $faker;
+    /** @var array<string> */
     private array $createdCustomerIds = [];
+    /** @var array<string> */
     private array $createdStatusIds = [];
+    /** @var array<string> */
     private array $createdTypeIds = [];
+
+    private Generator $faker;
 
     public function __construct(
         private TypeRepositoryInterface $typeRepository,
@@ -40,169 +44,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
-
-    /**
-     * Generic helper to track created IDs.
-     */
-    private function trackId(string $id, array &$storage): void
-    {
-        if (!in_array($id, $storage, true)) {
-            $storage[] = $id;
-        }
-    }
-
-    /* ============================================================
-       PREPARE ENTITIES (CustomerType and CustomerStatus)
-       Two versions are provided.
-    ============================================================ */
-
-    /**
-     * Prepares and persists CustomerType and CustomerStatus entities
-     * using default (faker) values.
-     *
-     * @return array [CustomerType, CustomerStatus]
-     */
-    private function prepareCustomerEntitiesDefault(string $id): array
-    {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
-
-        // Always use the default (faker) word.
-        $type->setValue($this->faker->word());
-        $status->setValue($this->faker->word());
-
-        $this->typeRepository->save($type);
-        $this->statusRepository->save($status);
-
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
-
-        return [$type, $status];
-    }
-
-    /**
-     * Prepares and persists CustomerType and CustomerStatus entities
-     * using provided values.
-     *
-     * @return array [CustomerType, CustomerStatus]
-     */
-    private function prepareCustomerWithValues(
-        string $id,
-        string $typeValue,
-        string $statusValue
-    ): array {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
-
-        // Directly set the provided values.
-        $type->setValue($typeValue);
-        $status->setValue($statusValue);
-
-        $this->typeRepository->save($type);
-        $this->statusRepository->save($status);
-
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
-
-        return [$type, $status];
-    }
-
-    /* ============================================================
-       CREATE AND SAVE CUSTOMER METHODS
-       Three variants: default, with provided type/status,
-       and one that always sets a specific lead source.
-    ============================================================ */
-
-    /**
-     * Creates and saves a customer using default entity values.
-     */
-    private function createAndSaveCustomerDefault(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed = true
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    /**
-     * Creates and saves a customer using provided type and status values.
-     */
-    private function createAndSaveCustomerWithValues(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed,
-        string $typeValue,
-        string $statusValue
-    ): void {
-        [$type, $status] = $this->prepareCustomerWithValues(
-            $id,
-            $typeValue,
-            $statusValue
-        );
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    /**
-     * Creates and saves a customer then sets a specific lead source.
-     * (This duplicates the customer creation logic so that no conditional callback is used.)
-     */
-    private function createAndSaveCustomerWithLeadSource(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            true,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        // Explicitly set the lead source (duplication rather than a callback)
-        $customer->setLeadSource($leadSource);
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    /* ============================================================
-       STEP DEFINITIONS
-       Each step now calls the appropriate duplicated method.
-    ============================================================ */
 
     /**
      * @Given customer with id :id exists
@@ -379,9 +220,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $this->trackId($id, $this->createdTypeIds);
     }
 
-    /**
-     * Helper method to retrieve or create a CustomerType.
-     */
     public function getCustomerType(string $id): CustomerType
     {
         $type = $this->typeFactory->create(
@@ -392,9 +230,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         return $type;
     }
 
-    /**
-     * Helper method to retrieve or create a CustomerStatus.
-     */
     public function getStatus(string $id): CustomerStatus
     {
         $status = $this->statusFactory->create(
@@ -418,14 +253,12 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         }
         $this->createdCustomerIds = [];
 
-        // Clean up statuses.
         foreach ($this->createdStatusIds as $id) {
             $status = $this->statusRepository->find($id);
             $this->statusRepository->delete($status);
         }
         $this->createdStatusIds = [];
 
-        // Clean up types.
         foreach ($this->createdTypeIds as $id) {
             $type = $this->typeRepository->find($id);
             $this->typeRepository->delete($type);
@@ -465,5 +298,133 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteTypeByValue(string $value): void
     {
         $this->typeRepository->deleteByValue($value);
+    }
+
+    /**
+     * @param array<string> $storage  The array to store IDs.
+     */
+    private function trackId(string $id, array &$storage): void
+    {
+        if (!in_array($id, $storage, true)) {
+            $storage[] = $id;
+        }
+    }
+
+    /**
+     * @return array{0: CustomerType, 1: CustomerStatus}
+     */
+    private function prepareCustomerEntitiesDefault(string $id): array
+    {
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+
+        $type->setValue($this->faker->word());
+        $status->setValue($this->faker->word());
+
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $this->trackId($id, $this->createdTypeIds);
+        $this->trackId($id, $this->createdStatusIds);
+
+        return [$type, $status];
+    }
+
+    /**
+     * @return array{0: CustomerType, 1: CustomerStatus}
+     */
+    private function prepareCustomerWithValues(
+        string $id,
+        string $typeValue,
+        string $statusValue
+    ): array {
+        $type = $this->getCustomerType($id);
+        $status = $this->getStatus($id);
+
+        $type->setValue($typeValue);
+        $status->setValue($statusValue);
+
+        $this->typeRepository->save($type);
+        $this->statusRepository->save($status);
+
+        $this->trackId($id, $this->createdTypeIds);
+        $this->trackId($id, $this->createdStatusIds);
+
+        return [$type, $status];
+    }
+
+    private function createAndSaveCustomerDefault(
+        string $id,
+        string $initials,
+        string $email,
+        string $phone,
+        string $leadSource,
+        bool $confirmed = true
+    ): void {
+        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            $confirmed,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->trackId($id, $this->createdCustomerIds);
+    }
+
+    private function createAndSaveCustomerWithValues(
+        string $id,
+        string $initials,
+        string $email,
+        string $phone,
+        string $leadSource,
+        bool $confirmed,
+        string $typeValue,
+        string $statusValue
+    ): void {
+        [$type, $status] = $this->prepareCustomerWithValues(
+            $id,
+            $typeValue,
+            $statusValue
+        );
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            $confirmed,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $this->customerRepository->save($customer);
+        $this->trackId($id, $this->createdCustomerIds);
+    }
+
+    private function createAndSaveCustomerWithLeadSource(
+        string $id,
+        string $initials,
+        string $email,
+        string $phone,
+        string $leadSource
+    ): void {
+        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
+        $customer = $this->customerFactory->create(
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $type,
+            $status,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+        );
+        $customer->setLeadSource($leadSource);
+        $this->customerRepository->save($customer);
+        $this->trackId($id, $this->createdCustomerIds);
     }
 }
