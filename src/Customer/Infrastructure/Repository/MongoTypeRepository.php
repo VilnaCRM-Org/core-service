@@ -41,8 +41,8 @@ final class MongoTypeRepository extends ServiceDocumentRepository implements
 
     public function deleteByValue(string $value): void
     {
-        $customerStatus = $this->findOneBy(['value' => $value]);
-        $this->documentManager->remove($customerStatus);
+        $customerType = $this->findOneBy(['value' => $value]);
+        $this->documentManager->remove($customerType);
         $this->documentManager->flush();
     }
 }
