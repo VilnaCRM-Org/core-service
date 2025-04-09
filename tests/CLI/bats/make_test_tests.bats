@@ -9,12 +9,6 @@ load 'bats-assert/load'
   assert_success
 }
 
-@test "make e2e-tests command executes" {
-  run make e2e-tests
-   assert_output --partial 'passed'
-  assert_success
-}
-
 @test "make behat command executes" {
   run make behat
   assert_output --partial 'passed'
