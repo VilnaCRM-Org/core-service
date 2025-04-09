@@ -43,7 +43,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     public function testCreateCustomerFailure(): void
     {
         $payload = [
-            'phone' => $this->faker->phoneNumber,
+            'phone' => $this->faker->phoneNumber(),
             'initials' => 'No Email',
             'leadSource' => $this->faker->word(),
             'confirmed' => true,
@@ -259,7 +259,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         return [
             'email' => $this->faker->unique()->email(),
-            'phone' => $this->faker->phoneNumber,
+            'phone' => $this->faker->phoneNumber(),
             'initials' => $name,
             'leadSource' => $this->faker->word(),
             'type' => $this->createCustomerType(),

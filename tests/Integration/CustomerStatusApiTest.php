@@ -86,6 +86,22 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(422);
     }
 
+    public function testReplaceCustomerStatusFailureWithValidation(): void
+    {
+        $orig = $this->getStatusPayload();
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+        $client = self::createClient();
+        $client->request(
+            'PUT',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode(['value' => '']),
+            ]
+        );
+        $this->assertResponseStatusCodeSame(422);
+    }
+
     public function testReplaceCustomerStatusNotFound(): void
     {
         $ulid = (string) $this->faker->ulid();
@@ -119,23 +135,6 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $this->assertResponseIsSuccessful();
         $data = (self::createClient()->request('GET', $iri))->toArray();
         $this->assertSame('Pending', $data['value']);
-    }
-
-    public function testPatchCustomerStatusFailure(): void
-    {
-        $orig = $this->getStatusPayload();
-        $iri = $this->createEntity('/api/customer_statuses', $orig);
-        $patch = ['value' => ''];
-        $client = self::createClient();
-        $client->request(
-            'PATCH',
-            $iri,
-            [
-                'headers' => ['Content-Type' => 'application/merge-patch+json'],
-                'body' => json_encode($patch),
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testPatchCustomerStatusNotFound(): void

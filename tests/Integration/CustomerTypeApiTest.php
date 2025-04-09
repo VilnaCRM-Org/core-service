@@ -104,6 +104,22 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(404);
     }
 
+    public function testReplaceCustomerTypeFailureWithValidation(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+        $client = self::createClient();
+        $client->request(
+            'PUT',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode(['value' => '']),
+            ]
+        );
+        $this->assertResponseStatusCodeSame(422);
+    }
+
     public function testPatchCustomerTypeSuccess(): void
     {
         $orig = $this->getTypePayload('Retail');
@@ -122,23 +138,6 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $response = $client->request('GET', $iri);
         $data = $response->toArray();
         $this->assertSame('VIP', $data['value']);
-    }
-
-    public function testPatchCustomerTypeFailure(): void
-    {
-        $orig = $this->getTypePayload('Retail');
-        $iri = $this->createEntity('/api/customer_types', $orig);
-        $patch = ['value' => ''];
-        $client = self::createClient();
-        $client->request(
-            'PATCH',
-            $iri,
-            [
-                'headers' => ['Content-Type' => 'application/merge-patch+json'],
-                'body' => json_encode($patch),
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testPatchCustomerTypeNotFound(): void

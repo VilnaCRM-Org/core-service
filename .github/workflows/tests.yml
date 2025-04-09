@@ -22,6 +22,9 @@ jobs:
       - name: Start application
         run: make start
 
+      - name: Execute Integration internal negative tests
+        run: make negative-tests-with-coverage
+
       - name: Execute Unit and Integration tests
         run: make tests-with-coverage
 
