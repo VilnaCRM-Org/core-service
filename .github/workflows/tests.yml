@@ -22,11 +22,11 @@ jobs:
       - name: Start application
         run: make start
 
-      - name: Execute Integration internal negative tests
-        run: make negative-tests-with-coverage
-
       - name: Execute Unit and Integration tests
         run: make tests-with-coverage
+
+      - name: Execute Integration internal negative tests
+        run: make negative-tests-with-coverage
 
       - name: Copy coverage report to host
         run: docker cp core-service-php-1:/coverage/coverage.xml /tmp
