@@ -3,15 +3,16 @@
 load 'bats-support/load'
 load 'bats-assert/load'
 
-@test "make all-tests command executes" {
-  run make all-tests
-  assert_output --partial 'OK'
-  assert_success
-}
 
 @test "make behat command executes" {
   run make behat
   assert_output --partial 'passed'
+  assert_success
+}
+
+@test "make all-tests command executes" {
+  run make all-tests
+  assert_output --partial 'OK'
   assert_success
 }
 

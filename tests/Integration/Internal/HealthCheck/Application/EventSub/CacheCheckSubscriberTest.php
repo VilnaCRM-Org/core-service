@@ -25,16 +25,34 @@ final class CacheCheckSubscriberTest extends BaseIntegrationTest
     public function testOnHealthCheckCachesResult(): void
     {
         $event = new HealthCheckEvent();
+
         $this->subscriber->onHealthCheck($event);
 
-        $result = $this->cache->get('health_check', static function () {
-            return 'not_ok';
-        });
-
+        $cacheItem = $this->cache->getItem('health_check');
+        $this->assertTrue($cacheItem->isHit(), 'Expected the cache item to be present.');
         $this->assertEquals(
             'ok',
-            $result,
-            'The cache should return "ok" for health_check key'
+            $cacheItem->get(),
+            'The cache should contain "ok" as the value for the health_check key.'
+        );
+
+        $cachedValue = $this->cache->get('health_check', static function () {
+            return 'not_ok';
+        });
+        $this->assertEquals(
+            'ok',
+            $cachedValue,
+            'The cached value should remain "ok", and the fallback should not be invoked.'
+        );
+
+        $this->subscriber->onHealthCheck($event);
+        $cachedValueAgain = $this->cache->get('health_check', static function () {
+            return 'not_ok';
+        });
+        $this->assertEquals(
+            $cachedValue,
+            $cachedValueAgain,
+            'Subsequent calls should continue to return the same cached value.'
         );
     }
 
@@ -44,7 +62,7 @@ final class CacheCheckSubscriberTest extends BaseIntegrationTest
         $this->assertEquals(
             $expected,
             CacheCheckSubscriber::getSubscribedEvents(),
-            'Events should correctly bind to onHealthCheck method'
+            'The events array should correctly bind the HealthCheckEvent to the onHealthCheck method.'
         );
     }
 }
