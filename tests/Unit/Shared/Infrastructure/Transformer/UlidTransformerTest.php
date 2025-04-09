@@ -18,15 +18,14 @@ final class UlidTransformerTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->ulidFactory = $this->createMock(
-            UlidFactory::class
-        );
+        parent::setUp();
+        $this->ulidFactory = $this->createMock(UlidFactory::class);
         $this->ulidTransformer = new UlidTransformer($this->ulidFactory);
     }
 
     public function testToDatabaseValueWithUlidInstance(): void
     {
-        $ulidString = '01ARZ3NDEKTSV4RRFFQ69G5FAV';
+        $ulidString = (string) $this->faker->ulid();
         $ulid = new Ulid($ulidString);
         $expectedBinary = $ulid->toBinary();
 
@@ -39,7 +38,7 @@ final class UlidTransformerTest extends UnitTestCase
 
     public function testToDatabaseValueWithString(): void
     {
-        $ulidString = '01ARZ3NDEKTSV4RRFFQ69G5FAV';
+        $ulidString = (string) $this->faker->ulid();
         $ulid = new Ulid($ulidString);
         $expectedBinary = $ulid->toBinary();
 
@@ -107,5 +106,24 @@ final class UlidTransformerTest extends UnitTestCase
             ->transformFromSymfonyUlid($symfonyUlid);
 
         $this->assertInstanceOf(Ulid::class, $result);
+    }
+
+    public function testToDatabaseValueReturnsNullForNullValue(): void
+    {
+        $this->ulidFactory->expects($this->never())->method('create');
+
+        $result = $this->ulidTransformer->toDatabaseValue(null);
+
+        $this->assertNull($result);
+    }
+
+    public function testToDatabaseValueReturnsNullForInvalidUlidString(): void
+    {
+        $invalidUlid = 'invalid-ulid-string';
+        $this->ulidFactory->expects($this->never())->method('create');
+
+        $result = $this->ulidTransformer->toDatabaseValue($invalidUlid);
+
+        $this->assertNull($result);
     }
 }
