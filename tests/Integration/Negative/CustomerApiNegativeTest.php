@@ -12,6 +12,7 @@ final class CustomerApiNegativeTest extends BaseNegativeApiTest
     {
         $this->sendRequest('GET', '/api/customers');
     }
+
     public function testGetCustomer500Error(): void
     {
         $customerId = $this->faker->ulid();

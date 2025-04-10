@@ -22,51 +22,55 @@ final class CacheCheckSubscriberTest extends BaseIntegrationTest
         $this->subscriber = new CacheCheckSubscriber($this->cache);
     }
 
-    public function testOnHealthCheckCachesResult(): void
+    public function testInitialHealthCheckSetsCache(): void
     {
         $event = new HealthCheckEvent();
-
         $this->subscriber->onHealthCheck($event);
-
         $cacheItem = $this->cache->getItem('health_check');
-        $this->assertTrue($cacheItem->isHit(), 'Expected the cache item to be present.');
+        $this->assertTrue(
+            $cacheItem->isHit(),
+            'Expected cache item present.'
+        );
         $this->assertEquals(
             'ok',
             $cacheItem->get(),
-            'The cache should contain "ok" as the value for the health_check key.'
+            'Cache should have "ok".'
         );
-
-        $cachedValue = $this->cache->get('health_check', static function () {
-            return 'not_ok';
-        });
         $this->assertEquals(
             'ok',
-            $cachedValue,
-            'The cached value should remain "ok",
-            and the fallback should not be invoked.'
+            $this->getHealthCheckCacheValue(),
+            'Cached value remains ok.'
         );
+    }
 
+    public function testHealthCheckCacheIdempotence(): void
+    {
+        $event = new HealthCheckEvent();
         $this->subscriber->onHealthCheck($event);
-        $cachedValueAgain = $this->cache->get(
-            'health_check',
-            static function () {
-                return 'not_ok';
-            }
-        );
+        $val = $this->getHealthCheckCacheValue();
+        $this->subscriber->onHealthCheck($event);
         $this->assertEquals(
-            $cachedValue,
-            $cachedValueAgain,
-            'Subsequent calls should continue to return the same cached value.'
+            $val,
+            $this->getHealthCheckCacheValue(),
+            'Subsequent calls return same value.'
         );
     }
 
     public function testGetSubscribedEvents(): void
     {
-        $expected = [HealthCheckEvent::class => 'onHealthCheck'];
+        $exp = [HealthCheckEvent::class => 'onHealthCheck'];
         $this->assertEquals(
-            $expected,
+            $exp,
             CacheCheckSubscriber::getSubscribedEvents(),
-            'The events array should correctly bind the HealthCheckEvent to the onHealthCheck method.'
+            'Events array should bind HealthCheckEvent to onHealthCheck.'
+        );
+    }
+
+    private function getHealthCheckCacheValue(): string
+    {
+        return $this->cache->get(
+            'health_check',
+            static fn (): string => 'not_ok'
         );
     }
 }

@@ -48,7 +48,10 @@ final class CustomerApiTest extends BaseIntegrationTest
 
         $this->assertResponseStatusCodeSame(201);
 
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertResponseHeaderSame(
+            'content-type',
+            'application/ld+json; charset=utf-8'
+        );
 
         $this->assertArrayHasKey('@id', $responseData);
 
