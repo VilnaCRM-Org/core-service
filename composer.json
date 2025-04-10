@@ -11,7 +11,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-mbstring": "*",
-    "ext-mongodb": "*",
+    "ext-mongodb": "^2.0",
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "^4.0",
