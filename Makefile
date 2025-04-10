@@ -109,7 +109,7 @@ integration-negative-tests: ## Run integration negative tests
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
-negative-tests-with-coverage: ## Run tests with coverage
+negative-tests-with-coverage: ## Run negative tests with coverage reporting
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
 all-tests: behat unit-tests integration-tests integration-negative-tests ## Run unit, integration and e2e tests
@@ -180,10 +180,10 @@ commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
 coverage-html: ## Create the code coverage report with PHPUnit
-	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Intgeration --coverage-html=coverage/html
+	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Integration --coverage-html=coverage/html
 
 coverage-xml: ## Create the code coverage report with PHPUnit
-	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Intgeration --coverage-clover coverage/coverage.xml
+	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Integration --coverage-clover coverage/coverage.xml
 
 generate-openapi-spec:
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml

@@ -23,7 +23,7 @@ final class UpdateCustomerTypeCommandFactoryTest extends UnitTestCase
         $this->factory = new UpdateCustomerTypeCommandFactory();
     }
 
-    public function testCreate(): void
+    public function testCreateAssignsCorrectPropertiesToCommand(): void
     {
         $value = $this->faker->word();
         $customerType = $this->createMock(CustomerType::class);

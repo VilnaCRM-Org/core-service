@@ -42,13 +42,17 @@ final class CacheCheckSubscriberTest extends BaseIntegrationTest
         $this->assertEquals(
             'ok',
             $cachedValue,
-            'The cached value should remain "ok", and the fallback should not be invoked.'
+            'The cached value should remain "ok",
+            and the fallback should not be invoked.'
         );
 
         $this->subscriber->onHealthCheck($event);
-        $cachedValueAgain = $this->cache->get('health_check', static function () {
-            return 'not_ok';
-        });
+        $cachedValueAgain = $this->cache->get(
+            'health_check',
+            static function () {
+                return 'not_ok';
+            }
+        );
         $this->assertEquals(
             $cachedValue,
             $cachedValueAgain,

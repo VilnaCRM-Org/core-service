@@ -40,6 +40,21 @@ final class CustomerApiTest extends BaseIntegrationTest
         $this->assertSame($payload['email'], $data['email']);
     }
 
+    public function testPostCustomerSuccess(): void
+    {
+        $payload = $this->getCustomerPayload('Jane Doe');
+
+        $responseData = $this->jsonRequest('POST', '/api/customers', $payload);
+
+        $this->assertResponseStatusCodeSame(201);
+
+        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+
+        $this->assertArrayHasKey('@id', $responseData);
+
+        $this->assertSame($payload['email'], $responseData['email']);
+    }
+
     public function testCreateCustomerFailure(): void
     {
         $payload = [
