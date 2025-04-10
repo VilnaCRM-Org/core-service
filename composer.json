@@ -37,7 +37,8 @@
     "symfony/uid": "7.1.*",
     "symfony/validator": "7.1.*",
     "symfony/yaml": "7.1.*",
-    "webonyx/graphql-php": "^15.14"
+    "webonyx/graphql-php": "^15.14",
+    "mongodb/mongodb": "^1.21"
   },
   "config": {
     "allow-plugins": {
@@ -54,7 +55,8 @@
     },
     "sort-packages": true,
     "platform": {
-      "php": "8.3.12"
+      "php": "8.3.12",
+      "ext-mongodb": "1.21.1"
     }
   },
   "autoload": {
