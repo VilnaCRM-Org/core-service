@@ -126,4 +126,4 @@ services:
 
   App\Tests\DataFixtures\:
     resource: '%kernel.project_dir%/tests/DataFixtures'
-    tags: [ 'doctrine_mongodb.odm.fixture' ]
+    tags: ['doctrine_mongodb.odm.fixture']
