@@ -15,6 +15,47 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $data = $response->toArray();
         $this->assertArrayHasKey('member', $data);
         $this->assertIsArray($data['member']);
+        $this->assertArrayHasKey('totalItems', $data);
+    }
+
+    public function testGetCustomerStatusesWithUnsupportedQueryParameter(): void
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_statuses?unsupportedParam=value');
+        $this->assertResponseIsSuccessful();
+        $this->assertArrayHasKey('member', $response->toArray());
+    }
+
+    public function testGetCustomerStatusesCollectionWithPagination(): void
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_statuses?page=2&itemsPerPage=10');
+        $data = $response->toArray();
+        $this->assertResponseIsSuccessful();
+        $this->assertArrayHasKey('member', $data);
+        $this->assertArrayHasKey('totalItems', $data);
+        $this->assertLessThanOrEqual(10, count($data['member']));
+    }
+
+    public function testGetCustomerStatusesCollectionWithOrdering(): void
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_statuses?order[ulid]=asc&order[value]=desc');
+        $data = $response->toArray();
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('order%5Bulid%5D=asc', $data['view']['@id'] ?? '');
+        $this->assertStringContainsString('order%5Bvalue%5D=desc', $data['view']['@id'] ?? '');
+    }
+
+    public function testGetCustomerStatusesCollectionFilteringByValue(): void
+    {
+        $this->createEntity('/api/customer_statuses', ['value' => 'Active']);
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_statuses?value=Active');
+        $data = $response->toArray();
+        $this->assertResponseIsSuccessful();
+        $this->assertNotEmpty($data['member']);
+        $this->assertStringContainsString('Active', $data['member'][0]['value']);
     }
 
     public function testGetCustomerStatusNotFound(): void
@@ -185,9 +226,6 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
 
     private function createCustomerStatus(): string
     {
-        return $this->createEntity(
-            '/api/customer_statuses',
-            $this->getStatusPayload()
-        );
+        return $this->createEntity('/api/customer_statuses', $this->getStatusPayload());
     }
 }
