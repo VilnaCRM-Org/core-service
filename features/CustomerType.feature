@@ -20,7 +20,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customer types collection with valid pagination parameters and check JSON keys and values
     When I send a GET request to "/api/customer_types?page=2&itemsPerPage=50"
@@ -39,7 +39,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customer types collection filtering by value (single)
     Given customer type with value "Prospect" exists
@@ -49,6 +49,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "member[0].value" should contain "Prospect"
+    And the JSON node "totalItems" should be equal to the number 1
 
   Scenario: Retrieve customer types collection with ordering parameters and check JSON ordering hints
     When I send a GET request to "/api/customer_types?order[ulid]=asc&order[value]=desc"
@@ -58,6 +59,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
     And the JSON node "view.@id" should contain "order%5Bvalue%5D=desc"
+    And the JSON node "totalItems" should be equal to the number 0
 
 # ----- GET /api/customer_types/{ulid} – Single Resource (Positive Tests) -----
 
@@ -74,11 +76,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Create a customer type resource with valid payload and verify full JSON response
     When I send a POST request to "/api/customer_types" with body:
-  """
-  {
-    "value": "Prospect"
-  }
-  """
+    """
+    {
+      "value": "Prospect"
+    }
+    """
     Then the response status code should be equal to 201
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -88,12 +90,12 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Create a customer type resource with additional unrecognized property which should be ignored
     When I send a POST request to "/api/customer_types" with body:
-  """
-  {
-    "value": "Lead",
-    "extraField": "Should be ignored"
-  }
-  """
+    """
+    {
+      "value": "Lead",
+      "extraField": "Should be ignored"
+    }
+    """
     Then the response status code should be equal to 201
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -107,11 +109,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
   Scenario: Replace a customer type resource with valid payload and verify full JSON response
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  {
-    "value": "Qualified"
-  }
-  """
+    """
+    {
+      "value": "Qualified"
+    }
+    """
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -121,12 +123,12 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
   Scenario: Replace a customer type resource while including an extra field that should be ignored
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  {
-    "value": "Converted",
-    "irrelevantField": "should be ignored"
-  }
-  """
+    """
+    {
+      "value": "Converted",
+      "irrelevantField": "should be ignored"
+    }
+    """
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -140,11 +142,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  {
-    "value": "Nurtured"
-  }
-  """
+    """
+    {
+      "value": "Nurtured"
+    }
+    """
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -155,9 +157,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  { }
-  """
+    """
+    { }
+    """
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -215,11 +217,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Fail to create a customer type resource with an empty value
     When I send a POST request to "/api/customer_types" with body:
-  """
-  {
-    "value": ""
-  }
-  """
+    """
+    {
+      "value": ""
+    }
+    """
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -228,9 +230,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Fail to create a customer type resource with missing required field (value)
     When I send a POST request to "/api/customer_types" with body:
-  """
-  { }
-  """
+    """
+    { }
+    """
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -239,11 +241,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Fail to create a customer type resource with too long value and check error message
     When I send a POST request to "/api/customer_types" with body:
-  """
-  {
-    "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  }
-  """
+    """
+    {
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+    """
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -255,9 +257,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
   Scenario: Fail to replace a customer type resource with missing required field (value)
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  { }
-  """
+    """
+    { }
+    """
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -266,11 +268,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Fail to replace a customer type resource for a non-existent ulid
     When I send a PUT request to "/api/customer_types/01JKX8XGXVDZ46MWYMZT94YER4" with body:
-  """
-  {
-    "value": "Updated"
-  }
-  """
+    """
+    {
+      "value": "Updated"
+    }
+    """
     Then the response status code should be equal to 404
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -281,11 +283,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 
   Scenario: Fail to replace a customer type resource with invalid ulid format
     When I send a PUT request to "/api/customer_types/invalid-ulid-format" with body:
-  """
-  {
-    "value": "Updated"
-  }
-  """
+    """
+    {
+      "value": "Updated"
+    }
+    """
     Then the response status code should be equal to 404
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -299,11 +301,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
-  """
-  {
-    "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  }
-  """
+    """
+    {
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+    """
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
@@ -313,11 +315,11 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
   Scenario: Fail to update customer type resource with invalid ulid format via PATCH
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/invalid-ulid-format" with body:
-  """
-  {
-    "value": "Updated"
-  }
-  """
+    """
+    {
+      "value": "Updated"
+    }
+    """
     Then the response status code should be equal to 404
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"

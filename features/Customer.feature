@@ -26,6 +26,22 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 0
     And the JSON node "view.@id" should exist
 
+  Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+
   Scenario: Retrieve customers collection with default pagination and verify JSON structure
     When I send a GET request to "/api/customers"
     Then the response status code should be equal to 200
@@ -33,7 +49,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customers collection filtering by initials (single value) and check JSON key and value
     Given create customer with initials "JD"
@@ -43,6 +59,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should contain "JD"
+    And the JSON node "totalItems" should be equal to the number 1
 
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
     Given create customer with initials "AB"
@@ -53,6 +70,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
+    And the JSON node "totalItems" should be equal to the number 2
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
     Given create customer with email "john.doe@example.com"
@@ -62,6 +80,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].email" should contain "john.doe@example.com"
+    And the JSON node "totalItems" should be equal to the number 1
 
   Scenario: Retrieve customers collection filtering by email (array values) and validate JSON values
     Given create customer with email "john.doe@example.com"
@@ -71,6 +90,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON nodes should contain:
       | member[0].email | john.doe@example.com |
       | member[1].email | jane.doe@example.com  |
@@ -82,6 +102,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].phone" should contain "0123456789"
 
   Scenario: Retrieve customers collection filtering by phone (array values) and verify JSON values
@@ -92,6 +113,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON nodes should contain:
       | member[0].phone | 0123456789 |
       | member[1].phone | 0987654321 |
@@ -113,6 +135,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the JSON node "totalItems" should be equal to the number 2
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON nodes should contain:
       | member[0].leadSource | Google |
@@ -125,6 +148,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
@@ -134,6 +158,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].confirmed" should be true
 
   Scenario: Retrieve customers collection filtering by confirmed (array) and verify JSON
@@ -144,6 +169,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "member[0].confirmed" should be true
     And the JSON node "member[1].confirmed" should be false
 

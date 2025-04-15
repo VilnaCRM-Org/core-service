@@ -7,6 +7,8 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
 
+  # ----- GET /api/customer_statuses – Collection (Positive Tests) -----
+
   Scenario: Retrieve customer statuses collection with unsupported query parameter
     When I send a GET request to "/api/customer_statuses?unsupportedParam=value"
     Then the response status code should be equal to 200
@@ -14,7 +16,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customer statuses collection with valid pagination parameters and check JSON keys and values
     When I send a GET request to "/api/customer_statuses?page=2&itemsPerPage=50"
@@ -33,7 +35,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customer statuses collection filtering by value (single)
     Given customer status with value "Active" exists
@@ -43,6 +45,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
     And the JSON node "member[0].value" should contain "Active"
+    And the JSON node "totalItems" should be equal to the number 1
 
   Scenario: Retrieve customer statuses collection with ordering parameters and check JSON ordering hints
     When I send a GET request to "/api/customer_statuses?order[ulid]=asc&order[value]=desc"
@@ -52,8 +55,9 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
     And the JSON node "view.@id" should contain "order%5Bvalue%5D=desc"
+    And the JSON node "totalItems" should be equal to the number 0
 
-# ----- GET /api/customer_statuses/{ulid} – Single Resource (Positive Tests) -----
+  # ----- GET /api/customer_statuses/{ulid} – Single Resource (Positive Tests) -----
 
   Scenario: Retrieve a customer status resource with valid ulid and validate full JSON body
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -64,7 +68,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_ulid_get"
     And the JSON node "value" should match "/^[A-Za-z]{2,}$/"
 
-# ----- POST /api/customer_statuses – Create Resource (Positive Tests) -----
+  # ----- POST /api/customer_statuses – Create Resource (Positive Tests) -----
 
   Scenario: Create a customer status resource with valid payload and verify full JSON response
     When I send a POST request to "/api/customer_statuses" with body:
@@ -96,7 +100,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "extraField" should not exist
     Then delete status with value "Inactive"
 
-# ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Positive Tests) -----
+  # ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Positive Tests) -----
 
   Scenario: Replace a customer status resource with valid payload and verify full JSON response
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -128,7 +132,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "value" should contain "Archived"
     And the JSON node "irrelevantField" should not exist
 
-# ----- PATCH /api/customer_statuses/{ulid} – Partial Update (Positive Tests) -----
+  # ----- PATCH /api/customer_statuses/{ulid} – Partial Update (Positive Tests) -----
 
   Scenario: Partially update a customer status resource's value
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -161,7 +165,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "ulid" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "value" should exist
 
-# ----- DELETE /api/customer_statuses/{ulid} – Delete Resource (Positive Test) -----
+  # ----- DELETE /api/customer_statuses/{ulid} – Delete Resource (Positive Test) -----
 
   Scenario: Delete a customer status resource with valid ulid and verify empty response
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -171,11 +175,11 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the header "Content-Type" should not exist
     And the response should be valid according to the operation id "api_customer_statuses_ulid_delete"
 
-###############################################################################
-#                             NEGATIVE TESTS
-###############################################################################
+  ###############################################################################
+  #                             NEGATIVE TESTS
+  ###############################################################################
 
-# ----- GET /api/customer_statuses – Collection (Negative Tests) -----
+  # ----- GET /api/customer_statuses – Collection (Negative Tests) -----
 
   Scenario: Retrieve customer statuses collection with invalid pagination parameters (non-integer)
     When I send a GET request to "/api/customer_statuses?page=abc&itemsPerPage=50"
@@ -185,7 +189,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
     And the JSON node "detail" should contain "Page should not be less than 1"
 
-# ----- GET /api/customer_statuses/{ulid} – Single Resource (Negative Tests) -----
+  # ----- GET /api/customer_statuses/{ulid} – Single Resource (Negative Tests) -----
 
   Scenario: Retrieve a non-existent customer status resource with valid ulid and receive 404 error
     When I send a GET request to "/api/customer_statuses/01JKX8XGXVDZ46MWYMZT94YER4"
@@ -205,7 +209,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_ulid_get"
     And the JSON node "detail" should contain "Not Found"
 
-# ----- POST /api/customer_statuses – Create Resource (Negative Tests) -----
+  # ----- POST /api/customer_statuses – Create Resource (Negative Tests) -----
 
   Scenario: Fail to create a customer status resource with an empty value
     When I send a POST request to "/api/customer_statuses" with body:
@@ -244,7 +248,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_post"
     And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less."
 
-# ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Negative Tests) -----
+  # ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Negative Tests) -----
 
   Scenario: Fail to replace a customer status resource with missing required field (value)
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -287,6 +291,8 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
 
+  # ----- PATCH /api/customer_statuses/{ulid} – Partial Update (Negative Tests) -----
+
   Scenario: Fail to update customer status resource with too long value via PATCH
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
@@ -316,6 +322,8 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the response should be valid according to the operation id "api_customer_statuses_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
+
+  # ----- DELETE /api/customer_statuses/{ulid} – Delete Resource (Negative Test) -----
 
   Scenario: Fail to delete a customer status resource for a non-existent ulid and check error message
     When I send a DELETE request to "/api/customer_statuses/01JKX8XGXVDZ46MWYMZT94YER4"
