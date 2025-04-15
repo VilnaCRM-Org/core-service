@@ -376,6 +376,22 @@ paths:
           explode: false
           allowReserved: false
         -
+          name: 'order[initials]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+          allowReserved: false
+        -
           name: 'order[email]'
           in: query
           description: ''
