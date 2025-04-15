@@ -123,7 +123,3 @@ services:
     arguments:
       ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
     autoconfigure: false
-
-  App\Tests\DataFixtures\:
-    resource: '%kernel.project_dir%/tests/DataFixtures'
-    tags: ['doctrine_mongodb.odm.fixture']
