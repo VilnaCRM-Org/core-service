@@ -36,7 +36,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should exist
 
   Scenario: Retrieve customers collection filtering by initials (single value) and check JSON key and value
-    Given customer with initials "JD" exists
+    Given create customer with initials "JD"
     When I send a GET request to "/api/customers?initials=JD"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -45,8 +45,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].initials" should contain "JD"
 
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
-    Given customer with initials "AB" exists
-    And customer with initials "CD" exists
+    Given create customer with initials "AB"
+    Given create customer with initials "CD"
     When I send a GET request to "/api/customers?initials[]=AB&initials[]=CD"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -55,7 +55,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
-    Given customer with email "john.doe@example.com" exists
+    Given create customer with email "john.doe@example.com"
     When I send a GET request to "/api/customers?email=john.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -64,8 +64,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].email" should contain "john.doe@example.com"
 
   Scenario: Retrieve customers collection filtering by email (array values) and validate JSON values
-    Given customer with email "john.doe@example.com" exists
-    And customer with email "jane.doe@example.com" exists
+    Given create customer with email "john.doe@example.com"
+    And create customer with email "jane.doe@example.com"
     When I send a GET request to "/api/customers?email[]=john.doe@example.com&email[]=jane.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -76,7 +76,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[1].email | jane.doe@example.com  |
 
   Scenario: Retrieve customers collection filtering by phone (single value) and verify JSON key
-    Given customer with phone "0123456789" exists
+    Given create customer with phone "0123456789"
     When I send a GET request to "/api/customers?phone=0123456789"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -85,8 +85,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].phone" should contain "0123456789"
 
   Scenario: Retrieve customers collection filtering by phone (array values) and verify JSON values
-    Given customer with phone "0123456789" exists
-    And customer with phone "0987654321" exists
+    Given create customer with phone "0123456789"
+    And create customer with phone "0987654321"
     When I send a GET request to "/api/customers?phone[]=0123456789&phone[]=0987654321"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -97,7 +97,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[1].phone | 0987654321 |
 
   Scenario: Retrieve customers collection filtering by leadSource (single value) and check JSON
-    Given customer with leadSource "Google" exists
+    Given create customer with leadSource "Google"
     When I send a GET request to "/api/customers?leadSource=Google"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -107,8 +107,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].leadSource" should contain "Google"
 
   Scenario: Retrieve customers collection filtering by leadSource (array values) and check JSON
-    Given customer with leadSource "Google" exists
-    And customer with leadSource "Bing" exists
+    Given create customer with leadSource "Google"
+    And create customer with leadSource "Bing"
     When I send a GET request to "/api/customers?leadSource[]=Google&leadSource[]=Bing"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -119,7 +119,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[1].leadSource | Bing   |
 
   Scenario: Retrieve customers collection filtering by type.value and status.value and check JSON
-    Given customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -128,7 +128,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
-    Given customer with confirmed true exists
+    Given create customer with confirmed true
     When I send a GET request to "/api/customers?confirmed=true"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -137,8 +137,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].confirmed" should be true
 
   Scenario: Retrieve customers collection filtering by confirmed (array) and verify JSON
-    Given customer with confirmed true exists
-    Given customer with confirmed false exists
+    Given create customer with confirmed true
+    Given create customer with confirmed false
     When I send a GET request to "/api/customers?confirmed[]=true&confirmed[]"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -165,7 +165,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
-    Given customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?updatedAt[before]=2025-12-31T23:59:59Z&updatedAt[strictly_before]=2025-12-31T23:59:59Z&updatedAt[after]=2020-01-01T00:00:00Z&updatedAt[strictly_after]=2020-01-01T00:00:00Z"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -174,7 +174,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "view.next" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection with ulid filter operator lt and check JSON value
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -185,7 +185,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@type" should be equal to "Collection"
 
   Scenario: Retrieve customers collection with ulid filter operator lte and check JSON value
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[lte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -196,7 +196,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@type" should be equal to "Collection"
 
   Scenario: Retrieve customers collection with ulid filter operator gt and check JSON value
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[gt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -207,7 +207,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@type" should be equal to "Collection"
 
   Scenario: Retrieve customers collection with ulid filter operator gte and check JSON value
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[gte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -218,7 +218,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@type" should be equal to "Collection"
 
   Scenario: Retrieve customers collection with ulid filter operator between and check JSON value
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[between]=01JKX8XGHVDZ46MWYMZT94YER3,01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -229,7 +229,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@type" should be equal to "Collection"
 
   Scenario: Retrieve a customer resource with valid ulid and validate full JSON body
-    Given customer with id 01JKX8XGHVDZ46MWYMZT94YER4 exists
+    Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
     When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -241,8 +241,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "initials" should exist
 
   Scenario: Create a customer resource with valid payload and verify full JSON response
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a POST request to "/api/customers" with body:
     """
     {
@@ -267,8 +267,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then delete customer with email "postcustomer@example.com"
 
   Scenario: Create a customer resource with additional unrecognized property which should be ignored
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a POST request to "/api/customers" with body:
     """
     {
@@ -290,12 +290,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "extraField" should not exist
     Then delete customer with email "extra@example.com"
 
-# ----- PUT /api/customers/{ulid} – Replace Resource (Positive Tests) -----
+#PUT /api/customers/{ulid} – Replace Resource (Positive Tests) -----
 
   Scenario: Replace a customer resource with valid payload and verify full JSON response
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -317,9 +317,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "confirmed" should be false
 
   Scenario: Replace a customer resource with updated leadSource and initials
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -340,9 +340,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "initials" should be equal to "AB"
 
   Scenario: Replace a customer resource with updated email (case normalization)
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -362,9 +362,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "email" should contain "new.email@example.com"
 
   Scenario: Replace a customer resource with all updated fields (verify complete replacement)
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -386,9 +386,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "leadSource" should contain "Twitter"
 
   Scenario: Replace a customer resource while including an extra field that should be ignored
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -412,7 +412,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 # ----- PATCH /api/customers/{ulid} – Partial Update (Positive Tests) -----
 
   Scenario: Partially update a customer resource's phone and leadSource
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -429,10 +429,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "leadSource" should contain "Facebook"
 
   Scenario: Partially update a customer resource's type and status references
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -448,7 +448,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Partially update a customer resource and verify unchanged fields remain intact
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -465,7 +465,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should exist
 
   Scenario: Partially update a customer resource's email and phone simultaneously
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -482,7 +482,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should be equal to "0555123456"
 
   Scenario: Update customer resource with valid patch payload and verify changed JSON key
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -497,7 +497,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "email" should contain "patched@example.com"
 
   Scenario: Update customer resource with an empty patch payload (resource remains unchanged)
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -520,7 +520,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "updatedAt" should exist
 
   Scenario: Update customer resource ignoring unknown properties via PATCH and verify JSON response
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -535,7 +535,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "unknownField" should not exist
 
   Scenario: Delete a customer resource with valid ulid and verify empty response
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a DELETE request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 204
     And the response should be empty
@@ -573,9 +573,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 # ----- POST /api/customers – Create Resource (Negative Tests) -----
 
   Scenario: Fail to create a customer resource with duplicate email
-    Given customer with email "duplicate@example.com" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with email "duplicate@example.com"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a POST request to "/api/customers" with body:
     """
     {
@@ -595,8 +595,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "email: This email address is already registered"
 
   Scenario: Create a customer resource with an empty initials field
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a POST request to "/api/customers" with body:
     """
     {
@@ -616,8 +616,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a POST request to "/api/customers" with body:
     """
     {
@@ -750,8 +750,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain 'No route matches "invalid-iri"'
 
   Scenario: Fail to replace a customer resource with duplicate email
-    Given customer with email "existing@example.com" exists
-    And customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with email "existing@example.com"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -771,7 +771,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "email: This email address is already registered"
 
   Scenario: Replace a customer resource with an empty initials field
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -791,9 +791,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to replace a customer resource with missing required field (phone) and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -812,9 +812,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "phone: This value should not be blank"
 
   Scenario: Fail to replace a customer resource with invalid email format and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -834,9 +834,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "email: This value is not a valid email address"
 
   Scenario: Fail to replace a customer resource with non-boolean confirmed and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -856,7 +856,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to replace a customer resource with invalid type and status references and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -876,9 +876,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain 'No route matches "invalid-iri"'
 
   Scenario: Fail to replace a customer resource with too long phone number and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
-    And type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -898,7 +898,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with initials exceeding maximum length via PUT
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -959,7 +959,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "Not Found"
 
   Scenario: Partially update a customer resource with an empty initials field
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -974,7 +974,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to update customer resource with malformed JSON payload via PATCH
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -988,7 +988,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "Syntax error"
 
   Scenario: Fail to patch a customer resource with invalid type and status references and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -1004,9 +1004,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain 'No route matches "invalid-iri"'
 
   Scenario: Fail to patch a customer resource with duplicate email
-    Given customer with email "existing@example.com" exists
+    Given create customer with email "existing@example.com"
     And I add "Content-Type" header equal to "application/merge-patch+json"
-    And customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -1020,7 +1020,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "email: This email address is already registered"
 
   Scenario: Fail to update customer resource with initials exceeding maximum length via PATCH
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -1035,7 +1035,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "initials: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with phone exceeding maximum length via PATCH
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -1050,7 +1050,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "phone: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with invalid email format via PATCH and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -1065,7 +1065,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "email: This value is not a valid email address."
 
   Scenario: Fail to update customer resource with non-boolean confirmed via PATCH and check error message
-    Given customer with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """

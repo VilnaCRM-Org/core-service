@@ -62,7 +62,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- GET /api/customer_types/{ulid} – Single Resource (Positive Tests) -----
 
   Scenario: Retrieve a customer type resource with valid ulid and validate full JSON body
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -105,7 +105,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- PUT /api/customer_types/{ulid} – Replace Resource (Positive Tests) -----
 
   Scenario: Replace a customer type resource with valid payload and verify full JSON response
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """
   {
@@ -119,7 +119,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "value" should be equal to "Qualified"
 
   Scenario: Replace a customer type resource while including an extra field that should be ignored
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """
   {
@@ -137,7 +137,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- PATCH /api/customer_types/{ulid} – Partial Update (Positive Tests) -----
 
   Scenario: Partially update a customer type resource's value
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """
@@ -152,7 +152,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "value" should contain "Nurtured"
 
   Scenario: Update customer type resource with an empty patch payload (resource remains unchanged)
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """
@@ -170,7 +170,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- DELETE /api/customer_types/{ulid} – Delete Resource (Positive Test) -----
 
   Scenario: Delete a customer type resource with valid ulid and verify empty response
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a DELETE request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 204
     And the response should be empty
@@ -253,7 +253,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- PUT /api/customer_types/{ulid} – Replace Resource (Negative Tests) -----
 
   Scenario: Fail to replace a customer type resource with missing required field (value)
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """
   { }
@@ -296,7 +296,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
 # ----- PATCH /api/customer_types/{ulid} – Partial Update (Negative Tests) -----
 
   Scenario: Fail to update customer type resource with too long value via PATCH
-    Given type with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
   """

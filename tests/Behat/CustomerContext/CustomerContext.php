@@ -46,7 +46,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with id :id exists
+     * @Given create customer with id :id
      */
     public function customerWithIdExists(string $id): void
     {
@@ -60,7 +60,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given type with id :id exists
+     * @Given create type with id :id
      */
     public function typeWithIdExists(string $id): void
     {
@@ -70,7 +70,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given status with id :id exists
+     * @Given create status with id :id
      */
     public function statusWithIdExists(string $id): void
     {
@@ -80,7 +80,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with initials :initials exists
+     * @Given create customer with initials :initials
      */
     public function customerWithInitialsExists(string $initials): void
     {
@@ -95,7 +95,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with email :email exists
+     * @Given create customer with email :email
      */
     public function customerWithEmailExists(string $email): void
     {
@@ -110,7 +110,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with phone :phone exists
+     * @Given create customer with phone :phone
      */
     public function customerWithPhoneExists(string $phone): void
     {
@@ -125,7 +125,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with leadSource :leadSource exists
+     * @Given create customer with leadSource :leadSource
      */
     public function customerWithLeadSourceExists(string $leadSource): void
     {
@@ -140,7 +140,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with type value "VIP" and status value "Active" and id :id exists
+     * @Given create customer with type value "VIP" and status value "Active" and id :id
      */
     public function customerWithVipActiveAndIdExists(string $id): void
     {
@@ -177,7 +177,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given customer with confirmed :confirmed exists
+     * @Given create customer with confirmed :confirmed
      */
     public function customerWithConfirmedExists(string $confirmed): void
     {

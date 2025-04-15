@@ -56,7 +56,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
 # ----- GET /api/customer_statuses/{ulid} – Single Resource (Positive Tests) -----
 
   Scenario: Retrieve a customer status resource with valid ulid and validate full JSON body
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -99,7 +99,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
 # ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Positive Tests) -----
 
   Scenario: Replace a customer status resource with valid payload and verify full JSON response
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -113,7 +113,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "value" should be equal to "Pending"
 
   Scenario: Replace a customer status resource with an extra field that should be ignored
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -131,7 +131,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
 # ----- PATCH /api/customer_statuses/{ulid} – Partial Update (Positive Tests) -----
 
   Scenario: Partially update a customer status resource's value
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -146,7 +146,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "value" should contain "Under Review"
 
   Scenario: Update customer status resource with an empty patch payload (resource remains unchanged)
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -164,7 +164,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
 # ----- DELETE /api/customer_statuses/{ulid} – Delete Resource (Positive Test) -----
 
   Scenario: Delete a customer status resource with valid ulid and verify empty response
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a DELETE request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 204
     And the response should be empty
@@ -247,7 +247,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
 # ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Negative Tests) -----
 
   Scenario: Fail to replace a customer status resource with missing required field (value)
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     { }
@@ -288,7 +288,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "detail" should contain "Not Found"
 
   Scenario: Fail to update customer status resource with too long value via PATCH
-    Given status with id "01JKX8XGHVDZ46MWYMZT94YER4" exists
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
