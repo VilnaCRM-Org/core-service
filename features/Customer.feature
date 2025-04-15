@@ -53,6 +53,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by initials (single value) and check JSON key and value
     Given create customer with initials "JD"
+    Given create customer with initials "FJ"
     When I send a GET request to "/api/customers?initials=JD"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -64,16 +65,19 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
     Given create customer with initials "AB"
     Given create customer with initials "CD"
+    Given create customer with initials "DC"
     When I send a GET request to "/api/customers?initials[]=AB&initials[]=CD"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
+    And the JSON node "member[1].initials" should match "/(AB|CD)/"
     And the JSON node "totalItems" should be equal to the number 2
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
     Given create customer with email "john.doe@example.com"
+    Given create customer with email "jane.doe@example.com"
     When I send a GET request to "/api/customers?email=john.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -85,6 +89,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve customers collection filtering by email (array values) and validate JSON values
     Given create customer with email "john.doe@example.com"
     And create customer with email "jane.doe@example.com"
+    And create customer with email "jake.doe@example.com"
     When I send a GET request to "/api/customers?email[]=john.doe@example.com&email[]=jane.doe@example.com"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -94,6 +99,46 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON nodes should contain:
       | member[0].email | john.doe@example.com |
       | member[1].email | jane.doe@example.com  |
+
+  Scenario: Retrieve customers collection filtering by email domain and sorted by email ascending
+    Given create customer with email "alice@example.com"
+    And create customer with email "bob@example.com"
+    And create customer with email "charlie@test.com"
+    When I send a GET request to "/api/customers?email[]=alice@example.com&email[]=bob@example.com&order[email]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].email" should contain "alice@example.com"
+    And the JSON node "member[1].email" should contain "bob@example.com"
+    And the JSON node "view.@id" should contain "order%5Bemail%5D=asc"
+
+  Scenario: Retrieve customers collection filtering by confirmed false and sorted by initials ascending
+    Given create customer with initials "BB"
+    And create customer with initials "AA"
+    When I send a GET request to "/api/customers?order[initials]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].initials" should contain "AA"
+    And the JSON node "member[1].initials" should contain "BB"
+    And the JSON node "view.@id" should contain "/api/customers?order%5Binitials%5D=asc"
+
+  Scenario: Retrieve customers collection filtering by confirmed false and sorted by initials descending
+    Given create customer with initials "BB"
+    And create customer with initials "AA"
+    When I send a GET request to "/api/customers?order[initials]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].initials" should contain "BB"
+    And the JSON node "member[1].initials" should contain "AA"
+    And the JSON node "view.@id" should contain "order%5Binitials%5D=desc"
 
   Scenario: Retrieve customers collection filtering by phone (single value) and verify JSON key
     Given create customer with phone "0123456789"
