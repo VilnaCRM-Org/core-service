@@ -8,23 +8,26 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And I add "Content-Type" header equal to "application/ld+json"
 
   Scenario: Retrieve customers collection with unsupported query parameter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?unsupportedParam=value"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member" should exist
-    And the JSON node "totalItems" should exist
+    And the JSON node "totalItems" should be equal to the number 1
 
-  Scenario: Retrieve customers collection with valid pagination parameters and check JSON keys and values
-    When I send a GET request to "/api/customers?page=2&itemsPerPage=50"
+  Scenario: Retrieve customers collection with createdAt date filters and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "member" should exist
-    And the JSON node "totalItems" should be equal to the number 0
-    And the JSON node "view.@id" should exist
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 elements
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -42,6 +45,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.previous" should contain "customers?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values with itemsPerPage parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -58,6 +62,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "view.@id" should exist
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "view.next" should contain "/api/customers?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.previous" should contain "/api/customers?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with empty and verify JSON structure
     When I send a GET request to "/api/customers"
@@ -117,46 +122,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[0].email | john.doe@example.com |
       | member[1].email | jane.doe@example.com  |
 
-  Scenario: Retrieve customers collection filtering by email domain and sorted by email ascending
-    Given create customer with email "alice@example.com"
-    And create customer with email "bob@example.com"
-    And create customer with email "charlie@test.com"
-    When I send a GET request to "/api/customers?email[]=alice@example.com&email[]=bob@example.com&order[email]=asc"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].email" should contain "alice@example.com"
-    And the JSON node "member[1].email" should contain "bob@example.com"
-    And the JSON node "view.@id" should contain "order%5Bemail%5D=asc"
-
-  Scenario: Retrieve customers collection filtering by confirmed false and sorted by initials ascending
-    Given create customer with initials "BB"
-    And create customer with initials "AA"
-    When I send a GET request to "/api/customers?order[initials]=asc"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].initials" should contain "AA"
-    And the JSON node "member[1].initials" should contain "BB"
-    And the JSON node "view.@id" should contain "/api/customers?order%5Binitials%5D=asc"
-
-  Scenario: Retrieve customers collection filtering by confirmed false and sorted by initials descending
-    Given create customer with initials "BB"
-    And create customer with initials "AA"
-    When I send a GET request to "/api/customers?order[initials]=desc"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].initials" should contain "BB"
-    And the JSON node "member[1].initials" should contain "AA"
-    And the JSON node "view.@id" should contain "order%5Binitials%5D=desc"
-
   Scenario: Retrieve customers collection filtering by phone (single value) and verify JSON key
     Given create customer with phone "0123456789"
     Given create customer with phone "3806312833"
@@ -207,16 +172,53 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       | member[0].leadSource | Google |
       | member[1].leadSource | Bing   |
 
-  Scenario: Retrieve customers collection filtering by type.value and status.value and check JSON
+  Scenario: Retrieve customers collection filtering by status.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
     Given create customer with type value "VIP" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
-    When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
+    When I send a GET request to "/api/customers?status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
     And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+
+  Scenario: Retrieve customers collection filtering by status.value and check JSON
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "VIP" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with type value "VIP" and status value "Expired" and id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers?status.value[]=Active&status.value[]=Inactive"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+
+  Scenario: Retrieve customers collection filtering by type.value and check JSON
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?type.value=VIP"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+
+  Scenario: Retrieve customers collection filtering by type.value and check JSON
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with type value "Plus" and status value "Expired" and id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers?type.value[]=VIP&type.value[]=Premium"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
     Given create customer with confirmed true
@@ -241,21 +243,243 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].confirmed" should be true
     And the JSON node "member[1].confirmed" should be false
 
-  Scenario: Retrieve customers collection with ordering parameters and check JSON ordering hints
-    When I send a GET request to "/api/customers?order[ulid]=asc&order[createdAt]=desc&order[email]=asc"
+  Scenario: Retrieve customers collection filtering by email domain and sorted by email ascending
+    Given create customer with email "alice@example.com"
+    And create customer with email "bob@example.com"
+    And create customer with email "charlie@test.com"
+    When I send a GET request to "/api/customers?email[]=alice@example.com&email[]=bob@example.com&order[email]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].email" should contain "alice@example.com"
+    And the JSON node "member[1].email" should contain "bob@example.com"
+    And the JSON node "view.@id" should contain "order%5Bemail%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by email in descending order
+    Given create customer with email "alice@example.com"
+    And create customer with email "bob@example.com"
+    When I send a GET request to "/api/customers?email[]=alice@example.com&email[]=bob@example.com&order[email]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].email" should contain "bob@example.com"
+    And the JSON node "member[1].email" should contain "alice@example.com"
+    And the JSON node "view.@id" should contain "order%5Bemail%5D=desc"
+
+  Scenario: Retrieve customers collection filtering by confirmed false and sorted by initials ascending
+    Given create customer with initials "BB"
+    And create customer with initials "AA"
+    When I send a GET request to "/api/customers?order[initials]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].initials" should contain "AA"
+    And the JSON node "member[1].initials" should contain "BB"
+    And the JSON node "view.@id" should contain "/api/customers?order%5Binitials%5D=asc"
+
+  Scenario: Retrieve customers collection filtering sorted by initials descending
+    Given create customer with initials "BB"
+    And create customer with initials "AA"
+    When I send a GET request to "/api/customers?order[initials]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member[0].initials" should contain "BB"
+    And the JSON node "member[1].initials" should contain "AA"
+    And the JSON node "view.@id" should contain "order%5Binitials%5D=desc"
+
+    # ---------------------------------------------------------------------------
+  # Sorting by leadSource
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by leadSource in ascending order
+    Given create customer with leadSource "Bing"
+    And create customer with leadSource "Google"
+    When I send a GET request to "/api/customers?order[leadSource]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].leadSource" should contain "Bing"
+    And the JSON node "member[1].leadSource" should contain "Google"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5BleadSource%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by leadSource in descending order
+    Given create customer with leadSource "Bing"
+    And create customer with leadSource "Google"
+    When I send a GET request to "/api/customers?order[leadSource]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].leadSource" should contain "Google"
+    And the JSON node "member[1].leadSource" should contain "Bing"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5BleadSource%5D=desc"
+
+  # ---------------------------------------------------------------------------
+  # Sorting by ulid
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by ulid in ascending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[ulid]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by ulid in descending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[ulid]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bulid%5D=desc"
+
+  # ---------------------------------------------------------------------------
+  # Sorting by createdAt
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by createdAt in ascending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[createdAt]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5BcreatedAt%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by createdAt in descending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[createdAt]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BcreatedAt%5D=desc"
 
+  # ---------------------------------------------------------------------------
+  # Sorting by updatedAt
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by updatedAt in ascending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[updatedAt]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5BupdatedAt%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by updatedAt in descending order
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customers?order[updatedAt]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5BupdatedAt%5D=desc"
+
+  # ---------------------------------------------------------------------------
+  # Sorting by phone
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by phone in ascending order
+    Given create customer with phone "0123456789"
+    And create customer with phone "0987654321"
+    When I send a GET request to "/api/customers?order[phone]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].phone" should contain "0123456789"
+    And the JSON node "member[1].phone" should contain "0987654321"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bphone%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by phone in descending order
+    Given create customer with phone "0123456789"
+    And create customer with phone "0987654321"
+    When I send a GET request to "/api/customers?order[phone]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].phone" should contain "0987654321"
+    And the JSON node "member[1].phone" should contain "0123456789"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bphone%5D=desc"
+
+  # ---------------------------------------------------------------------------
+  # Sorting by type.value
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by type.value in ascending order
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Basic" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?order[type.value]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Btype.value%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by type.value in descending order
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Basic" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?order[type.value]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Btype.value%5D=desc"
+
+  # ---------------------------------------------------------------------------
+  # Sorting by status.value
+  # ---------------------------------------------------------------------------
+  Scenario: Retrieve customers collection sorted by status.value in ascending order
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?order[status.value]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].status" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by status.value in descending order
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?order[status.value]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].status" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=desc"
+
   Scenario: Retrieve customers collection with createdAt date filters and verify JSON nodes
-    When I send a GET request to "/api/customers?createdAt[before]=2025-12-31T23:59:59Z&createdAt[strictly_before]=2025-12-31T23:59:59Z&createdAt[after]=2020-01-01T00:00:00Z&createdAt[strictly_after]=2020-01-01T00:00:00Z"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%&createdAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%&createdAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%&createdAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
@@ -404,6 +628,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should contain "0123456789"
     And the JSON node "initials" should contain "Name Surname"
     And the JSON node "leadSource" should contain "Google"
+    And the JSON node "type" should contain "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should contain "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "confirmed" should be true
     Then delete customer with email "postcustomer@example.com"
 
@@ -428,6 +654,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "email" should contain "extra@example.com"
+    And the JSON node "phone" should contain "0123456789"
+    And the JSON node "initials" should contain "Extra Field"
+    And the JSON node "leadSource" should contain "Google"
+    And the JSON node "type" should contain "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should contain "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "confirmed" should be true
     And the JSON node "extraField" should not exist
     Then delete customer with email "extra@example.com"
 
@@ -440,7 +672,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
-      "email": "updated9@example.com",
+      "email": "updated@example.com",
       "phone": "0987654321",
       "initials": "Updated Name",
       "leadSource": "Bing",
@@ -453,8 +685,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
-    And the JSON node "email" should be equal to "updated9@example.com"
+    And the JSON node "email" should be equal to "updated@example.com"
     And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "initials" should be equal to "Updated Name"
+    And the JSON node "leadSource" should be equal to "Bing"
+    And the JSON node "type" should be equal to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should be equal to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "confirmed" should be false
 
   Scenario: Replace a customer resource with updated leadSource and initials
@@ -477,10 +713,15 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
-    And the JSON node "leadSource" should contain "LinkedIn"
+    And the JSON node "email" should be equal to "updated@example.com"
+    And the JSON node "phone" should be equal to "0123456789"
     And the JSON node "initials" should be equal to "AB"
+    And the JSON node "leadSource" should be equal to "LinkedIn"
+    And the JSON node "type" should be equal to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should be equal to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "confirmed" should be true
 
-  Scenario: Replace a customer resource with updated email (case normalization)
+  Scenario: Replace a customer resource with updated email
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -500,7 +741,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
-    And the JSON node "email" should contain "new.email@example.com"
+    And the JSON node "email" should be equal to "NEW.EMAIL@EXAMPLE.COM"
+    And the JSON node "phone" should be equal to "0123456789"
+    And the JSON node "initials" should be equal to "CA"
+    And the JSON node "leadSource" should be equal to "Google"
+    And the JSON node "type" should be equal to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should be equal to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "confirmed" should be true
 
   Scenario: Replace a customer resource with all updated fields (verify complete replacement)
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -522,9 +769,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
-    And the JSON node "email" should contain "completelynew@example.com"
+    And the JSON node "email" should be equal to "completelynew@example.com"
     And the JSON node "phone" should be equal to "0987654321"
-    And the JSON node "leadSource" should contain "Twitter"
+    And the JSON node "initials" should be equal to "CN"
+    And the JSON node "leadSource" should be equal to "Twitter"
+    And the JSON node "type" should be equal to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should be equal to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "confirmed" should be false
 
   Scenario: Replace a customer resource while including an extra field that should be ignored
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -548,7 +799,12 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "email" should be equal to "updatedextra@example.com"
-    And the JSON node "irrelevantField" should not exist
+    And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "initials" should be equal to "Updated Extra"
+    And the JSON node "leadSource" should be equal to "Bing"
+    And the JSON node "type" should be equal to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status" should be equal to "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "confirmed" should be false
 
 # ----- PATCH /api/customers/{ulid} – Partial Update (Positive Tests) -----
 

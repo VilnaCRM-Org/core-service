@@ -17,9 +17,13 @@ use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
+use DateInterval;
+use DateTime;
 use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
@@ -30,6 +34,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     /** @var array<string> */
     private array $createdTypeIds = [];
 
+    private ?ResponseInterface $response = null;
+
     private Generator $faker;
 
     public function __construct(
@@ -39,12 +45,78 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         private CustomerRepositoryInterface $customerRepository,
         private CustomerFactoryInterface $customerFactory,
         private StatusFactoryInterface $statusFactory,
-        private TypeFactoryInterface $typeFactory
+        private TypeFactoryInterface $typeFactory,
+        private HttpClientInterface $client,
     ) {
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
 
+    /**
+     * Custom step that maps dynamic date placeholders and sends a GET request.
+     *
+     * For example, a URL can include:
+     *
+     *   /api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%
+     *
+     * This placeholder will be replaced at runtime with the current date plus one year.
+     *
+     * @When I send a GET data request to :url
+     */
+    public function iSendAGetDataRequestTo(string $url): void
+    {
+        // First, map the dynamic date placeholders in the URL.
+        $mappedUrl = $this->mapDynamicDates($url);
+
+        // Ensure the URL is fully-qualified. If not, prepend the base host.
+        if (!preg_match('/^https?:\/\//', $mappedUrl)) {
+            // Replace this with your actual base URL if needed.
+            $mappedUrl = 'http://localhost' . $mappedUrl;
+        }
+
+        // Now send a GET request using the injected HTTP client.
+        $this->response = $this->client->request('GET', $mappedUrl);
+    }
+
+    /**
+     * Scans the given URL for dynamic date placeholders and replaces them with computed values.
+     *
+     * Placeholders must have the following format:
+     *   !%date(<date_format>),date_interval(<interval>)!%
+     *
+     * Example:
+     *   !%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%
+     *   returns the current date plus one year formatted as ISO8601.
+     *
+     * @param string $url The URL containing dynamic date placeholders.
+     * @return string The URL with all placeholders replaced by computed date strings.
+     */
+    private function mapDynamicDates(string $url): string
+    {
+        $pattern = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
+
+        if (preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $dateTimeFormat = $match[1];  // e.g., "Y-m-d\TH:i:s\Z"
+                $dateTimeInterval = $match[2]; // e.g., "P1Y" or "-P1Y"
+
+                $date = new DateTime();
+
+                if (str_starts_with($dateTimeInterval, '-')) {
+                    $interval = new DateInterval(substr($dateTimeInterval, 1));
+                    $date->sub($interval);
+                } else {
+                    $interval = new DateInterval($dateTimeInterval);
+                    $date->add($interval);
+                }
+
+                $formattedDate = $date->format($dateTimeFormat);
+                $url = str_replace($match[0], $formattedDate, $url);
+            }
+        }
+
+        return $url;
+    }
     /**
      * @Given create customer with id :id
      */
