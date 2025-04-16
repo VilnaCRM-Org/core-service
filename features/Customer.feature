@@ -38,11 +38,28 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should exist
+    And the JSON node "member" should have 2 elements
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
 
-  Scenario: Retrieve customers collection with default pagination and verify JSON structure
+  Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values with itemsPerPage parameter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers?itemsPerPage=1&order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "member" should have 1 element
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.next" should contain "/api/customers?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+
+  Scenario: Retrieve customers collection with empty and verify JSON structure
     When I send a GET request to "/api/customers"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -192,7 +209,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by type.value and status.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
-    Given create customer with type value "VIP" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "VIP" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
     When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -250,60 +267,107 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "view.next" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
-  Scenario: Retrieve customers collection with ulid filter operator lt and check JSON value
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+  Scenario: Retrieve customers collection using ULID filter operator "lt" (less than)
+  This filter should return only customers whose ULIDs are lesser than the given value
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER3"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "view.@id" should contain "/api/customers?ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should exist
+    And the JSON node "totalItems" should be equal to the number 3
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[2].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER3"
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
+    And the JSON node "view.@id" should contain "ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
 
-  Scenario: Retrieve customers collection with ulid filter operator lte and check JSON value
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+  Scenario: Retrieve customers collection using ULID filter operator "lte" (less than or equal)
+  This operator should include the customer whose ULID exactly matches or lesser than the given value
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER3"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?ulid[lte]=01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "view.@id" should contain "/api/customers?ulid%5Blte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[2].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER3"
+    And the JSON node "member[3].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 4
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
+    And the JSON node "view.@id" should contain "ulid%5Blte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
 
-  Scenario: Retrieve customers collection with ulid filter operator gt and check JSON value
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET request to "/api/customers?ulid[gt]=01JKX8XGHVDZ46MWYMZT94YER4"
+  Scenario: Retrieve customers collection using ULID filter operator "gt" (greater than)
+  This filter should return only customers whose ULIDs are greater than the given value
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER3"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET request to "/api/customers?ulid[gt]=01JKX8XGHVDZ46MWYMZT94YER1"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER3"
+    And the JSON node "member[2].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 3
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
+    And the JSON node "view.@id" should contain "ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER1"
 
-  Scenario: Retrieve customers collection with ulid filter operator gte and check JSON value
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET request to "/api/customers?ulid[gte]=01JKX8XGHVDZ46MWYMZT94YER4"
+  Scenario: Retrieve customers collection using ULID filter operator "gte" (greater than or equal)
+  In this scenario, the filter returns the customer with the given ULID plus all with higher values
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER3"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET request to "/api/customers?ulid[gte]=01JKX8XGHVDZ46MWYMZT94YER1"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bgte%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[2].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER3"
+    And the JSON node "member[3].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 4
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
+    And the JSON node "view.@id" should contain "ulid%5Bgte%5D=01JKX8XGHVDZ46MWYMZT94YER1"
 
-  Scenario: Retrieve customers collection with ulid filter operator between and check JSON value
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET request to "/api/customers?ulid[between]=01JKX8XGHVDZ46MWYMZT94YER3,01JKX8XGHVDZ46MWYMZT94YER4"
+  Scenario: Retrieve customers collection using ULID filter operator "between"
+  This filter checks if the ULID values fall between two given boundaries (inclusive)
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER3"
+    And create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET request to "/api/customers?ulid[between]=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER3%2C01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER3"
+    And the JSON node "member[2].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "totalItems" should be equal to the number 3
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
+    And the JSON node "view.@id" should contain "/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve a customer resource with valid ulid and validate full JSON body
     Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
