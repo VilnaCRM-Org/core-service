@@ -142,6 +142,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by phone (single value) and verify JSON key
     Given create customer with phone "0123456789"
+    Given create customer with phone "3806312833"
     When I send a GET request to "/api/customers?phone=0123456789"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -153,6 +154,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve customers collection filtering by phone (array values) and verify JSON values
     Given create customer with phone "0123456789"
     And create customer with phone "0987654321"
+    And create customer with phone "3806312833"
     When I send a GET request to "/api/customers?phone[]=0123456789&phone[]=0987654321"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -165,6 +167,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by leadSource (single value) and check JSON
     Given create customer with leadSource "Google"
+    Given create customer with leadSource "Reddit"
     When I send a GET request to "/api/customers?leadSource=Google"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -176,6 +179,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve customers collection filtering by leadSource (array values) and check JSON
     Given create customer with leadSource "Google"
     And create customer with leadSource "Bing"
+    And create customer with leadSource "Reddit"
     When I send a GET request to "/api/customers?leadSource[]=Google&leadSource[]=Bing"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -188,6 +192,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by type.value and status.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "VIP" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET request to "/api/customers?type.value=VIP&status.value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -198,6 +203,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
     Given create customer with confirmed true
+    Given create customer with confirmed false
     When I send a GET request to "/api/customers?confirmed=true"
     Then the response status code should be equal to 200
     And the response should be in JSON

@@ -140,9 +140,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given create customer with type value "VIP" and status value "Active" and id :id
+     * @Given create customer with type value :type and status value :status and id :id
      */
-    public function customerWithVipActiveAndIdExists(string $id): void
+    public function customerWithTypeStatusAndIdExists(string $type, string $status, string $id): void
     {
         $this->createAndSaveCustomerWithValues(
             $id,
@@ -151,8 +151,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $this->faker->e164PhoneNumber(),
             $this->faker->word(),
             true,
-            'VIP',
-            'Active'
+            $type,
+            $status
         );
     }
 
