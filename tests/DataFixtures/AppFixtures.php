@@ -12,7 +12,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 
-class AppFixtures extends Fixture
+final class AppFixtures extends Fixture
 {
     private Generator $faker;
 

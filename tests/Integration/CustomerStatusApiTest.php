@@ -21,7 +21,10 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
     public function testGetCustomerStatusesWithUnsupportedQueryParameter(): void
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/api/customer_statuses?unsupportedParam=value');
+        $response = $client->request(
+            'GET',
+            '/api/customer_statuses?unsupportedParam=value'
+        );
         $this->assertResponseIsSuccessful();
         $this->assertArrayHasKey('member', $response->toArray());
     }
@@ -29,7 +32,10 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
     public function testGetCustomerStatusesCollectionWithPagination(): void
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/api/customer_statuses?page=2&itemsPerPage=10');
+        $response = $client->request(
+            'GET',
+            '/api/customer_statuses?page=2&itemsPerPage=10'
+        );
         $data = $response->toArray();
         $this->assertResponseIsSuccessful();
         $this->assertArrayHasKey('member', $data);
@@ -40,22 +46,37 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
     public function testGetCustomerStatusesCollectionWithOrdering(): void
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/api/customer_statuses?order[ulid]=asc&order[value]=desc');
+        $response = $client->request(
+            'GET',
+            '/api/customer_statuses?order[ulid]=asc&order[value]=desc'
+        );
         $data = $response->toArray();
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString('order%5Bulid%5D=asc', $data['view']['@id'] ?? '');
-        $this->assertStringContainsString('order%5Bvalue%5D=desc', $data['view']['@id'] ?? '');
+        $this->assertStringContainsString(
+            'order%5Bulid%5D=asc',
+            $data['view']['@id'] ?? ''
+        );
+        $this->assertStringContainsString(
+            'order%5Bvalue%5D=desc',
+            $data['view']['@id'] ?? ''
+        );
     }
 
     public function testGetCustomerStatusesCollectionFilteringByValue(): void
     {
         $this->createEntity('/api/customer_statuses', ['value' => 'Active']);
         $client = self::createClient();
-        $response = $client->request('GET', '/api/customer_statuses?value=Active');
+        $response = $client->request(
+            'GET',
+            '/api/customer_statuses?value=Active'
+        );
         $data = $response->toArray();
         $this->assertResponseIsSuccessful();
         $this->assertNotEmpty($data['member']);
-        $this->assertStringContainsString('Active', $data['member'][0]['value']);
+        $this->assertStringContainsString(
+            'Active',
+            $data['member'][0]['value']
+        );
     }
 
     public function testGetCustomerStatusNotFound(): void
@@ -226,6 +247,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
 
     private function createCustomerStatus(): string
     {
-        return $this->createEntity('/api/customer_statuses', $this->getStatusPayload());
+        return $this->createEntity(
+            '/api/customer_statuses',
+            $this->getStatusPayload()
+        );
     }
 }
