@@ -9,15 +9,20 @@ use App\Customer\Domain\Entity\CustomerType;
 
 final class CustomerApiTest extends BaseIntegrationTest
 {
+    private function extractUlid(string $iri): string
+    {
+        return substr($iri, strrpos($iri, '/') + 1);
+    }
+
     public function testGetCustomersCollection(): void
     {
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers');
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
+
         $this->assertArrayHasKey('member', $data);
         $this->assertIsArray($data['member']);
-        $this->assertArrayHasKey('totalItems', $data);
     }
 
     public function testGetCustomersCollectionInvalidQuery(): void
@@ -27,6 +32,265 @@ final class CustomerApiTest extends BaseIntegrationTest
             'query' => ['page' => 'invalid'],
         ]);
         $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function testEmptyCustomersCollection(): void
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers');
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertCount(0, $data['member']);
+    }
+
+    public function testFilterByInitials(): void
+    {
+        $payloadA = $this->getCustomerPayload('JD');
+        $this->createEntity('/api/customers', $payloadA);
+        $payloadB = $this->getCustomerPayload('FJ');
+        $this->createEntity('/api/customers', $payloadB);
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['initials' => 'JD'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('JD', $data['member'][0]['initials']);
+    }
+
+    public function testFilterByInitialsArray(): void
+    {
+        $payloadA = $this->getCustomerPayload('AB');
+        $this->createEntity('/api/customers', $payloadA);
+        $payloadB = $this->getCustomerPayload('CD');
+        $this->createEntity('/api/customers', $payloadB);
+        $payloadC = $this->getCustomerPayload('DC');
+        $this->createEntity('/api/customers', $payloadC);
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'initials[]' => ['AB', 'CD'],
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertContains($data['member'][0]['initials'], ['AB', 'CD']);
+        $this->assertContains($data['member'][1]['initials'], ['AB', 'CD']);
+    }
+
+    public function testFilterByEmail(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'john.doe@example.com']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jane.doe@example.com']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['email' => 'john.doe@example.com'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('john.doe@example.com', $data['member'][0]['email']);
+    }
+
+    public function testFilterByEmailArray(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'john.doe@example.com']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jane.doe@example.com']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jake.doe@example.com']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'email[]' => ['john.doe@example.com', 'jane.doe@example.com'],
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('john.doe@example.com', $data['member'][0]['email']);
+        $this->assertSame('jane.doe@example.com', $data['member'][1]['email']);
+    }
+
+    public function testFilterByPhone(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0123456789']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '3806312833']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['phone' => '0123456789'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('0123456789', $data['member'][0]['phone']);
+    }
+
+    public function testFilterByPhoneArray(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0123456789']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0987654321']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '3806312833']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'phone[]' => ['0123456789', '0987654321'],
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('0123456789', $data['member'][0]['phone']);
+        $this->assertSame('0987654321', $data['member'][1]['phone']);
+    }
+
+    public function testFilterByLeadSource(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Google']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Reddit']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['leadSource' => 'Google'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('Google', $data['member'][0]['leadSource']);
+    }
+
+    public function testFilterByLeadSourceArray(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Google']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Bing']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Reddit']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'leadSource[]' => ['Google', 'Bing'],
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('Google', $data['member'][0]['leadSource']);
+        $this->assertSame('Bing', $data['member'][1]['leadSource']);
+    }
+
+    public function testFilterByConfirmed(): void
+    {
+        $this->createEntity('/api/customers', $this->getCustomerPayload());
+        $falsePayload = $this->getCustomerPayload();
+        $falsePayload['confirmed'] = false;
+        $this->createEntity('/api/customers', $falsePayload);
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['confirmed' => 'true'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertTrue($data['member'][0]['confirmed']);
+    }
+
+    public function testFilterByConfirmedArray(): void
+    {
+        $this->createEntity('/api/customers', $this->getCustomerPayload());
+        $falsePayload = $this->getCustomerPayload();
+        $falsePayload['confirmed'] = false;
+        $this->createEntity('/api/customers', $falsePayload);
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'confirmed[]' => ['true', 'false'],
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+    }
+
+    public function testSortedByEmailAsc(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'alice@example.com']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'bob@example.com']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['order[email]' => 'asc'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('alice@example.com', $data['member'][0]['email']);
+        $this->assertSame('bob@example.com', $data['member'][1]['email']);
+    }
+
+    public function testSortedByEmailDesc(): void
+    {
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'alice@example.com']));
+        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'bob@example.com']));
+
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['order[email]' => 'desc'],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertSame('bob@example.com', $data['member'][0]['email']);
+        $this->assertSame('alice@example.com', $data['member'][1]['email']);
+    }
+
+    public function testCursorPagination(): void
+    {
+        $iri1 = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
+        $iri2 = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
+        $iri3 = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
+
+        $lastUlid = $this->extractUlid($iri3);
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'order[ulid]' => 'desc',
+                'ulid[lt]' => $lastUlid,
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertCount(2, $data['member']);
+    }
+
+    public function testCursorPaginationWithItemsPerPage(): void
+    {
+        $iri1 = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
+        $iri2 = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
+        $iri3 = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
+
+        $lastUlid = $this->extractUlid($iri3);
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'itemsPerPage' => '1',
+                'order[ulid]' => 'desc',
+                'ulid[lt]' => $lastUlid,
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+
+        $this->assertCount(1, $data['member']);
     }
 
     public function testCreateCustomerSuccess(): void

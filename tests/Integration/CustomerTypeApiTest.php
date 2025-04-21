@@ -47,7 +47,7 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $iri = $this->createEntity('/api/customer_types', $payload);
         $client = self::createClient();
         $response = $client->request('GET', $iri);
-        $this->assertResponseHeaderSame(
+        self::assertResponseHeaderSame(
             'Content-Type',
             'application/ld+json; charset=utf-8'
         );
