@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerTypeCommand;
-use App\Customer\Application\DTO\CustomerTypePatchDto;
+use App\Customer\Application\DTO\TypePatchDto;
 use App\Customer\Application\Factory\UpdateCustomerTypeCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerTypePatchProcessor;
 use App\Customer\Domain\Entity\CustomerType;
@@ -102,16 +102,16 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
-    private function createDto(): CustomerTypePatchDto
+    private function createDto(): TypePatchDto
     {
-        return new CustomerTypePatchDto(
+        return new TypePatchDto(
             $this->faker->word()
         );
     }
 
-    private function createDtoWithEmptyValue(): CustomerTypePatchDto
+    private function createDtoWithEmptyValue(): TypePatchDto
     {
-        return new CustomerTypePatchDto('');
+        return new TypePatchDto('');
     }
 
     private function setupRepository(

@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerTypeCommand;
-use App\Customer\Application\DTO\CustomerTypePutDto;
+use App\Customer\Application\DTO\TypePutDto;
 use App\Customer\Application\Factory\UpdateCustomerTypeCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerTypePutProcessor;
 use App\Customer\Domain\Entity\CustomerType;
@@ -79,9 +79,9 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
-    private function createDto(): CustomerTypePutDto
+    private function createDto(): TypePutDto
     {
-        return new CustomerTypePutDto(
+        return new TypePutDto(
             $this->faker->word()
         );
     }

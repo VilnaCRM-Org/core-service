@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerStatusCommand;
-use App\Customer\Application\DTO\CustomerStatusPutDto;
+use App\Customer\Application\DTO\StatusPutDto;
 use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerStatusPutProcessor;
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -80,9 +80,9 @@ final class CustomerStatusPutProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
-    private function createDto(): CustomerStatusPutDto
+    private function createDto(): StatusPutDto
     {
-        return new CustomerStatusPutDto(
+        return new StatusPutDto(
             $this->faker->word()
         );
     }

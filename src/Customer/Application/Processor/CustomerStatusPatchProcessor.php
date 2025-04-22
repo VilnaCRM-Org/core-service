@@ -6,7 +6,7 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerStatusPatchDto;
+use App\Customer\Application\DTO\StatusPatchDto;
 use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Exception\CustomerStatusNotFoundException;
@@ -16,7 +16,7 @@ use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
 /**
- * @implements ProcessorInterface<CustomerStatusPatchDto, CustomerStatus>
+ * @implements ProcessorInterface<StatusPatchDto, CustomerStatus>
  */
 final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
 {
@@ -29,7 +29,7 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
     }
 
     /**
-     * @param CustomerStatusPatchDto $data
+     * @param StatusPatchDto $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */

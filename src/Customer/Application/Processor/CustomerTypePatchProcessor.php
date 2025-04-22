@@ -6,7 +6,7 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerTypePatchDto;
+use App\Customer\Application\DTO\TypePatchDto;
 use App\Customer\Application\Factory\UpdateCustomerTypeCommandFactoryInterface;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Exception\CustomerTypeNotFoundException;
@@ -16,7 +16,7 @@ use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
 /**
- * @implements ProcessorInterface<CustomerTypePatchDto, CustomerType>
+ * @implements ProcessorInterface<TypePatchDto, CustomerType>
  */
 final readonly class CustomerTypePatchProcessor implements ProcessorInterface
 {
@@ -29,7 +29,7 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
     }
 
     /**
-     * @param CustomerTypePatchDto $data
+     * @param TypePatchDto $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */

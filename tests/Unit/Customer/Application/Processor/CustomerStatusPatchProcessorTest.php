@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerStatusCommand;
-use App\Customer\Application\DTO\CustomerStatusPatchDto;
+use App\Customer\Application\DTO\StatusPatchDto;
 use App\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerStatusPatchProcessor;
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -101,16 +101,16 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
-    private function createDto(): CustomerStatusPatchDto
+    private function createDto(): StatusPatchDto
     {
-        return new CustomerStatusPatchDto(
+        return new StatusPatchDto(
             $this->faker->word()
         );
     }
 
-    private function createDtoWithEmptyValue(): CustomerStatusPatchDto
+    private function createDtoWithEmptyValue(): StatusPatchDto
     {
-        return new CustomerStatusPatchDto('');
+        return new StatusPatchDto('');
     }
 
     private function setupRepository(
