@@ -3685,28 +3685,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    CustomerStatus.CustomerStatusPatchDto:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        value:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
-    CustomerStatus.CustomerStatusPutDto.jsonld:
-      type: object
-      description: ''
-      deprecated: false
-      required:
-        - value
-      properties:
-        value:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
     CustomerStatus.StatusCreateDto.jsonld:
       type: object
       description: ''
@@ -3716,6 +3694,24 @@ components:
       properties:
         value:
           maxLength: 255
+          type:
+            - string
+            - 'null'
+    CustomerStatus.StatusPatchDto:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
+          type:
+            - string
+            - 'null'
+    CustomerStatus.StatusPutDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
           type:
             - string
             - 'null'
@@ -3751,28 +3747,6 @@ components:
           type: string
         ulid:
           type: string
-    CustomerType.CustomerTypePatchDto:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        value:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
-    CustomerType.CustomerTypePutDto.jsonld:
-      type: object
-      description: ''
-      deprecated: false
-      required:
-        - value
-      properties:
-        value:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
     CustomerType.TypeCreateDto.jsonld:
       type: object
       description: ''
@@ -3782,6 +3756,24 @@ components:
       properties:
         value:
           maxLength: 255
+          type:
+            - string
+            - 'null'
+    CustomerType.TypePatchDto:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
+          type:
+            - string
+            - 'null'
+    CustomerType.TypePutDto.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        value:
           type:
             - string
             - 'null'
