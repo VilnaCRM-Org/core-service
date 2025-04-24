@@ -3703,6 +3703,7 @@ components:
       deprecated: false
       properties:
         value:
+          maxLength: 255
           type:
             - string
             - 'null'
@@ -3710,8 +3711,11 @@ components:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
+          maxLength: 255
           type:
             - string
             - 'null'
@@ -3765,6 +3769,7 @@ components:
       deprecated: false
       properties:
         value:
+          maxLength: 255
           type:
             - string
             - 'null'
@@ -3772,8 +3777,11 @@ components:
       type: object
       description: ''
       deprecated: false
+      required:
+        - value
       properties:
         value:
+          maxLength: 255
           type:
             - string
             - 'null'
