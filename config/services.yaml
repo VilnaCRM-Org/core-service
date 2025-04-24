@@ -6,7 +6,6 @@
 parameters:
 
 services:
-
   app.customer.mongodb.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments:
