@@ -78,13 +78,13 @@ App\Customer\Application\DTO\CustomerPutDto:
           type: 'bool'
           message: 'This value should be a boolean.'
 
-App\Customer\Application\DTO\CustomerTypePatchDto:
+App\Customer\Application\DTO\TypePatchDto:
   properties:
     value:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\CustomerTypePutDto:
+App\Customer\Application\DTO\TypePutDto:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }
@@ -105,13 +105,13 @@ App\Customer\Application\DTO\StatusCreateDto:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\CustomerStatusPatchDto:
+App\Customer\Application\DTO\StatusPatchDto:
   properties:
     value:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\CustomerStatusPutDto:
+App\Customer\Application\DTO\StatusPutDto:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }
