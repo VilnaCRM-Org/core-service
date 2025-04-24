@@ -106,6 +106,9 @@ integration-tests: ## Run integration tests
 integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
 
+fixtures-load: ## Run fixtures
+	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n
+
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
