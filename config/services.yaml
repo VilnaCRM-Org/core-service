@@ -7,10 +7,6 @@ parameters:
 
 services:
 
-  App\Tests\DataFixtures\:
-    resource: '%kernel.project_dir%/tests/DataFixtures'
-    tags: [ 'doctrine.fixture.odm' ]
-
   app.customer.mongodb.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments:
