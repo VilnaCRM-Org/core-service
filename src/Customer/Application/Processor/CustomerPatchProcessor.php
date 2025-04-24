@@ -62,7 +62,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function prepareCustomerUpdate(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): CustomerUpdate {
         $newInitials = $this->updateInitials($data, $customer);
         $newEmail = $this->updateEmail($data, $customer);
@@ -85,7 +85,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updateInitials(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): string {
         return $this->getNewValue(
             $data->initials,
@@ -95,7 +95,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updateEmail(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): string {
         return $this->getNewValue(
             $data->email,
@@ -105,7 +105,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updatePhone(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): string {
         return $this->getNewValue(
             $data->phone,
@@ -115,7 +115,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updateLeadSource(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): string {
         return $this->getNewValue(
             $data->leadSource,
@@ -125,7 +125,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updateType(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): CustomerType {
         return $data->type
             ? $this->getCustomerType($data->type)
@@ -134,7 +134,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function updateStatus(
         CustomerPatchDto $data,
-        Customer         $customer
+        Customer $customer
     ): CustomerStatus {
         return $data->status
             ? $this->getCustomerStatus($data->status)

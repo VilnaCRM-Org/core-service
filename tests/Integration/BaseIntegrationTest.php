@@ -6,6 +6,7 @@ namespace App\Tests\Integration;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Tests\Unit\UlidProvider;
+use Doctrine\Common\DataFixtures\Purger\MongoDBPurger;
 use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -22,6 +23,9 @@ abstract class BaseIntegrationTest extends ApiTestCase
         $this->container = $this->getContainer();
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
+        $dm = $this->container->get('doctrine_mongodb.odm.document_manager');
+        $purger = new MongoDBPurger($dm);
+        $purger->purge();
     }
 
     /**

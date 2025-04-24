@@ -271,6 +271,92 @@ final class CustomerApiTest extends BaseIntegrationTest
 
         $this->assertCount(2, $data['member']);
     }
+    private function createThreeEntities(): array
+    {
+        $iris = [];
+        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
+        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
+        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
+
+        return array_map([$this, 'extractUlid'], $iris);
+    }
+
+    public function testFilterUlidLt(): void
+    {
+        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+
+        $client   = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['ulid[lt]' => $ulid3],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        // Should return “One” and “Two”
+        $this->assertCount(2, $data['member']);
+    }
+
+    public function testFilterUlidLte(): void
+    {
+        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+
+        $client   = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['ulid[lte]' => $ulid2],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        // Should return “One” and “Two”
+        $this->assertCount(2, $data['member']);
+    }
+
+    public function testFilterUlidGt(): void
+    {
+        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+
+        $client   = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['ulid[gt]' => $ulid1],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        // Should return “Two” and “Three”
+        $this->assertCount(2, $data['member']);
+    }
+
+    public function testFilterUlidGte(): void
+    {
+        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+
+        $client   = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => ['ulid[gte]' => $ulid2],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        // Should return “Two” and “Three”
+        $this->assertCount(2, $data['member']);
+    }
+
+    public function testFilterUlidBetween(): void
+    {
+        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+
+        $client   = self::createClient();
+        $response = $client->request('GET', '/api/customers', [
+            'query' => [
+                'ulid[between]' => sprintf('%s..%s', $ulid1, $ulid2),
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        // Should return “One” and “Two”
+        $this->assertCount(2, $data['member']);
+    }
 
     public function testCursorPaginationWithItemsPerPage(): void
     {
