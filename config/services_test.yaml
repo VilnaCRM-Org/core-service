@@ -5,7 +5,7 @@ services:
 
   App\Tests\DataFixtures\:
     resource: '%kernel.project_dir%/tests/DataFixtures'
-    tags: [ 'doctrine.fixture.odm' ]
+    tags: ['doctrine.fixture.odm']
 
   Symfony\Contracts\Cache\CacheInterface:
     public: true
