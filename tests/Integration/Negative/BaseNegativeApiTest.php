@@ -4,12 +4,22 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Negative;
 
-use App\Tests\Integration\BaseIntegrationTest;
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Tests\Integration\Negative\Kernel\NegativeKernel;
+use App\Tests\Unit\UlidProvider;
+use Faker\Factory;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class BaseNegativeApiTest extends BaseIntegrationTest
+abstract class BaseNegativeApiTest extends ApiTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->container = $this->getContainer();
+        $this->faker = Factory::create();
+        $this->faker->addProvider(new UlidProvider($this->faker));
+    }
+
     protected static function getKernelClass(): string
     {
         return NegativeKernel::class;

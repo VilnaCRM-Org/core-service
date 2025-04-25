@@ -9,11 +9,6 @@ use App\Customer\Domain\Entity\CustomerType;
 
 final class CustomerApiTest extends BaseIntegrationTest
 {
-    private function extractUlid(string $iri): string
-    {
-        return substr($iri, strrpos($iri, '/') + 1);
-    }
-
     public function testGetCustomersCollection(): void
     {
         $client = self::createClient();
@@ -46,9 +41,9 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByInitials(): void
     {
-        $payloadA = $this->getCustomerPayload('JD');
+        $payloadA = $this->getCustomer('JD');
         $this->createEntity('/api/customers', $payloadA);
-        $payloadB = $this->getCustomerPayload('FJ');
+        $payloadB = $this->getCustomer('FJ');
         $this->createEntity('/api/customers', $payloadB);
 
         $client = self::createClient();
@@ -63,11 +58,11 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByInitialsArray(): void
     {
-        $payloadA = $this->getCustomerPayload('AB');
+        $payloadA = $this->getCustomer('AB');
         $this->createEntity('/api/customers', $payloadA);
-        $payloadB = $this->getCustomerPayload('CD');
+        $payloadB = $this->getCustomer('CD');
         $this->createEntity('/api/customers', $payloadB);
-        $payloadC = $this->getCustomerPayload('DC');
+        $payloadC = $this->getCustomer('DC');
         $this->createEntity('/api/customers', $payloadC);
 
         $client = self::createClient();
@@ -85,8 +80,14 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByEmail(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'john.doe@example.com']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jane.doe@example.com']));
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'john.doe@example.com'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'jane.doe@example.com'])
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -100,9 +101,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByEmailArray(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'john.doe@example.com']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jane.doe@example.com']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'jake.doe@example.com']));
+        $this->createCustomerWithEmails();
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -119,8 +118,14 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByPhone(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0123456789']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '3806312833']));
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['phone' => '0123456789'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['phone' => '3806312833'])
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -134,9 +139,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByPhoneArray(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0123456789']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '0987654321']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['phone' => '3806312833']));
+        $this->createCustomerWithPhones();
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -153,8 +156,14 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByLeadSource(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Google']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Reddit']));
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['leadSource' => 'Google'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['leadSource' => 'Reddit'])
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -168,9 +177,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByLeadSourceArray(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Google']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Bing']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['leadSource' => 'Reddit']));
+        $this->createCustomerWithLeadSource();
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -187,8 +194,8 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByConfirmed(): void
     {
-        $this->createEntity('/api/customers', $this->getCustomerPayload());
-        $falsePayload = $this->getCustomerPayload();
+        $this->createEntity('/api/customers', $this->getCustomer());
+        $falsePayload = $this->getCustomer();
         $falsePayload['confirmed'] = false;
         $this->createEntity('/api/customers', $falsePayload);
 
@@ -204,26 +211,30 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByConfirmedArray(): void
     {
-        $this->createEntity('/api/customers', $this->getCustomerPayload());
-        $falsePayload = $this->getCustomerPayload();
+        $this->createEntity('/api/customers', $this->getCustomer());
+        $falsePayload = $this->getCustomer();
         $falsePayload['confirmed'] = false;
         $this->createEntity('/api/customers', $falsePayload);
 
         $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
+        $client->request('GET', '/api/customers', [
             'query' => [
                 'confirmed[]' => ['true', 'false'],
             ],
         ]);
         $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
     }
 
     public function testSortedByEmailAsc(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'alice@example.com']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'bob@example.com']));
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'alice@example.com'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'bob@example.com'])
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -238,8 +249,14 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testSortedByEmailDesc(): void
     {
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'alice@example.com']));
-        $this->createEntity('/api/customers', array_merge($this->getCustomerPayload(), ['email' => 'bob@example.com']));
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'alice@example.com'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['email' => 'bob@example.com'])
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -254,16 +271,13 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testCursorPagination(): void
     {
-        $iri1 = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
-        $iri2 = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
-        $iri3 = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
+        $ulid3 = $this->createThreeEntities()[2];
 
-        $lastUlid = $this->extractUlid($iri3);
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => [
                 'order[ulid]' => 'desc',
-                'ulid[lt]' => $lastUlid,
+                'ulid[lt]' => $ulid3,
             ],
         ]);
         $this->assertResponseIsSuccessful();
@@ -271,21 +285,12 @@ final class CustomerApiTest extends BaseIntegrationTest
 
         $this->assertCount(2, $data['member']);
     }
-    private function createThreeEntities(): array
-    {
-        $iris = [];
-        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
-        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
-        $iris[] = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
-
-        return array_map([$this, 'extractUlid'], $iris);
-    }
 
     public function testFilterUlidLt(): void
     {
-        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+        $ulid3 = $this->createThreeEntities()[2];
 
-        $client   = self::createClient();
+        $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => ['ulid[lt]' => $ulid3],
         ]);
@@ -298,54 +303,51 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterUlidLte(): void
     {
-        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+        $ulid2 = $this->createThreeEntities()[1];
 
-        $client   = self::createClient();
+        $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => ['ulid[lte]' => $ulid2],
         ]);
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        // Should return “One” and “Two”
         $this->assertCount(2, $data['member']);
     }
 
     public function testFilterUlidGt(): void
     {
-        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+        [$ulid1] = $this->createThreeEntities();
 
-        $client   = self::createClient();
+        $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => ['ulid[gt]' => $ulid1],
         ]);
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        // Should return “Two” and “Three”
         $this->assertCount(2, $data['member']);
     }
 
     public function testFilterUlidGte(): void
     {
-        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+        $ulid2 = $this->createThreeEntities()[1];
 
-        $client   = self::createClient();
+        $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => ['ulid[gte]' => $ulid2],
         ]);
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        // Should return “Two” and “Three”
         $this->assertCount(2, $data['member']);
     }
 
     public function testFilterUlidBetween(): void
     {
-        [$ulid1, $ulid2, $ulid3] = $this->createThreeEntities();
+        [$ulid1, $ulid2] = $this->createThreeEntities();
 
-        $client   = self::createClient();
+        $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => [
                 'ulid[between]' => sprintf('%s..%s', $ulid1, $ulid2),
@@ -354,23 +356,19 @@ final class CustomerApiTest extends BaseIntegrationTest
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
-        // Should return “One” and “Two”
         $this->assertCount(2, $data['member']);
     }
 
     public function testCursorPaginationWithItemsPerPage(): void
     {
-        $iri1 = $this->createEntity('/api/customers', $this->getCustomerPayload('One'));
-        $iri2 = $this->createEntity('/api/customers', $this->getCustomerPayload('Two'));
-        $iri3 = $this->createEntity('/api/customers', $this->getCustomerPayload('Three'));
+        $ulid3 = $this->createThreeEntities()[2];
 
-        $lastUlid = $this->extractUlid($iri3);
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
             'query' => [
                 'itemsPerPage' => '1',
                 'order[ulid]' => 'desc',
-                'ulid[lt]' => $lastUlid,
+                'ulid[lt]' => $ulid3,
             ],
         ]);
         $this->assertResponseIsSuccessful();
@@ -381,7 +379,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testCreateCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('John Doe');
+        $payload = $this->getCustomer('John Doe');
         $iri = $this->createEntity('/api/customers', $payload);
         $client = self::createClient();
         $response = $client->request('GET', $iri);
@@ -392,7 +390,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testPostCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('Jane Doe');
+        $payload = $this->getCustomer('Jane Doe');
 
         $responseData = $this->jsonRequest('POST', '/api/customers', $payload);
 
@@ -430,7 +428,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testGetCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('Test Get');
+        $payload = $this->getCustomer('Test Get');
         $iri = $this->createEntity('/api/customers', $payload);
         $client = self::createClient();
         $response = $client->request('GET', $iri);
@@ -449,7 +447,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testReplaceCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('Replace Test');
+        $payload = $this->getCustomer('Replace Test');
         $iri = $this->createEntity('/api/customers', $payload);
 
         $updatedPayload = $this->getUpdatedCustomerPayload();
@@ -459,7 +457,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testReplaceCustomerFailure(): void
     {
-        $payload = $this->getCustomerPayload('Missing Email');
+        $payload = $this->getCustomer('Missing Email');
         $iri = $this->createEntity('/api/customers', $payload);
         $updated = [
             'phone' => '1112223333',
@@ -507,7 +505,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testPatchCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('Patch Test');
+        $payload = $this->getCustomer('Patch Test');
         $iri = $this->createEntity('/api/customers', $payload);
         $patch = [
             'email' => $this->faker->unique()->email(),
@@ -528,7 +526,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testPatchCustomerFailure(): void
     {
-        $payload = $this->getCustomerPayload('Patch Fail');
+        $payload = $this->getCustomer('Patch Fail');
         $iri = $this->createEntity('/api/customers', $payload);
         $patch = ['email' => 'invalid-email'];
         $client = self::createClient();
@@ -561,7 +559,7 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testDeleteCustomerSuccess(): void
     {
-        $payload = $this->getCustomerPayload('Delete Test');
+        $payload = $this->getCustomer('Delete Test');
         $iri = $this->createEntity('/api/customers', $payload);
         $client = self::createClient();
         $client->request('DELETE', $iri);
@@ -576,6 +574,90 @@ final class CustomerApiTest extends BaseIntegrationTest
         $client = self::createClient();
         $client->request('DELETE', "/api/customers/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function createCustomerWithPhones(): void
+    {
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['phone' => '0123456789'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['phone' => '0987654321'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['phone' => '3806312833'])
+        );
+    }
+
+    public function createCustomerWithLeadSource(): void
+    {
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['leadSource' => 'Google'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['leadSource' => 'Bing'])
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge($this->getCustomer(), ['leadSource' => 'Reddit'])
+        );
+    }
+
+    public function createCustomerWithEmails(): void
+    {
+        $this->createEntity(
+            '/api/customers',
+            array_merge(
+                $this->getCustomer(),
+                ['email' => 'john.doe@example.com']
+            )
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge(
+                $this->getCustomer(),
+                ['email' => 'jane.doe@example.com']
+            )
+        );
+        $this->createEntity(
+            '/api/customers',
+            array_merge(
+                $this->getCustomer(),
+                ['email' => 'jake.doe@example.com']
+            )
+        );
+    }
+
+    private function extractUlid(string $iri): string
+    {
+        return substr($iri, strrpos($iri, '/') + 1);
+    }
+
+    /**
+     * @return array<string>
+     */
+    private function createThreeEntities(): array
+    {
+        $iris = [];
+        $iris[] = $this->createEntity(
+            '/api/customers',
+            $this->getCustomer('One')
+        );
+        $iris[] = $this->createEntity(
+            '/api/customers',
+            $this->getCustomer('Two')
+        );
+        $iris[] = $this->createEntity(
+            '/api/customers',
+            $this->getCustomer('Three')
+        );
+
+        return array_map([$this, 'extractUlid'], $iris);
     }
 
     /**
@@ -623,7 +705,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     /**
      * @return array<string, string|bool|CustomerType|CustomerStatus>
      */
-    private function getCustomerPayload(string $name = 'Test Customer'): array
+    private function getCustomer(string $name = 'Test Customer'): array
     {
         return [
             'email' => $this->faker->unique()->email(),
