@@ -17,18 +17,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 1
 
-  Scenario: Retrieve customers collection with createdAt date filters and verify JSON nodes
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member" should have 1 elements
-    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.@type" should contain "PartialCollectionView"
-
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
@@ -294,9 +282,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].initials" should contain "AA"
     And the JSON node "view.@id" should contain "order%5Binitials%5D=desc"
 
-    # ---------------------------------------------------------------------------
-  # Sorting by leadSource
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by leadSource in ascending order
     Given create customer with leadSource "Bing"
     And create customer with leadSource "Google"
@@ -319,9 +304,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BleadSource%5D=desc"
 
-  # ---------------------------------------------------------------------------
-  # Sorting by ulid
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by ulid in ascending order
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
     And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
@@ -344,9 +326,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bulid%5D=desc"
 
-  # ---------------------------------------------------------------------------
-  # Sorting by createdAt
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by createdAt in ascending order
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
     And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
@@ -369,9 +348,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BcreatedAt%5D=desc"
 
-  # ---------------------------------------------------------------------------
-  # Sorting by updatedAt
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by updatedAt in ascending order
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
     And create customer with id "01JKX8XGHVDZ46MWYMZT94YER2"
@@ -394,9 +370,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BupdatedAt%5D=desc"
 
-  # ---------------------------------------------------------------------------
-  # Sorting by phone
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by phone in ascending order
     Given create customer with phone "0123456789"
     And create customer with phone "0987654321"
@@ -419,9 +392,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bphone%5D=desc"
 
-  # ---------------------------------------------------------------------------
-  # Sorting by type.value
-  # ---------------------------------------------------------------------------
   Scenario: Retrieve customers collection sorted by type.value in ascending order
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
     Given create customer with type value "Basic" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
@@ -468,19 +438,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=desc"
-
-  Scenario: Retrieve customers collection with createdAt date filters and verify JSON nodes
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%&createdAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%&createdAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%&createdAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_get_collection"
-    And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member" should have 2 elements
-    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
-    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.@type" should contain "PartialCollectionView"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -592,6 +549,178 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
+
+  Scenario: Retrieve customers collection with updatedAt[before] filter and verify JSON nodes
+    # A customer is created and its updatedAt (set to now) will be before a future date (now + 1 year).
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?updatedAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with updatedAt[strictly_before] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?updatedAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with updatedAt[after] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?updatedAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with updatedAt[strictly_after] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?updatedAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve zero customers with updatedAt[before] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET data request to "/api/customers?updatedAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with updatedAt[strictly_before] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET data request to "/api/customers?updatedAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with updatedAt[after] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET data request to "/api/customers?updatedAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with updatedAt[strictly_after] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET data request to "/api/customers?updatedAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve customers collection with createdAt date filters and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 elements
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with createdAt[strictly_before] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with createdAt[after] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve customers collection with createdAt[strictly_after] filter and verify JSON nodes
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@type" should contain "PartialCollectionView"
+
+  Scenario: Retrieve zero customers with createdAt[before] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the response should be valid according to the operation id "api_customers_get_collection"
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with createdAt[strictly_before] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
+    Then the response status code should be equal to 200
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be in JSON
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with createdAt[after] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
+
+  Scenario: Retrieve zero customers with createdAt[strictly_after] filter
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET data request to "/api/customers?createdAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "totalItems" should be equal to the number 0
+    And the JSON node "member" should have 0 elements
 
   Scenario: Retrieve a customer resource with valid ulid and validate full JSON body
     Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
@@ -1040,8 +1169,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       "phone": "0123456789",
       "initials": "Name Surname",
       "leadSource": "Google",
-      "type": "/api/customer_types/valid-type-id",
-      "status": "/api/customer_statuses/valid-status-id",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
       "confirmed": true
     }
     """
@@ -1059,8 +1188,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       "phone": "0123456789",
       "initials": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       "leadSource": "Google",
-      "type": "/api/customer_types/valid-type-id",
-      "status": "/api/customer_statuses/valid-status-id",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
       "confirmed": true
     }
     """
@@ -1078,8 +1207,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       "phone": "0123456789",
       "initials": "Name Surname",
       "leadSource": "Google",
-      "type": "/api/customer_types/valid-type-id",
-      "status": "/api/customer_statuses/valid-status-id",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
       "confirmed": "yes"
     }
     """
@@ -1097,8 +1226,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       "phone": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
       "initials": "Name Surname",
       "leadSource": "Google",
-      "type": "/api/customer_types/valid-type-id",
-      "status": "/api/customer_statuses/valid-status-id",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
       "confirmed": true
     }
     """

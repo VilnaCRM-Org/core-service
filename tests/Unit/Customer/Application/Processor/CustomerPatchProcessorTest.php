@@ -251,7 +251,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @return array<string, CustomerPatchDto>
+     * @return array{CustomerPatchDto, Operation, array<string,string>, Customer}
      */
     private function prepareProcessData(
         string $initials,

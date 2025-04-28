@@ -7,8 +7,6 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
 
-  # ----- GET /api/customer_statuses – Collection (Positive Tests) -----
-
   Scenario: Retrieve customer statuses collection with unsupported query parameter
     When I send a GET request to "/api/customer_statuses?unsupportedParam=value"
     Then the response status code should be equal to 200
@@ -18,17 +16,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 0
 
-  Scenario: Retrieve customer statuses collection with valid pagination parameters and check JSON keys and values
-    When I send a GET request to "/api/customer_statuses?page=2&itemsPerPage=50"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
-    And the JSON node "member" should exist
-    And the JSON node "totalItems" should be equal to the number 0
-    And the JSON node "view.@id" should exist
-
-  Scenario: Retrieve customer statuses collection with default pagination and verify JSON structure
+  Scenario: Retrieve customer statuses collection with default GET request and verify JSON structure
     When I send a GET request to "/api/customer_statuses"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -37,8 +25,44 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 0
 
+  Scenario: Retrieve customer statuses collection with valid cursor pagination parameters and check JSON keys and values
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customer_statuses?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should exist
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.next" should contain "/api/customer_statuses?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.previous" should contain "/api/customer_statuses?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+
+  Scenario: Retrieve customer statuses collection with itemsPerPage parameter and cursor pagination
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customer_statuses?itemsPerPage=1&order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "member" should have 1 element
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.next" should contain "/api/customer_statuses?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.previous" should contain "/api/customer_statuses?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+
   Scenario: Retrieve customer statuses collection filtering by value (single)
-    Given customer status with value "Active" exists
+    Given create customer status with value "Active"
+    Given create customer status with value "Inactive"
     When I send a GET request to "/api/customer_statuses?value=Active"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -47,15 +71,57 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     And the JSON node "member[0].value" should contain "Active"
     And the JSON node "totalItems" should be equal to the number 1
 
-  Scenario: Retrieve customer statuses collection with ordering parameters and check JSON ordering hints
-    When I send a GET request to "/api/customer_statuses?order[ulid]=asc&order[value]=desc"
+  Scenario: Retrieve customer statuses collection sorted by ulid in ascending order
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customer_statuses?order[ulid]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
+
+  Scenario: Retrieve customer statuses collection sorted by ulid in descending order
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customer_statuses?order[ulid]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bulid%5D=desc"
+
+  Scenario: Retrieve customer statuses collection sorted by value in ascending order
+    Given create customer status with value "Draft"
+    Given create customer status with value "Published"
+    When I send a GET request to "/api/customer_statuses?order[value]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member[0].value" should contain "Draft"
+    And the JSON node "member[1].value" should contain "Published"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bvalue%5D=asc"
+
+  Scenario: Retrieve customer statuses collection sorted by value in descending order
+    Given create customer status with value "Draft"
+    Given create customer status with value "Published"
+    When I send a GET request to "/api/customer_statuses?order[value]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_statuses_get_collection"
+    And the JSON node "member[0].value" should contain "Published"
+    And the JSON node "member[1].value" should contain "Draft"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bvalue%5D=desc"
-    And the JSON node "totalItems" should be equal to the number 0
 
   # ----- GET /api/customer_statuses/{ulid} – Single Resource (Positive Tests) -----
 

@@ -115,7 +115,7 @@ tests-with-coverage: ## Run tests with coverage
 negative-tests-with-coverage: ## Run negative tests with coverage reporting
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
-all-tests: behat unit-tests integration-tests integration-negative-tests ## Run unit, integration and e2e tests
+all-tests: behat unit-tests integration-tests integration-negative-tests ## Run unit, integration and behat tests
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
 	tests/Load/run-smoke-load-tests.sh

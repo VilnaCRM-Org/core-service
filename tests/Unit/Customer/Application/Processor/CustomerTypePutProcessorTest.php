@@ -73,8 +73,7 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         $this->setupRepository(null, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
 
-        $this->expectException(CustomerTypeNotFoundException::class);
-        $this->expectExceptionMessage('Customer type not found');
+        $this->expectExceptionObject(new CustomerTypeNotFoundException());
 
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }

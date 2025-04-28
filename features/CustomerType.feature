@@ -7,12 +7,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
 
-###############################################################################
-#                             POSITIVE TESTS
-###############################################################################
-
-# ----- GET /api/customer_types – Collection (Positive Tests) -----
-
   Scenario: Retrieve customer types collection with unsupported query parameter
     When I send a GET request to "/api/customer_types?unsupportedParam=value"
     Then the response status code should be equal to 200
@@ -22,15 +16,49 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 0
 
-  Scenario: Retrieve customer types collection with valid pagination parameters and check JSON keys and values
-    When I send a GET request to "/api/customer_types?page=2&itemsPerPage=50"
+  Scenario: Retrieve customer types collection with default GET request and verify JSON structure
+    When I send a GET request to "/api/customer_types"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "member" should exist
     And the JSON node "totalItems" should be equal to the number 0
+
+  Scenario: Retrieve customer types collection with valid cursor pagination parameters and check JSON keys and values
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customer_types?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should exist
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.next" should contain "/api/customer_types?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.previous" should contain "/api/customer_types?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+
+  Scenario: Retrieve customer types collection with itemsPerPage parameter and cursor pagination
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customer_types?itemsPerPage=1&order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member" should exist
+    And the JSON node "member" should have 1 element
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should exist
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.next" should contain "/api/customer_types?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.previous" should contain "/api/customer_types?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customer types collection with default pagination and verify JSON structure
     When I send a GET request to "/api/customer_types"
@@ -42,7 +70,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "totalItems" should be equal to the number 0
 
   Scenario: Retrieve customer types collection filtering by value (single)
-    Given customer type with value "Prospect" exists
+    Given create customer type with value "Prospect"
     When I send a GET request to "/api/customer_types?value=Prospect"
     Then the response status code should be equal to 200
     And the response should be in JSON
@@ -51,17 +79,57 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "member[0].value" should contain "Prospect"
     And the JSON node "totalItems" should be equal to the number 1
 
-  Scenario: Retrieve customer types collection with ordering parameters and check JSON ordering hints
-    When I send a GET request to "/api/customer_types?order[ulid]=asc&order[value]=desc"
+  Scenario: Retrieve customer types collection sorted by ulid in ascending order
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customer_types?order[ulid]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
-    And the JSON node "view.@id" should contain "order%5Bvalue%5D=desc"
-    And the JSON node "totalItems" should be equal to the number 0
 
-# ----- GET /api/customer_types/{ulid} – Single Resource (Positive Tests) -----
+  Scenario: Retrieve customer types collection sorted by ulid in descending order
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    When I send a GET request to "/api/customer_types?order[ulid]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bulid%5D=desc"
+
+  Scenario: Retrieve customer types collection sorted by value in ascending order
+    Given create customer type with value "Prospect"
+    Given create customer type with value "Regular"
+    When I send a GET request to "/api/customer_types?order[value]=asc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member[0].value" should contain "Prospect"
+    And the JSON node "member[1].value" should contain "Regular"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bvalue%5D=asc"
+
+  Scenario: Retrieve customer types collection sorted by value in descending order
+    Given create customer type with value "Prospect"
+    Given create customer type with value "Regular"
+    When I send a GET request to "/api/customer_types?order[value]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_get_collection"
+    And the JSON node "member[0].value" should contain "Regular"
+    And the JSON node "member[1].value" should contain "Prospect"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bvalue%5D=desc"
 
   Scenario: Retrieve a customer type resource with valid ulid and validate full JSON body
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -71,8 +139,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_get"
     And the JSON node "value" should match "/^[A-Za-z]{2,}$/"
-
-# ----- POST /api/customer_types – Create Resource (Positive Tests) -----
 
   Scenario: Create a customer type resource with valid payload and verify full JSON response
     When I send a POST request to "/api/customer_types" with body:
@@ -179,12 +245,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should not exist
     And the response should be valid according to the operation id "api_customer_types_ulid_delete"
 
-###############################################################################
-#                             NEGATIVE TESTS
-###############################################################################
-
-# ----- GET /api/customer_types – Collection (Negative Tests) -----
-
   Scenario: Retrieve customer types collection with invalid pagination parameters (non-integer)
     When I send a GET request to "/api/customer_types?page=abc&itemsPerPage=50"
     Then the response status code should be equal to 400
@@ -192,8 +252,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_get_collection"
     And the JSON node "detail" should contain "Page should not be less than 1"
-
-# ----- GET /api/customer_types/{ulid} – Single Resource (Negative Tests) -----
 
   Scenario: Retrieve a non-existent customer type resource with valid ulid and receive 404 error
     When I send a GET request to "/api/customer_types/01JKX8XGXVDZ46MWYMZT94YER4"
@@ -252,8 +310,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be valid according to the operation id "api_customer_types_post"
     And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less."
 
-# ----- PUT /api/customer_types/{ulid} – Replace Resource (Negative Tests) -----
-
   Scenario: Fail to replace a customer type resource with missing required field (value)
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
@@ -295,8 +351,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
 
-# ----- PATCH /api/customer_types/{ulid} – Partial Update (Negative Tests) -----
-
   Scenario: Fail to update customer type resource with too long value via PATCH
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
@@ -326,8 +380,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be valid according to the operation id "api_customer_types_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
     And the JSON node "detail" should contain "Not Found"
-
-# ----- DELETE /api/customer_types/{ulid} – Delete Resource (Negative Tests) -----
 
   Scenario: Fail to delete a customer type resource for a non-existent ulid and check error message
     When I send a DELETE request to "/api/customer_types/01JKX8XGXVDZ46MWYMZT94YER4"
