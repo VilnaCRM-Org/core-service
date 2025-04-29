@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e342dab0aacf8b93ac13b6b19a6faaf8",
+    "content-hash": "794611059d9735ffd5a9294571dd86e7",
     "packages": [
         {
             "name": "api-platform/core",
@@ -12123,6 +12123,71 @@
                 }
             ],
             "time": "2024-08-30T07:09:40+00:00"
+        },
+        {
+            "name": "runtothefather/doctrine-mongodb-psalm-plugin",
+            "version": "v0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/runtothefather/doctrine-mongodb-psalm-plugin.git",
+                "reference": "b530479b261ab0c2513d2c6da8cb49ca51640cae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/runtothefather/doctrine-mongodb-psalm-plugin/zipball/b530479b261ab0c2513d2c6da8cb49ca51640cae",
+                "reference": "b530479b261ab0c2513d2c6da8cb49ca51640cae",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/mongodb-odm": "^2.0",
+                "php": "^7.4 || ^8.0",
+                "vimeo/psalm": "^4.0 || ^5.0 || ^6.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "^5.0",
+                "weirdan/codeception-psalm-module": "^0.14"
+            },
+            "type": "psalm-plugin",
+            "extra": {
+                "psalm": {
+                    "pluginClass": "RunToTheFather\\DoctrineMongoDbPsalmPlugin\\Plugin"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "RunToTheFather\\DoctrineMongoDbPsalmPlugin\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Evgeny Savich",
+                    "email": "jack.savich@gmail.com"
+                }
+            ],
+            "description": "Stubs to let Psalm understand Doctrine MongoDb ODM better",
+            "keywords": [
+                "code",
+                "doctrine",
+                "extension",
+                "inspection",
+                "mongodb",
+                "odm",
+                "php",
+                "plugin",
+                "psalm",
+                "psalm-plugin",
+                "static analysis",
+                "static-analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/runtothefather/doctrine-mongodb-psalm-plugin/issues",
+                "source": "https://github.com/runtothefather/doctrine-mongodb-psalm-plugin/tree/v0.2.0"
+            },
+            "time": "2025-02-11T12:38:32+00:00"
         },
         {
             "name": "sanmai/later",

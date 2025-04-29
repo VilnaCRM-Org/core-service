@@ -14,4 +14,6 @@
             <directory name="tests/CLI/bats/php"/>
         </ignoreFiles>
     </projectFiles>
-<plugins><pluginClass class="Psalm\PhpUnitPlugin\Plugin"/></plugins></psalm>
+<plugins><pluginClass class="Psalm\PhpUnitPlugin\Plugin"/></plugins>
+<plugins><pluginClass class="Psalm\Plugin\DoctrineMongoDBPsalmPlugin\Plugin"/></plugins>
+</psalm>
