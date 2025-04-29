@@ -3,11 +3,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  App\Tests\DataFixtures\:
-    resource: '%kernel.project_dir%/tests/DataFixtures'
-    tags: ['doctrine.fixture.odm']
-    public: false
-
   Symfony\Contracts\Cache\CacheInterface:
     public: true
     class: Symfony\Component\Cache\Adapter\ArrayAdapter
