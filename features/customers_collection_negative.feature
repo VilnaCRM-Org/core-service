@@ -49,7 +49,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to create a customer resource with missing required field (email) and check error message
@@ -224,7 +224,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 422
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "detail" should contain "initials: Initials can not consist only of spaces"
 
   Scenario: Fail to replace a customer resource with missing required field (phone) and check error message

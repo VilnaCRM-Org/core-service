@@ -33,7 +33,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.previous" should contain "customers?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.previous" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values with itemsPerPage parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"

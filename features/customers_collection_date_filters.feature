@@ -286,8 +286,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve zero customers with createdAt[after] filter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET data request to "/api/customers?createdAt[after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     Then the response status code should be equal to 200
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be in JSON
     And the JSON node "totalItems" should be equal to the number 0
     And the JSON node "member" should have 0 elements
@@ -295,8 +295,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Scenario: Retrieve zero customers with createdAt[strictly_after] filter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET data request to "/api/customers?createdAt[strictly_after]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%"
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     Then the response status code should be equal to 200
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be in JSON
     And the JSON node "totalItems" should be equal to the number 0
     And the JSON node "member" should have 0 elements

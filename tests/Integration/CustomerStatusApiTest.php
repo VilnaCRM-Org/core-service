@@ -151,7 +151,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
                 'body' => json_encode([]),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString('value: This value should not be blank', $error['detail']);
     }
 
     public function testReplaceCustomerStatusFailureWithValidation(): void
@@ -167,7 +169,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
                 'body' => json_encode(['value' => '']),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString('value: This value should not be blank', $error['detail']);
     }
 
     public function testReplaceCustomerStatusNotFound(): void
@@ -183,6 +187,7 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
                 'body' => json_encode($upd),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
     }
 
@@ -218,7 +223,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
                 'body' => json_encode($patch),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testDeleteCustomerStatusSuccess(): void
@@ -240,7 +247,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
             'DELETE',
             "/api/customer_statuses/{$ulid}"
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     /**
