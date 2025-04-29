@@ -1,5 +1,6 @@
 type Query {
   node(id: ID!): Node
+  customerStatus(id: ID!): CustomerStatus
   customerStatuses(
     "Returns the first n elements from the list."
     first: Int
@@ -13,7 +14,7 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): CustomerStatusCursorConnection
-  customerStatus(id: ID!): CustomerStatus
+  customerType(id: ID!): CustomerType
   customerTypes(
     "Returns the first n elements from the list."
     first: Int
@@ -27,7 +28,7 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): CustomerTypeCursorConnection
-  customerType(id: ID!): CustomerType
+  customer(id: ID!): Customer
   customers(
     "Returns the first n elements from the list."
     first: Int
@@ -41,7 +42,7 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): CustomerCursorConnection
-  customer(id: ID!): Customer
+  healthCheck(id: ID!): HealthCheck
   healthChecks(
     "Returns the first n elements from the list."
     first: Int
@@ -55,13 +56,18 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): HealthCheckCursorConnection
-  healthCheck(id: ID!): HealthCheck
 }
 
 "A node, according to the Relay specification."
 interface Node {
   "The id of this node."
   id: ID!
+}
+
+type CustomerStatus implements Node {
+  id: ID!
+  value: String!
+  ulid: String!
 }
 
 "Cursor connection for CustomerStatus."
@@ -77,18 +83,17 @@ type CustomerStatusEdge {
   cursor: String!
 }
 
-type CustomerStatus implements Node {
-  id: ID!
-  value: String!
-  ulid: String!
-}
-
 "Information about the current page."
 type CustomerStatusPageInfo {
   endCursor: String
   startCursor: String
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
+}
+
+type CustomerType implements Node {
+  id: ID!
+  value: String!
 }
 
 "Cursor connection for CustomerType."
@@ -104,30 +109,12 @@ type CustomerTypeEdge {
   cursor: String!
 }
 
-type CustomerType implements Node {
-  id: ID!
-  value: String!
-}
-
 "Information about the current page."
 type CustomerTypePageInfo {
   endCursor: String
   startCursor: String
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
-}
-
-"Cursor connection for Customer."
-type CustomerCursorConnection {
-  edges: [CustomerEdge]
-  pageInfo: CustomerPageInfo!
-  totalCount: Int!
-}
-
-"Edge of Customer."
-type CustomerEdge {
-  node: Customer
-  cursor: String!
 }
 
 type Customer implements Node {
@@ -143,12 +130,29 @@ type Customer implements Node {
   updatedAt: String!
 }
 
+"Cursor connection for Customer."
+type CustomerCursorConnection {
+  edges: [CustomerEdge]
+  pageInfo: CustomerPageInfo!
+  totalCount: Int!
+}
+
+"Edge of Customer."
+type CustomerEdge {
+  node: Customer
+  cursor: String!
+}
+
 "Information about the current page."
 type CustomerPageInfo {
   endCursor: String
   startCursor: String
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
+}
+
+type HealthCheck implements Node {
+  id: ID!
 }
 
 "Cursor connection for HealthCheck."
@@ -162,10 +166,6 @@ type HealthCheckCursorConnection {
 type HealthCheckEdge {
   node: HealthCheck
   cursor: String!
-}
-
-type HealthCheck implements Node {
-  id: ID!
 }
 
 "Information about the current page."
