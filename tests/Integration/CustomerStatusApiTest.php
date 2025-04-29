@@ -85,10 +85,12 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $client = self::createClient();
         $client->request('GET', "/api/customer_statuses/{$ulid}");
         $this->assertResponseStatusCodeSame(404);
-        $this->assertResponseHeaderSame('content-type', 'application/problem+json; charset=utf-8');
+        $this->assertResponseHeaderSame(
+            'content-type',
+            'application/problem+json; charset=utf-8'
+        );
         $error = $client->getResponse()->toArray(false);
-        $this->assertArrayHasKey('hydra:description', $error);
-        $this->assertStringContainsString('Not Found', $error['hydra:title']);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testCreateCustomerStatusSuccess(): void

@@ -17,6 +17,7 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $client = self::createClient();
         $response = $client->request('GET', $iri);
         $data = $response->toArray();
+        $this->assertResponseStatusCodeSame(200);
         $this->assertArrayHasKey('@id', $data);
         $this->assertSame($value, $data['value']);
         $this->assertArrayNotHasKey(
@@ -62,23 +63,7 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $response = $client->request('GET', $iri);
         $data = $response->toArray();
 
-        $this->assertArrayHasKey(
-            '@context',
-            $data,
-            'Missing @context property'
-        );
-        $this->assertArrayHasKey('@id', $data, 'Missing @id property');
-        $this->assertArrayHasKey('@type', $data, 'Missing @type property');
-        $this->assertArrayHasKey(
-            'value',
-            $data,
-            'Missing expected "value" property'
-        );
-        $this->assertSame(
-            $value,
-            $data['value'],
-            'The value returned does not match the payload'
-        );
+        $this->testGetCustomerTypeResponseAssertion($data, $value);
     }
 
     public function testPatchCustomerTypeWithExtraFields(): void
@@ -308,6 +293,32 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         return $this->createEntity(
             '/api/customer_types',
             $this->getTypePayload()
+        );
+    }
+
+    /**
+     * @param array<string, string> $data
+     */
+    private function testGetCustomerTypeResponseAssertion(
+        array $data,
+        string $value
+    ): void {
+        $this->assertArrayHasKey(
+            '@context',
+            $data,
+            'Missing @context property'
+        );
+        $this->assertArrayHasKey('@id', $data, 'Missing @id property');
+        $this->assertArrayHasKey('@type', $data, 'Missing @type property');
+        $this->assertArrayHasKey(
+            'value',
+            $data,
+            'Missing expected "value" property'
+        );
+        $this->assertSame(
+            $value,
+            $data['value'],
+            'The value returned does not match the payload'
         );
     }
 }

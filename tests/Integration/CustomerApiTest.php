@@ -80,13 +80,8 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByEmail(): void
     {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'john.doe@example.com'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'jane.doe@example.com'])
+        $this->createCustomerWithEmails(
+            ['john.doe@example.com', 'jane.doe@example.com']
         );
 
         $client = self::createClient();
@@ -101,7 +96,9 @@ final class CustomerApiTest extends BaseIntegrationTest
 
     public function testFilterByEmailArray(): void
     {
-        $this->createCustomerWithEmails();
+        $this->createCustomerWithEmails(
+            ['john.doe@example.com', 'jane.doe@example.com']
+        );
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -608,29 +605,20 @@ final class CustomerApiTest extends BaseIntegrationTest
         );
     }
 
-    public function createCustomerWithEmails(): void
+    /**
+     * @param array<string> $emails
+     */
+    private function createCustomerWithEmails(array $emails): void
     {
-        $this->createEntity(
-            '/api/customers',
-            array_merge(
-                $this->getCustomer(),
-                ['email' => 'john.doe@example.com']
-            )
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge(
-                $this->getCustomer(),
-                ['email' => 'jane.doe@example.com']
-            )
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge(
-                $this->getCustomer(),
-                ['email' => 'jake.doe@example.com']
-            )
-        );
+        foreach ($emails as $email) {
+            $this->createEntity(
+                '/api/customers',
+                array_merge(
+                    $this->getCustomer(),
+                    ['email' => $email]
+                )
+            );
+        }
     }
 
     private function extractUlid(string $iri): string
