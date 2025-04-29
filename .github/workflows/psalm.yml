@@ -8,23 +8,29 @@ jobs:
   psalm:
     name: Psalm
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Psalm
-        uses: docker://ghcr.io/psalm/psalm-github-actions:5.26.1
+      - uses: shivammathur/setup-php@v2
         with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
+          php-version: ${{ vars.PHP_VERSION }}
 
-      - name: Psalm Security
-        uses: docker://ghcr.io/psalm/psalm-github-actions:5.26.1
-        with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
-          security_analysis: true
-          report_file: results.sarif
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Start application
+        run: make start
+
+      - name: Run Psalm
+        run: make psalm
+
+      - name: Psalm Security Analysis
+        run: vendor/bin/psalm --taint-analysis --report=results.sarif
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v1
