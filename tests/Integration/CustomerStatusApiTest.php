@@ -87,7 +87,6 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $this->assertResponseStatusCodeSame(404);
         $this->assertResponseHeaderSame('content-type', 'application/problem+json; charset=utf-8');
         $error = $client->getResponse()->toArray(false);
-        $this->assertArrayHasKey('hydra:title', $error);
         $this->assertArrayHasKey('hydra:description', $error);
         $this->assertStringContainsString('Not Found', $error['hydra:title']);
     }
