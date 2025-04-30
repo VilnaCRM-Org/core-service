@@ -226,7 +226,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member" should have 1 elements
+    And the JSON node "member" should have 1 element
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "view.@type" should contain "PartialCollectionView"
 

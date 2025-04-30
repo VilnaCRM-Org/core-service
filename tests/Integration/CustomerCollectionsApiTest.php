@@ -476,6 +476,7 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
             'CustomerType'
         );
     }
+
     private function extractUlid(string $iri): string
     {
         return substr($iri, strrpos($iri, '/') + 1);

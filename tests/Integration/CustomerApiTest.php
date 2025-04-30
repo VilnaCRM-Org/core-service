@@ -812,38 +812,6 @@ final class CustomerApiTest extends BaseIntegrationTest
         );
     }
 
-    public function createCustomerWithPhones(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['phone' => '0123456789'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['phone' => '0987654321'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['phone' => '3806312833'])
-        );
-    }
-
-    public function createCustomerWithLeadSource(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['leadSource' => 'Google'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['leadSource' => 'Bing'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['leadSource' => 'Reddit'])
-        );
-    }
-
     public function validationForBlankEmail(Client $client): void
     {
         $error = $client->getResponse()->toArray(false);
