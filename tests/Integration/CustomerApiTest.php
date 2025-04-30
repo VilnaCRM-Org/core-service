@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Customer\Domain\Entity\CustomerType;
 
@@ -420,7 +421,7 @@ final class CustomerApiTest extends BaseIntegrationTest
                 'body' => json_encode($payload),
             ]
         );
-        $this->assertResponseStatusCodeSame(422);
+        $this->validationForBlankEmail($client);
     }
 
     public function testGetCustomerSuccess(): void
@@ -439,7 +440,7 @@ final class CustomerApiTest extends BaseIntegrationTest
         $ulid = (string) $this->faker->ulid();
         $client = self::createClient();
         $client->request('GET', "/api/customers/{$ulid}");
-        $this->assertResponseStatusCodeSame(404);
+        $this->validationNotFound($client);
     }
 
     public function testReplaceCustomerSuccess(): void
@@ -473,7 +474,7 @@ final class CustomerApiTest extends BaseIntegrationTest
                 'body' => json_encode($updated),
             ]
         );
-        $this->assertResponseStatusCodeSame(422);
+        $this->validationForBlankEmail($client);
     }
 
     public function testReplaceCustomerNotFound(): void
@@ -497,7 +498,7 @@ final class CustomerApiTest extends BaseIntegrationTest
                 'body' => json_encode($updated),
             ]
         );
-        $this->assertResponseStatusCodeSame(404);
+        $this->validationNotFound($client);
     }
 
     public function testPatchCustomerSuccess(): void
@@ -535,7 +536,12 @@ final class CustomerApiTest extends BaseIntegrationTest
                 'body' => json_encode($patch),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is not a valid email address',
+            $error['detail']
+        );
     }
 
     public function testPatchCustomerNotFound(): void
@@ -551,7 +557,7 @@ final class CustomerApiTest extends BaseIntegrationTest
                 'body' => json_encode($patch),
             ]
         );
-        $this->assertResponseStatusCodeSame(404);
+        $this->validationNotFound($client);
     }
 
     public function testDeleteCustomerSuccess(): void
@@ -562,7 +568,7 @@ final class CustomerApiTest extends BaseIntegrationTest
         $client->request('DELETE', $iri);
         $this->assertResponseStatusCodeSame(204);
         $client->request('GET', $iri);
-        $this->assertResponseStatusCodeSame(404);
+        $this->validationNotFound($client);
     }
 
     public function testDeleteCustomerNotFound(): void
@@ -570,7 +576,7 @@ final class CustomerApiTest extends BaseIntegrationTest
         $ulid = (string) $this->faker->ulid();
         $client = self::createClient();
         $client->request('DELETE', "/api/customers/{$ulid}");
-        $this->assertResponseStatusCodeSame(404);
+        $this->validationNotFound($client);
     }
 
     public function createCustomerWithPhones(): void
@@ -605,20 +611,21 @@ final class CustomerApiTest extends BaseIntegrationTest
         );
     }
 
-    /**
-     * @param array<string> $emails
-     */
-    private function createCustomerWithEmails(array $emails): void
+    public function validationForBlankEmail(Client $client): void
     {
-        foreach ($emails as $email) {
-            $this->createEntity(
-                '/api/customers',
-                array_merge(
-                    $this->getCustomer(),
-                    ['email' => $email]
-                )
-            );
-        }
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function validationNotFound(Client $client): void
+    {
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     private function extractUlid(string $iri): string
@@ -655,9 +662,9 @@ final class CustomerApiTest extends BaseIntegrationTest
     {
         return [
             'email' => $this->faker->unique()->email(),
-            'phone' => '1112223333',
-            'initials' => 'Replaced',
-            'leadSource' => 'Yahoo',
+            'phone' => $this->faker->phoneNumber(),
+            'initials' => $this->faker->word(),
+            'leadSource' => $this->faker->word(),
             'type' => $this->createCustomerType(),
             'status' => $this->createCustomerStatus(),
             'confirmed' => false,
@@ -704,6 +711,22 @@ final class CustomerApiTest extends BaseIntegrationTest
             'status' => $this->createCustomerStatus(),
             'confirmed' => true,
         ];
+    }
+
+    /**
+     * @param array<string> $emails
+     */
+    private function createCustomerWithEmails(array $emails): void
+    {
+        foreach ($emails as $email) {
+            $this->createEntity(
+                '/api/customers',
+                array_merge(
+                    $this->getCustomer(),
+                    ['email' => $email]
+                )
+            );
+        }
     }
 
     private function createCustomerStatus(): string

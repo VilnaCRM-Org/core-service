@@ -127,7 +127,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $ulid = (string) $this->faker->ulid();
         $client = self::createClient();
         $client->request('GET', "/api/customer_types/{$ulid}");
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testCreateCustomerTypeSuccess(): void
@@ -154,7 +156,12 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
                 'body' => json_encode([]),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testReplaceCustomerTypeSuccess(): void
@@ -190,7 +197,12 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
                 'body' => json_encode([]),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testReplaceCustomerTypeNotFound(): void
@@ -206,7 +218,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
                 'body' => json_encode($upd),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testReplaceCustomerTypeFailureWithValidation(): void
@@ -222,7 +236,12 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
                 'body' => json_encode(['value' => '']),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testPatchCustomerTypeSuccess(): void
@@ -258,7 +277,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
                 'body' => json_encode($patch),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testDeleteCustomerTypeSuccess(): void
@@ -269,7 +290,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $client->request('DELETE', $iri);
         $this->assertResponseStatusCodeSame(204);
         $client->request('GET', $iri);
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testDeleteCustomerTypeNotFound(): void
@@ -277,7 +300,9 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         $ulid = (string) $this->faker->ulid();
         $client = self::createClient();
         $client->request('DELETE', "/api/customer_types/{$ulid}");
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     /**

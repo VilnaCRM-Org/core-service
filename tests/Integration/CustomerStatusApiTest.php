@@ -116,7 +116,12 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
                 'body' => json_encode([]),
             ]
         );
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testReplaceCustomerStatusSuccess(): void
@@ -153,7 +158,10 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         );
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
-        $this->assertStringContainsString('value: This value should not be blank', $error['detail']);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testReplaceCustomerStatusFailureWithValidation(): void
@@ -171,7 +179,10 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         );
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(422);
-        $this->assertStringContainsString('value: This value should not be blank', $error['detail']);
+        $this->assertStringContainsString(
+            'value: This value should not be blank',
+            $error['detail']
+        );
     }
 
     public function testReplaceCustomerStatusNotFound(): void
@@ -189,6 +200,7 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         );
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testPatchCustomerStatusSuccess(): void
@@ -236,7 +248,9 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
         $client->request('DELETE', $iri);
         $this->assertResponseStatusCodeSame(204);
         $client->request('GET', $iri);
+        $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Not Found', $error['detail']);
     }
 
     public function testDeleteCustomerStatusNotFound(): void
