@@ -214,12 +214,17 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
         $this->createEntity('/api/customers', $falsePayload);
 
         $client = self::createClient();
-        $client->request('GET', '/api/customers', [
+        $response = $client->request('GET', '/api/customers', [
             'query' => [
                 'confirmed[]' => ['true', 'false'],
             ],
         ]);
+
         $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        $values = array_column($data['member'], 'confirmed');
+        self::assertContains(true, $values);
+        self::assertContains(false, $values);
     }
 
     public function testSortedByEmailAsc(): void

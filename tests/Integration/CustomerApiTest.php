@@ -830,7 +830,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, CustomerStatus, CustomerType, string, bool>
+     * @return array<string, string|bool|CustomerType|CustomerStatus>
      */
     private function getUpdatedCustomerPayload(): array
     {
