@@ -127,7 +127,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "totalItems" should be equal to the number 3
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
-    And the JSON node "view.@id" should contain "/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection with updatedAt[before] filter and verify JSON nodes
     # A customer is created and its updatedAt (set to now) will be before a future date (now + 1 year).
@@ -278,8 +278,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a GET data request to "/api/customers?createdAt[strictly_before]=!%date(Y-m-d\TH:i:s\Z),date_interval(-P1Y)!%"
     Then the response status code should be equal to 200
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the JSON node "totalItems" should be equal to the number 0
     And the JSON node "member" should have 0 elements
 

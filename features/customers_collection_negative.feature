@@ -283,7 +283,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
       "leadSource": "Bing",
       "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
       "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4",
-      "confirmed": "non-bulean"
+      "confirmed": "non-boolean"
     }
     """
     Then the response status code should be equal to 400
@@ -514,7 +514,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_patch"
-    And the JSON node "detail" should contain "input data is misformatted"
+    And the JSON node "detail" should contain "The input data is misformatted"
 
   Scenario: Fail to replace a customer resource with invalid ulid format and check error message (PATCH case)
     And I add "Content-Type" header equal to "application/merge-patch+json"

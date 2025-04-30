@@ -10,371 +10,6 @@ use App\Customer\Domain\Entity\CustomerType;
 
 final class CustomerApiTest extends BaseIntegrationTest
 {
-    public function testGetCustomersCollection(): void
-    {
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers');
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertArrayHasKey('member', $data);
-        $this->assertIsArray($data['member']);
-    }
-
-    public function testGetCustomersCollectionInvalidQuery(): void
-    {
-        $client = self::createClient();
-        $client->request('GET', '/api/customers', [
-            'query' => ['page' => 'invalid'],
-        ]);
-        $this->assertResponseStatusCodeSame(400);
-    }
-
-    public function testEmptyCustomersCollection(): void
-    {
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers');
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertCount(0, $data['member']);
-    }
-
-    public function testFilterByInitials(): void
-    {
-        $payloadA = $this->getCustomer('JD');
-        $this->createEntity('/api/customers', $payloadA);
-        $payloadB = $this->getCustomer('FJ');
-        $this->createEntity('/api/customers', $payloadB);
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['initials' => 'JD'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('JD', $data['member'][0]['initials']);
-    }
-
-    public function testFilterByInitialsArray(): void
-    {
-        $payloadA = $this->getCustomer('AB');
-        $this->createEntity('/api/customers', $payloadA);
-        $payloadB = $this->getCustomer('CD');
-        $this->createEntity('/api/customers', $payloadB);
-        $payloadC = $this->getCustomer('DC');
-        $this->createEntity('/api/customers', $payloadC);
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'initials[]' => ['AB', 'CD'],
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertContains($data['member'][0]['initials'], ['AB', 'CD']);
-        $this->assertContains($data['member'][1]['initials'], ['AB', 'CD']);
-    }
-
-    public function testFilterByEmail(): void
-    {
-        $this->createCustomerWithEmails(
-            ['john.doe@example.com', 'jane.doe@example.com']
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['email' => 'john.doe@example.com'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('john.doe@example.com', $data['member'][0]['email']);
-    }
-
-    public function testFilterByEmailArray(): void
-    {
-        $this->createCustomerWithEmails(
-            ['john.doe@example.com', 'jane.doe@example.com']
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'email[]' => ['john.doe@example.com', 'jane.doe@example.com'],
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('john.doe@example.com', $data['member'][0]['email']);
-        $this->assertSame('jane.doe@example.com', $data['member'][1]['email']);
-    }
-
-    public function testFilterByPhone(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['phone' => '0123456789'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['phone' => '3806312833'])
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['phone' => '0123456789'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('0123456789', $data['member'][0]['phone']);
-    }
-
-    public function testFilterByPhoneArray(): void
-    {
-        $this->createCustomerWithPhones();
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'phone[]' => ['0123456789', '0987654321'],
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('0123456789', $data['member'][0]['phone']);
-        $this->assertSame('0987654321', $data['member'][1]['phone']);
-    }
-
-    public function testFilterByLeadSource(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['leadSource' => 'Google'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['leadSource' => 'Reddit'])
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['leadSource' => 'Google'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('Google', $data['member'][0]['leadSource']);
-    }
-
-    public function testFilterByLeadSourceArray(): void
-    {
-        $this->createCustomerWithLeadSource();
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'leadSource[]' => ['Google', 'Bing'],
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('Google', $data['member'][0]['leadSource']);
-        $this->assertSame('Bing', $data['member'][1]['leadSource']);
-    }
-
-    public function testFilterByConfirmed(): void
-    {
-        $this->createEntity('/api/customers', $this->getCustomer());
-        $falsePayload = $this->getCustomer();
-        $falsePayload['confirmed'] = false;
-        $this->createEntity('/api/customers', $falsePayload);
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['confirmed' => 'true'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertTrue($data['member'][0]['confirmed']);
-    }
-
-    public function testFilterByConfirmedArray(): void
-    {
-        $this->createEntity('/api/customers', $this->getCustomer());
-        $falsePayload = $this->getCustomer();
-        $falsePayload['confirmed'] = false;
-        $this->createEntity('/api/customers', $falsePayload);
-
-        $client = self::createClient();
-        $client->request('GET', '/api/customers', [
-            'query' => [
-                'confirmed[]' => ['true', 'false'],
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-    }
-
-    public function testSortedByEmailAsc(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'alice@example.com'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'bob@example.com'])
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['order[email]' => 'asc'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('alice@example.com', $data['member'][0]['email']);
-        $this->assertSame('bob@example.com', $data['member'][1]['email']);
-    }
-
-    public function testSortedByEmailDesc(): void
-    {
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'alice@example.com'])
-        );
-        $this->createEntity(
-            '/api/customers',
-            array_merge($this->getCustomer(), ['email' => 'bob@example.com'])
-        );
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['order[email]' => 'desc'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertSame('bob@example.com', $data['member'][0]['email']);
-        $this->assertSame('alice@example.com', $data['member'][1]['email']);
-    }
-
-    public function testCursorPagination(): void
-    {
-        $ulid3 = $this->createThreeEntities()[2];
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'order[ulid]' => 'desc',
-                'ulid[lt]' => $ulid3,
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testFilterUlidLt(): void
-    {
-        $ulid3 = $this->createThreeEntities()[2];
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['ulid[lt]' => $ulid3],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        // Should return “One” and “Two”
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testFilterUlidLte(): void
-    {
-        $ulid2 = $this->createThreeEntities()[1];
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['ulid[lte]' => $ulid2],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testFilterUlidGt(): void
-    {
-        [$ulid1] = $this->createThreeEntities();
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['ulid[gt]' => $ulid1],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testFilterUlidGte(): void
-    {
-        $ulid2 = $this->createThreeEntities()[1];
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => ['ulid[gte]' => $ulid2],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testFilterUlidBetween(): void
-    {
-        [$ulid1, $ulid2] = $this->createThreeEntities();
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'ulid[between]' => sprintf('%s..%s', $ulid1, $ulid2),
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        $this->assertCount(2, $data['member']);
-    }
-
-    public function testCursorPaginationWithItemsPerPage(): void
-    {
-        $ulid3 = $this->createThreeEntities()[2];
-
-        $client = self::createClient();
-        $response = $client->request('GET', '/api/customers', [
-            'query' => [
-                'itemsPerPage' => '1',
-                'order[ulid]' => 'desc',
-                'ulid[lt]' => $ulid3,
-            ],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-
-        $this->assertCount(1, $data['member']);
-    }
-
     public function testCreateCustomerSuccess(): void
     {
         $payload = $this->getCustomer('John Doe');
@@ -579,6 +214,604 @@ final class CustomerApiTest extends BaseIntegrationTest
         $this->validationNotFound($client);
     }
 
+    public function testCreateCustomerWithoutInitials(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['initials']);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'initials: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithTooLongInitials(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['initials'] = str_repeat('X', 256);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'initials: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithInvalidEmail(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['email'] = 'not-an-email';
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is not a valid email address.',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithTooLongEmail(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['email'] = str_repeat('a', 256) . '@example.com';
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithDuplicateEmail(): void
+    {
+        $payload = $this->getCustomer();
+        $this->createEntity('/api/customers', $payload);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString('email:', $error['detail']);
+    }
+
+    public function testCreateCustomerWithoutPhone(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['phone']);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'phone: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithTooLongPhone(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['phone'] = str_repeat('9', 256);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'phone: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithoutLeadSource(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['leadSource']);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'leadSource: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithTooLongLeadSource(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['leadSource'] = str_repeat('L', 256);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'leadSource: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithoutType(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['type']);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'type: This value should not be blank.',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithoutStatus(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['status']);
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'status: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testCreateCustomerWithNonBooleanConfirmed(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['confirmed'] = 'yes';
+
+        $client = self::createClient();
+        $client->request('POST', '/api/customers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            'The input data is misformatted.',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithTooLongInitials(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['initials' => str_repeat('X', 256)];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'initials: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithInvalidEmail(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['email' => 'bad@'];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is not a valid email address.',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithTooLongEmail(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['email' => str_repeat('a', 256) . '@x.com'];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithDuplicateEmail(): void
+    {
+        $existing = $this->getCustomer();
+        $this->createEntity('/api/customers', $existing);
+
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['email' => $existing['email']];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString('email:', $error['detail']);
+    }
+
+    public function testPatchCustomerWithTooLongPhone(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['phone' => str_repeat('9', 256)];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'phone: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithTooLongLeadSource(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['leadSource' => str_repeat('L', 256)];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'leadSource: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithNonBooleanConfirmed(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+        $patch = ['confirmed' => 'maybe'];
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode($patch),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            'The input data is misformatted.',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutInitials(): void
+    {
+        $payload = $this->getCustomer();
+        $iri = $this->createEntity('/api/customers', $payload);
+        unset($payload['initials']);
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'initials: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithTooLongInitials(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['initials'] = str_repeat('X', 256);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'initials: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutEmail(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['email']);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithInvalidEmailFormat(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['email'] = 'wrong';
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is not a valid email address.',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithTooLongEmail(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['email'] = str_repeat('a', 256) . '@x.com';
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'email: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutPhone(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['phone']);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'phone: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithTooLongPhone(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['phone'] = str_repeat('9', 256);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'phone: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutLeadSource(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['leadSource']);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'leadSource: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithTooLongLeadSource(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['leadSource'] = str_repeat('L', 256);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'leadSource: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutType(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['type']);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'type: This value should not be blank.',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithoutStatus(): void
+    {
+        $payload = $this->getCustomer();
+        unset($payload['status']);
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'status: This value should not be blank',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithNonBooleanConfirmed(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['confirmed'] = 'nope';
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            'The input data is misformatted.',
+            $error['detail']
+        );
+    }
+
     public function createCustomerWithPhones(): void
     {
         $this->createEntity(
@@ -626,33 +859,6 @@ final class CustomerApiTest extends BaseIntegrationTest
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
         $this->assertStringContainsString('Not Found', $error['detail']);
-    }
-
-    private function extractUlid(string $iri): string
-    {
-        return substr($iri, strrpos($iri, '/') + 1);
-    }
-
-    /**
-     * @return array<string>
-     */
-    private function createThreeEntities(): array
-    {
-        $iris = [];
-        $iris[] = $this->createEntity(
-            '/api/customers',
-            $this->getCustomer('One')
-        );
-        $iris[] = $this->createEntity(
-            '/api/customers',
-            $this->getCustomer('Two')
-        );
-        $iris[] = $this->createEntity(
-            '/api/customers',
-            $this->getCustomer('Three')
-        );
-
-        return array_map([$this, 'extractUlid'], $iris);
     }
 
     /**
@@ -711,22 +917,6 @@ final class CustomerApiTest extends BaseIntegrationTest
             'status' => $this->createCustomerStatus(),
             'confirmed' => true,
         ];
-    }
-
-    /**
-     * @param array<string> $emails
-     */
-    private function createCustomerWithEmails(array $emails): void
-    {
-        foreach ($emails as $email) {
-            $this->createEntity(
-                '/api/customers',
-                array_merge(
-                    $this->getCustomer(),
-                    ['email' => $email]
-                )
-            );
-        }
     }
 
     private function createCustomerStatus(): string
