@@ -61,14 +61,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * Custom step that maps dynamic date placeholders and sends a GET request.
-     *
-     * For example, a URL can include:
-     *
-     *   /api/customers?createdAt[before]=!%date(Y-m-d\TH:i:s\Z),date_interval(P1Y)!%
-     *
-     * This placeholder will be replaced at runtime with the current date plus one year.
-     *
      * @When I send a GET data request to :url
      */
     public function iSendAGetDataRequestTo(string $url): void
