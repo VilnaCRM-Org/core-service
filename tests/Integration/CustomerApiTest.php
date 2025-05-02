@@ -872,7 +872,7 @@ final class CustomerApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string|bool|CustomerType|CustomerStatus>
+     * @return array<string, string|bool>
      */
     private function getCustomer(string $name = 'Test Customer'): array
     {

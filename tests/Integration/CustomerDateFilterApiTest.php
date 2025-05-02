@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -114,7 +112,7 @@ final class CustomerDateFilterApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string|bool|CustomerType|CustomerStatus>
+     * @return array<string, string|bool>
      */
     private function getCustomer(string $name = 'Test Customer'): array
     {
