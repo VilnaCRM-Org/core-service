@@ -10,14 +10,15 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 
-class CustomerDateFilterApITest extends BaseIntegrationTest
+final class CustomerDateFilterApITest extends BaseIntegrationTest
 {
     public function testFilterByUpdatedAtAfter(): void
     {
         $this->createEntity('/api/customers', $this->getCustomer());
 
         $date = new DateTime('now', new DateTimeZone('UTC'));
-        $future = $date->add(new DateInterval('P1Y'))->format('Y-m-d\\TH:i:s\\Z');
+        $future = $date->add(new DateInterval('P1Y'))
+            ->format('Y-m-d\\TH:i:s\\Z');
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -35,7 +36,8 @@ class CustomerDateFilterApITest extends BaseIntegrationTest
         $this->createEntity('/api/customers', $this->getCustomer());
 
         $date = new DateTime('now', new DateTimeZone('UTC'));
-        $future = $date->add(new DateInterval('P1Y'))->format('Y-m-d\\TH:i:s\\Z');
+        $future = $date->add(new DateInterval('P1Y'))
+            ->format('Y-m-d\\TH:i:s\\Z');
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -54,7 +56,8 @@ class CustomerDateFilterApITest extends BaseIntegrationTest
         $ulid = $this->extractUlid($iri);
 
         $date = new DateTime('now', new DateTimeZone('UTC'));
-        $future = $date->add(new DateInterval('P1Y'))->format('Y-m-d\\TH:i:s\\Z');
+        $future = $date->add(new DateInterval('P1Y'))
+            ->format('Y-m-d\\TH:i:s\\Z');
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
@@ -75,7 +78,8 @@ class CustomerDateFilterApITest extends BaseIntegrationTest
         $ulid = $this->extractUlid($iri);
 
         $date = new DateTime('now', new DateTimeZone('UTC'));
-        $future = $date->add(new DateInterval('P1Y'))->format('Y-m-d\\TH:i:s\\Z');
+        $future = $date->add(new DateInterval('P1Y'))
+            ->format('Y-m-d\\TH:i:s\\Z');
 
         $client = self::createClient();
         $response = $client->request('GET', '/api/customers', [
