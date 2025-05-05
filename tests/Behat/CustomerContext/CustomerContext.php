@@ -66,7 +66,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function iSendAGetDataRequestTo(string $url): void
     {
         $mappedUrl = $this->mapDynamicDates($url);
-        $mappedUrl = 'http://caddy' . $mappedUrl;
+        $mappedUrl = getenv('BASE_URL') . $mappedUrl;
         $this->restContext->iSendARequestTo('GET', $mappedUrl);
     }
 
