@@ -1,5 +1,19 @@
 type Query {
   node(id: ID!): Node
+  customer(id: ID!): Customer
+  customers(
+    "Returns the first n elements from the list."
+    first: Int
+
+    "Returns the last n elements from the list."
+    last: Int
+
+    "Returns the elements in the list that come before the specified cursor."
+    before: String
+
+    "Returns the elements in the list that come after the specified cursor."
+    after: String
+  ): CustomerCursorConnection
   customerStatus(id: ID!): CustomerStatus
   customerStatuses(
     "Returns the first n elements from the list."
@@ -28,20 +42,6 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): CustomerTypeCursorConnection
-  customer(id: ID!): Customer
-  customers(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-  ): CustomerCursorConnection
   healthCheck(id: ID!): HealthCheck
   healthChecks(
     "Returns the first n elements from the list."
@@ -64,10 +64,49 @@ interface Node {
   id: ID!
 }
 
+type Customer implements Node {
+  id: ID!
+  initials: String!
+  email: String!
+  phone: String!
+  leadSource: String!
+  type: CustomerType!
+  status: CustomerStatus!
+  confirmed: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type CustomerType implements Node {
+  id: ID!
+  value: String!
+}
+
 type CustomerStatus implements Node {
   id: ID!
   value: String!
   ulid: String!
+}
+
+"Cursor connection for Customer."
+type CustomerCursorConnection {
+  edges: [CustomerEdge]
+  pageInfo: CustomerPageInfo!
+  totalCount: Int!
+}
+
+"Edge of Customer."
+type CustomerEdge {
+  node: Customer
+  cursor: String!
+}
+
+"Information about the current page."
+type CustomerPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
 }
 
 "Cursor connection for CustomerStatus."
@@ -91,11 +130,6 @@ type CustomerStatusPageInfo {
   hasPreviousPage: Boolean!
 }
 
-type CustomerType implements Node {
-  id: ID!
-  value: String!
-}
-
 "Cursor connection for CustomerType."
 type CustomerTypeCursorConnection {
   edges: [CustomerTypeEdge]
@@ -111,40 +145,6 @@ type CustomerTypeEdge {
 
 "Information about the current page."
 type CustomerTypePageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-type Customer implements Node {
-  id: ID!
-  initials: String!
-  email: String!
-  phone: String!
-  leadSource: String!
-  type: CustomerType!
-  status: CustomerStatus!
-  confirmed: Boolean!
-  createdAt: String!
-  updatedAt: String!
-}
-
-"Cursor connection for Customer."
-type CustomerCursorConnection {
-  edges: [CustomerEdge]
-  pageInfo: CustomerPageInfo!
-  totalCount: Int!
-}
-
-"Edge of Customer."
-type CustomerEdge {
-  node: Customer
-  cursor: String!
-}
-
-"Information about the current page."
-type CustomerPageInfo {
   endCursor: String
   startCursor: String
   hasNextPage: Boolean!
@@ -177,6 +177,15 @@ type HealthCheckPageInfo {
 }
 
 type Mutation {
+  "Updates a Customer."
+  updateCustomer(input: updateCustomerInput!): updateCustomerPayload
+
+  "Deletes a Customer."
+  deleteCustomer(input: deleteCustomerInput!): deleteCustomerPayload
+
+  "Creates a Customer."
+  createCustomer(input: createCustomerInput!): createCustomerPayload
+
   "Updates a CustomerStatus."
   updateCustomerStatus(input: updateCustomerStatusInput!): updateCustomerStatusPayload
 
@@ -195,15 +204,6 @@ type Mutation {
   "Creates a CustomerType."
   createCustomerType(input: createCustomerTypeInput!): createCustomerTypePayload
 
-  "Updates a Customer."
-  updateCustomer(input: updateCustomerInput!): updateCustomerPayload
-
-  "Deletes a Customer."
-  deleteCustomer(input: deleteCustomerInput!): deleteCustomerPayload
-
-  "Creates a Customer."
-  createCustomer(input: createCustomerInput!): createCustomerPayload
-
   "Updates a HealthCheck."
   updateHealthCheck(input: updateHealthCheckInput!): updateHealthCheckPayload
 
@@ -212,6 +212,59 @@ type Mutation {
 
   "Creates a HealthCheck."
   createHealthCheck(input: createHealthCheckInput!): createHealthCheckPayload
+}
+
+"Updates a Customer."
+input updateCustomerInput {
+  id: ID!
+  initials: String
+  email: String
+  phone: String
+  leadSource: String
+  type: String
+  status: String
+  confirmed: Boolean
+  createdAt: String
+  updatedAt: String
+  clientMutationId: String
+}
+
+"Updates a Customer."
+type updateCustomerPayload {
+  customer: Customer
+  clientMutationId: String
+}
+
+"Deletes a Customer."
+input deleteCustomerInput {
+  id: ID!
+  clientMutationId: String
+}
+
+"Deletes a Customer."
+type deleteCustomerPayload {
+  customer: Customer
+  clientMutationId: String
+}
+
+"Creates a Customer."
+input createCustomerInput {
+  initials: String!
+  email: String!
+  phone: String!
+  leadSource: String!
+  type: String!
+  status: String!
+  confirmed: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  clientMutationId: String
+}
+
+"Creates a Customer."
+type createCustomerPayload {
+  customer: Customer
+  clientMutationId: String
 }
 
 "Updates a CustomerStatus."
@@ -285,59 +338,6 @@ input createCustomerTypeInput {
 "Creates a CustomerType."
 type createCustomerTypePayload {
   customerType: CustomerType
-  clientMutationId: String
-}
-
-"Updates a Customer."
-input updateCustomerInput {
-  id: ID!
-  initials: String
-  email: String
-  phone: String
-  leadSource: String
-  type: String
-  status: String
-  confirmed: Boolean
-  createdAt: String
-  updatedAt: String
-  clientMutationId: String
-}
-
-"Updates a Customer."
-type updateCustomerPayload {
-  customer: Customer
-  clientMutationId: String
-}
-
-"Deletes a Customer."
-input deleteCustomerInput {
-  id: ID!
-  clientMutationId: String
-}
-
-"Deletes a Customer."
-type deleteCustomerPayload {
-  customer: Customer
-  clientMutationId: String
-}
-
-"Creates a Customer."
-input createCustomerInput {
-  initials: String!
-  email: String!
-  phone: String!
-  leadSource: String!
-  type: String!
-  status: String!
-  confirmed: Boolean!
-  createdAt: String!
-  updatedAt: String!
-  clientMutationId: String
-}
-
-"Creates a Customer."
-type createCustomerPayload {
-  customer: Customer
   clientMutationId: String
 }
 
