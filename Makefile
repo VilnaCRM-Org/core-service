@@ -85,6 +85,9 @@ psalm: ## A static analysis tool for finding errors in PHP applications
 psalm-security: ## Psalm security analysis
 	$(EXEC_ENV) $(PSALM) --taint-analysis
 
+psalm-security-report: ## Comprehensive Psalm security scan: taint analysis, SARIF report, and taint graph dump
+	$(EXEC_ENV) $(PSALM) --taint-analysis --report=results.sarif
+
 phpinsights: ## Instant PHP quality checks and static analysis tool
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --ansi --format=github-action --disable-security-check && ./vendor/bin/phpinsights analyse tests --no-interaction
 

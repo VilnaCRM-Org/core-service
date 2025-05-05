@@ -20,9 +20,6 @@ jobs:
         with:
           php-version: ${{ vars.PHP_VERSION }}
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start application
         run: make start
 
@@ -30,7 +27,7 @@ jobs:
         run: make psalm
 
       - name: Psalm Security Analysis
-        run: vendor/bin/psalm --taint-analysis --report=results.sarif
+        run: make psalm-security-report
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v1
