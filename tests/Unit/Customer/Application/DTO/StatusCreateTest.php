@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\DTO;
 
-use App\Customer\Application\DTO\TypeCreateDto;
+use App\Customer\Application\DTO\StatusCreate;
 use App\Tests\Unit\UnitTestCase;
 
-final class TypeCreateDtoTest extends UnitTestCase
+final class StatusCreateTest extends UnitTestCase
 {
     public function testConstruct(): void
     {
         $value = $this->faker->word();
-        $dto = new TypeCreateDto($value);
+        $dto = new StatusCreate($value);
 
         $this->assertEquals($value, $dto->value);
     }

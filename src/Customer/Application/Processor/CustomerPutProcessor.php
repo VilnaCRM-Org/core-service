@@ -7,7 +7,7 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerPutDto;
+use App\Customer\Application\DTO\CustomerPut;
 use App\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Exception\CustomerNotFoundException;
@@ -16,7 +16,7 @@ use App\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<CustomerPutDto, Customer>
+ * @implements ProcessorInterface<CustomerPut, Customer>
  */
 final readonly class CustomerPutProcessor implements ProcessorInterface
 {
@@ -29,7 +29,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     }
 
     /**
-     * @param CustomerPutDto $data
+     * @param CustomerPut $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */
@@ -66,10 +66,10 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     }
 
     private function executeUpdateCommand(
-        Customer $customer,
-        CustomerPutDto $data,
-        object $customerType,
-        object $customerStatus
+        Customer    $customer,
+        CustomerPut $data,
+        object      $customerType,
+        object      $customerStatus
     ): void {
         $customerUpdate = new CustomerUpdate(
             $data->initials,

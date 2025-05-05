@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\CreateTypeCommand;
 use App\Customer\Application\Command\CreateTypeCommandResponse;
-use App\Customer\Application\DTO\TypeCreateDto;
+use App\Customer\Application\DTO\TypeCreate;
 use App\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Customer\Application\Processor\CreateTypeProcessor;
 use App\Customer\Domain\Entity\CustomerType;
@@ -58,9 +58,9 @@ final class CreateTypeProcessorTest extends UnitTestCase
         $this->assertSame($customerType, $result);
     }
 
-    private function createDto(): TypeCreateDto
+    private function createDto(): TypeCreate
     {
-        return new TypeCreateDto(
+        return new TypeCreate(
             $this->faker->word()
         );
     }

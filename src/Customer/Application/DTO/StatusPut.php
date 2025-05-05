@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\DTO;
 
-final readonly class TypePatchDto
+final readonly class StatusPut
 {
     public function __construct(
         public ?string $value = null,

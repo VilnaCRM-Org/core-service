@@ -1,4 +1,4 @@
-App\Customer\Application\DTO\CustomerCreateDto:
+App\Customer\Application\DTO\CustomerCreate:
   properties:
     initials:
       - NotBlank: { message: 'not.blank' }
@@ -26,7 +26,7 @@ App\Customer\Application\DTO\CustomerCreateDto:
     confirmed:
       - Type: { type: 'bool', message: 'This value should be a boolean.' }
 
-App\Customer\Application\DTO\CustomerPatchDto:
+App\Customer\Application\DTO\CustomerPatch:
   properties:
     initials:
       - Length:
@@ -48,7 +48,7 @@ App\Customer\Application\DTO\CustomerPatchDto:
           type: 'bool'
           message: 'This value should be a boolean.'
 
-App\Customer\Application\DTO\CustomerPutDto:
+App\Customer\Application\DTO\CustomerPut:
   properties:
     initials:
       - NotBlank: { message: 'not.blank' }
@@ -78,40 +78,40 @@ App\Customer\Application\DTO\CustomerPutDto:
           type: 'bool'
           message: 'This value should be a boolean.'
 
-App\Customer\Application\DTO\TypePatchDto:
+App\Customer\Application\DTO\TypePatch:
   properties:
     value:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\TypePutDto:
-  properties:
-    value:
-      - NotBlank: { message: 'not.blank' }
-      - Length:
-          max: 255
-
-App\Customer\Application\DTO\TypeCreateDto:
+App\Customer\Application\DTO\TypePut:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
 
-App\Customer\Application\DTO\StatusCreateDto:
+App\Customer\Application\DTO\TypeCreate:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
 
-App\Customer\Application\DTO\StatusPatchDto:
+App\Customer\Application\DTO\StatusCreate:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Customer\Application\DTO\StatusPatch:
   properties:
     value:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\StatusPutDto:
+App\Customer\Application\DTO\StatusPut:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }

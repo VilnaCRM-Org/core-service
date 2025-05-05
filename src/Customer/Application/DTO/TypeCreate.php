@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\DTO;
 
-final readonly class TypeCreateDto
+final readonly class TypeCreate
 {
     public function __construct(
         public ?string $value = null,

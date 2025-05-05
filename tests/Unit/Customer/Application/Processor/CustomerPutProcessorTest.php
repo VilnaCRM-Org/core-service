@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\UpdateCustomerCommand;
-use App\Customer\Application\DTO\CustomerPutDto;
+use App\Customer\Application\DTO\CustomerPut;
 use App\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Customer\Application\Processor\CustomerPutProcessor;
 use App\Customer\Domain\Entity\Customer;
@@ -107,8 +107,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function setupIriConverter(
-        CustomerPutDto $dto,
-        CustomerType $type,
+        CustomerPut    $dto,
+        CustomerType   $type,
         CustomerStatus $status
     ): void {
         $this->iriConverter
@@ -120,10 +120,10 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function setupFactoryAndCommandBus(
-        CustomerPutDto $dto,
-        CustomerType $type,
-        CustomerStatus $status,
-        Customer $customer,
+        CustomerPut           $dto,
+        CustomerType          $type,
+        CustomerStatus        $status,
+        Customer              $customer,
         UpdateCustomerCommand $command
     ): void {
         $this->factory
@@ -154,9 +154,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
      * @throws \InvalidArgumentException if the IRI is unexpected.
      */
     private function resolveIri(
-        string $iri,
-        CustomerPutDto $dto,
-        CustomerType $type,
+        string         $iri,
+        CustomerPut    $dto,
+        CustomerType   $type,
         CustomerStatus $status
     ): CustomerType|CustomerStatus {
         $mapping = [
@@ -171,9 +171,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function isUpdateValid(
-        object $update,
-        CustomerPutDto $dto,
-        CustomerType $type,
+        object         $update,
+        CustomerPut    $dto,
+        CustomerType   $type,
         CustomerStatus $status
     ): bool {
         $expected = [
@@ -189,9 +189,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
         return get_object_vars($update) === $expected;
     }
 
-    private function createDto(): CustomerPutDto
+    private function createDto(): CustomerPut
     {
-        return new CustomerPutDto(
+        return new CustomerPut(
             initials: $this->faker->name(),
             email: $this->faker->email(),
             phone: $this->faker->phoneNumber(),

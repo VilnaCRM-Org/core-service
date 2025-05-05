@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\CreateStatusCommand;
 use App\Customer\Application\Command\CreateStatusCommandResponse;
-use App\Customer\Application\DTO\StatusCreateDto;
+use App\Customer\Application\DTO\StatusCreate;
 use App\Customer\Application\Factory\CreateStatusFactoryInterface;
 use App\Customer\Application\Processor\CreateStatusProcessor;
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -58,9 +58,9 @@ final class CreateStatusProcessorTest extends UnitTestCase
         $this->assertSame($status, $result);
     }
 
-    private function createDto(): StatusCreateDto
+    private function createDto(): StatusCreate
     {
-        return new StatusCreateDto(
+        return new StatusCreate(
             $this->faker->word()
         );
     }

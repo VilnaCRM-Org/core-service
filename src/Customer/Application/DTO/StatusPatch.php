@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\DTO;
 
-final readonly class TypePutDto
+final readonly class StatusPatch
 {
     public function __construct(
-        public ?string $value = null,
+        public ?string $value,
     ) {
     }
 }

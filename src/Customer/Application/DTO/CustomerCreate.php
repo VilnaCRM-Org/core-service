@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\DTO;
 
-final readonly class CustomerCreateDto
+final readonly class CustomerCreate
 {
     public function __construct(
         public ?string $initials = null,

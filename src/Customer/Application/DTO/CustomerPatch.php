@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Customer\Application\DTO;
 
-final readonly class CustomerPutDto
+final readonly class CustomerPatch
 {
     public function __construct(
         public ?string $initials = null,

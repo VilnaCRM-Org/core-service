@@ -10,12 +10,12 @@ App\Customer\Domain\Entity\Customer:
         - mongodb.range
     ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\Put:
-      input: App\Customer\Application\DTO\CustomerPutDto
+      input: App\Customer\Application\DTO\CustomerPut
       processor: App\Customer\Application\Processor\CustomerPutProcessor
     ApiPlatform\Metadata\Patch:
-      input: App\Customer\Application\DTO\CustomerPatchDto
+      input: App\Customer\Application\DTO\CustomerPatch
       processor: App\Customer\Application\Processor\CustomerPatchProcessor
     ApiPlatform\Metadata\Delete: ~
     ApiPlatform\Metadata\Post:
-      input: App\Customer\Application\DTO\CustomerCreateDto
+      input: App\Customer\Application\DTO\CustomerCreate
       processor: App\Customer\Application\Processor\CreateCustomerProcessor

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\DTO;
 
-use App\Customer\Application\DTO\CustomerPutDto;
+use App\Customer\Application\DTO\CustomerPut;
 use App\Tests\Unit\UnitTestCase;
 
-final class CustomerPutDtoTest extends UnitTestCase
+final class CustomerPutTest extends UnitTestCase
 {
     public function testConstruct(): void
     {
@@ -39,7 +39,7 @@ final class CustomerPutDtoTest extends UnitTestCase
         string $status,
         bool $confirmed,
     ): void {
-        $dto = new CustomerPutDto(
+        $dto = new CustomerPut(
             $initials,
             $email,
             $phone,

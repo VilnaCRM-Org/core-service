@@ -6,13 +6,13 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\TypeCreateDto;
+use App\Customer\Application\DTO\TypeCreate;
 use App\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<TypeCreateDto, CustomerType>
+ * @implements ProcessorInterface<TypeCreate, CustomerType>
  */
 final readonly class CreateTypeProcessor implements ProcessorInterface
 {
@@ -23,7 +23,7 @@ final readonly class CreateTypeProcessor implements ProcessorInterface
     }
 
     /**
-     * @param TypeCreateDto $data
+     * @param TypeCreate $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */

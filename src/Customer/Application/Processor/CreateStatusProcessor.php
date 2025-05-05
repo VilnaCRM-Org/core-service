@@ -6,13 +6,13 @@ namespace App\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\StatusCreateDto;
+use App\Customer\Application\DTO\StatusCreate;
 use App\Customer\Application\Factory\CreateStatusFactoryInterface;
 use App\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<StatusCreateDto, CustomerStatus>
+ * @implements ProcessorInterface<StatusCreate, CustomerStatus>
  */
 final readonly class CreateStatusProcessor implements ProcessorInterface
 {
@@ -23,7 +23,7 @@ final readonly class CreateStatusProcessor implements ProcessorInterface
     }
 
     /**
-     * @param StatusCreateDto $data
+     * @param StatusCreate $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */

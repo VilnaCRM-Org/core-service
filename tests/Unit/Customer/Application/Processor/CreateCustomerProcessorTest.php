@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Application\Command\CreateCustomerCommandResponse;
-use App\Customer\Application\DTO\CustomerCreateDto;
+use App\Customer\Application\DTO\CustomerCreate;
 use App\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Customer\Application\Processor\CreateCustomerProcessor;
 use App\Customer\Domain\Entity\Customer;
@@ -66,8 +66,8 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     }
 
     private function setupIriConverter(
-        CustomerCreateDto $dto,
-        CustomerType $type,
+        CustomerCreate $dto,
+        CustomerType   $type,
         CustomerStatus $status
     ): void {
         $this->iriConverter->expects($this->exactly(2))
@@ -86,11 +86,11 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     }
 
     private function setupFactoryAndCommandBus(
-        CustomerCreateDto $dto,
-        CustomerType $type,
-        CustomerStatus $status,
+        CustomerCreate        $dto,
+        CustomerType          $type,
+        CustomerStatus        $status,
         CreateCustomerCommand $command,
-        Customer $customer
+        Customer              $customer
     ): void {
         $this->factory->expects($this->once())
             ->method('create')
@@ -114,9 +114,9 @@ final class CreateCustomerProcessorTest extends UnitTestCase
             ->willReturn(new CreateCustomerCommandResponse($customer));
     }
 
-    private function createDto(): CustomerCreateDto
+    private function createDto(): CustomerCreate
     {
-        return new CustomerCreateDto(
+        return new CustomerCreate(
             $this->faker->name(),
             $this->faker->email(),
             $this->faker->phoneNumber(),

@@ -7,13 +7,13 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerCreateDto;
+use App\Customer\Application\DTO\CustomerCreate;
 use App\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 /**
- * @implements ProcessorInterface<CustomerCreateDto, Customer>
+ * @implements ProcessorInterface<CustomerCreate, Customer>
  */
 final readonly class CreateCustomerProcessor implements ProcessorInterface
 {
@@ -25,7 +25,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
     }
 
     /**
-     * @param CustomerCreateDto $data
+     * @param CustomerCreate $data
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */

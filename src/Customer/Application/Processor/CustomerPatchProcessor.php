@@ -7,7 +7,7 @@ namespace App\Customer\Application\Processor;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Customer\Application\DTO\CustomerPatchDto;
+use App\Customer\Application\DTO\CustomerPatch;
 use App\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Entity\CustomerStatus;
@@ -19,7 +19,7 @@ use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
 /**
- * @implements ProcessorInterface<CustomerPatchDto, Customer>
+ * @implements ProcessorInterface<CustomerPatch, Customer>
  */
 final readonly class CustomerPatchProcessor implements ProcessorInterface
 {
@@ -33,7 +33,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     /**
-     * @param CustomerPatchDto       $data
+     * @param CustomerPatch       $data
      * @param array<string,string>   $context
      * @param array<string,string>   $uriVariables
      */
@@ -61,8 +61,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function prepareCustomerUpdate(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): CustomerUpdate {
         $newInitials = $this->updateInitials($data, $customer);
         $newEmail = $this->updateEmail($data, $customer);
@@ -84,8 +84,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updateInitials(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): string {
         return $this->getNewValue(
             $data->initials,
@@ -94,8 +94,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updateEmail(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): string {
         return $this->getNewValue(
             $data->email,
@@ -104,8 +104,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updatePhone(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): string {
         return $this->getNewValue(
             $data->phone,
@@ -114,8 +114,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updateLeadSource(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): string {
         return $this->getNewValue(
             $data->leadSource,
@@ -124,8 +124,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updateType(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): CustomerType {
         return $data->type
             ? $this->getCustomerType($data->type)
@@ -133,8 +133,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     }
 
     private function updateStatus(
-        CustomerPatchDto $data,
-        Customer $customer
+        CustomerPatch $data,
+        Customer      $customer
     ): CustomerStatus {
         return $data->status
             ? $this->getCustomerStatus($data->status)
