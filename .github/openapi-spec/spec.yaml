@@ -3445,6 +3445,20 @@ paths:
               value: Prospect
         required: true
       deprecated: false
+  /api/health:
+    get:
+      operationId: api_health_get
+      tags:
+        - HealthCheck
+      responses:
+        '204':
+          description: 'Health check passed with no content to return.'
+        '500':
+          description: 'Health check failed.'
+      summary: 'Retrieves a HealthCheck resource.'
+      description: 'Retrieves a HealthCheck resource.'
+      parameters: []
+      deprecated: false
 components:
   schemas:
     ConstraintViolation-json:
@@ -3834,6 +3848,34 @@ components:
           readOnly: true
           description: 'A URI reference that identifies the problem type'
           type: string
+    HealthCheck.jsonld:
+      type: object
+      description: ''
+      deprecated: false
+      properties:
+        '@context':
+          readOnly: true
+          oneOf:
+            -
+              type: string
+            -
+              type: object
+              properties:
+                '@vocab':
+                  type: string
+                hydra:
+                  type: string
+                  enum: ['http://www.w3.org/ns/hydra/core#']
+              required:
+                - '@vocab'
+                - hydra
+              additionalProperties: true
+        '@id':
+          readOnly: true
+          type: string
+        '@type':
+          readOnly: true
+          type: string
     UlidInterface.jsonld:
       type: object
       description: ''
@@ -3904,4 +3946,6 @@ tags:
     name: CustomerStatus
   -
     name: CustomerType
+  -
+    name: HealthCheck
 webhooks: {  }
