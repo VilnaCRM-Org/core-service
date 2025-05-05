@@ -1,0 +1,22 @@
+App\Customer\Domain\Entity\CustomerType:
+  normalizationContext:
+    groups: ['output']
+  paginationViaCursor:
+    - { field: 'ulid', direction: 'DESC' }
+  operations:
+    ApiPlatform\Metadata\GetCollection:
+      filters:
+        - customer.mongodb.type.order
+        - customer.mongodb.type.partial_search
+        - mongodb.range
+    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Put:
+      input: App\Customer\Application\DTO\TypePutDto
+      processor: App\Customer\Application\Processor\CustomerTypePutProcessor
+    ApiPlatform\Metadata\Patch:
+      input: App\Customer\Application\DTO\TypePatchDto
+      processor: App\Customer\Application\Processor\CustomerTypePatchProcessor
+    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Post:
+      input: App\Customer\Application\DTO\TypeCreateDto
+      processor: App\Customer\Application\Processor\CreateTypeProcessor
