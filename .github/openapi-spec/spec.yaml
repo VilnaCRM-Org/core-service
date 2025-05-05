@@ -3497,7 +3497,7 @@ components:
           type:
             - string
             - 'null'
-    Customer.CustomerCreateDto.jsonld:
+    Customer.CustomerCreate.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3544,7 +3544,7 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.CustomerPatchDto:
+    Customer.CustomerPatch:
       type: object
       description: ''
       deprecated: false
@@ -3584,7 +3584,7 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.CustomerPutDto.jsonld:
+    Customer.CustomerPut.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3685,7 +3685,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-    CustomerStatus.StatusCreateDto.jsonld:
+    CustomerStatus.StatusCreate.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3697,7 +3697,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.StatusPatchDto:
+    CustomerStatus.StatusPatch:
       type: object
       description: ''
       deprecated: false
@@ -3707,7 +3707,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.StatusPutDto.jsonld:
+    CustomerStatus.StatusPut.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3751,7 +3751,7 @@ components:
           type: string
         ulid:
           type: string
-    CustomerType.TypeCreateDto.jsonld:
+    CustomerType.TypeCreate.jsonld:
       type: object
       description: ''
       deprecated: false
@@ -3763,7 +3763,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerType.TypePatchDto:
+    CustomerType.TypePatch:
       type: object
       description: ''
       deprecated: false
@@ -3773,7 +3773,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerType.TypePutDto.jsonld:
+    CustomerType.TypePut.jsonld:
       type: object
       description: ''
       deprecated: false
