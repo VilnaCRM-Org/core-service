@@ -55,7 +55,7 @@
     },
     "sort-packages": true,
     "platform": {
-      "php": "8.3.12",
+      "php": "8.4.0",
       "ext-mongodb": "1.21.1"
     }
   },
