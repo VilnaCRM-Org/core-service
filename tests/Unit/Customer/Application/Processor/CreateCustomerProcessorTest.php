@@ -67,7 +67,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 
     private function setupIriConverter(
         CustomerCreate $dto,
-        CustomerType   $type,
+        CustomerType $type,
         CustomerStatus $status
     ): void {
         $this->iriConverter->expects($this->exactly(2))
@@ -86,11 +86,11 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     }
 
     private function setupFactoryAndCommandBus(
-        CustomerCreate        $dto,
-        CustomerType          $type,
-        CustomerStatus        $status,
+        CustomerCreate $dto,
+        CustomerType $type,
+        CustomerStatus $status,
         CreateCustomerCommand $command,
-        Customer              $customer
+        Customer $customer
     ): void {
         $this->factory->expects($this->once())
             ->method('create')

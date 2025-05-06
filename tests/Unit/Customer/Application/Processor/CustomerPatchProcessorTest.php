@@ -157,8 +157,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     private function setupIriConverter(
-        CustomerPatch  $dto,
-        CustomerType   $type,
+        CustomerPatch $dto,
+        CustomerType $type,
         CustomerStatus $status
     ): void {
         $this->iriConverter->expects($this->atLeastOnce())
@@ -168,9 +168,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     private function resolveIri(
-        string         $iri,
-        CustomerPatch  $dto,
-        CustomerType   $type,
+        string $iri,
+        CustomerPatch $dto,
+        CustomerType $type,
         CustomerStatus $status
     ): CustomerType|CustomerStatus {
         $mapping = array_filter(
@@ -186,11 +186,11 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     private function isUpdateValid(
-        object         $update,
-        CustomerPatch  $dto,
-        CustomerType   $type,
+        object $update,
+        CustomerPatch $dto,
+        CustomerType $type,
         CustomerStatus $status,
-        Customer       $customer
+        Customer $customer
     ): bool {
         $expected = [
             'newInitials' => $dto->initials ?? $customer->getInitials(),
@@ -205,10 +205,10 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     private function setupDependencies(
-        CustomerPatch         $dto,
-        CustomerType          $type,
-        CustomerStatus        $status,
-        Customer              $customer,
+        CustomerPatch $dto,
+        CustomerType $type,
+        CustomerStatus $status,
+        Customer $customer,
         UpdateCustomerCommand $command
     ): void {
         $this->factory->expects($this->once())
@@ -290,7 +290,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
      */
     private function prepareProcessPreserveData(
         CustomerPatch $dto,
-        array         $exData
+        array $exData
     ): array {
         [$operation, $uriVars, $ulid] = $this->createOperationContext();
         $exType = $this->createMock(CustomerType::class);
@@ -324,10 +324,10 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     private function expectUpdateCommand(
-        CustomerPatch  $dto,
-        CustomerType   $type,
+        CustomerPatch $dto,
+        CustomerType $type,
         CustomerStatus $status,
-        Customer       $customer
+        Customer $customer
     ): UpdateCustomerCommand {
         $command = $this->createMock(UpdateCustomerCommand::class);
         $this->factory->expects($this->once())

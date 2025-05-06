@@ -27,7 +27,7 @@ final class CustomerStatusPatchTest extends UnitTestCase
 
     private function assertDto(
         StatusPatch $dto,
-        ?string     $value
+        ?string $value
     ): void {
         $this->assertEquals($value, $dto->value);
     }

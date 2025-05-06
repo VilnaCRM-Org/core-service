@@ -107,8 +107,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function setupIriConverter(
-        CustomerPut    $dto,
-        CustomerType   $type,
+        CustomerPut $dto,
+        CustomerType $type,
         CustomerStatus $status
     ): void {
         $this->iriConverter
@@ -120,10 +120,10 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function setupFactoryAndCommandBus(
-        CustomerPut           $dto,
-        CustomerType          $type,
-        CustomerStatus        $status,
-        Customer              $customer,
+        CustomerPut $dto,
+        CustomerType $type,
+        CustomerStatus $status,
+        Customer $customer,
         UpdateCustomerCommand $command
     ): void {
         $this->factory
@@ -154,9 +154,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
      * @throws \InvalidArgumentException if the IRI is unexpected.
      */
     private function resolveIri(
-        string         $iri,
-        CustomerPut    $dto,
-        CustomerType   $type,
+        string $iri,
+        CustomerPut $dto,
+        CustomerType $type,
         CustomerStatus $status
     ): CustomerType|CustomerStatus {
         $mapping = [
@@ -171,9 +171,9 @@ final class CustomerPutProcessorTest extends UnitTestCase
     }
 
     private function isUpdateValid(
-        object         $update,
-        CustomerPut    $dto,
-        CustomerType   $type,
+        object $update,
+        CustomerPut $dto,
+        CustomerType $type,
         CustomerStatus $status
     ): bool {
         $expected = [

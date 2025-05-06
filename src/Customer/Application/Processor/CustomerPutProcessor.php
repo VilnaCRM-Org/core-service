@@ -66,10 +66,10 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     }
 
     private function executeUpdateCommand(
-        Customer    $customer,
+        Customer $customer,
         CustomerPut $data,
-        object      $customerType,
-        object      $customerStatus
+        object $customerType,
+        object $customerStatus
     ): void {
         $customerUpdate = new CustomerUpdate(
             $data->initials,
