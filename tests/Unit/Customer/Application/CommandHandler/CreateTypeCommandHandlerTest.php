@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\CreateTypeCommand;
-use App\Customer\Application\Command\CreateTypeCommandResponse;
-use App\Customer\Application\CommandHandler\CreateTypeCommandHandler;
-use App\Customer\Application\Transformer\CreateTypeTransformer;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Core\Customer\Application\Command\CreateTypeCommand;
+use App\Core\Customer\Application\Command\CreateTypeCommandResponse;
+use App\Core\Customer\Application\CommandHandler\CreateTypeCommandHandler;
+use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

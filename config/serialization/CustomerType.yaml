@@ -1,4 +1,4 @@
-App\Customer\Domain\Entity\CustomerType:
+App\Core\Customer\Domain\Entity\CustomerType:
   attributes:
     ulid:
       groups: ['output']

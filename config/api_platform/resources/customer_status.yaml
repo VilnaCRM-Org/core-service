@@ -1,4 +1,4 @@
-App\Customer\Domain\Entity\CustomerStatus:
+App\Core\Customer\Domain\Entity\CustomerStatus:
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
@@ -9,12 +9,12 @@ App\Customer\Domain\Entity\CustomerStatus:
         - mongodb.range
     ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\Put:
-      input: App\Customer\Application\DTO\StatusPut
-      processor: App\Customer\Application\Processor\CustomerStatusPutProcessor
+      input: App\Core\Customer\Application\DTO\StatusPut
+      processor: App\Core\Customer\Application\Processor\CustomerStatusPutProcessor
     ApiPlatform\Metadata\Patch:
-      input: App\Customer\Application\DTO\StatusPatch
-      processor: App\Customer\Application\Processor\CustomerStatusPatchProcessor
+      input: App\Core\Customer\Application\DTO\StatusPatch
+      processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
     ApiPlatform\Metadata\Delete: ~
     ApiPlatform\Metadata\Post:
-      input: App\Customer\Application\DTO\StatusCreate
-      processor: App\Customer\Application\Processor\CreateStatusProcessor
+      input: App\Core\Customer\Application\DTO\StatusCreate
+      processor: App\Core\Customer\Application\Processor\CreateStatusProcessor

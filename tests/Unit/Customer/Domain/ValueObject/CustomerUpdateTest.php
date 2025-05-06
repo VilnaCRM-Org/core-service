@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Domain\ValueObject;
 
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;

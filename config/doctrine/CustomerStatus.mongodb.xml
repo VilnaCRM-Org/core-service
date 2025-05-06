@@ -6,7 +6,7 @@
 >
 
     <document
-    name="App\Customer\Domain\Entity\CustomerStatus"
+    name="App\Core\Customer\Domain\Entity\CustomerStatus"
     db="app"
     collection="customer_statuses"
   >

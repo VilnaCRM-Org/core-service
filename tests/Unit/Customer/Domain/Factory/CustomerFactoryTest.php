@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Domain\Factory;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Factory\CustomerFactory;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\CustomerFactory;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use App\Tests\Unit\UnitTestCase;
 

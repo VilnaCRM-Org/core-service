@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Infrastructure\Factory;
 
-use App\Customer\Application\Command\UpdateCustomerTypeCommand;
-use App\Customer\Application\Factory\UpdateCustomerTypeCommandFactoryInterface;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\ValueObject\CustomerTypeUpdate;
-use App\Customer\Infrastructure\Factory\UpdateCustomerTypeCommandFactory;
+use App\Core\Customer\Application\Command\UpdateCustomerTypeCommand;
+use App\Core\Customer\Application\Factory\UpdateTypeCommandFactoryInterface;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
+use App\Core\Customer\Infrastructure\Factory\UpdateTypeCommandFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class UpdateCustomerTypeCommandFactoryTest extends UnitTestCase
 {
-    private UpdateCustomerTypeCommandFactoryInterface $factory;
+    private UpdateTypeCommandFactoryInterface $factory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->factory = new UpdateCustomerTypeCommandFactory();
+        $this->factory = new UpdateTypeCommandFactory();
     }
 
     public function testCreateAssignsCorrectPropertiesToCommand(): void

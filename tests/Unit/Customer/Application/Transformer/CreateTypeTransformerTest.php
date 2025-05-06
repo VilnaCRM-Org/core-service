@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Customer\Application\Command\CreateTypeCommand;
-use App\Customer\Application\Transformer\CreateTypeTransformer;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Factory\TypeFactoryInterface;
+use App\Core\Customer\Application\Command\CreateTypeCommand;
+use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;

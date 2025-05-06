@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Domain\Entity;
 
-use App\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;

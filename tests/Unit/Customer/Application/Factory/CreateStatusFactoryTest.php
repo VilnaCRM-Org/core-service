@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Factory;
 
-use App\Customer\Application\Command\CreateStatusCommand;
-use App\Customer\Application\Factory\CreateStatusFactory;
+use App\Core\Customer\Application\Command\CreateStatusCommand;
+use App\Core\Customer\Application\Factory\CreateStatusFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateStatusFactoryTest extends UnitTestCase

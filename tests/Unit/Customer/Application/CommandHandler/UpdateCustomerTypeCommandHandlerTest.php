@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\UpdateCustomerTypeCommand;
-use App\Customer\Application\CommandHandler\UpdateCustomerTypeCommandHandler;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Repository\TypeRepositoryInterface;
-use App\Customer\Domain\ValueObject\CustomerTypeUpdate;
+use App\Core\Customer\Application\Command\UpdateCustomerTypeCommand;
+use App\Core\Customer\Application\CommandHandler\UpdateTypeCommandHandler;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,14 +16,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 final class UpdateCustomerTypeCommandHandlerTest extends UnitTestCase
 {
     private TypeRepositoryInterface|MockObject $repository;
-    private UpdateCustomerTypeCommandHandler $handler;
+    private UpdateTypeCommandHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
-        $this->handler = new UpdateCustomerTypeCommandHandler(
+        $this->handler = new UpdateTypeCommandHandler(
             $this->repository
         );
     }

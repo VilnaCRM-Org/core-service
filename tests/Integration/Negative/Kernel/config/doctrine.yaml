@@ -15,5 +15,5 @@ doctrine_mongodb:
           is_bundle: false
           type: xml
           dir: '%kernel.project_dir%/config/doctrine'
-          prefix: 'App\Customer\Domain\Entity'
+          prefix: 'App\Core\Customer\Domain\Entity'
           alias: App

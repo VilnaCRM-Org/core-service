@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Integration;
 
 use ApiPlatform\Symfony\Bundle\Test\Client;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
 
 final class CustomerApiTest extends BaseIntegrationTest
 {

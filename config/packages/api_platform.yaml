@@ -23,7 +23,7 @@ api_platform:
 
   # Tell API Platform where your domain classes live
   resource_class_directories:
-    - '%kernel.project_dir%/src/Customer/Domain/Entity'
+    - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'
     - '%kernel.project_dir%/src/Internal/HealthCheck/Domain/ValueObject'
 
   # <<< Add this section to load all YAML files in your custom resources folder

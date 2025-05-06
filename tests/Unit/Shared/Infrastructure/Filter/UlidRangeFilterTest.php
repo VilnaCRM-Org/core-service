@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
 use ApiPlatform\Metadata\Operation;
-use App\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\UlidRangeFilter;
 use App\Tests\Unit\UnitTestCase;

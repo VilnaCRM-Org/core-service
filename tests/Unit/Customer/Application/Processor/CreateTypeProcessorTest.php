@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
-use App\Customer\Application\Command\CreateTypeCommand;
-use App\Customer\Application\Command\CreateTypeCommandResponse;
-use App\Customer\Application\DTO\TypeCreate;
-use App\Customer\Application\Factory\CreateTypeFactoryInterface;
-use App\Customer\Application\Processor\CreateTypeProcessor;
-use App\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Application\Command\CreateTypeCommand;
+use App\Core\Customer\Application\Command\CreateTypeCommandResponse;
+use App\Core\Customer\Application\DTO\TypeCreate;
+use App\Core\Customer\Application\Factory\CreateTypeFactoryInterface;
+use App\Core\Customer\Application\Processor\CreateTypeProcessor;
+use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;

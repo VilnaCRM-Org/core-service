@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat\CustomerContext;
 
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Factory\CustomerFactoryInterface;
-use App\Customer\Domain\Factory\StatusFactoryInterface;
-use App\Customer\Domain\Factory\TypeFactoryInterface;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Customer\Domain\Repository\StatusRepositoryInterface;
-use App\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
+use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
+use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
+use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;

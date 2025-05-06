@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
-use App\Customer\Application\Command\CreateStatusCommand;
-use App\Customer\Application\Command\CreateStatusCommandResponse;
-use App\Customer\Application\DTO\StatusCreate;
-use App\Customer\Application\Factory\CreateStatusFactoryInterface;
-use App\Customer\Application\Processor\CreateStatusProcessor;
-use App\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Application\Command\CreateStatusCommand;
+use App\Core\Customer\Application\Command\CreateStatusCommandResponse;
+use App\Core\Customer\Application\DTO\StatusCreate;
+use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
+use App\Core\Customer\Application\Processor\CreateStatusProcessor;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;

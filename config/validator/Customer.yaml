@@ -1,4 +1,4 @@
-App\Customer\Application\DTO\CustomerCreate:
+App\Core\Customer\Application\DTO\CustomerCreate:
   properties:
     initials:
       - NotBlank: { message: 'not.blank' }
@@ -26,7 +26,7 @@ App\Customer\Application\DTO\CustomerCreate:
     confirmed:
       - Type: { type: 'bool', message: 'This value should be a boolean.' }
 
-App\Customer\Application\DTO\CustomerPatch:
+App\Core\Customer\Application\DTO\CustomerPatch:
   properties:
     initials:
       - Length:
@@ -48,7 +48,7 @@ App\Customer\Application\DTO\CustomerPatch:
           type: 'bool'
           message: 'This value should be a boolean.'
 
-App\Customer\Application\DTO\CustomerPut:
+App\Core\Customer\Application\DTO\CustomerPut:
   properties:
     initials:
       - NotBlank: { message: 'not.blank' }

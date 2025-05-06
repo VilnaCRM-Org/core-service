@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Repository\MongoCustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Command;
 
-use App\Customer\Application\Command\UpdateCustomerStatusCommand;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
+use App\Core\Customer\Application\Command\UpdateCustomerStatusCommand;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

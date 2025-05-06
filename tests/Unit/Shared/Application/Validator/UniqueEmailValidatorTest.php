@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Validator;
 
-use App\Customer\Domain\Entity\CustomerInterface;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Factory\CustomerFactory;
-use App\Customer\Domain\Factory\CustomerFactoryInterface;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Entity\CustomerInterface;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\CustomerFactory;
+use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Application\Validator\UniqueEmail;
 use App\Shared\Application\Validator\UniqueEmailValidator;
 use App\Shared\Infrastructure\Factory\UlidFactory;

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\UpdateCustomerCommand;
-use App\Customer\Application\CommandHandler\UpdateCustomerCommandHandler;
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Core\Customer\Application\Command\UpdateCustomerCommand;
+use App\Core\Customer\Application\CommandHandler\UpdateCustomerCommandHandler;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;

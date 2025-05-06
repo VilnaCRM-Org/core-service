@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
-use App\Customer\Application\Command\UpdateCustomerTypeCommand;
-use App\Customer\Application\DTO\TypePut;
-use App\Customer\Application\Factory\UpdateCustomerTypeCommandFactoryInterface;
-use App\Customer\Application\Processor\CustomerTypePutProcessor;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Exception\CustomerTypeNotFoundException;
-use App\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Core\Customer\Application\Command\UpdateCustomerTypeCommand;
+use App\Core\Customer\Application\DTO\TypePut;
+use App\Core\Customer\Application\Factory\UpdateTypeCommandFactoryInterface;
+use App\Core\Customer\Application\Processor\CustomerTypePutProcessor;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
+use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
@@ -22,7 +22,7 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
 {
     private TypeRepositoryInterface|MockObject $repository;
     private CommandBusInterface|MockObject $commandBus;
-    private UpdateCustomerTypeCommandFactoryInterface|MockObject $factory;
+    private UpdateTypeCommandFactoryInterface|MockObject $factory;
     private UlidFactory|MockObject $ulidFactory;
     private CustomerTypePutProcessor $processor;
 
@@ -33,7 +33,7 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this
-            ->createMock(UpdateCustomerTypeCommandFactoryInterface::class);
+            ->createMock(UpdateTypeCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
 
         $this->processor = new CustomerTypePutProcessor(

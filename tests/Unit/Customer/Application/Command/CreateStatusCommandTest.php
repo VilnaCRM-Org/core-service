@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Command;
 
-use App\Customer\Application\Command\CreateStatusCommand;
+use App\Core\Customer\Application\Command\CreateStatusCommand;
 use App\Shared\Domain\Bus\Command\CommandResponseInterface;
 use App\Tests\Unit\UnitTestCase;
 

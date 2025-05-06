@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\DTO;
 
-use App\Customer\Application\DTO\CustomerPut;
+use App\Core\Customer\Application\DTO\CustomerPut;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerPutTest extends UnitTestCase

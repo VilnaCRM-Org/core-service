@@ -1,17 +1,17 @@
-App\Customer\Application\DTO\TypePatch:
+App\Core\Customer\Application\DTO\TypePatch:
   properties:
     value:
       - Length:
           max: 255
 
-App\Customer\Application\DTO\TypePut:
+App\Core\Customer\Application\DTO\TypePut:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
 
-App\Customer\Application\DTO\TypeCreate:
+App\Core\Customer\Application\DTO\TypeCreate:
   properties:
     value:
       - NotBlank: { message: 'not.blank' }

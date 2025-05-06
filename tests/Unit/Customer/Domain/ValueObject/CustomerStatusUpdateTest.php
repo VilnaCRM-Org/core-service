@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Domain\ValueObject;
 
-use App\Customer\Domain\ValueObject\CustomerStatusUpdate;
+use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerStatusUpdateTest extends UnitTestCase

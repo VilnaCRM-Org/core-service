@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Customer\Application\Command\CreateCustomerCommand;
-use App\Customer\Application\Transformer\CreateCustomerTransformer;
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerInterface;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\Factory\CustomerFactoryInterface;
+use App\Core\Customer\Application\Command\CreateCustomerCommand;
+use App\Core\Customer\Application\Transformer\CreateCustomerTransformer;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerInterface;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;

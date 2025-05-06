@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Command;
 
-use App\Customer\Application\Command\CreateStatusCommandResponse;
-use App\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Application\Command\CreateStatusCommandResponse;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateStatusCommandResponseTest extends UnitTestCase

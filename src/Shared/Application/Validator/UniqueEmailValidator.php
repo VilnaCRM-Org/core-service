@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Validator;
 
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Contracts\Translation\TranslatorInterface;

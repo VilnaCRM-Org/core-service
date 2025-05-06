@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Customer\Application\Command\CreateStatusCommand;
-use App\Customer\Application\Transformer\CreateStatusTransformer;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Factory\StatusFactoryInterface;
+use App\Core\Customer\Application\Command\CreateStatusCommand;
+use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;

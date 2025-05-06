@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\CreateStatusCommand;
-use App\Customer\Application\Command\CreateStatusCommandResponse;
-use App\Customer\Application\CommandHandler\CreateStatusCommandHandler;
-use App\Customer\Application\Transformer\CreateStatusTransformer;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Repository\StatusRepositoryInterface;
+use App\Core\Customer\Application\Command\CreateStatusCommand;
+use App\Core\Customer\Application\Command\CreateStatusCommandResponse;
+use App\Core\Customer\Application\CommandHandler\CreateStatusCommandHandler;
+use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Infrastructure\Factory;
 
-use App\Customer\Application\Command\UpdateCustomerCommand;
-use App\Customer\Application\Factory\UpdateCustomerCommandFactory;
-use App\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerStatus;
-use App\Customer\Domain\Entity\CustomerType;
-use App\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Core\Customer\Application\Command\UpdateCustomerCommand;
+use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactory;
+use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Tests\Unit\UnitTestCase;
 
 final class UpdateCustomerCommandFactoryTest extends UnitTestCase

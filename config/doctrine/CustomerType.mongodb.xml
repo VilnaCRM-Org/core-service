@@ -5,7 +5,7 @@
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd"
 >
 
-    <document name="App\Customer\Domain\Entity\CustomerType" db="app" collection="customer_types">
+    <document name="App\Core\Customer\Domain\Entity\CustomerType" db="app" collection="customer_types">
 
         <id field-name="ulid" type="ulid" strategy="NONE" />
 
