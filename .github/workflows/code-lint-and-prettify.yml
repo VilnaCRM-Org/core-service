@@ -23,8 +23,9 @@ jobs:
 
       - name: Install Prettier XML plugin
         run: npm install --save-dev prettier @prettier/plugin-xml
+
       - name: Format XML files
-        run: npx prettier --plugin=@prettier/plugin-xml --write "'**/*.xml'"
+        run: npx prettier --ignore-unknown --plugin=@prettier/plugin-xml --write "**/*.xml"
 
       - name: Run Super-Linter
         continue-on-error: true
