@@ -5,40 +5,23 @@ declare(strict_types=1);
 namespace App\Customer\Infrastructure\Repository;
 
 use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Entity\CustomerInterface;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
-use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
-use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
- * @extends ServiceDocumentRepository<Customer>
+ * @extends BaseRepository<Customer>
  */
-final class MongoCustomerRepository extends ServiceDocumentRepository implements
+final class MongoCustomerRepository extends BaseRepository implements
     CustomerRepositoryInterface
 {
-    private DocumentManager $documentManager;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Customer::class);
         $this->documentManager = $this->getDocumentManager();
     }
 
-    public function save(Customer $customer): void
+    public function findByEmail(string $email): ?Customer
     {
-        $this->documentManager->persist($customer);
-        $this->documentManager->flush();
-    }
-
-    public function delete(Customer $customer): void
-    {
-        $this->documentManager->remove($customer);
-        $this->documentManager->flush();
-    }
-
-    public function findByEmail(string $email): ?CustomerInterface
-    {
-        return $this->findOneBy(['email' => $email]);
+        return $this->findOneByCriteria(['email' => $email]);
     }
 }

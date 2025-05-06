@@ -7,41 +7,22 @@ namespace App\Customer\Infrastructure\Repository;
 use App\Customer\Domain\Entity\CustomerType;
 use App\Customer\Domain\Repository\TypeRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
-use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
-use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
- * @extends ServiceDocumentRepository<CustomerType>
+ * @extends BaseRepository<CustomerType>
  */
-final class MongoTypeRepository extends ServiceDocumentRepository implements
+final class MongoTypeRepository extends BaseRepository implements
     TypeRepositoryInterface
 {
-    private DocumentManager $documentManager;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CustomerType::class);
         $this->documentManager = $this->getDocumentManager();
     }
 
-    /**
-     * @param CustomerType $customerType
-     */
-    public function save(object $customerType): void
-    {
-        $this->documentManager->persist($customerType);
-        $this->documentManager->flush();
-    }
-
-    public function delete(CustomerType $customerType): void
-    {
-        $this->documentManager->remove($customerType);
-        $this->documentManager->flush();
-    }
-
     public function deleteByValue(string $value): void
     {
-        $customerType = $this->findOneBy(['value' => $value]);
+        $customerType = $this->findOneByCriteria(['value' => $value]);
         $this->documentManager->remove($customerType);
         $this->documentManager->flush();
     }
