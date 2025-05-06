@@ -1,32 +1,36 @@
-<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
-                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
-                                            http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+<doctrine-mongo-mapping
+  xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                                            http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd"
+>
 
-    <document name="App\Customer\Domain\Entity\Customer"
-              db="app"
-              collection="customers">
+    <document name="App\Customer\Domain\Entity\Customer" db="app" collection="customers">
 
-        <id field-name="ulid" type="ulid" strategy="NONE"/>
+        <id field-name="ulid" type="ulid" strategy="NONE" />
 
-        <field field-name="initials" type="string"/>
-        <field field-name="email"    type="string"/>
-        <field field-name="phone"    type="string"/>
-        <field field-name="leadSource" type="string"/>
-        <field field-name="createdAt"  type="date"/>
-        <field field-name="updatedAt"  type="date"/>
-        <field field-name="confirmed"  type="boolean"/>
+        <field field-name="initials" type="string" />
+        <field field-name="email" type="string" />
+        <field field-name="phone" type="string" />
+        <field field-name="leadSource" type="string" />
+        <field field-name="createdAt" type="date" />
+        <field field-name="updatedAt" type="date" />
+        <field field-name="confirmed" type="boolean" />
 
-        <reference-one target-document="App\Customer\Domain\Entity\CustomerStatus"
-                       field="status"
-                       store-as="id"/>
-        <reference-one target-document="App\Customer\Domain\Entity\CustomerType"
-                       field="type"
-                       store-as="id"/>
+        <reference-one
+      target-document="App\Customer\Domain\Entity\CustomerStatus"
+      field="status"
+      store-as="id"
+    />
+        <reference-one
+      target-document="App\Customer\Domain\Entity\CustomerType"
+      field="type"
+      store-as="id"
+    />
 
         <indexes>
             <index unique="true">
-                <key name="email"/>
+                <key name="email" />
             </index>
         </indexes>
     </document>
