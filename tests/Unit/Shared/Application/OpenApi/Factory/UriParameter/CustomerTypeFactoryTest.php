@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
+use App\Core\Customer\Application\OpenApi\UriParameter\CustomerTypeFactory;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
-use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerTypeFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerTypeFactoryTest extends UnitTestCase

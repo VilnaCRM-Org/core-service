@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Core\Customer\Application\OpenApi\Request\Customer\UpdateFactory;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class UpdateFactoryTest extends UnitTestCase

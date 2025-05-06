@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Type;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Core\Customer\Application\OpenApi\Request\Type\TypeCreateFactory;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\Type\TypeCreateFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class TypeCreateFactoryTest extends UnitTestCase
