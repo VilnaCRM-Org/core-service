@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\TypeCreate;
 use App\Core\Customer\Application\Factory\CreateTypeFactoryInterface;
+use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -18,7 +19,8 @@ final readonly class CreateTypeProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateTypeFactoryInterface $createTypeCommandFactory
+        private CreateTypeFactoryInterface $createTypeCommandFactory,
+        private CreateTypeTransformer $transformer,
     ) {
     }
 
@@ -33,11 +35,13 @@ final readonly class CreateTypeProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerType {
+        $customerType = $this->transformer->transform($data->value);
         $command = $this->createTypeCommandFactory->create(
-            $data->value
+            $customerType
         );
+
         $this->commandBus->dispatch($command);
 
-        return $command->getResponse()->customerType;
+        return $customerType;
     }
 }

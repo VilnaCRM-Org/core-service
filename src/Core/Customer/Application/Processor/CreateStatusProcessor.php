@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\StatusCreate;
 use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
+use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -18,7 +19,8 @@ final readonly class CreateStatusProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateStatusFactoryInterface $statusCommandFactory
+        private CreateStatusFactoryInterface $statusCommandFactory,
+        private CreateStatusTransformer $transformer,
     ) {
     }
 
@@ -31,13 +33,15 @@ final readonly class CreateStatusProcessor implements ProcessorInterface
         mixed $data,
         Operation $operation,
         array $uriVariables = [],
-        array $context = []
+        array $context = [],
     ): CustomerStatus {
+        $customerStatus = $this->transformer->transform($data->value);
         $command = $this->statusCommandFactory->create(
-            $data->value
+            $customerStatus
         );
+
         $this->commandBus->dispatch($command);
 
-        return $command->getResponse()->customerStatus;
+        return $customerStatus;
     }
 }

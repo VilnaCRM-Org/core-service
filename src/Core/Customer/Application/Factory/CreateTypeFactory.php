@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Command\CreateTypeCommand;
+use App\Core\Customer\Domain\Entity\CustomerType;
 
 final class CreateTypeFactory implements CreateTypeFactoryInterface
 {
-    public function create(string $value): CreateTypeCommand
+    public function create(CustomerType $type): CreateTypeCommand
     {
-        return new CreateTypeCommand($value);
+        return new CreateTypeCommand($type);
     }
 }

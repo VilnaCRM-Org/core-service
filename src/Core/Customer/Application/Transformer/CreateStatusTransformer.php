@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Command\CreateStatusCommand;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
@@ -20,10 +19,10 @@ final class CreateStatusTransformer
     }
 
     public function transform(
-        CreateStatusCommand $command
+        string $value
     ): CustomerStatus {
         return $this->statusFactory->create(
-            $command->value,
+            $value,
             $this->transformer->transformFromSymfonyUlid(
                 $this->ulidFactory->create()
             )

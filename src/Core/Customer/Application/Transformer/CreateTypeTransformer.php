@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Command\CreateTypeCommand;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
@@ -20,10 +19,10 @@ final class CreateTypeTransformer
     }
 
     public function transform(
-        CreateTypeCommand $command
+        string $value
     ): CustomerType {
         return $this->typeFactory->create(
-            $command->value,
+            $value,
             $this->transformer->transformFromSymfonyUlid(
                 $this->ulidFactory->create()
             )
