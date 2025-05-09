@@ -108,14 +108,13 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     private function testFactoryAndDispatchAreCalled(
         MockObject|Customer $customerEntity
     ): void {
-        $command = $this->createMock(CreateCustomerCommand::class);
+        $command = new CreateCustomerCommand($customerEntity);
         $this->factory
             ->expects(self::once())
             ->method('create')
             ->with($customerEntity)
             ->willReturn($command);
 
-        $command->customer = $customerEntity;
 
         $this->commandBus
             ->expects(self::once())
