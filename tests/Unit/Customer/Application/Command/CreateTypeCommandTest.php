@@ -12,13 +12,10 @@ final class CreateTypeCommandTest extends UnitTestCase
 {
     public function testConstructorAcceptsTypeEntity(): void
     {
-        // Arrange: create a mock CustomerType
         $type = $this->createMock(CustomerType::class);
 
-        // Act: construct the command with the entity
         $command = new CreateTypeCommand($type);
 
-        // Assert: it holds exactly that same CustomerType
         $this->assertInstanceOf(CreateTypeCommand::class, $command);
         $this->assertSame($type, $command->type);
     }

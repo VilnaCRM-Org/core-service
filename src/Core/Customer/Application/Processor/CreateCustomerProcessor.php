@@ -20,7 +20,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private CreateCustomerFactoryInterface $statusCommandFactory,
+        private CreateCustomerFactoryInterface $createCustomerFactory,
         private IriConverterInterface $iriConverter,
         private CreateCustomerTransformer $transformer,
     ) {
@@ -50,7 +50,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
             $customerStatusEntity,
             $data->confirmed
         );
-        $command = $this->statusCommandFactory->create(
+        $command = $this->createCustomerFactory->create(
             $customer
         );
         $this->commandBus->dispatch($command);

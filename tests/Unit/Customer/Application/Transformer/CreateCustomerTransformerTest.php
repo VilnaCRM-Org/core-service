@@ -96,11 +96,11 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         $this->type = $this->createMock(CustomerType::class);
         $this->status = $this->createMock(CustomerStatus::class);
-        $this->initials = 'John Doe';
-        $this->email = 'john@example.com';
-        $this->phone = '+123456789';
-        $this->lead = 'Website';
-        $this->confirmed = true;
+        $this->initials = $this->faker->name();
+        $this->email = $this->faker->email();
+        $this->phone = $this->faker->phoneNumber();
+        $this->lead = $this->faker->word();
+        $this->confirmed = $this->faker->boolean();
 
         $this->customer = $this->createMock(Customer::class);
     }

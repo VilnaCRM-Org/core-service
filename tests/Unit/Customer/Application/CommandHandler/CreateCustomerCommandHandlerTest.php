@@ -36,7 +36,7 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
         $command = new CreateCustomerCommand($customer);
 
         $this->repository
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('save')
             ->with($customer);
 

@@ -115,7 +115,6 @@ final class CreateCustomerProcessorTest extends UnitTestCase
             ->with($customerEntity)
             ->willReturn($command);
 
-
         $this->commandBus
             ->expects(self::once())
             ->method('dispatch')

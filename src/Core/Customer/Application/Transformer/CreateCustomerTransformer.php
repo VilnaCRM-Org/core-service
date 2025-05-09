@@ -11,7 +11,7 @@ use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory;
 
-final class CreateCustomerTransformer
+final readonly class CreateCustomerTransformer
 {
     public function __construct(
         private CustomerFactoryInterface $customerFactory,

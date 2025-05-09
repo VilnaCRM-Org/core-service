@@ -38,7 +38,7 @@ final class CreateStatusTransformerTest extends UnitTestCase
 
     public function testTransformCreatesStatusWithGeneratedUlid(): void
     {
-        [$value, $ulid, $domainUlid, $status] = $this->prepareData();
+        [$value, $ulid, $domainUlid, $status] = $this->createTestFixtures();
 
         $this->ulidFactory
             ->expects(self::once())
@@ -68,7 +68,7 @@ final class CreateStatusTransformerTest extends UnitTestCase
     /**
      * @return array<SymfonyUlid, Ulid, CustomerStatus>
      */
-    private function prepareData(): array
+    private function createTestFixtures(): array
     {
         $value = $this->faker->word();
         $symfonyUlid = $this->createMock(SymfonyUlid::class);
