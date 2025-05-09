@@ -6,10 +6,10 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Application\Command\CreateTypeCommand;
-use App\Core\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Core\Customer\Application\DTO\TypeCreate;
 use App\Core\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateTypeProcessor;
+use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -19,6 +19,7 @@ final class CreateTypeProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateTypeFactoryInterface|MockObject $factory;
+    private CreateTypeTransformer|MockObject $transformer;
     private CreateTypeProcessor $processor;
 
     protected function setUp(): void
@@ -27,31 +28,35 @@ final class CreateTypeProcessorTest extends UnitTestCase
 
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this->createMock(CreateTypeFactoryInterface::class);
+        $this->transformer = $this->createMock(CreateTypeTransformer::class);
+
         $this->processor = new CreateTypeProcessor(
             $this->commandBus,
-            $this->factory
+            $this->factory,
+            $this->transformer
         );
     }
 
-    public function testProcessCreatesAndDispatchesCommand(): void
+    public function testProcessTransformsCreatesAndDispatchesCommand(): void
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
         $command = $this->createMock(CreateTypeCommand::class);
         $customerType = $this->createMock(CustomerType::class);
 
-        $this->factory->expects($this->once())
-            ->method('create')
+        $this->transformer->expects(self::once())
+            ->method('transform')
             ->with($dto->value)
+            ->willReturn($customerType);
+
+        $this->factory->expects(self::once())
+            ->method('create')
+            ->with($customerType)
             ->willReturn($command);
 
-        $this->commandBus->expects($this->once())
+        $this->commandBus->expects(self::once())
             ->method('dispatch')
             ->with($command);
-
-        $command->expects($this->once())
-            ->method('getResponse')
-            ->willReturn(new CreateTypeCommandResponse($customerType));
 
         $result = $this->processor->process($dto, $operation);
 

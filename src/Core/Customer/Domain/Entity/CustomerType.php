@@ -6,7 +6,7 @@ namespace App\Core\Customer\Domain\Entity;
 
 use App\Shared\Domain\ValueObject\UlidInterface;
 
-class CustomerType
+class CustomerType implements CustomerTypeInterface
 {
     public function __construct(
         private string $value,

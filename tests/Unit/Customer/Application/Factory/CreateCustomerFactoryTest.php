@@ -6,61 +6,27 @@ namespace App\Tests\Unit\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\Factory\CreateCustomerFactory;
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Core\Customer\Domain\Entity\Customer;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ */
 final class CreateCustomerFactoryTest extends UnitTestCase
 {
     public function testCreateCustomerCommand(): void
     {
-        $initials = $this->faker->name();
-        $email = $this->faker->email();
-        $phone = $this->faker->phoneNumber();
-        $leadSource = $this->faker->word();
-        $confirmed = $this->faker->boolean();
+        // Arrange: mock a Customer instance
+        /** @var Customer&MockObject $customer */
+        $customer = $this->createMock(Customer::class);
 
-        $ulidTransformer = new UlidTransformer(new UlidFactory());
-        $customerType = $this->createCustomerType($ulidTransformer);
-        $customerStatus = $this->createCustomerStatus($ulidTransformer);
-
+        // Act: invoke factory with the Customer
         $factory = new CreateCustomerFactory();
-        $command = $factory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $customerType,
-            $customerStatus,
-            $confirmed
-        );
+        $command = $factory->create($customer);
 
+        // Assert: it returns a command wrapping the same Customer
         $this->assertInstanceOf(CreateCustomerCommand::class, $command);
-    }
-
-    private function createCustomerType(
-        UlidTransformer $ulidTransformer
-    ): CustomerType {
-        $typeValue = $this->faker->word();
-        $typeUlidString = $this->faker->ulid();
-
-        return new CustomerType(
-            $typeValue,
-            $ulidTransformer->transformFromSymfonyUlid($typeUlidString)
-        );
-    }
-
-    private function createCustomerStatus(
-        UlidTransformer $ulidTransformer
-    ): CustomerStatus {
-        $statusValue = $this->faker->word();
-        $statusUlidString = $this->faker->ulid();
-
-        return new CustomerStatus(
-            $statusValue,
-            $ulidTransformer->transformFromSymfonyUlid($statusUlidString)
-        );
+        $this->assertSame($customer, $command->customer);
     }
 }

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
 use App\Core\Customer\Application\Command\CreateStatusCommand;
-use App\Core\Customer\Application\Command\CreateStatusCommandResponse;
 use App\Core\Customer\Application\CommandHandler\CreateStatusCommandHandler;
-use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ */
 final class CreateStatusCommandHandlerTest extends UnitTestCase
 {
-    private CreateStatusTransformer|MockObject $transformer;
     private StatusRepositoryInterface|MockObject $repository;
     private CreateStatusCommandHandler $handler;
 
@@ -23,39 +23,20 @@ final class CreateStatusCommandHandlerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->transformer = $this->createMock(CreateStatusTransformer::class);
         $this->repository = $this->createMock(StatusRepositoryInterface::class);
-        $this->handler = new CreateStatusCommandHandler(
-            $this->transformer,
-            $this->repository
-        );
+        $this->handler = new CreateStatusCommandHandler($this->repository);
     }
 
-    public function testInvokeCreatesAndSavesStatus(): void
+    public function testInvokeSavesStatus(): void
     {
-        $command = $this->createCommand();
         $status = $this->createMock(CustomerStatus::class);
+        $command = new CreateStatusCommand($status);
 
-        $this->transformer->expects($this->once())
-            ->method('transform')
-            ->with($command)
-            ->willReturn($status);
-
-        $this->repository->expects($this->once())
+        $this->repository
+            ->expects($this->once())
             ->method('save')
             ->with($status);
 
         ($this->handler)($command);
-
-        $response = $command->getResponse();
-        $this->assertInstanceOf(CreateStatusCommandResponse::class, $response);
-        $this->assertSame($status, $response->customerStatus);
-    }
-
-    private function createCommand(): CreateStatusCommand
-    {
-        return new CreateStatusCommand(
-            $this->faker->word()
-        );
     }
 }

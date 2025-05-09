@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\Transformer\CreateCustomerTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
@@ -19,168 +17,104 @@ use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class CreateCustomerTransformerTest extends UnitTestCase
 {
-    private UlidTransformer $ulidTransformerMock;
-    private UlidFactory $ulidFactoryMock;
-    private CustomerFactoryInterface $customerFactoryMock;
-    private CreateCustomerTransformer $createCustomerTransformer;
+    private UlidTransformer $ulidTransformer;
+    private UlidFactory $ulidFactory;
+    private CustomerFactoryInterface $customerFactory;
+    private CreateCustomerTransformer $transformer;
+    private SymfonyUlid $symfonyUlid;
+    private Ulid $voUlid;
+
+    private CustomerType $type;
+
+    private CustomerStatus $status;
+
+    private string $initials;
+
+    private string $email;
+
+    private string $phone;
+
+    private string $lead;
+
+    private bool $confirmed;
+
+    private Customer $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->ulidTransformerMock = $this
-            ->createMock(UlidTransformer::class);
-        $this->ulidFactoryMock = $this
-            ->createMock(UlidFactory::class);
-        $this->customerFactoryMock = $this
-            ->createMock(CustomerFactoryInterface::class);
-        $this->createCustomerTransformer = new CreateCustomerTransformer(
-            $this->customerFactoryMock,
-            $this->ulidTransformerMock,
-            $this->ulidFactoryMock
+        $this->ulidTransformer = $this->createMock(UlidTransformer::class);
+        $this->ulidFactory = $this->createMock(UlidFactory::class);
+        $this->customerFactory = $this->createMock(
+            CustomerFactoryInterface::class
         );
-    }
 
-    public function testTransform(): void
-    {
-        $testData = $this->prepareTestData();
-        $command = $this->createCommandFromTestData($testData);
-        $this->setExpectationsFromTestData($testData);
+        $this->symfonyUlid = $this->createMock(SymfonyUlid::class);
+        $this->voUlid = $this->createMock(Ulid::class);
 
-        $result = $this->createCustomerTransformer->transform($command);
-        $this->assertSame($testData['customer'], $result);
-    }
-
-    /**
-     * @param array<string, string|bool|CustomerType|CustomerStatus|Customer> $testData
-     */
-    private function createCommandFromTestData(
-        array $testData
-    ): CreateCustomerCommand {
-        return $this->createCommand(
-            $testData['initials'],
-            $testData['email'],
-            $testData['phone'],
-            $testData['leadSource'],
-            $testData['customerType'],
-            $testData['customerStatus'],
-            $testData['confirmed']
-        );
-    }
-
-    /**
-     * @param array<string, string|bool|CustomerType|CustomerStatus|Customer> $testData
-     */
-    private function setExpectationsFromTestData(array $testData): void
-    {
-        $this->setExpectations(
-            $testData['customer'],
-            $testData['initials'],
-            $testData['email'],
-            $testData['phone'],
-            $testData['leadSource'],
-            $testData['customerType'],
-            $testData['customerStatus'],
-            $testData['confirmed']
-        );
-    }
-
-    /**
-     * @return array<string, string|bool|CustomerType|CustomerStatus|Customer>
-     */
-    private function prepareTestData(): array
-    {
-        return [
-            'customerType' => $this->createMock(CustomerType::class),
-            'customerStatus' => $this->createMock(CustomerStatus::class),
-            'initials' => $this->faker->name(),
-            'email' => $this->faker->email(),
-            'phone' => $this->faker->phoneNumber(),
-            'leadSource' => 'Website',
-            'confirmed' => true,
-            'customer' => $this->createMock(Customer::class),
-        ];
-    }
-
-    private function createCommand(
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed
-    ): CreateCustomerCommand {
-        return new CreateCustomerCommand(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-        );
-    }
-
-    private function setExpectations(
-        CustomerInterface $customer,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed
-    ): void {
-        $ulidObject = $this->createMock(Ulid::class);
-        $this->setupUlidExpectations($ulidObject);
-        $this->setupCustomerFactoryExpectations(
-            $customer,
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $ulidObject
-        );
-    }
-
-    private function setupUlidExpectations(Ulid $ulidObject): void
-    {
-        $this->ulidFactoryMock->expects($this->once())
+        $this->ulidFactory
             ->method('create')
-            ->willReturn($this->createMock(SymfonyUlid::class));
+            ->willReturn($this->symfonyUlid);
 
-        $this->ulidTransformerMock->expects($this->once())
+        $this->ulidTransformer
             ->method('transformFromSymfonyUlid')
-            ->willReturn($ulidObject);
+            ->with($this->symfonyUlid)
+            ->willReturn($this->voUlid);
+
+        $this->transformer = new CreateCustomerTransformer(
+            $this->customerFactory,
+            $this->ulidTransformer,
+            $this->ulidFactory
+        );
     }
 
-    private function setupCustomerFactoryExpectations(
-        CustomerInterface $customer,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed,
-        Ulid $ulidObject
-    ): void {
-        $this->customerFactoryMock->expects($this->once())
+    public function testTransformCreatesCustomerWithGeneratedUlid(): void
+    {
+        $this->prepareData();
+        $this->customerFactory
+            ->expects(self::once())
             ->method('create')
             ->with(
-                $initials,
-                $email,
-                $phone,
-                $leadSource,
-                $type,
-                $status,
-                $confirmed,
-                $ulidObject
+                $this->initials,
+                $this->email,
+                $this->phone,
+                $this->lead,
+                self::identicalTo($this->type),
+                self::identicalTo($this->status),
+                $this->confirmed,
+                self::identicalTo($this->voUlid)
             )
-            ->willReturn($customer);
+            ->willReturn($this->customer);
+
+        $result = $this->receiveResult();
+
+        self::assertSame($this->customer, $result);
+    }
+
+    private function prepareData(): void
+    {
+        $this->type = $this->createMock(CustomerType::class);
+        $this->status = $this->createMock(CustomerStatus::class);
+        $this->initials = 'John Doe';
+        $this->email = 'john@example.com';
+        $this->phone = '+123456789';
+        $this->lead = 'Website';
+        $this->confirmed = true;
+
+        $this->customer = $this->createMock(Customer::class);
+    }
+
+    private function receiveResult(): Customer
+    {
+        return $this->transformer->transform(
+            $this->initials,
+            $this->email,
+            $this->phone,
+            $this->lead,
+            $this->type,
+            $this->status,
+            $this->confirmed,
+        );
     }
 }

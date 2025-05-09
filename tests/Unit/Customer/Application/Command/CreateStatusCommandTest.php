@@ -5,28 +5,21 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Command;
 
 use App\Core\Customer\Application\Command\CreateStatusCommand;
-use App\Shared\Domain\Bus\Command\CommandResponseInterface;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateStatusCommandTest extends UnitTestCase
 {
-    public function testConstructor(): void
+    public function testConstructorAcceptsStatusEntity(): void
     {
-        $value = $this->faker->word();
-        $command = new CreateStatusCommand($value);
+        // Arrange: create a mock CustomerStatus (or use a real one if you prefer)
+        $status = $this->createMock(CustomerStatus::class);
 
+        // Act: construct the command
+        $command = new CreateStatusCommand($status);
+
+        // Assert: it holds exactly that same CustomerStatus
         $this->assertInstanceOf(CreateStatusCommand::class, $command);
-        $this->assertSame($value, $command->value);
-    }
-
-    public function testSetAndGetResponse(): void
-    {
-        $value = $this->faker->word();
-        $command = new CreateStatusCommand($value);
-
-        $response = $this->createMock(CommandResponseInterface::class);
-        $command->setResponse($response);
-
-        $this->assertSame($response, $command->getResponse());
+        $this->assertSame($status, $command->status);
     }
 }

@@ -5,28 +5,21 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Command;
 
 use App\Core\Customer\Application\Command\CreateTypeCommand;
-use App\Shared\Domain\Bus\Command\CommandResponseInterface;
+use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateTypeCommandTest extends UnitTestCase
 {
-    public function testConstructor(): void
+    public function testConstructorAcceptsTypeEntity(): void
     {
-        $value = $this->faker->word();
-        $command = new CreateTypeCommand($value);
+        // Arrange: create a mock CustomerType
+        $type = $this->createMock(CustomerType::class);
 
+        // Act: construct the command with the entity
+        $command = new CreateTypeCommand($type);
+
+        // Assert: it holds exactly that same CustomerType
         $this->assertInstanceOf(CreateTypeCommand::class, $command);
-        $this->assertSame($value, $command->value);
-    }
-
-    public function testSetAndGetResponse(): void
-    {
-        $value = $this->faker->word();
-        $command = new CreateTypeCommand($value);
-
-        $response = $this->createMock(CommandResponseInterface::class);
-        $command->setResponse($response);
-
-        $this->assertSame($response, $command->getResponse());
+        $this->assertSame($type, $command->type);
     }
 }

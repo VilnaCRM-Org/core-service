@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
+use App\Core\Customer\Application\Transformer\CreateCustomerTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -21,6 +22,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         private CommandBusInterface $commandBus,
         private CreateCustomerFactoryInterface $statusCommandFactory,
         private IriConverterInterface $iriConverter,
+        private CreateCustomerTransformer $transformer,
     ) {
     }
 
@@ -39,8 +41,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
             ->getResourceFromIri($data->status);
         $customerTypeEntity = $this->iriConverter
             ->getResourceFromIri($data->type);
-
-        $command = $this->statusCommandFactory->create(
+        $customer = $this->transformer->transform(
             $data->initials,
             $data->email,
             $data->phone,
@@ -49,8 +50,11 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
             $customerStatusEntity,
             $data->confirmed
         );
+        $command = $this->statusCommandFactory->create(
+            $customer
+        );
         $this->commandBus->dispatch($command);
 
-        return $command->getResponse()->customer;
+        return $command->customer;
     }
 }

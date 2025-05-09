@@ -6,10 +6,10 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Application\Command\CreateStatusCommand;
-use App\Core\Customer\Application\Command\CreateStatusCommandResponse;
 use App\Core\Customer\Application\DTO\StatusCreate;
 use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateStatusProcessor;
+use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -19,6 +19,7 @@ final class CreateStatusProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateStatusFactoryInterface|MockObject $factory;
+    private CreateStatusTransformer|MockObject $transformer;
     private CreateStatusProcessor $processor;
 
     protected function setUp(): void
@@ -27,9 +28,12 @@ final class CreateStatusProcessorTest extends UnitTestCase
 
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this->createMock(CreateStatusFactoryInterface::class);
+        $this->transformer = $this->createMock(CreateStatusTransformer::class);
+
         $this->processor = new CreateStatusProcessor(
             $this->commandBus,
-            $this->factory
+            $this->factory,
+            $this->transformer
         );
     }
 
@@ -37,31 +41,41 @@ final class CreateStatusProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $command = $this->createMock(CreateStatusCommand::class);
-        $status = $this->createMock(CustomerStatus::class);
 
-        $this->factory->expects($this->once())
-            ->method('create')
+        // This is the CustomerStatus instance the transformer will return
+        $status = $this->createMock(CustomerStatus::class);
+        // This is the command that the factory will create
+        $command = $this->createMock(CreateStatusCommand::class);
+
+        // 1) Transformer should be invoked with the DTO’s value and return our $status
+        $this->transformer
+            ->expects($this->once())
+            ->method('transform')
             ->with($dto->value)
+            ->willReturn($status);
+
+        // 2) Factory should be invoked with the transformed status and return our $command
+        $this->factory
+            ->expects($this->once())
+            ->method('create')
+            ->with($status)
             ->willReturn($command);
 
-        $this->commandBus->expects($this->once())
+        // 3) Command bus should dispatch the command
+        $this->commandBus
+            ->expects($this->once())
             ->method('dispatch')
             ->with($command);
 
-        $command->expects($this->once())
-            ->method('getResponse')
-            ->willReturn(new CreateStatusCommandResponse($status));
-
+        // Execute
         $result = $this->processor->process($dto, $operation);
 
+        // Assert we get back the same CustomerStatus instance
         $this->assertSame($status, $result);
     }
 
     private function createDto(): StatusCreate
     {
-        return new StatusCreate(
-            $this->faker->word()
-        );
+        return new StatusCreate($this->faker->word());
     }
 }

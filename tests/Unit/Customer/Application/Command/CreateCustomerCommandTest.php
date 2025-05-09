@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Command;
 
 use App\Core\Customer\Application\Command\CreateCustomerCommand;
-use App\Core\Customer\Application\Command\CreateCustomerCommandResponse;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -14,10 +13,8 @@ use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
-/**
- * @internal
- */
 final class CreateCustomerCommandTest extends UnitTestCase
 {
     private CustomerFactoryInterface $customerFactory;
@@ -30,41 +27,24 @@ final class CreateCustomerCommandTest extends UnitTestCase
         $this->transformer = new UlidTransformer(new UlidFactory());
     }
 
-    public function testConstructor(): void
+    public function testConstructorAcceptsCustomer(): void
     {
-        $params = $this->getCommandParams();
-        $command = $this->createCommand($params);
-        $this->assertInstanceOf(CreateCustomerCommand::class, $command);
-        $this->assertSame($params['initials'], $command->initials);
-        $this->assertSame($params['email'], $command->email);
-        $this->assertSame($params['phone'], $command->phone);
-        $this->assertSame($params['leadSource'], $command->leadSource);
-        $this->assertSame($params['type'], $command->type);
-        $this->assertSame($params['status'], $command->status);
-        $this->assertSame($params['confirmed'], $command->confirmed);
-    }
+        $customer = $this->createCustomer($this->getCommandParams());
 
-    public function testGetResponse(): void
-    {
-        $params = $this->getCommandParams();
-        $customer = $this->createCustomer($params);
-        $command = $this->createCommand($params);
-        $response = new CreateCustomerCommandResponse($customer);
-        $command->setResponse($response);
-        $this->assertSame($response, $command->getResponse());
-        $this->assertSame($customer, $command->getResponse()->customer);
+        $command = new CreateCustomerCommand($customer);
+
+        $this->assertInstanceOf(CreateCustomerCommand::class, $command);
+        $this->assertSame($customer, $command->customer);
     }
 
     /**
-     * Get parameters for creating a command.
-     *
      * @return array{
      *     initials: string,
      *     email: string,
      *     phone: string,
      *     leadSource: string,
-     *     type: \PHPUnit\Framework\MockObject\MockObject,
-     *     status: \PHPUnit\Framework\MockObject\MockObject,
+     *     type: MockObject,
+     *     status: MockObject,
      *     confirmed: bool
      * }
      */
@@ -82,21 +62,12 @@ final class CreateCustomerCommandTest extends UnitTestCase
     }
 
     /**
-     * Create a customer using the provided parameters.
-     *
-     * @param array{
-     *     initials: string,
-     *     email: string,
-     *     phone: string,
-     *     leadSource: string,
-     *     type: \PHPUnit\Framework\MockObject\MockObject,
-     *     status: \PHPUnit\Framework\MockObject\MockObject,
-     *     confirmed: bool
-     * } $params
+     * @param array<string, string|CustomerType|CustomerStatus> $params
      */
     private function createCustomer(array $params): Customer
     {
         $ulid = $this->faker->ulid();
+
         return $this->customerFactory->create(
             $params['initials'],
             $params['email'],
@@ -105,33 +76,7 @@ final class CreateCustomerCommandTest extends UnitTestCase
             $params['type'],
             $params['status'],
             $params['confirmed'],
-            $this->transformer->transformFromSymfonyUlid($ulid)
-        );
-    }
-
-    /**
-     * Create a command using the provided parameters.
-     *
-     * @param array{
-     *     initials: string,
-     *     email: string,
-     *     phone: string,
-     *     leadSource: string,
-     *     type: \PHPUnit\Framework\MockObject\MockObject,
-     *     status: \PHPUnit\Framework\MockObject\MockObject,
-     *     confirmed: bool
-     * } $params
-     */
-    private function createCommand(array $params): CreateCustomerCommand
-    {
-        return new CreateCustomerCommand(
-            $params['initials'],
-            $params['email'],
-            $params['phone'],
-            $params['leadSource'],
-            $params['type'],
-            $params['status'],
-            $params['confirmed']
+            $this->transformer->transformFromSymfonyUlid($ulid),
         );
     }
 }

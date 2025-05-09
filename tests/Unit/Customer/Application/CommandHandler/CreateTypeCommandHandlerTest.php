@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\CommandHandler;
 
 use App\Core\Customer\Application\Command\CreateTypeCommand;
-use App\Core\Customer\Application\Command\CreateTypeCommandResponse;
 use App\Core\Customer\Application\CommandHandler\CreateTypeCommandHandler;
-use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ */
 final class CreateTypeCommandHandlerTest extends UnitTestCase
 {
-    private CreateTypeTransformer|MockObject $transformer;
     private TypeRepositoryInterface|MockObject $repository;
     private CreateTypeCommandHandler $handler;
 
@@ -23,39 +23,20 @@ final class CreateTypeCommandHandlerTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->transformer = $this->createMock(CreateTypeTransformer::class);
         $this->repository = $this->createMock(TypeRepositoryInterface::class);
-        $this->handler = new CreateTypeCommandHandler(
-            $this->transformer,
-            $this->repository
-        );
+        $this->handler = new CreateTypeCommandHandler($this->repository);
     }
 
-    public function testInvokeCreatesAndSavesType(): void
+    public function testInvokeSavesType(): void
     {
-        $command = $this->createCommand();
         $type = $this->createMock(CustomerType::class);
+        $command = new CreateTypeCommand($type);
 
-        $this->transformer->expects($this->once())
-            ->method('transform')
-            ->with($command)
-            ->willReturn($type);
-
-        $this->repository->expects($this->once())
+        $this->repository
+            ->expects($this->once())
             ->method('save')
             ->with($type);
 
         ($this->handler)($command);
-
-        $response = $command->getResponse();
-        $this->assertInstanceOf(CreateTypeCommandResponse::class, $response);
-        $this->assertSame($type, $response->customerType);
-    }
-
-    private function createCommand(): CreateTypeCommand
-    {
-        return new CreateTypeCommand(
-            $this->faker->word()
-        );
     }
 }
