@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: run codecov
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
@@ -21,7 +21,7 @@ jobs:
         run: make coverage-xml
       - name: Copy coverage report to host
         run: docker cp core-service-php-1:/srv/app/coverage/coverage.xml /tmp
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
