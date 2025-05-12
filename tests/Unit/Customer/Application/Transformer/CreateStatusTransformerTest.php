@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
 use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
+use App\Core\Customer\Application\Transformer\StatusTransformerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
@@ -19,7 +20,7 @@ final class CreateStatusTransformerTest extends UnitTestCase
     private StatusFactoryInterface|MockObject $statusFactory;
     private UlidTransformer|MockObject $ulidTransformer;
     private UlidFactory|MockObject $ulidFactory;
-    private CreateStatusTransformer $transformer;
+    private StatusTransformerInterface $transformer;
 
     protected function setUp(): void
     {

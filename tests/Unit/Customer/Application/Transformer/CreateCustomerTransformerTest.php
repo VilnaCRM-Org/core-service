@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Transformer\CreateCustomerTransformer;
+use App\Core\Customer\Application\Transformer\CustomerTransformer;
+use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -20,7 +21,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     private UlidTransformer $ulidTransformer;
     private UlidFactory $ulidFactory;
     private CustomerFactoryInterface $customerFactory;
-    private CreateCustomerTransformer $transformer;
+    private CustomerTransformerInterface $transformer;
     private SymfonyUlid $symfonyUlid;
     private Ulid $voUlid;
 
@@ -62,7 +63,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
             ->with($this->symfonyUlid)
             ->willReturn($this->voUlid);
 
-        $this->transformer = new CreateCustomerTransformer(
+        $this->transformer = new CustomerTransformer(
             $this->customerFactory,
             $this->ulidTransformer,
             $this->ulidFactory

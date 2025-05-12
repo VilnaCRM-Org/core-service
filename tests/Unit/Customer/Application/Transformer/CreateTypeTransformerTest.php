@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
 use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
+use App\Core\Customer\Application\Transformer\TypeTransformerInterface;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
@@ -19,7 +20,7 @@ final class CreateTypeTransformerTest extends UnitTestCase
     private TypeFactoryInterface|MockObject $typeFactory;
     private UlidTransformer|MockObject $ulidTransformer;
     private UlidFactory|MockObject $ulidFactory;
-    private CreateTypeTransformer $transformer;
+    private TypeTransformerInterface $transformer;
 
     protected function setUp(): void
     {

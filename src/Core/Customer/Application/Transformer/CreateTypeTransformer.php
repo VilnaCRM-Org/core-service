@@ -9,7 +9,8 @@ use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory;
 
-final readonly class CreateTypeTransformer
+final readonly class CreateTypeTransformer implements
+    TypeTransformerInterface
 {
     public function __construct(
         private TypeFactoryInterface $typeFactory,

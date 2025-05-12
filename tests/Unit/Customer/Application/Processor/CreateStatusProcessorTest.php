@@ -9,7 +9,7 @@ use App\Core\Customer\Application\Command\CreateStatusCommand;
 use App\Core\Customer\Application\DTO\StatusCreate;
 use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateStatusProcessor;
-use App\Core\Customer\Application\Transformer\CreateStatusTransformer;
+use App\Core\Customer\Application\Transformer\StatusTransformerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -19,7 +19,7 @@ final class CreateStatusProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateStatusFactoryInterface|MockObject $factory;
-    private CreateStatusTransformer|MockObject $transformer;
+    private StatusTransformerInterface|MockObject $transformer;
     private CreateStatusProcessor $processor;
 
     protected function setUp(): void
@@ -28,7 +28,9 @@ final class CreateStatusProcessorTest extends UnitTestCase
 
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this->createMock(CreateStatusFactoryInterface::class);
-        $this->transformer = $this->createMock(CreateStatusTransformer::class);
+        $this->transformer = $this->createMock(
+            StatusTransformerInterface::class
+        );
 
         $this->processor = new CreateStatusProcessor(
             $this->commandBus,

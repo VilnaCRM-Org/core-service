@@ -9,7 +9,8 @@ use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory;
 
-final class CreateStatusTransformer
+final class CreateStatusTransformer implements
+    StatusTransformerInterface
 {
     public function __construct(
         private StatusFactoryInterface $statusFactory,

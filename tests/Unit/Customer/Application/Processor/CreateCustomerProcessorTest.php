@@ -10,7 +10,7 @@ use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateCustomerProcessor;
-use App\Core\Customer\Application\Transformer\CreateCustomerTransformer;
+use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -23,7 +23,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     private CommandBusInterface|MockObject $commandBus;
     private CreateCustomerFactoryInterface|MockObject $factory;
     private IriConverterInterface|MockObject $iriConverter;
-    private CreateCustomerTransformer|MockObject $transformer;
+    private CustomerTransformerInterface|MockObject $transformer;
     private CreateCustomerProcessor $processor;
 
     protected function setUp(): void
@@ -36,7 +36,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         );
         $this->iriConverter = $this->createMock(IriConverterInterface::class);
         $this->transformer = $this->createMock(
-            CreateCustomerTransformer::class
+            CustomerTransformerInterface::class
         );
 
         $this->processor = new CreateCustomerProcessor(

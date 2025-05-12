@@ -9,7 +9,7 @@ use App\Core\Customer\Application\Command\CreateTypeCommand;
 use App\Core\Customer\Application\DTO\TypeCreate;
 use App\Core\Customer\Application\Factory\CreateTypeFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateTypeProcessor;
-use App\Core\Customer\Application\Transformer\CreateTypeTransformer;
+use App\Core\Customer\Application\Transformer\TypeTransformerInterface;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -19,7 +19,7 @@ final class CreateTypeProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateTypeFactoryInterface|MockObject $factory;
-    private CreateTypeTransformer|MockObject $transformer;
+    private TypeTransformerInterface|MockObject $transformer;
     private CreateTypeProcessor $processor;
 
     protected function setUp(): void
@@ -28,7 +28,7 @@ final class CreateTypeProcessorTest extends UnitTestCase
 
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this->createMock(CreateTypeFactoryInterface::class);
-        $this->transformer = $this->createMock(CreateTypeTransformer::class);
+        $this->transformer = $this->createMock(TypeTransformerInterface::class);
 
         $this->processor = new CreateTypeProcessor(
             $this->commandBus,
