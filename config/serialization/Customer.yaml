@@ -1,0 +1,22 @@
+App\Core\Customer\Domain\Entity\Customer:
+  attributes:
+    email:
+      groups: ['output', 'write:customer']
+    phone:
+      groups: ['output', 'write:customer']
+    initials:
+      groups: ['output', 'write:customer']
+    confirmed:
+      groups: ['output', 'write:customer']
+    leadSource:
+      groups: ['output', 'write:customer']
+    type:
+      groups: ['output', 'write:customer']
+    status:
+      groups: ['output', 'write:customer']
+    createdAt:
+      groups: ['output']
+    updatedAt:
+      groups: ['output']
+    ulid:
+      groups: ['output']

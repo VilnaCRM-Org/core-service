@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Domain\Aggregate;
 
 use App\Shared\Domain\Aggregate\AggregateRoot;
 use App\Shared\Domain\Bus\Event\DomainEvent;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\UnitTestCase;
 
-final class AggregateRootTest extends TestCase
+final class AggregateRootTest extends UnitTestCase
 {
     public function testPullDomainEvents(): void
     {

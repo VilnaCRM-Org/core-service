@@ -30,7 +30,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
         - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|DoctrineType|RetryStrategy).*'
+          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory).*'
 
     - name: Symfony
       collectors:
@@ -57,6 +57,11 @@ parameters:
         - type: className
           regex: '.*GraphQL\\.*'
 
+    - name: BSON
+      collectors:
+        - type: className
+          regex: 'MongoDB\\BSON\\.*'
+
   ruleset:
     Application:
       - Domain
@@ -65,10 +70,12 @@ parameters:
       - ApiPlatform
       - Logging
       - GraphQl
+      - BSON
     Infrastructure:
       - Domain
       - Application
       - Symfony
       - Doctrine
       - Logging
+      - BSON
     Domain: []
