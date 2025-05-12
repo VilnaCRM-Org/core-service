@@ -64,7 +64,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 
         $result = $this->processor->process($dto, $operation);
 
-        self::assertSame($customerEntity, $result);
+        $this->assertSame($customerEntity, $result);
     }
 
     private function createDto(): CustomerCreate

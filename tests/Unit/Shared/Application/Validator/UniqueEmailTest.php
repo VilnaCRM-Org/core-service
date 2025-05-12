@@ -18,7 +18,7 @@ final class UniqueEmailTest extends UnitTestCase
         $constraint = new UniqueEmail($groups, $payload);
 
         self::assertInstanceOf(Constraint::class, $constraint);
-        self::assertSame($groups, $constraint->groups);
-        self::assertSame($payload, $constraint->payload);
+        $this->assertSame($groups, $constraint->groups);
+        $this->assertSame($payload, $constraint->payload);
     }
 }

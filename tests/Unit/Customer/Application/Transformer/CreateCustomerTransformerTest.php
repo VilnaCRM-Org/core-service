@@ -90,7 +90,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
 
         $result = $this->receiveResult();
 
-        self::assertSame($this->customer, $result);
+        $this->assertSame($this->customer, $result);
     }
 
     private function prepareData(): void
