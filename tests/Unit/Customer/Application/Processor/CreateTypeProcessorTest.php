@@ -44,17 +44,17 @@ final class CreateTypeProcessorTest extends UnitTestCase
         $command = $this->createMock(CreateTypeCommand::class);
         $customerType = $this->createMock(CustomerType::class);
 
-        $this->transformer->expects(self::once())
+        $this->transformer->expects($this->once())
             ->method('transform')
             ->with($dto->value)
             ->willReturn($customerType);
 
-        $this->factory->expects(self::once())
+        $this->factory->expects($this->once())
             ->method('create')
             ->with($customerType)
             ->willReturn($command);
 
-        $this->commandBus->expects(self::once())
+        $this->commandBus->expects($this->once())
             ->method('dispatch')
             ->with($command);
 

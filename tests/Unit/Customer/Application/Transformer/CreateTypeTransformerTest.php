@@ -44,16 +44,16 @@ final class CreateTypeTransformerTest extends UnitTestCase
         $valueObjectUlid = $this->createMock(Ulid::class);
         $expectedType = $this->createMock(CustomerType::class);
 
-        $this->ulidFactory->expects(self::once())
+        $this->ulidFactory->expects($this->once())
             ->method('create')
             ->willReturn($symfonyUlid);
 
-        $this->ulidTransformer->expects(self::once())
+        $this->ulidTransformer->expects($this->once())
             ->method('transformFromSymfonyUlid')
             ->with(self::identicalTo($symfonyUlid))
             ->willReturn($valueObjectUlid);
 
-        $this->typeFactory->expects(self::once())
+        $this->typeFactory->expects($this->once())
             ->method('create')
             ->with(
                 self::equalTo($value),

@@ -74,7 +74,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
     {
         $this->prepareData();
         $this->customerFactory
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('create')
             ->with(
                 $this->initials,

@@ -110,13 +110,13 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     ): void {
         $command = new CreateCustomerCommand($customerEntity);
         $this->factory
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('create')
             ->with($customerEntity)
             ->willReturn($command);
 
         $this->commandBus
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('dispatch')
             ->with($command);
     }
@@ -128,7 +128,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         MockObject|Customer $customerEntity
     ): void {
         $this->transformer
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('transform')
             ->with(
                 $dto->initials,

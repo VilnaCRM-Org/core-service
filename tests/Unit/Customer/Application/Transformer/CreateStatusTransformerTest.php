@@ -42,18 +42,18 @@ final class CreateStatusTransformerTest extends UnitTestCase
         [$value, $ulid, $domainUlid, $status] = $this->createTestFixtures();
 
         $this->ulidFactory
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('create')
             ->willReturn($ulid);
 
         $this->ulidTransformer
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('transformFromSymfonyUlid')
             ->with(self::identicalTo($ulid))
             ->willReturn($domainUlid);
 
         $this->statusFactory
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('create')
             ->with(
                 self::equalTo($value),
