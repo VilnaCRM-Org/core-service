@@ -21,12 +21,6 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           fetch-depth: 0
 
-      - name: Install Prettier XML plugin
-        run: npm install --save-dev prettier @prettier/plugin-xml
-
-      - name: Format XML files
-        run: npx prettier --ignore-unknown --plugin=@prettier/plugin-xml --write "**/*.xml"
-
       - name: Run Super-Linter
         continue-on-error: true
         uses: super-linter/super-linter@v7.1.0
