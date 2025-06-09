@@ -35,10 +35,10 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-     mv tests/Behat/CustomerContext/CustomerContext.php tests/
-     run make behat
-     mv tests/CustomerContext.php tests/Behat/CustomerContext
-     assert_failure
+  mv tests/Behat/DemoContext.php tests/
+  run make behat
+  mv tests/DemoContext.php tests/Behat/
+  assert_failure
 }
 
 @test "make psalm should fail when there are errors" {
@@ -53,14 +53,22 @@ load 'bats-assert/load'
 }
 
 @test "make deptrac should fail when there are dependency violations" {
-  mkdir src/Internal/HealthCheck/Domain/Entity/
-  mv tests/CLI/bats/php/SomeEntity.php src/Internal/HealthCheck/Domain/Entity/
+  mkdir src/CompanySubdomain/SomeModule/Domain/Entity/
+  mv tests/CLI/bats/php/SomeEntity.php src/CompanySubdomain/SomeModule/Domain/Entity/
 
   run make deptrac
 
-  mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
-  rmdir src/Internal/HealthCheck/Domain/Entity/
-  assert_output --partial "error"
+  mv src/CompanySubdomain/SomeModule/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
+  rmdir src/CompanySubdomain/SomeModule/Domain/Entity/
+  assert_output --partial "App\CompanySubdomain\SomeModule\Domain\Entity\SomeEntity must not depend on App\CompanySubdomain\SomeModule\Application\Command\SomeCommand"
+  assert_failure
+}
+
+@test "make e2e-tests should fail when scenarios fail" {
+  mv tests/Behat/DemoContext.php tests/
+    run make behat
+    mv tests/DemoContext.php tests/Behat/
+    assert_failure
 }
 
 @test "make phpinsights should fail when code quality is low" {
@@ -71,7 +79,7 @@ load 'bats-assert/load'
   mv temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The code quality score is too low"
+  assert_output --partial "The style score is too low"
 }
 
 @test "make unit-tests should fail if tests fail" {

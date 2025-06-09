@@ -2,7 +2,7 @@
 include .env.test
 
 # Parameters
-PROJECT       = core-service
+PROJECT       = php-service-template
 GIT_AUTHOR    = Kravalg
 
 # Executables: local only
@@ -27,6 +27,7 @@ PSALM         = ./vendor/bin/psalm
 PHP_CS_FIXER  = ./vendor/bin/php-cs-fixer
 DEPTRAC       = ./vendor/bin/deptrac
 INFECTION     = ./vendor/bin/infection
+RECTOR        = ./vendor/bin/rector
 
 # Misc
 .DEFAULT_GOAL = help
@@ -42,8 +43,7 @@ endif
 # Variables for environment and commands
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
-COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Unit,Integration --coverage-clover /coverage/coverage.xml
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-clover /coverage/coverage.xml
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -e $(1) php $(2)
@@ -53,11 +53,9 @@ endef
 ifeq ($(CI),1)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
-    RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
-    RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
 endif
 
 help:
@@ -85,9 +83,6 @@ psalm: ## A static analysis tool for finding errors in PHP applications
 psalm-security: ## Psalm security analysis
 	$(EXEC_ENV) $(PSALM) --taint-analysis
 
-psalm-security-report: ## Comprehensive Psalm security scan: taint analysis, SARIF report, and taint graph dump
-	$(EXEC_ENV) $(PSALM) --taint-analysis --report=results.sarif
-
 phpinsights: ## Instant PHP quality checks and static analysis tool
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --ansi --format=github-action --disable-security-check && ./vendor/bin/phpinsights analyse tests --no-interaction
 
@@ -103,22 +98,25 @@ deptrac-debug: ## Find files unassigned for Deptrac
 behat: ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
 
+rector-apply: ## Apply Rector transformations to the codebase
+	$(EXEC_ENV) env RECTOR_MODE=dev $(RECTOR) process --ansi --config=rector.php
+
+rector-ci: ## Run Rector in CI mode (dry-run, no diffs)
+	$(EXEC_ENV) $(RECTOR) process --dry-run --ansi --no-progress-bar --no-diffs --config=rector.php
+
 integration-tests: ## Run integration tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Integration
-
-integration-negative-tests: ## Run integration negative tests
-	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
-
-fixtures-load: ## Run fixtures
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n
 
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
-negative-tests-with-coverage: ## Run negative tests with coverage reporting
-	$(RUN_INTERNAL_TESTS_COVERAGE)
+setup-test-db: ## Create database for testing purposes
+	$(SYMFONY_TEST_ENV) c:c
+	$(SYMFONY_TEST_ENV) doctrine:database:drop --force --if-exists
+	$(SYMFONY_TEST_ENV) doctrine:database:create
+	$(SYMFONY_TEST_ENV) doctrine:migrations:migrate --no-interaction
 
-all-tests: unit-tests integration-tests integration-negative-tests behat ## Run unit, integration and behat tests
+all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
 	tests/Load/run-smoke-load-tests.sh
@@ -143,6 +141,12 @@ infection: ## Run mutations test.
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
+
+doctrine-migrations-migrate: ## Executes a migration to a specified version or the latest available version
+	$(SYMFONY) d:m:m
+
+doctrine-migrations-generate: ## Generates a blank migration class
+	$(SYMFONY) d:m:g
 
 cache-clear: ## Clears and warms up the application cache for a given environment and debug mode
 	$(SYMFONY) c:c
@@ -185,11 +189,19 @@ stop: ## Stop docker and the Symfony binary server
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
+load-fixtures: ## Build the DB, control the schema validity, load fixtures and check the migration status
+	@$(SYMFONY) doctrine:cache:clear-metadata
+	@$(SYMFONY) doctrine:database:create --if-not-exists
+	@$(SYMFONY) doctrine:schema:drop --force
+	@$(SYMFONY) doctrine:schema:create
+	@$(SYMFONY) doctrine:schema:validate
+	@$(SYMFONY) d:f:l
+
 coverage-html: ## Create the code coverage report with PHPUnit
-	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Integration --coverage-html=coverage/html
+	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
 
 coverage-xml: ## Create the code coverage report with PHPUnit
-	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --testsuite Unit,Integration --coverage-clover coverage/coverage.xml
+	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover coverage/coverage.xml
 
 generate-openapi-spec:
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml

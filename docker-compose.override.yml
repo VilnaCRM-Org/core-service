@@ -41,6 +41,5 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
       - ./infrastructure/docker/php/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-
 volumes:
   localstack_data:

@@ -1,7 +1,6 @@
-# config/packages/api_platform.yaml
 api_platform:
-  title: 'Core Service API'
-  description: 'This API provides endpoints to manage core service data within a VilnaCRM.'
+  title: 'PHP Service Template API'
+  description: 'This API provides endpoints to manage php service template data within a VilnaCRM.'
   version: '1.0.0'
 
   use_symfony_listeners: false
@@ -10,23 +9,14 @@ api_platform:
     overrideResponses: false
 
   defaults:
-    pagination_partial: true
-    paginationClientItemsPerPage: true
     extra_properties:
       rfc_7807_compliant_errors: true
 
   formats:
-    jsonld: ['application/ld+json']
+    json: ['application/json']
 
   error_formats:
     jsonproblem: ['application/problem+json']
 
-  # Tell API Platform where your domain classes live
   resource_class_directories:
-    - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'
     - '%kernel.project_dir%/src/Internal/HealthCheck/Domain/ValueObject'
-
-  # <<< Add this section to load all YAML files in your custom resources folder
-  mapping:
-    paths:
-      - '%kernel.project_dir%/config/api_platform/resources'
