@@ -15,7 +15,7 @@
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "^4.0",
-    "api-platform/doctrine-odm": "^4.0",
+    "api-platform/doctrine-odm": "*",
     "aws/aws-sdk-php": "^3.317.1",
     "cfpinto/graphql": "^2.0",
     "doctrine/mongodb-odm": "^2.10",
@@ -101,8 +101,7 @@
     }
   },
   "require-dev": {
-    "behat/behat": "^3.12",
-    "behat/gherkin": "4.12.0",
+    "behat/behat": "^3.18",
     "behat/mink": "^1.12",
     "behat/mink-browserkit-driver": "^2.0",
     "captainhook/captainhook": "^5.22",
@@ -128,5 +127,6 @@
     "twentytwo-labs/behat-open-api": "^1.0",
     "vimeo/psalm": "*",
     "weirdan/doctrine-psalm-plugin": "^2.5"
-  }
+  },
+  "version": "0.2.0"
 }

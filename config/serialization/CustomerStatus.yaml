@@ -1,0 +1,6 @@
+App\Core\Customer\Domain\Entity\CustomerStatus:
+  attributes:
+    ulid:
+      groups: ['read:customerStatus']
+    value:
+      groups: ['read:customerStatus', 'write:customerStatus']

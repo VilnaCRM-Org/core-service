@@ -1,0 +1,20 @@
+App\Core\Customer\Domain\Entity\CustomerStatus:
+  paginationViaCursor:
+    - { field: 'ulid', direction: 'DESC' }
+  operations:
+    ApiPlatform\Metadata\GetCollection:
+      filters:
+        - customer.mongodb.status.order
+        - customer.mongodb.status.partial_search
+        - mongodb.range
+    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Put:
+      input: App\Core\Customer\Application\DTO\StatusPut
+      processor: App\Core\Customer\Application\Processor\CustomerStatusPutProcessor
+    ApiPlatform\Metadata\Patch:
+      input: App\Core\Customer\Application\DTO\StatusPatch
+      processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
+    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Post:
+      input: App\Core\Customer\Application\DTO\StatusCreate
+      processor: App\Core\Customer\Application\Processor\CreateStatusProcessor
