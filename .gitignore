@@ -35,6 +35,7 @@
 
 ###> super-linter/super-linter ###
 super-linter-output
+/node_modules
 super-linter.log
 venv
 ###< super-linter/super-linter ###

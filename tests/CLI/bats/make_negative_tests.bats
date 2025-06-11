@@ -35,9 +35,9 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-     mv tests/Behat/HealthCheckContext/HealthCheckContext.php tests/
+     mv tests/Behat/CustomerContext/CustomerContext.php tests/
      run make behat
-     mv tests/HealthCheckContext.php tests/Behat/HealthCheckContext
+     mv tests/CustomerContext.php tests/Behat/CustomerContext
      assert_failure
 }
 
@@ -61,13 +61,6 @@ load 'bats-assert/load'
   mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
   rmdir src/Internal/HealthCheck/Domain/Entity/
   assert_output --partial "error"
-}
-
-@test "make e2e-tests should fail when scenarios fail" {
-    mv tests/Behat/HealthCheckContext/HealthCheckContext.php tests/
-    run make behat
-    mv tests/HealthCheckContext.php tests/Behat/HealthCheckContext
-    assert_failure
 }
 
 @test "make phpinsights should fail when code quality is low" {
