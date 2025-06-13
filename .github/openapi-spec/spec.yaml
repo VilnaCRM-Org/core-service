@@ -3836,7 +3836,8 @@ components:
             - 'null'
         status:
           type: number
-          example: 404
+          examples:
+            - 404
           default: 400
         instance:
           readOnly: true
