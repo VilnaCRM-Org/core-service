@@ -25,6 +25,7 @@ use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
+/** @psalm-suppress UnusedClass */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     /** @var array<string> */
@@ -273,6 +274,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      *
      * @AfterScenario
      */
+    /** @psalm-suppress UnusedParam */
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
     ): void {

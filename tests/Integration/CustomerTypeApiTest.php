@@ -313,6 +313,7 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
         return ['value' => $value];
     }
 
+    /** @psalm-suppress UnusedReturnValue */
     private function createCustomerType(): string
     {
         return $this->createEntity(

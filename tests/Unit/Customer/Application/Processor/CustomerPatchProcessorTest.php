@@ -24,6 +24,7 @@ use Symfony\Component\Uid\Ulid;
 final class CustomerPatchProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
+    /** @psalm-suppress UnusedReturnValue */
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerRepositoryInterface|MockObject $repository;
@@ -323,6 +324,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         return [$operation, $uriVars, $ulid];
     }
 
+    /** @psalm-suppress UnusedReturnValue */
     private function expectUpdateCommand(
         CustomerPatch $dto,
         CustomerType $type,
