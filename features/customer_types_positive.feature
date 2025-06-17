@@ -6,6 +6,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
   Background:
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
+    And the customers database is empty
 
   Scenario: Retrieve customer types collection with unsupported query parameter
     When I send a GET request to "/api/customer_types?unsupportedParam=value"

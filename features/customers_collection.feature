@@ -6,6 +6,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Background:
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
+    And the customers database is empty
 
   Scenario: Retrieve customers collection with unsupported query parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"

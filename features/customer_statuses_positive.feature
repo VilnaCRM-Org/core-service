@@ -6,6 +6,7 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
   Background:
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
+    And the customers database is empty
 
   Scenario: Retrieve customer statuses collection with unsupported query parameter
     When I send a GET request to "/api/customer_statuses?unsupportedParam=value"

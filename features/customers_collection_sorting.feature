@@ -6,6 +6,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Background:
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
+    And the customers database is empty
 
   Scenario: Retrieve customers collection sorted by leadSource in ascending order
     Given create customer with leadSource "Bing"

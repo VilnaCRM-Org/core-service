@@ -6,6 +6,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
   Background:
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
+    And the customers database is empty
 
   Scenario: Retrieve customers collection sorted by status.value in descending order
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"

@@ -270,6 +270,35 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Given the customers database is empty
+     */
+    public function theCustomersDatabaseIsEmpty(): void
+    {
+        // Очищаємо всіх клієнтів з бази даних
+        $customers = $this->customerRepository->findAll();
+        foreach ($customers as $customer) {
+            $this->customerRepository->delete($customer);
+        }
+
+        // Очищаємо всі статуси
+        $statuses = $this->statusRepository->findAll();
+        foreach ($statuses as $status) {
+            $this->statusRepository->delete($status);
+        }
+
+        // Очищаємо всі типи
+        $types = $this->typeRepository->findAll();
+        foreach ($types as $type) {
+            $this->typeRepository->delete($type);
+        }
+
+        // Очищаємо масиви відстеження
+        $this->createdCustomerIds = [];
+        $this->createdStatusIds = [];
+        $this->createdTypeIds = [];
+    }
+
+    /**
      * Cleanup after each scenario.
      *
      * @AfterScenario
