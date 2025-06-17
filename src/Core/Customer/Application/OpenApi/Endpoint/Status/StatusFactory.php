@@ -28,12 +28,12 @@ final class StatusFactory extends BaseEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private StatusCreateFactory $createCustomerStatusRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        protected StatusCreateFactory $createCustomerStatusRequestFactory,
+        protected ValidationErrorFactory $validationErrorResponseFactory,
+        protected BadRequestResponseFactory $badRequestResponseFactory,
+        protected InternalErrorFactory $internalErrorFactory,
+        protected ForbiddenResponseFactory $forbiddenResponseFactory,
+        protected UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerStatusRequest =
             $this->createCustomerStatusRequestFactory->getRequest();

@@ -40,16 +40,16 @@ final class ParamFactory extends BaseEndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private CustomerFactory $parameterFactory,
-        private UpdateFactory $updateCustomerRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private NotFoundFactory $customerNotFoundFactory,
-        private DeletedFactory $deletedResponseFactory,
-        private CreateFactory $replaceCustomerRequestFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        protected CustomerFactory $parameterFactory,
+        protected UpdateFactory $updateCustomerRequestFactory,
+        protected ValidationErrorFactory $validationErrorResponseFactory,
+        protected BadRequestResponseFactory $badRequestResponseFactory,
+        protected NotFoundFactory $customerNotFoundFactory,
+        protected DeletedFactory $deletedResponseFactory,
+        protected CreateFactory $replaceCustomerRequestFactory,
+        protected InternalErrorFactory $internalErrorFactory,
+        protected ForbiddenResponseFactory $forbiddenResponseFactory,
+        protected UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->ulidWithExamplePathParam =
             $this->parameterFactory->getParameter();
