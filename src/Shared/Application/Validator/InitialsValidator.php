@@ -24,11 +24,15 @@ final class InitialsValidator extends ConstraintValidator
         $this->validateTrimmedValue($value);
     }
 
-    private function shouldSkipValidation(mixed $value, Constraint $constraint): bool
-    {
+    private function shouldSkipValidation(
+        mixed $value,
+        Constraint $constraint
+    ): bool {
         $isNull = $this->isNull($value);
-        $isOptionalAndEmpty = $constraint->isOptional()
-            && $this->isEmpty($value);
+        $isOptional = $constraint->isOptional();
+        $isEmpty = $this->isEmpty($value);
+        $isOptionalAndEmpty = $isOptional
+            && $isEmpty;
 
         return $isNull || $isOptionalAndEmpty;
     }

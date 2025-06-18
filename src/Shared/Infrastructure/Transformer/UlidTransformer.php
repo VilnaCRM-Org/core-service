@@ -47,7 +47,9 @@ final readonly class UlidTransformer
 
     private function createUlidFromValue(mixed $value): Ulid
     {
-        return $value instanceof Ulid ? $value : $this->ulidFactory->create($value);
+        return $value instanceof Ulid
+            ? $value
+            : $this->ulidFactory->create($value);
     }
 
     private function createUlid(string $ulid): Ulid

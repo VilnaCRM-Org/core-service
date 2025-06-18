@@ -59,8 +59,8 @@ abstract class BaseIntegrationTest extends ApiTestCase
     /**
      * @param array<string, string> $payload
      * @param array<string, string> $responseData
+     * @psalm-suppress PossiblyUnusedMethod
      */
-    /** @psalm-suppress PossiblyUnusedMethod */
     protected function assertCreatedResponse(
         array $payload,
         array $responseData
