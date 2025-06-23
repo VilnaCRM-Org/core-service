@@ -13,4 +13,4 @@ final class UlidProvider extends Base
     {
         return new Ulid();
     }
-} 
+}

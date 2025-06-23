@@ -24,20 +24,6 @@ abstract class BaseNegativeApiTest extends ApiTestCase
 
     protected static function getKernelClass(): string
     {
-        $kernel = new 
-            \App\Tests\Integration\Negative\Kernel\NegativeKernel(
-                'test',
-                true
-            );
-        self::assertIsString($kernel->getEnvironment()
-        );
-        $container = static::getContainer();
-        if ($container) {
-            $kernel->configureContainer(
-                $container->get('service_container'),
-                $container->get('routing.loader')
-            );
-        }
         return NegativeKernel::class;
     }
 
