@@ -17,11 +17,27 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         parent::setUp();
         $this->container = $this->getContainer();
         $this->faker = Factory::create();
-        $this->faker->addProvider(new UlidProvider($this->faker));
+        $this->faker->addProvider(
+            new UlidProvider($this->faker)
+        );
     }
 
     protected static function getKernelClass(): string
     {
+        $kernel = new 
+            \App\Tests\Integration\Negative\Kernel\NegativeKernel(
+                'test',
+                true
+            );
+        self::assertIsString($kernel->getEnvironment()
+        );
+        $container = static::getContainer();
+        if ($container) {
+            $kernel->configureContainer(
+                $container->get('service_container'),
+                $container->get('routing.loader')
+            );
+        }
         return NegativeKernel::class;
     }
 
@@ -53,14 +69,5 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $client->request($method, $uri, $options);
 
         $this->assertResponseStatusCodeSame($expectedStatusCode);
-    }
-
-    /** @psalm-suppress PossiblyUnusedMethod */
-    protected function requestAndAssertError(
-        string $method,
-        string $url,
-        int $expectedStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR
-    ): void {
-        $this->sendRequest($method, $url, [], [], $expectedStatusCode);
     }
 }

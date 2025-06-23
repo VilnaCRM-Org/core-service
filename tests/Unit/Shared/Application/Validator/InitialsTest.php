@@ -14,6 +14,21 @@ final class InitialsTest extends UnitTestCase
         $groups = [$this->faker->word(), $this->faker->word()];
         $payload = [$this->faker->word() => $this->faker->word()];
 
+        $ulid = $this->faker->ulid();
+        $this->assertInstanceOf(\Symfony\Component\Uid\Ulid::class, $ulid);
+
+        $provider = new \App\Tests\Unit\UlidProvider($this->faker);
+        $ulidDirect = $provider->ulid();
+        $this->assertInstanceOf(
+            \Symfony\Component\Uid\Ulid::class,
+            $ulidDirect
+        );
+
+        $ulidObj = $this->generateUlid();
+        $ulidStr = $this->generateUlidString();
+        $this->assertInstanceOf(\Symfony\Component\Uid\Ulid::class, $ulidObj);
+        $this->assertIsString($ulidStr);
+
         $constraint = new Initials($groups, $payload);
 
         $this->assertEquals($groups, $constraint->groups);

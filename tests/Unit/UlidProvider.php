@@ -9,9 +9,8 @@ use Symfony\Component\Uid\Ulid;
 
 final class UlidProvider extends Base
 {
-    /** @psalm-suppress PossiblyUnusedMethod */
     public function ulid(): Ulid
     {
         return new Ulid();
     }
-}
+} 
