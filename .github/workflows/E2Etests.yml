@@ -20,12 +20,6 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Fix Behat Gherkin i18n.php path issue
-        run: |
-          if [ -f vendor/behat/gherkin/i18n.php ]; then
-            ln -sf vendor/behat/gherkin/i18n.php vendor/i18n.php
-          fi
-
       - name: Start Application
         run: make start
 
