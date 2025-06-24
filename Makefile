@@ -101,13 +101,7 @@ deptrac-debug: ## Find files unassigned for Deptrac
 	$(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
 behat: ## A php framework for autotesting business expectations
-	$(EXEC_ENV) bash -c "\
-		if [ -f vendor/behat/gherkin/i18n.php ]; then \
-			ln -sf \$$PWD/vendor/behat/gherkin/i18n.php \$$PWD/vendor/i18n.php; \
-		else \
-			touch vendor/i18n.php; \
-		fi; \
-		./vendor/bin/behat"
+	$(EXEC_ENV) $(BEHAT)
 
 integration-tests: ## Run integration tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Integration
