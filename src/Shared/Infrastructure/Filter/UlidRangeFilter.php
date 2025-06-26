@@ -24,6 +24,11 @@ final class UlidRangeFilter extends AbstractFilter implements
 
         return array_merge(
             ...array_map(
+                /**
+                 * @return (bool|string)[][]
+                 *
+                 * @psalm-return array<string, array<string, bool|string>>
+                 */
                 static fn (
                     string $property
                 ): array => self::buildDescriptionForProperty(
@@ -66,7 +71,9 @@ final class UlidRangeFilter extends AbstractFilter implements
     /**
      * @param array<string> $operators
      *
-     * @return array<string, array<string, string|bool>>
+     * @return (bool|string)[][]
+     *
+     * @psalm-return array<string, array<string, bool|string>>
      */
     private static function buildDescriptionForProperty(
         string $property,
@@ -80,6 +87,11 @@ final class UlidRangeFilter extends AbstractFilter implements
                 $operators
             ),
             array_map(
+                /**
+                 * @return (bool|string)[]
+                 *
+                 * @psalm-return array<string, bool|string>
+                 */
                 static fn (
                     string $op
                 ): array => self::buildOperatorDescription($property, $op),
@@ -89,7 +101,9 @@ final class UlidRangeFilter extends AbstractFilter implements
     }
 
     /**
-     * @return array<string, string|bool>
+     * @return (false|string)[]
+     *
+     * @psalm-return array{property: string, type: 'string', required: false, description: string}
      */
     private static function buildOperatorDescription(
         string $property,

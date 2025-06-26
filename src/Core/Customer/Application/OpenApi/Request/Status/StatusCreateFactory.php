@@ -14,6 +14,9 @@ final class StatusCreateFactory extends CustomerStatusRequestFactory
     ) {
     }
 
+    /**
+     * @return RequestBuilder
+     */
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

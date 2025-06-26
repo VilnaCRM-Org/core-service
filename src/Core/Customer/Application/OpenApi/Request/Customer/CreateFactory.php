@@ -13,6 +13,9 @@ final class CreateFactory extends CustomerRequestFactory
     {
     }
 
+    /**
+     * @return RequestBuilder
+     */
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

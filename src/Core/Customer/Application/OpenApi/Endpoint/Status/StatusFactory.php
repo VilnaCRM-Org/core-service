@@ -28,11 +28,17 @@ final class StatusFactory extends BaseEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
+        /** @psalm-suppress UnusedProperty */
         private StatusCreateFactory $createCustomerStatusRequestFactory,
+        /** @psalm-suppress UnusedProperty */
         private ValidationErrorFactory $validationErrorResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private BadRequestResponseFactory $badRequestResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private InternalErrorFactory $internalErrorFactory,
+        /** @psalm-suppress UnusedProperty */
         private ForbiddenResponseFactory $forbiddenResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerStatusRequest =
@@ -79,7 +85,9 @@ final class StatusFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
      */
     private function getPostResponses(): array
     {
@@ -93,7 +101,9 @@ final class StatusFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
      */
     private function getGetResponses(): array
     {

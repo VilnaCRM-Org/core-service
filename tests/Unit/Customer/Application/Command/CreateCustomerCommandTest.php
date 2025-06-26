@@ -38,15 +38,9 @@ final class CreateCustomerCommandTest extends UnitTestCase
     }
 
     /**
-     * @return array{
-     *     initials: string,
-     *     email: string,
-     *     phone: string,
-     *     leadSource: string,
-     *     type: MockObject,
-     *     status: MockObject,
-     *     confirmed: bool
-     * }
+     * @return (MockObject&CustomerStatus|MockObject&CustomerType|bool|string)[]
+     *
+     * @psalm-return array{initials: string, email: string, phone: string, leadSource: string, type: MockObject&CustomerType, status: MockObject&CustomerStatus, confirmed: bool}
      */
     private function getCommandParams(): array
     {

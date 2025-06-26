@@ -18,7 +18,10 @@ final class Ulid implements UlidInterface
         return $this->uid;
     }
 
-    public function toBinary(): string
+    /**
+     * @return false|string
+     */
+    public function toBinary(): string|false
     {
         $ulid = strtr(
             $this->uid,

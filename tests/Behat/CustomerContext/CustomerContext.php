@@ -25,6 +25,9 @@ use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     /** @var array<string> */
@@ -272,6 +275,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      * Cleanup after each scenario.
      *
      * @AfterScenario
+     * @psalm-suppress UnusedParam
      */
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
@@ -339,7 +343,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
+     * @return (CustomerStatus|CustomerType)[]
+     *
+     * @psalm-return list{CustomerType, CustomerStatus}
      */
     private function prepareCustomerEntitiesDefault(string $id): array
     {
@@ -386,7 +392,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
+     * @return (CustomerStatus|CustomerType)[]
+     *
+     * @psalm-return list{CustomerType, CustomerStatus}
      */
     private function prepareCustomerWithValues(
         string $id,

@@ -77,7 +77,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->validate($email, $constraint);
     }
 
-    private function createCustomer(string $email): CustomerInterface
+    private function createCustomer(string $email): \App\Core\Customer\Domain\Entity\Customer
     {
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);

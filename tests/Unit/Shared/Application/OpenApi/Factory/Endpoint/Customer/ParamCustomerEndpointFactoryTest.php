@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Core\Customer\Application\OpenApi\Endpoint\Customer\ParamFactory;
+use App\Core\Customer\Application\OpenApi\Endpoint\Customer\CustomerParamFactory;
 use App\Core\Customer\Application\OpenApi\Request\Customer\CreateFactory;
 use App\Core\Customer\Application\OpenApi\Request\Customer\UpdateFactory;
 use App\Core\Customer\Application\OpenApi\Response\Customer\DeletedFactory;
@@ -122,7 +122,7 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->unauthorizedResponse = $this->createResponseMock();
     }
 
-    private function createResponseMock(): Response
+    private function createResponseMock(): \PHPUnit\Framework\MockObject\MockObject&Response
     {
         return $this->getMockBuilder(Response::class)
             ->disableOriginalConstructor()
@@ -168,9 +168,9 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): ParamFactory
+    private function createFactory(): CustomerParamFactory
     {
-        return new ParamFactory(
+        return new CustomerParamFactory(
             $this->parameterFactory,
             $this->updateCustomerRequestFactory,
             $this->validationErrorFactory,
@@ -226,7 +226,9 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 404: Response, 422: Response, 500: Response}
      */
     private function getUpdateResponses(): array
     {
@@ -241,7 +243,9 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{204: Response, 401: Response, 403: Response, 404: Response, 500: Response}
      */
     private function getDeleteResponses(): array
     {
@@ -255,7 +259,9 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{401: Response, 403: Response, 404: Response, 500: Response}
      */
     private function getGetResponses(): array
     {

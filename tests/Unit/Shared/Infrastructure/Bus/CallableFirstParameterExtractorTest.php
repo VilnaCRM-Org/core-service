@@ -23,7 +23,9 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     {
         $subscriber = new class() implements DomainEventSubscriberInterface {
             /**
-             * @return array<string>
+             * @return string[]
+             *
+             * @psalm-return list{'MyEvent'}
              */
             public function subscribedTo(): array
             {
@@ -69,7 +71,9 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $subscriberClass =
             new class() implements DomainEventSubscriberInterface {
                 /**
-                 * @return array<string>
+                 * @return string[]
+                 *
+                 * @psalm-return list{\App\Shared\Domain\Bus\Event\DomainEvent::class}
                  */
                 public function subscribedTo(): array
                 {
@@ -92,7 +96,9 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $subscriberClass =
             new class() implements DomainEventSubscriberInterface {
                 /**
-                 * @return array<string>
+                 * @return string[]
+                 *
+                 * @psalm-return list{'MyEvent'}
                  */
                 public function subscribedTo(): array
                 {
@@ -112,14 +118,16 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
     private function getSubscriberWithEmptyInvoke(
         string $class
-    ): callable|DomainEventSubscriberInterface {
+    ): object|DomainEventSubscriberInterface {
         return new class($class) implements DomainEventSubscriberInterface {
             public function __construct(private string $subscribedTo)
             {
             }
 
             /**
-             * @return array<string>
+             * @return string[]
+             *
+             * @psalm-return list{string}
              */
             public function subscribedTo(): array
             {

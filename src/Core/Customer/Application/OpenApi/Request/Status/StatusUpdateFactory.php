@@ -13,6 +13,9 @@ final class StatusUpdateFactory extends CustomerStatusRequestFactory
     {
     }
 
+    /**
+     * @return RequestPatchBuilder
+     */
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

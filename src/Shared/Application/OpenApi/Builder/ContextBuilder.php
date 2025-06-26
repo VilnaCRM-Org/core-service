@@ -71,6 +71,8 @@ final class ContextBuilder
      * @param array<string, string> $properties
      * @param array<string, string|int|array> $example
      * @param array<string> $required
+     *
+     * @psalm-return \ArrayObject<string, array{schema: array{type: 'object', properties: array<string, string>, required: array<string>}, example: array<string, array|int|string>}>
      */
     private function buildContent(
         string $contentType,

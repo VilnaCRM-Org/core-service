@@ -56,7 +56,10 @@ final class CallableFirstParameterExtractor
         return null;
     }
 
-    private static function classExtractor(self $parameterExtractor): callable
+    /**
+     * @psalm-return \Closure(callable):(null|string)
+     */
+    private static function classExtractor(self $parameterExtractor): \Closure
     {
         return static fn (
             callable $handler
@@ -73,7 +76,10 @@ final class CallableFirstParameterExtractor
         return $parameterExtractor->extract($handler);
     }
 
-    private static function pipedCallablesReducer(): callable
+    /**
+     * @psalm-return \Closure(array, DomainEventSubscriberInterface):array
+     */
+    private static function pipedCallablesReducer(): \Closure
     {
         return static fn (
             array $subscribers,
@@ -91,7 +97,9 @@ final class CallableFirstParameterExtractor
     /**
      * @param array<DomainEventSubscriberInterface> $subscribers
      *
-     * @return array<int, array<DomainEventSubscriberInterface>>
+     * @return DomainEventSubscriberInterface[]
+     *
+     * @psalm-return array<DomainEventSubscriberInterface>
      */
     private static function addSubscriberToEvent(
         array $subscribers,
@@ -102,7 +110,10 @@ final class CallableFirstParameterExtractor
         return $subscribers;
     }
 
-    private static function unflatten(): callable
+    /**
+     * @psalm-return \Closure(mixed):list{mixed}
+     */
+    private static function unflatten(): \Closure
     {
         return static fn ($value) => [$value];
     }

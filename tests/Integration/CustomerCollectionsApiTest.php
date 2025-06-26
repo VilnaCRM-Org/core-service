@@ -408,7 +408,9 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string>
+     * @return string[]
+     *
+     * @psalm-return list{string, string, string}
      */
     private function createThreeEntities(): array
     {
@@ -446,7 +448,9 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string|bool>
+     * @return (string|true)[]
+     *
+     * @psalm-return array{email: string, phone: string, initials: string, leadSource: string, type: string, status: string, confirmed: true}
      */
     private function getCustomer(string $name = 'Test Customer'): array
     {

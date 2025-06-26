@@ -153,7 +153,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function getNewValue(
         ?string $newValue,
         string $defaultValue
-    ): string {
+    ): string|null {
         return strlen(trim($newValue ?? '')) > 0
             ? $newValue
             : $defaultValue;

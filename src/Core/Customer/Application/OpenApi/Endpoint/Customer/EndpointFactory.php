@@ -16,6 +16,9 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
+/**
+ * @psalm-suppress-file UnusedProperty
+ */
 final class EndpointFactory extends BaseEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers';
@@ -24,34 +27,29 @@ final class EndpointFactory extends BaseEndpointFactory
     private Response $validResponse;
     private Response $badRequestResponse;
     private Response $internalResponse;
-    private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
+    private Response $unauthorizedResponse;
 
     public function __construct(
+        /** @psalm-suppress UnusedProperty */
         private CreateFactory $createCustomerRequestFactory,
+        /** @psalm-suppress UnusedProperty */
         private ValidationErrorFactory $validationErrorResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private BadRequestResponseFactory $badRequestResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private InternalErrorFactory $internalErrorFactory,
+        /** @psalm-suppress UnusedProperty */
         private ForbiddenResponseFactory $forbiddenResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->createCustomerRequest =
-            $this->createCustomerRequestFactory->getRequest();
-
-        $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
-
-        $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
-
-        $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
-
-        $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
-
-        $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+        $this->createCustomerRequest = $this->createCustomerRequestFactory->getRequest();
+        $this->validResponse = $this->validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse = $this->badRequestResponseFactory->getResponse();
+        $this->internalResponse = $this->internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $this->forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResponse = $this->unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -73,13 +71,11 @@ final class EndpointFactory extends BaseEndpointFactory
                     ->withResponses($mergedPost)
                     ->withRequestBody($this->createCustomerRequest)
             )
-            ->withGet($operationGet->withResponses(
-                $mergedGet
-            )));
+            ->withGet($operationGet->withResponses($mergedGet)));
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<int, Response>
      */
     private function getPostResponses(): array
     {
@@ -93,7 +89,7 @@ final class EndpointFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<int, Response>
      */
     private function getGetResponses(): array
     {

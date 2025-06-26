@@ -41,6 +41,15 @@ final class UlidType extends Type
             ->toPhpValue($binary);
     }
 
+    /**
+     * @return string
+     *
+     * @psalm-return '$return = $value instanceof \App\Shared\Domain\ValueObject\Ulid
+    ? new \MongoDB\BSON\Binary(
+    $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
+    )
+    : null;'
+     */
     public function closureToMongo(): string
     {
         return <<<'PHP'
@@ -52,6 +61,21 @@ final class UlidType extends Type
     PHP;
     }
 
+    /**
+     * @return string
+     *
+     * @psalm-return '$return = $value ? (function($value) {
+    $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
+    new \App\Shared\Infrastructure\Factory\UlidFactory()
+    );
+    $binary = $value instanceof \MongoDB\BSON\Binary ? $value
+    ->getData() : $value;
+    if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
+        $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
+    }
+    return $transformer->transformFromSymfonyUlid($binary);
+})($value) : null;'
+     */
     public function closureToPHP(): string
     {
         return <<<'PHP'

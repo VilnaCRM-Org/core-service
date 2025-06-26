@@ -15,25 +15,25 @@ final readonly class UlidTransformer
     {
     }
 
-    public function toDatabaseValue(mixed $value): ?Binary
+    public function toDatabaseValue(string|Ulid|null $value): ?Binary
     {
-        if (
-            $value === null || $this->isInvalidUlidString($value)
-        ) {
+        if ($value === null || $this->isInvalidUlidString($value)) {
             return null;
         }
 
-        $ulid = $value instanceof
-        Ulid ? $value : $this->ulidFactory->create($value);
+        $ulid = $value instanceof Ulid
+            ? $value
+            : $this->ulidFactory->create($value);
+
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPhpValue(mixed $binary): ?Ulid
+    public function toPhpValue(string|SymfonyUlid $binaryData): Ulid
     {
-        if (!$binary instanceof SymfonyUlid) {
-            $binary = SymfonyUlid::fromBinary($binary);
+        if (!$binaryData instanceof SymfonyUlid) {
+            $binaryData = SymfonyUlid::fromBinary($binaryData);
         }
-        return $this->transformFromSymfonyUlid($binary);
+        return $this->transformFromSymfonyUlid($binaryData);
     }
 
     public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
@@ -48,7 +48,6 @@ final readonly class UlidTransformer
 
     private function isInvalidUlidString(mixed $value): bool
     {
-        return is_string($value)
-            && !SymfonyUlid::isValid($value);
+        return is_string($value) && !SymfonyUlid::isValid($value);
     }
 }

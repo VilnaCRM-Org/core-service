@@ -29,7 +29,12 @@ final class UlidFilterProcessor
         return str_ends_with($property, 'ulid');
     }
 
-    private function parseUlidValue(string $value): Ulid|array|null
+    /**
+     * @return Ulid|Ulid[]
+     *
+     * @psalm-return Ulid|list{Ulid, Ulid}
+     */
+    private function parseUlidValue(string $value): array|Ulid|null
     {
         if (str_contains($value, '..')) {
             $parts = explode('..', $value, 2);

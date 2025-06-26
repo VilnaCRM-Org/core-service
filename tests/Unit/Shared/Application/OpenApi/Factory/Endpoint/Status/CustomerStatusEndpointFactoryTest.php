@@ -212,7 +212,9 @@ final class CustomerStatusEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
      */
     private function getPostExpectedResponses(): array
     {
@@ -226,7 +228,9 @@ final class CustomerStatusEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
      */
     private function getGetExpectedResponses(): array
     {

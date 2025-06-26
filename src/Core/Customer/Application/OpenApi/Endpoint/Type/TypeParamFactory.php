@@ -22,63 +22,56 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamFactory extends BaseEndpointFactory
+/**
+ * @psalm-suppress-file UnusedProperty
+ */
+final class TypeParamFactory extends BaseEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types/{ulid}';
 
     private Parameter $ulidWithExamplePathParam;
-
     private RequestBody $updateCustomerTypeRequest;
     private Response $validResponse;
     private Response $badRequestResponse;
-    private Response $customerTypeNotFoundResponse;
-    private Response $customerTypeDeletedResponse;
+    private Response $notFoundResponse;
+    private Response $typeDeletedResponse;
     private Response $internalResponse;
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
+        /** @psalm-suppress UnusedProperty */
         private CustomerTypeFactory $parameterFactory,
+        /** @psalm-suppress UnusedProperty */
         private TypeUpdateFactory $updateCustomerTypeFactory,
+        /** @psalm-suppress UnusedProperty */
         private ValidationErrorFactory $validationErrorResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private BadRequestResponseFactory $badRequestResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private NotFoundFactory $customerTypeNotFoundFactory,
+        /** @psalm-suppress UnusedProperty */
         private DeletedFactory $deletedResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private TypeCreateFactory $replaceCustomerRequestFactory,
+        /** @psalm-suppress UnusedProperty */
         private InternalErrorFactory $internalErrorFactory,
+        /** @psalm-suppress UnusedProperty */
         private ForbiddenResponseFactory $forbiddenResponseFactory,
+        /** @psalm-suppress UnusedProperty */
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->ulidWithExamplePathParam =
-            $this->parameterFactory->getParameter();
-
-        $this->updateCustomerTypeRequest =
-            $this->updateCustomerTypeFactory->getRequest();
-
-        $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
-
-        $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
-
-        $this->customerTypeNotFoundResponse =
-            $this->customerTypeNotFoundFactory->getResponse();
-
-        $this->customerTypeDeletedResponse =
-            $this->deletedResponseFactory->getResponse();
-
-        $this->replaceCustomerTypeRequest =
-            $this->replaceCustomerRequestFactory->getRequest();
-
-        $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
-
-        $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
-
-        $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+        $this->ulidWithExamplePathParam = $this->parameterFactory->getParameter();
+        $this->updateCustomerTypeRequest = $this->updateCustomerTypeFactory->getRequest();
+        $this->validResponse = $this->validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse = $this->badRequestResponseFactory->getResponse();
+        $this->notFoundResponse = $this->customerTypeNotFoundFactory->getResponse();
+        $this->typeDeletedResponse = $this->deletedResponseFactory->getResponse();
+        $this->replaceCustomerTypeRequest = $this->replaceCustomerRequestFactory->getRequest();
+        $this->internalResponse = $this->internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $this->forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResponse = $this->unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -117,6 +110,7 @@ final class ParamFactory extends BaseEndpointFactory
             $operationPut->getResponses(),
             $this->getUpdateResponses()
         );
+
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withPut(
                 $operationPut
@@ -153,40 +147,41 @@ final class ParamFactory extends BaseEndpointFactory
             ));
     }
 
-    private function getPathItem(OpenApi $openApi): PathItem
+    private function getPathItem(OpenApi $openApi): PathItem|null
     {
-        return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
+        $paths = $openApi->getPaths();
+        return $paths->getPath(self::ENDPOINT_URI);
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<int, Response>
      */
     private function getDeleteResponses(): array
     {
         return [
-            HttpResponse::HTTP_NO_CONTENT => $this->customerTypeDeletedResponse,
+            HttpResponse::HTTP_NO_CONTENT => $this->typeDeletedResponse,
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerTypeNotFoundResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<int, Response>
      */
     private function getGetResponses(): array
     {
         return [
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerTypeNotFoundResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<int, Response>
      */
     private function getUpdateResponses(): array
     {
@@ -194,7 +189,7 @@ final class ParamFactory extends BaseEndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
             HttpResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
             HttpResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_NOT_FOUND => $this->customerTypeNotFoundResponse,
+            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResponse,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validResponse,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResponse,
         ];

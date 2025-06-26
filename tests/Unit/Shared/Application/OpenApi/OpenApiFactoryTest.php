@@ -46,7 +46,9 @@ final class OpenApiFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<EndpointFactoryInterface>
+     * @return \PHPUnit\Framework\MockObject\MockObject&EndpointFactoryInterface[]
+     *
+     * @psalm-return list{\PHPUnit\Framework\MockObject\MockObject&EndpointFactoryInterface, \PHPUnit\Framework\MockObject\MockObject&EndpointFactoryInterface}
      */
     private function createEndpointFactories(OpenApi $openApi): array
     {
