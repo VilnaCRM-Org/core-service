@@ -3676,7 +3676,9 @@ components:
           format: iri-reference
           example: 'https://example.com/'
         confirmed:
-          type: boolean
+          type:
+            - boolean
+            - 'null'
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld'
         createdAt:
@@ -3750,7 +3752,7 @@ components:
         value:
           type: string
         ulid:
-          type: string
+          $ref: '#/components/schemas/UlidInterface.jsonld'
     CustomerType.TypeCreate.jsonld:
       type: object
       description: ''
@@ -3825,18 +3827,15 @@ components:
         title:
           readOnly: true
           description: 'A short, human-readable summary of the problem.'
-          type:
-            - string
-            - 'null'
+          type: string
         detail:
           readOnly: true
           description: 'A human-readable explanation specific to this occurrence of the problem.'
-          type:
-            - string
-            - 'null'
+          type: string
         status:
           type: number
-          example: 404
+          examples:
+            - 404
           default: 400
         instance:
           readOnly: true
