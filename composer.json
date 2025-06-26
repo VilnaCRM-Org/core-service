@@ -107,7 +107,7 @@
     "behat/mink-browserkit-driver": "^2.0",
     "captainhook/captainhook": "^5.22",
     "captainhook/plugin-composer": "^5.3",
-    "dg/bypass-finals": "1.5",
+    "dg/bypass-finals": "^1.5",
     "doctrine/data-fixtures": "^2.0",
     "fakerphp/faker": "^1.23.0",
     "friends-of-behat/symfony-extension": "^2.4",
