@@ -6,7 +6,6 @@ namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\UlidRangeFilter;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
