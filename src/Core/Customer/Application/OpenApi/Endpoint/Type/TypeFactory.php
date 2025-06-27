@@ -31,36 +31,23 @@ final class TypeFactory extends BaseEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        /** @psalm-suppress UnusedProperty */
-        private TypeCreateFactory $createCustomerTypeRequestFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private InternalErrorFactory $internalErrorFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        TypeCreateFactory $createCustomerTypeRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerTypeRequest =
-            $this->createCustomerTypeRequestFactory->getRequest();
-
+            $createCustomerTypeRequestFactory->getRequest();
         $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
-
+            $validationErrorResponseFactory->getResponse();
         $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
-
-        $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
-
-        $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
-
+            $badRequestResponseFactory->getResponse();
+        $this->internalResponse = $internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $forbiddenResponseFactory->getResponse();
         $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -88,9 +75,7 @@ final class TypeFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return Response[]
-     *
-     * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
+     * @return array<int, Response>
      */
     private function getPostResponses(): array
     {
@@ -104,9 +89,7 @@ final class TypeFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return Response[]
-     *
-     * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
+     * @return array<int, Response>
      */
     private function getGetResponses(): array
     {

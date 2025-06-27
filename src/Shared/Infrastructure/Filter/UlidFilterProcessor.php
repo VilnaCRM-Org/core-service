@@ -4,56 +4,83 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Filter;
 
+use ApiPlatform\Doctrine\Odm\Filter\FilterInterface;
+use ApiPlatform\Metadata\Operation;
 use App\Shared\Domain\ValueObject\Ulid;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
+use InvalidArgumentException;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
-final class UlidFilterProcessor
+/**
+ * @psalm-suppress UndefinedClass
+ */
+final class UlidFilterProcessor implements FilterInterface
 {
-    public function process(
-        string $property,
-        string $operator,
-        mixed $rawValue,
-        Builder $builder
+    /**
+     * @return array<string, mixed>
+     */
+    public function getDescription(string $resourceClass): array
+    {
+        return [];
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     * @param object $queryNameGenerator
+     *
+     * @psalm-suppress UndefinedClass
+     */
+    public function apply(
+        Builder $aggregationBuilder,
+        object $queryNameGenerator,
+        string $resourceClass,
+        ?Operation $operation = null,
+        array $context = []
     ): void {
-        if (!$this->isUlidProperty($property) || !is_string($rawValue)) {
-            return;
+        $filters = $context['filters'] ?? [];
+
+        foreach ($filters as $property => $value) {
+            if ($this->isUlidProperty($property) &&
+                $this->isValidUlid($value)) {
+                $this->applyUlidFilter(
+                    $aggregationBuilder,
+                    $property,
+                    $value
+                );
+            }
         }
-
-        $parsedValue = $this->parseUlidValue($rawValue);
-
-        $this->applyOperator($operator, $parsedValue, $property, $builder);
     }
 
     private function isUlidProperty(string $property): bool
     {
-        return str_ends_with($property, 'ulid');
+        return str_ends_with($property, 'Id') ||
+            str_ends_with($property, '_id') ||
+            $property === 'id';
     }
 
     /**
-     * @return Ulid|Ulid[]
-     *
-     * @psalm-return Ulid|list{Ulid, Ulid}
+     * @param mixed $value
      */
-    private function parseUlidValue(string $value): array|Ulid|null
+    private function isValidUlid($value): bool
     {
-        if (str_contains($value, '..')) {
-            $parts = explode('..', $value, 2);
-            $min = new Ulid(trim($parts[0]));
-            $max = new Ulid(trim($parts[1]));
-            return [$min, $max];
+        if (!is_string($value)) {
+            return false;
         }
-        return new Ulid($value);
+
+        return SymfonyUlid::isValid($value);
     }
 
-    private function applyOperator(
-        string $operator,
-        Ulid|array $filterValue,
-        string $field,
-        Builder $builder
+    private function applyUlidFilter(
+        Builder $aggregationBuilder,
+        string $property,
+        string $value
     ): void {
-        $class = __NAMESPACE__ . '\\' . ucfirst($operator);
-        /** @var OperatorStrategyInterface $operatorStrategy */
-        $operatorStrategy = new $class();
-        $operatorStrategy->apply($builder, $field, $filterValue);
+        try {
+            $ulid = Ulid::fromString($value);
+            $aggregationBuilder->match()->field($property)->equals($ulid);
+        } catch (InvalidArgumentException $exception) {
+            // Log or handle invalid ULID appropriately
+            error_log('Invalid ULID provided: ' . $exception->getMessage());
+        }
     }
 }

@@ -41,37 +41,34 @@ final class TypeParamFactory extends BaseEndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        /** @psalm-suppress UnusedProperty */
-        private CustomerTypeFactory $parameterFactory,
-        /** @psalm-suppress UnusedProperty */
-        private TypeUpdateFactory $updateCustomerTypeFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private NotFoundFactory $customerTypeNotFoundFactory,
-        /** @psalm-suppress UnusedProperty */
-        private DeletedFactory $deletedResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private TypeCreateFactory $replaceCustomerRequestFactory,
-        /** @psalm-suppress UnusedProperty */
-        private InternalErrorFactory $internalErrorFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        CustomerTypeFactory $parameterFactory,
+        TypeUpdateFactory $updateCustomerTypeRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        NotFoundFactory $customerTypeNotFoundFactory,
+        DeletedFactory $deletedResponseFactory,
+        TypeCreateFactory $replaceCustomerTypeFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->ulidWithExamplePathParam = $this->parameterFactory->getParameter();
-        $this->updateCustomerTypeRequest = $this->updateCustomerTypeFactory->getRequest();
-        $this->validResponse = $this->validationErrorResponseFactory->getResponse();
-        $this->badRequestResponse = $this->badRequestResponseFactory->getResponse();
-        $this->notFoundResponse = $this->customerTypeNotFoundFactory->getResponse();
-        $this->typeDeletedResponse = $this->deletedResponseFactory->getResponse();
-        $this->replaceCustomerTypeRequest = $this->replaceCustomerRequestFactory->getRequest();
-        $this->internalResponse = $this->internalErrorFactory->getResponse();
-        $this->forbiddenResponse = $this->forbiddenResponseFactory->getResponse();
-        $this->unauthorizedResponse = $this->unauthorizedResponseFactory->getResponse();
+        $this->ulidWithExamplePathParam = $parameterFactory->getParameter();
+        $this->updateCustomerTypeRequest =
+            $updateCustomerTypeRequestFactory->getRequest();
+        $this->validResponse =
+            $validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse =
+            $badRequestResponseFactory->getResponse();
+        $this->notFoundResponse =
+            $customerTypeNotFoundFactory->getResponse();
+        $this->typeDeletedResponse =
+            $deletedResponseFactory->getResponse();
+        $this->replaceCustomerTypeRequest =
+            $replaceCustomerTypeFactory->getRequest();
+        $this->internalResponse = $internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResponse =
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -92,13 +89,12 @@ final class TypeParamFactory extends BaseEndpointFactory
         );
         $openApi->getPaths()->addPath(
             self::ENDPOINT_URI,
-            $pathItem
-                ->withPatch(
-                    $operationPatch
-                        ->withParameters([$this->ulidWithExamplePathParam])
-                        ->withRequestBody($this->updateCustomerTypeRequest)
-                        ->withResponses($mergedResponses)
-                )
+            $pathItem->withPatch(
+                $operationPatch
+                    ->withParameters([$this->ulidWithExamplePathParam])
+                    ->withRequestBody($this->updateCustomerTypeRequest)
+                    ->withResponses($mergedResponses)
+            )
         );
     }
 
@@ -111,25 +107,29 @@ final class TypeParamFactory extends BaseEndpointFactory
             $this->getUpdateResponses()
         );
 
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withPut(
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem->withPut(
                 $operationPut
                     ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
                     ->withRequestBody($this->replaceCustomerTypeRequest)
-            ));
+            )
+        );
     }
 
     private function setDeleteOperation(OpenApi $openApi): void
     {
         $pathItem = $this->getPathItem($openApi);
         $operationDelete = $pathItem->getDelete();
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withDelete(
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem->withDelete(
                 $operationDelete
                     ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($this->getDeleteResponses())
-            ));
+            )
+        );
     }
 
     private function setGetOperation(OpenApi $openApi): void
@@ -140,11 +140,14 @@ final class TypeParamFactory extends BaseEndpointFactory
             $operationGet->getResponses(),
             $this->getGetResponses()
         );
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withGet(
-                $operationGet->withParameters([$this->ulidWithExamplePathParam])
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem->withGet(
+                $operationGet
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
-            ));
+            )
+        );
     }
 
     private function getPathItem(OpenApi $openApi): ?PathItem

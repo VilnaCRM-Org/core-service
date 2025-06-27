@@ -4,42 +4,67 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\ValueObject;
 
-final class Ulid implements UlidInterface
-{
-    private string $uid;
+use App\Shared\Domain\Factory\UlidFactoryInterface;
+use InvalidArgumentException;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
-    public function __construct(string $uid)
+final readonly class Ulid implements UlidInterface
+{
+    public function __construct(private string $value)
     {
-        $this->uid = $uid;
+        $this->validate($value);
+    }
+
+    public static function random(): self
+    {
+        return new self(SymfonyUlid::generate());
+    }
+
+    public function toBinary(): string
+    {
+        return SymfonyUlid::fromString($this->value)->toBinary();
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function equals(UlidInterface $other): bool
+    {
+        return $this->value === $other->value();
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public static function fromFactory(UlidFactoryInterface $factory): self
+    {
+        return $factory->createFromString($factory->generate());
     }
 
     public function __toString(): string
     {
-        return $this->uid;
+        return $this->value;
     }
 
-    /**
-     * @return false|string
-     */
-    public function toBinary(): string|false
+    private function validate(string $value): void
     {
-        $ulid = strtr(
-            $this->uid,
-            'ABCDEFGHJKMNPQRSTVWXYZ',
-            'abcdefghijklmnopqrstuv'
-        );
-
-        $ulid = sprintf(
-            '%02s%05s%05s%05s%05s%05s%05s',
-            base_convert(substr($ulid, 0, 2), 32, 16),
-            base_convert(substr($ulid, 2, 4), 32, 16),
-            base_convert(substr($ulid, 6, 4), 32, 16),
-            base_convert(substr($ulid, 10, 4), 32, 16),
-            base_convert(substr($ulid, 14, 4), 32, 16),
-            base_convert(substr($ulid, 18, 4), 32, 16),
-            base_convert(substr($ulid, 22, 4), 32, 16)
-        );
-
-        return hex2bin($ulid);
+        if (!SymfonyUlid::isValid($value)) {
+            throw new InvalidArgumentException(
+                sprintf('Invalid ULID format: %s', $value)
+            );
+        }
     }
 }

@@ -5,135 +5,115 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Bus;
 
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use LogicException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 
 final class CallableFirstParameterExtractor
 {
     /**
-     * @param iterable<DomainEventSubscriberInterface> $callables
+     * @param array<DomainEventSubscriberInterface> $callables
      *
-     * @return array<int, string|null>
+     * @return array<string, array<DomainEventSubscriberInterface>>
      */
-    public static function forCallables(iterable $callables): array
+    public function forCallables(array $callables): array
     {
-        $callableArray = iterator_to_array($callables);
+        $indexedCallables = [];
 
-        $keys = array_map(
-            self::classExtractor(new self()),
-            $callableArray
-        );
-
-        $values = array_map(
-            self::unflatten(),
-            $callableArray
-        );
-
-        return array_combine($keys, $values);
-    }
-
-    /**
-     * @param iterable<DomainEventSubscriberInterface> $callables
-     *
-     * @return array<int, array<DomainEventSubscriberInterface>>
-     */
-    public static function forPipedCallables(iterable $callables): array
-    {
-        return array_reduce(
-            iterator_to_array($callables),
-            self::pipedCallablesReducer(),
-            []
-        );
-    }
-
-    public function extract(object|string $class): ?string
-    {
-        $reflector = new \ReflectionClass($class);
-        $method = $reflector->getMethod('__invoke');
-
-        if ($this->hasOnlyOneParameter($method)) {
-            return $this->firstParameterClassFrom($method);
+        foreach ($callables as $callable) {
+            $indexedCallables[''][] = $callable;
         }
 
-        return null;
+        return $indexedCallables;
     }
 
     /**
-     * @psalm-return \Closure(callable):(null|string)
-     */
-    private static function classExtractor(self $parameterExtractor): \Closure
-    {
-        return static fn (
-            callable $handler
-        ): ?string => self::extractHandler(
-            $parameterExtractor,
-            $handler
-        );
-    }
-
-    private static function extractHandler(
-        self $parameterExtractor,
-        callable $handler
-    ): ?string {
-        return $parameterExtractor->extract($handler);
-    }
-
-    /**
-     * @psalm-return \Closure(array, DomainEventSubscriberInterface):array
-     */
-    private static function pipedCallablesReducer(): \Closure
-    {
-        return static fn (
-            array $subscribers,
-            DomainEventSubscriberInterface $subscriber
-        ): array => array_reduce(
-            $subscriber->subscribedTo(),
-            static fn (
-                array $carry,
-                string $event
-            ) => self::addSubscriberToEvent($carry, $event, $subscriber),
-            $subscribers
-        );
-    }
-
-    /**
-     * @param array<DomainEventSubscriberInterface> $subscribers
+     * @param array<DomainEventSubscriberInterface> $callables
      *
-     * @return DomainEventSubscriberInterface[]
-     *
-     * @psalm-return array<DomainEventSubscriberInterface>
+     * @return array<string, array<DomainEventSubscriberInterface>>
      */
-    private static function addSubscriberToEvent(
-        array $subscribers,
-        string $event,
-        DomainEventSubscriberInterface $subscriber
-    ): array {
-        $subscribers[$event][] = $subscriber;
-        return $subscribers;
+    public function forPipedCallables(array $callables): array
+    {
+        $indexedCallables = [];
+
+        foreach ($callables as $callable) {
+            $this->pipedCallablesFor($indexedCallables, $callable);
+        }
+
+        return $indexedCallables;
     }
 
-    /**
-     * @psalm-return \Closure(mixed):list{mixed}
-     */
-    private static function unflatten(): \Closure
+    public function extract(DomainEventSubscriberInterface $subscriber): string
     {
-        return static fn ($value) => [$value];
+        $subscriberClass = $subscriber::class;
+        $method = $this->getInvokeMethod($subscriberClass);
+        $this->validateMethodParameters($method, $subscriberClass);
+
+        return $this->extractFirstParameterType($method, $subscriberClass);
     }
 
-    private function firstParameterClassFrom(\ReflectionMethod $method): string
+    private function getInvokeMethod(string $subscriberClass): ReflectionMethod
     {
-        /** @var \ReflectionNamedType $firstParameterType */
-        $firstParameterType = $method->getParameters()[0]->getType();
-
-        if ($firstParameterType === null) {
-            throw new \LogicException(
-                'Missing type hint for the first parameter of __invoke'
+        try {
+            $reflection = new ReflectionClass($subscriberClass);
+            return $reflection->getMethod('__invoke');
+        } catch (ReflectionException $error) {
+            $message = sprintf(
+                'Trying to get a method \'__invoke\' from a class \'%s\' ' .
+                'that does not exist. %s',
+                $subscriberClass,
+                $error->getMessage()
             );
+            throw new LogicException($message);
+        }
+    }
+
+    private function validateMethodParameters(
+        ReflectionMethod $method,
+        string $subscriberClass
+    ): void {
+        if ($method->getNumberOfParameters() !== 1) {
+            $message = sprintf(
+                'Method \'__invoke\' of class \'%s\' has an invalid number ' .
+                'of arguments. Expected 1, given %d',
+                $subscriberClass,
+                $method->getNumberOfParameters()
+            );
+            throw new LogicException($message);
+        }
+    }
+
+    private function extractFirstParameterType(
+        ReflectionMethod $method,
+        string $subscriberClass
+    ): string {
+        $firstParameter = $method->getParameters()[0];
+        $firstParameterType = $firstParameter->getType();
+
+        if (!$firstParameterType instanceof \ReflectionNamedType) {
+            $message = sprintf(
+                'Method \'__invoke\' of class \'%s\' has an invalid first ' .
+                'parameter. Expected a class, given none.',
+                $subscriberClass
+            );
+            throw new LogicException($message);
         }
 
         return $firstParameterType->getName();
     }
 
-    private function hasOnlyOneParameter(\ReflectionMethod $method): bool
-    {
-        return $method->getNumberOfParameters() === 1;
+    /**
+     * @param array<string, array<DomainEventSubscriberInterface>> $indexedCallables
+     */
+    private function pipedCallablesFor(
+        array &$indexedCallables,
+        DomainEventSubscriberInterface $callable
+    ): void {
+        $subscribedEvents = $callable->subscribedTo();
+
+        foreach ($subscribedEvents as $eventClass) {
+            $indexedCallables[$eventClass][] = $callable;
+        }
     }
 }

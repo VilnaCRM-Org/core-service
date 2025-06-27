@@ -22,9 +22,6 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-/**
- * @psalm-suppress-file UnusedProperty
- */
 final class CustomerParamFactory extends BaseEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers/{ulid}';
@@ -41,37 +38,33 @@ final class CustomerParamFactory extends BaseEndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        /** @psalm-suppress UnusedProperty */
-        private CustomerFactory $parameterFactory,
-        /** @psalm-suppress UnusedProperty */
-        private UpdateFactory $updateCustomerRequestFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private NotFoundFactory $customerNotFoundFactory,
-        /** @psalm-suppress UnusedProperty */
-        private DeletedFactory $deletedResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private CreateFactory $replaceCustomerRequestFactory,
-        /** @psalm-suppress UnusedProperty */
-        private InternalErrorFactory $internalErrorFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        CustomerFactory $parameterFactory,
+        UpdateFactory $updateCustomerRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        NotFoundFactory $customerNotFoundFactory,
+        DeletedFactory $deletedResponseFactory,
+        CreateFactory $replaceCustomerRequestFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->ulidWithExamplePathParam = $this->parameterFactory->getParameter();
-        $this->updateCustomerRequest = $this->updateCustomerRequestFactory->getRequest();
-        $this->validResponse = $this->validationErrorResponseFactory->getResponse();
-        $this->badRequestResponse = $this->badRequestResponseFactory->getResponse();
-        $this->customerNotFoundResponse = $this->customerNotFoundFactory->getResponse();
-        $this->customerDeletedResponse = $this->deletedResponseFactory->getResponse();
-        $this->replaceCustomerRequest = $this->replaceCustomerRequestFactory->getRequest();
-        $this->internalResponse = $this->internalErrorFactory->getResponse();
-        $this->forbiddenResponse = $this->forbiddenResponseFactory->getResponse();
-        $this->unauthorizedResponse = $this->unauthorizedResponseFactory->getResponse();
+        $this->ulidWithExamplePathParam = $parameterFactory->getParameter();
+        $this->updateCustomerRequest =
+            $updateCustomerRequestFactory->getRequest();
+        $this->validResponse =
+            $validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse = $badRequestResponseFactory->getResponse();
+        $this->customerNotFoundResponse =
+            $customerNotFoundFactory->getResponse();
+        $this->customerDeletedResponse =
+            $deletedResponseFactory->getResponse();
+        $this->replaceCustomerRequest =
+            $replaceCustomerRequestFactory->getRequest();
+        $this->internalResponse = $internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResponse =
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

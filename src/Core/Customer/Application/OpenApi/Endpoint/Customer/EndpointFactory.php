@@ -31,25 +31,23 @@ final class EndpointFactory extends BaseEndpointFactory
     private Response $unauthorizedResponse;
 
     public function __construct(
-        /** @psalm-suppress UnusedProperty */
-        private CreateFactory $createCustomerRequestFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private InternalErrorFactory $internalErrorFactory,
-        /** @psalm-suppress UnusedProperty */
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        /** @psalm-suppress UnusedProperty */
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        CreateFactory $createCustomerRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->createCustomerRequest = $this->createCustomerRequestFactory->getRequest();
-        $this->validResponse = $this->validationErrorResponseFactory->getResponse();
-        $this->badRequestResponse = $this->badRequestResponseFactory->getResponse();
-        $this->internalResponse = $this->internalErrorFactory->getResponse();
-        $this->forbiddenResponse = $this->forbiddenResponseFactory->getResponse();
-        $this->unauthorizedResponse = $this->unauthorizedResponseFactory->getResponse();
+        $this->createCustomerRequest =
+            $createCustomerRequestFactory->getRequest();
+        $this->validResponse =
+            $validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse =
+            $badRequestResponseFactory->getResponse();
+        $this->internalResponse = $internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResponse =
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

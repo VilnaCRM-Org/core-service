@@ -118,8 +118,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
     private function getSubscriberWithEmptyInvoke(
         string $class
-    ): DomainEventSubscriberInterface
-    {
+    ): DomainEventSubscriberInterface {
         return new class($class) implements DomainEventSubscriberInterface {
             public function __construct(private string $subscribedTo)
             {

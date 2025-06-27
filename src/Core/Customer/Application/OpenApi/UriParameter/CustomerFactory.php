@@ -8,11 +8,6 @@ use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriParameterFactory;
 
 final class CustomerFactory extends UlidUriParameterFactory
 {
-    /**
-     * @return string
-     *
-     * @psalm-return 'Customer identifier'
-     */
     protected function getDescription(): string
     {
         return 'Customer identifier';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\OpenApi\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
+use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
@@ -21,9 +22,7 @@ abstract class CustomerRequestFactory implements RequestFactoryInterface
     abstract protected function getRequestBuilder(): RequestBuilderInterface;
 
     /**
-     * @return Parameter[]
-     *
-     * @psalm-return list{Parameter, Parameter, Parameter, Parameter, Parameter, Parameter, Parameter}
+     * @return array<int, Response>
      */
     protected function getDefaultParameters(): array
     {

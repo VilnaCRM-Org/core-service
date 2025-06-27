@@ -42,54 +42,45 @@ final class UlidType extends Type
     }
 
     /**
-     * @return string
-     *
      * @psalm-return '$return = $value instanceof \App\Shared\Domain\ValueObject\Ulid
-    ? new \MongoDB\BSON\Binary(
-    $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
-    )
-    : null;'
-     */
+    *     ? new \MongoDB\BSON\Binary(
+    *     $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
+    *     )
+    *     : null;'
+    */
     public function closureToMongo(): string
     {
-        return <<<'PHP'
-    $return = $value instanceof \App\Shared\Domain\ValueObject\Ulid
-        ? new \MongoDB\BSON\Binary(
-        $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
-        )
-        : null;
-    PHP;
+        return '$return = $value instanceof ' .
+            '\App\Shared\Domain\ValueObject\Ulid ? new ' .
+            '\MongoDB\BSON\Binary($value->toBinary(), ' .
+            '\MongoDB\BSON\Binary::TYPE_GENERIC) : null;';
     }
 
     /**
-     * @return string
-     *
      * @psalm-return '$return = $value ? (function($value) {
-    $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
-    new \App\Shared\Infrastructure\Factory\UlidFactory()
-    );
-    $binary = $value instanceof \MongoDB\BSON\Binary ? $value
-    ->getData() : $value;
-    if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
-        $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
-    }
-    return $transformer->transformFromSymfonyUlid($binary);
-})($value) : null;'
-     */
+    *     $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
+    *     new \App\Shared\Infrastructure\Factory\UlidFactory()
+    *     );
+    *     $binary = $value instanceof \MongoDB\BSON\Binary ? $value
+    *     ->getData() : $value;
+    *     if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
+    *         $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
+    *     }
+    *     return $transformer->transformFromSymfonyUlid($binary);
+    * })($value) : null;'
+    */
     public function closureToPHP(): string
     {
-        return <<<'PHP'
-$return = $value ? (function($value) {
-    $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
-    new \App\Shared\Infrastructure\Factory\UlidFactory()
-    );
-    $binary = $value instanceof \MongoDB\BSON\Binary ? $value
-    ->getData() : $value;
-    if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
-        $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
-    }
-    return $transformer->transformFromSymfonyUlid($binary);
-})($value) : null;
-PHP;
+        return '$return = $value ? (function($value) {
+            $transformer = new ' .
+            '\App\Shared\Infrastructure\Transformer\UlidTransformer(' .
+            'new \App\Shared\Infrastructure\Factory\UlidFactory());
+            $binary = $value instanceof \MongoDB\BSON\Binary ? ' .
+            '$value->getData() : $value;
+            if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
+                $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
+            }
+            return $transformer->transformFromSymfonyUlid($binary);
+        })($value) : null;';
     }
 }

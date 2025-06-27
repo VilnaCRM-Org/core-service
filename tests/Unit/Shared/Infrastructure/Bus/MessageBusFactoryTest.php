@@ -7,32 +7,54 @@ namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 use App\Shared\Infrastructure\Bus\CallableFirstParameterExtractor;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
 use App\Tests\Unit\UnitTestCase;
-use Symfony\Component\Messenger\Handler\HandlersLocator;
-use Symfony\Component\Messenger\MessageBus;
-use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
 
 final class MessageBusFactoryTest extends UnitTestCase
 {
-    public function testCreate(): void
+    public function testCreateCommandBus(): void
     {
         $commandHandlers = [];
+        $extractor = new CallableFirstParameterExtractor();
+        $factory = new MessageBusFactory($extractor);
 
-        $factory = new MessageBusFactory();
+        $commandBus = $factory->createCommandBus($commandHandlers);
 
-        $messageBus = $factory->create($commandHandlers);
-        $expectedMessageBus = new MessageBus(
-            [
-                new HandleMessageMiddleware(
-                    new HandlersLocator(
-                        CallableFirstParameterExtractor::forCallables(
-                            $commandHandlers
-                        )
-                    )
-                ),
-            ]
+        $this->assertInstanceOf(
+            \App\Shared\Domain\Bus\Command\CommandBusInterface::class,
+            $commandBus
         );
+    }
 
-        $this->assertInstanceOf(MessageBus::class, $messageBus);
-        $this->assertEquals($expectedMessageBus, $messageBus);
+    public function testCreateQueryBus(): void
+    {
+        $queryHandlers = [];
+        $extractor = new CallableFirstParameterExtractor();
+        $factory = new MessageBusFactory($extractor);
+
+        $queryBus = $factory->createQueryBus($queryHandlers);
+
+        /**
+         * @psalm-suppress UndefinedClass
+         */
+        $this->assertInstanceOf(
+            \App\Shared\Domain\Bus\Query\QueryBusInterface::class,
+            $queryBus
+        );
+    }
+
+    public function testCreateEventBus(): void
+    {
+        $subscribers = [];
+        $extractor = new CallableFirstParameterExtractor();
+        $factory = new MessageBusFactory($extractor);
+
+        $eventBus = $factory->createEventBus($subscribers);
+
+        /**
+         * @psalm-suppress UndefinedClass
+         */
+        $this->assertInstanceOf(
+            \App\Shared\Domain\Bus\Event\DomainEventBusInterface::class,
+            $eventBus
+        );
     }
 }

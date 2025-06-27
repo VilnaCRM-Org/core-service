@@ -4,36 +4,42 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Bus\Event;
 
+use App\Shared\Domain\ValueObject\Ulid;
+use DateTimeImmutable;
+
 abstract class DomainEvent
 {
-    private readonly string $eventId;
-    private readonly string $occurredOn;
+    public function __construct(
+        private string $aggregateId,
+        private string $eventId,
+        private string $occurredOn
+    ) {
+    }
 
     /**
+     * @param array<string, string> $body
+     * @psalm-suppress PossiblyUnusedParam
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public function __construct(string $eventId, ?string $occurredOn)
-    {
-        $this->eventId = $eventId;
-        $this->occurredOn = $occurredOn ??
-            self::dateToString(new \DateTimeImmutable());
+    public static function fromPrimitives(
+        string $aggregateId,
+        array $body,
+        string $eventId,
+        string $occurredOn
+    ): static {
+        return new static($aggregateId, $eventId, $occurredOn);
     }
 
     /**
      * @psalm-suppress PossiblyUnusedMethod
      */
-    abstract public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self;
+    public function aggregateId(): string
+    {
+        return $this->aggregateId;
+    }
 
     /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    abstract public static function eventName(): string;
-
-    /**
+     * @return array<string, string>
      * @psalm-suppress PossiblyUnusedMethod
      */
     abstract public function toPrimitives(): array;
@@ -48,8 +54,31 @@ abstract class DomainEvent
         return $this->occurredOn;
     }
 
-    private function dateToString(\DateTimeInterface $date): string
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public static function eventName(): string
     {
-        return $date->format(\DateTimeInterface::ATOM);
+        return static::class;
+    }
+
+    /**
+     * @param array<string, string|int|bool|float|null> $body
+     * @psalm-suppress PossiblyUnusedParam
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public static function fromDomain(
+        string $aggregateId,
+        array $body = [],
+        ?string $eventId = null,
+        ?string $occurredOn = null
+    ): static {
+        return new static(
+            $aggregateId,
+            $eventId ?? Ulid::random()->value(),
+            $occurredOn ?? (new DateTimeImmutable())->format(
+            DateTimeImmutable::ATOM
+        )
+        );
     }
 }
