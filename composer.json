@@ -98,10 +98,14 @@
       "allow-contrib": true,
       "require": "7.1.*",
       "docker": true
+    },
+    "_comments": {
+      "behat-gherkin": "Version locked to 4.10 due to compatibility issues. See: https://github.com/Behat/Gherkin/issues/317"
     }
   },
   "require-dev": {
-    "behat/behat": "^3.18",
+    "behat/behat": "^3.19",
+    "behat/gherkin": "4.10",
     "behat/mink": "^1.12",
     "behat/mink-browserkit-driver": "^2.0",
     "captainhook/captainhook": "^5.22",
