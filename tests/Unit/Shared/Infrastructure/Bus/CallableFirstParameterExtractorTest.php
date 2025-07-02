@@ -66,7 +66,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
     public function testExtractFromInvokableClass(): void
     {
-        $invokable = new class () {
+        $invokable = new class() {
             public function __invoke(DomainEvent $event): void
             {
                 Assert::assertNotNull($event);
@@ -83,7 +83,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     public function testIndexedSkipsNullResults(): void
     {
         $validSubscriber = $this->createSubscriber('ValidEvent');
-        $invalidSubscriber = new class () {
+        $invalidSubscriber = new class() {
         };
 
         $extractor = CallableFirstParameterExtractor::forCallables([
@@ -98,7 +98,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
     private function createSubscriber(string $eventClass): DomainEventSubscriberInterface
     {
-        return new class ($eventClass) implements DomainEventSubscriberInterface {
+        return new class($eventClass) implements DomainEventSubscriberInterface {
             public function __construct(private string $eventClass)
             {
             }
@@ -115,7 +115,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
             private function createMockEvent(): object
             {
-                return new class ($this->eventClass) {
+                return new class($this->eventClass) {
                     public function __construct(private string $className)
                     {
                     }
@@ -134,7 +134,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
     private function createDomainEventSubscriber(): DomainEventSubscriberInterface
     {
-        return new class () implements DomainEventSubscriberInterface {
+        return new class() implements DomainEventSubscriberInterface {
             public function subscribedTo(): array
             {
                 $mockEvent = $this->createMock(DomainEvent::class);
@@ -148,7 +148,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
 
             private function createMock(string $className): object
             {
-                return new class ($className) {
+                return new class($className) {
                     public function __construct(string $className)
                     {
                     }

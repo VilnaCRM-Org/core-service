@@ -18,7 +18,7 @@ final class UniqueEmailValidator extends ConstraintValidator
     /**
      * @param null|string $value
      */
-    public function validate(string|null $value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if ($value === null || $value === '') {
             return;

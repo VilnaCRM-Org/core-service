@@ -11,7 +11,7 @@ final class Gte implements OperatorStrategyInterface
     public function apply(
         Builder $builder,
         string $field,
-        \App\Shared\Domain\ValueObject\Ulid $filterValue
+        mixed $filterValue
     ): void {
         $builder->match()->field($field)->gte($filterValue);
     }

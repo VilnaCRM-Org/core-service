@@ -16,7 +16,7 @@ final class Between implements OperatorStrategyInterface
     public function apply(
         Builder $builder,
         string $field,
-        array|\App\Shared\Domain\ValueObject\Ulid $filterValue
+        mixed $filterValue
     ): void {
         if (count($filterValue) === 2) {
             $builder->match()

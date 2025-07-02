@@ -86,7 +86,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function updateInitials(
         CustomerPatch $data,
         Customer $customer
-    ): string|null {
+    ): ?string {
         return $this->getNewValue(
             $data->initials,
             $customer->getInitials()
@@ -96,7 +96,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function updateEmail(
         CustomerPatch $data,
         Customer $customer
-    ): string|null {
+    ): ?string {
         return $this->getNewValue(
             $data->email,
             $customer->getEmail()
@@ -106,7 +106,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function updatePhone(
         CustomerPatch $data,
         Customer $customer
-    ): string|null {
+    ): ?string {
         return $this->getNewValue(
             $data->phone,
             $customer->getPhone()
@@ -116,7 +116,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function updateLeadSource(
         CustomerPatch $data,
         Customer $customer
-    ): string|null {
+    ): ?string {
         return $this->getNewValue(
             $data->leadSource,
             $customer->getLeadSource()
@@ -153,7 +153,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     private function getNewValue(
         ?string $newValue,
         string $defaultValue
-    ): string|null {
+    ): ?string {
         return strlen(trim($newValue ?? '')) > 0
             ? $newValue
             : $defaultValue;

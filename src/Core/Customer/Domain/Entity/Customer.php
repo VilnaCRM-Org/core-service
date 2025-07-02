@@ -103,7 +103,7 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function isConfirmed(): bool|null
+    public function isConfirmed(): ?bool
     {
         return $this->confirmed;
     }

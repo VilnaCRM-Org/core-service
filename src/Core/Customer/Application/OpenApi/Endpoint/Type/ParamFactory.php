@@ -37,6 +37,7 @@ final class ParamFactory extends BaseEndpointFactory
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerTypeRequest;
+
     public function __construct(
         CustomerTypeFactory $parameterFactory,
         TypeUpdateFactory $updateCustomerTypeFactory,
@@ -152,7 +153,7 @@ final class ParamFactory extends BaseEndpointFactory
             ));
     }
 
-    private function getPathItem(OpenApi $openApi): PathItem|null
+    private function getPathItem(OpenApi $openApi): ?PathItem
     {
         return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
     }

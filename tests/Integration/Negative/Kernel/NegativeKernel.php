@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Negative\Kernel;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
 final class NegativeKernel extends BaseKernel

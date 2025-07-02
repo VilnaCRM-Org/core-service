@@ -153,7 +153,7 @@ final class ParamFactory extends BaseEndpointFactory
             ));
     }
 
-    private function getPathItem(OpenApi $openApi): PathItem|null
+    private function getPathItem(OpenApi $openApi): ?PathItem
     {
         return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
     }
