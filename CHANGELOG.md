@@ -1,11 +1,8 @@
 # [0.4.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.3.0...v0.4.0) (2025-07-01)
 
-
 ### Features
 
-* **deps:** bump brace-expansion from 1.1.11 to 1.1.12 in /tests/Load in the npm_and_yarn group ([#40](https://github.com/VilnaCRM-Org/core-service/issues/40)) ([af77b17](https://github.com/VilnaCRM-Org/core-service/commit/af77b17f528de81f5de50179f983302610a86b94))
-
-
+- **deps:** bump brace-expansion from 1.1.11 to 1.1.12 in /tests/Load in the npm_and_yarn group ([#40](https://github.com/VilnaCRM-Org/core-service/issues/40)) ([af77b17](https://github.com/VilnaCRM-Org/core-service/commit/af77b17f528de81f5de50179f983302610a86b94))
 
 # [0.3.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.2.0...v0.3.0) (2025-06-30)
 
