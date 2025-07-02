@@ -18,17 +18,26 @@ class Customer implements CustomerInterface
         private CustomerType $type,
         private CustomerStatus $status,
         private ?bool $confirmed,
+        /** @psalm-suppress UnusedProperty */
         private UlidInterface $ulid,
+        /** @psalm-suppress UnusedProperty */
         private DateTimeInterface $createdAt = new DateTimeImmutable(),
+        /** @psalm-suppress UnusedProperty */
         private DateTimeInterface $updatedAt = new DateTimeImmutable(),
     ) {
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function getUlid(): string
     {
         return (string) $this->ulid;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setUlid(UlidInterface $ulid): void
     {
         $this->ulid = $ulid;
@@ -94,27 +103,7 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getCreatedAt(): DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(DateTimeInterface $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    public function getUpdatedAt(): DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
-    public function isConfirmed(): bool
+    public function isConfirmed(): bool|null
     {
         return $this->confirmed;
     }
@@ -122,5 +111,37 @@ class Customer implements CustomerInterface
     public function setConfirmed(bool $confirmed): void
     {
         $this->confirmed = $confirmed;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function getCreatedAt(): DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function setCreatedAt(DateTimeInterface $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function getUpdatedAt(): DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 }

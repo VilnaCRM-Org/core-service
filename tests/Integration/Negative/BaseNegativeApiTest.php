@@ -20,6 +20,11 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
 
+    /**
+     * @return string
+     *
+     * @psalm-return Kernel\NegativeKernel::class
+     */
     protected static function getKernelClass(): string
     {
         return NegativeKernel::class;
@@ -53,13 +58,5 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $client->request($method, $uri, $options);
 
         $this->assertResponseStatusCodeSame($expectedStatusCode);
-    }
-
-    protected function requestAndAssertError(
-        string $method,
-        string $url,
-        int $expectedStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR
-    ): void {
-        $this->sendRequest($method, $url, [], [], $expectedStatusCode);
     }
 }

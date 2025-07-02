@@ -20,6 +20,8 @@ abstract class CustomerStatusRequestFactory implements RequestFactoryInterface
 
     /**
      * @return array<Parameter>
+     *
+     * @psalm-return list{Parameter}
      */
     protected function getDefaultParameters(): array
     {

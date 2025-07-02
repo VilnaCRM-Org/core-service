@@ -28,30 +28,30 @@ final class EndpointFactory extends BaseEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private CreateFactory $createCustomerRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        CreateFactory $createCustomerRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerRequest =
-            $this->createCustomerRequestFactory->getRequest();
+            $createCustomerRequestFactory->getRequest();
 
         $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
+            $validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
+            $badRequestResponseFactory->getResponse();
 
         $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
+            $internalErrorFactory->getResponse();
 
         $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
+            $forbiddenResponseFactory->getResponse();
 
         $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -79,7 +79,9 @@ final class EndpointFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
      */
     private function getPostResponses(): array
     {
@@ -93,7 +95,9 @@ final class EndpointFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
      */
     private function getGetResponses(): array
     {

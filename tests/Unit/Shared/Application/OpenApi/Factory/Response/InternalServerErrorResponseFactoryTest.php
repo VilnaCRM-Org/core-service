@@ -31,7 +31,9 @@ final class InternalServerErrorResponseFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<Parameter>
+     * @return Parameter[]
+     *
+     * @psalm-return list{Parameter, Parameter, Parameter, Parameter}
      */
     private function getParams(): array
     {

@@ -830,7 +830,9 @@ final class CustomerApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string|bool|CustomerType|CustomerStatus>
+     * @return (false|string)[]
+     *
+     * @psalm-return array{email: string, phone: string, initials: string, leadSource: string, type: string, status: string, confirmed: false}
      */
     private function getUpdatedCustomerPayload(): array
     {
@@ -872,7 +874,9 @@ final class CustomerApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string|bool>
+     * @return (string|true)[]
+     *
+     * @psalm-return array{email: string, phone: string, initials: string, leadSource: string, type: string, status: string, confirmed: true}
      */
     private function getCustomer(string $name = 'Test Customer'): array
     {

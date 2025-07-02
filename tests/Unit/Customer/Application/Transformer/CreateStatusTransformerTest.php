@@ -67,7 +67,9 @@ final class CreateStatusTransformerTest extends UnitTestCase
     }
 
     /**
-     * @return array<SymfonyUlid, Ulid, CustomerStatus>
+     * @return (MockObject&CustomerStatus|MockObject&SymfonyUlid|MockObject&Ulid|string)[]
+     *
+     * @psalm-return list{string, MockObject&SymfonyUlid, MockObject&Ulid, MockObject&CustomerStatus}
      */
     private function createTestFixtures(): array
     {

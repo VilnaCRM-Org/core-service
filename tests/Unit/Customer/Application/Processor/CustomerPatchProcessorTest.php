@@ -251,7 +251,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @return array{CustomerPatch, Operation, array<string,string>, Customer}
+     * @return (CustomerPatch|MockObject&Customer|MockObject&Operation|string[])[]
+     *
+     * @psalm-return list{CustomerPatch, MockObject&Operation, array{ulid: string}, MockObject&Customer}
      */
     private function prepareProcessData(
         string $initials,
@@ -286,7 +288,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     /**
      * @param array<string, string|bool> $exData
      *
-     * @return array{CustomerPatch, Operation, array<string, string>, Customer}
+     * @return (CustomerPatch|MockObject&Customer|Operation|string[])[]
+     *
+     * @psalm-return list{CustomerPatch, Operation, array<string, string>, MockObject&Customer}
      */
     private function prepareProcessPreserveData(
         CustomerPatch $dto,
@@ -312,7 +316,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @return array{Operation, array<string, string>, Ulid}
+     * @return array{CustomerPatch, Operation, array<string,string>, Customer}
      */
     private function createOperationContext(): array
     {
@@ -328,7 +332,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         CustomerType $type,
         CustomerStatus $status,
         Customer $customer
-    ): UpdateCustomerCommand {
+    ): void
+    {
         $command = $this->createMock(UpdateCustomerCommand::class);
         $this->factory->expects($this->once())
             ->method('create')
@@ -348,6 +353,12 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->commandBus->expects($this->once())
             ->method('dispatch')
             ->with($command);
-        return $command;
+    }
+
+    public function testSomeMethod(): void
+    {
+        [, , $ulid] = $this->createOperationContext();
+
+        $this->assertNotNull($ulid);
     }
 }

@@ -17,42 +17,7 @@ final class NegativeKernel extends BaseKernel
     private const CONFIG_DOCTRINE_YAML = '/config/doctrine.yaml';
 
     /**
-     * @var iterable<string>
+     * @psalm-suppress UnusedProperty
      */
     private array $extraConfigs;
-
-    public function __construct(
-        string $environment,
-        bool $debug,
-    ) {
-        parent::__construct($environment, $debug);
-        $this->extraConfigs = [__DIR__ . self::CONFIG_DOCTRINE_YAML];
-    }
-
-    public function configureContainer(
-        ContainerBuilder $container,
-        LoaderInterface $loader
-    ): void {
-        $confDir = $this->getProjectDir() . '/config';
-        $configFiles = [
-            $confDir . '/packages/*' . self::CONFIG_EXTS,
-            $confDir . '/services' . self::CONFIG_EXTS,
-            $confDir . '/services_' . $this->environment . self::CONFIG_EXTS,
-        ];
-
-        $envDir = $confDir . '/packages/' . $this->environment;
-        if (is_dir($envDir)) {
-            $configFiles[] = $envDir . '/**/*' . self::CONFIG_EXTS;
-        }
-
-        array_walk(
-            $configFiles,
-            static fn ($filePattern) => $loader->load($filePattern, 'glob')
-        );
-
-        array_walk(
-            $this->extraConfigs,
-            static fn ($extraConfig) => $loader->load($extraConfig)
-        );
-    }
 }

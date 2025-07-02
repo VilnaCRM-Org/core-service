@@ -14,6 +14,9 @@ final class UpdateFactory extends CustomerRequestFactory
     {
     }
 
+    /**
+     * @return RequestPatchBuilder
+     */
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

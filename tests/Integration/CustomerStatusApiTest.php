@@ -267,13 +267,18 @@ final class CustomerStatusApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string>
+     * @return string[]
+     *
+     * @psalm-return array{value: string}
      */
     private function getStatusPayload(string $value = 'Active'): array
     {
         return ['value' => $value];
     }
 
+    /**
+     * @psalm-suppress UnusedReturnValue
+     */
     private function createCustomerStatus(): string
     {
         return $this->createEntity(

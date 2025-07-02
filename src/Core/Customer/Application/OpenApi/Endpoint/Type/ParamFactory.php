@@ -37,48 +37,47 @@ final class ParamFactory extends BaseEndpointFactory
     private Response $unauthorizedResponse;
     private Response $forbiddenResponse;
     private RequestBody $replaceCustomerTypeRequest;
-
     public function __construct(
-        private CustomerTypeFactory $parameterFactory,
-        private TypeUpdateFactory $updateCustomerTypeFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private NotFoundFactory $customerTypeNotFoundFactory,
-        private DeletedFactory $deletedResponseFactory,
-        private TypeCreateFactory $replaceCustomerRequestFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        CustomerTypeFactory $parameterFactory,
+        TypeUpdateFactory $updateCustomerTypeFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        NotFoundFactory $customerTypeNotFoundFactory,
+        DeletedFactory $deletedResponseFactory,
+        TypeCreateFactory $replaceCustomerRequestFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->ulidWithExamplePathParam =
-            $this->parameterFactory->getParameter();
+            $parameterFactory->getParameter();
 
         $this->updateCustomerTypeRequest =
-            $this->updateCustomerTypeFactory->getRequest();
+            $updateCustomerTypeFactory->getRequest();
 
         $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
+            $validationErrorResponseFactory->getResponse();
 
         $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
+            $badRequestResponseFactory->getResponse();
 
         $this->customerTypeNotFoundResponse =
-            $this->customerTypeNotFoundFactory->getResponse();
+            $customerTypeNotFoundFactory->getResponse();
 
         $this->customerTypeDeletedResponse =
-            $this->deletedResponseFactory->getResponse();
+            $deletedResponseFactory->getResponse();
 
         $this->replaceCustomerTypeRequest =
-            $this->replaceCustomerRequestFactory->getRequest();
+            $replaceCustomerRequestFactory->getRequest();
 
         $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
+            $internalErrorFactory->getResponse();
 
         $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
+            $forbiddenResponseFactory->getResponse();
 
         $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -153,13 +152,15 @@ final class ParamFactory extends BaseEndpointFactory
             ));
     }
 
-    private function getPathItem(OpenApi $openApi): PathItem
+    private function getPathItem(OpenApi $openApi): PathItem|null
     {
         return $openApi->getPaths()->getPath(self::ENDPOINT_URI);
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return array{204: Response, 401: Response, 403: Response, 404: Response, 500: Response}
      */
     private function getDeleteResponses(): array
     {
@@ -173,7 +174,9 @@ final class ParamFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return array{401: Response, 403: Response, 404: Response, 500: Response}
      */
     private function getGetResponses(): array
     {
@@ -186,7 +189,9 @@ final class ParamFactory extends BaseEndpointFactory
     }
 
     /**
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 404: Response, 422: Response, 500: Response}
      */
     private function getUpdateResponses(): array
     {

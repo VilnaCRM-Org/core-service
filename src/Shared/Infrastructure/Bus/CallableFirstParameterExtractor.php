@@ -10,7 +10,6 @@ final class CallableFirstParameterExtractor
 {
     /**
      * @param iterable<DomainEventSubscriberInterface> $callables
-     *
      * @return array<int, string|null>
      */
     public static function forCallables(iterable $callables): array
@@ -32,8 +31,8 @@ final class CallableFirstParameterExtractor
 
     /**
      * @param iterable<DomainEventSubscriberInterface> $callables
-     *
      * @return array<int, array<DomainEventSubscriberInterface>>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public static function forPipedCallables(iterable $callables): array
     {
@@ -73,6 +72,9 @@ final class CallableFirstParameterExtractor
         return $parameterExtractor->extract($handler);
     }
 
+    /**
+     * @psalm-suppress UnusedMethod
+     */
     private static function pipedCallablesReducer(): callable
     {
         return static fn (
@@ -90,7 +92,6 @@ final class CallableFirstParameterExtractor
 
     /**
      * @param array<DomainEventSubscriberInterface> $subscribers
-     *
      * @return array<int, array<DomainEventSubscriberInterface>>
      */
     private static function addSubscriberToEvent(

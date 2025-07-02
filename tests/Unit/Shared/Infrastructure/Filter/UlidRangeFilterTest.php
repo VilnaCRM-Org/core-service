@@ -352,9 +352,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @param array<string, null> $properties
+     * @param array<string, mixed> $properties
      */
-    private function createFilterWithMapping(array $properties): UlidRangeFilter
+    private function createFilterWithMapping(array $properties): MockObject|UlidRangeFilter
     {
         $filter = $this->getMockBuilder(UlidRangeFilter::class)
             ->setConstructorArgs([
@@ -415,7 +415,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     * @return (Ulid|UlidRangeFilter|string[][])[]
+     *
+     * @psalm-return array{0: Ulid|UlidRangeFilter, 1: Ulid|array<string, array<string, string>>,...}
      */
     private function setupAllOperatorsTest(): array
     {
@@ -432,7 +434,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return array{0: array<string>, 1: array<Ulid>}
+     * @return array<int, array{0: array<array<Ulid|string>>, 1: array<string, mixed>}>
+     *
+     * @psalm-return list{array<int<1, 6>, string>, array<int<1, 6>, Ulid>}
      */
     private function generateUlidTestValues(): array
     {
@@ -451,7 +455,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     /**
      * @param array<int, string> $ulidStrings
      *
-     * @return array<string, array<string, string>>
+     * @return array<int, array{0: array<array<string|null|string>>, 1: array<string, mixed>}>
+     *
+     * @psalm-return array<string, array<string, array<string, string|null>|string>>
      */
     private function buildContextForAllOperators(array $ulidStrings): array
     {
@@ -549,7 +555,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     /**
      * @param array<string, array<string, string|null>|string> $filters
      *
-     * @return array<string, array<string, array<string, string|null>|string>>
+     * @return array<int, array{0: array<array<string|null|string>>, 1: array<string, mixed>}>
+     *
+     * @psalm-return array{filters: array<string, array<string, string|null>|string>}
      */
     private function buildContext(array $filters): array
     {

@@ -25,6 +25,9 @@ use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     /** @var array<string> */
@@ -272,6 +275,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      * Cleanup after each scenario.
      *
      * @AfterScenario
+     * @psalm-suppress UnusedParam
      */
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
@@ -297,7 +301,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     /**
      * @Then delete customer with id :id
      */
-    public function deleteCustomerById(mixed $id): void
+    public function deleteCustomerById(string $id): void
     {
         $customer = $this->customerRepository->find($id);
         $this->customerRepository->delete($customer);
@@ -339,7 +343,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
+     * @return (CustomerStatus|CustomerType)[]
+     *
+     * @psalm-return list{CustomerType, CustomerStatus}
      */
     private function prepareCustomerEntitiesDefault(string $id): array
     {
@@ -386,7 +392,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
+     * @return (CustomerStatus|CustomerType)[]
+     *
+     * @psalm-return list{CustomerType, CustomerStatus}
      */
     private function prepareCustomerWithValues(
         string $id,
@@ -481,5 +489,21 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $customer->setLeadSource($leadSource);
         $this->customerRepository->save($customer);
         $this->trackId($id, $this->createdCustomerIds);
+    }
+
+    /**
+     * @AfterScenario
+     * @psalm-suppress UnusedParam
+     */
+    public function cleanupAfterScenario(AfterScenarioScope $scope): void
+    {
+        $this->cleanupCreatedEntities();
+    }
+
+    private function cleanupCreatedEntities(): void
+    {
+        $this->createdCustomerIds = [];
+        $this->createdStatusIds = [];
+        $this->createdTypeIds = [];
     }
 }

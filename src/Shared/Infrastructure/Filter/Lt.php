@@ -11,7 +11,7 @@ final class Lt implements OperatorStrategyInterface
     public function apply(
         Builder $builder,
         string $field,
-        mixed $filterValue
+        \App\Shared\Domain\ValueObject\Ulid $filterValue
     ): void {
         $builder->match()->field($field)->lt($filterValue);
     }

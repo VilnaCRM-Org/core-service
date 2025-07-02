@@ -96,7 +96,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
         $this->unauthorizedResponse = $this->createResponseMock();
     }
 
-    private function createResponseMock(): Response
+    private function createResponseMock(): \PHPUnit\Framework\MockObject\MockObject&Response
     {
         return $this->getMockBuilder(Response::class)
             ->disableOriginalConstructor()
@@ -196,7 +196,9 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
      */
     private function getPostResponses(): array
     {
@@ -210,7 +212,9 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return array<int, Response>
+     * @return Response[]
+     *
+     * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
      */
     private function getGetResponses(): array
     {

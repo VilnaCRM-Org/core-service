@@ -91,7 +91,7 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         $this->assertStringContainsString($expectedErrorMessage, $content);
     }
 
-    private function createCacheMock(): CacheInterface
+    private function createCacheMock(): \PHPUnit\Framework\MockObject\MockObject&CacheInterface
     {
         $cacheMock = $this->getMockForAbstractClass(
             CacheInterface::class,
@@ -109,7 +109,7 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         return $cacheMock;
     }
 
-    private function createSqsClientMock(): SqsClient
+    private function createSqsClientMock(): \PHPUnit\Framework\MockObject\MockObject&SqsClient
     {
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()

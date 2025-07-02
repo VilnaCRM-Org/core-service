@@ -14,11 +14,7 @@ use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 final class MongoCustomerRepository extends BaseRepository implements
     CustomerRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Customer::class);
-        $this->documentManager = $this->getDocumentManager();
-    }
+
 
     public function findByEmail(string $email): ?Customer
     {

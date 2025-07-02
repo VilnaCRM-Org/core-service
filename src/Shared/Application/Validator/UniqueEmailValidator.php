@@ -7,30 +7,29 @@ namespace App\Shared\Application\Validator;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class UniqueEmailValidator extends ConstraintValidator
 {
     public function __construct(
-        private readonly CustomerRepositoryInterface $customerRepository,
-        private readonly TranslatorInterface $translator
+        private readonly CustomerRepositoryInterface $customerRepository
     ) {
     }
 
-    public function validate(mixed $value, Constraint $constraint): void
+    /**
+     * @param null|string $value
+     */
+    public function validate(string|null $value, Constraint $constraint): void
     {
-        if (
-            $value !== null && $this->customerRepository->findByEmail($value)
-        ) {
-            $this->addViolation($this->translator->trans(
-                'email.not.unique'
-            ));
+        if ($value === null || $value === '') {
+            return;
         }
-    }
 
-    private function addViolation(string $message): void
-    {
-        $this->context->buildViolation($message)
-            ->addViolation();
+        $customer = $this->customerRepository->findByEmail($value);
+
+        if ($customer !== null) {
+            $this->context->buildViolation($constraint->message)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+        }
     }
 }

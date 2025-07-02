@@ -66,7 +66,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     /**
      * @param array<string> $operators
      *
-     * @return array<string, array<string, string|bool>>
+     * @return array<string, array<string, bool|string>>
      */
     private static function buildDescriptionForProperty(
         string $property,
@@ -89,7 +89,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     }
 
     /**
-     * @return array<string, string|bool>
+     * @return array{property: string, type: 'string', required: false, description: string}
      */
     private static function buildOperatorDescription(
         string $property,

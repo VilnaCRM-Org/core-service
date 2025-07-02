@@ -13,9 +13,11 @@ abstract class BaseEndpointFactory implements EndpointFactoryInterface
      * @param array<int,Response> $baseResponses
      * @param array<int,Response> $overrideResponses
      *
-     * @return array<int,Response>
+     * @return array<Response>
+     *
+     * @psalm-return list<Response>
      */
-    public function mergeResponses(
+    protected function mergeResponses(
         array $baseResponses,
         array $overrideResponses,
     ): array {

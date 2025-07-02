@@ -124,3 +124,5 @@ services:
     arguments:
       ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
     autoconfigure: false
+
+  Doctrine\Persistence\ManagerRegistry: '@doctrine_mongodb'

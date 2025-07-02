@@ -13,6 +13,9 @@ final class TypeUpdateFactory extends CustomerTypeRequestFactory
     {
     }
 
+    /**
+     * @return RequestPatchBuilder
+     */
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

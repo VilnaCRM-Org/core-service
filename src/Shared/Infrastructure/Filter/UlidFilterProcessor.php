@@ -9,46 +9,62 @@ use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
 final class UlidFilterProcessor
 {
+    /**
+     * @var array<string, object>
+     */
+    private array $strategies;
+
+    public function __construct()
+    {
+        $this->strategies = [
+            'lt' => new Lt(),
+            'lte' => new Lte(),
+            'gt' => new Gt(),
+            'gte' => new Gte(),
+            'between' => new Between(),
+        ];
+    }
+
     public function process(
-        string $property,
+        string $field,
         string $operator,
-        mixed $rawValue,
+        string $rawValue,
         Builder $builder
     ): void {
-        if (!$this->isUlidProperty($property) || !is_string($rawValue)) {
+        $strategy = $this->strategies[$operator] ?? null;
+        if (!$strategy || !$this->isValidUlid($rawValue)) {
             return;
         }
 
-        $parsedValue = $this->parseUlidValue($rawValue);
-
-        $this->applyOperator($operator, $parsedValue, $property, $builder);
+        $filterValue = $this->prepareFilterValue($operator, $rawValue);
+        $strategy->apply($builder, $field, $filterValue);
     }
 
-    private function isUlidProperty(string $property): bool
-    {
-        return str_ends_with($property, 'ulid');
-    }
-
-    private function parseUlidValue(string $value): Ulid|array|null
-    {
-        if (str_contains($value, '..')) {
-            $parts = explode('..', $value, 2);
-            $min = new Ulid(trim($parts[0]));
-            $max = new Ulid(trim($parts[1]));
-            return [$min, $max];
-        }
-        return new Ulid($value);
-    }
-
-    private function applyOperator(
+    /**
+     * @return Ulid|array<Ulid>
+     */
+    private function prepareFilterValue(
         string $operator,
-        Ulid|array $filterValue,
-        string $field,
-        Builder $builder
-    ): void {
-        $class = __NAMESPACE__ . '\\' . ucfirst($operator);
-        /** @var OperatorStrategyInterface $operatorStrategy */
-        $operatorStrategy = new $class();
-        $operatorStrategy->apply($builder, $field, $filterValue);
+        string $rawValue
+    ): Ulid|array {
+        if ($operator === 'between') {
+            $values = explode(',', $rawValue);
+            return array_map(
+                static fn ($val) => new Ulid(trim($val)),
+                $values
+            );
+        }
+
+        return new Ulid($rawValue);
+    }
+
+    private function isValidUlid(string $value): bool
+    {
+        try {
+            new Ulid($value);
+            return true;
+        } catch (\Exception) {
+            return false;
+        }
     }
 }

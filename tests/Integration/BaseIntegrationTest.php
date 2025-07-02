@@ -57,25 +57,6 @@ abstract class BaseIntegrationTest extends ApiTestCase
     }
 
     /**
-     * @param array<string, string> $payload
-     * @param array<string, string> $responseData
-     */
-    protected function assertCreatedResponse(
-        array $payload,
-        array $responseData
-    ): void {
-        $this->assertResponseStatusCodeSame(201);
-        $this->assertResponseHeaderSame(
-            'content-type',
-            'application/ld+json; charset=utf-8'
-        );
-        $this->assertArrayHasKey('@id', $responseData);
-        if (isset($payload['email'])) {
-            $this->assertSame($payload['email'], $responseData['email']);
-        }
-    }
-
-    /**
      * @param array<string, int|string|float|bool|array|null> $payload
      */
     protected function createEntity(

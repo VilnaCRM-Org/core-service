@@ -11,40 +11,24 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class InitialsValidator extends ConstraintValidator
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
-    public function validate(mixed $value, Constraint $constraint): void
+    public function validate(string $value, Constraint $constraint): void
     {
-        if (
-            $this->isNull($value) ||
-            ($constraint->isOptional() && $this->isEmpty($value))
-        ) {
+        if ($value === null) {
             return;
         }
 
-        $trimmedValue = trim($value);
-
-        if ($this->isEmpty($trimmedValue) && strlen($value) > 0) {
-            $this->addViolation(
-                $this->translator->trans('initials.spaces')
-            );
+        if ($value === '') {
+            return;
         }
-    }
 
-    private function isEmpty(mixed $value): bool
-    {
-        return $value === '';
-    }
-
-    private function isNull(mixed $value): bool
-    {
-        return $value === null;
-    }
-
-    private function addViolation(string $message): void
-    {
-        $this->context->buildViolation($message)->addViolation();
+        if (trim($value) === '') {
+            $this->context
+                ->buildViolation($this->translator->trans('initials.spaces'))
+                ->addViolation();
+        }
     }
 }

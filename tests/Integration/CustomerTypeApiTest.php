@@ -306,13 +306,18 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return array<string, string>
+     * @return string[]
+     *
+     * @psalm-return array{value: string}
      */
     private function getTypePayload(string $value = 'Prospect'): array
     {
         return ['value' => $value];
     }
 
+    /**
+     * @psalm-suppress UnusedReturnValue
+     */
     private function createCustomerType(): string
     {
         return $this->createEntity(

@@ -52,6 +52,8 @@ final class ArrayContextBuilder
      * @param array<string, string> $items
      * @param array<string, string|int|array> $example
      * @param array<string> $required
+     *
+     * @psalm-return \ArrayObject<'application/ld+json', array{schema: array{type: 'array', items: array{properties: array<string, string>}, required: array<string>}, example: list{array<string, array|int|string>}}>
      */
     private function buildContent(
         array $items,
