@@ -8,13 +8,9 @@ final class Ulid implements UlidInterface
 {
     private string $uid;
 
-    public function __construct(string $uid = '')
+    public function __construct(string $uid)
     {
-        if ($uid === '') {
-            $this->uid = \Symfony\Component\Uid\Ulid::generate();
-        } else {
-            $this->uid = $uid;
-        }
+        $this->uid = $uid;
     }
 
     public function __toString(): string

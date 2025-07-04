@@ -47,4 +47,32 @@ final class UlidTest extends UnitTestCase
             'The hexadecimal representation should be 32 characters long.'
         );
     }
+
+    public function testConstructorAndGetValue(): void
+    {
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+
+        $this->assertSame($ulidString, $ulid->getValue());
+        $this->assertSame($ulidString, (string) $ulid);
+    }
+
+    public function testToBinary(): void
+    {
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+
+        $binary = $ulid->toBinary();
+
+        $this->assertIsString($binary);
+        $this->assertSame(16, strlen($binary));
+    }
+
+    public function testToBinaryWithInvalidHex(): void
+    {
+        $ulid = new Ulid('00000000000000000000000000');
+
+        $binary = $ulid->toBinary();
+        $this->assertIsString($binary);
+    }
 }

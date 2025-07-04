@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Bus\Event;
 
+/**
+ * @psalm-consistent-constructor
+ */
 abstract class DomainEvent
 {
     private readonly string $eventId;
     private readonly string $occurredOn;
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(string $eventId, ?string $occurredOn)
     {
         $this->eventId = $eventId;
@@ -18,6 +24,8 @@ abstract class DomainEvent
 
     /**
      * @param array<string, string> $body
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     abstract public static function fromPrimitives(
         array $body,
@@ -25,10 +33,15 @@ abstract class DomainEvent
         string $occurredOn
     ): self;
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     abstract public static function eventName(): string;
 
     /**
      * @return array<string, string>
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     abstract public function toPrimitives(): array;
 

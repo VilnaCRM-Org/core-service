@@ -4,63 +4,68 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Filter;
 
-use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Filter\Between;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use Doctrine\ODM\MongoDB\Aggregation\Stage\MatchStage;
-use PHPUnit\Framework\MockObject\MockObject;
 
 final class BetweenTest extends UnitTestCase
 {
-    private Between $operator;
-    private Builder|MockObject $builder;
-    private MatchStage|MockObject $matchStage;
-
-    protected function setUp(): void
+    public function testApplyWithValidArray(): void
     {
-        $this->operator = new Between();
-        $this->builder = $this->createMock(Builder::class);
-        $this->matchStage = $this->createMock(MatchStage::class);
-    }
+        $between = new Between();
+        $builder = $this->createMock(Builder::class);
+        $matchStage = $this->createMock(MatchStage::class);
 
-    public function testApplyWithValidRange(): void
-    {
-        $field = 'ulid';
-        $min = new Ulid('01JKX8XGHVDZ46MWYMZT94YER4');
-        $max = new Ulid('01JKX8XGHVDZ46MWYMZT94YER5');
-        $filterValue = [$min, $max];
-
-        $this->builder->expects($this->once())
+        $builder->expects($this->once())
             ->method('match')
-            ->willReturn($this->matchStage);
+            ->willReturn($matchStage);
 
-        $this->matchStage->expects($this->once())
+        $matchStage->expects($this->once())
             ->method('field')
-            ->with($field)
-            ->willReturn($this->matchStage);
+            ->with('testField')
+            ->willReturn($matchStage);
 
-        $this->matchStage->expects($this->once())
+        $matchStage->expects($this->once())
             ->method('gte')
-            ->with($min)
-            ->willReturn($this->matchStage);
+            ->with(10)
+            ->willReturn($matchStage);
 
-        $this->matchStage->expects($this->once())
+        $matchStage->expects($this->once())
             ->method('lte')
-            ->with($max)
-            ->willReturn($this->matchStage);
+            ->with(20)
+            ->willReturn($matchStage);
 
-        $this->operator->apply($this->builder, $field, $filterValue);
+        $between->apply($builder, 'testField', [10, 20]);
     }
 
-    public function testApplyWithNonArrayValue(): void
+    public function testApplyIgnoresNonArray(): void
     {
-        $field = 'ulid';
-        $filterValue = new Ulid('01JKX8XGHVDZ46MWYMZT94YER4');
+        $between = new Between();
+        $builder = $this->createMock(Builder::class);
 
-        $this->builder->expects($this->never())
-            ->method('match');
+        $builder->expects($this->never())->method('match');
 
-        $this->operator->apply($this->builder, $field, $filterValue);
+        $between->apply($builder, 'testField', 'not-an-array');
+    }
+
+    public function testApplyIgnoresWrongArraySize(): void
+    {
+        $between = new Between();
+        $builder = $this->createMock(Builder::class);
+
+        $builder->expects($this->never())->method('match');
+
+        $between->apply($builder, 'testField', [1, 2, 3]);
+    }
+
+    public function testApplyIgnoresEmptyArray(): void
+    {
+        $between = new Between();
+        $builder = $this->createMock(Builder::class);
+
+        $builder->expects($this->never())->method('match');
+
+        $between->apply($builder, 'testField', []);
     }
 }

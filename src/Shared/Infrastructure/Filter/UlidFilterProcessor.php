@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Filter;
 
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
 final class UlidFilterProcessor
 {
+    public function __construct(
+        private UlidFactory $ulidFactory = new UlidFactory()
+    ) {
+    }
+
     /**
      * @psalm-param 123|string $rawValue
      */
@@ -36,11 +42,11 @@ final class UlidFilterProcessor
     {
         if (str_contains($value, '..')) {
             $parts = explode('..', $value, 2);
-            $min = new Ulid(trim($parts[0]));
-            $max = new Ulid(trim($parts[1]));
+            $min = $this->ulidFactory->create(trim($parts[0]));
+            $max = $this->ulidFactory->create(trim($parts[1]));
             return [$min, $max];
         }
-        return new Ulid($value);
+        return $this->ulidFactory->create($value);
     }
 
     private function applyOperator(

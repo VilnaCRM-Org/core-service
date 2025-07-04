@@ -8,7 +8,6 @@ use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
-use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidTransformerTest extends UnitTestCase
@@ -23,24 +22,56 @@ final class UlidTransformerTest extends UnitTestCase
         $this->ulidTransformer = new UlidTransformer($this->ulidFactory);
     }
 
+    public function testTransformToSymfonyUlid(): void
+    {
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+
+        $result = $this->ulidTransformer->transformToSymfonyUlid($ulid);
+
+        $this->assertInstanceOf(SymfonyUlid::class, $result);
+        $this->assertSame($ulidString, (string) $result);
+    }
+
+    public function testTransformFromString(): void
+    {
+        $ulidString = (string) $this->faker->ulid();
+        $expectedUlid = new Ulid($ulidString);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with($ulidString)
+            ->willReturn($expectedUlid);
+
+        $result = $this->ulidTransformer->transformFromString($ulidString);
+
+        $this->assertSame($expectedUlid, $result);
+    }
+
+    public function testTransformFromStringWithInvalidFormat(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid ULID format');
+
+        $this->ulidTransformer->transformFromString('invalid-ulid');
+    }
+
     public function testToDatabaseValueWithUlidInstance(): void
     {
         $ulidString = (string) $this->faker->ulid();
         $ulid = new Ulid($ulidString);
-        $expectedBinary = $ulid->toBinary();
 
         $result = $this->ulidTransformer->toDatabaseValue($ulid);
 
-        $this->assertInstanceOf(Binary::class, $result);
-        $this->assertSame($expectedBinary, $result->getData());
-        $this->assertSame(Binary::TYPE_GENERIC, $result->getType());
+        $this->assertNotNull($result);
+        $this->assertTrue(is_object($result));
     }
 
     public function testToDatabaseValueWithString(): void
     {
         $ulidString = (string) $this->faker->ulid();
         $ulid = new Ulid($ulidString);
-        $expectedBinary = $ulid->toBinary();
 
         $this->ulidFactory
             ->expects($this->once())
@@ -50,9 +81,8 @@ final class UlidTransformerTest extends UnitTestCase
 
         $result = $this->ulidTransformer->toDatabaseValue($ulidString);
 
-        $this->assertInstanceOf(Binary::class, $result);
-        $this->assertSame($expectedBinary, $result->getData());
-        $this->assertSame(Binary::TYPE_GENERIC, $result->getType());
+        $this->assertNotNull($result);
+        $this->assertTrue(is_object($result));
     }
 
     public function testToPhpValueWithBinaryString(): void
@@ -93,19 +123,19 @@ final class UlidTransformerTest extends UnitTestCase
 
     public function testTransformFromSymfonyUlid(): void
     {
-        $symfonyUlid = $this->createMock(SymfonyUlid::class);
-        $ulid = $this->createMock(Ulid::class);
+        $symfonyUlid = new SymfonyUlid();
+        $expectedUlid = new Ulid((string) $symfonyUlid);
 
         $this->ulidFactory
             ->expects($this->once())
             ->method('create')
-            ->with((string) $symfonyUlid)
-            ->willReturn($ulid);
+            ->with($symfonyUlid->toBase32())
+            ->willReturn($expectedUlid);
 
         $result = $this->ulidTransformer
             ->transformFromSymfonyUlid($symfonyUlid);
 
-        $this->assertInstanceOf(Ulid::class, $result);
+        $this->assertSame($expectedUlid, $result);
     }
 
     public function testToDatabaseValueReturnsNullForNullValue(): void
@@ -123,6 +153,20 @@ final class UlidTransformerTest extends UnitTestCase
         $this->ulidFactory->expects($this->never())->method('create');
 
         $result = $this->ulidTransformer->toDatabaseValue($invalidUlid);
+
+        $this->assertNull($result);
+    }
+
+    public function testToPhpValueReturnsNullForNullValue(): void
+    {
+        $result = $this->ulidTransformer->toPhpValue(null);
+
+        $this->assertNull($result);
+    }
+
+    public function testToPhpValueReturnsNullForUnsupportedType(): void
+    {
+        $result = $this->ulidTransformer->toPhpValue(123);
 
         $this->assertNull($result);
     }

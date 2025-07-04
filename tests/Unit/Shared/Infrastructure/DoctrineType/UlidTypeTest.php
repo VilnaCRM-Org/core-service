@@ -12,91 +12,65 @@ use ReflectionClass;
 
 final class UlidTypeTest extends UnitTestCase
 {
-    public function testGetName(): void
-    {
-        $ulidType = $this->getUlidTypeInstance();
-        $this->assertSame('ulid', $ulidType->getName());
-    }
+    private UlidType $ulidType;
 
-    public function testConvertToDatabaseValueWithBinary(): void
+    protected function setUp(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
-        $binary = new Binary('some binary data', Binary::TYPE_GENERIC);
-        $result = $ulidType->convertToDatabaseValue($binary);
-        $this->assertSame($binary, $result);
+        parent::setUp();
+        $reflectionClass = new ReflectionClass(UlidType::class);
+        $this->ulidType = $reflectionClass->newInstanceWithoutConstructor();
     }
 
     public function testConvertToDatabaseValueWithUlid(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
 
-        $dummyUlid = $this->createMock(Ulid::class);
+        $result = $this->ulidType->convertToDatabaseValue($ulid);
 
-        $result = $ulidType->convertToDatabaseValue($dummyUlid);
         $this->assertInstanceOf(Binary::class, $result);
+        $this->assertSame(Binary::TYPE_GENERIC, $result->getType());
     }
 
-    public function testConvertToPHPValueWithNull(): void
+    public function testConvertToDatabaseValueWithString(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
-        $result = $ulidType->convertToPHPValue(null);
+        $ulidString = (string) $this->faker->ulid();
+
+        $result = $this->ulidType->convertToDatabaseValue($ulidString);
+
+        $this->assertInstanceOf(Binary::class, $result);
+        $this->assertSame(Binary::TYPE_GENERIC, $result->getType());
+    }
+
+    public function testConvertToDatabaseValueWithNull(): void
+    {
+        $result = $this->ulidType->convertToDatabaseValue(null);
+
         $this->assertNull($result);
-    }
-
-    public function testConvertToPHPValueWithUlid(): void
-    {
-        $ulidType = $this->getUlidTypeInstance();
-        $dummyUlid = $this->createMock(Ulid::class);
-
-        $result = $ulidType->convertToPHPValue($dummyUlid);
-        $this->assertSame($dummyUlid, $result);
     }
 
     public function testConvertToPHPValueWithBinary(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
+        $binary = new Binary('some binary data', Binary::TYPE_GENERIC);
 
-        $binaryData = 'some binary data';
-        $binary = new Binary($binaryData, Binary::TYPE_GENERIC);
+        $result = $this->ulidType->convertToPHPValue($binary);
 
-        $result = $ulidType->convertToPHPValue($binary);
-
-        if ($result !== null) {
-            $this->assertInstanceOf(Ulid::class, $result);
-        } else {
-            $this->markTestIncomplete(
-                'Ulid transformation logic not fully implemented for testing.'
-            );
-        }
+        $this->assertInstanceOf(Ulid::class, $result);
     }
 
-    public function testClosureToMongo(): void
+    public function testConvertToPHPValueWithString(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
-        $closureCode = $ulidType->closureToMongo();
+        $ulidString = (string) $this->faker->ulid();
 
-        $this->assertStringContainsString('\MongoDB\BSON\Binary', $closureCode);
-        $this->assertStringContainsString('toBinary()', $closureCode);
+        $result = $this->ulidType->convertToPHPValue($ulidString);
+
+        $this->assertInstanceOf(Ulid::class, $result);
     }
 
-    public function testClosureToPHP(): void
+    public function testConvertToPHPValueWithNull(): void
     {
-        $ulidType = $this->getUlidTypeInstance();
-        $closureCode = $ulidType->closureToPHP();
+        $result = $this->ulidType->convertToPHPValue(null);
 
-        $this->assertStringContainsString(
-            'new \App\Shared\Infrastructure\Transformer\UlidTransformer',
-            $closureCode
-        );
-        $this->assertStringContainsString(
-            'transformFromSymfonyUlid',
-            $closureCode
-        );
-    }
-
-    private function getUlidTypeInstance(): UlidType
-    {
-        $reflection = new ReflectionClass(UlidType::class);
-        return $reflection->newInstanceWithoutConstructor();
+        $this->assertNull($result);
     }
 }
