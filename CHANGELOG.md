@@ -26,4 +26,4 @@
 
 - **#5:** add Sync GitHub App ([edb8e9e](https://github.com/VilnaCRM-Org/core-service/commit/edb8e9ee87696cd5eca3819f11e9373f0f83df18)), closes [#5](https://github.com/VilnaCRM-Org/core-service/issues/5)
 - **#5:** remove all files and add GitHub App ([5b96692](https://github.com/VilnaCRM-Org/core-service/commit/5b96692e5b9e6fcdb1f8cbb4773564199c2ec91e)), closes [#5](https://github.com/VilnaCRM-Org/core-service/issues/5)
-- **#7:** multiple improvements including behat tests, MongoDB integration, CI fixes, GraphQL/OpenAPI spec generation, and codebase refactoring (see commits ffe35d4...9728859), closes [#7](https://github.com/VilnaCRM-Org/core-service/issues/7)
+- **#7:** fix CLI CI and php-insights (see commits 93a2a8f…08c7525)
