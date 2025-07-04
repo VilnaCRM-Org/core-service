@@ -70,7 +70,7 @@ final class ContextBuilderTest extends UnitTestCase
     }
 
     /**
-     * @return (((null|string)[]|string)[]|string)[]
+     * @return array<string|array<string|array<string|null>>>
      *
      * @psalm-return array{type: 'object', properties: array{name: array{type: 'string', maxLength: null, format: null}, age: array{type: 'integer', maxLength: null, format: null}}, required: list{'name', 'age'}}
      */
@@ -95,7 +95,7 @@ final class ContextBuilderTest extends UnitTestCase
     }
 
     /**
-     * @return (((null|string)[]|string)[]|string)[]
+     * @return array<string|array<string|array<string|null>>>
      *
      * @psalm-return array{type: 'object', properties: array{address: array{type: 'object', maxLength: null, format: null}}, required: list{'address'}}
      */
@@ -117,8 +117,6 @@ final class ContextBuilderTest extends UnitTestCase
     /**
      * @param array<string,string|array<string>> $expectedSchema
      * @param array<string,string|array<string>> $expectedExample
-     *
-     * @psalm-return ArrayObject<'application/problem+json', array{schema: array<string, array<string>|string>, example: array<string, array<string>|string>}>
      */
     private function getExpectedResult(
         array $expectedSchema,
@@ -133,9 +131,7 @@ final class ContextBuilderTest extends UnitTestCase
     }
 
     /**
-     * @return Parameter[]
-     *
-     * @psalm-return list{Parameter, Parameter}
+     * @return array<Parameter>
      */
     private function testBuildWithSimpleParamsGetParams(): array
     {

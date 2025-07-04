@@ -120,6 +120,13 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, $uriVars);
     }
 
+    public function testSomeMethod(): void
+    {
+        [, , $ulid] = $this->createOperationContext();
+
+        $this->assertNotNull($ulid);
+    }
+
     private function setupRepository(Ulid $ulid, Customer $customer): void
     {
         $this->repository->expects($this->once())
@@ -251,7 +258,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     }
 
     /**
-     * @return (CustomerPatch|MockObject&Customer|MockObject&Operation|string[])[]
+     * @return array<CustomerPatch|MockObject&Customer|MockObject&Operation|array<string>>
      *
      * @psalm-return list{CustomerPatch, MockObject&Operation, array{ulid: string}, MockObject&Customer}
      */
@@ -352,12 +359,5 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->commandBus->expects($this->once())
             ->method('dispatch')
             ->with($command);
-    }
-
-    public function testSomeMethod(): void
-    {
-        [, , $ulid] = $this->createOperationContext();
-
-        $this->assertNotNull($ulid);
     }
 }

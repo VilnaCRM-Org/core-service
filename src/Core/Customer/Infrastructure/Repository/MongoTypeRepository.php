@@ -23,7 +23,9 @@ final class MongoTypeRepository extends BaseRepository implements
     public function deleteByValue(string $value): void
     {
         $customerType = $this->findOneByCriteria(['value' => $value]);
-        $this->documentManager->remove($customerType);
-        $this->documentManager->flush();
+        if ($customerType !== null) {
+            $this->documentManager->remove($customerType);
+            $this->documentManager->flush();
+        }
     }
 }

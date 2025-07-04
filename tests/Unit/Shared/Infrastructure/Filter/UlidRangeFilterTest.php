@@ -352,9 +352,9 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @param array<string, mixed> $properties
+     * @param array<string, null> $properties
      */
-    private function createFilterWithMapping(array $properties): MockObject|UlidRangeFilter
+    private function createFilterWithMapping(array $properties): UlidRangeFilter
     {
         $filter = $this->getMockBuilder(UlidRangeFilter::class)
             ->setConstructorArgs([
@@ -415,7 +415,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return (Ulid|UlidRangeFilter|string[][])[]
+     * @return array<Ulid|UlidRangeFilter|array<string, array<string, string>>>
      *
      * @psalm-return array{0: Ulid|UlidRangeFilter, 1: Ulid|array<string, array<string, string>>,...}
      */
@@ -434,9 +434,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return array<int, array{0: array<array<Ulid|string>>, 1: array<string, mixed>}>
-     *
-     * @psalm-return list{array<int<1, 6>, string>, array<int<1, 6>, Ulid>}
+     * @return array{0: array<string>, 1: array<Ulid>}
      */
     private function generateUlidTestValues(): array
     {
@@ -455,7 +453,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     /**
      * @param array<int, string> $ulidStrings
      *
-     * @return array<int, array{0: array<array<string|null|string>>, 1: array<string, mixed>}>
+     * @return array<array<string|array<string|null>>>
      *
      * @psalm-return array<string, array<string, array<string, string|null>|string>>
      */
@@ -555,9 +553,7 @@ final class UlidRangeFilterTest extends UnitTestCase
     /**
      * @param array<string, array<string, string|null>|string> $filters
      *
-     * @return array<int, array{0: array<array<string|null|string>>, 1: array<string, mixed>}>
-     *
-     * @psalm-return array{filters: array<string, array<string, string|null>|string>}
+     * @return array<string, array<string, array<string, string|null>|string>>
      */
     private function buildContext(array $filters): array
     {

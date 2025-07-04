@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat\CustomerContext;
 
+use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
@@ -15,7 +16,6 @@ use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;
-use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use DateInterval;
@@ -25,10 +25,7 @@ use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
-/**
- * @psalm-suppress UnusedClass
- */
-final class CustomerContext implements Context, SnippetAcceptingContext
+final class CustomerContext implements Context
 {
     /** @var array<string> */
     private array $createdCustomerIds = [];
@@ -38,7 +35,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     private array $createdTypeIds = [];
 
     private Generator $faker;
-
     private RestContext $restContext;
 
     public function __construct(
@@ -50,8 +46,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         private StatusFactoryInterface $statusFactory,
         private TypeFactoryInterface $typeFactory,
     ) {
-        $this->faker = Factory::create();
-        $this->faker->addProvider(new UlidProvider($this->faker));
+        $this->initializeFaker();
     }
 
     /**
@@ -69,8 +64,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function iSendAGetDataRequestTo(string $url): void
     {
         $mappedUrl = $this->mapDynamicDates($url);
-        $mappedUrl = getenv('BASE_URL') . $mappedUrl;
-        $this->restContext->iSendARequestTo('GET', $mappedUrl);
+        $fullUrl = $this->buildFullUrl($mappedUrl);
+        $this->restContext->iSendARequestTo('GET', $fullUrl);
     }
 
     /**
@@ -78,13 +73,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithIdExists(string $id): void
     {
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word()
-        );
+        $this->createCustomerWithDefaults($id);
     }
 
     /**
@@ -92,9 +81,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function typeWithIdExists(string $id): void
     {
-        $type = $this->getCustomerType($id);
-        $this->typeRepository->save($type);
-        $this->trackId($id, $this->createdTypeIds);
+        $this->createAndSaveType($id);
     }
 
     /**
@@ -102,9 +89,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function statusWithIdExists(string $id): void
     {
-        $status = $this->getStatus($id);
-        $this->statusRepository->save($status);
-        $this->trackId($id, $this->createdStatusIds);
+        $this->createAndSaveStatus($id);
     }
 
     /**
@@ -112,14 +97,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithInitialsExists(string $initials): void
     {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $initials,
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word()
-        );
+        $data = ['initials' => $initials];
+        $this->createCustomerWithCustomData($data);
     }
 
     /**
@@ -127,14 +106,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithEmailExists(string $email): void
     {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $email,
-            $this->faker->e164PhoneNumber(),
-            'defaultSource'
-        );
+        $data = $this->buildEmailCustomerData($email);
+        $this->createCustomerWithCustomData($data);
     }
 
     /**
@@ -142,14 +115,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithPhoneExists(string $phone): void
     {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $phone,
-            $this->faker->word()
-        );
+        $data = ['phone' => $phone];
+        $this->createCustomerWithCustomData($data);
     }
 
     /**
@@ -157,14 +124,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithLeadSourceExists(string $leadSource): void
     {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerWithLeadSource(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $leadSource
-        );
+        $this->createCustomerWithSpecificLeadSource($leadSource);
     }
 
     /**
@@ -175,16 +135,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         string $status,
         string $id
     ): void {
-        $this->createAndSaveCustomerWithValues(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            true,
-            $type,
-            $status
-        );
+        $this->createCustomerWithSpecificTypeAndStatus($type, $status, $id);
     }
 
     /**
@@ -194,14 +145,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         string $typeValue,
         string $statusValue
     ): void {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerWithValues(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            true,
+        $this->createCustomerWithRandomIdAndTypeStatus(
             $typeValue,
             $statusValue
         );
@@ -212,15 +156,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithConfirmedExists(string $confirmed): void
     {
-        $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            filter_var($confirmed, FILTER_VALIDATE_BOOLEAN)
-        );
+        $confirmedValue = filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
+        $data = ['confirmed' => $confirmedValue];
+        $this->createCustomerWithCustomData($data);
     }
 
     /**
@@ -229,14 +167,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerStatusWithValueExists(string $value): void
     {
         $id = (string) $this->faker->ulid();
-        $status = $this->statusRepository->find($id)
-            ?? $this->statusFactory->create(
-                $value,
-                $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-            );
-        $status->setValue($value);
-        $this->statusRepository->save($status);
-        $this->trackId($id, $this->createdStatusIds);
+        $this->createCustomStatus($id, $value);
     }
 
     /**
@@ -245,57 +176,16 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerTypeWithValueExists(string $value): void
     {
         $id = (string) $this->faker->ulid();
-        $type = $this->getCustomerType($id);
-        $type->setValue($value);
-        $this->typeRepository->save($type);
-        $this->trackId($id, $this->createdTypeIds);
-    }
-
-    public function getCustomerType(string $id): CustomerType
-    {
-        $type = $this->typeFactory->create(
-            $this->faker->word(),
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->trackId($id, $this->createdTypeIds);
-        return $type;
-    }
-
-    public function getStatus(string $id): CustomerStatus
-    {
-        $status = $this->statusFactory->create(
-            $this->faker->word(),
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->trackId($id, $this->createdStatusIds);
-        return $status;
+        $this->createCustomType($id, $value);
     }
 
     /**
-     * Cleanup after each scenario.
-     *
      * @AfterScenario
-     * @psalm-suppress UnusedParam
      */
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
     ): void {
-        foreach ($this->createdCustomerIds as $id) {
-            $this->deleteCustomerById($id);
-        }
-        $this->createdCustomerIds = [];
-
-        foreach ($this->createdStatusIds as $id) {
-            $status = $this->statusRepository->find($id);
-            $this->statusRepository->delete($status);
-        }
-        $this->createdStatusIds = [];
-
-        foreach ($this->createdTypeIds as $id) {
-            $type = $this->typeRepository->find($id);
-            $this->typeRepository->delete($type);
-        }
-        $this->createdTypeIds = [];
+        $this->safeCleanup();
     }
 
     /**
@@ -303,8 +193,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerById(string $id): void
     {
-        $customer = $this->customerRepository->find($id);
-        $this->customerRepository->delete($customer);
+        $this->safeDeleteCustomerById($id);
     }
 
     /**
@@ -312,8 +201,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerByEmail(string $email): void
     {
-        $customer = $this->customerRepository->findByEmail($email);
-        $this->customerRepository->delete($customer);
+        $this->safeDeleteCustomerByEmail($email);
     }
 
     /**
@@ -321,7 +209,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteStatusByValue(string $value): void
     {
-        $this->statusRepository->deleteByValue($value);
+        $this->safeDeleteStatusByValue($value);
     }
 
     /**
@@ -329,181 +217,357 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteTypeByValue(string $value): void
     {
-        $this->typeRepository->deleteByValue($value);
+        $this->safeDeleteTypeByValue($value);
+    }
+
+    private function initializeFaker(): void
+    {
+        $this->faker = Factory::create();
+        $this->faker->addProvider(new UlidProvider($this->faker));
+    }
+
+    private function buildFullUrl(string $mappedUrl): string
+    {
+        return getenv('BASE_URL') . $mappedUrl;
+    }
+
+    private function createCustomerWithDefaults(string $id): void
+    {
+        $type = $this->createAndSaveType($id);
+        $status = $this->createAndSaveStatus($id);
+        $data = $this->getDefaultCustomerData();
+        $this->createAndSaveCustomer($id, $data, $type, $status);
     }
 
     /**
-     * @param array<string> $storage  The array to store IDs.
+     * @return array<string, string>
      */
-    private function trackId(string $id, array &$storage): void
+    private function buildEmailCustomerData(string $email): array
     {
-        if (!in_array($id, $storage, true)) {
-            $storage[] = $id;
+        return [
+            'email' => $email,
+            'leadSource' => 'defaultSource',
+        ];
+    }
+
+    private function createCustomerWithSpecificLeadSource(
+        string $leadSource
+    ): void {
+        $id = (string) $this->faker->ulid();
+        $type = $this->createAndSaveType($id);
+        $status = $this->createAndSaveStatus($id);
+        $data = $this->getDefaultCustomerData();
+        $data['leadSource'] = $leadSource;
+
+        $customer = $this->buildCustomer($id, $data, $type, $status);
+        $customer->setLeadSource($leadSource);
+        $this->saveCustomerAndTrack($customer, $id);
+    }
+
+    private function createCustomerWithSpecificTypeAndStatus(
+        string $typeValue,
+        string $statusValue,
+        string $id
+    ): void {
+        $typeEntity = $this->createCustomType($id, $typeValue);
+        $statusEntity = $this->createCustomStatus($id, $statusValue);
+        $data = $this->getDefaultCustomerData();
+        $this->createAndSaveCustomer($id, $data, $typeEntity, $statusEntity);
+    }
+
+    private function createCustomerWithRandomIdAndTypeStatus(
+        string $typeValue,
+        string $statusValue
+    ): void {
+        $id = (string) $this->faker->ulid();
+        $this->createCustomerWithSpecificTypeAndStatus(
+            $typeValue,
+            $statusValue,
+            $id
+        );
+    }
+
+    private function safeCleanup(): void
+    {
+        try {
+            $this->performCleanup();
+        } catch (\Throwable $e) {
+            error_log('Cleanup failed: ' . $e->getMessage());
         }
     }
 
-    /**
-     * @return (CustomerStatus|CustomerType)[]
-     *
-     * @psalm-return list{CustomerType, CustomerStatus}
-     */
-    private function prepareCustomerEntitiesDefault(string $id): array
+    private function safeDeleteCustomerById(string $id): void
     {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
+        try {
+            $customer = $this->customerRepository->find($id);
+            if ($customer) {
+                $this->customerRepository->delete($customer);
+            }
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete customer', $id, $e);
+        }
+    }
 
+    private function safeDeleteCustomerByEmail(string $email): void
+    {
+        try {
+            $customer = $this->customerRepository->findByEmail($email);
+            if ($customer) {
+                $this->customerRepository->delete($customer);
+            }
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete customer', $email, $e);
+        }
+    }
+
+    private function safeDeleteStatusByValue(string $value): void
+    {
+        try {
+            $this->statusRepository->deleteByValue($value);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete status', $value, $e);
+        }
+    }
+
+    private function safeDeleteTypeByValue(string $value): void
+    {
+        try {
+            $this->typeRepository->deleteByValue($value);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete type', $value, $e);
+        }
+    }
+
+    private function logError(
+        string $message,
+        string $identifier,
+        \Throwable $e
+    ): void {
+        error_log(sprintf(
+            '%s %s: %s',
+            $message,
+            $identifier,
+            $e->getMessage()
+        ));
+    }
+
+    /**
+     * @param array<string, string|bool> $customData
+     */
+    private function createCustomerWithCustomData(array $customData): void
+    {
+        $id = (string) $this->faker->ulid();
+        $type = $this->createAndSaveType($id);
+        $status = $this->createAndSaveStatus($id);
+        $data = array_merge($this->getDefaultCustomerData(), $customData);
+        $this->createAndSaveCustomer($id, $data, $type, $status);
+    }
+
+    private function saveCustomerAndTrack(Customer $customer, string $id): void
+    {
+        $this->customerRepository->save($customer);
+        $this->createdCustomerIds[] = $id;
+    }
+
+    private function performCleanup(): void
+    {
+        $this->cleanupCustomers();
+        $this->cleanupStatuses();
+        $this->cleanupTypes();
+        $this->resetIdArrays();
+    }
+
+    private function cleanupCustomers(): void
+    {
+        foreach ($this->createdCustomerIds as $id) {
+            $this->deleteCustomerById($id);
+        }
+    }
+
+    private function cleanupStatuses(): void
+    {
+        foreach ($this->createdStatusIds as $id) {
+            $this->deleteStatusEntity($id);
+        }
+    }
+
+    private function cleanupTypes(): void
+    {
+        foreach ($this->createdTypeIds as $id) {
+            $this->deleteTypeEntity($id);
+        }
+    }
+
+    private function resetIdArrays(): void
+    {
+        $this->createdCustomerIds = [];
+        $this->createdStatusIds = [];
+        $this->createdTypeIds = [];
+    }
+
+    private function createAndSaveType(string $id): CustomerType
+    {
+        $type = $this->createType($id);
         $type->setValue($this->faker->word());
-        $status->setValue($this->faker->word());
-
         $this->typeRepository->save($type);
+        $this->createdTypeIds[] = $id;
+        return $type;
+    }
+
+    private function createAndSaveStatus(string $id): CustomerStatus
+    {
+        $status = $this->createStatus($id);
+        $status->setValue($this->faker->word());
         $this->statusRepository->save($status);
+        $this->createdStatusIds[] = $id;
+        return $status;
+    }
 
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
+    private function createCustomType(string $id, string $value): CustomerType
+    {
+        $type = $this->createType($id);
+        $type->setValue($value);
+        $this->typeRepository->save($type);
+        $this->createdTypeIds[] = $id;
+        return $type;
+    }
 
-        return [$type, $status];
+    private function createCustomStatus(
+        string $id,
+        string $value
+    ): CustomerStatus {
+        $status = $this->createStatus($id);
+        $status->setValue($value);
+        $this->statusRepository->save($status);
+        $this->createdStatusIds[] = $id;
+        return $status;
+    }
+
+    private function createType(string $id): CustomerType
+    {
+        $ulid = $this->createUlidFromString($id);
+        $word = $this->faker->word();
+        return $this->typeFactory->create($word, $ulid);
+    }
+
+    private function createStatus(string $id): CustomerStatus
+    {
+        $ulid = $this->createUlidFromString($id);
+        $word = $this->faker->word();
+        return $this->statusFactory->create($word, $ulid);
+    }
+
+    /**
+     * @return array<string, string|bool>
+     */
+    private function getDefaultCustomerData(): array
+    {
+        return [
+            'initials' => $this->faker->lexify('??'),
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->e164PhoneNumber(),
+            'leadSource' => $this->faker->word(),
+            'confirmed' => true,
+        ];
+    }
+
+    /**
+     * @param array<string, string|bool> $data
+     */
+    private function createAndSaveCustomer(
+        string $id,
+        array $data,
+        CustomerType $type,
+        CustomerStatus $status
+    ): void {
+        $customer = $this->buildCustomer($id, $data, $type, $status);
+        $this->saveCustomerAndTrack($customer, $id);
+    }
+
+    /**
+     * @param array<string, string|bool> $data
+     */
+    private function buildCustomer(
+        string $id,
+        array $data,
+        CustomerType $type,
+        CustomerStatus $status
+    ): Customer {
+        $ulid = $this->createUlidFromString($id);
+        return $this->customerFactory->create(
+            (string) $data['initials'],
+            (string) $data['email'],
+            (string) $data['phone'],
+            (string) $data['leadSource'],
+            $type,
+            $status,
+            (bool) $data['confirmed'],
+            $ulid
+        );
     }
 
     private function mapDynamicDates(string $url): string
     {
         $pattern = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
+        return preg_replace_callback(
+            $pattern,
+            fn ($matches) => $this->replaceDatePlaceholder($matches),
+            $url
+        ) ?? $url;
+    }
 
-        if (preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $dateTimeFormat = $match[1];  // e.g., "Y-m-d\TH:i:s\Z"
-                $dateTimeInterval = $match[2]; // e.g., "P1Y" or "-P1Y"
+    /**
+     * @param array<string> $matches
+     */
+    private function replaceDatePlaceholder(array $matches): string
+    {
+        $date = $this->createDateWithInterval($matches[2]);
+        return $date->format($matches[1]);
+    }
 
-                $date = new DateTime();
+    private function createDateWithInterval(string $interval): DateTime
+    {
+        $date = new DateTime();
+        $this->applyDateInterval($date, $interval);
+        return $date;
+    }
 
-                if (str_starts_with($dateTimeInterval, '-')) {
-                    $interval = new DateInterval(substr($dateTimeInterval, 1));
-                    $date->sub($interval);
-                } else {
-                    $interval = new DateInterval($dateTimeInterval);
-                    $date->add($interval);
-                }
+    private function applyDateInterval(DateTime $date, string $interval): void
+    {
+        $isNegative = str_starts_with($interval, '-');
+        $cleanInterval = $isNegative ? substr($interval, 1) : $interval;
+        $dateInterval = new DateInterval($cleanInterval);
 
-                $formattedDate = $date->format($dateTimeFormat);
-                $url = str_replace($match[0], $formattedDate, $url);
+        $isNegative ? $date->sub($dateInterval) : $date->add($dateInterval);
+    }
+
+    private function deleteStatusEntity(string $id): void
+    {
+        try {
+            $status = $this->statusRepository->find($id);
+            if ($status) {
+                $this->statusRepository->delete($status);
             }
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete status entity', $id, $e);
         }
-
-        return $url;
     }
 
-    /**
-     * @return (CustomerStatus|CustomerType)[]
-     *
-     * @psalm-return list{CustomerType, CustomerStatus}
-     */
-    private function prepareCustomerWithValues(
-        string $id,
-        string $typeValue,
-        string $statusValue
-    ): array {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
-
-        $type->setValue($typeValue);
-        $status->setValue($statusValue);
-
-        $this->typeRepository->save($type);
-        $this->statusRepository->save($status);
-
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
-
-        return [$type, $status];
-    }
-
-    private function createAndSaveCustomerDefault(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed = true
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    private function createAndSaveCustomerWithValues(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed,
-        string $typeValue,
-        string $statusValue
-    ): void {
-        [$type, $status] = $this->prepareCustomerWithValues(
-            $id,
-            $typeValue,
-            $statusValue
-        );
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    private function createAndSaveCustomerWithLeadSource(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            true,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
-        );
-        $customer->setLeadSource($leadSource);
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    /**
-     * @AfterScenario
-     * @psalm-suppress UnusedParam
-     */
-    public function cleanupAfterScenario(AfterScenarioScope $scope): void
+    private function deleteTypeEntity(string $id): void
     {
-        $this->cleanupCreatedEntities();
+        try {
+            $type = $this->typeRepository->find($id);
+            if ($type) {
+                $this->typeRepository->delete($type);
+            }
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete type entity', $id, $e);
+        }
     }
 
-    private function cleanupCreatedEntities(): void
+    private function createUlidFromString(string $id): object
     {
-        $this->createdCustomerIds = [];
-        $this->createdStatusIds = [];
-        $this->createdTypeIds = [];
+        $symfonyUlid = new Ulid($id);
+        return $this->ulidTransformer->transformFromSymfonyUlid($symfonyUlid);
     }
 }

@@ -39,3 +39,4 @@ super-linter-output
 super-linter.log
 venv
 ###< super-linter/super-linter ###
+tests/Load/node_modules/

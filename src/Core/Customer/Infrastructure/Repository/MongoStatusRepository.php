@@ -23,7 +23,9 @@ final class MongoStatusRepository extends BaseRepository implements
     public function deleteByValue(string $value): void
     {
         $customerStatus = $this->findOneByCriteria(['value' => $value]);
-        $this->documentManager->remove($customerStatus);
-        $this->documentManager->flush();
+        if ($customerStatus !== null) {
+            $this->documentManager->remove($customerStatus);
+            $this->documentManager->flush();
+        }
     }
 }

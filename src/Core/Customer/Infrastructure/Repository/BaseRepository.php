@@ -6,6 +6,7 @@ namespace App\Core\Customer\Infrastructure\Repository;
 
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @template T of object
@@ -16,10 +17,16 @@ abstract class BaseRepository extends ServiceDocumentRepository
 {
     protected DocumentManager $documentManager;
 
+    public function __construct(
+        ManagerRegistry $registry,
+        string $documentClass
+    ) {
+        parent::__construct($registry, $documentClass);
+        $this->documentManager = $this->getDocumentManager();
+    }
+
     /**
      * Persist and flush an entity.
-     *
-     * @param T $entity
      */
     public function save(object $entity): void
     {
@@ -29,8 +36,6 @@ abstract class BaseRepository extends ServiceDocumentRepository
 
     /**
      * Remove and flush an entity.
-     *
-     * @param T $entity
      */
     public function delete(object $entity): void
     {

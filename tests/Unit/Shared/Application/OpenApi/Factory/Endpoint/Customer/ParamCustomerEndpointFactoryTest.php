@@ -22,6 +22,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -122,7 +123,7 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
         $this->unauthorizedResponse = $this->createResponseMock();
     }
 
-    private function createResponseMock(): \PHPUnit\Framework\MockObject\MockObject&Response
+    private function createResponseMock(): MockObject&Response
     {
         return $this->getMockBuilder(Response::class)
             ->disableOriginalConstructor()
@@ -226,7 +227,7 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return Response[]
+     * @return array<Response>
      *
      * @psalm-return array{400: Response, 401: Response, 403: Response, 404: Response, 422: Response, 500: Response}
      */
@@ -243,7 +244,7 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return Response[]
+     * @return array<Response>
      *
      * @psalm-return array{204: Response, 401: Response, 403: Response, 404: Response, 500: Response}
      */
@@ -259,7 +260,7 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     }
 
     /**
-     * @return Response[]
+     * @return array<Response>
      *
      * @psalm-return array{401: Response, 403: Response, 404: Response, 500: Response}
      */

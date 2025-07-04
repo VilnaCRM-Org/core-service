@@ -14,6 +14,9 @@ use Doctrine\Persistence\ManagerRegistry;
 final class MongoCustomerRepository extends BaseRepository implements
     CustomerRepositoryInterface
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Customer::class);

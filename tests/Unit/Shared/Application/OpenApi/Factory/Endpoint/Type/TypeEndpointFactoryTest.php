@@ -239,7 +239,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return Response[]
+     * @return array<Response>
      *
      * @psalm-return array{400: Response, 401: Response, 403: Response, 422: Response, 500: Response}
      */
@@ -255,7 +255,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
     }
 
     /**
-     * @return Response[]
+     * @return array<Response>
      *
      * @psalm-return array{400: Response, 401: Response, 403: Response, 500: Response}
      */

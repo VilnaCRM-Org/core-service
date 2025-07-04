@@ -7,6 +7,7 @@ namespace App\Tests\Integration;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use Aws\Sqs\SqsClient;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Cache\Exception\CacheException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -91,7 +92,7 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         $this->assertStringContainsString($expectedErrorMessage, $content);
     }
 
-    private function createCacheMock(): \PHPUnit\Framework\MockObject\MockObject&CacheInterface
+    private function createCacheMock(): MockObject&CacheInterface
     {
         $cacheMock = $this->getMockForAbstractClass(
             CacheInterface::class,
@@ -109,7 +110,7 @@ final class HealthCheckIntegrationTest extends BaseIntegrationTest
         return $cacheMock;
     }
 
-    private function createSqsClientMock(): \PHPUnit\Framework\MockObject\MockObject&SqsClient
+    private function createSqsClientMock(): MockObject&SqsClient
     {
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()

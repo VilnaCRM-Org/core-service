@@ -408,7 +408,7 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      *
      * @psalm-return list{string, string, string}
      */
@@ -448,7 +448,7 @@ final class CustomerCollectionsApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return (string|true)[]
+     * @return array<string|true>
      *
      * @psalm-return array{email: string, phone: string, initials: string, leadSource: string, type: string, status: string, confirmed: true}
      */

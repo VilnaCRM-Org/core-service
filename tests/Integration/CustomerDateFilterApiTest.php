@@ -112,7 +112,7 @@ final class CustomerDateFilterApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return (string|true)[]
+     * @return array<string|true>
      *
      * @psalm-return array{email: string, phone: string, initials: string, leadSource: string, type: string, status: string, confirmed: true}
      */

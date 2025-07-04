@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Validator;
 
+use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -77,7 +78,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->validate($email, $constraint);
     }
 
-    private function createCustomer(string $email): \App\Core\Customer\Domain\Entity\Customer
+    private function createCustomer(string $email): Customer
     {
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);

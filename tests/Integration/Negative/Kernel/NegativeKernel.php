@@ -15,6 +15,8 @@ final class NegativeKernel extends BaseKernel
     private const CONFIG_DOCTRINE_YAML = '/config/doctrine.yaml';
 
     /**
+     * @var array<string>
+     *
      * @psalm-suppress UnusedProperty
      */
     private array $extraConfigs;

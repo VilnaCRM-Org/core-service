@@ -306,7 +306,7 @@ final class CustomerTypeApiTest extends BaseIntegrationTest
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      *
      * @psalm-return array{value: string}
      */

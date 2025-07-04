@@ -1,0 +1,177 @@
+Escaped mutants:
+================
+
+Timed Out mutants:
+==================
+
+Skipped mutants:
+================
+
+Not Covered mutants:
+====================
+
+1) /srv/app/src/Shared/Application/Validator/Initials.php:23    [M] PublicVisibility
+
+--- Original
++++ New
+@@ @@
+         $this->optional = $optional ?? $this->optional;
+         parent::__construct([], $groups, $payload);
+     }
+-    public function isOptional() : bool
++    protected function isOptional() : bool
+     {
+         return $this->optional;
+     }
+ }
+
+
+2) /srv/app/src/Shared/Application/Validator/InitialsValidator.php:38    [M] MethodCallRemoval
+
+--- Original
++++ New
+@@ @@
+             return true;
+         }
+         if (!is_string($value)) {
+-            $this->addViolation('The value must be a string.');
++            
+             return true;
+         }
+         return false;
+
+
+3) /srv/app/src/Shared/Application/Validator/InitialsValidator.php:39    [M] TrueValue
+
+--- Original
++++ New
+@@ @@
+         }
+         if (!is_string($value)) {
+             $this->addViolation('The value must be a string.');
+-            return true;
++            return false;
+         }
+         return false;
+     }
+
+
+4) /srv/app/src/Shared/Application/Validator/InitialsValidator.php:66    [M] MethodCallRemoval
+
+--- Original
++++ New
+@@ @@
+         $validLength = $length >= self::MIN_LENGTH && $length <= self::MAX_LENGTH;
+         $validPattern = preg_match(self::INITIALS_PATTERN, $value) === 1;
+         if (!$validLength) {
+-            $this->addViolation('Invalid initials length.');
++            
+         }
+         if (!$validPattern) {
+             $this->addViolation('Invalid initials format.');
+
+
+5) /srv/app/src/Shared/Application/Validator/InitialsValidator.php:70    [M] MethodCallRemoval
+
+--- Original
++++ New
+@@ @@
+             $this->addViolation('Invalid initials length.');
+         }
+         if (!$validPattern) {
+-            $this->addViolation('Invalid initials format.');
++            
+         }
+     }
+     private function addViolation(string $message) : void
+
+
+6) /srv/app/src/Shared/Domain/ValueObject/Ulid.php:43    [M] PublicVisibility
+
+--- Original
++++ New
+@@ @@
+         $ulid = sprintf('%02s%05s%05s%05s%05s%05s%05s', base_convert(substr($ulid, 0, 2), 32, 16), base_convert(substr($ulid, 2, 4), 32, 16), base_convert(substr($ulid, 6, 4), 32, 16), base_convert(substr($ulid, 10, 4), 32, 16), base_convert(substr($ulid, 14, 4), 32, 16), base_convert(substr($ulid, 18, 4), 32, 16), base_convert(substr($ulid, 22, 4), 32, 16));
+         return hex2bin($ulid);
+     }
+-    public function getValue() : string
++    protected function getValue() : string
+     {
+         return $this->uid;
+     }
+ }
+
+
+7) /srv/app/src/Shared/Infrastructure/Transformer/UlidTransformer.php:26    [M] PublicVisibility
+
+--- Original
++++ New
+@@ @@
+     {
+         return $this->ulidFactory->create($ulid->toBase32());
+     }
+-    public function transformToSymfonyUlid(Ulid $ulid) : SymfonyUlid
++    protected function transformToSymfonyUlid(Ulid $ulid) : SymfonyUlid
+     {
+         return SymfonyUlid::fromBase32($ulid->getValue());
+     }
+
+
+8) /srv/app/src/Shared/Infrastructure/Transformer/UlidTransformer.php:31    [M] PublicVisibility
+
+--- Original
++++ New
+@@ @@
+     {
+         return SymfonyUlid::fromBase32($ulid->getValue());
+     }
+-    public function transformFromString(string $ulidString) : Ulid
++    protected function transformFromString(string $ulidString) : Ulid
+     {
+         $this->validateUlidString($ulidString);
+         return $this->ulidFactory->create($ulidString);
+
+
+9) /srv/app/src/Shared/Infrastructure/Transformer/UlidTransformer.php:33    [M] MethodCallRemoval
+
+--- Original
++++ New
+@@ @@
+     }
+     public function transformFromString(string $ulidString) : Ulid
+     {
+-        $this->validateUlidString($ulidString);
++        
+         return $this->ulidFactory->create($ulidString);
+     }
+     public function toDatabaseValue(mixed $value) : ?Binary
+
+
+10) /srv/app/src/Shared/Infrastructure/Transformer/UlidTransformer.php:85    [M] LogicalNot
+
+--- Original
++++ New
+@@ @@
+     }
+     private function validateUlidString(string $ulidString) : void
+     {
+-        if (!$this->isValidUlidFormat($ulidString)) {
++        if ($this->isValidUlidFormat($ulidString)) {
+             throw new \InvalidArgumentException('Invalid ULID format');
+         }
+     }
+
+
+11) /srv/app/src/Shared/Infrastructure/Transformer/UlidTransformer.php:86    [M] Throw_
+
+--- Original
++++ New
+@@ @@
+     private function validateUlidString(string $ulidString) : void
+     {
+         if (!$this->isValidUlidFormat($ulidString)) {
+-            throw new \InvalidArgumentException('Invalid ULID format');
++            new \InvalidArgumentException('Invalid ULID format');
+         }
+     }
+     private function isValidUlidFormat(string $ulidString) : bool

@@ -12,147 +12,124 @@ use PHPUnit\Framework\Assert;
 
 final class CallableFirstParameterExtractorTest extends UnitTestCase
 {
-    public function testForCallables(): void
+    private CallableFirstParameterExtractor $extractor;
+
+    protected function setUp(): void
     {
-        $subscriber = $this->createSubscriber('MyEvent');
-        $callables = [$subscriber];
-
-        $extractor = CallableFirstParameterExtractor::forCallables($callables);
-        $result = $extractor->indexed();
-
-        $expected = ['MyEvent' => [$subscriber]];
-        $this->assertEquals($expected, $result);
+        $this->extractor = new CallableFirstParameterExtractor();
     }
 
-    public function testForPimpleCallables(): void
+    public function testExtractForCallables(): void
     {
-        $subscriber1 = $this->createSubscriber('MyEvent1');
-        $subscriber2 = $this->createSubscriber('MyEvent2');
-        $callables = [$subscriber1, $subscriber2];
-
-        $extractor = CallableFirstParameterExtractor::forPimpleCallables($callables);
-        $result = $extractor->indexed();
-
-        $expected = [
-            'MyEvent1' => [$subscriber1],
-            'MyEvent2' => [$subscriber2],
-        ];
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testExtractFromDomainEventSubscriber(): void
-    {
-        $subscriber = $this->createDomainEventSubscriber();
-        $extractor = CallableFirstParameterExtractor::forCallables([$subscriber]);
-
-        $mockEvent = $this->createMock(DomainEvent::class);
-        $result = $extractor->extract($subscriber, $mockEvent);
-
-        $this->assertEquals(DomainEvent::class, $result);
-    }
-
-    public function testExtractFromClosure(): void
-    {
-        $closure = static function (DomainEvent $event): void {
-            Assert::assertNotNull($event);
-        };
-
-        $extractor = CallableFirstParameterExtractor::forCallables([$closure]);
-        $mockEvent = $this->createMock(DomainEvent::class);
-        $result = $extractor->extract($closure, $mockEvent);
-
-        $this->assertEquals(DomainEvent::class, $result);
-    }
-
-    public function testExtractFromInvokableClass(): void
-    {
-        $invokable = new class() {
-            public function __invoke(DomainEvent $event): void
-            {
-                Assert::assertNotNull($event);
-            }
-        };
-
-        $extractor = CallableFirstParameterExtractor::forCallables([$invokable]);
-        $mockEvent = $this->createMock(DomainEvent::class);
-        $result = $extractor->extract($invokable, $mockEvent);
-
-        $this->assertEquals(DomainEvent::class, $result);
-    }
-
-    public function testIndexedSkipsNullResults(): void
-    {
-        $validSubscriber = $this->createSubscriber('ValidEvent');
-        $invalidSubscriber = new class() {
-        };
-
-        $extractor = CallableFirstParameterExtractor::forCallables([
-            $validSubscriber,
-            $invalidSubscriber
-        ]);
-        $result = $extractor->indexed();
-
-        $this->assertArrayHasKey('ValidEvent', $result);
-        $this->assertCount(1, $result);
-    }
-
-    private function createSubscriber(string $eventClass): DomainEventSubscriberInterface
-    {
-        return new class($eventClass) implements DomainEventSubscriberInterface {
-            public function __construct(private string $eventClass)
-            {
-            }
-
+        $subscriber = new class() implements DomainEventSubscriberInterface {
+            /**
+             * @return array<string>
+             */
             public function subscribedTo(): array
             {
-                return [$this->createMockEvent()];
+                return ['MyEvent'];
             }
 
             public function __invoke(): void
             {
                 Assert::assertTrue(true);
             }
-
-            private function createMockEvent(): object
-            {
-                return new class($this->eventClass) {
-                    public function __construct(private string $className)
-                    {
-                    }
-
-                    public function __get(string $name): string
-                    {
-                        if ($name === 'class') {
-                            return $this->className;
-                        }
-                        return '';
-                    }
-                };
-            }
         };
+
+        $callables = [$subscriber];
+
+        $expected = ['' => [$subscriber]];
+
+        $extracted = CallableFirstParameterExtractor::forCallables($callables);
+
+        $this->assertEquals($expected, $extracted);
     }
 
-    private function createDomainEventSubscriber(): DomainEventSubscriberInterface
+    public function testExtractForPipedCallables(): void
     {
-        return new class() implements DomainEventSubscriberInterface {
+        $className1 = 'MyEvent1';
+        $className2 = 'MyEvent2';
+        $subscriber1 = $this->getSubscriberWithEmptyInvoke($className1);
+        $subscriber2 = $this->getSubscriberWithEmptyInvoke($className2);
+
+        $callables = [$subscriber1, $subscriber2];
+
+        $expected = [
+            $className1 => [$subscriber1],
+            $className2 => [$subscriber2],
+        ];
+
+        $extracted =
+            CallableFirstParameterExtractor::forPipedCallables($callables);
+
+        $this->assertEquals($expected, $extracted);
+    }
+
+    public function testExtract(): void
+    {
+        $subscriberClass =
+            new class() implements DomainEventSubscriberInterface {
+                /**
+                 * @return array<string>
+                 */
+                public function subscribedTo(): array
+                {
+                    return [DomainEvent::class];
+                }
+
+                public function __invoke(DomainEvent $someClass): void
+                {
+                    Assert::assertNotNull($someClass);
+                }
+            };
+
+        $extracted = $this->extractor->extract($subscriberClass);
+
+        $this->assertEquals(DomainEvent::class, $extracted);
+    }
+
+    public function testExtractWithError(): void
+    {
+        $subscriberClass =
+            new class() implements DomainEventSubscriberInterface {
+                /**
+                 * @return array<string>
+                 */
+                public function subscribedTo(): array
+                {
+                    return ['MyEvent'];
+                }
+
+                public function __invoke($someClass): void
+                {
+                    Assert::assertNotNull($someClass);
+                }
+            };
+
+        $this->expectException(\LogicException::class);
+
+        $this->extractor->extract($subscriberClass);
+    }
+
+    private function getSubscriberWithEmptyInvoke(
+        string $class
+    ): callable|DomainEventSubscriberInterface {
+        return new class($class) implements DomainEventSubscriberInterface {
+            public function __construct(private string $subscribedTo)
+            {
+            }
+
+            /**
+             * @return array<string>
+             */
             public function subscribedTo(): array
             {
-                $mockEvent = $this->createMock(DomainEvent::class);
-                return [$mockEvent];
+                return [$this->subscribedTo];
             }
 
-            public function __invoke(DomainEvent $event): void
+            public function __invoke(): void
             {
-                Assert::assertNotNull($event);
-            }
-
-            private function createMock(string $className): object
-            {
-                return new class($className) {
-                    public function __construct(string $className)
-                    {
-                    }
-                };
+                Assert::assertTrue(true);
             }
         };
     }

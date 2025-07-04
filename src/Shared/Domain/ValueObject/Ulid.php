@@ -8,9 +8,13 @@ final class Ulid implements UlidInterface
 {
     private string $uid;
 
-    public function __construct(string $uid)
+    public function __construct(string $uid = '')
     {
-        $this->uid = $uid;
+        if ($uid === '') {
+            $this->uid = \Symfony\Component\Uid\Ulid::generate();
+        } else {
+            $this->uid = $uid;
+        }
     }
 
     public function __toString(): string
@@ -18,10 +22,7 @@ final class Ulid implements UlidInterface
         return $this->uid;
     }
 
-    /**
-     * @return false|string
-     */
-    public function toBinary(): string|false
+    public function toBinary(): string
     {
         $ulid = strtr(
             $this->uid,
@@ -40,6 +41,16 @@ final class Ulid implements UlidInterface
             base_convert(substr($ulid, 22, 4), 32, 16)
         );
 
-        return hex2bin($ulid);
+        $binary = hex2bin($ulid);
+        if ($binary === false) {
+            throw new \RuntimeException('Failed to convert ULID to binary');
+        }
+
+        return $binary;
+    }
+
+    public function getValue(): string
+    {
+        return $this->uid;
     }
 }

@@ -81,7 +81,7 @@ final class ArrayResponseBuilderTest extends UnitTestCase
     }
 
     /**
-     * @psalm-return \ArrayObject<'application/json', array{schema: array{type: 'object', properties: array<string, array{type: string}>}, example: array<string, string>}>
+     * @return array<Parameter>
      */
     private function getExpectedContent(): \ArrayObject
     {
@@ -101,7 +101,7 @@ final class ArrayResponseBuilderTest extends UnitTestCase
     }
 
     /**
-     * @return Parameter[]
+     * @return array<Parameter>
      *
      * @psalm-return list{Parameter}
      */
@@ -117,7 +117,7 @@ final class ArrayResponseBuilderTest extends UnitTestCase
     }
 
     /**
-     * @return Header[]
+     * @return array<Header>
      *
      * @psalm-return list{Header}
      */
