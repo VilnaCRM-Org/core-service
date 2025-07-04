@@ -39,3 +39,10 @@ super-linter-output
 super-linter.log
 venv
 ###< super-linter/super-linter ###
+# Load tests dependencies
+/tests/Load/node_modules/
+/tests/Load/package-lock.json
+/tests/Load/yarn.lock
+
+# Structurizr files
+/.structurizr/
