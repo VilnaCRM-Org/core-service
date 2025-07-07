@@ -8,14 +8,76 @@ jobs:
   openapi-diff:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate token with necessary permissions
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.VILNACRM_APP_ID }}
+          private_key: ${{ secrets.VILNACRM_APP_PRIVATE_KEY }}
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
-      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v4
         with:
+          token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Import GPG key
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+          git_tag_gpgsign: true
+
+      - name: Configure GPG for automated signing
+        run: |
+          export GPG_TTY=$(tty)
+          echo "GPG_TTY=$GPG_TTY" >> $GITHUB_ENV
+          echo "GPG_PASSPHRASE=${{ secrets.GPG_PASSPHRASE }}" >> $GITHUB_ENV
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          cat > ~/.gnupg/gpg.conf << EOF
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
+          cat > ~/.gnupg/gpg-agent.conf << EOF
+          allow-loopback-pinentry
+          pinentry-mode loopback
+          max-cache-ttl 86400
+          default-cache-ttl 86400
+          EOF
+          gpg-connect-agent reloadagent /bye || true
+          cat > ~/.gnupg/gpg-wrapper.sh << 'EOF'
+          #!/bin/bash
+          export GPG_TTY=$(tty)
+          case "$*" in
+            *--detach-sign*|*--sign*)
+              echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 "$@"
+              ;;
+            *)
+              gpg "$@"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.gnupg/gpg-wrapper.sh
+          git config --global gpg.program ~/.gnupg/gpg-wrapper.sh
+
+      - name: Test GPG signing
+        run: |
+          echo "Testing GPG signing..."
+          echo "test message" | ~/.gnupg/gpg-wrapper.sh --armor --detach-sign > /dev/null 2>&1 && echo "✅ GPG signing works" || echo "❌ GPG signing failed"
+
       - name: Copy .env.test.local
         run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v3
@@ -24,28 +86,42 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
+
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
       - name: Generate openapi spec
         run: php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+
       - name: Commit changes
+        env:
+          GPG_TTY: ${{ env.GPG_TTY }}
+          GPG_PASSPHRASE: ${{ env.GPG_PASSPHRASE }}
         uses: EndBug/add-and-commit@v9
         with:
           add: '.github/openapi-spec/spec.yaml'
-          message: 'feat(#${{ toJSON(github.event.number) }}): generate openapi spec'
+          message: 'feat(#${{ github.event.number }}): generate openapi spec'
+          committer_name: ${{ steps.import-gpg.outputs.name }}
+          committer_email: ${{ steps.import-gpg.outputs.email }}
+          author_name: ${{ steps.import-gpg.outputs.name }}
+          author_email: ${{ steps.import-gpg.outputs.email }}
+
       - name: Check out head branch
         uses: actions/checkout@v2
         with:
           path: head
+
       - name: Check out master branch
         uses: actions/checkout@v2
         with:
           ref: main
           path: base
+
       - name: Run OpenAPI Diff (from HEAD revision)
         uses: docker://openapitools/openapi-diff:latest
         with:
           args: '/github/workspace/head/.github/openapi-spec/spec.yaml /github/workspace/base/.github/openapi-spec/spec.yaml'
+
       - uses: actions/upload-artifact@v4
         with:
           name: diff-reports

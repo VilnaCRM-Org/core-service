@@ -416,13 +416,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
 """
     { "email": "malformed@example.com",
-    """
+"""
     Then the response status code should be equal to 400
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
-    And the JSON node "detail" should contain "Syntax error"
+    And the JSON node "detail" should contain "Parse error"
 
   Scenario: Fail to patch a customer resource with invalid type and status references and check error message
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"

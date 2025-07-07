@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Domain\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType implements CustomerTypeInterface
@@ -14,6 +15,7 @@ class CustomerType implements CustomerTypeInterface
     ) {
     }
 
+    #[ApiProperty(readable: true, writable: false)]
     public function getUlid(): string
     {
         return (string) $this->ulid;

@@ -21,6 +21,7 @@ final class NegativeKernel extends BaseKernel
      */
     private array $extraConfigs;
 
+    /** @psalm-suppress PossiblyUnusedMethod */
     public function __construct(
         string $environment,
         bool $debug,
@@ -29,6 +30,11 @@ final class NegativeKernel extends BaseKernel
         $this->extraConfigs = [__DIR__ . self::CONFIG_DOCTRINE_YAML];
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     *
+     * @psalm-suppress UnusedParam
+     */
     public function configureContainer(
         ContainerBuilder $container,
         LoaderInterface $loader

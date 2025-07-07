@@ -25,6 +25,9 @@ use Faker\Generator;
 use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
+/**
+ * @psalm-suppress UnusedClass - This class is used by Behat configuration
+ */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     /** @var array<string> */
@@ -272,35 +275,26 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      * Cleanup after each scenario.
      *
      * @AfterScenario
+     *
+     * @psalm-suppress UnusedParam - Parameter is required by Behat hook interface
      */
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
     ): void {
-        foreach ($this->createdCustomerIds as $id) {
-            $this->deleteCustomerById($id);
-        }
-        $this->createdCustomerIds = [];
-
-        foreach ($this->createdStatusIds as $id) {
-            $status = $this->statusRepository->find($id);
-            $this->statusRepository->delete($status);
-        }
-        $this->createdStatusIds = [];
-
-        foreach ($this->createdTypeIds as $id) {
-            $type = $this->typeRepository->find($id);
-            $this->typeRepository->delete($type);
-        }
-        $this->createdTypeIds = [];
+        $this->cleanupCustomers();
+        $this->cleanupStatuses();
+        $this->cleanupTypes();
     }
 
     /**
      * @Then delete customer with id :id
      */
-    public function deleteCustomerById(mixed $id): void
+    public function deleteCustomerById(string $id): void
     {
         $customer = $this->customerRepository->find($id);
-        $this->customerRepository->delete($customer);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
     }
 
     /**
@@ -309,7 +303,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteCustomerByEmail(string $email): void
     {
         $customer = $this->customerRepository->findByEmail($email);
-        $this->customerRepository->delete($customer);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
     }
 
     /**
@@ -326,6 +322,36 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteTypeByValue(string $value): void
     {
         $this->typeRepository->deleteByValue($value);
+    }
+
+    private function cleanupCustomers(): void
+    {
+        foreach ($this->createdCustomerIds as $id) {
+            $this->deleteCustomerById($id);
+        }
+        $this->createdCustomerIds = [];
+    }
+
+    private function cleanupStatuses(): void
+    {
+        foreach ($this->createdStatusIds as $id) {
+            $status = $this->statusRepository->find($id);
+            if ($status !== null) {
+                $this->statusRepository->delete($status);
+            }
+        }
+        $this->createdStatusIds = [];
+    }
+
+    private function cleanupTypes(): void
+    {
+        foreach ($this->createdTypeIds as $id) {
+            $type = $this->typeRepository->find($id);
+            if ($type !== null) {
+                $this->typeRepository->delete($type);
+            }
+        }
+        $this->createdTypeIds = [];
     }
 
     /**
@@ -361,28 +387,54 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     private function mapDynamicDates(string $url): string
     {
         $pattern = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
+        $matches = [];
 
-        if (preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $dateTimeFormat = $match[1];  // e.g., "Y-m-d\TH:i:s\Z"
-                $dateTimeInterval = $match[2]; // e.g., "P1Y" or "-P1Y"
+        if (!preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
+            return $url;
+        }
 
-                $date = new DateTime();
+        return $this->processDateMatches($url, $matches);
+    }
 
-                if (str_starts_with($dateTimeInterval, '-')) {
-                    $interval = new DateInterval(substr($dateTimeInterval, 1));
-                    $date->sub($interval);
-                } else {
-                    $interval = new DateInterval($dateTimeInterval);
-                    $date->add($interval);
-                }
-
-                $formattedDate = $date->format($dateTimeFormat);
-                $url = str_replace($match[0], $formattedDate, $url);
-            }
+    /**
+     * @param array<array<string>> $matches
+     */
+    private function processDateMatches(string $url, array $matches): string
+    {
+        foreach ($matches as $match) {
+            $dateTimeFormat = $match[1];
+            $dateTimeInterval = $match[2];
+            $formattedDate = $this->calculateFormattedDate(
+                $dateTimeFormat,
+                $dateTimeInterval
+            );
+            $url = str_replace($match[0], $formattedDate, $url);
         }
 
         return $url;
+    }
+
+    private function calculateFormattedDate(
+        string $format,
+        string $intervalString
+    ): string {
+        $date = new DateTime();
+        $this->applyDateInterval($date, $intervalString);
+        return $date->format($format);
+    }
+
+    private function applyDateInterval(
+        DateTime $date,
+        string $intervalString
+    ): void {
+        if (str_starts_with($intervalString, '-')) {
+            $interval = new DateInterval(substr($intervalString, 1));
+            $date->sub($interval);
+            return;
+        }
+
+        $interval = new DateInterval($intervalString);
+        $date->add($interval);
     }
 
     /**

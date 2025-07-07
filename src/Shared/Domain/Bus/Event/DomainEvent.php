@@ -9,6 +9,9 @@ abstract class DomainEvent
     private readonly string $eventId;
     private readonly string $occurredOn;
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(string $eventId, ?string $occurredOn)
     {
         $this->eventId = $eventId;
@@ -17,6 +20,8 @@ abstract class DomainEvent
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedMethod
+     *
      * @param array<string, string|object> $body
      */
     abstract public static function fromPrimitives(
@@ -25,9 +30,14 @@ abstract class DomainEvent
         string $occurredOn
     ): self;
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     abstract public static function eventName(): string;
 
     /**
+     * @psalm-suppress PossiblyUnusedMethod
+     *
      * @return array<string, string|object>
      */
     abstract public function toPrimitives(): array;

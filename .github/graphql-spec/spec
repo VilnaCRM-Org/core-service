@@ -72,7 +72,7 @@ type Customer implements Node {
   leadSource: String!
   type: CustomerType!
   status: CustomerStatus!
-  confirmed: Boolean!
+  confirmed: Boolean
   createdAt: String!
   updatedAt: String!
 }
@@ -85,7 +85,6 @@ type CustomerType implements Node {
 type CustomerStatus implements Node {
   id: ID!
   value: String!
-  ulid: String!
 }
 
 "Cursor connection for Customer."
@@ -255,7 +254,7 @@ input createCustomerInput {
   leadSource: String!
   type: String!
   status: String!
-  confirmed: Boolean!
+  confirmed: Boolean
   createdAt: String!
   updatedAt: String!
   clientMutationId: String

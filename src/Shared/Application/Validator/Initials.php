@@ -20,6 +20,7 @@ final class Initials extends Constraint
         parent::__construct([], $groups, $payload);
     }
 
+    /** @psalm-suppress PossiblyUnusedMethod */
     public function isOptional(): bool
     {
         return $this->optional;

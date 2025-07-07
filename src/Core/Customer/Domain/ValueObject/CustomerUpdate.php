@@ -14,8 +14,8 @@ final readonly class CustomerUpdate
         public string $newEmail,
         public string $newPhone,
         public string $newLeadSource,
-        public CustomerType $newType,
-        public CustomerStatus $newStatus,
+        public ?CustomerType $newType,
+        public ?CustomerStatus $newStatus,
         public bool $newConfirmed,
     ) {
     }

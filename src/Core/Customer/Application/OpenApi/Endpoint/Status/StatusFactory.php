@@ -28,30 +28,21 @@ final class StatusFactory extends BaseEndpointFactory
     private Response $forbiddenResponse;
 
     public function __construct(
-        private StatusCreateFactory $createCustomerStatusRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        StatusCreateFactory $createCustomerStatusRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerStatusRequest =
-            $this->createCustomerStatusRequestFactory->getRequest();
-
-        $this->validResponse =
-            $this->validationErrorResponseFactory->getResponse();
-
-        $this->badRequestResponse =
-            $this->badRequestResponseFactory->getResponse();
-
-        $this->internalResponse =
-            $this->internalErrorFactory->getResponse();
-
-        $this->forbiddenResponse =
-            $this->forbiddenResponseFactory->getResponse();
-
+            $createCustomerStatusRequestFactory->getRequest();
+        $this->validResponse = $validationErrorResponseFactory->getResponse();
+        $this->badRequestResponse = $badRequestResponseFactory->getResponse();
+        $this->internalResponse = $internalErrorFactory->getResponse();
+        $this->forbiddenResponse = $forbiddenResponseFactory->getResponse();
         $this->unauthorizedResponse =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

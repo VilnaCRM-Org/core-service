@@ -17,10 +17,15 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (
-            $this->isNull($value) ||
-            ($constraint->isOptional() && $this->isEmpty($value))
-        ) {
+        if ($constraint->isOptional() && $this->isEmpty($value)) {
+            return;
+        }
+
+        if ($value === null) {
+            return;
+        }
+
+        if (!is_string($value)) {
             return;
         }
 
@@ -35,12 +40,7 @@ final class InitialsValidator extends ConstraintValidator
 
     private function isEmpty(mixed $value): bool
     {
-        return $value === '';
-    }
-
-    private function isNull(mixed $value): bool
-    {
-        return $value === null;
+        return $value === '' || $value === null;
     }
 
     private function addViolation(string $message): void

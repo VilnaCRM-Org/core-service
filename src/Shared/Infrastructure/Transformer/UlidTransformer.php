@@ -17,14 +17,15 @@ final readonly class UlidTransformer
 
     public function toDatabaseValue(mixed $value): ?Binary
     {
-        if (
-            $value === null || $this->isInvalidUlidString($value)
-        ) {
+        if ($value === null) {
             return null;
         }
 
-        $ulid = $value instanceof
-        Ulid ? $value : $this->ulidFactory->create($value);
+        if ($this->isInvalidUlidString($value)) {
+            return null;
+        }
+
+        $ulid = $this->getUlidInstance($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
@@ -41,6 +42,13 @@ final readonly class UlidTransformer
         return $this->createUlid((string) $symfonyUlid);
     }
 
+    private function getUlidInstance(mixed $value): Ulid
+    {
+        return $value instanceof Ulid
+            ? $value
+            : $this->ulidFactory->create($value);
+    }
+
     private function createUlid(string $ulid): Ulid
     {
         return $this->ulidFactory->create($ulid);
@@ -48,7 +56,6 @@ final readonly class UlidTransformer
 
     private function isInvalidUlidString(mixed $value): bool
     {
-        return is_string($value)
-            && !SymfonyUlid::isValid($value);
+        return is_string($value) && !SymfonyUlid::isValid($value);
     }
 }
