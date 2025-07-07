@@ -3,6 +3,8 @@ framework:
     transports:
       dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
 
+    routing:
+
 when@test:
   framework:
     messenger:
