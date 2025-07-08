@@ -103,11 +103,13 @@ services:
       tags: ['app.openapi_endpoint_factory']
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged_iterator app.command_handler]
+    arguments:
+      ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged_iterator app.command_handler]
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged_iterator app.event_subscriber]
+    arguments:
+      ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged_iterator app.event_subscriber]
     lazy: true
 
   Aws\Sqs\SqsClient:
@@ -122,7 +124,10 @@ services:
   App\Shared\Application\OpenApi\OpenApiFactory:
     decorates: 'api_platform.openapi.factory'
     arguments:
-      ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged_iterator app.openapi_endpoint_factory]
+      [
+        '@App\Shared\Application\OpenApi\OpenApiFactory.inner',
+        !tagged_iterator app.openapi_endpoint_factory,
+      ]
     autoconfigure: false
 
   Doctrine\Persistence\ManagerRegistry: '@doctrine_mongodb'

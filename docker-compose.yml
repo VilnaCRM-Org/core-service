@@ -13,7 +13,7 @@ services:
     volumes:
       - php_socket:/var/run/php
     healthcheck:
-      test: ["CMD", "php", "-v"]
+      test: ['CMD', 'php', '-v']
       interval: 10s
       timeout: 3s
       retries: 3
