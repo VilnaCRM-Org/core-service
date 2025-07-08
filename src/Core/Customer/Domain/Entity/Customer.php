@@ -7,42 +7,81 @@ namespace App\Core\Customer\Domain\Entity;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class Customer implements CustomerInterface
 {
+    #[Groups(['customer:read'])]
+    private string $ulid;
+
+    #[Groups(['customer:read'])]
+    private DateTimeInterface $createdAt;
+
+    #[Groups(['customer:read'])]
+    private DateTimeInterface $updatedAt;
+
+    #[Groups(['customer:read', 'customer:write'])]
+    private CustomerType $type;
+
+    #[Groups(['customer:read', 'customer:write'])]
+    private CustomerStatus $status;
+
     public function __construct(
+        #[Groups(['customer:read', 'customer:write'])]
+        #[Assert\NotBlank]
+        #[Assert\Length(max: 255)]
         private string $initials,
+        #[Groups(['customer:read', 'customer:write'])]
+        #[Assert\NotBlank]
+        #[Assert\Email]
+        #[Assert\Length(max: 255)]
         private string $email,
+        #[Groups(['customer:read', 'customer:write'])]
+        #[Assert\NotBlank]
+        #[Assert\Length(max: 255)]
         private string $phone,
+        #[Groups(['customer:read', 'customer:write'])]
+        #[Assert\NotBlank]
+        #[Assert\Length(max: 255)]
         private string $leadSource,
-        private CustomerType $type,
-        private CustomerStatus $status,
+        CustomerType $type,
+        CustomerStatus $status,
+        #[Groups(['customer:read', 'customer:write'])]
         private ?bool $confirmed,
-        /** @psalm-suppress UnusedProperty */
-        private UlidInterface $ulid,
-        /** @psalm-suppress UnusedProperty */
-        private DateTimeInterface $createdAt = new DateTimeImmutable(),
-        /** @psalm-suppress UnusedProperty */
-        private DateTimeInterface $updatedAt = new DateTimeImmutable(),
+        UlidInterface $ulid,
+        DateTimeInterface $createdAt = new DateTimeImmutable(),
+        DateTimeInterface $updatedAt = new DateTimeImmutable(),
     ) {
+        $this->ulid = (string) $ulid;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+        $this->type = $type;
+        $this->status = $status;
     }
 
     /**
+     * API Platform identifier method
+     *
      * @psalm-suppress PossiblyUnusedMethod
      */
+    public function getId(): string
+    {
+        return $this->ulid;
+    }
+
+    /**
+     * Get ULID identifier
+     *
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    #[Groups(['customer:read'])]
     public function getUlid(): string
     {
-        return (string) $this->ulid;
+        return $this->ulid;
     }
 
-    /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    public function setUlid(UlidInterface $ulid): void
-    {
-        $this->ulid = $ulid;
-    }
-
+    #[Groups(['customer:read', 'customer:write'])]
     public function getInitials(): string
     {
         return $this->initials;
@@ -53,6 +92,7 @@ class Customer implements CustomerInterface
         $this->initials = $initials;
     }
 
+    #[Groups(['customer:read', 'customer:write'])]
     public function getEmail(): string
     {
         return $this->email;
@@ -63,6 +103,7 @@ class Customer implements CustomerInterface
         $this->email = $email;
     }
 
+    #[Groups(['customer:read', 'customer:write'])]
     public function getPhone(): string
     {
         return $this->phone;
@@ -73,6 +114,7 @@ class Customer implements CustomerInterface
         $this->phone = $phone;
     }
 
+    #[Groups(['customer:read', 'customer:write'])]
     public function getLeadSource(): string
     {
         return $this->leadSource;
@@ -83,7 +125,8 @@ class Customer implements CustomerInterface
         $this->leadSource = $leadSource;
     }
 
-    public function getType(): CustomerType
+    #[Groups(['customer:read', 'customer:write'])]
+    public function getType(): ?CustomerType
     {
         return $this->type;
     }
@@ -93,7 +136,8 @@ class Customer implements CustomerInterface
         $this->type = $type;
     }
 
-    public function getStatus(): CustomerStatus
+    #[Groups(['customer:read', 'customer:write'])]
+    public function getStatus(): ?CustomerStatus
     {
         return $this->status;
     }
@@ -103,6 +147,7 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
+    #[Groups(['customer:read', 'customer:write'])]
     public function isConfirmed(): ?bool
     {
         return $this->confirmed;
@@ -116,6 +161,7 @@ class Customer implements CustomerInterface
     /**
      * @psalm-suppress PossiblyUnusedMethod
      */
+    #[Groups(['customer:read'])]
     public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
@@ -132,6 +178,7 @@ class Customer implements CustomerInterface
     /**
      * @psalm-suppress PossiblyUnusedMethod
      */
+    #[Groups(['customer:read'])]
     public function getUpdatedAt(): DateTimeInterface
     {
         return $this->updatedAt;
@@ -143,5 +190,13 @@ class Customer implements CustomerInterface
     public function setUpdatedAt(DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function setUlid(UlidInterface $ulid): void
+    {
+        $this->ulid = (string) $ulid;
     }
 }

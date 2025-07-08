@@ -1,22 +1,29 @@
 App\Core\Customer\Domain\Entity\CustomerType:
+  identifier: ['ulid']
   normalizationContext:
-    groups: ['output']
-  paginationViaCursor:
-    - { field: 'ulid', direction: 'DESC' }
+    groups: ['customer_type:read']
+  denormalizationContext:
+    groups: ['customer_type:write']
   operations:
     ApiPlatform\Metadata\GetCollection:
+      uriTemplate: '/customer_types'
       filters:
         - customer.mongodb.type.order
         - customer.mongodb.type.partial_search
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Get:
+      uriTemplate: '/customer_types/{id}'
     ApiPlatform\Metadata\Put:
+      uriTemplate: '/customer_types/{id}'
       input: App\Core\Customer\Application\DTO\TypePut
       processor: App\Core\Customer\Application\Processor\CustomerTypePutProcessor
     ApiPlatform\Metadata\Patch:
+      uriTemplate: '/customer_types/{id}'
       input: App\Core\Customer\Application\DTO\TypePatch
       processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      uriTemplate: '/customer_types/{id}'
     ApiPlatform\Metadata\Post:
+      uriTemplate: '/customer_types'
       input: App\Core\Customer\Application\DTO\TypeCreate
       processor: App\Core\Customer\Application\Processor\CreateTypeProcessor

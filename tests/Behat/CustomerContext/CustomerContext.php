@@ -184,6 +184,7 @@ final class CustomerContext implements Context
 
     /**
      * @AfterScenario
+     *
      * @psalm-suppress UnusedParam
      */
     public function cleanupCreatedCustomersAndEntities(

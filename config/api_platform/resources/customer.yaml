@@ -1,6 +1,8 @@
 App\Core\Customer\Domain\Entity\Customer:
+  identifier: ['ulid']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
+  uriTemplate: null
   operations:
     ApiPlatform\Metadata\GetCollection:
       filters:
@@ -8,6 +10,9 @@ App\Core\Customer\Domain\Entity\Customer:
         - customer.mongodb.order
         - customer.mongodb.date
         - mongodb.range
+      extraProperties:
+        allow_extra_attributes: true
+        filter_validation_enabled: false
     ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\Put:
       input: App\Core\Customer\Application\DTO\CustomerPut

@@ -11,79 +11,75 @@ use MongoDB\BSON\Binary;
 
 final class UlidType extends Type
 {
-    public function convertToDatabaseValue($value): ?Binary
+    public function convertToDatabaseValue(mixed $value): ?Binary
     {
         if ($value === null) {
             return null;
         }
 
         if ($value instanceof Ulid) {
-            return $this->createBinary($value);
+            return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
         }
 
         if (is_string($value)) {
-            return $this->handleStringValue($value);
+            return $this->stringToBinary($value);
         }
 
         return null;
     }
 
-    public function convertToPHPValue($value): ?Ulid
+    public function convertToPHPValue(mixed $value): ?Ulid
     {
         if ($value === null) {
             return null;
         }
 
         if ($value instanceof Binary) {
-            return $this->handleBinaryValue($value);
+            return $this->binaryToUlid($value);
         }
 
         if (is_string($value)) {
-            return $this->getUlidFactory()->create($value);
+            return $this->stringToUlid($value);
         }
 
         return null;
     }
 
-    private function createBinary(Ulid $ulid): Binary
+    private function stringToBinary(string $value): Binary
     {
+        $ulid = $this->stringToUlid($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    private function handleStringValue(string $value): Binary
+    private function binaryToUlid(Binary $value): Ulid
     {
-        $ulid = $this->getUlidFactory()->create($value);
-        return $this->createBinary($ulid);
+        $hex = bin2hex($value->getData());
+        $ulidString = $this->processHex($hex);
+        return $this->stringToUlid($ulidString);
     }
 
-    private function handleBinaryValue(Binary $value): Ulid
+    private function stringToUlid(string $value): Ulid
     {
-        $binaryData = $value->getData();
-        $hex = bin2hex($binaryData);
-        $ulidString = $this->hexToUlid($hex);
-        return $this->getUlidFactory()->create($ulidString);
+        return (new UlidFactory())->create($value);
     }
 
-    private function getUlidFactory(): UlidFactory
+    private function processHex(string $hex): string
     {
-        return new UlidFactory();
+        $binary = hex2bin($hex);
+
+        $this->validateBinary($binary);
+
+        return strtoupper(bin2hex($binary));
     }
 
-    private function hexToUlid(string $hex): string
+    private function validateBinary(string|false $binary): void
     {
-        $binaryString = hex2bin($hex);
-        if ($binaryString === false || strlen($binaryString) !== 16) {
-            throw new \InvalidArgumentException(
-                'Invalid binary data for ULID conversion'
-            );
+        if ($binary === false) {
+            throw new \InvalidArgumentException('Invalid hex data');
         }
 
-        $timestamp = substr($binaryString, 0, 6);
-        $randomness = substr($binaryString, 6, 10);
-
-        $timestampHex = bin2hex($timestamp);
-        $randomnessHex = bin2hex($randomness);
-
-        return strtoupper($timestampHex . $randomnessHex);
+        if (strlen($binary) !== 16) {
+            throw new \InvalidArgumentException('Invalid binary length');
+        }
     }
 }

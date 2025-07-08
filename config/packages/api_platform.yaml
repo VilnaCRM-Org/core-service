@@ -1,4 +1,3 @@
-# config/packages/api_platform.yaml
 api_platform:
   title: 'Core Service API'
   description: 'This API provides endpoints to manage core service data within a VilnaCRM.'
@@ -14,19 +13,25 @@ api_platform:
     paginationClientItemsPerPage: true
     extra_properties:
       rfc_7807_compliant_errors: true
+      allow_extra_attributes: true
+    collection:
+      allow_extra_attributes: true
+    stateless: true
+
+  exception_to_status:
+    ApiPlatform\Exception\FilterValidationException: 200
 
   formats:
     jsonld: ['application/ld+json']
+    json: ['application/json']
 
   error_formats:
     jsonproblem: ['application/problem+json']
 
-  # Tell API Platform where your domain classes live
   resource_class_directories:
     - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'
     - '%kernel.project_dir%/src/Internal/HealthCheck/Domain/ValueObject'
 
-  # <<< Add this section to load all YAML files in your custom resources folder
   mapping:
     paths:
       - '%kernel.project_dir%/config/api_platform/resources'

@@ -14,12 +14,22 @@ final class StatusFactoryTest extends UnitTestCase
     public function testCreateReturnsCustomerStatusInstance(): void
     {
         $value = $this->faker->name();
-        $ulid = $this->createMock(UlidInterface::class);
+        $ulid = $this->createMockUlid();
 
         $factory = new StatusFactory();
 
         $customerStatus = $factory->create($value, $ulid);
 
         $this->assertInstanceOf(CustomerStatus::class, $customerStatus);
+    }
+
+    private function createMockUlid(): UlidInterface
+    {
+        return new class() implements UlidInterface {
+            public function __toString(): string
+            {
+                return '01JKX8XGHVDZ46MWYMZT94YER4';
+            }
+        };
     }
 }

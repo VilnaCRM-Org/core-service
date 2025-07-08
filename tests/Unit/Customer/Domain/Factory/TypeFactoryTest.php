@@ -14,12 +14,22 @@ final class TypeFactoryTest extends UnitTestCase
     public function testCreateReturnsCustomerTypeInstance(): void
     {
         $value = $this->faker->name();
-        $ulid = $this->createMock(UlidInterface::class);
+        $ulid = $this->createMockUlid();
 
         $factory = new TypeFactory();
 
         $customerType = $factory->create($value, $ulid);
 
         $this->assertInstanceOf(CustomerType::class, $customerType);
+    }
+
+    private function createMockUlid(): UlidInterface
+    {
+        return new class() implements UlidInterface {
+            public function __toString(): string
+            {
+                return '01JKX8XGHVDZ46MWYMZT94YER4';
+            }
+        };
     }
 }

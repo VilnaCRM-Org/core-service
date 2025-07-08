@@ -1,7 +1,7 @@
 <doctrine-mongo-mapping
-  xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+        xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd"
 >
 
@@ -15,18 +15,18 @@
         <field field-name="leadSource" type="string" />
         <field field-name="createdAt" type="date" />
         <field field-name="updatedAt" type="date" />
-        <field field-name="confirmed" type="boolean" />
+        <field field-name="confirmed" type="bool" />
 
         <reference-one
-      target-document="App\Core\Customer\Domain\Entity\CustomerStatus"
-      field="status"
-      store-as="id"
-    />
+                target-document="App\Core\Customer\Domain\Entity\CustomerStatus"
+                field="status"
+                store-as="dbRef"
+        />
         <reference-one
-      target-document="App\Core\Customer\Domain\Entity\CustomerType"
-      field="type"
-      store-as="id"
-    />
+                target-document="App\Core\Customer\Domain\Entity\CustomerType"
+                field="type"
+                store-as="dbRef"
+        />
 
         <indexes>
             <index unique="true">

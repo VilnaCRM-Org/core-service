@@ -19,7 +19,7 @@ final class CustomerFactory implements CustomerFactoryInterface
         CustomerType $type,
         CustomerStatus $status,
         bool $confirmed,
-        UlidInterface $ulid
+        UlidInterface $ulid,
     ): Customer {
         return new Customer(
             $initials,

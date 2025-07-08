@@ -10,78 +10,65 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InitialsValidator extends ConstraintValidator
 {
-    private const MIN_LENGTH = 1;
     private const MAX_LENGTH = 255;
-    private const INITIALS_PATTERN = '/^[A-Za-z]+(\s[A-Za-z]+)*$/';
+    private const PATTERN = '/^[A-Za-z]+(\s[A-Za-z]+)*$/';
 
     public function __construct(
-        private TranslatorInterface $translator
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$this->isValidInput($value)) {
+        if ($this->shouldSkipValidation($value)) {
             return;
         }
 
-        $this->checkInitials((string) $value);
+        $this->validateInitials((string) $value);
     }
 
-    private function isValidInput(mixed $value): bool
+    private function shouldSkipValidation(mixed $value): bool
     {
         if ($value === null || $value === '') {
-            return false;
+            return true;
         }
 
         if (!is_string($value)) {
-            $this->addViolation('The value must be a string.');
-            return false;
+            $this->addError('The value must be a string.');
+            return true;
         }
 
-        return true;
+        return false;
     }
 
-    private function checkInitials(string $value): void
+    private function validateInitials(string $value): void
     {
         $trimmed = trim($value);
 
-        if (!$this->hasValidContent($trimmed)) {
+        if ($trimmed === '') {
+            $this->addError($this->translator->trans('initials.spaces'));
             return;
         }
 
-        if (!$this->hasValidLength($trimmed)) {
-            $this->addViolation('Invalid initials length.');
-        }
-
-        if (!$this->hasValidFormat($trimmed)) {
-            $this->addViolation('Invalid initials format.');
-        }
+        $this->validateLength($trimmed);
+        $this->validatePattern($trimmed);
     }
 
-    private function hasValidContent(string $value): bool
+    private function validateLength(string $value): void
     {
-        if ($value === '') {
-            $message = $this->translator->trans('initials.spaces');
-            $this->addViolation($message);
-            return false;
+        if (strlen($value) > self::MAX_LENGTH) {
+            $this->addError('Invalid initials length.');
         }
-
-        return true;
     }
 
-    private function hasValidLength(string $value): bool
+    private function validatePattern(string $value): void
     {
-        $length = strlen($value);
-        return $length >= self::MIN_LENGTH && $length <= self::MAX_LENGTH;
+        if (!preg_match(self::PATTERN, $value)) {
+            $this->addError('Invalid initials format.');
+        }
     }
 
-    private function hasValidFormat(string $value): bool
-    {
-        return preg_match(self::INITIALS_PATTERN, $value) === 1;
-    }
-
-    private function addViolation(string $message): void
+    private function addError(string $message): void
     {
         $this->context->buildViolation($message)->addViolation();
     }

@@ -1,20 +1,31 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
+  identifier: ['ulid']
+  normalizationContext:
+    groups: ['customer_status:read']
+  denormalizationContext:
+    groups: ['customer_status:write']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
     ApiPlatform\Metadata\GetCollection:
+      uriTemplate: '/customer_statuses'
       filters:
         - customer.mongodb.status.order
         - customer.mongodb.status.partial_search
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Get:
+      uriTemplate: '/customer_statuses/{id}'
     ApiPlatform\Metadata\Put:
+      uriTemplate: '/customer_statuses/{id}'
       input: App\Core\Customer\Application\DTO\StatusPut
       processor: App\Core\Customer\Application\Processor\CustomerStatusPutProcessor
     ApiPlatform\Metadata\Patch:
+      uriTemplate: '/customer_statuses/{id}'
       input: App\Core\Customer\Application\DTO\StatusPatch
       processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      uriTemplate: '/customer_statuses/{id}'
     ApiPlatform\Metadata\Post:
+      uriTemplate: '/customer_statuses'
       input: App\Core\Customer\Application\DTO\StatusCreate
       processor: App\Core\Customer\Application\Processor\CreateStatusProcessor

@@ -15,29 +15,33 @@ final class CustomerFactoryTest extends UnitTestCase
 {
     public function testCreateReturnsCustomerInstance(): void
     {
-        $initials = $this->faker->name();
-        $email = $this->faker->email();
-        $phone = $this->faker->phoneNumber();
-        $leadSource = $this->faker->name();
-        $confirmed = true;
-
         $type = $this->createMock(CustomerType::class);
         $status = $this->createMock(CustomerStatus::class);
-        $ulid = $this->createMock(UlidInterface::class);
+        $ulid = $this->createMockUlid();
 
         $factory = new CustomerFactory();
 
         $customer = $factory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->name(),
             $type,
             $status,
-            $confirmed,
+            true,
             $ulid
         );
 
         $this->assertInstanceOf(Customer::class, $customer);
+    }
+
+    private function createMockUlid(): UlidInterface
+    {
+        return new class() implements UlidInterface {
+            public function __toString(): string
+            {
+                return '01JKX8XGHVDZ46MWYMZT94YER4';
+            }
+        };
     }
 }
