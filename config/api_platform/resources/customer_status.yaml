@@ -18,3 +18,10 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\StatusCreate
       processor: App\Core\Customer\Application\Processor\CreateStatusProcessor
+  properties:
+    ulid:
+      readable: true
+      writable: false
+    value:
+      readable: true
+      writable: true
