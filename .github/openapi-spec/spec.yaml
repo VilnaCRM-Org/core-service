@@ -3676,9 +3676,7 @@ components:
           format: iri-reference
           example: 'https://example.com/'
         confirmed:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld'
         createdAt:
