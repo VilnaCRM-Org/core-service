@@ -176,6 +176,33 @@ type HealthCheckPageInfo {
 }
 
 type Mutation {
+  "CreateCustomers a Customer."
+  createCustomerCustomer(input: createCustomerCustomerInput!): createCustomerCustomerPayload
+
+  "UpdateCustomers a Customer."
+  updateCustomerCustomer(input: updateCustomerCustomerInput!): updateCustomerCustomerPayload
+
+  "DeleteCustomers a Customer."
+  deleteCustomerCustomer(input: deleteCustomerCustomerInput!): deleteCustomerCustomerPayload
+
+  "CreateCustomerStatuss a CustomerStatus."
+  createCustomerStatusCustomerStatus(input: createCustomerStatusCustomerStatusInput!): createCustomerStatusCustomerStatusPayload
+
+  "UpdateCustomerStatuss a CustomerStatus."
+  updateCustomerStatusCustomerStatus(input: updateCustomerStatusCustomerStatusInput!): updateCustomerStatusCustomerStatusPayload
+
+  "DeleteCustomerStatuss a CustomerStatus."
+  deleteCustomerStatusCustomerStatus(input: deleteCustomerStatusCustomerStatusInput!): deleteCustomerStatusCustomerStatusPayload
+
+  "CreateCustomerTypes a CustomerType."
+  createCustomerTypeCustomerType(input: createCustomerTypeCustomerTypeInput!): createCustomerTypeCustomerTypePayload
+
+  "UpdateCustomerTypes a CustomerType."
+  updateCustomerTypeCustomerType(input: updateCustomerTypeCustomerTypeInput!): updateCustomerTypeCustomerTypePayload
+
+  "DeleteCustomerTypes a CustomerType."
+  deleteCustomerTypeCustomerType(input: deleteCustomerTypeCustomerTypeInput!): deleteCustomerTypeCustomerTypePayload
+
   "Updates a HealthCheck."
   updateHealthCheck(input: updateHealthCheckInput!): updateHealthCheckPayload
 
@@ -184,6 +211,147 @@ type Mutation {
 
   "Creates a HealthCheck."
   createHealthCheck(input: createHealthCheckInput!): createHealthCheckPayload
+}
+
+"CreateCustomers a Customer."
+input createCustomerCustomerInput {
+  id: ID!
+  initials: String!
+  email: String!
+  phone: String!
+  leadSource: String!
+  type: String!
+  status: String!
+  confirmed: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  clientMutationId: String
+}
+
+"CreateCustomers a Customer."
+type createCustomerCustomerPayload {
+  customer: Customer
+  clientMutationId: String
+}
+
+"UpdateCustomers a Customer."
+input updateCustomerCustomerInput {
+  id: ID!
+  initials: String!
+  email: String!
+  phone: String!
+  leadSource: String!
+  type: String!
+  status: String!
+  confirmed: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  clientMutationId: String
+}
+
+"UpdateCustomers a Customer."
+type updateCustomerCustomerPayload {
+  customer: Customer
+  clientMutationId: String
+}
+
+"DeleteCustomers a Customer."
+input deleteCustomerCustomerInput {
+  id: ID!
+  initials: String!
+  email: String!
+  phone: String!
+  leadSource: String!
+  type: String!
+  status: String!
+  confirmed: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  clientMutationId: String
+}
+
+"DeleteCustomers a Customer."
+type deleteCustomerCustomerPayload {
+  customer: Customer
+  clientMutationId: String
+}
+
+"CreateCustomerStatuss a CustomerStatus."
+input createCustomerStatusCustomerStatusInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"CreateCustomerStatuss a CustomerStatus."
+type createCustomerStatusCustomerStatusPayload {
+  customerStatus: CustomerStatus
+  clientMutationId: String
+}
+
+"UpdateCustomerStatuss a CustomerStatus."
+input updateCustomerStatusCustomerStatusInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"UpdateCustomerStatuss a CustomerStatus."
+type updateCustomerStatusCustomerStatusPayload {
+  customerStatus: CustomerStatus
+  clientMutationId: String
+}
+
+"DeleteCustomerStatuss a CustomerStatus."
+input deleteCustomerStatusCustomerStatusInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"DeleteCustomerStatuss a CustomerStatus."
+type deleteCustomerStatusCustomerStatusPayload {
+  customerStatus: CustomerStatus
+  clientMutationId: String
+}
+
+"CreateCustomerTypes a CustomerType."
+input createCustomerTypeCustomerTypeInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"CreateCustomerTypes a CustomerType."
+type createCustomerTypeCustomerTypePayload {
+  customerType: CustomerType
+  clientMutationId: String
+}
+
+"UpdateCustomerTypes a CustomerType."
+input updateCustomerTypeCustomerTypeInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"UpdateCustomerTypes a CustomerType."
+type updateCustomerTypeCustomerTypePayload {
+  customerType: CustomerType
+  clientMutationId: String
+}
+
+"DeleteCustomerTypes a CustomerType."
+input deleteCustomerTypeCustomerTypeInput {
+  id: ID!
+  value: String!
+  clientMutationId: String
+}
+
+"DeleteCustomerTypes a CustomerType."
+type deleteCustomerTypeCustomerTypePayload {
+  customerType: CustomerType
+  clientMutationId: String
 }
 
 "Updates a HealthCheck."

@@ -2,6 +2,15 @@ App\Core\Customer\Domain\Entity\Customer:
   graphQlOperations:
     ApiPlatform\Metadata\GraphQl\Query: ~
     ApiPlatform\Metadata\GraphQl\QueryCollection: ~
+    create_customer:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: createCustomer
+    update_customer:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: updateCustomer
+    delete_customer:
+      class: ApiPlatform\Metadata\GraphQl\DeleteMutation
+      name: deleteCustomer
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:

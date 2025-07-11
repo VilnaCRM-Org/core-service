@@ -1,9 +1,16 @@
 App\Core\Customer\Domain\Entity\CustomerType:
-  normalizationContext:
-    groups: ['output']
   graphQlOperations:
     ApiPlatform\Metadata\GraphQl\Query: ~
     ApiPlatform\Metadata\GraphQl\QueryCollection: ~
+    create_customer_type:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: createCustomerType
+    update_customer_type:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: updateCustomerType
+    delete_customer_type:
+      class: ApiPlatform\Metadata\GraphQl\DeleteMutation
+      name: deleteCustomerType
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:

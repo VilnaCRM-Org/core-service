@@ -40,4 +40,24 @@ final class CustomerStatusTest extends UnitTestCase
 
         $this->assertSame($newValue, $customerStatus->getValue());
     }
+
+    public function testSetUlid(): void
+    {
+        $initialValue = $this->faker->word();
+        $initialUlid = $this->faker->ulid();
+        $newUlid = $this->faker->ulid();
+
+        $ulidTransformer = new UlidTransformer(new UlidFactory());
+        $initialUlidObject = $ulidTransformer
+            ->transformFromSymfonyUlid($initialUlid);
+        $newUlidObject = $ulidTransformer->transformFromSymfonyUlid($newUlid);
+
+        $customerStatus = new CustomerStatus($initialValue, $initialUlidObject);
+
+        $this->assertSame((string) $initialUlid, $customerStatus->getUlid());
+
+        $customerStatus->setUlid($newUlidObject);
+
+        $this->assertSame((string) $newUlid, $customerStatus->getUlid());
+    }
 }
