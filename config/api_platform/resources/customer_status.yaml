@@ -22,6 +22,12 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
     ulid:
       readable: true
       writable: false
+    createdAt:
+      readable: true
+      writable: false
+    updatedAt:
+      readable: true
+      writable: false
     value:
       readable: true
       writable: true

@@ -24,6 +24,12 @@ class CustomerStatus implements CustomerStatusInterface
         return $this->value;
     }
 
+    /** @psalm-suppress PossiblyUnusedMethod - Used by API Platform for entity manipulation */
+    public function setUlid(UlidInterface $ulid): void
+    {
+        $this->ulid = $ulid;
+    }
+
     public function setValue(string $value): void
     {
         $this->value = $value;
