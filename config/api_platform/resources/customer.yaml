@@ -1,4 +1,7 @@
 App\Core\Customer\Domain\Entity\Customer:
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query: ~
+    ApiPlatform\Metadata\GraphQl\QueryCollection: ~
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:

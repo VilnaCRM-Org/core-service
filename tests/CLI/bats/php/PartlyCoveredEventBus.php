@@ -17,7 +17,10 @@ final class PartlyCoveredEventBus implements EventBus
         $this->bus = $bus;
     }
 
-    public function publish(DomainEvent ...$events): void
+    /**
+     * @param array<DomainEvent> $events
+     */
+    public function publish(array $events): void
     {
         foreach ($events as $event) {
             $this->bus->dispatch($event);

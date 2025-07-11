@@ -1,6 +1,9 @@
 App\Core\Customer\Domain\Entity\CustomerType:
   normalizationContext:
     groups: ['output']
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query: ~
+    ApiPlatform\Metadata\GraphQl\QueryCollection: ~
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
