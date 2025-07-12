@@ -1,6 +1,4 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
-  normalizationContext:
-    groups: ['output']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
@@ -26,8 +24,5 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
       writable: false
       identifier: true
     value:
-      readable: true
-      writable: false
-    id:
       readable: true
       writable: false

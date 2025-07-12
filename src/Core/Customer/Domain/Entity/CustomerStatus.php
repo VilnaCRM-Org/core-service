@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Domain\Entity;
 
-use ApiPlatform\Metadata\ApiProperty;
 use App\Shared\Domain\ValueObject\UlidInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 class CustomerStatus implements CustomerStatusInterface
 {
@@ -16,23 +14,11 @@ class CustomerStatus implements CustomerStatusInterface
     ) {
     }
 
-    #[ApiProperty(identifier: true)]
-    #[Groups(['output'])]
     public function getUlid(): string
     {
         return (string) $this->ulid;
     }
 
-    /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    #[Groups(['output'])]
-    public function getId(): string
-    {
-        return $this->getUlid();
-    }
-
-    #[Groups(['output'])]
     public function getValue(): string
     {
         return $this->value;
