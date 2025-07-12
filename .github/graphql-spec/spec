@@ -80,11 +80,13 @@ type Customer implements Node {
 type CustomerType implements Node {
   id: ID!
   value: String!
+  _id: String!
 }
 
 type CustomerStatus implements Node {
   id: ID!
   value: String!
+  _id: String!
 }
 
 "Cursor connection for Customer."

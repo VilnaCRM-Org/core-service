@@ -24,3 +24,10 @@ App\Core\Customer\Domain\Entity\CustomerType:
     ulid:
       readable: true
       writable: false
+      identifier: true
+    value:
+      readable: true
+      writable: false
+    id:
+      readable: true
+      writable: false
