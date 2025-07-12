@@ -1486,7 +1486,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -1725,7 +1725,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -1873,7 +1873,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -1989,7 +1989,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -2287,7 +2287,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -3719,7 +3719,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.jsonld:
+    CustomerStatus.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3750,7 +3750,10 @@ components:
         value:
           type: string
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld'
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+        id:
+          readOnly: true
+          type: string
     CustomerType.TypeCreate.jsonld:
       type: object
       description: ''
@@ -3817,6 +3820,9 @@ components:
           type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld-output'
+        id:
+          readOnly: true
+          type: string
     Error:
       type: object
       description: 'A representation of common errors.'
