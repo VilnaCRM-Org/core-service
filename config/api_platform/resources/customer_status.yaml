@@ -1,16 +1,4 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
-  graphQlOperations:
-    ApiPlatform\Metadata\GraphQl\Query: ~
-    ApiPlatform\Metadata\GraphQl\QueryCollection: ~
-    create_customer_status:
-      class: ApiPlatform\Metadata\GraphQl\Mutation
-      name: createCustomerStatus
-    update_customer_status:
-      class: ApiPlatform\Metadata\GraphQl\Mutation
-      name: updateCustomerStatus
-    delete_customer_status:
-      class: ApiPlatform\Metadata\GraphQl\DeleteMutation
-      name: deleteCustomerStatus
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
@@ -34,12 +22,3 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
     ulid:
       readable: true
       writable: false
-    createdAt:
-      readable: true
-      writable: false
-    updatedAt:
-      readable: true
-      writable: false
-    value:
-      readable: true
-      writable: true

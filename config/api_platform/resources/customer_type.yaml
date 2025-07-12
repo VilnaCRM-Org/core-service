@@ -1,16 +1,6 @@
 App\Core\Customer\Domain\Entity\CustomerType:
-  graphQlOperations:
-    ApiPlatform\Metadata\GraphQl\Query: ~
-    ApiPlatform\Metadata\GraphQl\QueryCollection: ~
-    create_customer_type:
-      class: ApiPlatform\Metadata\GraphQl\Mutation
-      name: createCustomerType
-    update_customer_type:
-      class: ApiPlatform\Metadata\GraphQl\Mutation
-      name: updateCustomerType
-    delete_customer_type:
-      class: ApiPlatform\Metadata\GraphQl\DeleteMutation
-      name: deleteCustomerType
+  normalizationContext:
+    groups: ['output']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
   operations:
@@ -34,12 +24,3 @@ App\Core\Customer\Domain\Entity\CustomerType:
     ulid:
       readable: true
       writable: false
-    createdAt:
-      readable: true
-      writable: false
-    updatedAt:
-      readable: true
-      writable: false
-    value:
-      readable: true
-      writable: true
