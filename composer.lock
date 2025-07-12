@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5095b1115bacf8b1e685be85491779c8",
+    "content-hash": "611781c1ac4fd4ff7eb14ab88e56f7a6",
     "packages": [
         {
             "name": "api-platform/core",
@@ -276,16 +276,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.349.2",
+            "version": "3.349.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "63cc727845f077d17cb94791deb327249e1626ce"
+                "reference": "b2d4718786398f47626add9c29840fc416175ef2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/63cc727845f077d17cb94791deb327249e1626ce",
-                "reference": "63cc727845f077d17cb94791deb327249e1626ce",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/b2d4718786398f47626add9c29840fc416175ef2",
+                "reference": "b2d4718786398f47626add9c29840fc416175ef2",
                 "shasum": ""
             },
             "require": {
@@ -367,9 +367,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.349.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.349.3"
             },
-            "time": "2025-07-03T18:08:27+00:00"
+            "time": "2025-07-09T18:10:17+00:00"
         },
         {
             "name": "blackbonjour/stdlib",
@@ -4033,16 +4033,16 @@
         },
         {
             "name": "symfony/flex",
-            "version": "v2.8.0",
+            "version": "v2.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/flex.git",
-                "reference": "68cdcde0b7e36b008a08bcf3709c07a20e757a29"
+                "reference": "423c36e369361003dc31ef11c5f15fb589e52c01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/flex/zipball/68cdcde0b7e36b008a08bcf3709c07a20e757a29",
-                "reference": "68cdcde0b7e36b008a08bcf3709c07a20e757a29",
+                "url": "https://api.github.com/repos/symfony/flex/zipball/423c36e369361003dc31ef11c5f15fb589e52c01",
+                "reference": "423c36e369361003dc31ef11c5f15fb589e52c01",
                 "shasum": ""
             },
             "require": {
@@ -4081,7 +4081,7 @@
             "description": "Composer plugin for Symfony",
             "support": {
                 "issues": "https://github.com/symfony/flex/issues",
-                "source": "https://github.com/symfony/flex/tree/v2.8.0"
+                "source": "https://github.com/symfony/flex/tree/v2.8.1"
             },
             "funding": [
                 {
@@ -4097,7 +4097,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-04T06:30:46+00:00"
+            "time": "2025-07-05T07:45:19+00:00"
         },
         {
             "name": "symfony/framework-bundle",
@@ -6734,16 +6734,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v15.20.1",
+            "version": "v15.21.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "10fc7f1b4a87a39f68579f6dee55ccd8e39a75e4"
+                "reference": "1a7aac3b7f8d66fd52aa7d1b7eafad3dec1f9cb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/10fc7f1b4a87a39f68579f6dee55ccd8e39a75e4",
-                "reference": "10fc7f1b4a87a39f68579f6dee55ccd8e39a75e4",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/1a7aac3b7f8d66fd52aa7d1b7eafad3dec1f9cb5",
+                "reference": "1a7aac3b7f8d66fd52aa7d1b7eafad3dec1f9cb5",
                 "shasum": ""
             },
             "require": {
@@ -6756,7 +6756,7 @@
                 "amphp/http-server": "^2.1",
                 "dms/phpunit-arraysubset-asserts": "dev-master",
                 "ergebnis/composer-normalize": "^2.28",
-                "friendsofphp/php-cs-fixer": "3.76.0",
+                "friendsofphp/php-cs-fixer": "3.82.2",
                 "mll-lab/php-cs-fixer-config": "5.11.0",
                 "nyholm/psr7": "^1.5",
                 "phpbench/phpbench": "^1.2",
@@ -6796,7 +6796,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v15.20.1"
+                "source": "https://github.com/webonyx/graphql-php/tree/v15.21.2"
             },
             "funding": [
                 {
@@ -6804,7 +6804,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2025-07-04T07:47:56+00:00"
+            "time": "2025-07-10T08:58:25+00:00"
         },
         {
             "name": "willdurand/negotiation",
@@ -9935,16 +9935,16 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.1",
+            "version": "1.13.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "1720ddd719e16cf0db4eb1c6eca108031636d46c"
+                "reference": "faed855a7b5f4d4637717c2b3863e277116beb36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/1720ddd719e16cf0db4eb1c6eca108031636d46c",
-                "reference": "1720ddd719e16cf0db4eb1c6eca108031636d46c",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/faed855a7b5f4d4637717c2b3863e277116beb36",
+                "reference": "faed855a7b5f4d4637717c2b3863e277116beb36",
                 "shasum": ""
             },
             "require": {
@@ -9983,7 +9983,7 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.1"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.3"
             },
             "funding": [
                 {
@@ -9991,7 +9991,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-04-29T12:36:36+00:00"
+            "time": "2025-07-05T12:25:42+00:00"
         },
         {
             "name": "netresearch/jsonmapper",
@@ -12216,16 +12216,16 @@
         },
         {
             "name": "sanmai/pipeline",
-            "version": "6.18",
+            "version": "6.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sanmai/pipeline.git",
-                "reference": "d9fbdf2a4a363f44f4d8155f71766f35d49b8fb2"
+                "reference": "3707180c66dd6b3b9c4b5f9fe26155325812037d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sanmai/pipeline/zipball/d9fbdf2a4a363f44f4d8155f71766f35d49b8fb2",
-                "reference": "d9fbdf2a4a363f44f4d8155f71766f35d49b8fb2",
+                "url": "https://api.github.com/repos/sanmai/pipeline/zipball/3707180c66dd6b3b9c4b5f9fe26155325812037d",
+                "reference": "3707180c66dd6b3b9c4b5f9fe26155325812037d",
                 "shasum": ""
             },
             "require": {
@@ -12236,10 +12236,10 @@
                 "friendsofphp/php-cs-fixer": "^3.17",
                 "infection/infection": ">=0.10.5",
                 "league/pipeline": "^0.3 || ^1.0",
-                "phan/phan": ">=1.1",
                 "php-coveralls/php-coveralls": "^2.4.1",
-                "phpstan/phpstan": ">=0.10 <2",
+                "phpstan/phpstan": "^2",
                 "phpunit/phpunit": ">=9.4 <12",
+                "sanmai/phpstan-rules": "^0.3.0",
                 "vimeo/psalm": ">=2"
             },
             "type": "library",
@@ -12269,7 +12269,7 @@
             "description": "General-purpose collections pipeline",
             "support": {
                 "issues": "https://github.com/sanmai/pipeline/issues",
-                "source": "https://github.com/sanmai/pipeline/tree/v6.12"
+                "source": "https://github.com/sanmai/pipeline/tree/6.19"
             },
             "funding": [
                 {
@@ -12277,7 +12277,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-06-30T23:36:16+00:00"
+            "time": "2025-07-05T14:39:33+00:00"
         },
         {
             "name": "sebastian/code-unit",
