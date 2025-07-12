@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/VilnaCRM-Org/core-service/compare/v0.4.0...v0.4.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* **#42:** update dependabot.yml ([#42](https://github.com/VilnaCRM-Org/core-service/issues/42)) ([bfa7245](https://github.com/VilnaCRM-Org/core-service/commit/bfa72457f087b60646968472fdbd1a7f7e7ec39c))
+
+
+
 # [0.4.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.3.0...v0.4.0) (2025-07-01)
 
 ### Features
