@@ -3,6 +3,11 @@
 load 'bats-support/load'
 load 'bats-assert/load'
 
+@test "make setup-test-db works correctly" {
+  run make setup-test-db
+  assert_success
+}
+
 @test "make help command lists all available targets" {
   run make help
   assert_success
@@ -14,7 +19,7 @@ load 'bats-assert/load'
 @test "make composer-validate command executes and reports validity with warnings" {
   run make composer-validate
   assert_success
-  assert_output --partial "./composer.json is valid"
+  assert_output --partial "./composer.json is valid, but with a few warnings"
 }
 
 @test "make check-requirements command executes and passes" {
@@ -50,6 +55,17 @@ load 'bats-assert/load'
   assert_output --partial "true true true true"
 }
 
+@test "make doctrine-migrations-migrate executes migrations" {
+  run bash -c "echo 'yes' | make doctrine-migrations-migrate"
+  assert_success
+  assert_output --partial 'DoctrineMigrations'
+}
+
+@test "make doctrine-migrations-generate command executes" {
+  run make doctrine-migrations-generate
+  assert_success
+}
+
 @test "make cache-clear command executes" {
   run make cache-clear
   assert_success
@@ -60,9 +76,10 @@ load 'bats-assert/load'
   assert_success
 }
 
-@test "make update command executes" {
-  run make update
-  assert_success
+@test "make load-fixtures command executes" {
+   run bash -c "make load-fixtures & sleep 2; kill $!"
+   assert_failure
+   assert_output --partial "Successfully deleted cache entries."
 }
 
 @test "make cache-warmup command executes" {

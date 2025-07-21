@@ -6,35 +6,33 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use App\Tests\Integration\BaseIntegrationTest;
-use Doctrine\ODM\MongoDB\DocumentManager;
+use App\Tests\Integration\IntegrationTestCase;
+use Doctrine\DBAL\Connection;
 
-final class DBCheckSubscriberTest extends BaseIntegrationTest
+final class DBCheckSubscriberTest extends IntegrationTestCase
 {
-    private DocumentManager $documentManager;
+    private Connection $connection;
     private DBCheckSubscriber $subscriber;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->documentManager = $this->container
-            ->get('doctrine_mongodb.odm.default_document_manager');
-        $this->subscriber = new DBCheckSubscriber($this->documentManager);
+        $this->connection = $this->container->get(
+            'doctrine.dbal.default_connection'
+        );
+        $this->subscriber = new DBCheckSubscriber($this->connection);
     }
 
     public function testOnHealthCheck(): void
     {
-        try {
-            $client = $this->documentManager->getClient();
-            $databases = $client->listDatabases();
-            $this->assertNotEmpty($databases);
-        } catch (\Exception $e) {
-            $this->fail('MongoDB connection failed: ' . $e->getMessage());
-        }
-
         $event = new HealthCheckEvent();
         $this->subscriber->onHealthCheck($event);
+
+        $result = $this->connection->executeQuery('SELECT 1');
+        $fetched = $result->fetchOne();
+
+        $this->assertEquals(1, $fetched);
     }
 
     public function testGetSubscribedEvents(): void
