@@ -1,4 +1,4 @@
-App\Customer\Domain\Entity\Customer:
+App\Core\Customer\Domain\Entity\Customer:
   attributes:
     email:
       groups: ['output', 'write:customer']

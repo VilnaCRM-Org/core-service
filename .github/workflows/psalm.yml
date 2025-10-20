@@ -8,23 +8,22 @@ jobs:
   psalm:
     name: Psalm
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Psalm
-        uses: docker://ghcr.io/psalm/psalm-github-actions
-        with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
+      - name: Start application
+        run: make start
 
-      - name: Psalm Security
-        uses: docker://ghcr.io/psalm/psalm-github-actions
-        with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
-          security_analysis: true
-          report_file: results.sarif
+      - name: Run Psalm
+        run: make psalm
+
+      - name: Psalm Security Analysis
+        run: make psalm-security-report
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v1

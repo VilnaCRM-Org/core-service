@@ -1,0 +1,19 @@
+App\Core\Customer\Application\DTO\StatusCreate:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Core\Customer\Application\DTO\StatusPatch:
+  properties:
+    value:
+      - Length:
+          max: 255
+
+App\Core\Customer\Application\DTO\StatusPut:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255

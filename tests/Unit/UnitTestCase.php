@@ -15,7 +15,7 @@ abstract class UnitTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->faker = Factory::create();
+        $this->faker->addProvider(new UlidProvider($this->faker));
     }
 }

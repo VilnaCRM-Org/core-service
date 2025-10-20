@@ -6,12 +6,12 @@ namespace App\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
     /**
-     * @param iterable<AbstractEndpointFactoryInterface> $endpointFactories
+     * @param iterable<EndpointFactoryInterface> $endpointFactories
      */
     public function __construct(
         private OpenApiFactoryInterface $decorated,

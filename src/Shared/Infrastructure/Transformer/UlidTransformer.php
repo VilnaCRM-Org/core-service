@@ -4,45 +4,51 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Transformer;
 
+use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use MongoDB\BSON\Binary;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final readonly class UlidTransformer
 {
-    public function toDatabase(mixed $value): ?Binary
+    public function __construct(private UlidFactory $ulidFactory)
     {
-        if ($value === null || $value === '') {
+    }
+
+    public function toDatabaseValue(mixed $value): ?Binary
+    {
+        if (
+            $value === null || $this->isInvalidUlidString($value)
+        ) {
             return null;
         }
 
-        if ($value instanceof Binary) {
-            return $value;
-        }
-
-        $ulid = $this->convertToUlid($value);
+        $ulid = $value instanceof
+        Ulid ? $value : $this->ulidFactory->create($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPHP(mixed $value): ?Ulid
+    public function toPhpValue(mixed $binary): ?Ulid
     {
-        if ($value === null || $value === '') {
-            return null;
+        if (!$binary instanceof SymfonyUlid) {
+            $binary = SymfonyUlid::fromBinary($binary);
         }
-
-        if ($value instanceof Ulid) {
-            return $value;
-        }
-
-        return $this->convertToUlid($value);
+        return $this->transformFromSymfonyUlid($binary);
     }
 
-    private function convertToUlid(mixed $value): Ulid
+    public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
-        if ($value instanceof Ulid) {
-            return $value;
-        }
+        return $this->createUlid((string) $symfonyUlid);
+    }
 
-        $string = $value instanceof Binary ? $value->getData() : $value;
-        return Ulid::fromString($string);
+    private function createUlid(string $ulid): Ulid
+    {
+        return $this->ulidFactory->create($ulid);
+    }
+
+    private function isInvalidUlidString(mixed $value): bool
+    {
+        return is_string($value)
+            && !SymfonyUlid::isValid($value);
     }
 }
