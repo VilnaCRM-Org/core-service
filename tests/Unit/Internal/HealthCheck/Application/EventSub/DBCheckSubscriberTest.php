@@ -30,7 +30,7 @@ final class DBCheckSubscriberTest extends UnitTestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->expects($this->once())
             ->method('listDatabases')
-            ->willReturn([]);
+            ->willReturn(new \ArrayIterator([]));
 
         $this->documentManager->expects($this->once())
             ->method('getClient')
