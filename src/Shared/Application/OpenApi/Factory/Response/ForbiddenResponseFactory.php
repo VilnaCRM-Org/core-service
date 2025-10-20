@@ -29,9 +29,8 @@ final class ForbiddenResponseFactory implements ResponseFactoryInterface
         );
     }
 
-    public function getTypeParam(): Parameter
+    private function getTypeParam(): Parameter
     {
-        // RFC2616 Section 10.4.4 describes the 403 Forbidden status.
         return new Parameter(
             'type',
             'string',
@@ -39,7 +38,7 @@ final class ForbiddenResponseFactory implements ResponseFactoryInterface
         );
     }
 
-    public function getTitleParam(): Parameter
+    private function getTitleParam(): Parameter
     {
         return new Parameter(
             'title',
@@ -48,7 +47,7 @@ final class ForbiddenResponseFactory implements ResponseFactoryInterface
         );
     }
 
-    public function getDetailParam(): Parameter
+    private function getDetailParam(): Parameter
     {
         return new Parameter(
             'detail',
@@ -57,7 +56,7 @@ final class ForbiddenResponseFactory implements ResponseFactoryInterface
         );
     }
 
-    public function getStatusParam(): Parameter
+    private function getStatusParam(): Parameter
     {
         return new Parameter(
             'status',

@@ -1,6 +1,6 @@
-App\Customer\Domain\Entity\CustomerType:
+App\Core\Customer\Domain\Entity\CustomerType:
   attributes:
     ulid:
-      groups: ['read:customerType']
+      groups: ['output']
     value:
-      groups: ['read:customerType', 'write:customerType']
+      groups: ['output']
