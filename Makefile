@@ -92,8 +92,7 @@ psalm-security: ## Psalm security analysis
 	$(EXEC_ENV) $(PSALM) --taint-analysis
 
 phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpmd src ansi codesize,design,cleancode --exclude vendor
-	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor
+	$(EXEC_ENV) ./vendor/bin/phpmd src ansi phpmd.xml
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check

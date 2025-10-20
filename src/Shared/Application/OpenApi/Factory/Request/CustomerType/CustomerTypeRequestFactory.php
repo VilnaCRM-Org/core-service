@@ -7,9 +7,10 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
 
-abstract class CustomerTypeRequestFactory implements AbstractRequestFactoryInterface
+abstract class CustomerTypeRequestFactory implements
+    AbstractReqFactoryInterface
 {
     public function getRequest(): RequestBody
     {
