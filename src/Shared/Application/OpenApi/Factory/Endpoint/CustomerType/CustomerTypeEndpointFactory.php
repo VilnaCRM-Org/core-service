@@ -7,13 +7,13 @@ namespace App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CrCTyReq;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerTypeEndpointFactory extends EndpointFactory
@@ -21,14 +21,14 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     private const ENDPOINT_URI = '/api/customer_types';
 
     private RequestBody $createCustomerTypeRequest;
-    private Response $validationResponse;
-    private Response $badRequestResponse;
-    private Response $internalErrorResponse;
-    private Response $unauthorizedResponse;
-    private Response $forbiddenResponse;
+    private Response $validationResp;
+    private Response $badRequestResp;
+    private Response $internalResp;
+    private Response $unauthorizedResp;
+    private Response $forbiddenResp;
 
     public function __construct(
-        private CustTypeCreateReqFactory $createCustomerTypeRequestFactory,
+        private CrCTyReq $createCustomerTypeRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
         private InternalErrorFactory $internalErrorFactory,
@@ -38,19 +38,19 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
         $this->createCustomerTypeRequest =
             $this->createCustomerTypeRequestFactory->getRequest();
 
-        $this->validationResponse =
+        $this->validationResp =
             $this->validationErrorResponseFactory->getResponse();
 
-        $this->badRequestResponse =
+        $this->badRequestResp =
             $this->badRequestResponseFactory->getResponse();
 
-        $this->internalErrorResponse =
+        $this->internalResp =
             $this->internalErrorFactory->getResponse();
 
-        $this->forbiddenResponse =
+        $this->forbiddenResp =
             $this->forbiddenResponseFactory->getResponse();
 
-        $this->unauthorizedResponse =
+        $this->unauthorizedResp =
             $this->unauthorizedResponseFactory->getResponse();
     }
 
@@ -84,11 +84,11 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     private function getPostResponses(): array
     {
         return [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResp,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResp,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResp,
+            HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationResp,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResp,
         ];
     }
 
@@ -98,10 +98,10 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     private function getGetResponses(): array
     {
         return [
-            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResponse,
-            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResponse,
-            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResponse,
-            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalErrorResponse,
+            HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResp,
+            HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResp,
+            HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResp,
+            HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResp,
         ];
     }
 }

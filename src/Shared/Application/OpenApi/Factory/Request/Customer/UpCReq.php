@@ -8,7 +8,7 @@ use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 
-final class UpdateCustomerRequestFactory extends CustomerRequestFactory
+final class UpCReq extends CustomerRequestFactory
 {
     public function __construct(private RequestPatchBuilder $requestBuilder)
     {

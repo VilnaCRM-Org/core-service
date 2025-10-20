@@ -7,9 +7,9 @@ namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
 
-abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
+abstract class CustomerRequestFactory implements AbstractReqFactoryInterface
 {
     public function getRequest(): RequestBody
     {
@@ -43,7 +43,13 @@ abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
 
     protected function getEmailParam(): Parameter
     {
-        return new Parameter('email', 'string', 'customer@example.com', 255, 'email');
+        return new Parameter(
+            'email',
+            'string',
+            'customer@example.com',
+            255,
+            'email'
+        );
     }
 
     protected function getPhoneParam(): Parameter

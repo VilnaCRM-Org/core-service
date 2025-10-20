@@ -57,6 +57,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
 
     /**
      * @BeforeScenario
+     *
      * @psalm-suppress UndefinedClass
      */
     public function gatherContexts(BeforeScenarioScope $scope): void
@@ -67,6 +68,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
 
     /**
      * @When I send a GET data request to :url
+     *
      * @psalm-suppress UndefinedClass
      */
     public function iSendAGetDataRequestTo(string $url): void
@@ -339,7 +341,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     private function trackId(string $id, array &$storage): void
     {
-        if (!in_array($id, $storage, true)) {
+        if (! in_array($id, $storage, true)) {
             $storage[] = $id;
         }
     }
