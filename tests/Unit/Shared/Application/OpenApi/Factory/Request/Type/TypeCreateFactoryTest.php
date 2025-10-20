@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Type;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CrCTyReq;
 use App\Tests\Unit\UnitTestCase;
 
 final class TypeCreateFactoryTest extends UnitTestCase
@@ -20,7 +20,7 @@ final class TypeCreateFactoryTest extends UnitTestCase
             ->with($this->isType('array'))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $typeCreateFactory = new CustTypeCreateReqFactory($requestBuilderMock);
+        $typeCreateFactory = new CrCTyReq($requestBuilderMock);
         $requestBody = $typeCreateFactory->getRequest();
 
         $this->assertInstanceOf(RequestBody::class, $requestBody);

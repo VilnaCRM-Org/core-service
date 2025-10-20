@@ -12,28 +12,28 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\ParamCustomerStatusEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CustomerCreateStatusRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CrCStReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpCStReq;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStDelResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStNFResp;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustSt;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamEndpointFactoryTest extends UnitTestCase
 {
-    private UuidUriCustomerStatusFactory $parameterFactory;
-    private UpdateCustomerStatusRequestFactory $updateFactory;
+    private UuidUriCustSt $parameterFactory;
+    private UpCStReq $updateFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
-    private CustomerStatusNotFoundResponseFactory $notFoundFactory;
-    private CustomerStatusDeletedResponseFactory $deletedFactory;
-    private CustomerCreateStatusRequestFactory $replaceFactory;
+    private CStNFResp $notFoundFactory;
+    private CStDelResp $deletedFactory;
+    private CrCStReq $replaceFactory;
     private InternalErrorFactory $internalErrorFactory;
     private ForbiddenResponseFactory $forbiddenResponseFactory;
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
@@ -67,7 +67,7 @@ final class ParamEndpointFactoryTest extends UnitTestCase
     public function testCreateEndpoint(): void
     {
         $this->setupFactoryReturnValues();
-        $this->setExpectations();
+        $this->configureExpectations();
 
         $factory = $this->createFactory();
         $factory->createEndpoint($this->openApi);
@@ -76,19 +76,19 @@ final class ParamEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this
-            ->createMock(UuidUriCustomerStatusFactory::class);
+            ->createMock(UuidUriCustSt::class);
         $this->updateFactory = $this
-            ->createMock(UpdateCustomerStatusRequestFactory::class);
+            ->createMock(UpCStReq::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
             ->createMock(BadRequestResponseFactory::class);
         $this->notFoundFactory = $this
-            ->createMock(CustomerStatusNotFoundResponseFactory::class);
+            ->createMock(CStNFResp::class);
         $this->deletedFactory = $this
-            ->createMock(CustomerStatusDeletedResponseFactory::class);
+            ->createMock(CStDelResp::class);
         $this->replaceFactory = $this
-            ->createMock(CustomerCreateStatusRequestFactory::class);
+            ->createMock(CrCStReq::class);
         $this->internalErrorFactory = $this
             ->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this

@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\UpCReq;
 use App\Tests\Unit\UnitTestCase;
 
 final class UpdateFactoryTest extends UnitTestCase
@@ -22,7 +22,7 @@ final class UpdateFactoryTest extends UnitTestCase
             }))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $updateFactory = new UpdateCustomerRequestFactory($requestBuilderMock);
+        $updateFactory = new UpCReq($requestBuilderMock);
 
         $requestBody = $updateFactory->getRequest();
 
