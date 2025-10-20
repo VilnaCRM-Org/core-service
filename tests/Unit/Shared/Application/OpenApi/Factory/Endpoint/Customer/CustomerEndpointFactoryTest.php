@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\CustomerEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CrCReq;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerEndpointFactoryTest extends UnitTestCase
 {
-    private CustomerCreateRequestFactory $createFactory;
+    private CrCReq $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
     private InternalErrorFactory $internalErrorFactory;
@@ -67,7 +67,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this
-            ->createMock(CustomerCreateRequestFactory::class);
+            ->createMock(CrCReq::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
