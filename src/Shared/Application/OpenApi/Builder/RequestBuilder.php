@@ -27,4 +27,24 @@ final class RequestBuilder implements RequestBuilderInterface
             required: $required
         );
     }
+
+    /**
+     * @param array<Parameter> $params
+     */
+    public function buildRequired(
+        array $params,
+        string $contentType = 'application/ld+json'
+    ): RequestBody {
+        return $this->build($params, true, $contentType);
+    }
+
+    /**
+     * @param array<Parameter> $params
+     */
+    public function buildOptional(
+        array $params,
+        string $contentType = 'application/ld+json'
+    ): RequestBody {
+        return $this->build($params, false, $contentType);
+    }
 }

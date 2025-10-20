@@ -17,38 +17,50 @@ final readonly class UlidTransformer
 
     public function toDatabaseValue(mixed $value): ?Binary
     {
-        if (
-            $value === null || $this->isInvalidUlidString($value)
-        ) {
+        if ($this->isInvalidValue($value)) {
             return null;
         }
 
-        $ulid = $value instanceof
-        Ulid ? $value : $this->ulidFactory->create($value);
+        $ulid = $this->ensureUlidInstance($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
     public function toPhpValue(mixed $binary): ?Ulid
     {
-        if (!$binary instanceof SymfonyUlid) {
-            $binary = SymfonyUlid::fromBinary($binary);
-        }
-        return $this->transformFromSymfonyUlid($binary);
+        $symfonyUlid = $this->ensureSymfonyUlidInstance($binary);
+        return $this->transformFromSymfonyUlid($symfonyUlid);
     }
 
     public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
-        return $this->createUlid((string) $symfonyUlid);
+        return $this->ulidFactory->create((string) $symfonyUlid);
     }
 
-    private function createUlid(string $ulid): Ulid
+    private function isInvalidValue(mixed $value): bool
     {
-        return $this->ulidFactory->create($ulid);
+        if ($value === null) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return !SymfonyUlid::isValid($value);
+        }
+
+        return false;
     }
 
-    private function isInvalidUlidString(mixed $value): bool
+    private function ensureUlidInstance(mixed $value): Ulid
     {
-        return is_string($value)
-            && !SymfonyUlid::isValid($value);
+        return $value instanceof Ulid
+            ? $value
+            : $this->ulidFactory->create($value);
+    }
+
+    private function ensureSymfonyUlidInstance(
+        mixed $binary
+    ): SymfonyUlid {
+        return $binary instanceof SymfonyUlid
+            ? $binary
+            : SymfonyUlid::fromBinary($binary);
     }
 }
