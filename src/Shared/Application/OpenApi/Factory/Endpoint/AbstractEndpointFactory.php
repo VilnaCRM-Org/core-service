@@ -11,6 +11,7 @@ abstract class AbstractEndpointFactory implements AbstractEndpointFactoryInterfa
     /**
      * @param array<int,Response> $baseResponses
      * @param array<int,Response> $overrideResponses
+     *
      * @return array<int,Response>
      */
     public function mergeResponses(

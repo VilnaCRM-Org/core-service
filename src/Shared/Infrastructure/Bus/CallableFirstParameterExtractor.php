@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Bus;
 
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use LogicException;
+use ReflectionClass;
 
 final class CallableFirstParameterExtractor
 {
@@ -46,7 +48,7 @@ final class CallableFirstParameterExtractor
 
     public function extract(object|string $class): ?string
     {
-        $reflector = new \ReflectionClass($class);
+        $reflector = new ReflectionClass($class);
         $method = $reflector->getMethod('__invoke');
 
         if ($this->hasOnlyOneParameter($method)) {
@@ -113,7 +115,7 @@ final class CallableFirstParameterExtractor
         $firstParameterType = $method->getParameters()[0]->getType();
 
         if ($firstParameterType === null) {
-            throw new \LogicException(
+            throw new LogicException(
                 'Missing type hint for the first parameter of __invoke'
             );
         }

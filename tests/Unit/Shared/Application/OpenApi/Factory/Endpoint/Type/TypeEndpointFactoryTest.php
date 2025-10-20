@@ -10,8 +10,8 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Core\Customer\Application\OpenApi\Endpoint\Type\TypeFactory;
-use App\Core\Customer\Application\OpenApi\Request\Type\TypeCreateFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\CustomerTypeEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class TypeEndpointFactoryTest extends UnitTestCase
 {
-    private TypeCreateFactory $createFactory;
+    private CustTypeCreateReqFactory $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
     private InternalErrorFactory $internalErrorFactory;
@@ -87,7 +87,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this
-            ->createMock(TypeCreateFactory::class);
+            ->createMock(CustTypeCreateReqFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
@@ -146,9 +146,9 @@ final class TypeEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): TypeFactory
+    private function createFactory(): CustomerTypeEndpointFactory
     {
-        return new TypeFactory(
+        return new CustomerTypeEndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,

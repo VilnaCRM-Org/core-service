@@ -40,16 +40,16 @@ final class ParamCustomerEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UuidUriCustomerFactory          $parameterFactory,
-        private UpdateCustomerRequestFactory    $updateCustomerRequestFactory,
-        private ValidationErrorFactory          $validationErrorResponseFactory,
-        private BadRequestResponseFactory       $badRequestResponseFactory,
+        private UuidUriCustomerFactory $parameterFactory,
+        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
         private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerCreateRequestFactory    $replaceCustomerRequestFactory,
-        private InternalErrorFactory            $internalErrorFactory,
-        private ForbiddenResponseFactory        $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory     $unauthorizedResponseFactory,
+        private CustomerDeletedResponseFactory $deletedResponseFactory,
+        private CustomerCreateRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
