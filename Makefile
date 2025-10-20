@@ -123,7 +123,7 @@ deptrac-debug: ## Find files unassigned for Deptrac
 
 setup-test-db: ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
+	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
 	$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
 
 behat: setup-test-db ## A php framework for autotesting business expectations

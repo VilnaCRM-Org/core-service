@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Builder;
 
+use ArrayObject;
+
 final class ContextBuilder
 {
     /**
@@ -12,8 +14,8 @@ final class ContextBuilder
     public function build(
         array $params,
         string $contentType = 'application/problem+json'
-    ): \ArrayObject {
-        $content = new \ArrayObject([
+    ): ArrayObject {
+        $content = new ArrayObject([
             $contentType => [
                 'example' => '',
             ],
@@ -77,8 +79,8 @@ final class ContextBuilder
         array $properties,
         array $example,
         array $required
-    ): \ArrayObject {
-        return new \ArrayObject([
+    ): ArrayObject {
+        return new ArrayObject([
             $contentType => [
                 'schema' => [
                     'type' => 'object',
