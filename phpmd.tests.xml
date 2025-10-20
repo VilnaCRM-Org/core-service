@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<ruleset name="PHPMD Tests Ruleset"
+         xmlns="http://pmd.sf.net/ruleset/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
+                     http://pmd.sf.net/ruleset_xml_schema.xsd"
+         xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+    <description>
+        PHPMD ruleset for test code - less strict than production code
+    </description>
+
+    <!-- Code Size Rules with higher thresholds for tests -->
+    <rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>
+    <rule ref="rulesets/codesize.xml/NPathComplexity"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveMethodLength"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassLength"/>
+    <rule ref="rulesets/codesize.xml/ExcessiveParameterList"/>
+    <rule ref="rulesets/codesize.xml/ExcessivePublicCount">
+        <properties>
+            <property name="minimum" value="60"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
+        <properties>
+            <property name="maximum" value="60"/>
+        </properties>
+    </rule>
+    
+    <rule ref="rulesets/codesize.xml/TooManyPublicMethods">
+        <properties>
+            <property name="maxmethods" value="60"/>
+        </properties>
+    </rule>
+    
+    <rule ref="rulesets/codesize.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="60"/>
+        </properties>
+    </rule>
+    
+    <rule ref="rulesets/codesize.xml/TooManyFields">
+        <properties>
+            <property name="maxfields" value="30"/>
+        </properties>
+    </rule>
+
+    <!-- Clean Code Rules with exclusions for tests -->
+    <rule ref="rulesets/cleancode.xml">
+        <exclude name="StaticAccess"/>
+        <exclude name="BooleanArgumentFlag"/>
+        <exclude name="ElseExpression"/>
+        <exclude name="MissingImport"/>
+    </rule>
+
+    <!-- Design Rules with higher thresholds for tests -->
+    <rule ref="rulesets/design.xml/ExitExpression"/>
+    <rule ref="rulesets/design.xml/EvalExpression"/>
+    <rule ref="rulesets/design.xml/GotoStatement"/>
+    <rule ref="rulesets/design.xml/DepthOfInheritance"/>
+    <rule ref="rulesets/design.xml/DevelopmentCodeFragment"/>
+    <rule ref="rulesets/design.xml/EmptyCatchBlock"/>
+    <rule ref="rulesets/design.xml/CountInLoopExpression"/>
+    
+    <rule ref="rulesets/design.xml/NumberOfChildren">
+        <properties>
+            <property name="minimum" value="200"/>
+        </properties>
+    </rule>
+    
+    <rule ref="rulesets/design.xml/CouplingBetweenObjects">
+        <properties>
+            <property name="maximum" value="20"/>
+        </properties>
+    </rule>
+</ruleset>

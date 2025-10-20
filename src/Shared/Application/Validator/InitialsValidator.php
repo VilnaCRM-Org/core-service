@@ -36,15 +36,39 @@ final class InitialsValidator extends ConstraintValidator
             return true;
         }
 
-        return $constraint->isOptional() && $value === '';
+        return $this->isOptionalEmptyValue($value, $constraint);
+    }
+
+    private function isOptionalEmptyValue(
+        mixed $value,
+        Constraint $constraint
+    ): bool {
+        return $this->isOptionalConstraint($constraint)
+            && $this->isEmptyString($value);
+    }
+
+    private function isOptionalConstraint(Constraint $constraint): bool
+    {
+        return $constraint->isOptional();
+    }
+
+    private function isEmptyString(mixed $value): bool
+    {
+        return $value === '';
     }
 
     private function containsOnlySpaces(string $value): bool
     {
-        if (strlen($value) === 0) {
-            return false;
-        }
+        return $this->isNotEmpty($value) && $this->isOnlyWhitespace($value);
+    }
 
+    private function isNotEmpty(string $value): bool
+    {
+        return strlen($value) > 0;
+    }
+
+    private function isOnlyWhitespace(string $value): bool
+    {
         return trim($value) === '';
     }
 

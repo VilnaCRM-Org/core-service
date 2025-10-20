@@ -16,7 +16,7 @@ use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerTypeEndpointFactory extends EndpointFactory
+final class CTyEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types';
 

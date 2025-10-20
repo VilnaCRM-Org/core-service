@@ -32,10 +32,10 @@ final class UpdateCustomerCommandFactoryTest extends UnitTestCase
         $customerStatus = $this->createMock(CustomerStatus::class);
 
         $updateData = new CustomerUpdate(
-            $this->faker->word,
-            $this->faker->email,
-            $this->faker->phoneNumber,
-            $this->faker->word,
+            $this->faker->word(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
             $customerType,
             $customerStatus,
             true
