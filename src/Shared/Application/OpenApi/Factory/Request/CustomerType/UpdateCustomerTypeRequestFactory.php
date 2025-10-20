@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 
-class UpdateCustomerTypeRequestFactory extends CustomerTypeRequestFactory
+final class UpdateCustomerTypeRequestFactory extends CustomerTypeRequestFactory
 {
     public function __construct(private RequestPatchBuilder $requestBuilder)
     {

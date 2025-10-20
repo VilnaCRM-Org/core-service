@@ -23,11 +23,10 @@ final class MessageBusFactory
      */
     private function getMiddleWare(iterable $callables): HandleMessageMiddleware
     {
+        $extractor = new CallableFirstParameterExtractor();
         return new HandleMessageMiddleware(
             new HandlersLocator(
-                CallableFirstParameterExtractor::forCallables(
-                    $callables
-                )
+                $extractor->forCallables($callables)
             )
         );
     }

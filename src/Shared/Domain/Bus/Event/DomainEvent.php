@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Bus\Event;
 
+use DateTimeImmutable;
+
 abstract class DomainEvent
 {
     private readonly string $eventId;
@@ -13,7 +15,7 @@ abstract class DomainEvent
     {
         $this->eventId = $eventId;
         $this->occurredOn = $occurredOn ??
-            self::dateToString(new \DateTimeImmutable());
+            self::dateToString(new DateTimeImmutable());
     }
 
     /**

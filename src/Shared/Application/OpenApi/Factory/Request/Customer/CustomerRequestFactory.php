@@ -11,14 +11,14 @@ use App\Shared\Application\OpenApi\Factory\Request\AbstractRequestFactoryInterfa
 
 abstract class CustomerRequestFactory implements AbstractRequestFactoryInterface
 {
-    abstract protected function getRequestBuilder(): RequestBuilderInterface;
-
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(
             $this->getDefaultParameters()
         );
     }
+
+    abstract protected function getRequestBuilder(): RequestBuilderInterface;
 
     /**
      * @return array<Parameter>
