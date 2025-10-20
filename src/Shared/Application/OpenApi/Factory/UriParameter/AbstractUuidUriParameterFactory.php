@@ -24,8 +24,5 @@ abstract class AbstractUuidUriParameterFactory implements UriParameterFactoryInt
         );
     }
 
-    protected function getDescription(): string
-    {
-        return 'Customer identifier';
-    }
+    abstract protected function getDescription(): string;
 }
