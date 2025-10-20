@@ -12,28 +12,28 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\ParamCustomerTypeEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CrCTyReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpCTyReq;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TypeNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CTyDelResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TyNFResp;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerTypeFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustTy;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 {
-    private UuidUriCustomerTypeFactory $parameterFactory;
-    private UpdateCustomerTypeRequestFactory $updateFactory;
+    private UuidUriCustTy $parameterFactory;
+    private UpCTyReq $updateFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
-    private TypeNotFoundResponseFactory $notFoundFactory;
-    private CustomerTypeDeletedResponseFactory $deletedFactory;
-    private CustTypeCreateReqFactory $replaceFactory;
+    private TyNFResp $notFoundFactory;
+    private CTyDelResp $deletedFactory;
+    private CrCTyReq $replaceFactory;
     private InternalErrorFactory $internalErrorFactory;
     private ForbiddenResponseFactory $forbiddenResponseFactory;
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
@@ -76,19 +76,19 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this
-            ->createMock(UuidUriCustomerTypeFactory::class);
+            ->createMock(UuidUriCustTy::class);
         $this->updateFactory = $this
-            ->createMock(UpdateCustomerTypeRequestFactory::class);
+            ->createMock(UpCTyReq::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
             ->createMock(BadRequestResponseFactory::class);
         $this->notFoundFactory = $this
-            ->createMock(TypeNotFoundResponseFactory::class);
+            ->createMock(TyNFResp::class);
         $this->deletedFactory = $this
-            ->createMock(CustomerTypeDeletedResponseFactory::class);
+            ->createMock(CTyDelResp::class);
         $this->replaceFactory = $this
-            ->createMock(CustTypeCreateReqFactory::class);
+            ->createMock(CrCTyReq::class);
         $this->internalErrorFactory = $this
             ->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this

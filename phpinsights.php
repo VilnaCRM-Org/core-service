@@ -16,7 +16,7 @@ return [
     'ide' => 'phpstorm',
     'exclude' => [
         'vendor',
-        'CLI/bats/php',
+        'tests/CLI/bats/php',
     ],
     'add' => [],
     'remove' => [
