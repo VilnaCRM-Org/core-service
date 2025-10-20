@@ -9,7 +9,6 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\AbstractEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CustTypeCreateReqFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
@@ -20,9 +19,10 @@ use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerTypeFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerTypeEndpointFactory extends AbstractEndpointFactory
+final class ParamCustomerTypeEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types/{ulid}';
 
