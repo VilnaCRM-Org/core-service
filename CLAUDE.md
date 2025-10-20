@@ -9,6 +9,7 @@ VilnaCRM Core Service - A modern PHP microservice template built with Symfony 7,
 ## Development Commands
 
 ### Docker Environment
+
 ```bash
 make start          # Start docker containers
 make stop           # Stop docker containers
@@ -20,12 +21,14 @@ make new-logs       # Show live logs
 ```
 
 ### Dependency Management
+
 ```bash
 make install        # Install dependencies from composer.lock
 make update         # Update dependencies per composer.json
 ```
 
 ### Code Quality & Static Analysis
+
 ```bash
 make phpcsfixer     # Auto-fix PHP coding standards
 make psalm          # Run Psalm static analysis
@@ -36,6 +39,7 @@ make composer-validate  # Validate composer files
 ```
 
 ### Testing
+
 ```bash
 make unit-tests          # Run unit tests only
 make integration-tests   # Run integration tests only
@@ -49,6 +53,7 @@ make setup-test-db      # Drop and recreate test MongoDB schema
 ```
 
 ### Load Testing
+
 ```bash
 make smoke-load-tests   # Minimal load test
 make average-load-tests # Average load test
@@ -62,6 +67,7 @@ make aws-load-tests-cleanup # Clean up AWS resources
 ```
 
 ### Symfony Commands
+
 ```bash
 make cache-clear    # Clear Symfony cache
 make cache-warmup   # Warmup cache
@@ -69,6 +75,7 @@ make commands       # List all Symfony console commands
 ```
 
 ### API Documentation
+
 ```bash
 make generate-openapi-spec   # Export OpenAPI spec to .github/openapi-spec/spec.yaml
 make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
@@ -77,6 +84,7 @@ make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
 ## Architecture
 
 ### Directory Structure
+
 ```
 src/
 ├── Customer/              # Customer bounded context
@@ -94,6 +102,7 @@ src/
 The codebase enforces strict architectural boundaries via Deptrac:
 
 - **Domain Layer**: Pure business logic with no external dependencies. Contains:
+
   - Entities and Value Objects
   - Aggregates (extend `AggregateRoot` for domain events)
   - Domain Events and Commands (interfaces)
@@ -101,6 +110,7 @@ The codebase enforces strict architectural boundaries via Deptrac:
   - Domain Exceptions
 
 - **Application Layer**: Use cases and orchestration. Contains:
+
   - Command Handlers (implement `CommandHandlerInterface`)
   - Event Subscribers (implement `DomainEventSubscriberInterface`)
   - DTOs and Transformers
@@ -114,6 +124,7 @@ The codebase enforces strict architectural boundaries via Deptrac:
   - Retry strategies
 
 **Dependency Rules**:
+
 - Domain layer has NO dependencies on other layers
 - Application layer depends on Domain and Infrastructure
 - Infrastructure layer depends on Domain and Application
@@ -129,6 +140,7 @@ The codebase enforces strict architectural boundaries via Deptrac:
 ### Service Registration
 
 Services are auto-configured in `config/services.yaml`:
+
 - All classes in `src/` are auto-wired
 - Command handlers tagged via `_instanceof` with `app.command_handler`
 - Event subscribers tagged via `_instanceof` with `app.event_subscriber`
@@ -200,6 +212,7 @@ Define filters in `config/services.yaml` inheriting from API Platform's built-in
 ## CI/CD Checks
 
 The project enforces high code quality standards:
+
 - Psalm static analysis (with security/taint analysis)
 - PHP CS Fixer (PSR-12 compliant)
 - PHPInsights (100% score required)
@@ -210,6 +223,7 @@ The project enforces high code quality standards:
 ## Environment Variables
 
 Key environment variables are defined in `.env` and `.env.test`:
+
 - `APP_ENV`: Application environment (dev, test, prod)
 - `DB_URL`: MongoDB connection string
 - `AWS_SQS_*`: AWS SQS configuration for message queuing
