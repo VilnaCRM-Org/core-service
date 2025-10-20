@@ -27,94 +27,6 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
-          description: 'Bad request'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves the collection of Customer resources.'
       description: 'Retrieves the collection of Customer resources.'
       parameters:
@@ -641,174 +553,34 @@ paths:
                 $ref: '#/components/schemas/Customer.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Creates a Customer resource.'
       description: 'Creates a Customer resource.'
       parameters: []
       requestBody:
+        description: 'The new Customer resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                  format: null
-                initials:
-                  type: string
-                  maxLength: 255
-                  format: null
-                leadSource:
-                  type: string
-                  maxLength: 255
-                  format: null
-                type:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                status:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                confirmed:
-                  type: boolean
-                  maxLength: null
-                  format: null
-              required:
-                - email
-                - phone
-                - initials
-                - leadSource
-                - type
-                - status
-                - confirmed
-            example:
-              email: customer@example.com
-              phone: '0123456789'
-              initials: 'Name Surname'
-              leadSource: Google
-              type: /api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447
-              status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
-              confirmed: true
+              $ref: '#/components/schemas/Customer.CustomerCreate.jsonld'
         required: true
       deprecated: false
   '/api/customers/{ulid}':
@@ -823,94 +595,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/Customer.jsonld'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'Customer not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'Customer not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves a Customer resource.'
       description: 'Retrieves a Customer resource.'
       parameters:
@@ -926,7 +610,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customers_ulid_put
@@ -941,143 +624,25 @@ paths:
                 $ref: '#/components/schemas/Customer.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'Customer not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'Customer not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Replaces the Customer resource.'
       description: 'Replaces the Customer resource.'
       parameters:
@@ -1093,57 +658,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated Customer resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                  format: null
-                initials:
-                  type: string
-                  maxLength: 255
-                  format: null
-                leadSource:
-                  type: string
-                  maxLength: 255
-                  format: null
-                type:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                status:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                confirmed:
-                  type: boolean
-                  maxLength: null
-                  format: null
-              required:
-                - email
-                - phone
-                - initials
-                - leadSource
-                - type
-                - status
-                - confirmed
-            example:
-              email: customer@example.com
-              phone: '0123456789'
-              initials: 'Name Surname'
-              leadSource: Google
-              type: /api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447
-              status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
-              confirmed: true
+              $ref: '#/components/schemas/Customer.CustomerPut.jsonld'
         required: true
       deprecated: false
     delete:
@@ -1153,98 +673,6 @@ paths:
       responses:
         '204':
           description: 'Customer resource deleted'
-          content:
-            application/problem+json:
-              example: ''
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'Customer not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'Customer not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Removes the Customer resource.'
       description: 'Removes the Customer resource.'
       parameters:
@@ -1260,7 +688,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customers_ulid_patch
@@ -1275,143 +702,25 @@ paths:
                 $ref: '#/components/schemas/Customer.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'Customer not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'Customer not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Updates the Customer resource.'
       description: 'Updates the Customer resource.'
       parameters:
@@ -1427,50 +736,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated Customer resource'
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                  format: null
-                initials:
-                  type: string
-                  maxLength: 255
-                  format: null
-                leadSource:
-                  type: string
-                  maxLength: 255
-                  format: null
-                type:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                status:
-                  type: iri-reference
-                  maxLength: 255
-                  format: null
-                confirmed:
-                  type: boolean
-                  maxLength: null
-                  format: null
-              required: []
-            example:
-              email: customer@example.com
-              phone: '0123456789'
-              initials: 'Name Surname'
-              leadSource: Google
-              type: /api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447
-              status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
-              confirmed: true
+              $ref: '#/components/schemas/Customer.CustomerPatch'
         required: true
       deprecated: false
   /api/customer_statuses:
@@ -1492,94 +763,6 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
-          description: 'Bad request'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves the collection of CustomerStatus resources.'
       description: 'Retrieves the collection of CustomerStatus resources.'
       parameters:
@@ -1728,138 +911,34 @@ paths:
                 $ref: '#/components/schemas/CustomerStatus.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Creates a CustomerStatus resource.'
       description: 'Creates a CustomerStatus resource.'
       parameters: []
       requestBody:
+        description: 'The new CustomerStatus resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Active
+              $ref: '#/components/schemas/CustomerStatus.StatusCreate.jsonld'
         required: true
       deprecated: false
   '/api/customer_statuses/{ulid}':
@@ -1874,94 +953,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerStatus.jsonld'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerStatus not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerStatus not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves a CustomerStatus resource.'
       description: 'Retrieves a CustomerStatus resource.'
       parameters:
@@ -1977,7 +968,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
@@ -1992,143 +982,25 @@ paths:
                 $ref: '#/components/schemas/CustomerStatus.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerStatus not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerStatus not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Replaces the CustomerStatus resource.'
       description: 'Replaces the CustomerStatus resource.'
       parameters:
@@ -2144,21 +1016,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated CustomerStatus resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Active
+              $ref: '#/components/schemas/CustomerStatus.StatusPut.jsonld'
         required: true
       deprecated: false
     delete:
@@ -2168,98 +1031,6 @@ paths:
       responses:
         '204':
           description: 'CustomerStatus resource deleted'
-          content:
-            application/problem+json:
-              example: ''
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerStatus not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerStatus not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Removes the CustomerStatus resource.'
       description: 'Removes the CustomerStatus resource.'
       parameters:
@@ -2275,7 +1046,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
@@ -2290,143 +1060,25 @@ paths:
                 $ref: '#/components/schemas/CustomerStatus.jsonld'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerStatus not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerStatus not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Updates the CustomerStatus resource.'
       description: 'Updates the CustomerStatus resource.'
       parameters:
@@ -2442,21 +1094,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated CustomerStatus resource'
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Active
+              $ref: '#/components/schemas/CustomerStatus.StatusPatch'
         required: true
       deprecated: false
   /api/customer_types:
@@ -2478,94 +1121,6 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
-          description: 'Bad request'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves the collection of CustomerType resources.'
       description: 'Retrieves the collection of CustomerType resources.'
       parameters:
@@ -2714,138 +1269,34 @@ paths:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Creates a CustomerType resource.'
       description: 'Creates a CustomerType resource.'
       parameters: []
       requestBody:
+        description: 'The new CustomerType resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Prospect
+              $ref: '#/components/schemas/CustomerType.TypeCreate.jsonld'
         required: true
       deprecated: false
   '/api/customer_types/{ulid}':
@@ -2860,94 +1311,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerType not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerType not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Retrieves a CustomerType resource.'
       description: 'Retrieves a CustomerType resource.'
       parameters:
@@ -2963,7 +1326,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customer_types_ulid_put
@@ -2978,143 +1340,25 @@ paths:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerType not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerType not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Replaces the CustomerType resource.'
       description: 'Replaces the CustomerType resource.'
       parameters:
@@ -3130,21 +1374,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated CustomerType resource'
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Prospect
+              $ref: '#/components/schemas/CustomerType.TypePut.jsonld'
         required: true
       deprecated: false
     delete:
@@ -3154,98 +1389,6 @@ paths:
       responses:
         '204':
           description: 'CustomerType resource deleted'
-          content:
-            application/problem+json:
-              example: ''
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerType not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerType not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
       summary: 'Removes the CustomerType resource.'
       description: 'Removes the CustomerType resource.'
       parameters:
@@ -3261,7 +1404,6 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
@@ -3276,143 +1418,25 @@ paths:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
           links: {  }
         '400':
-          description: 'Bad request'
+          description: 'Invalid input'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'The input data is misformatted.'
-                status: 400
-          headers: {  }
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          links: {  }
         '422':
-          description: 'Validation error'
+          description: 'An error occurred'
           content:
             application/problem+json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - violations
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'some_property: This value should not be blank.'
-                violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
-                status: 422
-          headers: {  }
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
+                $ref: '#/components/schemas/ConstraintViolation-json'
+            application/json:
               schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.2'
-                title: Unauthorized
-                detail: 'Authentication credentials are missing or invalid.'
-                status: 401
-          headers: {  }
-        '403':
-          description: Forbidden
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10.4.4'
-                title: Forbidden
-                detail: 'The server understood the request, but refuses to authorize it.'
-                status: 403
-          headers: {  }
-        '404':
-          description: 'CustomerType not found'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: 'https://tools.ietf.org/html/rfc2616#section-10'
-                title: 'An error occurred'
-                detail: 'CustomerType not found'
-                status: 404
-          headers: {  }
-        '500':
-          description: 'Internal server error'
-          content:
-            application/problem+json:
-              schema:
-                type: object
-                properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
-                required:
-                  - type
-                  - title
-                  - detail
-                  - status
-              example:
-                type: /errors/500
-                title: 'An error occurred'
-                detail: 'Something went wrong'
-                status: 500
-          headers: {  }
+                $ref: '#/components/schemas/ConstraintViolation-json'
+          links: {  }
       summary: 'Updates the CustomerType resource.'
       description: 'Updates the CustomerType resource.'
       parameters:
@@ -3428,21 +1452,12 @@ paths:
           style: simple
           explode: false
           allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
+        description: 'The updated CustomerType resource'
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-                  format: null
-              required:
-                - value
-            example:
-              value: Prospect
+              $ref: '#/components/schemas/CustomerType.TypePatch'
         required: true
       deprecated: false
   /api/health:
