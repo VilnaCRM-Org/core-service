@@ -11,29 +11,29 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Core\Customer\Application\OpenApi\Endpoint\Customer\ParamFactory;
-use App\Core\Customer\Application\OpenApi\Request\Customer\CreateFactory;
-use App\Core\Customer\Application\OpenApi\Request\Customer\UpdateFactory;
-use App\Core\Customer\Application\OpenApi\Response\Customer\DeletedFactory;
-use App\Core\Customer\Application\OpenApi\Response\Customer\NotFoundFactory;
-use App\Core\Customer\Application\OpenApi\UriParameter\CustomerFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\ParamCustomerEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerEndpointFactoryTest extends TestCase
 {
-    private CustomerFactory $parameterFactory;
-    private UpdateFactory $updateCustomerRequestFactory;
+    private UuidUriCustomerFactory $parameterFactory;
+    private UpdateCustomerRequestFactory $updateCustomerRequestFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
-    private NotFoundFactory $customerNotFoundFactory;
-    private DeletedFactory $deletedResponseFactory;
-    private CreateFactory $replaceCustomerRequestFactory;
+    private CustomerNotFoundResponseFactory $customerNotFoundFactory;
+    private CustomerDeletedResponseFactory $deletedResponseFactory;
+    private CustomerCreateRequestFactory $replaceCustomerRequestFactory;
     private InternalErrorFactory $internalErrorFactory;
     private ForbiddenResponseFactory $forbiddenResponseFactory;
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
@@ -74,19 +74,19 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this
-            ->createMock(CustomerFactory::class);
+            ->createMock(UuidUriCustomerFactory::class);
         $this->updateCustomerRequestFactory = $this
-            ->createMock(UpdateFactory::class);
+            ->createMock(UpdateCustomerRequestFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
             ->createMock(BadRequestResponseFactory::class);
         $this->customerNotFoundFactory = $this
-            ->createMock(NotFoundFactory::class);
+            ->createMock(CustomerNotFoundResponseFactory::class);
         $this->deletedResponseFactory = $this
-            ->createMock(DeletedFactory::class);
+            ->createMock(CustomerDeletedResponseFactory::class);
         $this->replaceCustomerRequestFactory = $this
-            ->createMock(CreateFactory::class);
+            ->createMock(CustomerCreateRequestFactory::class);
         $this->internalErrorFactory = $this
             ->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this
@@ -168,9 +168,9 @@ final class ParamCustomerEndpointFactoryTest extends TestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): ParamFactory
+    private function createFactory(): ParamCustomerEndpointFactory
     {
-        return new ParamFactory(
+        return new ParamCustomerEndpointFactory(
             $this->parameterFactory,
             $this->updateCustomerRequestFactory,
             $this->validationErrorFactory,

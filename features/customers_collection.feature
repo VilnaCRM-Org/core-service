@@ -9,7 +9,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection with unsupported query parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET request to "/api/customers?unsupportedParam=value"
+    When I send a GET request to "/api/customers.jsonld?unsupportedParam=value"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -21,7 +21,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER6"
-    When I send a GET request to "/api/customers?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers.jsonld?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -32,8 +32,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member" should have 2 elements
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.previous" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.next" should contain "/api/customers.jsonld?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.previous" should contain "/api/customers.jsonld?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values with itemsPerPage parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -53,7 +53,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "view.previous" should contain "/api/customers?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with empty and verify JSON structure
-    When I send a GET request to "/api/customers"
+    When I send a GET request to "/api/customers.jsonld"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"

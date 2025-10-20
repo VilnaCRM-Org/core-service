@@ -22,7 +22,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
 use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
+final class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
 
@@ -39,16 +39,16 @@ class ParamCustomerStatusEndpointFactory extends AbstractEndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustomerStatusFactory          $parameterFactory,
-        private UpdateCustomerStatusRequestFactory    $updateCustomerStatusRequestFactory,
-        private ValidationErrorFactory                $validationErrorResponseFactory,
-        private BadRequestResponseFactory             $badRequestResponseFactory,
+        private UuidUriCustomerStatusFactory $parameterFactory,
+        private UpdateCustomerStatusRequestFactory $updateCustomerStatusRequestFactory,
+        private ValidationErrorFactory $validationErrorResponseFactory,
+        private BadRequestResponseFactory $badRequestResponseFactory,
         private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
-        private CustomerStatusDeletedResponseFactory  $deletedResponseFactory,
-        private CustomerCreateStatusRequestFactory    $replaceCustomerRequestFactory,
-        private InternalErrorFactory                  $internalErrorFactory,
-        private ForbiddenResponseFactory              $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory           $unauthorizedResponseFactory,
+        private CustomerStatusDeletedResponseFactory $deletedResponseFactory,
+        private CustomerCreateStatusRequestFactory $replaceCustomerRequestFactory,
+        private InternalErrorFactory $internalErrorFactory,
+        private ForbiddenResponseFactory $forbiddenResponseFactory,
+        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();

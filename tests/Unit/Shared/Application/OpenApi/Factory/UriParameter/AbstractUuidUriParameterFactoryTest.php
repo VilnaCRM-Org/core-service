@@ -6,14 +6,14 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\AbstractUuidUriParameterFactory;
 use App\Tests\Unit\UnitTestCase;
 
-final class CustomerStatusFactoryTest extends UnitTestCase
+final class AbstractUuidUriParameterFactoryTest extends UnitTestCase
 {
     private UriParameterBuilder $parameterBuilder;
     private Parameter $expectedParameter;
-    private UuidUriCustomerStatusFactory $factory;
+    private TestAbstractUuidUriParameterFactory $factory;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ final class CustomerStatusFactoryTest extends UnitTestCase
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
         $this->setupParameterBuilderMock();
-        $this->factory = new UuidUriCustomerStatusFactory($this->parameterBuilder);
+        $this->factory = new TestAbstractUuidUriParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
@@ -31,12 +31,20 @@ final class CustomerStatusFactoryTest extends UnitTestCase
         $this->assertSame($this->expectedParameter, $actualParameter);
     }
 
+    public function testGetDescriptionReturnsDefaultDescription(): void
+    {
+        // The getDescription method is called internally by getParameter
+        // We can verify it works by checking that the parameter is built with the correct description
+        $parameter = $this->factory->getParameter();
+        $this->assertSame('Customer identifier', $parameter->getDescription());
+    }
+
     private function setupExpectedParameter(): void
     {
         $this->expectedParameter = new Parameter(
             'ulid',
             'query',
-            'CustomerStatus identifier',
+            'Customer identifier',
             true,
             false,
             false,
@@ -53,11 +61,17 @@ final class CustomerStatusFactoryTest extends UnitTestCase
             ->method('build')
             ->with(
                 'ulid',
-                'CustomerStatus identifier',
+                'Customer identifier',
                 true,
                 '01JKX8XGHVDZ46MWYMZT94YER4',
                 'string'
             )
             ->willReturn($this->expectedParameter);
     }
+}
+
+class TestAbstractUuidUriParameterFactory extends AbstractUuidUriParameterFactory
+{
+    // This class extends the abstract class to test it
+    // The getDescription method is not overridden, so it uses the default implementation
 }

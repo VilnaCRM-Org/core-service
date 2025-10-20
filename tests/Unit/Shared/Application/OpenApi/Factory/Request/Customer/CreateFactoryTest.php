@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Core\Customer\Application\OpenApi\Request\Customer\CreateFactory;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CustomerCreateRequestFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateFactoryTest extends UnitTestCase
@@ -20,7 +20,7 @@ final class CreateFactoryTest extends UnitTestCase
             ->with($this->isType('array'))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $createFactory = new CreateFactory($requestBuilderMock);
+        $createFactory = new CustomerCreateRequestFactory($requestBuilderMock);
 
         $requestBody = $createFactory->getRequest();
 

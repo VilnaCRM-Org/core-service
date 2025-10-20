@@ -6,14 +6,14 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustomerStatusFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriParameterFactory;
 use App\Tests\Unit\UnitTestCase;
 
-final class CustomerStatusFactoryTest extends UnitTestCase
+final class UlidUriParameterFactoryTest extends UnitTestCase
 {
     private UriParameterBuilder $parameterBuilder;
     private Parameter $expectedParameter;
-    private UuidUriCustomerStatusFactory $factory;
+    private TestUlidUriParameterFactory $factory;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ final class CustomerStatusFactoryTest extends UnitTestCase
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
         $this->setupParameterBuilderMock();
-        $this->factory = new UuidUriCustomerStatusFactory($this->parameterBuilder);
+        $this->factory = new TestUlidUriParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
@@ -36,7 +36,7 @@ final class CustomerStatusFactoryTest extends UnitTestCase
         $this->expectedParameter = new Parameter(
             'ulid',
             'query',
-            'CustomerStatus identifier',
+            'Test identifier',
             true,
             false,
             false,
@@ -53,11 +53,19 @@ final class CustomerStatusFactoryTest extends UnitTestCase
             ->method('build')
             ->with(
                 'ulid',
-                'CustomerStatus identifier',
+                'Test identifier',
                 true,
                 '01JKX8XGHVDZ46MWYMZT94YER4',
                 'string'
             )
             ->willReturn($this->expectedParameter);
+    }
+}
+
+class TestUlidUriParameterFactory extends UlidUriParameterFactory
+{
+    protected function getDescription(): string
+    {
+        return 'Test identifier';
     }
 }
