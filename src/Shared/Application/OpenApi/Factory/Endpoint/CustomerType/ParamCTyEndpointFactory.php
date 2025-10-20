@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus;
+namespace App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
@@ -10,42 +10,42 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CrCStReq;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpCStReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CrCTyReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpCTyReq;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStDelResp;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStNFResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CTyDelResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TyNFResp;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustSt;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustTy;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class ParamCustomerStatusEndpointFactory extends EndpointFactory
+final class ParamCTyEndpointFactory extends EndpointFactory
 {
-    private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
+    private const ENDPOINT_URI = '/api/customer_types/{ulid}';
 
     private Parameter $uuidWithExamplePathParam;
 
-    private RequestBody $updateCustomerStatusRequest;
+    private RequestBody $updateCustomerTypeRequest;
     private Response $validationResp;
     private Response $badRequestResp;
-    private Response $notFoundResp;
-    private Response $custStDeletedResp;
+    private Response $custTyNFResp;
+    private Response $custTyDeletedResp;
     private Response $internalResp;
     private Response $unauthorizedResp;
     private Response $forbiddenResp;
-    private RequestBody $replaceCustomerStatusRequest;
+    private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UuidUriCustSt $parameterFactory,
-        private UpCStReq $updateCustomerStatusRequestFactory,
+        private UuidUriCustTy $parameterFactory,
+        private UpCTyReq $updateCustomerTypeRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CStNFResp $customerStatusNotFoundResponseFactory,
-        private CStDelResp $deletedResponseFactory,
-        private CrCStReq $replaceCustomerRequestFactory,
+        private TyNFResp $customerTyNFResp,
+        private CTyDelResp $deletedResponseFactory,
+        private CrCTyReq $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
@@ -53,8 +53,8 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
         $this->uuidWithExamplePathParam =
             $this->parameterFactory->getParameter();
 
-        $this->updateCustomerStatusRequest =
-            $this->updateCustomerStatusRequestFactory->getRequest();
+        $this->updateCustomerTypeRequest =
+            $this->updateCustomerTypeRequestFactory->getRequest();
 
         $this->validationResp =
             $this->validationErrorResponseFactory->getResponse();
@@ -62,13 +62,13 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
         $this->badRequestResp =
             $this->badRequestResponseFactory->getResponse();
 
-        $this->notFoundResp =
-            $this->customerStatusNotFoundResponseFactory->getResponse();
+        $this->custTyNFResp =
+            $this->customerTyNFResp->getResponse();
 
-        $this->custStDeletedResp =
+        $this->custTyDeletedResp =
             $this->deletedResponseFactory->getResponse();
 
-        $this->replaceCustomerStatusRequest =
+        $this->replaceCustomerTypeRequest =
             $this->replaceCustomerRequestFactory->getRequest();
 
         $this->internalResp =
@@ -103,7 +103,7 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
                 ->withPatch(
                     $operationPatch
                         ->withParameters([$this->uuidWithExamplePathParam])
-                        ->withRequestBody($this->updateCustomerStatusRequest)
+                        ->withRequestBody($this->updateCustomerTypeRequest)
                         ->withResponses($mergedResponses)
                 )
         );
@@ -123,7 +123,7 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
                 $operationPut
                     ->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
-                    ->withRequestBody($this->replaceCustomerStatusRequest)
+                    ->withRequestBody($this->replaceCustomerTypeRequest)
             )
         );
     }
@@ -132,12 +132,14 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
     {
         $pathItem = $this->getPathItem($openApi);
         $operationDelete = $pathItem->getDelete();
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withDelete(
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem->withDelete(
                 $operationDelete
                     ->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($this->getDeleteResponses())
-            ));
+            )
+        );
     }
 
     private function setGetOperation(OpenApi $openApi): void
@@ -148,11 +150,14 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
             $operationGet->getResponses(),
             $this->getGetResponses()
         );
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withGet(
-                $operationGet->withParameters([$this->uuidWithExamplePathParam])
+        $openApi->getPaths()->addPath(
+            self::ENDPOINT_URI,
+            $pathItem->withGet(
+                $operationGet
+                    ->withParameters([$this->uuidWithExamplePathParam])
                     ->withResponses($mergedResponses)
-            ));
+            )
+        );
     }
 
     private function getPathItem(OpenApi $openApi): PathItem
@@ -166,10 +171,10 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
     private function getDeleteResponses(): array
     {
         return [
-            HttpResponse::HTTP_NO_CONTENT => $this->custStDeletedResp,
+            HttpResponse::HTTP_NO_CONTENT => $this->custTyDeletedResp,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResp,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResp,
-            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResp,
+            HttpResponse::HTTP_NOT_FOUND => $this->custTyNFResp,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResp,
         ];
     }
@@ -182,7 +187,7 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
         return [
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResp,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResp,
-            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResp,
+            HttpResponse::HTTP_NOT_FOUND => $this->custTyNFResp,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResp,
         ];
     }
@@ -196,7 +201,7 @@ final class ParamCustomerStatusEndpointFactory extends EndpointFactory
             HttpResponse::HTTP_BAD_REQUEST => $this->badRequestResp,
             HTTPResponse::HTTP_UNAUTHORIZED => $this->unauthorizedResp,
             HTTPResponse::HTTP_FORBIDDEN => $this->forbiddenResp,
-            HttpResponse::HTTP_NOT_FOUND => $this->notFoundResp,
+            HttpResponse::HTTP_NOT_FOUND => $this->custTyNFResp,
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY => $this->validationResp,
             HttpResponse::HTTP_INTERNAL_SERVER_ERROR => $this->internalResp,
         ];
