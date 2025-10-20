@@ -1,0 +1,8 @@
+not:
+  blank: 'This value should not be blank.'
+email:
+  invalid: 'This value is not a valid email address.'
+  not:
+    unique: 'This email address is already registered'
+initials:
+  spaces: 'Initials can not consist only of spaces'
