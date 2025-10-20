@@ -379,7 +379,10 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     * @return array{
+     *     0: UlidRangeFilter,
+     *     1: array<string, array<string, string>>
+     * }
      */
     private function setupMultipleValuesTest(): array
     {
@@ -415,7 +418,10 @@ final class UlidRangeFilterTest extends UnitTestCase
     }
 
     /**
-     * @return array{0: UlidRangeFilter, 1: array<string, array<string, string>>}
+     * @return array{
+     *     0: UlidRangeFilter,
+     *     1: array<string, array<string, string>>
+     * }
      */
     private function setupAllOperatorsTest(): array
     {

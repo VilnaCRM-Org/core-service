@@ -218,7 +218,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithConfirmedExists(string $confirmed): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
+        $this->createAndSaveCustomerWithConfirmationStatus(
             $id,
             $this->faker->lexify('??'),
             $this->faker->email(),
@@ -370,27 +370,51 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $pattern = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
 
-        if (preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $dateTimeFormat = $match[1];  // e.g., "Y-m-d\TH:i:s\Z"
-                $dateTimeInterval = $match[2]; // e.g., "P1Y" or "-P1Y"
+        if (! preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
+            return $url;
+        }
 
-                $date = new DateTime();
-
-                if (str_starts_with($dateTimeInterval, '-')) {
-                    $interval = new DateInterval(substr($dateTimeInterval, 1));
-                    $date->sub($interval);
-                } else {
-                    $interval = new DateInterval($dateTimeInterval);
-                    $date->add($interval);
-                }
-
-                $formattedDate = $date->format($dateTimeFormat);
-                $url = str_replace($match[0], $formattedDate, $url);
-            }
+        foreach ($matches as $match) {
+            $url = $this->replaceDatePlaceholder($url, $match);
         }
 
         return $url;
+    }
+
+    /**
+     * @param array<string> $match
+     */
+    private function replaceDatePlaceholder(string $url, array $match): string
+    {
+        $dateTimeFormat = $match[1];
+        $dateTimeInterval = $match[2];
+        $date = $this->calculateDate($dateTimeInterval);
+        $formattedDate = $date->format($dateTimeFormat);
+
+        return str_replace($match[0], $formattedDate, $url);
+    }
+
+    private function calculateDate(string $interval): DateTime
+    {
+        $date = new DateTime();
+        $isNegative = str_starts_with($interval, '-');
+        $intervalString = $this->extractIntervalString($interval, $isNegative);
+        $dateInterval = new DateInterval($intervalString);
+
+        return $this->applyDateInterval($date, $dateInterval, $isNegative);
+    }
+
+    private function extractIntervalString(string $interval, bool $isNegative): string
+    {
+        return $isNegative ? substr($interval, 1) : $interval;
+    }
+
+    private function applyDateInterval(
+        DateTime $date,
+        DateInterval $dateInterval,
+        bool $isNegative
+    ): DateTime {
+        return $isNegative ? $date->sub($dateInterval) : $date->add($dateInterval);
     }
 
     /**
@@ -421,8 +445,25 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         string $initials,
         string $email,
         string $phone,
+        string $leadSource
+    ): void {
+        $this->createAndSaveCustomerWithConfirmationStatus(
+            $id,
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            true
+        );
+    }
+
+    private function createAndSaveCustomerWithConfirmationStatus(
+        string $id,
+        string $initials,
+        string $email,
+        string $phone,
         string $leadSource,
-        bool $confirmed = true
+        bool $confirmed
     ): void {
         [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
         $customer = $this->customerFactory->create(

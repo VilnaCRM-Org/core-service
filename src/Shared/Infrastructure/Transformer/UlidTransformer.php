@@ -42,11 +42,22 @@ final readonly class UlidTransformer
             return true;
         }
 
-        if (is_string($value)) {
-            return !SymfonyUlid::isValid($value);
-        }
+        return $this->isInvalidStringValue($value);
+    }
 
-        return false;
+    private function isInvalidStringValue(mixed $value): bool
+    {
+        return $this->isStringValue($value) && $this->isInvalidUlid($value);
+    }
+
+    private function isStringValue(mixed $value): bool
+    {
+        return is_string($value);
+    }
+
+    private function isInvalidUlid(string $value): bool
+    {
+        return !SymfonyUlid::isValid($value);
     }
 
     private function ensureUlidInstance(mixed $value): Ulid
