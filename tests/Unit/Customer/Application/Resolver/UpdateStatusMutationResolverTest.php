@@ -22,69 +22,16 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
 {
     public function testInvokeUpdatesStatus(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateStatusMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateStatusCommandFactoryInterface::class);
-        $repository = $this->createMock(StatusRepositoryInterface::class);
-        $ulidFactory = new UlidFactory();
+        $dependencies = $this->setupDependencies();
+        $resolver = $this->createResolver($dependencies);
+        $input = $this->generateInput();
 
-        $resolver = new UpdateStatusMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $repository,
-            $ulidFactory,
-        );
-
-        $input = [
-            'id' => $this->faker->uuid(),
-            'value' => $this->faker->word(),
-        ];
-
-        $mutationInput = new UpdateStatusMutationInput();
-        $transformer
-            ->expects(self::once())
-            ->method('transform')
-            ->with($input)
-            ->willReturn($mutationInput);
-
-        $validator
-            ->expects(self::once())
-            ->method('validate')
-            ->with($mutationInput);
-
+        $this->setupTransformerAndValidator($dependencies, $input);
         $status = $this->createMock(CustomerStatus::class);
-
-        $repository
-            ->expects(self::once())
-            ->method('find')
-            ->with($this->callback(function ($ulid) use ($input) {
-                self::assertSame($input['id'], (string) $ulid);
-
-                return true;
-            }))
-            ->willReturn($status);
+        $this->setupRepositoryToReturnStatus($dependencies['repository'], $input, $status);
 
         $capturedUpdate = null;
-
-        $factory
-            ->expects(self::once())
-            ->method('create')
-            ->with(self::identicalTo($status), $this->isInstanceOf(CustomerStatusUpdate::class))
-            ->willReturnCallback(
-                function (CustomerStatus $statusArg, CustomerStatusUpdate $update) use (&$capturedUpdate) {
-                    $capturedUpdate = $update;
-
-                    return new UpdateCustomerStatusCommand($statusArg, $update);
-                }
-            );
-
-        $commandBus
-            ->expects(self::once())
-            ->method('dispatch')
-            ->with($this->isInstanceOf(UpdateCustomerStatusCommand::class));
+        $this->setupFactoryAndCommandBus($dependencies, $status, $capturedUpdate);
 
         $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
 
@@ -95,59 +42,136 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
 
     public function testInvokeThrowsWhenStatusNotFound(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateStatusMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateStatusCommandFactoryInterface::class);
-        $repository = $this->createMock(StatusRepositoryInterface::class);
-        $ulidFactory = new UlidFactory();
+        $dependencies = $this->setupDependencies();
+        $resolver = $this->createResolver($dependencies);
+        $input = $this->generateInput();
 
-        $resolver = new UpdateStatusMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $repository,
-            $ulidFactory,
+        $this->setupTransformerAndValidator($dependencies, $input);
+        $this->setupRepositoryToReturnNull($dependencies['repository'], $input);
+        $this->expectNeverCalledFactoryAndCommandBus($dependencies);
+
+        $this->expectException(CustomerStatusNotFoundException::class);
+        $resolver->__invoke(null, ['args' => ['input' => $input]]);
+    }
+
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> */
+    private function setupDependencies(): array
+    {
+        return [
+            'commandBus' => $this->createMock(CommandBusInterface::class),
+            'validator' => $this->createMock(MutationInputValidator::class),
+            'transformer' => $this->createMock(UpdateStatusMutationInputTransformer::class),
+            'factory' => $this->createMock(UpdateStatusCommandFactoryInterface::class),
+            'repository' => $this->createMock(StatusRepositoryInterface::class),
+            'ulidFactory' => new UlidFactory(),
+        ];
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    private function createResolver(array $deps): UpdateStatusMutationResolver
+    {
+        return new UpdateStatusMutationResolver(
+            $deps['commandBus'],
+            $deps['validator'],
+            $deps['transformer'],
+            $deps['factory'],
+            $deps['repository'],
+            $deps['ulidFactory'],
         );
+    }
 
-        $input = [
+    /** @return array<string, string> */
+    private function generateInput(): array
+    {
+        return [
             'id' => $this->faker->uuid(),
             'value' => $this->faker->word(),
         ];
+    }
 
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps
+     * @param array<string, string> $input
+     */
+    private function setupTransformerAndValidator(array $deps, array $input): void
+    {
         $mutationInput = new UpdateStatusMutationInput();
-
-        $transformer
+        $deps['transformer']
             ->expects(self::once())
             ->method('transform')
             ->with($input)
             ->willReturn($mutationInput);
 
-        $validator
+        $deps['validator']
             ->expects(self::once())
             ->method('validate')
             ->with($mutationInput);
+    }
 
+    /** @param array<string, string> $input */
+    private function setupRepositoryToReturnStatus(
+        \PHPUnit\Framework\MockObject\MockObject $repository,
+        array $input,
+        \PHPUnit\Framework\MockObject\MockObject $status
+    ): void {
         $repository
             ->expects(self::once())
             ->method('find')
-            ->with($this->callback(function ($ulid) use ($input) {
+            ->with($this->callback(static function ($ulid) use ($input) {
                 self::assertSame($input['id'], (string) $ulid);
+                return true;
+            }))
+            ->willReturn($status);
+    }
 
+    /** @param array<string, string> $input */
+    private function setupRepositoryToReturnNull(
+        \PHPUnit\Framework\MockObject\MockObject $repository,
+        array $input
+    ): void {
+        $repository
+            ->expects(self::once())
+            ->method('find')
+            ->with($this->callback(static function ($ulid) use ($input) {
+                self::assertSame($input['id'], (string) $ulid);
                 return true;
             }))
             ->willReturn(null);
+    }
 
-        $commandBus
-            ->expects(self::never())
-            ->method('dispatch');
-        $factory
-            ->expects(self::never())
-            ->method('create');
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    private function setupFactoryAndCommandBus(
+        array $deps,
+        \PHPUnit\Framework\MockObject\MockObject $status,
+        ?CustomerStatusUpdate &$capturedUpdate
+    ): void {
+        $deps['factory']
+            ->expects(self::once())
+            ->method('create')
+            ->with(
+                self::identicalTo($status),
+                $this->isInstanceOf(CustomerStatusUpdate::class)
+            )
+            ->willReturnCallback(
+                static function (
+                    CustomerStatus $statusArg,
+                    CustomerStatusUpdate $update
+                ) use (&$capturedUpdate) {
+                    $capturedUpdate = $update;
+                    return new UpdateCustomerStatusCommand($statusArg, $update);
+                }
+            );
 
-        $this->expectException(CustomerStatusNotFoundException::class);
+        $deps['commandBus']
+            ->expects(self::once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(UpdateCustomerStatusCommand::class));
+    }
 
-        $resolver->__invoke(null, ['args' => ['input' => $input]]);
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    private function expectNeverCalledFactoryAndCommandBus(array $deps): void
+    {
+        $deps['commandBus']->expects(self::never())->method('dispatch');
+        $deps['factory']->expects(self::never())->method('create');
     }
 }

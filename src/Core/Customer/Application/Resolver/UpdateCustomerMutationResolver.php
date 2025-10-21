@@ -6,16 +6,17 @@ namespace App\Core\Customer\Application\Resolver;
 
 use ApiPlatform\GraphQl\Resolver\MutationResolverInterface as MutationResolver;
 use ApiPlatform\Metadata\IriConverterInterface;
-use App\Core\Customer\Application\Factory as CustomerFactory;
-use App\Core\Customer\Application\Transformer as CustomerTf;
+use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
+use App\Core\Customer\Application\Transformer\UpdateCustomerMutationInputTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
-use App\Core\Customer\Domain\Repository as CustomerRepository;
-use App\Core\Customer\Domain\ValueObject as CustomerValueObject;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
+
 use function assert;
 
 final readonly class UpdateCustomerMutationResolver implements MutationResolver
@@ -23,10 +24,10 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
     public function __construct(
         private CommandBusInterface $commandBus,
         private MutationInputValidator $validator,
-        private CustomerTf\UpdateCustomerMutationInputTransformer $inputTransformer,
-        private CustomerFactory\UpdateCustomerCommandFactoryInterface $factory,
+        private UpdateCustomerMutationInputTransformer $inputTransformer,
+        private UpdateCustomerCommandFactoryInterface $factory,
         private IriConverterInterface $iriConverter,
-        private CustomerRepository\CustomerRepositoryInterface $customers,
+        private CustomerRepositoryInterface $customers,
     ) {
     }
 
@@ -92,11 +93,11 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
     private function createCustomerUpdate(
         Customer $customer,
         array $input
-    ): CustomerValueObject\CustomerUpdate {
+    ): CustomerUpdate {
         $customerType = $this->resolveCustomerType($customer, $input);
         $customerStatus = $this->resolveCustomerStatus($customer, $input);
 
-        return new CustomerValueObject\CustomerUpdate(
+        return new CustomerUpdate(
             $input['initials'] ?? $customer->getInitials(),
             $input['email'] ?? $customer->getEmail(),
             $input['phone'] ?? $customer->getPhone(),
@@ -110,10 +111,11 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
     /**
      * @param array{type?: string|null} $input
      */
-    private function resolveCustomerType(Customer $customer, array $input): CustomerType
-    {
-        $typeIri = $input['type']
-            ?? sprintf('/api/customer_types/%s', $customer->getType()->getUlid());
+    private function resolveCustomerType(
+        Customer $customer,
+        array $input
+    ): CustomerType {
+        $typeIri = $input['type'] ?? $this->getDefaultTypeIri($customer);
 
         $resource = $this->iriConverter->getResourceFromIri($typeIri);
         assert($resource instanceof CustomerType);
@@ -121,17 +123,35 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         return $resource;
     }
 
+    private function getDefaultTypeIri(Customer $customer): string
+    {
+        return sprintf(
+            '/api/customer_types/%s',
+            $customer->getType()->getUlid()
+        );
+    }
+
     /**
      * @param array{status?: string|null} $input
      */
-    private function resolveCustomerStatus(Customer $customer, array $input): CustomerStatus
-    {
+    private function resolveCustomerStatus(
+        Customer $customer,
+        array $input
+    ): CustomerStatus {
         $statusIri = $input['status']
-            ?? sprintf('/api/customer_statuses/%s', $customer->getStatus()->getUlid());
+            ?? $this->getDefaultStatusIri($customer);
 
         $resource = $this->iriConverter->getResourceFromIri($statusIri);
         assert($resource instanceof CustomerStatus);
 
         return $resource;
+    }
+
+    private function getDefaultStatusIri(Customer $customer): string
+    {
+        return sprintf(
+            '/api/customer_statuses/%s',
+            $customer->getStatus()->getUlid()
+        );
     }
 }
