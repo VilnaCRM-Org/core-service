@@ -16,7 +16,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 
@@ -24,21 +24,15 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 {
     public function testInvokeUpdatesCustomerWithProvidedData(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateCustomerMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $repository = $this->createMock(CustomerRepositoryInterface::class);
-
-        $resolver = new UpdateCustomerMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $iriConverter,
-            $repository,
-        );
+        [
+            'resolver' => $resolver,
+            'commandBus' => $commandBus,
+            'validator' => $validator,
+            'transformer' => $transformer,
+            'factory' => $factory,
+            'iriConverter' => $iriConverter,
+            'repository' => $repository,
+        ] = $this->createResolverWithDependencies();
 
         $input = [
             'id' => $this->faker->uuid(),
@@ -120,21 +114,22 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 
     public function testInvokeUsesExistingDataWhenOptionalFieldsMissing(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateCustomerMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $repository = $this->createMock(CustomerRepositoryInterface::class);
+        [
+            'resolver' => $resolver,
+            'commandBus' => $commandBus,
+            'validator' => $validator,
+            'transformer' => $transformer,
+            'factory' => $factory,
+            'iriConverter' => $iriConverter,
+            'repository' => $repository,
+        ] = $this->createResolverWithDependencies();
 
-        $resolver = new UpdateCustomerMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $iriConverter,
-            $repository,
-        );
+        [
+            'customer' => $customer,
+            'type' => $customerType,
+            'status' => $customerStatus,
+            'data' => $existingData,
+        ] = $this->createCustomerWithExistingData();
 
         $input = ['id' => $this->faker->uuid()];
 
@@ -150,48 +145,6 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             ->method('validate')
             ->with($mutationInput);
 
-        $customerType = $this->createMock(CustomerType::class);
-        $customerStatus = $this->createMock(CustomerStatus::class);
-
-        $existingTypeUlid = $this->faker->uuid();
-        $existingStatusUlid = $this->faker->uuid();
-        $existingInitials = $this->faker->lexify('??');
-        $existingEmail = $this->faker->email();
-        $existingPhone = $this->faker->phoneNumber();
-        $existingLead = $this->faker->word();
-
-        $customer = $this->createMock(Customer::class);
-
-        $customer
-            ->method('getType')
-            ->willReturn($customerType);
-        $customerType
-            ->method('getUlid')
-            ->willReturn($existingTypeUlid);
-
-        $customer
-            ->method('getStatus')
-            ->willReturn($customerStatus);
-        $customerStatus
-            ->method('getUlid')
-            ->willReturn($existingStatusUlid);
-
-        $customer
-            ->method('getInitials')
-            ->willReturn($existingInitials);
-        $customer
-            ->method('getEmail')
-            ->willReturn($existingEmail);
-        $customer
-            ->method('getPhone')
-            ->willReturn($existingPhone);
-        $customer
-            ->method('getLeadSource')
-            ->willReturn($existingLead);
-        $customer
-            ->method('isConfirmed')
-            ->willReturn(true);
-
         $repository
             ->expects(self::once())
             ->method('find')
@@ -202,9 +155,9 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             ->expects(self::exactly(2))
             ->method('getResourceFromIri')
             ->withConsecutive([
-                '/api/customer_types/' . $existingTypeUlid,
+                '/api/customer_types/' . $existingData['typeUlid'],
             ], [
-                '/api/customer_statuses/' . $existingStatusUlid,
+                '/api/customer_statuses/' . $existingData['statusUlid'],
             ])
             ->willReturnOnConsecutiveCalls($customerType, $customerStatus);
 
@@ -231,32 +184,26 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 
         self::assertSame($customer, $result);
         self::assertInstanceOf(CustomerUpdate::class, $caughtUpdate);
-        self::assertSame($existingInitials, $caughtUpdate->newInitials);
-        self::assertSame($existingEmail, $caughtUpdate->newEmail);
-        self::assertSame($existingPhone, $caughtUpdate->newPhone);
-        self::assertSame($existingLead, $caughtUpdate->newLeadSource);
+        self::assertSame($existingData['initials'], $caughtUpdate->newInitials);
+        self::assertSame($existingData['email'], $caughtUpdate->newEmail);
+        self::assertSame($existingData['phone'], $caughtUpdate->newPhone);
+        self::assertSame($existingData['lead'], $caughtUpdate->newLeadSource);
         self::assertSame($customerType, $caughtUpdate->newType);
         self::assertSame($customerStatus, $caughtUpdate->newStatus);
-        self::assertTrue($caughtUpdate->newConfirmed);
+        self::assertSame($existingData['confirmed'], $caughtUpdate->newConfirmed);
     }
 
     public function testInvokeThrowsWhenCustomerNotFound(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateCustomerMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $repository = $this->createMock(CustomerRepositoryInterface::class);
-
-        $resolver = new UpdateCustomerMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $iriConverter,
-            $repository,
-        );
+        [
+            'resolver' => $resolver,
+            'commandBus' => $commandBus,
+            'validator' => $validator,
+            'transformer' => $transformer,
+            'factory' => $factory,
+            'iriConverter' => $iriConverter,
+            'repository' => $repository,
+        ] = $this->createResolverWithDependencies();
 
         $input = ['id' => $this->faker->uuid()];
         $mutationInput = new UpdateCustomerMutationInput();
@@ -291,5 +238,114 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
         $this->expectException(CustomerNotFoundException::class);
 
         $resolver->__invoke(null, ['args' => ['input' => $input]]);
+    }
+
+    /**
+     * @return array{
+     *     resolver: UpdateCustomerMutationResolver,
+     *     commandBus: CommandBusInterface&\PHPUnit\Framework\MockObject\MockObject,
+     *     validator: MutationInputValidator&\PHPUnit\Framework\MockObject\MockObject,
+     *     transformer: UpdateCustomerMutationInputTransformer&\PHPUnit\Framework\MockObject\MockObject,
+     *     factory: UpdateCustomerCommandFactoryInterface&\PHPUnit\Framework\MockObject\MockObject,
+     *     iriConverter: IriConverterInterface&\PHPUnit\Framework\MockObject\MockObject,
+     *     repository: CustomerRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject,
+     * }
+     */
+    private function createResolverWithDependencies(): array
+    {
+        $commandBus = $this->createMock(CommandBusInterface::class);
+        $validator = $this->createMock(MutationInputValidator::class);
+        $transformer = $this->createMock(UpdateCustomerMutationInputTransformer::class);
+        $factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
+        $iriConverter = $this->createMock(IriConverterInterface::class);
+        $repository = $this->createMock(CustomerRepositoryInterface::class);
+
+        $resolver = new UpdateCustomerMutationResolver(
+            $commandBus,
+            $validator,
+            $transformer,
+            $factory,
+            $iriConverter,
+            $repository,
+        );
+
+        return [
+            'resolver' => $resolver,
+            'commandBus' => $commandBus,
+            'validator' => $validator,
+            'transformer' => $transformer,
+            'factory' => $factory,
+            'iriConverter' => $iriConverter,
+            'repository' => $repository,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     customer: Customer&\PHPUnit\Framework\MockObject\MockObject,
+     *     type: CustomerType&\PHPUnit\Framework\MockObject\MockObject,
+     *     status: CustomerStatus&\PHPUnit\Framework\MockObject\MockObject,
+     *     data: array{
+     *         typeUlid: string,
+     *         statusUlid: string,
+     *         initials: string,
+     *         email: string,
+     *         phone: string,
+     *         lead: string,
+     *         confirmed: bool,
+     *     },
+     * }
+     */
+    private function createCustomerWithExistingData(): array
+    {
+        $customerType = $this->createMock(CustomerType::class);
+        $customerStatus = $this->createMock(CustomerStatus::class);
+        $customer = $this->createMock(Customer::class);
+
+        $data = [
+            'typeUlid' => $this->faker->uuid(),
+            'statusUlid' => $this->faker->uuid(),
+            'initials' => $this->faker->lexify('??'),
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'lead' => $this->faker->word(),
+            'confirmed' => true,
+        ];
+
+        $customerType
+            ->method('getUlid')
+            ->willReturn($data['typeUlid']);
+        $customerStatus
+            ->method('getUlid')
+            ->willReturn($data['statusUlid']);
+
+        $customer
+            ->method('getType')
+            ->willReturn($customerType);
+        $customer
+            ->method('getStatus')
+            ->willReturn($customerStatus);
+        $customer
+            ->method('getInitials')
+            ->willReturn($data['initials']);
+        $customer
+            ->method('getEmail')
+            ->willReturn($data['email']);
+        $customer
+            ->method('getPhone')
+            ->willReturn($data['phone']);
+        $customer
+            ->method('getLeadSource')
+            ->willReturn($data['lead']);
+        $customer
+            ->method('isConfirmed')
+            ->willReturn($data['confirmed']);
+
+        return [
+            'customer' => $customer,
+            'type' => $customerType,
+            'status' => $customerStatus,
+            'data' => $data,
+        ];
     }
 }

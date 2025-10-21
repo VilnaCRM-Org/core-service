@@ -4,36 +4,42 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Resolver;
 
-use ApiPlatform\GraphQl\Resolver\MutationResolverInterface;
-use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
-use App\Core\Customer\Application\Transformer\CreateStatusMutationInputTransformer;
-use App\Core\Customer\Application\Transformer\StatusTransformerInterface;
+use ApiPlatform\GraphQl\Resolver\MutationResolverInterface as MutationResolver;
+use App\Core\Customer\Application\Factory as CustomerFactory;
+use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
-final readonly class CreateStatusMutationResolver implements MutationResolverInterface
+final readonly class CreateStatusMutationResolver implements MutationResolver
 {
     public function __construct(
         private CommandBusInterface $commandBus,
         private MutationInputValidator $validator,
-        private CreateStatusMutationInputTransformer $transformer,
-        private CreateStatusFactoryInterface $statusCommandFactory,
-        private StatusTransformerInterface $statusTransformer,
+        private CustomerTf\CreateStatusMutationInputTransformer $inputs,
+        private CustomerFactory\CreateStatusFactoryInterface $factory,
+        private CustomerTf\StatusTransformerInterface $statusBuilder,
     ) {
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array{
+     *     args: array{
+     *         input: array{
+     *             value: string
+     *         }
+     *     }
+     * } $context
      */
     public function __invoke(?object $item, array $context): CustomerStatus
     {
+        /** @var array{value: string} $input */
         $input = $context['args']['input'];
-        $mutationInput = $this->transformer->transform($input);
+        $mutationInput = $this->inputs->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customerStatus = $this->statusTransformer->transform($input['value']);
-        $command = $this->statusCommandFactory->create($customerStatus);
+        $customerStatus = $this->statusBuilder->transform($input['value']);
+        $command = $this->factory->create($customerStatus);
         $this->commandBus->dispatch($command);
 
         return $customerStatus;

@@ -9,7 +9,7 @@ use App\Core\Customer\Application\MutationInput\UpdateStatusMutationInput;
 final class UpdateStatusMutationInputTransformer
 {
     /**
-     * @param array<string, mixed> $args
+     * @param array{value?: string|null} $args
      */
     public function transform(array $args): UpdateStatusMutationInput
     {

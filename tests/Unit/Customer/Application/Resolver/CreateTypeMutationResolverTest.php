@@ -6,12 +6,12 @@ namespace App\Tests\Unit\Customer\Application\Resolver;
 
 use App\Core\Customer\Application\Command\CreateTypeCommand;
 use App\Core\Customer\Application\Factory\CreateTypeFactoryInterface;
+use App\Core\Customer\Application\MutationInput\CreateTypeMutationInput;
 use App\Core\Customer\Application\Resolver\CreateTypeMutationResolver;
 use App\Core\Customer\Application\Transformer\CreateTypeMutationInputTransformer;
 use App\Core\Customer\Application\Transformer\TypeTransformerInterface;
-use App\Core\Customer\Application\MutationInput\CreateTypeMutationInput;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 
