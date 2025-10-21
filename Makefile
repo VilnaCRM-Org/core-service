@@ -101,8 +101,22 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
-	@$(RUN_TESTS_COVERAGE) --testsuite=Unit 2>&1 | tee /tmp/phpunit_output.txt
-	@coverage=$$(sed 's/\x1b\[[0-9;]*m//g' /tmp/phpunit_output.txt | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	@tmpfile=$$(mktemp); \
+	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
+	test_status=$$?; \
+	cat $$tmpfile; \
+	if [ $$test_status -ne 0 ]; then \
+		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$tmpfile; \
+		exit $$test_status; \
+	fi; \
+	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
+		rm -f $$tmpfile; \
+		exit 1; \
+	fi; \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
 		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
