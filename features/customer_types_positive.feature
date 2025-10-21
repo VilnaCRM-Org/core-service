@@ -154,21 +154,17 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "value" should contain "Prospect"
     Then delete type with value "Prospect"
 
-  Scenario: Create a customer type resource with additional unrecognized property which should be ignored
+  Scenario: Create a customer type resource with additional unrecognized property should be rejected
     When I send a POST request to "/api/customer_types" with body:
     """
     {
       "value": "Lead",
-      "extraField": "Should be ignored"
+      "extraField": "Should be rejected"
     }
     """
-    Then the response status code should be equal to 201
+    Then the response status code should be equal to 400
     And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customer_types_post"
-    And the JSON node "value" should contain "Lead"
-    And the JSON node "extraField" should not exist
-    Then delete type with value "Lead"
+    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
 
 # ----- PUT /api/customer_types/{ulid} – Replace Resource (Positive Tests) -----
 
@@ -186,21 +182,18 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be valid according to the operation id "api_customer_types_ulid_put"
     And the JSON node "value" should be equal to "Qualified"
 
-  Scenario: Replace a customer type resource while including an extra field that should be ignored
+  Scenario: Replace a customer type resource while including an extra field should be rejected
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send a PUT request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
       "value": "Converted",
-      "irrelevantField": "should be ignored"
+      "irrelevantField": "should be rejected"
     }
     """
-    Then the response status code should be equal to 200
+    Then the response status code should be equal to 400
     And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customer_types_ulid_put"
-    And the JSON node "value" should contain "Converted"
-    And the JSON node "irrelevantField" should not exist
+    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
 
 # ----- PATCH /api/customer_types/{ulid} – Partial Update (Positive Tests) -----
 

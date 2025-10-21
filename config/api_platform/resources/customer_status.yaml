@@ -1,6 +1,12 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
+  exceptionToStatus:
+    'App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException': 404
+  normalizationContext:
+    groups: ['output']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
+
+  # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
       filters:
@@ -11,10 +17,57 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
     ApiPlatform\Metadata\Put:
       input: App\Core\Customer\Application\DTO\StatusPut
       processor: App\Core\Customer\Application\Processor\CustomerStatusPutProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
       input: App\Core\Customer\Application\DTO\StatusPatch
       processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\Delete: ~
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\StatusCreate
       processor: App\Core\Customer\Application\Processor\CreateStatusProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+
+  # GraphQL Operations
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query:
+      filters:
+        - customer.mongodb.status.order
+        - customer.mongodb.status.partial_search
+        - mongodb.range
+    ApiPlatform\Metadata\GraphQl\QueryCollection:
+      filters:
+        - customer.mongodb.status.order
+        - customer.mongodb.status.partial_search
+        - mongodb.range
+      paginationType: cursor
+    ApiPlatform\Metadata\GraphQl\Mutation:
+      name: create
+      resolver: App\Core\Customer\Application\Resolver\CreateStatusMutationResolver
+      deserialize: false
+      denormalizationContext:
+        groups: []
+      extraArgs:
+        value:
+          type: 'String!'
+    update_mutation:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: update
+      resolver: App\Core\Customer\Application\Resolver\UpdateStatusMutationResolver
+      deserialize: false
+      read: false
+      write: false
+      denormalizationContext:
+        groups: []
+      extraArgs:
+        id:
+          type: 'String!'
+        value:
+          type: 'String!'
+    ApiPlatform\Metadata\GraphQl\DeleteMutation:
+      name: delete
+      normalizationContext:
+        groups: ['deleteMutationOutput']

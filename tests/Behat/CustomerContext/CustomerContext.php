@@ -291,13 +291,17 @@ final class CustomerContext implements Context, SnippetAcceptingContext
 
         foreach ($this->createdStatusIds as $id) {
             $status = $this->statusRepository->find($id);
-            $this->statusRepository->delete($status);
+            if ($status !== null) {
+                $this->statusRepository->delete($status);
+            }
         }
         $this->createdStatusIds = [];
 
         foreach ($this->createdTypeIds as $id) {
             $type = $this->typeRepository->find($id);
-            $this->typeRepository->delete($type);
+            if ($type !== null) {
+                $this->typeRepository->delete($type);
+            }
         }
         $this->createdTypeIds = [];
     }
@@ -308,7 +312,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteCustomerById(mixed $id): void
     {
         $customer = $this->customerRepository->find($id);
-        $this->customerRepository->delete($customer);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
     }
 
     /**
@@ -317,7 +323,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteCustomerByEmail(string $email): void
     {
         $customer = $this->customerRepository->findByEmail($email);
-        $this->customerRepository->delete($customer);
+        if ($customer !== null) {
+            $this->customerRepository->delete($customer);
+        }
     }
 
     /**

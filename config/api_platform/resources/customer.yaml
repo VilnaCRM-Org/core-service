@@ -1,21 +1,111 @@
 App\Core\Customer\Domain\Entity\Customer:
+  exceptionToStatus:
+    'App\Core\Customer\Domain\Exception\CustomerNotFoundException': 404
+  normalizationContext:
+    groups: ['output']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
+
+  properties:
+    type:
+      readableLink: false
+      writableLink: false
+    status:
+      readableLink: false
+      writableLink: false
+
+  # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
       filters:
         - customer.mongodb.search
         - customer.mongodb.order
         - customer.mongodb.date
+        - customer.mongodb.boolean
         - mongodb.range
     ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\Put:
       input: App\Core\Customer\Application\DTO\CustomerPut
       processor: App\Core\Customer\Application\Processor\CustomerPutProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
       input: App\Core\Customer\Application\DTO\CustomerPatch
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\Delete: ~
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\CustomerCreate
       processor: App\Core\Customer\Application\Processor\CreateCustomerProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+
+  # GraphQL Operations
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query:
+      filters:
+        - customer.mongodb.search
+        - customer.mongodb.order
+        - customer.mongodb.date
+        - customer.mongodb.boolean
+        - mongodb.range
+    ApiPlatform\Metadata\GraphQl\QueryCollection:
+      filters:
+        - customer.mongodb.search
+        - customer.mongodb.order
+        - customer.mongodb.date
+        - customer.mongodb.boolean
+        - mongodb.range
+      paginationType: cursor
+    ApiPlatform\Metadata\GraphQl\Mutation:
+      name: create
+      resolver: App\Core\Customer\Application\Resolver\CreateCustomerMutationResolver
+      deserialize: false
+      denormalizationContext:
+        groups: []
+      extraArgs:
+        initials:
+          type: 'String!'
+        email:
+          type: 'String!'
+        phone:
+          type: 'String!'
+        leadSource:
+          type: 'String!'
+        type:
+          type: 'String!'
+        status:
+          type: 'String!'
+        confirmed:
+          type: 'Boolean!'
+    update_mutation:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: update
+      resolver: App\Core\Customer\Application\Resolver\UpdateCustomerMutationResolver
+      deserialize: false
+      read: false
+      write: false
+      denormalizationContext:
+        groups: []
+      extraArgs:
+        id:
+          type: 'String!'
+        initials:
+          type: 'String'
+        email:
+          type: 'String'
+        phone:
+          type: 'String'
+        leadSource:
+          type: 'String'
+        type:
+          type: 'String'
+        status:
+          type: 'String'
+        confirmed:
+          type: 'Boolean'
+    ApiPlatform\Metadata\GraphQl\DeleteMutation:
+      name: delete
+      normalizationContext:
+        groups: ['deleteMutationOutput']

@@ -169,7 +169,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection filtering by status.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -181,8 +181,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection filtering by type.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -193,7 +193,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Retrieve customers collection filtering by type.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -205,8 +205,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
     Given create customer with confirmed true
