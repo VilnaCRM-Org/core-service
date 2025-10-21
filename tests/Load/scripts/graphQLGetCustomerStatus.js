@@ -27,7 +27,7 @@ export function setup() {
 
   return {
     statuses: statuses,
-    totalStatuses: statuses.length
+    totalStatuses: statuses.length,
   };
 }
 
@@ -50,14 +50,10 @@ export default function getCustomerStatus(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customerStatus query returned',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.customerStatus && body.data.customerStatus.id;
-    }
-  );
+  utils.checkResponse(response, 'customerStatus query returned', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.customerStatus && body.data.customerStatus.id;
+  });
 }
 
 export function teardown(data) {

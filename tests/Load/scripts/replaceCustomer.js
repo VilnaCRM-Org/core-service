@@ -28,7 +28,7 @@ export function setup() {
 
   return {
     customers: customers,
-    totalCustomers: customers.length
+    totalCustomers: customers.length,
   };
 }
 
@@ -48,16 +48,12 @@ export default function replaceCustomer(data) {
     leadSource: leadSources[Math.floor(Math.random() * leadSources.length)],
     type: customer.type['@id'],
     status: customer.status['@id'],
-    confirmed: true
+    confirmed: true,
   };
 
-  const response = http.put(
-    `http://localhost:80${customer['@id']}`,
-    JSON.stringify(replaceData),
-    {
-      headers: { 'Content-Type': 'application/ld+json' }
-    }
-  );
+  const response = http.put(`http://localhost:80${customer['@id']}`, JSON.stringify(replaceData), {
+    headers: { 'Content-Type': 'application/ld+json' },
+  });
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

@@ -37,19 +37,15 @@ export default function createCustomerType(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer type created',
-    res => {
-      const body = JSON.parse(res.body);
-      if (body.data && body.data.createCustomerType && body.data.createCustomerType.customerType) {
-        // Track created type for cleanup
-        data.createdTypes.push(body.data.createCustomerType.customerType.id);
-        return body.data.createCustomerType.customerType.value === value;
-      }
-      return false;
+  utils.checkResponse(response, 'customer type created', res => {
+    const body = JSON.parse(res.body);
+    if (body.data && body.data.createCustomerType && body.data.createCustomerType.customerType) {
+      // Track created type for cleanup
+      data.createdTypes.push(body.data.createCustomerType.customerType.id);
+      return body.data.createCustomerType.customerType.value === value;
     }
-  );
+    return false;
+  });
 }
 
 export function teardown(data) {
