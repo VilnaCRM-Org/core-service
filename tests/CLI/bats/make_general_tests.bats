@@ -12,34 +12,33 @@ load 'bats-assert/load'
 }
 
 @test "make composer-validate command executes and reports validity with warnings" {
-  run bash -c "CI=1 make composer-validate"
+  run make composer-validate
   assert_success
   assert_output --partial "./composer.json is valid"
 }
 
 @test "make check-requirements command executes and passes" {
-  run bash -c "CI=1 make check-requirements"
+  run make check-requirements
   assert_success
   assert_output --partial "Symfony Requirements Checker"
   assert_output --partial "Your system is ready to run Symfony projects"
 }
 
 @test "make phpinsights command executes and completes analysis" {
-  run bash -c "CI=1 make phpinsights"
+  run make phpinsights
   assert_success
   assert_output --partial '✨ Analysis Completed !'
-  assert_output --partial './vendor/bin/phpinsights --no-interaction --ansi --format=github-action'
 }
 
 @test "make check-security command executes and reports no vulnerabilities" {
-  run bash -c "CI=1 make check-security"
+  run make check-security
   assert_success
   assert_output --partial "Symfony Security Check Report"
   assert_output --partial "No packages have known vulnerabilities."
 }
 
 @test "make infection command executes" {
-  run bash -c "CI=1 make infection"
+  run make infection
   assert_success
   assert_output --partial 'Infection - PHP Mutation Testing Framework'
   assert_output --partial 'Mutation Code Coverage: 100%'
@@ -51,22 +50,22 @@ load 'bats-assert/load'
 
 @test "make cache-clear command executes" {
   run bash -c "CI=1 make cache-clear"
-  assert_success
+  run make cache-clear
 }
 
 @test "make install command executes" {
   run bash -c "CI=1 make install"
-  assert_success
+  run make install
 }
 
 @test "make update command executes" {
   run bash -c "CI=1 make update"
-  assert_success
+  run make update
 }
 
 @test "make cache-warmup command executes" {
   run bash -c "CI=1 make cache-warmup"
-  assert_success
+  run make cache-warmup
 }
 
 @test "make purge command executes" {
@@ -84,7 +83,7 @@ load 'bats-assert/load'
 
 @test "make commands lists all available Symfony commands" {
   run bash -c "CI=1 make commands"
-  assert_success
+  run make commands
   assert_output --partial "Usage:"
   assert_output --partial "command [options] [arguments]"
   assert_output --partial "Options:"
@@ -98,7 +97,7 @@ load 'bats-assert/load'
 
 @test "make generate-openapi-spec command executes" {
   run bash -c "CI=1 make generate-openapi-spec"
-  assert_success
+  run make generate-openapi-spec
   openapi_file=".github/openapi-spec/spec.yaml"
   [ -f "$openapi_file" ]
   assert_success

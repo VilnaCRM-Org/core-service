@@ -18,3 +18,11 @@ load 'bats-assert/load'
 @test "make down command executes" {
   skip "Requires Docker - skipped in CI environment"
 }
+
+@test "make up command starts containers" {
+  skip "Requires Docker - skipped in CI environment"
+}
+
+@test "make ps command lists running containers" {
+  skip "Requires Docker - skipped in CI environment"
+}

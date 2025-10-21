@@ -21,8 +21,7 @@ export function setup() {
 export const options = scenarioUtils.getOptions();
 
 export default function deleteCustomerStatus(data) {
-  // Use atomic counter to select each status exactly once
-  const status = data.statuses[counter.up()];
+  const status = data.statuses[counter.up() % data.statuses.length];
   utils.checkCustomerIsDefined(status);
 
   const mutation = `
@@ -63,5 +62,5 @@ export default function deleteCustomerStatus(data) {
 }
 
 export function teardown(data) {
-  console.log(`Deleted ${data.statuses.length} customer statuses during GraphQL load test`);
+  console.log(`Deleted customer statuses during GraphQL load test from pool of ${data.statuses.length}`);
 }

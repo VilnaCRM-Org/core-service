@@ -21,8 +21,7 @@ export function setup() {
 export const options = scenarioUtils.getOptions();
 
 export default function deleteCustomerType(data) {
-  // Use atomic counter to select each type exactly once
-  const type = data.types[counter.up()];
+  const type = data.types[counter.up() % data.types.length];
   utils.checkCustomerIsDefined(type);
 
   const mutation = `
@@ -63,5 +62,5 @@ export default function deleteCustomerType(data) {
 }
 
 export function teardown(data) {
-  console.log(`Deleted ${data.types.length} customer types during GraphQL load test`);
+  console.log(`Deleted customer types during GraphQL load test from pool of ${data.types.length}`);
 }

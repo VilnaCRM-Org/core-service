@@ -103,8 +103,7 @@ FROM app_php AS app_php_dev
 
 RUN apk add --no-cache \
     bash \
-    make \
-    bats
+    make
 
 RUN curl -sS https://get.symfony.com/cli/installer | bash \
  && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
