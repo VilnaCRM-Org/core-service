@@ -16,16 +16,16 @@ export function setup() {
     email: `deletetest_${Date.now()}@example.com`,
     phone: '+1-555-0004',
     leadSource: 'Load Test',
-    confirmed: true
+    confirmed: true,
   };
-  
+
   const response = utils.createCustomer(customerData);
-  
+
   if (response.status === 201) {
     const customer = JSON.parse(response.body);
     return { customerId: customer['@id'] };
   }
-  
+
   return { customerId: null };
 }
 
@@ -34,8 +34,8 @@ export default function deleteCustomer(data) {
     console.log('No customer ID available for testing');
     return;
   }
-  
+
   const response = http.del(`${utils.getBaseHttpUrl()}${data.customerId}`);
-  
+
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }

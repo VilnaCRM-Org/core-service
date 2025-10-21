@@ -10,6 +10,7 @@ This skill guides you through creating and managing database migrations for Mong
 ## When to Use This Skill
 
 Activate this skill when:
+
 - Adding new entities
 - Modifying existing entity fields
 - Changing database schema
@@ -19,6 +20,7 @@ Activate this skill when:
 ## Migration Commands
 
 ### Apply Migrations
+
 ```bash
 make doctrine-migrations-migrate
 ```
@@ -27,6 +29,7 @@ make doctrine-migrations-migrate
 **Runtime**: 1-2 minutes
 
 ### Generate New Migration
+
 ```bash
 make doctrine-migrations-generate
 ```
@@ -35,12 +38,14 @@ make doctrine-migrations-generate
 **Location**: `migrations/`
 
 ### Setup Test Database
+
 ```bash
 make setup-test-db
 ```
 
 **Purpose**: Drop and recreate test MongoDB schema
 **When to use**:
+
 - Before running integration/E2E tests
 - After schema changes
 - When tests fail due to database state
@@ -154,11 +159,11 @@ Update `config/packages/api_platform.yaml`:
 
 ```yaml
 api_platform:
-    mapping:
-        paths:
-            - '%kernel.project_dir%/config/api_platform'
-            - '%kernel.project_dir%/src/Customer/Domain/Entity'
-    # ... rest of config
+  mapping:
+    paths:
+      - '%kernel.project_dir%/config/api_platform'
+      - '%kernel.project_dir%/src/Customer/Domain/Entity'
+  # ... rest of config
 ```
 
 ### Step 5: Generate and Apply Migration
@@ -210,9 +215,9 @@ Add field to serialization groups if needed:
 
 ```yaml
 normalizationContext:
-    groups: ['customer:read']
+  groups: ['customer:read']
 denormalizationContext:
-    groups: ['customer:write']
+  groups: ['customer:write']
 ```
 
 ### Step 4: Clear Cache
@@ -234,10 +239,12 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 The project uses custom Doctrine types:
 
 **ULID Type** (`Shared/Infrastructure/DoctrineType/UlidType.php`):
+
 - Used for MongoDB document IDs
 - Generates sortable, unique identifiers
 
 **Domain UUID Type** (`Shared/Infrastructure/DoctrineType/DomainUuidType.php`):
+
 - Used for domain entity identifiers
 - Maintains UUID format
 
@@ -379,12 +386,12 @@ final class CustomerRepository implements CustomerRepositoryInterface
 
 ```yaml
 services:
-    App\Customer\Infrastructure\Repository\CustomerRepository:
-        arguments:
-            $documentManager: '@doctrine_mongodb.odm.document_manager'
+  App\Customer\Infrastructure\Repository\CustomerRepository:
+    arguments:
+      $documentManager: '@doctrine_mongodb.odm.document_manager'
 
-    App\Customer\Domain\Repository\CustomerRepositoryInterface:
-        alias: App\Customer\Infrastructure\Repository\CustomerRepository
+  App\Customer\Domain\Repository\CustomerRepositoryInterface:
+    alias: App\Customer\Infrastructure\Repository\CustomerRepository
 ```
 
 ## Testing with Database
