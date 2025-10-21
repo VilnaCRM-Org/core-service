@@ -9,7 +9,15 @@ use App\Core\Customer\Application\MutationInput\UpdateCustomerMutationInput;
 final class UpdateCustomerMutationInputTransformer
 {
     /**
-     * @param array<string, mixed> $args
+     * @param array{
+     *     initials?: string|null,
+     *     email?: string|null,
+     *     phone?: string|null,
+     *     leadSource?: string|null,
+     *     type?: string|null,
+     *     status?: string|null,
+     *     confirmed?: bool|null
+     * } $args
      */
     public function transform(array $args): UpdateCustomerMutationInput
     {
