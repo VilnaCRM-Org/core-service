@@ -4,7 +4,11 @@
     "delayBetweenScenarios": 60,
     "batchSize": 50,
     "customersFileName": "customers.json",
-    "customersFileLocation": "./",
+    "customersFileLocation": "/loadTests/",
+    "customerStatusesFileName": "customer_statuses.json",
+    "customerStatusesFileLocation": "/loadTests/",
+    "customerTypesFileName": "customer_types.json",
+    "customerTypesFileLocation": "/loadTests/",
     "endpoints": {
         "health": {
             "setupTimeoutInMinutes": 30,

@@ -41,6 +41,12 @@ export default class Utils {
     check(response, { [checkName]: res => checkFunction(res) });
   }
 
+  checkCustomerIsDefined(customer) {
+    if (!customer) {
+      throw new Error('Customer is undefined - pool exhausted');
+    }
+  }
+
   getJsonHeader() {
     return {
       headers: {
