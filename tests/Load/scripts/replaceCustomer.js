@@ -17,16 +17,16 @@ export function setup() {
     email: `replacetest_${Date.now()}@example.com`,
     phone: '+1-555-0003',
     leadSource: 'Load Test',
-    confirmed: false
+    confirmed: false,
   };
-  
+
   const response = utils.createCustomer(customerData);
-  
+
   if (response.status === 201) {
     const customer = JSON.parse(response.body);
     return { customerId: customer['@id'] };
   }
-  
+
   return { customerId: null };
 }
 
@@ -35,28 +35,28 @@ export default function replaceCustomer(data) {
     console.log('No customer ID available for testing');
     return;
   }
-  
+
   const domains = ['example.com', 'test.org', 'demo.net'];
   const leadSources = ['Website', 'Referral', 'Social Media'];
   const name = `Replaced_${randomString(8)}`;
   const domain = domains[Math.floor(Math.random() * domains.length)];
-  
+
   const replaceData = {
     initials: name,
     email: `${name.toLowerCase()}@${domain}`,
     phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
     leadSource: leadSources[Math.floor(Math.random() * leadSources.length)],
-    confirmed: true
+    confirmed: true,
   };
-  
+
   const response = http.put(
     `${utils.getBaseHttpUrl()}${data.customerId}`,
     JSON.stringify(replaceData),
     {
-      headers: { 'Content-Type': 'application/ld+json' }
+      headers: { 'Content-Type': 'application/ld+json' },
     }
   );
-  
+
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
 
