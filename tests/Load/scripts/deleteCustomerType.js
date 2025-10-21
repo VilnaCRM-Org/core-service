@@ -14,23 +14,23 @@ export function setup() {
   // Create test customer types specifically for deletion
   // Create enough for smoke test: 5 rps * 10s = 50 iterations
   const types = [];
-  
+
   for (let i = 0; i < 60; i++) {
     const typeData = {
-      value: `DeleteTestType_${i}_${Date.now()}`
+      value: `DeleteTestType_${i}_${Date.now()}`,
     };
-    
+
     const response = utils.createCustomerType(typeData);
-    
+
     if (response.status === 201) {
       const type = JSON.parse(response.body);
       types.push(type);
     }
   }
-  
-  return { 
+
+  return {
     types: types,
-    totalTypes: types.length 
+    totalTypes: types.length,
   };
 }
 

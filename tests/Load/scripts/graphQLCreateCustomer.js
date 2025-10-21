@@ -33,7 +33,7 @@ export function setup() {
     types: types,
     statuses: statuses,
     totalTypes: types.length,
-    totalStatuses: statuses.length
+    totalStatuses: statuses.length,
   };
 }
 
@@ -77,28 +77,26 @@ export default function createCustomer(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer created',
-    res => {
-      if (res.status !== 200) {
-        console.error(`GraphQL create failed with status ${res.status}: ${res.body}`);
-        return false;
-      }
-      const body = JSON.parse(res.body);
-      if (body.errors) {
-        console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
-        return false;
-      }
-      if (body.data && body.data.createCustomer && body.data.createCustomer.customer) {
-        return body.data.createCustomer.customer.email === email;
-      }
+  utils.checkResponse(response, 'customer created', res => {
+    if (res.status !== 200) {
+      console.error(`GraphQL create failed with status ${res.status}: ${res.body}`);
       return false;
     }
-  );
+    const body = JSON.parse(res.body);
+    if (body.errors) {
+      console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
+      return false;
+    }
+    if (body.data && body.data.createCustomer && body.data.createCustomer.customer) {
+      return body.data.createCustomer.customer.email === email;
+    }
+    return false;
+  });
 }
 
 export function teardown(data) {
   // Customers, types, and statuses will be cleaned up by CleanupCustomers script
-  console.log(`Created customers during GraphQL load test using ${data.totalTypes} types and ${data.totalStatuses} statuses`);
+  console.log(
+    `Created customers during GraphQL load test using ${data.totalTypes} types and ${data.totalStatuses} statuses`
+  );
 }

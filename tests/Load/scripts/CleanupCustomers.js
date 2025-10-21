@@ -75,7 +75,9 @@ export default function cleanupCustomers() {
   hasMore = true;
 
   while (hasMore) {
-    const response = http.get(`${utils.getBaseHttpUrl()}/customer_statuses?page=${page}&itemsPerPage=30`);
+    const response = http.get(
+      `${utils.getBaseHttpUrl()}/customer_statuses?page=${page}&itemsPerPage=30`
+    );
 
     if (response.status !== 200) {
       console.error(`Failed to fetch statuses page ${page}: ${response.status}`);
@@ -115,7 +117,9 @@ export default function cleanupCustomers() {
   hasMore = true;
 
   while (hasMore) {
-    const response = http.get(`${utils.getBaseHttpUrl()}/customer_types?page=${page}&itemsPerPage=30`);
+    const response = http.get(
+      `${utils.getBaseHttpUrl()}/customer_types?page=${page}&itemsPerPage=30`
+    );
 
     if (response.status !== 200) {
       console.error(`Failed to fetch types page ${page}: ${response.status}`);

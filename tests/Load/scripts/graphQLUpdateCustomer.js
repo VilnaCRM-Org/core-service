@@ -30,7 +30,7 @@ export function setup() {
       type: type['@id'],
       status: status['@id'],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     const response = utils.createCustomer(customerData);
@@ -42,7 +42,7 @@ export function setup() {
         customerId: customer['@id'],
         customerEmail: customer.email,
         typeIri: type['@id'],
-        statusIri: status['@id']
+        statusIri: status['@id'],
       };
     }
   }
@@ -84,18 +84,16 @@ export default function updateCustomer(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer updated',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data &&
-             body.data.updateCustomer &&
-             body.data.updateCustomer.customer &&
-             body.data.updateCustomer.customer.initials === newInitials &&
-             body.data.updateCustomer.customer.confirmed === true;
-    }
-  );
+  utils.checkResponse(response, 'customer updated', res => {
+    const body = JSON.parse(res.body);
+    return (
+      body.data &&
+      body.data.updateCustomer &&
+      body.data.updateCustomer.customer &&
+      body.data.updateCustomer.customer.initials === newInitials &&
+      body.data.updateCustomer.customer.confirmed === true
+    );
+  });
 }
 
 export function teardown(data) {

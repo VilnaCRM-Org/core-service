@@ -38,19 +38,19 @@ export default function createCustomerStatus(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer status created',
-    res => {
-      const body = JSON.parse(res.body);
-      if (body.data && body.data.createCustomerStatus && body.data.createCustomerStatus.customerStatus) {
-        // Track created status for cleanup
-        data.createdStatuses.push(body.data.createCustomerStatus.customerStatus.id);
-        return body.data.createCustomerStatus.customerStatus.value === value;
-      }
-      return false;
+  utils.checkResponse(response, 'customer status created', res => {
+    const body = JSON.parse(res.body);
+    if (
+      body.data &&
+      body.data.createCustomerStatus &&
+      body.data.createCustomerStatus.customerStatus
+    ) {
+      // Track created status for cleanup
+      data.createdStatuses.push(body.data.createCustomerStatus.customerStatus.id);
+      return body.data.createCustomerStatus.customerStatus.value === value;
     }
-  );
+    return false;
+  });
 }
 
 export function teardown(data) {
