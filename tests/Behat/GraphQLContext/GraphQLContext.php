@@ -1,0 +1,268 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Behat\GraphQLContext;
+
+use Behat\Behat\Context\Context;
+use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Gherkin\Node\PyStringNode;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+
+final class GraphQLContext implements Context, SnippetAcceptingContext
+{
+    private ?Response $response = null;
+    private ?array $responseData = null;
+
+    public function __construct(
+        private readonly KernelInterface $kernel
+    ) {
+    }
+
+    /**
+     * @When I send the following GraphQL query:
+     * @When I send the following GraphQL mutation:
+     */
+    public function iSendTheFollowingGraphQLQuery(PyStringNode $query): void
+    {
+        $this->sendGraphQLRequest($query->getRaw());
+    }
+
+    /**
+     * @When I send a GraphQL query :query
+     */
+    public function iSendAGraphQLQuery(string $query): void
+    {
+        $this->sendGraphQLRequest($query);
+    }
+
+    /**
+     * @When I send the following GraphQL request with variables:
+     */
+    public function iSendGraphQLRequestWithVariables(PyStringNode $requestBody): void
+    {
+        $body = json_decode($requestBody->getRaw(), true);
+        $this->sendGraphQLRequest($body['query'], $body['variables'] ?? []);
+    }
+
+    /**
+     * @Then the GraphQL response status code should be :statusCode
+     */
+    public function theGraphQLResponseStatusCodeShouldBe(int $statusCode): void
+    {
+        if ($this->response === null) {
+            throw new \RuntimeException('No response received');
+        }
+
+        $actualStatusCode = $this->response->getStatusCode();
+        if ($actualStatusCode !== $statusCode) {
+            throw new \RuntimeException(
+                sprintf('Expected status code %d, got %d', $statusCode, $actualStatusCode)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response should contain :field
+     */
+    public function theGraphQLResponseShouldContain(string $field): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (!$this->hasField($this->responseData, $field)) {
+            throw new \RuntimeException(
+                sprintf('Field "%s" not found in response', $field)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response :path should be :value
+     */
+    public function theGraphQLResponseFieldShouldBe(string $path, string $value): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        $actualValue = $this->getFieldValue($this->responseData, $path);
+
+        // Handle boolean conversion
+        if (in_array(strtolower($value), ['true', 'false'], true)) {
+            $expectedValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            if ($actualValue !== $expectedValue) {
+                throw new \RuntimeException(
+                    sprintf('Expected %s to be %s, got %s', $path, var_export($expectedValue, true), var_export($actualValue, true))
+                );
+            }
+            return;
+        }
+
+        // Handle null
+        if (strtolower($value) === 'null') {
+            if ($actualValue !== null) {
+                throw new \RuntimeException(
+                    sprintf('Expected %s to be null, got %s', $path, var_export($actualValue, true))
+                );
+            }
+            return;
+        }
+
+        if ((string) $actualValue !== $value) {
+            throw new \RuntimeException(
+                sprintf('Expected %s to be "%s", got "%s"', $path, $value, $actualValue)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response :path should contain :value
+     */
+    public function theGraphQLResponseFieldShouldContain(string $path, string $value): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        $actualValue = $this->getFieldValue($this->responseData, $path);
+
+        if (!str_contains((string) $actualValue, $value)) {
+            throw new \RuntimeException(
+                sprintf('Expected %s to contain "%s", got "%s"', $path, $value, $actualValue)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response should not have errors
+     */
+    public function theGraphQLResponseShouldNotHaveErrors(): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (isset($this->responseData['errors'])) {
+            $errors = json_encode($this->responseData['errors'], JSON_PRETTY_PRINT);
+            throw new \RuntimeException(
+                sprintf('GraphQL response contains errors: %s', $errors)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response should have errors
+     */
+    public function theGraphQLResponseShouldHaveErrors(): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (!isset($this->responseData['errors'])) {
+            throw new \RuntimeException('Expected GraphQL response to contain errors, but none found');
+        }
+    }
+
+    /**
+     * @Then the GraphQL error message should contain :message
+     */
+    public function theGraphQLErrorMessageShouldContain(string $message): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (!isset($this->responseData['errors'])) {
+            throw new \RuntimeException('No errors in GraphQL response');
+        }
+
+        $found = false;
+        foreach ($this->responseData['errors'] as $error) {
+            if (isset($error['message']) && str_contains($error['message'], $message)) {
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            throw new \RuntimeException(
+                sprintf('Error message "%s" not found in errors', $message)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response data should be empty
+     */
+    public function theGraphQLResponseDataShouldBeEmpty(): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (!empty($this->responseData['data']) && $this->responseData['data'] !== null) {
+            throw new \RuntimeException(
+                sprintf('Expected empty data, got: %s', json_encode($this->responseData['data']))
+            );
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $variables
+     */
+    private function sendGraphQLRequest(string $query, array $variables = []): void
+    {
+        $requestData = ['query' => $query];
+        if (!empty($variables)) {
+            $requestData['variables'] = $variables;
+        }
+
+        $request = Request::create(
+            '/api/graphql',
+            'POST',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode($requestData)
+        );
+
+        $this->response = $this->kernel->handle($request);
+        $content = $this->response->getContent();
+
+        if ($content !== false) {
+            $this->responseData = json_decode($content, true);
+        }
+    }
+
+    private function ensureResponseDataAvailable(): void
+    {
+        if ($this->responseData === null) {
+            throw new \RuntimeException('No GraphQL response data available');
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function hasField(array $data, string $path): bool
+    {
+        try {
+            $this->getFieldValue($data, $path);
+            return true;
+        } catch (\RuntimeException) {
+            return false;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function getFieldValue(array $data, string $path): mixed
+    {
+        $parts = explode('.', $path);
+        $current = $data;
+
+        foreach ($parts as $part) {
+            if (!is_array($current) || !array_key_exists($part, $current)) {
+                throw new \RuntimeException(
+                    sprintf('Path "%s" not found in response', $path)
+                );
+            }
+            $current = $current[$part];
+        }
+
+        return $current;
+    }
+}

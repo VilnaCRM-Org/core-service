@@ -1,4 +1,5 @@
 import { check } from 'k6';
+import http from 'k6/http';
 
 export default class Utils {
   constructor() {
@@ -32,5 +33,36 @@ export default class Utils {
 
   checkResponse(response, checkName, checkFunction) {
     check(response, { [checkName]: res => checkFunction(res) });
+  }
+
+  getJsonHeader() {
+    return {
+      headers: {
+        'Content-Type': 'application/ld+json',
+      },
+    };
+  }
+
+  getMergePatchHeader() {
+    return {
+      headers: {
+        'Content-Type': 'application/merge-patch+json',
+      },
+    };
+  }
+
+  createCustomer(customerData) {
+    const payload = JSON.stringify(customerData);
+    return http.post(`${this.baseHttpUrl}/customers`, payload, this.getJsonHeader());
+  }
+
+  createCustomerType(typeData) {
+    const payload = JSON.stringify(typeData);
+    return http.post(`${this.baseHttpUrl}/customer_types`, payload, this.getJsonHeader());
+  }
+
+  createCustomerStatus(statusData) {
+    const payload = JSON.stringify(statusData);
+    return http.post(`${this.baseHttpUrl}/customer_statuses`, payload, this.getJsonHeader());
   }
 }
