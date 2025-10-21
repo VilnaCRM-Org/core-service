@@ -1,52 +1,36 @@
 import http from 'k6/http';
+import counter from 'k6/x/counter';
+import InsertCustomersUtils from '../utils/insertCustomersUtils.js';
 import ScenarioUtils from '../utils/scenarioUtils.js';
 import Utils from '../utils/utils.js';
-import counter from 'k6/x/counter';
 
 const scenarioName = 'deleteCustomer';
 
 const utils = new Utils();
 const scenarioUtils = new ScenarioUtils(utils, scenarioName);
+const insertCustomersUtils = new InsertCustomersUtils(utils, scenarioName);
 
-export const options = scenarioUtils.getOptions();
+const customers = insertCustomersUtils.loadInsertedCustomers();
 
 export function setup() {
-  // Fetch existing customers created by PrepareCustomers script
-  const response = http.get(`${utils.getBaseHttpUrl()}/customers?itemsPerPage=100`);
-
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch customers for delete customer load test.');
-  }
-
-  const data = JSON.parse(response.body);
-  const customers = data.member || [];
-
-  if (customers.length === 0) {
-    throw new Error('No customers found. Please run PrepareCustomers script first.');
-  }
-
   return {
     customers: customers,
-    totalCustomers: customers.length
   };
 }
 
+export const options = scenarioUtils.getOptions();
+
 export default function deleteCustomer(data) {
-  // Use counter to select different customer for each iteration
-  const customerIndex = counter.up() % data.totalCustomers;
-  const customer = data.customers[customerIndex];
+  const customer = data.customers[counter.up()];
+  utils.checkCustomerIsDefined(customer);
 
-  if (!customer) {
-    console.warn(`Customer at index ${customerIndex} not found`);
-    return;
-  }
+  const { '@id': id } = customer;
 
-  const response = http.del(`http://localhost:80${customer['@id']}`);
+  const response = http.del(`${utils.getBaseHttpUrl()}${id}`);
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }
 
 export function teardown(data) {
-  // Remaining customers will be cleaned up by CleanupCustomers script
-  console.log(`Deleted customers during load test from pool of ${data.totalCustomers}`);
+  console.log(`Deleted ${data.customers.length} customers during load test`);
 }
