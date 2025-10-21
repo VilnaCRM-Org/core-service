@@ -11,16 +11,24 @@ export const options = scenarioUtils.getOptions();
 
 export default function createCustomerType() {
   const typeData = generateCustomerTypeData();
-  
+
   const response = utils.createCustomerType(typeData);
-  
+
   utils.checkResponse(response, 'is status 201', res => res.status === 201);
 }
 
 function generateCustomerTypeData() {
-  const typeNames = ['Premium', 'Standard', 'VIP', 'Enterprise', 'Starter', 'Professional', 'Basic'];
-  
+  const typeNames = [
+    'Premium',
+    'Standard',
+    'VIP',
+    'Enterprise',
+    'Starter',
+    'Professional',
+    'Basic',
+  ];
+
   return {
-    value: `${typeNames[Math.floor(Math.random() * typeNames.length)]}_${randomString(6)}`
+    value: `${typeNames[Math.floor(Math.random() * typeNames.length)]}_${randomString(6)}`,
   };
 }

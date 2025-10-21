@@ -10,6 +10,7 @@ This skill ensures documentation in the `docs/` directory remains synchronized w
 ## When to Use This Skill
 
 Activate this skill when:
+
 - Implementing new features or modifying existing ones
 - Adding or changing API endpoints (REST or GraphQL)
 - Modifying database schema or entities
@@ -22,26 +23,31 @@ Activate this skill when:
 ## Core Documentation Files
 
 ### API and Integration
+
 - `docs/api-endpoints.md` - API endpoints, schemas, examples
 - `docs/user-guide.md` - User-facing feature usage
 - `docs/security.md` - Authentication, authorization, security practices
 
 ### Architecture and Design
+
 - `docs/design-and-architecture.md` - System design, components, patterns
 - `docs/developer-guide.md` - Development patterns, code examples
 - `docs/glossary.md` - Domain terms and definitions
 
 ### Operations and Configuration
+
 - `docs/advanced-configuration.md` - Environment variables, configuration
 - `docs/getting-started.md` - Setup and initial configuration
 - `docs/operational.md` - Monitoring, logging, maintenance
 
 ### Development
+
 - `docs/testing.md` - Testing strategies, coverage, commands
 - `docs/performance.md` - Performance benchmarks, optimizations
 - `docs/onboarding.md` - New developer onboarding
 
 ### Versioning and Changes
+
 - `docs/versioning.md` - Version information
 - `docs/release-notes.md` - Changelog and significant changes
 
@@ -50,6 +56,7 @@ Activate this skill when:
 ### When Adding New REST API Endpoints
 
 **Update** `docs/api-endpoints.md`:
+
 - Endpoint URL and HTTP method
 - Request/response schemas with examples
 - Authentication/authorization requirements
@@ -57,15 +64,18 @@ Activate this skill when:
 - Rate limiting information
 
 **Update** `docs/user-guide.md`:
+
 - Usage examples for the new endpoint
 - Integration patterns
 
 **Update** `.github/openapi-spec/`:
+
 ```bash
 make generate-openapi-spec
 ```
 
 **Example**:
+
 ```markdown
 ### POST /api/users/confirm
 
@@ -74,13 +84,14 @@ Confirms a user's email address using a confirmation token.
 **Request Body**:
 \`\`\`json
 {
-  "token": "abc123def456"
+"token": "abc123def456"
 }
 \`\`\`
 
 **Response**: 204 No Content
 
 **Errors**:
+
 - 400 Bad Request: Invalid token format
 - 404 Not Found: Token not found or expired
 - 401 Unauthorized: Missing authentication
@@ -91,41 +102,45 @@ Confirms a user's email address using a confirmation token.
 ### When Adding New GraphQL Operations
 
 **Update** `docs/api-endpoints.md`:
+
 - Query/mutation schemas
 - Input/output types
 - Example requests and responses
 - Authentication requirements
 
 **Update** `.github/graphql-spec/`:
+
 ```bash
 make generate-graphql-spec
 ```
 
 **Update** `docs/user-guide.md`:
+
 - Client integration examples
 
 **Example**:
+
 ```markdown
 ### Mutation: confirmUser
 
 \`\`\`graphql
 mutation ConfirmUser($input: ConfirmUserInput!) {
-  confirmUser(input: $input) {
-    user {
-      id
-      email
-      confirmed
-    }
-  }
+confirmUser(input: $input) {
+user {
+id
+email
+confirmed
+}
+}
 }
 \`\`\`
 
 **Input**:
 \`\`\`json
 {
-  "input": {
-    "token": "abc123def456"
-  }
+"input": {
+"token": "abc123def456"
+}
 }
 \`\`\`
 ```
@@ -133,21 +148,25 @@ mutation ConfirmUser($input: ConfirmUserInput!) {
 ### When Modifying Database Schema
 
 **Update** `docs/design-and-architecture.md`:
+
 - Updated entity relationships
 - New database tables or fields
 - Migration considerations
 
 **Update** `docs/developer-guide.md`:
+
 - New entity usage patterns
 - Repository method examples
 
 **Example**:
+
 ```markdown
 #### User Entity
 
 The User entity represents registered users in the system.
 
 **Fields**:
+
 - `id`: UUID (primary key)
 - `email`: Unique email address
 - `password`: Bcrypt hashed password
@@ -156,12 +175,14 @@ The User entity represents registered users in the system.
 - `createdAt`: Registration timestamp
 
 **Relationships**:
+
 - One-to-many with ConfirmationToken
 ```
 
 ### When Adding Configuration Options
 
 **Update** `docs/advanced-configuration.md`:
+
 - New environment variables
 - Configuration examples
 - Default values and validation rules
@@ -170,6 +191,7 @@ The User entity represents registered users in the system.
 **Update** `docs/getting-started.md` (if required for basic setup)
 
 **Example**:
+
 ```markdown
 ### EMAIL_CONFIRMATION_TOKEN_LENGTH
 
@@ -189,18 +211,22 @@ EMAIL_CONFIRMATION_TOKEN_LENGTH=16
 ### When Implementing Domain Features
 
 **Update** `docs/design-and-architecture.md`:
+
 - New domain models and aggregates
 - Command/query handlers
 - Domain events and their handlers
 - Bounded context interactions
 
 **Update** `docs/glossary.md`:
+
 - New domain terms
 
 **Update** `docs/developer-guide.md`:
+
 - Usage examples
 
 **Example**:
+
 ```markdown
 ## User Confirmation Bounded Context
 
@@ -209,9 +235,11 @@ EMAIL_CONFIRMATION_TOKEN_LENGTH=16
 **ConfirmationEmail**: Manages the email confirmation workflow
 
 - **Commands**:
+
   - `SendConfirmationEmailCommand`: Triggers email sending
 
 - **Events**:
+
   - `ConfirmationEmailSentEvent`: Email successfully sent
 
 - **Handlers**:
@@ -229,17 +257,21 @@ EMAIL_CONFIRMATION_TOKEN_LENGTH=16
 ### When Modifying Authentication/Authorization
 
 **Update** `docs/security.md`:
+
 - New OAuth flows or grant types
 - Permission changes
 - Security considerations
 
 **Update** `docs/api-endpoints.md`:
+
 - Updated auth requirements per endpoint
 
 **Update** `docs/user-guide.md`:
+
 - Client authentication examples
 
 **Example**:
+
 ```markdown
 ### OAuth Password Grant
 
@@ -250,15 +282,16 @@ Used for trusted first-party clients to authenticate users with username/passwor
 **Request**:
 \`\`\`json
 {
-  "grant_type": "password",
-  "client_id": "your_client_id",
-  "client_secret": "your_client_secret",
-  "username": "user@example.com",
-  "password": "userpassword"
+"grant_type": "password",
+"client_id": "your_client_id",
+"client_secret": "your_client_secret",
+"username": "user@example.com",
+"password": "userpassword"
 }
 \`\`\`
 
 **Security Considerations**:
+
 - Only use over HTTPS
 - Store client secrets securely
 - Implement rate limiting
@@ -267,6 +300,7 @@ Used for trusted first-party clients to authenticate users with username/passwor
 ### When Adding Testing Strategies
 
 **Update** `docs/testing.md`:
+
 - New test categories or patterns
 - Updated coverage requirements
 - New testing commands or procedures
@@ -274,6 +308,7 @@ Used for trusted first-party clients to authenticate users with username/passwor
 **Update** `docs/developer-guide.md` (if workflow changes)
 
 **Example**:
+
 ```markdown
 ### Contract Testing
 
@@ -292,6 +327,7 @@ make contract-tests
 ### When Implementing Performance Optimizations
 
 **Update** `docs/performance.md`:
+
 - Performance benchmarks and improvements
 - New caching strategies
 - Resource usage optimizations
@@ -299,12 +335,14 @@ make contract-tests
 **Update** `docs/php-fpm-vs-frankenphp.md` (if runtime comparisons change)
 
 **Example**:
+
 ```markdown
 ### Redis Caching for Rate Limiting
 
 Migrated rate limiting from database to Redis cache.
 
 **Performance Impact**:
+
 - 60% reduction in database queries
 - 40% improvement in rate limit check latency
 - P99 latency: 5ms → 2ms
@@ -343,18 +381,22 @@ REDIS_URL=redis://redis:6379/0
 ### Before Committing Code Changes
 
 1. **Review Documentation Impact**:
+
    - Identify which documentation files need updates
    - List all affected docs files
 
 2. **Update Relevant Files**:
+
    - Make comprehensive updates to all affected documentation
    - Ensure consistency across all docs
 
 3. **Cross-Reference Check**:
+
    - Verify all internal links remain valid
    - Check references between documentation files
 
 4. **Example Validation**:
+
    - Test all code examples
    - Ensure they work with current implementation
 

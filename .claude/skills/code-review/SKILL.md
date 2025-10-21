@@ -10,6 +10,7 @@ This skill provides a systematic approach to retrieving and addressing all code 
 ## When to Use This Skill
 
 Activate this skill when:
+
 - User asks to address code review comments
 - Working on PR feedback
 - Refactoring based on reviewer suggestions
@@ -19,16 +20,19 @@ Activate this skill when:
 ## Step 1: Retrieve All PR Comments
 
 ### Auto-detect PR from current branch
+
 ```bash
 make pr-comments
 ```
 
 ### Specify PR number explicitly
+
 ```bash
 make pr-comments PR=215
 ```
 
 ### Different output formats
+
 ```bash
 make pr-comments FORMAT=json      # JSON format
 make pr-comments FORMAT=markdown  # Markdown format
@@ -37,6 +41,7 @@ make pr-comments FORMAT=markdown  # Markdown format
 ### What You Get
 
 The command outputs all **unresolved** comments with:
+
 - File path and line number
 - Author and timestamp
 - Full comment content
@@ -49,16 +54,19 @@ Analyze each comment and categorize:
 ### A. Committable Suggestions (Highest Priority)
 
 **Characteristics**:
+
 - Contains code suggestions
 - Usually prefixed with "suggestion"
 - Has code blocks to apply
 
 **Action**:
+
 1. Apply the suggested change exactly as provided
 2. Commit immediately with descriptive message
 3. Reference comment URL in commit message
 
 **Example**:
+
 ```bash
 # Apply suggestion directly
 # Commit the change
@@ -71,11 +79,13 @@ Ref: https://github.com/user/repo/pull/215#discussion_r123456"
 ### B. LLM Prompts and Instructions (High Priority)
 
 **Characteristics**:
+
 - Provides specific refactoring instructions
 - Includes architectural guidance
 - Describes implementation approach
 
 **Action**:
+
 1. Use comment as detailed prompt for code generation
 2. Analyze current implementation
 3. Design and implement changes following instructions
@@ -85,10 +95,12 @@ Ref: https://github.com/user/repo/pull/215#discussion_r123456"
 ### C. Questions and Clarifications (Medium Priority)
 
 **Characteristics**:
+
 - Asks for explanation
 - Requests clarification of implementation
 
 **Action**:
+
 1. Reply with clear explanation
 2. Make code more self-documenting if needed
 3. Add documentation if helpful
@@ -96,10 +108,12 @@ Ref: https://github.com/user/repo/pull/215#discussion_r123456"
 ### D. General Feedback (Low Priority)
 
 **Characteristics**:
+
 - General observations
 - Praise or acknowledgment
 
 **Action**:
+
 - Consider for future improvements
 - No immediate action needed
 
@@ -151,6 +165,7 @@ git commit -m "test: update tests for new validation approach"
 **After each change or group of related changes**:
 
 ### For Code Changes
+
 ```bash
 make phpcsfixer      # Fix code style
 make psalm           # Static analysis
@@ -158,11 +173,13 @@ make unit-tests      # Run unit tests
 ```
 
 ### For Significant Changes
+
 ```bash
 make ci              # Full CI suite
 ```
 
 ### For Test Changes
+
 ```bash
 make unit-tests      # Verify tests pass
 make infection       # Check mutation coverage
@@ -173,6 +190,7 @@ make infection       # Check mutation coverage
 ### Reply Systematically
 
 **For Questions**:
+
 ```markdown
 Good question! [Clear, concise answer]
 
@@ -180,6 +198,7 @@ Good question! [Clear, concise answer]
 ```
 
 **For Implemented Suggestions**:
+
 ```markdown
 ✅ Implemented in [commit hash]
 
@@ -187,8 +206,10 @@ Good question! [Clear, concise answer]
 ```
 
 **For Complex Refactoring**:
+
 ```markdown
 Refactored as suggested across these commits:
+
 - [commit hash]: [brief description]
 - [commit hash]: [brief description]
 
@@ -196,6 +217,7 @@ Refactored as suggested across these commits:
 ```
 
 **For Cannot Implement**:
+
 ```markdown
 I understand the concern, but [technical constraint].
 
@@ -255,6 +277,7 @@ git push
 ## Integration with Workflow
 
 ### Before Starting
+
 ```bash
 git status                  # Clean working directory
 git pull origin main        # Latest changes
@@ -262,11 +285,13 @@ make pr-comments           # Current comment status
 ```
 
 ### During Refactoring
+
 - Work on one comment or related group at a time
 - Commit frequently with descriptive messages
 - Reference comment URLs in commit messages
 
 ### After Completing
+
 ```bash
 make ci                    # Full quality check
 make pr-comments           # Verify no new unresolved comments
