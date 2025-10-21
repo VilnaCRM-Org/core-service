@@ -21,17 +21,16 @@ export function setup() {
 export const options = scenarioUtils.getOptions();
 
 export default function deleteCustomerStatus(data) {
-  // Use atomic counter to select each status exactly once
-  const status = data.statuses[counter.up()];
+  const status = data.statuses[counter.up() % data.statuses.length];
   utils.checkCustomerIsDefined(status);
   
   const { '@id': id } = status;
 
-  const response = http.del(`${utils.getBaseHttpUrl()}${id}`);
+  const response = http.del(`http://localhost:80${id}`);
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }
 
 export function teardown(data) {
-  console.log(`Deleted ${data.statuses.length} customer statuses during load test`);
+  console.log(`Deleted customer statuses during load test from pool of ${data.statuses.length}`);
 }

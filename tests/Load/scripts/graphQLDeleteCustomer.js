@@ -83,8 +83,7 @@ export function setup() {
 }
 
 export default function deleteCustomer(data) {
-  // Use atomic counter to select each customer exactly once
-  const customer = data.customers[counter.up()];
+  const customer = data.customers[counter.up() % data.customers.length];
   utils.checkCustomerIsDefined(customer);
   
   const customerId = customer['@id'];
@@ -121,7 +120,7 @@ export function teardown(data) {
     // Clean up type and status
     if (data.typeIri) {
       try {
-        http.del(`${utils.getBaseHttpUrl()}${data.typeIri}`);
+        http.del(`http://localhost:80${data.typeIri}`);
       } catch (e) {
         // Ignore cleanup errors
       }
@@ -129,7 +128,7 @@ export function teardown(data) {
 
     if (data.statusIri) {
       try {
-        http.del(`${utils.getBaseHttpUrl()}${data.statusIri}`);
+        http.del(`http://localhost:80${data.statusIri}`);
       } catch (e) {
         // Ignore cleanup errors
       }
