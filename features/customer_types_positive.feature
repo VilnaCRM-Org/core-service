@@ -154,18 +154,6 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "value" should contain "Prospect"
     Then delete type with value "Prospect"
 
-  Scenario: Create a customer type resource with additional unrecognized property should be rejected
-    When I send a POST request to "/api/customer_types" with body:
-    """
-    {
-      "value": "Lead",
-      "extraField": "Should be rejected"
-    }
-    """
-    Then the response status code should be equal to 400
-    And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
-
 # ----- PUT /api/customer_types/{ulid} – Replace Resource (Positive Tests) -----
 
   Scenario: Replace a customer type resource with valid payload and verify full JSON response

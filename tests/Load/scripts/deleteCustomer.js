@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import ScenarioUtils from '../utils/scenarioUtils.js';
 import Utils from '../utils/utils.js';
+import counter from 'k6/x/counter';
 
 const scenarioName = 'deleteCustomer';
 
@@ -10,32 +11,42 @@ const scenarioUtils = new ScenarioUtils(utils, scenarioName);
 export const options = scenarioUtils.getOptions();
 
 export function setup() {
-  // Create a test customer for deleting
-  const customerData = {
-    initials: 'DeleteTest Customer',
-    email: `deletetest_${Date.now()}@example.com`,
-    phone: '+1-555-0004',
-    leadSource: 'Load Test',
-    confirmed: true
-  };
-  
-  const response = utils.createCustomer(customerData);
-  
-  if (response.status === 201) {
-    const customer = JSON.parse(response.body);
-    return { customerId: customer['@id'] };
+  // Fetch existing customers created by PrepareCustomers script
+  const response = http.get(`${utils.getBaseHttpUrl()}/customers?itemsPerPage=100`);
+
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch customers for delete customer load test.');
   }
-  
-  return { customerId: null };
+
+  const data = JSON.parse(response.body);
+  const customers = data.member || [];
+
+  if (customers.length === 0) {
+    throw new Error('No customers found. Please run PrepareCustomers script first.');
+  }
+
+  return {
+    customers: customers,
+    totalCustomers: customers.length
+  };
 }
 
 export default function deleteCustomer(data) {
-  if (!data.customerId) {
-    console.log('No customer ID available for testing');
+  // Use counter to select different customer for each iteration
+  const customerIndex = counter.up() % data.totalCustomers;
+  const customer = data.customers[customerIndex];
+
+  if (!customer) {
+    console.warn(`Customer at index ${customerIndex} not found`);
     return;
   }
-  
-  const response = http.del(`${utils.getBaseHttpUrl()}${data.customerId}`);
-  
+
+  const response = http.del(`http://localhost:80${customer['@id']}`);
+
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
+}
+
+export function teardown(data) {
+  // Remaining customers will be cleaned up by CleanupCustomers script
+  console.log(`Deleted customers during load test from pool of ${data.totalCustomers}`);
 }
