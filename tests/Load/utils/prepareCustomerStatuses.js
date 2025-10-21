@@ -3,7 +3,8 @@ import Utils from './utils.js';
 import file from 'k6/x/file';
 
 const utils = new Utils();
-const filepath = utils.getConfig()['customerStatusesFileLocation'] + utils.getConfig()['customerStatusesFileName'];
+const filepath =
+  utils.getConfig()['customerStatusesFileLocation'] + utils.getConfig()['customerStatusesFileName'];
 const scenarioName = utils.getCLIVariable('scenarioName');
 const insertStatusesUtils = new InsertCustomerStatusesUtils(utils, scenarioName);
 
