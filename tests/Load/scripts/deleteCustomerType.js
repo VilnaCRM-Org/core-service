@@ -21,17 +21,16 @@ export function setup() {
 export const options = scenarioUtils.getOptions();
 
 export default function deleteCustomerType(data) {
-  // Use atomic counter to select each type exactly once
-  const type = data.types[counter.up()];
+  const type = data.types[counter.up() % data.types.length];
   utils.checkCustomerIsDefined(type);
   
   const { '@id': id } = type;
 
-  const response = http.del(`${utils.getBaseHttpUrl()}${id}`);
+  const response = http.del(`http://localhost:80${id}`);
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }
 
 export function teardown(data) {
-  console.log(`Deleted ${data.types.length} customer types during load test`);
+  console.log(`Deleted customer types during load test from pool of ${data.types.length}`);
 }

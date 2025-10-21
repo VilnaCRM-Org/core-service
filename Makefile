@@ -71,7 +71,7 @@ help:
 	@grep -E '^[-a-zA-Z0-9_\.\/]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
 bats: ## Run tests for bash commands
-	$(DOCKER_COMPOSE) exec -e APP_ENV=test -e BATS_LIB_PATH=/usr/lib/bats php bats tests/CLI/bats/
+	bats tests/CLI/bats/
 
 phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
@@ -91,7 +91,7 @@ psalm: ## A static analysis tool for finding errors in PHP applications
 psalm-security: ## Psalm security analysis
 	$(EXEC_ENV) $(PSALM) --taint-analysis
 
---allow-tool 'shell(*)'psalm-security-report: ## Psalm security analysis with SARIF output
+psalm-security-report: ## Psalm security analysis with SARIF output
 	$(EXEC_ENV) $(PSALM) --taint-analysis --report=results.sarif
 
 phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insights

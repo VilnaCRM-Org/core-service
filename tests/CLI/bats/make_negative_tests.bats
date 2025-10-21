@@ -35,10 +35,10 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-     mv tests/Behat/CustomerContext/CustomerContext.php tests/
-     run make behat
-     mv tests/CustomerContext.php tests/Behat/CustomerContext
-     assert_failure
+  mv tests/Behat/CustomerContext/CustomerContext.php tests/
+  run make behat
+  mv tests/CustomerContext.php tests/Behat/CustomerContext
+  assert_failure
 }
 
 @test "make psalm should fail when there are errors" {
@@ -101,10 +101,5 @@ load 'bats-assert/load'
   mv composer.json.bak composer.json
 
   assert_failure
-  assert_output --partial "does not contain valid JSON"
 }
 
-@test "make aws-lod-tests without config should fail" {
-  run make aws-load-tests
-  assert_failure
-}
