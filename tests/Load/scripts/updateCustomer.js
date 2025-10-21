@@ -17,16 +17,16 @@ export function setup() {
     email: `updatetest_${Date.now()}@example.com`,
     phone: '+1-555-0002',
     leadSource: 'Load Test',
-    confirmed: false
+    confirmed: false,
   };
-  
+
   const response = utils.createCustomer(customerData);
-  
+
   if (response.status === 201) {
     const customer = JSON.parse(response.body);
     return { customerId: customer['@id'] };
   }
-  
+
   return { customerId: null };
 }
 
@@ -35,21 +35,21 @@ export default function updateCustomer(data) {
     console.log('No customer ID available for testing');
     return;
   }
-  
+
   const updateData = {
     initials: `Updated_${randomString(8)}`,
     phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
-    confirmed: true
+    confirmed: true,
   };
-  
+
   const response = http.patch(
     `${utils.getBaseHttpUrl()}${data.customerId}`,
     JSON.stringify(updateData),
     {
-      headers: { 'Content-Type': 'application/merge-patch+json' }
+      headers: { 'Content-Type': 'application/merge-patch+json' },
     }
   );
-  
+
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
 

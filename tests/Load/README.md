@@ -34,7 +34,7 @@ make load-tests
 
 # Run specific load test levels
 make smoke-load-tests    # Minimal load
-make average-load-tests  # Average load  
+make average-load-tests  # Average load
 make stress-load-tests   # High load
 make spike-load-tests    # Spike load
 
@@ -87,6 +87,7 @@ The comprehensive test simulates realistic API usage:
 - 20% Customer status operations
 
 Within each category:
+
 - 30-40% Create operations
 - 20% List operations
 - 15% Get specific resource

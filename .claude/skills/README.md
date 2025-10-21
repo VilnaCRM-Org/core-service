@@ -5,14 +5,17 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ## Available Skills
 
 ### 1. CI Workflow (`ci-workflow/`)
+
 **Purpose**: Run comprehensive CI checks before committing changes
 
 **When activated**:
+
 - User asks to "run CI" or "run quality checks"
 - Before finishing any task involving code changes
 - Before creating pull requests
 
 **What it does**:
+
 - Executes `make ci` with all quality checks
 - Guides through fixing failures (code style, static analysis, tests, mutations)
 - Ensures "✅ CI checks successfully passed!" message appears
@@ -23,14 +26,17 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ---
 
 ### 2. Testing Workflow (`testing-workflow/`)
+
 **Purpose**: Run and manage different types of tests
 
 **When activated**:
+
 - Running tests (unit, integration, E2E, mutation, load)
 - Debugging test failures
 - Checking test coverage
 
 **What it does**:
+
 - Provides comprehensive testing guidance for all test types
 - Explains debugging strategies for different failure types
 - Covers mutation testing (Infection) strategies
@@ -42,14 +48,17 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ---
 
 ### 3. Code Review Workflow (`code-review/`)
+
 **Purpose**: Systematically retrieve and address PR code review comments
 
 **When activated**:
+
 - Handling code review feedback
 - Addressing PR comments
 - Refactoring based on reviewer suggestions
 
 **What it does**:
+
 - Uses `make pr-comments` to retrieve all unresolved comments
 - Categorizes comments (committable suggestions, LLM prompts, questions, feedback)
 - Provides systematic approach to implementing suggestions
@@ -61,15 +70,18 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ---
 
 ### 4. Quality Standards (`quality-standards/`)
+
 **Purpose**: Maintain and improve code quality without decreasing standards
 
 **When activated**:
+
 - PHPInsights reports quality issues
 - Cyclomatic complexity is too high
 - Architecture violations detected
 - Code quality needs improvement
 
 **What it does**:
+
 - Protects quality metrics (never allows lowering thresholds)
 - Reduces cyclomatic complexity with refactoring strategies
 - Fixes architecture violations (Deptrac layer rules)
@@ -79,6 +91,7 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 **Key commands**: `make phpinsights`, `make phpmd`, `make psalm`, `make deptrac`
 
 **Protected thresholds**:
+
 - PHPInsights quality: 100%
 - PHPInsights complexity: 95%
 - PHPInsights architecture: 100%
@@ -88,15 +101,18 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ---
 
 ### 5. Documentation Synchronization (`documentation-sync/`)
+
 **Purpose**: Keep `docs/` directory synchronized with code changes
 
 **When activated**:
+
 - Implementing new features or modifying existing ones
 - Adding/changing API endpoints (REST or GraphQL)
 - Modifying database schema or entities
 - Changing architecture or configuration
 
 **What it does**:
+
 - Identifies which documentation files need updates
 - Provides templates for documenting different change types
 - Ensures consistency across documentation
@@ -110,15 +126,18 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ---
 
 ### 6. Database Migrations (`database-migrations/`)
+
 **Purpose**: Create and manage database migrations using Doctrine ODM for MongoDB
 
 **When activated**:
+
 - Adding new entities
 - Modifying entity fields
 - Managing database schema changes
 - Setting up test database
 
 **What it does**:
+
 - Guides entity creation (Domain layer, XML mapping, API Platform config)
 - Documents MongoDB-specific features (custom types, indexes, embedded docs)
 - Provides repository implementation patterns
@@ -132,24 +151,29 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 ## How Skills Work
 
 ### Automatic Discovery
+
 Claude Code automatically discovers and loads Skills from this directory. No manual activation is required.
 
 ### Invocation
+
 Skills are **model-invoked** — Claude autonomously decides when to use them based on:
+
 - Task context and user request
 - Skill descriptions (the `description` field in YAML frontmatter)
 - Relevance to current work
 
 ### Skill Structure
+
 Each Skill consists of:
+
 - A directory (e.g., `ci-workflow/`)
 - A `SKILL.md` file with YAML frontmatter:
+
   ```yaml
   ---
   name: Skill Name
   description: What this skill does and when to use it
   ---
-
   Detailed instructions...
   ```
 
@@ -164,6 +188,7 @@ To add a new Skill:
 5. Include examples and commands
 
 **Best practices**:
+
 - Keep Skills focused on single capabilities
 - Write specific descriptions with concrete trigger terms
 - Include relevant commands and examples
@@ -172,18 +197,21 @@ To add a new Skill:
 ## Skill vs CLAUDE.md vs AGENTS.md
 
 ### CLAUDE.md (238 lines)
+
 - **Purpose**: Concise project instructions automatically loaded by Claude
 - **Content**: Essential project overview, commands, architecture basics
 - **Location**: Root directory
 - **Usage**: Automatic context for every conversation
 
 ### AGENTS.md (1,327 lines)
+
 - **Purpose**: Comprehensive repository guidelines and best practices
 - **Content**: Complete development workflow, quality standards, troubleshooting
 - **Location**: Root directory
 - **Usage**: Reference documentation for complex scenarios
 
 ### Skills (1,933 lines total across 6 Skills)
+
 - **Purpose**: Modular, reusable capabilities for specific workflows
 - **Content**: Step-by-step instructions for focused tasks
 - **Location**: `.claude/skills/`
@@ -203,6 +231,7 @@ Skills integrate seamlessly with the project's development workflow:
 ## Success Metrics
 
 All Skills enforce these project standards:
+
 - ✅ CI checks successfully passed
 - 100% test coverage maintained
 - 100% mutation score (0 escaped mutants)
@@ -213,6 +242,7 @@ All Skills enforce these project standards:
 ## Questions or Issues?
 
 If a Skill needs improvement or you encounter issues:
+
 1. Review the Skill's SKILL.md for detailed instructions
 2. Check AGENTS.md for comprehensive guidelines
 3. Consult CLAUDE.md for quick reference
