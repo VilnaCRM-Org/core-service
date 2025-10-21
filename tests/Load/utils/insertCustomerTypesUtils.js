@@ -21,7 +21,7 @@ export default class InsertCustomerTypesUtils {
 
     for (let i = 0; i < numberOfTypes; i++) {
       const typeData = {
-        value: `DeleteTestType_${i}_${Date.now()}`
+        value: `DeleteTestType_${i}_${Date.now()}`,
       };
 
       const response = this.utils.createCustomerType(typeData);

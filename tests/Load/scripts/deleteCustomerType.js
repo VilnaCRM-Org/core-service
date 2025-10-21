@@ -23,7 +23,7 @@ export const options = scenarioUtils.getOptions();
 export default function deleteCustomerType(data) {
   const type = data.types[counter.up() % data.types.length];
   utils.checkCustomerIsDefined(type);
-  
+
   const { '@id': id } = type;
 
   const response = http.del(`http://localhost:80${id}`);
