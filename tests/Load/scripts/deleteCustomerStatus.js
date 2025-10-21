@@ -14,23 +14,23 @@ export function setup() {
   // Create test customer statuses specifically for deletion
   // Create enough for smoke test: 5 rps * 10s = 50 iterations
   const statuses = [];
-  
+
   for (let i = 0; i < 60; i++) {
     const statusData = {
-      value: `DeleteTestStatus_${i}_${Date.now()}`
+      value: `DeleteTestStatus_${i}_${Date.now()}`,
     };
-    
+
     const response = utils.createCustomerStatus(statusData);
-    
+
     if (response.status === 201) {
       const status = JSON.parse(response.body);
       statuses.push(status);
     }
   }
-  
-  return { 
+
+  return {
     statuses: statuses,
-    totalStatuses: statuses.length 
+    totalStatuses: statuses.length,
   };
 }
 

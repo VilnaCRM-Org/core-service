@@ -1,28 +1,33 @@
 # Load Testing Skill
 
 ## Overview
+
 This skill provides comprehensive guidance for creating and managing load tests using K6 for both REST and GraphQL APIs. It follows established patterns from the VilnaCRM ecosystem and ensures professional, maintainable, and effective load testing.
 
 ## Core Principles
 
 ### 1. Individual Endpoint Testing
+
 - Create separate test scripts for each endpoint (REST) or operation (GraphQL)
 - Follow the pattern: `createResource.js`, `getResource.js`, `updateResource.js`, `deleteResource.js`
 - For GraphQL: `graphQLCreateResource.js`, `graphQLGetResource.js`, etc.
 - Avoid composite/random operation scripts for better debugging and clarity
 
 ### 2. Deterministic Testing
+
 - **NEVER use random operations** in load tests
 - Use predictable, iteration-based patterns (`__ITER % N`)
 - Ensure reproducible results for reliable performance analysis
 
 ### 3. Proper Resource Management
+
 - Implement `setup()` function to create test dependencies
 - Implement `teardown()` function to clean up test data
 - Use proper IRI handling for REST APIs
 - Use proper ID handling for GraphQL queries/mutations
 
 ### 4. Automatic Integration
+
 - All test scripts are automatically discovered from `tests/Load/scripts/`
 - No separate commands needed - GraphQL and REST tests run together
 - Use existing Makefile commands: `make smoke-load-tests`, `make average-load-tests`, etc.
@@ -92,24 +97,28 @@ function generateResourceData(data) {
 ### REST Load Test Types
 
 #### 1. Create Operations
+
 - **Purpose**: Test resource creation endpoints
 - **Pattern**: POST requests with valid payloads
 - **Setup**: Create dependencies (types, statuses, etc.)
 - **Validation**: Check for 201 status codes
 
 #### 2. Read Operations
+
 - **Get Single**: Test individual resource retrieval
 - **Get Collection**: Test listing with pagination and filters
 - **Pattern**: GET requests with various query parameters
 - **Setup**: Create test resources to retrieve
 
 #### 3. Update Operations
+
 - **Partial Update**: PATCH with `application/merge-patch+json`
 - **Full Replace**: PUT with `application/ld+json`
 - **Setup**: Create resources to update
 - **Validation**: Check for 200 status codes
 
 #### 4. Delete Operations
+
 - **Purpose**: Test resource deletion
 - **Pattern**: DELETE requests
 - **Setup**: Create resources to delete
@@ -143,7 +152,7 @@ export function setup() {
     const type = JSON.parse(typeResponse.body);
     return {
       typeIri: type['@id'],
-      createdResources: []
+      createdResources: [],
     };
   }
 
@@ -176,19 +185,15 @@ export default function graphQLOperationResource(data) {
     utils.getJsonHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'resource created',
-    res => {
-      const body = JSON.parse(res.body);
-      if (body.data && body.data.createResource && body.data.createResource.resource) {
-        // Track for cleanup
-        data.createdResources.push(body.data.createResource.resource.id);
-        return true;
-      }
-      return false;
+  utils.checkResponse(response, 'resource created', res => {
+    const body = JSON.parse(res.body);
+    if (body.data && body.data.createResource && body.data.createResource.resource) {
+      // Track for cleanup
+      data.createdResources.push(body.data.createResource.resource.id);
+      return true;
     }
-  );
+    return false;
+  });
 }
 
 export function teardown(data) {
@@ -210,6 +215,7 @@ export function teardown(data) {
 #### 1. Query Operations (Read)
 
 **Get Single Resource:**
+
 ```javascript
 const query = `
   query {
@@ -227,6 +233,7 @@ const query = `
 ```
 
 **Get Collection with Pagination:**
+
 ```javascript
 const query = `
   query {
@@ -251,6 +258,7 @@ const query = `
 #### 2. Mutation Operations (Write)
 
 **Create Resource:**
+
 ```javascript
 const mutation = `
   mutation {
@@ -271,6 +279,7 @@ const mutation = `
 ```
 
 **Update Resource:**
+
 ```javascript
 const mutation = `
   mutation {
@@ -290,6 +299,7 @@ const mutation = `
 ```
 
 **Delete Resource:**
+
 ```javascript
 const mutation = `
   mutation {
@@ -309,29 +319,29 @@ const mutation = `
 ### GraphQL-Specific Best Practices
 
 #### 1. ID Format
+
 - Use full IRI format: `/api/resources/01234`
 - Extract IRI from REST API creation: `resource['@id']`
 - Extract ID from IRI: `iri.split('/').pop()`
 
 #### 2. Response Validation
+
 ```javascript
-utils.checkResponse(
-  response,
-  'query returned data',
-  res => {
-    const body = JSON.parse(res.body);
-    // Check for data, not errors
-    return body.data && body.data.resource && !body.errors;
-  }
-);
+utils.checkResponse(response, 'query returned data', res => {
+  const body = JSON.parse(res.body);
+  // Check for data, not errors
+  return body.data && body.data.resource && !body.errors;
+});
 ```
 
 #### 3. Setup/Teardown Strategy
+
 - **Setup**: Use REST API for faster dependency creation
 - **Test**: Use GraphQL for the actual load test
 - **Teardown**: Use REST API for faster cleanup
 
 #### 4. Naming Convention
+
 - Prefix all GraphQL tests with `graphQL`
 - Follow REST naming: `graphQLGetCustomer`, `graphQLCreateCustomer`
 - This ensures automatic discovery and clear differentiation
@@ -446,6 +456,7 @@ getBaseGraphQLUrl() {
 ## IRI and ID Handling
 
 ### REST API: IRI Handling
+
 ```javascript
 // When storing created resource IDs
 if (response.status === 201) {
@@ -459,6 +470,7 @@ http.del(`${utils.getBaseHttpUrl()}${resourceIri}`);
 ```
 
 ### GraphQL: ID Extraction
+
 ```javascript
 // Extract ID from IRI for GraphQL queries
 const resourceId = resource['@id'].split('/').pop();
@@ -477,6 +489,7 @@ const query = `
 ## Data Generation Guidelines
 
 ### 1. Realistic Data
+
 ```javascript
 function generateCustomerData() {
   const domains = ['example.com', 'test.org', 'demo.net'];
@@ -494,6 +507,7 @@ function generateCustomerData() {
 ```
 
 ### 2. Timestamp-Based Uniqueness
+
 ```javascript
 // Ensure unique values with timestamps
 const uniqueValue = `TestValue_${Date.now()}_${randomString(6)}`;
@@ -505,24 +519,28 @@ const email = `test_${Date.now()}@example.com`;
 ## Load Test Levels
 
 ### 1. Smoke Tests (Minimal Load)
+
 - **VUs**: 2-5
 - **Duration**: 10 seconds
 - **Purpose**: Basic functionality verification
 - **Success Rate**: 100%
 
 ### 2. Average Tests (Normal Load)
+
 - **VUs**: 10-20
 - **Duration**: 2-3 minutes with ramp-up/down
 - **Purpose**: Normal traffic simulation
 - **Success Rate**: >99%
 
 ### 3. Stress Tests (High Load)
+
 - **VUs**: 30-80
 - **Duration**: 5-15 minutes with ramp-up/down
 - **Purpose**: Find breaking points
 - **Success Rate**: >95%
 
 ### 4. Spike Tests (Extreme Load)
+
 - **VUs**: 100-200
 - **Duration**: Short bursts (1-3 minutes)
 - **Purpose**: Test resilience under sudden load
@@ -546,7 +564,7 @@ if (operation < 0.3) {
 // Hardcoded test data
 const customer = {
   email: 'test@example.com', // Will cause conflicts
-  name: 'Test Customer'
+  name: 'Test Customer',
 };
 
 // Missing cleanup
@@ -565,15 +583,21 @@ const id = response.body.data.resource.id; // Will fail if errors exist
 // Deterministic operations
 const operationIndex = __ITER % 3;
 switch (operationIndex) {
-  case 0: createResource(); break;
-  case 1: updateResource(); break;
-  case 2: deleteResource(); break;
+  case 0:
+    createResource();
+    break;
+  case 1:
+    updateResource();
+    break;
+  case 2:
+    deleteResource();
+    break;
 }
 
 // Dynamic test data
 const customer = {
   email: `test_${Date.now()}_${randomString(6)}@example.com`,
-  name: `TestCustomer_${randomString(8)}`
+  name: `TestCustomer_${randomString(8)}`,
 };
 
 // Proper cleanup
@@ -597,9 +621,11 @@ if (body.data && body.data.resource && !body.errors) {
 ## Running Load Tests
 
 ### Automatic Discovery
+
 All scripts in `tests/Load/scripts/` are automatically discovered. Both REST and GraphQL tests run together.
 
 ### Available Commands
+
 ```bash
 # All load tests (REST + GraphQL)
 make load-tests
@@ -622,6 +648,7 @@ make execute-load-tests-script scenario=graphQLCreateCustomer
 ```
 
 ### Configuration Management
+
 - Main config: `tests/Load/config.json`
 - Fallback: `tests/Load/config.json.dist`
 - Environment variables: `API_HOST`, `API_PORT`
@@ -631,6 +658,7 @@ make execute-load-tests-script scenario=graphQLCreateCustomer
 ## Checklist for New Load Tests
 
 ### Before Creating
+
 - [ ] Identify the specific endpoint/operation to test
 - [ ] Determine if REST or GraphQL (or both)
 - [ ] Identify required dependencies (types, statuses, etc.)
@@ -638,6 +666,7 @@ make execute-load-tests-script scenario=graphQLCreateCustomer
 - [ ] Choose appropriate load test parameters
 
 ### During Creation
+
 - [ ] Follow the appropriate script structure template (REST or GraphQL)
 - [ ] Implement proper setup/teardown functions
 - [ ] Use deterministic operations (no random)
@@ -647,6 +676,7 @@ make execute-load-tests-script scenario=graphQLCreateCustomer
 - [ ] Use proper naming: `graphQL` prefix for GraphQL tests
 
 ### After Creation
+
 - [ ] Verify automatic discovery: `./tests/Load/get-load-test-scenarios.sh`
 - [ ] Test with smoke load first
 - [ ] Verify 100% success rate in controlled environment
@@ -659,6 +689,7 @@ make execute-load-tests-script scenario=graphQLCreateCustomer
 ## Complete Example: Customer CRUD
 
 ### REST: Create Customer
+
 ```javascript
 // File: tests/Load/scripts/createCustomer.js
 import http from 'k6/http';
@@ -682,7 +713,7 @@ export function setup() {
   return {
     type: JSON.parse(typeResponse.body),
     status: JSON.parse(statusResponse.body),
-    createdCustomers: []
+    createdCustomers: [],
   };
 }
 
@@ -697,7 +728,7 @@ export default function createCustomer(data) {
     status: data.status['@id'],
     confirmed: true,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 
   const response = utils.createCustomer(customerData);
@@ -720,6 +751,7 @@ export function teardown(data) {
 ```
 
 ### GraphQL: Create Customer
+
 ```javascript
 // File: tests/Load/scripts/graphQLCreateCustomer.js
 import http from 'k6/http';
@@ -744,7 +776,7 @@ export function setup() {
   return {
     typeIri: JSON.parse(typeResponse.body)['@id'],
     statusIri: JSON.parse(statusResponse.body)['@id'],
-    createdCustomers: []
+    createdCustomers: [],
   };
 }
 
@@ -805,12 +837,14 @@ export function teardown(data) {
 ## Performance Monitoring
 
 ### Success Criteria
+
 - **Smoke Tests**: 100% success rate
 - **Average Tests**: >99% success rate
 - **Stress Tests**: >95% success rate
 - **Response Times**: <threshold configured per endpoint
 
 ### Key Metrics
+
 - HTTP status codes (201, 200, 204 for success)
 - Response times (avg, p95, p99)
 - Error rates and types
@@ -822,6 +856,7 @@ export function teardown(data) {
 ## Troubleshooting
 
 ### High Error Rates
+
 1. Check API server capacity and resources
 2. Verify test data dependencies are created
 3. Review IRI/ID path construction
@@ -829,6 +864,7 @@ export function teardown(data) {
 5. Validate GraphQL query syntax
 
 ### Slow Response Times
+
 1. Analyze database query performance
 2. Check for N+1 query problems
 3. Review API endpoint optimization
@@ -836,6 +872,7 @@ export function teardown(data) {
 5. Check network latency
 
 ### Setup/Teardown Failures
+
 1. Verify dependency creation order
 2. Check cleanup logic and error handling
 3. Review timeout settings in config

@@ -28,7 +28,7 @@ export function setup() {
 
   return {
     customers: customers,
-    totalCustomers: customers.length
+    totalCustomers: customers.length,
   };
 }
 
@@ -39,16 +39,12 @@ export default function updateCustomer(data) {
   const updateData = {
     initials: `Updated_${randomString(8)}`,
     phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
-    confirmed: true
+    confirmed: true,
   };
 
-  const response = http.patch(
-    `http://localhost:80${customer['@id']}`,
-    JSON.stringify(updateData),
-    {
-      headers: { 'Content-Type': 'application/merge-patch+json' }
-    }
-  );
+  const response = http.patch(`http://localhost:80${customer['@id']}`, JSON.stringify(updateData), {
+    headers: { 'Content-Type': 'application/merge-patch+json' },
+  });
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

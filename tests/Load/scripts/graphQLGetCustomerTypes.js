@@ -26,7 +26,7 @@ export function setup() {
 
   return {
     types: types.map(t => t['@id']),
-    totalTypes: types.length
+    totalTypes: types.length,
   };
 }
 
@@ -56,22 +56,23 @@ export default function getCustomerTypes(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customerTypes query returned',
-    res => {
-      if (res.status !== 200) {
-        console.error(`GraphQL request failed with status ${res.status}: ${res.body}`);
-        return false;
-      }
-      const body = JSON.parse(res.body);
-      if (body.errors) {
-        console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
-        return false;
-      }
-      return body.data && body.data.customerTypes && body.data.customerTypes.edges && body.data.customerTypes.edges.length > 0;
+  utils.checkResponse(response, 'customerTypes query returned', res => {
+    if (res.status !== 200) {
+      console.error(`GraphQL request failed with status ${res.status}: ${res.body}`);
+      return false;
     }
-  );
+    const body = JSON.parse(res.body);
+    if (body.errors) {
+      console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
+      return false;
+    }
+    return (
+      body.data &&
+      body.data.customerTypes &&
+      body.data.customerTypes.edges &&
+      body.data.customerTypes.edges.length > 0
+    );
+  });
 }
 
 export function teardown(data) {
