@@ -17,63 +17,24 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($this->shouldSkipValidation($value, $constraint)) {
+        if ($value === null) {
             return;
         }
 
-        if ($this->containsOnlySpaces($value)) {
-            $this->addViolation(
-                $this->translator->trans('initials.spaces')
-            );
-        }
-    }
-
-    private function shouldSkipValidation(
-        mixed $value,
-        Constraint $constraint
-    ): bool {
-        if ($value === null) {
-            return true;
+        if ($value === '') {
+            if ($constraint->isOptional()) {
+                return;
+            }
         }
 
-        return $this->isOptionalEmptyValue($value, $constraint);
-    }
+        if ($value === '') {
+            return;
+        }
 
-    private function isOptionalEmptyValue(
-        mixed $value,
-        Constraint $constraint
-    ): bool {
-        return $this->isOptionalConstraint($constraint)
-            && $this->isEmptyString($value);
-    }
-
-    private function isOptionalConstraint(Constraint $constraint): bool
-    {
-        return $constraint->isOptional();
-    }
-
-    private function isEmptyString(mixed $value): bool
-    {
-        return $value === '';
-    }
-
-    private function containsOnlySpaces(string $value): bool
-    {
-        return $this->isNotEmpty($value) && $this->isOnlyWhitespace($value);
-    }
-
-    private function isNotEmpty(string $value): bool
-    {
-        return strlen($value) > 0;
-    }
-
-    private function isOnlyWhitespace(string $value): bool
-    {
-        return trim($value) === '';
-    }
-
-    private function addViolation(string $message): void
-    {
-        $this->context->buildViolation($message)->addViolation();
+        if (trim($value) === '') {
+            $this->context
+                ->buildViolation($this->translator->trans('initials.spaces'))
+                ->addViolation();
+        }
     }
 }

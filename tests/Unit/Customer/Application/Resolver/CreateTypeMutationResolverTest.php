@@ -19,35 +19,67 @@ final class CreateTypeMutationResolverTest extends UnitTestCase
 {
     public function testInvokeCreatesType(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(CreateTypeMutationInputTransformer::class);
-        $factory = $this->createMock(CreateTypeFactoryInterface::class);
-        $typeTransformer = $this->createMock(TypeTransformerInterface::class);
-
-        $resolver = new CreateTypeMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $typeTransformer,
-        );
-
+        $dependencies = $this->setupDependencies();
+        $resolver = $this->createResolver($dependencies);
         $value = $this->faker->word();
         $input = ['value' => $value];
 
+        $this->setupTransformerAndValidator($dependencies, $input);
+        $type = $this->setupTypeTransformer($dependencies['typeTransformer'], $value);
+        $this->setupFactoryAndCommandBus($dependencies, $type);
+
+        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
+
+        self::assertSame($type, $result);
+    }
+
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
+    private function setupDependencies(): array
+    {
+        return [
+            'commandBus' => $this->createMock(CommandBusInterface::class),
+            'validator' => $this->createMock(MutationInputValidator::class),
+            'transformer' => $this->createMock(CreateTypeMutationInputTransformer::class),
+            'factory' => $this->createMock(CreateTypeFactoryInterface::class),
+            'typeTransformer' => $this->createMock(TypeTransformerInterface::class),
+        ];
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
+    private function createResolver(array $deps): CreateTypeMutationResolver
+    {
+        return new CreateTypeMutationResolver(
+            $deps['commandBus'],
+            $deps['validator'],
+            $deps['transformer'],
+            $deps['factory'],
+            $deps['typeTransformer'],
+        );
+    }
+
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps
+     * @param array<string, string> $input
+     */
+    private function setupTransformerAndValidator(array $deps, array $input): void
+    {
         $mutationInput = new CreateTypeMutationInput();
-        $transformer
+        $deps['transformer']
             ->expects(self::once())
             ->method('transform')
             ->with($input)
             ->willReturn($mutationInput);
 
-        $validator
+        $deps['validator']
             ->expects(self::once())
             ->method('validate')
             ->with($mutationInput);
+    }
 
+    private function setupTypeTransformer(
+        \PHPUnit\Framework\MockObject\MockObject $typeTransformer,
+        string $value
+    ): \PHPUnit\Framework\MockObject\MockObject {
         $type = $this->createMock(CustomerType::class);
         $typeTransformer
             ->expects(self::once())
@@ -55,21 +87,27 @@ final class CreateTypeMutationResolverTest extends UnitTestCase
             ->with($value)
             ->willReturn($type);
 
+        return $type;
+    }
+
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps
+     */
+    private function setupFactoryAndCommandBus(
+        array $deps,
+        \PHPUnit\Framework\MockObject\MockObject $type
+    ): void {
         $command = new CreateTypeCommand($type);
 
-        $factory
+        $deps['factory']
             ->expects(self::once())
             ->method('create')
             ->with($type)
             ->willReturn($command);
 
-        $commandBus
+        $deps['commandBus']
             ->expects(self::once())
             ->method('dispatch')
             ->with($command);
-
-        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
-
-        self::assertSame($type, $result);
     }
 }

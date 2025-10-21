@@ -160,6 +160,12 @@ negative-tests-with-coverage: ## Run negative tests with coverage reporting
 
 all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
 
+prepare-test-data: build-k6-docker ## Prepare test data for load tests
+	tests/Load/prepare-test-data.sh
+
+cleanup-test-data: build-k6-docker ## Clean up test data after load tests
+	tests/Load/cleanup-test-data.sh
+
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
 	tests/Load/run-smoke-load-tests.sh
 

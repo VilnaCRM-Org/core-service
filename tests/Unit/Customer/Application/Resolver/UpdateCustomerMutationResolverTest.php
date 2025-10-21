@@ -24,17 +24,70 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 {
     public function testInvokeUpdatesCustomerWithProvidedData(): void
     {
-        [
-            'resolver' => $resolver,
-            'commandBus' => $commandBus,
-            'validator' => $validator,
-            'transformer' => $transformer,
-            'factory' => $factory,
-            'iriConverter' => $iriConverter,
-            'repository' => $repository,
-        ] = $this->createResolverWithDependencies();
+        $dependencies = $this->createResolverWithDependencies();
+        $input = $this->generateFullInput();
 
-        $input = [
+        $this->setupTransformerAndValidatorMocks($dependencies, $input);
+        $customer = $this->setupRepositoryMock($dependencies['repository'], $input['id']);
+        $entities = $this->setupIriConverterMock($dependencies['iriConverter'], $input);
+
+        $caughtUpdate = null;
+        $this->setupFactoryAndCommandBusMocks(
+            $dependencies,
+            $customer,
+            $caughtUpdate
+        );
+
+        $result = $dependencies['resolver']->__invoke(null, ['args' => ['input' => $input]]);
+
+        $this->assertUpdateResult($result, $customer, $caughtUpdate, $input, $entities);
+    }
+
+    public function testInvokeUsesExistingDataWhenOptionalFieldsMissing(): void
+    {
+        $dependencies = $this->createResolverWithDependencies();
+        $customerData = $this->createCustomerWithExistingData();
+        $input = ['id' => $this->faker->uuid()];
+
+        $this->setupMocksForExistingDataTest($dependencies, $input, $customerData);
+
+        $caughtUpdate = null;
+        $this->setupFactoryForExistingData(
+            $dependencies['factory'],
+            $customerData['customer'],
+            $caughtUpdate
+        );
+        $dependencies['commandBus']
+            ->expects(self::once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(UpdateCustomerCommand::class));
+
+        $result = $dependencies['resolver']->__invoke(null, ['args' => ['input' => $input]]);
+
+        $this->assertExistingDataResult($result, $customerData, $caughtUpdate);
+    }
+
+    public function testInvokeThrowsWhenCustomerNotFound(): void
+    {
+        $dependencies = $this->createResolverWithDependencies();
+        $input = ['id' => $this->faker->uuid()];
+
+        $this->setupTransformerAndValidatorForNotFound(
+            $dependencies['transformer'],
+            $dependencies['validator'],
+            $input
+        );
+        $this->setupRepositoryToReturnNull($dependencies['repository'], $input['id']);
+        $this->expectNoInteractionsWithFactoryAndConverters($dependencies);
+
+        $this->expectException(CustomerNotFoundException::class);
+        $dependencies['resolver']->__invoke(null, ['args' => ['input' => $input]]);
+    }
+
+    /** @return array<string, string|bool> */
+    private function generateFullInput(): array
+    {
+        return [
             'id' => $this->faker->uuid(),
             'initials' => $this->faker->lexify('??'),
             'email' => $this->faker->email(),
@@ -44,27 +97,46 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             'status' => '/api/customer_statuses/' . $this->faker->uuid(),
             'confirmed' => true,
         ];
+    }
 
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |UpdateCustomerMutationResolver> $deps
+     * @param array<string, string|bool> $input
+     */
+    private function setupTransformerAndValidatorMocks(array $deps, array $input): void
+    {
         $mutationInput = new UpdateCustomerMutationInput();
-        $transformer
-            ->expects(self::once())
+        $deps['transformer']->expects(self::once())
             ->method('transform')
             ->with($input)
             ->willReturn($mutationInput);
-
-        $validator
-            ->expects(self::once())
+        $deps['validator']->expects(self::once())
             ->method('validate')
             ->with($mutationInput);
+    }
 
+    private function setupRepositoryMock(
+        \PHPUnit\Framework\MockObject\MockObject $repository,
+        string $customerId
+    ): \PHPUnit\Framework\MockObject\MockObject {
         $customer = $this->createMock(Customer::class);
-
-        $repository
-            ->expects(self::once())
+        $repository->expects(self::once())
             ->method('find')
-            ->with($input['id'])
+            ->with($customerId)
             ->willReturn($customer);
+        return $customer;
+    }
 
+    /**
+     * @param array<string, string|bool> $input
+     *
+     * @return array<string, \PHPUnit\Framework\MockObject\MockObject>
+     */
+    private function setupIriConverterMock(
+        \PHPUnit\Framework\MockObject\MockObject $iriConverter,
+        array $input
+    ): array {
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
 
@@ -74,170 +146,189 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             ->withConsecutive([$input['type']], [$input['status']])
             ->willReturnOnConsecutiveCalls($customerType, $customerStatus);
 
-        $caughtUpdate = null;
+        return ['type' => $customerType, 'status' => $customerStatus];
+    }
 
-        $factory
-            ->expects(self::once())
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |UpdateCustomerMutationResolver> $deps
+     */
+    private function setupFactoryAndCommandBusMocks(
+        array $deps,
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        ?CustomerUpdate &$caughtUpdate
+    ): void {
+        $this->setupFactoryMock($deps['factory'], $customer, $caughtUpdate);
+        $this->setupCommandBusMock($deps['commandBus'], $customer, $caughtUpdate);
+    }
+
+    private function setupFactoryMock(
+        \PHPUnit\Framework\MockObject\MockObject $factory,
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        ?CustomerUpdate &$caughtUpdate
+    ): void {
+        $factory->expects(self::once())
             ->method('create')
-            ->with(self::identicalTo($customer), $this->isInstanceOf(CustomerUpdate::class))
+            ->with(
+                self::identicalTo($customer),
+                $this->isInstanceOf(CustomerUpdate::class)
+            )
             ->willReturnCallback(
-                function (Customer $customerArg, CustomerUpdate $update) use (&$caughtUpdate) {
-                    $caughtUpdate = $update;
-
-                    return new UpdateCustomerCommand($customerArg, $update);
+                static function (Customer $c, CustomerUpdate $u) use (&$caughtUpdate) {
+                    $caughtUpdate = $u;
+                    return new UpdateCustomerCommand($c, $u);
                 }
             );
+    }
 
-        $commandBus
-            ->expects(self::once())
+    private function setupCommandBusMock(
+        \PHPUnit\Framework\MockObject\MockObject $commandBus,
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        ?CustomerUpdate &$caughtUpdate
+    ): void {
+        $commandBus->expects(self::once())
             ->method('dispatch')
-            ->with($this->callback(static function ($command) use ($customer, &$caughtUpdate) {
-                self::assertInstanceOf(UpdateCustomerCommand::class, $command);
-                self::assertSame($customer, $command->customer);
-                self::assertSame($caughtUpdate, $command->updateData);
-
+            ->with($this->callback(static function ($cmd) use ($customer, &$caughtUpdate) {
+                self::assertInstanceOf(UpdateCustomerCommand::class, $cmd);
+                self::assertSame($customer, $cmd->customer);
+                self::assertSame($caughtUpdate, $cmd->updateData);
                 return true;
             }));
+    }
 
-        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
-
+    /**
+     * @param array<string, string|bool> $input
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $entities
+     */
+    private function assertUpdateResult(
+        \PHPUnit\Framework\MockObject\MockObject $result,
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        ?CustomerUpdate $caughtUpdate,
+        array $input,
+        array $entities
+    ): void {
         self::assertSame($customer, $result);
         self::assertInstanceOf(CustomerUpdate::class, $caughtUpdate);
         self::assertSame($input['initials'], $caughtUpdate->newInitials);
         self::assertSame($input['email'], $caughtUpdate->newEmail);
         self::assertSame($input['phone'], $caughtUpdate->newPhone);
         self::assertSame($input['leadSource'], $caughtUpdate->newLeadSource);
-        self::assertSame($customerType, $caughtUpdate->newType);
-        self::assertSame($customerStatus, $caughtUpdate->newStatus);
+        self::assertSame($entities['type'], $caughtUpdate->newType);
+        self::assertSame($entities['status'], $caughtUpdate->newStatus);
         self::assertTrue($caughtUpdate->newConfirmed);
     }
 
-    public function testInvokeUsesExistingDataWhenOptionalFieldsMissing(): void
-    {
-        [
-            'resolver' => $resolver,
-            'commandBus' => $commandBus,
-            'validator' => $validator,
-            'transformer' => $transformer,
-            'factory' => $factory,
-            'iriConverter' => $iriConverter,
-            'repository' => $repository,
-        ] = $this->createResolverWithDependencies();
-
-        [
-            'customer' => $customer,
-            'type' => $customerType,
-            'status' => $customerStatus,
-            'data' => $existingData,
-        ] = $this->createCustomerWithExistingData();
-
-        $input = ['id' => $this->faker->uuid()];
-
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |UpdateCustomerMutationResolver> $deps
+     * @param array<string, string> $input
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |array<string, string|bool>> $customerData
+     */
+    private function setupMocksForExistingDataTest(
+        array $deps,
+        array $input,
+        array $customerData
+    ): void {
         $mutationInput = new UpdateCustomerMutationInput();
-        $transformer
-            ->expects(self::once())
+        $deps['transformer']->expects(self::once())
             ->method('transform')
             ->with($input)
             ->willReturn($mutationInput);
-
-        $validator
-            ->expects(self::once())
+        $deps['validator']->expects(self::once())
             ->method('validate')
             ->with($mutationInput);
-
-        $repository
-            ->expects(self::once())
+        $deps['repository']->expects(self::once())
             ->method('find')
             ->with($input['id'])
-            ->willReturn($customer);
+            ->willReturn($customerData['customer']);
 
-        $iriConverter
+        $deps['iriConverter']
             ->expects(self::exactly(2))
             ->method('getResourceFromIri')
-            ->withConsecutive([
-                '/api/customer_types/' . $existingData['typeUlid'],
-            ], [
-                '/api/customer_statuses/' . $existingData['statusUlid'],
-            ])
-            ->willReturnOnConsecutiveCalls($customerType, $customerStatus);
+            ->withConsecutive(
+                ['/api/customer_types/' . $customerData['data']['typeUlid']],
+                ['/api/customer_statuses/' . $customerData['data']['statusUlid']]
+            )
+            ->willReturnOnConsecutiveCalls($customerData['type'], $customerData['status']);
+    }
 
-        $caughtUpdate = null;
-
+    private function setupFactoryForExistingData(
+        \PHPUnit\Framework\MockObject\MockObject $factory,
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        ?CustomerUpdate &$caughtUpdate
+    ): void {
         $factory
             ->expects(self::once())
             ->method('create')
-            ->with(self::identicalTo($customer), $this->isInstanceOf(CustomerUpdate::class))
+            ->with(
+                self::identicalTo($customer),
+                $this->isInstanceOf(CustomerUpdate::class)
+            )
             ->willReturnCallback(
-                function (Customer $customerArg, CustomerUpdate $update) use (&$caughtUpdate) {
+                static function (
+                    Customer $customerArg,
+                    CustomerUpdate $update
+                ) use (&$caughtUpdate) {
                     $caughtUpdate = $update;
-
                     return new UpdateCustomerCommand($customerArg, $update);
                 }
             );
+    }
 
-        $commandBus
-            ->expects(self::once())
-            ->method('dispatch')
-            ->with($this->isInstanceOf(UpdateCustomerCommand::class));
-
-        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
-
-        self::assertSame($customer, $result);
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |array<string, string|bool>> $customerData
+     */
+    private function assertExistingDataResult(
+        \PHPUnit\Framework\MockObject\MockObject $result,
+        array $customerData,
+        ?CustomerUpdate $caughtUpdate
+    ): void {
+        $existingData = $customerData['data'];
+        self::assertSame($customerData['customer'], $result);
         self::assertInstanceOf(CustomerUpdate::class, $caughtUpdate);
         self::assertSame($existingData['initials'], $caughtUpdate->newInitials);
         self::assertSame($existingData['email'], $caughtUpdate->newEmail);
         self::assertSame($existingData['phone'], $caughtUpdate->newPhone);
         self::assertSame($existingData['lead'], $caughtUpdate->newLeadSource);
-        self::assertSame($customerType, $caughtUpdate->newType);
-        self::assertSame($customerStatus, $caughtUpdate->newStatus);
+        self::assertSame($customerData['type'], $caughtUpdate->newType);
+        self::assertSame($customerData['status'], $caughtUpdate->newStatus);
         self::assertSame($existingData['confirmed'], $caughtUpdate->newConfirmed);
     }
 
-    public function testInvokeThrowsWhenCustomerNotFound(): void
-    {
-        [
-            'resolver' => $resolver,
-            'commandBus' => $commandBus,
-            'validator' => $validator,
-            'transformer' => $transformer,
-            'factory' => $factory,
-            'iriConverter' => $iriConverter,
-            'repository' => $repository,
-        ] = $this->createResolverWithDependencies();
-
-        $input = ['id' => $this->faker->uuid()];
+    /** @param array<string, string> $input */
+    private function setupTransformerAndValidatorForNotFound(
+        \PHPUnit\Framework\MockObject\MockObject $transformer,
+        \PHPUnit\Framework\MockObject\MockObject $validator,
+        array $input
+    ): void {
         $mutationInput = new UpdateCustomerMutationInput();
-
-        $transformer
-            ->expects(self::once())
+        $transformer->expects(self::once())
             ->method('transform')
             ->with($input)
             ->willReturn($mutationInput);
-
-        $validator
-            ->expects(self::once())
+        $validator->expects(self::once())
             ->method('validate')
             ->with($mutationInput);
+    }
 
-        $repository
-            ->expects(self::once())
-            ->method('find')
-            ->with($input['id'])
-            ->willReturn(null);
+    private function setupRepositoryToReturnNull(
+        \PHPUnit\Framework\MockObject\MockObject $repository,
+        string $customerId
+    ): void {
+        $repository->expects(self::once())->method('find')->with($customerId)->willReturn(null);
+    }
 
-        $commandBus
-            ->expects(self::never())
-            ->method('dispatch');
-        $factory
-            ->expects(self::never())
-            ->method('create');
-        $iriConverter
-            ->expects(self::never())
-            ->method('getResourceFromIri');
-
-        $this->expectException(CustomerNotFoundException::class);
-
-        $resolver->__invoke(null, ['args' => ['input' => $input]]);
+    /**
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject
+     *     |UpdateCustomerMutationResolver> $deps
+     */
+    private function expectNoInteractionsWithFactoryAndConverters(array $deps): void
+    {
+        $deps['commandBus']->expects(self::never())->method('dispatch');
+        $deps['factory']->expects(self::never())->method('create');
+        $deps['iriConverter']->expects(self::never())->method('getResourceFromIri');
     }
 
     /**
@@ -245,7 +336,8 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
      *     resolver: UpdateCustomerMutationResolver,
      *     commandBus: CommandBusInterface&\PHPUnit\Framework\MockObject\MockObject,
      *     validator: MutationInputValidator&\PHPUnit\Framework\MockObject\MockObject,
-     *     transformer: UpdateCustomerMutationInputTransformer&\PHPUnit\Framework\MockObject\MockObject,
+     *     transformer: UpdateCustomerMutationInputTransformer
+     *         &\PHPUnit\Framework\MockObject\MockObject,
      *     factory: UpdateCustomerCommandFactoryInterface&\PHPUnit\Framework\MockObject\MockObject,
      *     iriConverter: IriConverterInterface&\PHPUnit\Framework\MockObject\MockObject,
      *     repository: CustomerRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject,
@@ -253,31 +345,36 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
      */
     private function createResolverWithDependencies(): array
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(UpdateCustomerMutationInputTransformer::class);
-        $factory = $this->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $repository = $this->createMock(CustomerRepositoryInterface::class);
+        $mocks = $this->createAllMocks();
+        $resolver = $this->createResolverFromMocks($mocks);
 
-        $resolver = new UpdateCustomerMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $iriConverter,
-            $repository,
-        );
+        return array_merge(['resolver' => $resolver], $mocks);
+    }
 
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
+    private function createAllMocks(): array
+    {
         return [
-            'resolver' => $resolver,
-            'commandBus' => $commandBus,
-            'validator' => $validator,
-            'transformer' => $transformer,
-            'factory' => $factory,
-            'iriConverter' => $iriConverter,
-            'repository' => $repository,
+            'commandBus' => $this->createMock(CommandBusInterface::class),
+            'validator' => $this->createMock(MutationInputValidator::class),
+            'transformer' => $this->createMock(UpdateCustomerMutationInputTransformer::class),
+            'factory' => $this->createMock(UpdateCustomerCommandFactoryInterface::class),
+            'iriConverter' => $this->createMock(IriConverterInterface::class),
+            'repository' => $this->createMock(CustomerRepositoryInterface::class),
         ];
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $mocks */
+    private function createResolverFromMocks(array $mocks): UpdateCustomerMutationResolver
+    {
+        return new UpdateCustomerMutationResolver(
+            $mocks['commandBus'],
+            $mocks['validator'],
+            $mocks['transformer'],
+            $mocks['factory'],
+            $mocks['iriConverter'],
+            $mocks['repository'],
+        );
     }
 
     /**
@@ -302,7 +399,34 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
         $customerStatus = $this->createMock(CustomerStatus::class);
         $customer = $this->createMock(Customer::class);
 
-        $data = [
+        $data = $this->generateCustomerData();
+
+        $this->configureTypeMock($customerType, $data['typeUlid']);
+        $this->configureStatusMock($customerStatus, $data['statusUlid']);
+        $this->configureCustomerMock($customer, $customerType, $customerStatus, $data);
+
+        return [
+            'customer' => $customer,
+            'type' => $customerType,
+            'status' => $customerStatus,
+            'data' => $data,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     typeUlid: string,
+     *     statusUlid: string,
+     *     initials: string,
+     *     email: string,
+     *     phone: string,
+     *     lead: string,
+     *     confirmed: bool
+     * }
+     */
+    private function generateCustomerData(): array
+    {
+        return [
             'typeUlid' => $this->faker->uuid(),
             'statusUlid' => $this->faker->uuid(),
             'initials' => $this->faker->lexify('??'),
@@ -311,41 +435,37 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             'lead' => $this->faker->word(),
             'confirmed' => true,
         ];
+    }
 
-        $customerType
-            ->method('getUlid')
-            ->willReturn($data['typeUlid']);
-        $customerStatus
-            ->method('getUlid')
-            ->willReturn($data['statusUlid']);
+    private function configureTypeMock(
+        \PHPUnit\Framework\MockObject\MockObject $type,
+        string $ulid
+    ): void {
+        $type->method('getUlid')->willReturn($ulid);
+    }
 
-        $customer
-            ->method('getType')
-            ->willReturn($customerType);
-        $customer
-            ->method('getStatus')
-            ->willReturn($customerStatus);
-        $customer
-            ->method('getInitials')
-            ->willReturn($data['initials']);
-        $customer
-            ->method('getEmail')
-            ->willReturn($data['email']);
-        $customer
-            ->method('getPhone')
-            ->willReturn($data['phone']);
-        $customer
-            ->method('getLeadSource')
-            ->willReturn($data['lead']);
-        $customer
-            ->method('isConfirmed')
-            ->willReturn($data['confirmed']);
+    private function configureStatusMock(
+        \PHPUnit\Framework\MockObject\MockObject $status,
+        string $ulid
+    ): void {
+        $status->method('getUlid')->willReturn($ulid);
+    }
 
-        return [
-            'customer' => $customer,
-            'type' => $customerType,
-            'status' => $customerStatus,
-            'data' => $data,
-        ];
+    /**
+     * @param array<string, string|bool> $data
+     */
+    private function configureCustomerMock(
+        \PHPUnit\Framework\MockObject\MockObject $customer,
+        \PHPUnit\Framework\MockObject\MockObject $type,
+        \PHPUnit\Framework\MockObject\MockObject $status,
+        array $data
+    ): void {
+        $customer->method('getType')->willReturn($type);
+        $customer->method('getStatus')->willReturn($status);
+        $customer->method('getInitials')->willReturn($data['initials']);
+        $customer->method('getEmail')->willReturn($data['email']);
+        $customer->method('getPhone')->willReturn($data['phone']);
+        $customer->method('getLeadSource')->willReturn($data['lead']);
+        $customer->method('isConfirmed')->willReturn($data['confirmed']);
     }
 }

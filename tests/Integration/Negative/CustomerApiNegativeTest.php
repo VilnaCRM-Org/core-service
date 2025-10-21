@@ -19,7 +19,7 @@ final class CustomerApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest('GET', "/api/customers/{$customerId}");
     }
 
-    public function testCreateCustomer500Error(): void
+    public function testCreateCustomer400Error(): void
     {
         $payload = [
             'name' => $this->faker->name(),
@@ -34,7 +34,9 @@ final class CustomerApiNegativeTest extends BaseNegativeApiTest
         $this->sendRequest(
             'POST',
             '/api/customers',
-            $payload
+            $payload,
+            [],
+            Response::HTTP_BAD_REQUEST
         );
     }
 
