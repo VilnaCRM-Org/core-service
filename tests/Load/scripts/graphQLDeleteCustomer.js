@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import counter from 'k6/x/counter';
 import ScenarioUtils from '../utils/scenarioUtils.js';
 import Utils from '../utils/utils.js';
 
@@ -9,7 +10,33 @@ const scenarioUtils = new ScenarioUtils(utils, scenarioName);
 
 export const options = scenarioUtils.getOptions();
 
+function calculateTotalNeeded() {
+  const config = utils.getConfig().endpoints[scenarioName];
+  let total = 0;
+  
+  if (utils.getCLIVariable('run_smoke') !== 'false') {
+    total += config.smoke.rps * config.smoke.duration;
+  }
+  if (utils.getCLIVariable('run_average') !== 'false') {
+    const avg = config.average;
+    total += (avg.rps * (avg.duration.rise + avg.duration.plateau + avg.duration.fall));
+  }
+  if (utils.getCLIVariable('run_stress') !== 'false') {
+    const stress = config.stress;
+    total += (stress.rps * (stress.duration.rise + stress.duration.plateau + stress.duration.fall));
+  }
+  if (utils.getCLIVariable('run_spike') !== 'false') {
+    const spike = config.spike;
+    total += (spike.rps * (spike.duration.rise + spike.duration.fall)) / 2;
+  }
+  
+  return Math.ceil(total * 1.1);
+}
+
 export function setup() {
+  const totalNeeded = calculateTotalNeeded();
+  console.log(`Creating ${totalNeeded} customers for GraphQL deletion test`);
+  
   // Create customers to delete
   const customerTypeData = { value: `GraphQLDeleteType_${Date.now()}` };
   const typeResponse = utils.createCustomerType(customerTypeData);
@@ -23,8 +50,8 @@ export function setup() {
     const type = JSON.parse(typeResponse.body);
     const status = JSON.parse(statusResponse.body);
 
-    // Create multiple customers for deletion during test
-    for (let i = 0; i < 5; i++) {
+    // Create exact number of customers needed
+    for (let i = 0; i < totalNeeded; i++) {
       const customerData = {
         initials: `GraphQL Delete Customer ${i}`,
         email: `graphql_delete_${i}_${Date.now()}@example.com`,
@@ -41,28 +68,26 @@ export function setup() {
 
       if (response.status === 201) {
         const customer = JSON.parse(response.body);
-        customersToDelete.push(customer['@id']);
+        customersToDelete.push(customer);
       }
     }
 
     return {
-      customersToDelete,
+      customers: customersToDelete,
       typeIri: type['@id'],
       statusIri: status['@id']
     };
   }
 
-  return { customersToDelete: [] };
+  return { customers: [] };
 }
 
 export default function deleteCustomer(data) {
-  if (!data || !data.customersToDelete || data.customersToDelete.length === 0) {
-    return;
-  }
-
-  // Get a customer to delete (cycle through the list)
-  const customerIndex = __ITER % data.customersToDelete.length;
-  const customerId = data.customersToDelete[customerIndex];
+  // Use atomic counter to select each customer exactly once
+  const customer = data.customers[counter.up()];
+  utils.checkCustomerIsDefined(customer);
+  
+  const customerId = customer['@id'];
 
   const mutation = `
     mutation {
@@ -96,23 +121,24 @@ export default function deleteCustomer(data) {
 export function teardown(data) {
   // Clean up type and status (customers should be deleted during test)
   if (data) {
-    // Try to delete any remaining customers
-    if (data.customersToDelete) {
-      data.customersToDelete.forEach(customerId => {
-        try {
-          http.del(`${utils.getBaseHttpUrl()}${customerId}`);
-        } catch (e) {
-          // Customer might already be deleted, ignore error
-        }
-      });
-    }
 
+    // Clean up type and status
     if (data.typeIri) {
-      http.del(`${utils.getBaseHttpUrl()}${data.typeIri}`);
+      try {
+        http.del(`${utils.getBaseHttpUrl()}${data.typeIri}`);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
     }
 
     if (data.statusIri) {
-      http.del(`${utils.getBaseHttpUrl()}${data.statusIri}`);
+      try {
+        http.del(`${utils.getBaseHttpUrl()}${data.statusIri}`);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
     }
+    
+    console.log(`Deleted ${data.customers ? data.customers.length : 0} customers during GraphQL load test`);
   }
 }
