@@ -33,7 +33,7 @@ export function setup() {
         type: type['@id'],
         status: status['@id'],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const response = utils.createCustomer(customerData);
@@ -43,7 +43,7 @@ export function setup() {
         customers.push({
           id: customer['@id'],
           typeId: type['@id'],
-          statusId: status['@id']
+          statusId: status['@id'],
         });
       }
     }
@@ -84,14 +84,10 @@ export default function getCustomers(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customers query returned',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.customers && body.data.customers.edges.length > 0;
-    }
-  );
+  utils.checkResponse(response, 'customers query returned', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.customers && body.data.customers.edges.length > 0;
+  });
 }
 
 export function teardown(data) {
