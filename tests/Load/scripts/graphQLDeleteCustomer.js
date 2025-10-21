@@ -13,30 +13,30 @@ export const options = scenarioUtils.getOptions();
 function calculateTotalNeeded() {
   const config = utils.getConfig().endpoints[scenarioName];
   let total = 0;
-  
+
   if (utils.getCLIVariable('run_smoke') !== 'false') {
     total += config.smoke.rps * config.smoke.duration;
   }
   if (utils.getCLIVariable('run_average') !== 'false') {
     const avg = config.average;
-    total += (avg.rps * (avg.duration.rise + avg.duration.plateau + avg.duration.fall));
+    total += avg.rps * (avg.duration.rise + avg.duration.plateau + avg.duration.fall);
   }
   if (utils.getCLIVariable('run_stress') !== 'false') {
     const stress = config.stress;
-    total += (stress.rps * (stress.duration.rise + stress.duration.plateau + stress.duration.fall));
+    total += stress.rps * (stress.duration.rise + stress.duration.plateau + stress.duration.fall);
   }
   if (utils.getCLIVariable('run_spike') !== 'false') {
     const spike = config.spike;
     total += (spike.rps * (spike.duration.rise + spike.duration.fall)) / 2;
   }
-  
+
   return Math.ceil(total * 1.1);
 }
 
 export function setup() {
   const totalNeeded = calculateTotalNeeded();
   console.log(`Creating ${totalNeeded} customers for GraphQL deletion test`);
-  
+
   // Create customers to delete
   const customerTypeData = { value: `GraphQLDeleteType_${Date.now()}` };
   const typeResponse = utils.createCustomerType(customerTypeData);
@@ -85,7 +85,7 @@ export function setup() {
 export default function deleteCustomer(data) {
   const customer = data.customers[counter.up() % data.customers.length];
   utils.checkCustomerIsDefined(customer);
-  
+
   const customerId = customer['@id'];
 
   const mutation = `
@@ -116,7 +116,6 @@ export default function deleteCustomer(data) {
 export function teardown(data) {
   // Clean up type and status (customers should be deleted during test)
   if (data) {
-
     // Clean up type and status
     if (data.typeIri) {
       try {
@@ -133,7 +132,9 @@ export function teardown(data) {
         // Ignore cleanup errors
       }
     }
-    
-    console.log(`Deleted ${data.customers ? data.customers.length : 0} customers during GraphQL load test`);
+
+    console.log(
+      `Deleted ${data.customers ? data.customers.length : 0} customers during GraphQL load test`
+    );
   }
 }
