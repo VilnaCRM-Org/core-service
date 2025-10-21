@@ -23,7 +23,7 @@ export const options = scenarioUtils.getOptions();
 export default function deleteCustomerStatus(data) {
   const status = data.statuses[counter.up() % data.statuses.length];
   utils.checkCustomerIsDefined(status);
-  
+
   const { '@id': id } = status;
 
   const response = http.del(`http://localhost:80${id}`);
