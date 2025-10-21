@@ -10,6 +10,7 @@ This skill guides maintaining and improving code quality standards without ever 
 ## When to Use This Skill
 
 Activate this skill when:
+
 - PHPInsights reports quality issues
 - Cyclomatic complexity is too high
 - Deptrac reports architecture violations
@@ -21,45 +22,53 @@ Activate this skill when:
 **NEVER decrease these thresholds**:
 
 ### PHPInsights (Source Code)
+
 - **min-quality**: 100%
 - **min-complexity**: 95%
 - **min-architecture**: 100%
 - **min-style**: 100%
 
 ### PHPInsights (Tests)
+
 - **min-quality**: 95%
 - **min-complexity**: 95%
 - **min-architecture**: 90%
 - **min-style**: 95%
 
 ### Test Coverage
+
 - **Unit test coverage**: 100%
 - **Mutation testing (Infection) MSI**: 100%
 
 ## Quality Check Commands
 
 ### Run PHPInsights
+
 ```bash
 make phpinsights
 ```
 
 ### Run PHP Mess Detector (for complexity issues)
+
 ```bash
 make phpmd
 ```
 
 ### Run Psalm Static Analysis
+
 ```bash
 make psalm
 make psalm-security  # Security taint analysis
 ```
 
 ### Run Deptrac Architecture Validation
+
 ```bash
 make deptrac
 ```
 
 ### Run PHP CS Fixer
+
 ```bash
 make phpcsfixer
 ```
@@ -73,6 +82,7 @@ make phpcsfixer
 **Solution**:
 
 1. **Run PHP Mess Detector first** to find hotspots:
+
    ```bash
    make phpmd
    ```
@@ -93,6 +103,7 @@ make phpcsfixer
 ### Strategy 1: Extract Methods
 
 **Before** (complexity: 8):
+
 ```php
 public function validate($value, Constraint $constraint): void
 {
@@ -112,6 +123,7 @@ public function validate($value, Constraint $constraint): void
 ```
 
 **After** (complexity: 2):
+
 ```php
 public function validate($value, Constraint $constraint): void
 {
@@ -138,6 +150,7 @@ private function performValidations($value): void
 ### Strategy 2: Use Strategy Pattern
 
 **Before** (complexity: 10):
+
 ```php
 public function process($data, $type): array
 {
@@ -153,6 +166,7 @@ public function process($data, $type): array
 ```
 
 **After** (complexity: 2):
+
 ```php
 public function process($data, $type): array
 {
@@ -164,6 +178,7 @@ public function process($data, $type): array
 ### Strategy 3: Early Returns
 
 **Before** (complexity: 6):
+
 ```php
 public function calculate($value): int
 {
@@ -179,6 +194,7 @@ public function calculate($value): int
 ```
 
 **After** (complexity: 3):
+
 ```php
 public function calculate($value): int
 {
@@ -199,6 +215,7 @@ public function calculate($value): int
 ### Understanding Deptrac Layers
 
 **Dependency Rules**:
+
 - **Domain** layer: NO dependencies on other layers
 - **Application** layer: Can depend on Domain and Infrastructure
 - **Infrastructure** layer: Can depend on Domain and Application
@@ -206,6 +223,7 @@ public function calculate($value): int
 ### Common Violations
 
 **Problem**: Domain depends on Infrastructure
+
 ```php
 // ❌ BAD: Domain using Doctrine annotation
 namespace App\User\Domain\Entity;
@@ -217,6 +235,7 @@ class User { }
 ```
 
 **Solution**: Move annotations to XML mapping
+
 ```xml
 <!-- config/doctrine/User.orm.xml -->
 <doctrine-mongo-mapping>
@@ -286,6 +305,7 @@ if ($this->isEmptyButNotOnlySpaces($value)) {
 ### 1. Identify Issues
 
 Run all quality checks:
+
 ```bash
 make phpinsights
 make phpmd
@@ -296,6 +316,7 @@ make deptrac
 ### 2. Prioritize Fixes
 
 **Priority Order**:
+
 1. Architecture violations (Deptrac)
 2. Security issues (Psalm security)
 3. High complexity methods (PHPMD)
@@ -305,6 +326,7 @@ make deptrac
 ### 3. Apply Fixes
 
 For each issue:
+
 1. Understand the root cause
 2. Apply appropriate refactoring strategy
 3. Run specific quality check
@@ -313,6 +335,7 @@ For each issue:
 ### 4. Verify Overall Quality
 
 Run comprehensive checks:
+
 ```bash
 make ci
 ```
@@ -385,6 +408,7 @@ public function processUser(User $user): ProcessedUser
 ## Remember
 
 **NEVER** modify quality thresholds downward in:
+
 - `phpinsights.php`
 - `phpinsights-tests.php`
 - `infection.json5`
