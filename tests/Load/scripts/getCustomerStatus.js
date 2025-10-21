@@ -27,7 +27,7 @@ export function setup() {
 
   return {
     statuses: statuses,
-    totalStatuses: statuses.length
+    totalStatuses: statuses.length,
   };
 }
 
