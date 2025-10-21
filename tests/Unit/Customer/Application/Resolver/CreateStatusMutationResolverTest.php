@@ -6,12 +6,12 @@ namespace App\Tests\Unit\Customer\Application\Resolver;
 
 use App\Core\Customer\Application\Command\CreateStatusCommand;
 use App\Core\Customer\Application\Factory\CreateStatusFactoryInterface;
+use App\Core\Customer\Application\MutationInput\CreateStatusMutationInput;
 use App\Core\Customer\Application\Resolver\CreateStatusMutationResolver;
 use App\Core\Customer\Application\Transformer\CreateStatusMutationInputTransformer;
 use App\Core\Customer\Application\Transformer\StatusTransformerInterface;
-use App\Core\Customer\Application\MutationInput\CreateStatusMutationInput;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Resolver;
 
 use ApiPlatform\Metadata\IriConverterInterface;
+use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
+use App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput;
 use App\Core\Customer\Application\Resolver\CreateCustomerMutationResolver;
 use App\Core\Customer\Application\Transformer\CreateCustomerMutationInputTransformer;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Core\Customer\Application\Command\CreateCustomerCommand;
-use App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateCustomerMutationResolverTest extends UnitTestCase
