@@ -14,7 +14,9 @@ export function setup() {
   const response = http.get(`${utils.getBaseHttpUrl()}/customer_statuses?itemsPerPage=100`);
 
   if (response.status !== 200) {
-    throw new Error('Failed to fetch customer statuses for GraphQL get customer statuses load test.');
+    throw new Error(
+      'Failed to fetch customer statuses for GraphQL get customer statuses load test.'
+    );
   }
 
   const data = JSON.parse(response.body);
@@ -26,7 +28,7 @@ export function setup() {
 
   return {
     statuses: statuses.map(s => s['@id']),
-    totalStatuses: statuses.length
+    totalStatuses: statuses.length,
   };
 }
 
@@ -57,14 +59,10 @@ export default function getCustomerStatuses(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customerStatuses query returned',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.customerStatuses && body.data.customerStatuses.edges.length > 0;
-    }
-  );
+  utils.checkResponse(response, 'customerStatuses query returned', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.customerStatuses && body.data.customerStatuses.edges.length > 0;
+  });
 }
 
 export function teardown(data) {

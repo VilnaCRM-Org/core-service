@@ -28,7 +28,7 @@ export function setup() {
 
   return {
     statuses: statuses,
-    totalStatuses: statuses.length
+    totalStatuses: statuses.length,
   };
 }
 
@@ -40,19 +40,15 @@ export default function updateCustomerStatus(data) {
 
   // Use counter to select different status for each iteration
   const status = data.statuses[counter.up() % data.totalStatuses];
-  
+
   const statusNames = ['Active', 'Inactive', 'Lead', 'Prospect', 'Converted', 'Churned', 'Pending'];
   const updateData = {
-    value: `${statusNames[Math.floor(Math.random() * statusNames.length)]}_Updated_${randomString(6)}`
+    value: `${statusNames[Math.floor(Math.random() * statusNames.length)]}_Updated_${randomString(6)}`,
   };
 
-  const response = http.patch(
-    `http://localhost:80${status['@id']}`,
-    JSON.stringify(updateData),
-    {
-      headers: { 'Content-Type': 'application/merge-patch+json' }
-    }
-  );
+  const response = http.patch(`http://localhost:80${status['@id']}`, JSON.stringify(updateData), {
+    headers: { 'Content-Type': 'application/merge-patch+json' },
+  });
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
