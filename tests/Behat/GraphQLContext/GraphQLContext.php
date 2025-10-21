@@ -14,6 +14,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 final class GraphQLContext implements Context, SnippetAcceptingContext
 {
     private ?Response $response = null;
+
+    /** @var array<string, string|int|bool|float|array|null>|null */
     private ?array $responseData = null;
 
     public function __construct(
@@ -84,35 +86,19 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     public function theGraphQLResponseFieldShouldBe(string $path, string $value): void
     {
         $this->ensureResponseDataAvailable();
-
         $actualValue = $this->getFieldValue($this->responseData, $path);
 
-        // Handle boolean conversion
-        if (in_array(strtolower($value), ['true', 'false'], true)) {
-            $expectedValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-            if ($actualValue !== $expectedValue) {
-                throw new \RuntimeException(
-                    sprintf('Expected %s to be %s, got %s', $path, var_export($expectedValue, true), var_export($actualValue, true))
-                );
-            }
+        if ($this->isBooleanValue($value)) {
+            $this->assertBooleanValue($path, $value, $actualValue);
             return;
         }
 
-        // Handle null
-        if (strtolower($value) === 'null') {
-            if ($actualValue !== null) {
-                throw new \RuntimeException(
-                    sprintf('Expected %s to be null, got %s', $path, var_export($actualValue, true))
-                );
-            }
+        if ($this->isNullValue($value)) {
+            $this->assertNullValue($path, $actualValue);
             return;
         }
 
-        if ((string) $actualValue !== $value) {
-            throw new \RuntimeException(
-                sprintf('Expected %s to be "%s", got "%s"', $path, $value, $actualValue)
-            );
-        }
+        $this->assertStringValue($path, $value, $actualValue);
     }
 
     /**
@@ -154,7 +140,9 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
         $this->ensureResponseDataAvailable();
 
         if (!isset($this->responseData['errors'])) {
-            throw new \RuntimeException('Expected GraphQL response to contain errors, but none found');
+            throw new \RuntimeException(
+                'Expected GraphQL response to contain errors, but none found'
+            );
         }
     }
 
@@ -191,7 +179,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     {
         $this->ensureResponseDataAvailable();
 
-        if (!empty($this->responseData['data']) && $this->responseData['data'] !== null) {
+        if (($this->responseData['data'] ?? null) !== null && $this->responseData['data'] !== []) {
             throw new \RuntimeException(
                 sprintf('Expected empty data, got: %s', json_encode($this->responseData['data']))
             );
@@ -199,12 +187,12 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @param array<string, mixed> $variables
+     * @param array<string, string|int|bool|float|array|null> $variables
      */
     private function sendGraphQLRequest(string $query, array $variables = []): void
     {
         $requestData = ['query' => $query];
-        if (!empty($variables)) {
+        if ($variables !== []) {
             $requestData['variables'] = $variables;
         }
 
@@ -233,8 +221,54 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
         }
     }
 
+    private function isBooleanValue(string $value): bool
+    {
+        return in_array(strtolower($value), ['true', 'false'], true);
+    }
+
+    private function isNullValue(string $value): bool
+    {
+        return strtolower($value) === 'null';
+    }
+
+    private function assertBooleanValue(string $path, string $value, mixed $actualValue): void
+    {
+        $expectedValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        if ($actualValue !== $expectedValue) {
+            throw new \RuntimeException(
+                sprintf(
+                    'Expected %s to be %s, got %s',
+                    $path,
+                    var_export($expectedValue, true),
+                    var_export($actualValue, true)
+                )
+            );
+        }
+    }
+
+    private function assertNullValue(string $path, mixed $actualValue): void
+    {
+        if ($actualValue !== null) {
+            throw new \RuntimeException(
+                sprintf('Expected %s to be null, got %s', $path, var_export($actualValue, true))
+            );
+        }
+    }
+
+    private function assertStringValue(
+        string $path,
+        string $expectedValue,
+        mixed $actualValue
+    ): void {
+        if ((string) $actualValue !== $expectedValue) {
+            throw new \RuntimeException(
+                sprintf('Expected %s to be "%s", got "%s"', $path, $expectedValue, $actualValue)
+            );
+        }
+    }
+
     /**
-     * @param array<string, mixed> $data
+     * @param array<string, string|int|bool|float|array|null> $data
      */
     private function hasField(array $data, string $path): bool
     {
@@ -247,9 +281,11 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array<string, string|int|bool|float|array|null> $data
+     *
+     * @return string|int|bool|float|array<array-key, string|int|bool|float|array|null>|null
      */
-    private function getFieldValue(array $data, string $path): mixed
+    private function getFieldValue(array $data, string $path): string|int|bool|float|array|null
     {
         $parts = explode('.', $path);
         $current = $data;

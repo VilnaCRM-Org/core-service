@@ -2,6 +2,9 @@
     "apiHost": "localhost",
     "apiPort": "80",
     "delayBetweenScenarios": 60,
+    "batchSize": 50,
+    "customersFileName": "customers.json",
+    "customersFileLocation": "./",
     "endpoints": {
         "health": {
             "setupTimeoutInMinutes": 30,
@@ -393,6 +396,84 @@
                 }
             }
         },
+        "updateCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "deleteCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
         "createCustomerStatus": {
             "setupTimeoutInMinutes": 30,
             "teardownTimeoutInMinutes": 30,
@@ -468,6 +549,708 @@
                 "duration": {
                     "rise": 2,
                     "fall": 2
+                }
+            }
+        },
+        "getCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "updateCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "deleteCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLGetCustomers": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 8,
+                "vus": 4,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 20,
+                "vus": 15,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 60,
+                "vus": 45,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 120,
+                "vus": 90,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLGetCustomer": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 10,
+                "vus": 5,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 25,
+                "vus": 20,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 75,
+                "vus": 60,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 150,
+                "vus": 120,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLGetCustomerTypes": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLGetCustomerStatuses": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLCreateCustomer": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 500,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 800,
+                "rps": 15,
+                "vus": 15,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1500,
+                "rps": 50,
+                "vus": 50,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 3000,
+                "rps": 100,
+                "vus": 100,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLUpdateCustomer": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 400,
+                "rps": 4,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 600,
+                "rps": 12,
+                "vus": 10,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1200,
+                "rps": 40,
+                "vus": 30,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2500,
+                "rps": 80,
+                "vus": 60,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLDeleteCustomer": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 3,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 8,
+                "vus": 6,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 25,
+                "vus": 20,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 50,
+                "vus": 40,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLCreateCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 3,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 8,
+                "vus": 8,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 25,
+                "vus": 25,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 50,
+                "vus": 50,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLCreateCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 3,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 8,
+                "vus": 8,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 25,
+                "vus": 25,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 50,
+                "vus": 50,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLGetCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLGetCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 200,
+                "rps": 5,
+                "vus": 3,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 400,
+                "rps": 15,
+                "vus": 12,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 6,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 800,
+                "rps": 40,
+                "vus": 35,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 80,
+                "vus": 70,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
+        },
+        "graphQLUpdateCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 400,
+                "rps": 4,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 600,
+                "rps": 12,
+                "vus": 10,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1200,
+                "rps": 40,
+                "vus": 30,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2500,
+                "rps": 80,
+                "vus": 60,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLUpdateCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 400,
+                "rps": 4,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 600,
+                "rps": 12,
+                "vus": 10,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1200,
+                "rps": 40,
+                "vus": 30,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2500,
+                "rps": 80,
+                "vus": 60,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLDeleteCustomerType": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 3,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 8,
+                "vus": 6,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 25,
+                "vus": 20,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 50,
+                "vus": 40,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
+                }
+            }
+        },
+        "graphQLDeleteCustomerStatus": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 3,
+                "vus": 2,
+                "duration": 10
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 8,
+                "vus": 6,
+                "duration": {
+                    "rise": 2,
+                    "plateau": 8,
+                    "fall": 2
+                }
+            },
+            "stress": {
+                "threshold": 1000,
+                "rps": 25,
+                "vus": 20,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 10,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 2000,
+                "rps": 50,
+                "vus": 40,
+                "duration": {
+                    "rise": 3,
+                    "fall": 3
                 }
             }
         }

@@ -22,23 +22,63 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
 {
     public function testInvokeCreatesCustomer(): void
     {
-        $commandBus = $this->createMock(CommandBusInterface::class);
-        $validator = $this->createMock(MutationInputValidator::class);
-        $transformer = $this->createMock(CreateCustomerMutationInputTransformer::class);
-        $factory = $this->createMock(CreateCustomerFactoryInterface::class);
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $customerTransformer = $this->createMock(CustomerTransformerInterface::class);
+        $dependencies = $this->setupDependencies();
+        $resolver = $this->createResolver($dependencies);
+        $input = $this->generateInput();
 
-        $resolver = new CreateCustomerMutationResolver(
-            $commandBus,
-            $validator,
-            $transformer,
-            $factory,
-            $iriConverter,
-            $customerTransformer,
+        $this->setupTransformerExpectations($dependencies['transformer'], $input);
+        $this->setupValidatorExpectations($dependencies['validator']);
+
+        $entities = $this->setupEntityMocks();
+        $this->setupIriConverterExpectations($dependencies['iriConverter'], $input, $entities);
+        $this->setupCustomerTransformerExpectations(
+            $dependencies['customerTransformer'],
+            $input,
+            $entities,
+            $entities['customer']
         );
 
-        $input = [
+        $this->setupCommandFactoryAndBus(
+            $dependencies['factory'],
+            $dependencies['commandBus'],
+            $entities['customer']
+        );
+
+        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
+
+        self::assertSame($entities['customer'], $result);
+    }
+
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
+    private function setupDependencies(): array
+    {
+        return [
+            'commandBus' => $this->createMock(CommandBusInterface::class),
+            'validator' => $this->createMock(MutationInputValidator::class),
+            'transformer' => $this->createMock(CreateCustomerMutationInputTransformer::class),
+            'factory' => $this->createMock(CreateCustomerFactoryInterface::class),
+            'iriConverter' => $this->createMock(IriConverterInterface::class),
+            'customerTransformer' => $this->createMock(CustomerTransformerInterface::class),
+        ];
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
+    private function createResolver(array $deps): CreateCustomerMutationResolver
+    {
+        return new CreateCustomerMutationResolver(
+            $deps['commandBus'],
+            $deps['validator'],
+            $deps['transformer'],
+            $deps['factory'],
+            $deps['iriConverter'],
+            $deps['customerTransformer'],
+        );
+    }
+
+    /** @return array<string, string|bool> */
+    private function generateInput(): array
+    {
+        return [
             'initials' => $this->faker->lexify('??'),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
@@ -47,30 +87,65 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             'status' => '/api/customer_statuses/' . $this->faker->uuid(),
             'confirmed' => $this->faker->boolean(),
         ];
+    }
 
-        $mutationInput = new CreateCustomerMutationInput();
+    /** @param array<string, string|bool> $input */
+    private function setupTransformerExpectations(
+        \PHPUnit\Framework\MockObject\MockObject $transformer,
+        array $input
+    ): void {
         $transformer
             ->expects(self::once())
             ->method('transform')
             ->with($input)
-            ->willReturn($mutationInput);
+            ->willReturn(new CreateCustomerMutationInput());
+    }
 
+    private function setupValidatorExpectations(
+        \PHPUnit\Framework\MockObject\MockObject $validator
+    ): void {
         $validator
             ->expects(self::once())
             ->method('validate')
-            ->with($mutationInput);
+            ->with($this->isInstanceOf(CreateCustomerMutationInput::class));
+    }
 
-        $customerStatus = $this->createMock(CustomerStatus::class);
-        $customerType = $this->createMock(CustomerType::class);
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
+    private function setupEntityMocks(): array
+    {
+        return [
+            'customerStatus' => $this->createMock(CustomerStatus::class),
+            'customerType' => $this->createMock(CustomerType::class),
+            'customer' => $this->createMock(Customer::class),
+        ];
+    }
 
+    /**
+     * @param array<string, string|bool> $input
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $entities
+     */
+    private function setupIriConverterExpectations(
+        \PHPUnit\Framework\MockObject\MockObject $iriConverter,
+        array $input,
+        array $entities
+    ): void {
         $iriConverter
             ->expects(self::exactly(2))
             ->method('getResourceFromIri')
             ->withConsecutive([$input['status']], [$input['type']])
-            ->willReturnOnConsecutiveCalls($customerStatus, $customerType);
+            ->willReturnOnConsecutiveCalls($entities['customerStatus'], $entities['customerType']);
+    }
 
-        $customer = $this->createMock(Customer::class);
-
+    /**
+     * @param array<string, string|bool> $input
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $entities
+     */
+    private function setupCustomerTransformerExpectations(
+        \PHPUnit\Framework\MockObject\MockObject $customerTransformer,
+        array $input,
+        array $entities,
+        \PHPUnit\Framework\MockObject\MockObject $customer
+    ): void {
         $customerTransformer
             ->expects(self::once())
             ->method('transform')
@@ -79,12 +154,18 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
                 $input['email'],
                 $input['phone'],
                 $input['leadSource'],
-                $customerType,
-                $customerStatus,
+                $entities['customerType'],
+                $entities['customerStatus'],
                 $input['confirmed']
             )
             ->willReturn($customer);
+    }
 
+    private function setupCommandFactoryAndBus(
+        \PHPUnit\Framework\MockObject\MockObject $factory,
+        \PHPUnit\Framework\MockObject\MockObject $commandBus,
+        \PHPUnit\Framework\MockObject\MockObject $customer
+    ): void {
         $command = new CreateCustomerCommand($customer);
 
         $factory
@@ -97,9 +178,5 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             ->expects(self::once())
             ->method('dispatch')
             ->with($command);
-
-        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
-
-        self::assertSame($customer, $result);
     }
 }
