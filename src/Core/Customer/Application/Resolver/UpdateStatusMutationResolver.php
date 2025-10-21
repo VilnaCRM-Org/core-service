@@ -4,45 +4,53 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Resolver;
 
-use ApiPlatform\GraphQl\Resolver\MutationResolverInterface;
-use App\Core\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
-use App\Core\Customer\Application\Transformer\UpdateStatusMutationInputTransformer;
+use ApiPlatform\GraphQl\Resolver\MutationResolverInterface as MutationResolver;
+use App\Core\Customer\Application\Factory as CustomerFactory;
+use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
-use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
-use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Core\Customer\Domain\Repository as CustomerRepository;
+use App\Core\Customer\Domain\ValueObject as CustomerValueObject;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
-final readonly class UpdateStatusMutationResolver implements MutationResolverInterface
+final readonly class UpdateStatusMutationResolver implements MutationResolver
 {
     public function __construct(
         private CommandBusInterface $commandBus,
         private MutationInputValidator $validator,
-        private UpdateStatusMutationInputTransformer $transformer,
-        private UpdateStatusCommandFactoryInterface $commandFactory,
-        private StatusRepositoryInterface $repository,
-        private UlidFactory $ulidFactory,
+        private CustomerTf\UpdateStatusMutationInputTransformer $inputs,
+        private CustomerFactory\UpdateStatusCommandFactoryInterface $factory,
+        private CustomerRepository\StatusRepositoryInterface $statusRepository,
+        private UlidFactory $ulids,
     ) {
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array{
+     *     args: array{
+     *         input: array{
+     *             id: string,
+     *             value: string
+     *         }
+     *     }
+     * } $context
      */
     public function __invoke(?object $item, array $context): CustomerStatus
     {
+        /** @var array{id: string, value: string} $input */
         $input = $context['args']['input'];
-        $mutationInput = $this->transformer->transform($input);
+        $mutationInput = $this->inputs->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customerStatus = $this->repository->find(
-            $this->ulidFactory->create($input['id'])
-        ) ?? throw new CustomerStatusNotFoundException();
+        $ulid = $this->ulids->create($input['id']);
+        $customerStatus = $this->statusRepository->find($ulid)
+            ?? throw new CustomerStatusNotFoundException();
 
-        $command = $this->commandFactory->create(
+        $command = $this->factory->create(
             $customerStatus,
-            new CustomerStatusUpdate($input['value'])
+            new CustomerValueObject\CustomerStatusUpdate($input['value'])
         );
         $this->commandBus->dispatch($command);
 

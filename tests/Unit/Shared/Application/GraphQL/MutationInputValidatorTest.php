@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\GraphQL;
 
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Shared\Application\GraphQL\MutationInput;
-use App\Shared\Application\GraphQL\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidator;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
