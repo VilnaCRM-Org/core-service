@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **💡 Note**: For task-specific workflows (CI, testing, code review, quality standards), see modular skills in `.claude/skills/` directory. Skills are automatically discovered and activated when relevant.
+
 ## Project Overview
 
 VilnaCRM Core Service - A modern PHP microservice template built with Symfony 7, API Platform 4, and MongoDB. This service follows Hexagonal Architecture (Ports & Adapters), Domain-Driven Design (DDD), and CQRS patterns.
