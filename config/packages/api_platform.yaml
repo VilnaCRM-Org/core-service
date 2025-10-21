@@ -21,6 +21,17 @@ api_platform:
   error_formats:
     jsonproblem: ['application/problem+json']
 
+  # Enable GraphQL support
+  graphql:
+    enabled: true
+    graphiql:
+      enabled: true
+    graphql_playground:
+      enabled: true
+    # Default to ID for mutations
+    default_ide: graphiql
+    nesting_separator: _
+
   # Tell API Platform where your domain classes live
   resource_class_directories:
     - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'
