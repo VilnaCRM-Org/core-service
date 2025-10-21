@@ -30,7 +30,7 @@ export function setup() {
       type: type['@id'],
       status: status['@id'],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     const response = utils.createCustomer(customerData);
@@ -44,7 +44,7 @@ export function setup() {
         customerId: customerId,
         customerIri: customer['@id'],
         typeIri: type['@id'],
-        statusIri: status['@id']
+        statusIri: status['@id'],
       };
     }
   }
@@ -85,14 +85,10 @@ export default function getCustomer(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer query returned',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.customer && body.data.customer.id;
-    }
-  );
+  utils.checkResponse(response, 'customer query returned', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.customer && body.data.customer.id;
+  });
 }
 
 export function teardown(data) {

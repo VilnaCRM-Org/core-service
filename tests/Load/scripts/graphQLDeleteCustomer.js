@@ -61,7 +61,7 @@ export function setup() {
         type: type['@id'],
         status: status['@id'],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const response = utils.createCustomer(customerData);
@@ -75,7 +75,7 @@ export function setup() {
     return {
       customers: customersToDelete,
       typeIri: type['@id'],
-      statusIri: status['@id']
+      statusIri: status['@id'],
     };
   }
 
@@ -108,14 +108,10 @@ export default function deleteCustomer(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer deleted',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.deleteCustomer && body.data.deleteCustomer.customer;
-    }
-  );
+  utils.checkResponse(response, 'customer deleted', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.deleteCustomer && body.data.deleteCustomer.customer;
+  });
 }
 
 export function teardown(data) {

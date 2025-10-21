@@ -3742,7 +3742,6 @@ components:
     CustomerType.TypeCreate.jsonld:
       type: object
       description: ''
-      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3755,7 +3754,6 @@ components:
     CustomerType.TypePatch:
       type: object
       description: ''
-      additionalProperties: false
       deprecated: false
       properties:
         value:
