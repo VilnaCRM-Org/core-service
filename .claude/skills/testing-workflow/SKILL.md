@@ -10,6 +10,7 @@ This skill provides comprehensive guidance for running and managing tests in the
 ## When to Use This Skill
 
 Activate this skill when:
+
 - User asks to run tests
 - Debugging test failures
 - Checking test coverage
@@ -20,6 +21,7 @@ Activate this skill when:
 ## Test Types and Commands
 
 ### Unit Tests
+
 **Purpose**: Test individual classes/methods in isolation with mocked dependencies
 
 ```bash
@@ -31,6 +33,7 @@ make unit-tests
 **Coverage Required**: 100%
 
 ### Integration Tests
+
 **Purpose**: Test interactions between components with real database and services
 
 ```bash
@@ -42,6 +45,7 @@ make integration-tests
 **Coverage Required**: Comprehensive
 
 ### End-to-End Tests (Behat)
+
 **Purpose**: BDD scenarios testing complete user journeys
 
 ```bash
@@ -55,6 +59,7 @@ make e2e-tests
 **Contexts**: Defined in `behat.yml.dist`
 
 ### All Tests
+
 **Purpose**: Run complete test suite
 
 ```bash
@@ -65,6 +70,7 @@ make all-tests
 **CRITICAL**: NEVER CANCEL - Wait for completion
 
 ### Mutation Testing (Infection)
+
 **Purpose**: Validate test quality by making code mutations
 
 ```bash
@@ -75,6 +81,7 @@ make infection
 **Target**: 100% MSI (0 escaped mutants)
 
 ### Load Testing
+
 **Purpose**: Validate performance under various load conditions
 
 ```bash
@@ -90,6 +97,7 @@ make load-tests          # All load tests
 ## Test Coverage Workflow
 
 ### Check Coverage
+
 ```bash
 make tests-with-coverage
 ```
@@ -98,6 +106,7 @@ make tests-with-coverage
 **Output**: Coverage report
 
 ### Generate HTML Coverage Report
+
 ```bash
 make coverage-html
 ```
@@ -109,16 +118,19 @@ Opens detailed coverage report in browser.
 ### Step 1: Identify Failure Type
 
 **Unit Test Failure**:
+
 - Check test output for assertion failures
 - Review mocked dependencies
 - Verify test data setup
 
 **Integration Test Failure**:
+
 - Check database state
 - Verify service connections
 - Review environment variables
 
 **Behat Test Failure**:
+
 - Check feature file scenarios
 - Review context implementations
 - Verify API responses match expectations
@@ -126,16 +138,19 @@ Opens detailed coverage report in browser.
 ### Step 2: Run Specific Test
 
 **Run single test file**:
+
 ```bash
 docker compose exec -e APP_ENV=test php vendor/bin/phpunit tests/Unit/Specific/TestFile.php
 ```
 
 **Run specific test method**:
+
 ```bash
 docker compose exec -e APP_ENV=test php vendor/bin/phpunit --filter testMethodName
 ```
 
 **Run specific Behat scenario**:
+
 ```bash
 docker compose exec -e APP_ENV=test php vendor/bin/behat features/specific.feature:10
 ```
@@ -154,6 +169,7 @@ docker compose exec -e APP_ENV=test php vendor/bin/behat features/specific.featu
 Infection makes small code changes (mutations) and checks if tests catch them.
 
 **Common mutation types**:
+
 - Boundary conditions (`>` → `>=`, `<` → `<=`)
 - Return values (`true` → `false`)
 - Operators (`+` → `-`, `&&` → `||`)
@@ -162,6 +178,7 @@ Infection makes small code changes (mutations) and checks if tests catch them.
 ### Fixing Escaped Mutants
 
 1. **Run Infection**:
+
    ```bash
    make infection
    ```
@@ -169,6 +186,7 @@ Infection makes small code changes (mutations) and checks if tests catch them.
 2. **Review mutation diff** in output
 
 3. **Add targeted tests** for edge cases:
+
    ```php
    public function testBoundaryCondition(): void
    {
@@ -195,12 +213,14 @@ Infection makes small code changes (mutations) and checks if tests catch them.
 ## Test Database Management
 
 ### Setup Test Database
+
 ```bash
 make setup-test-db
 ```
 
 **Purpose**: Drop and recreate test MongoDB schema
 **When to use**:
+
 - Before running integration/E2E tests
 - After schema changes
 - When tests fail due to database state
