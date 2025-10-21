@@ -28,7 +28,7 @@ export function setup() {
 
   return {
     types: types,
-    totalTypes: types.length
+    totalTypes: types.length,
   };
 }
 
@@ -40,19 +40,23 @@ export default function updateCustomerType(data) {
 
   // Use counter to select different type for each iteration
   const type = data.types[counter.up() % data.totalTypes];
-  
-  const typeNames = ['Premium', 'Standard', 'VIP', 'Enterprise', 'Starter', 'Professional', 'Basic'];
+
+  const typeNames = [
+    'Premium',
+    'Standard',
+    'VIP',
+    'Enterprise',
+    'Starter',
+    'Professional',
+    'Basic',
+  ];
   const updateData = {
-    value: `${typeNames[Math.floor(Math.random() * typeNames.length)]}_Updated_${randomString(6)}`
+    value: `${typeNames[Math.floor(Math.random() * typeNames.length)]}_Updated_${randomString(6)}`,
   };
 
-  const response = http.patch(
-    `http://localhost:80${type['@id']}`,
-    JSON.stringify(updateData),
-    {
-      headers: { 'Content-Type': 'application/merge-patch+json' }
-    }
-  );
+  const response = http.patch(`http://localhost:80${type['@id']}`, JSON.stringify(updateData), {
+    headers: { 'Content-Type': 'application/merge-patch+json' },
+  });
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

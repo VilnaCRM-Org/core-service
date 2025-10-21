@@ -27,7 +27,7 @@ export function setup() {
 
   return {
     types: types,
-    totalTypes: types.length
+    totalTypes: types.length,
   };
 }
 
@@ -50,14 +50,10 @@ export default function getCustomerType(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customerType query returned',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data && body.data.customerType && body.data.customerType.id;
-    }
-  );
+  utils.checkResponse(response, 'customerType query returned', res => {
+    const body = JSON.parse(res.body);
+    return body.data && body.data.customerType && body.data.customerType.id;
+  });
 }
 
 export function teardown(data) {

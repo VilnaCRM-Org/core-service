@@ -27,7 +27,7 @@ export function setup() {
 
   return {
     customers: customers,
-    totalCustomers: customers.length
+    totalCustomers: customers.length,
   };
 }
 

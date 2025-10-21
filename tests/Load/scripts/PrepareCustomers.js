@@ -36,7 +36,7 @@ export default function prepareCustomers() {
   for (const typeData of types) {
     const response = utils.createCustomerType(typeData);
     check(response, {
-      'customer type created': (r) => r.status === 201,
+      'customer type created': r => r.status === 201,
     });
 
     if (response.status === 201) {
@@ -62,7 +62,7 @@ export default function prepareCustomers() {
   for (const statusData of statuses) {
     const response = utils.createCustomerStatus(statusData);
     check(response, {
-      'customer status created': (r) => r.status === 201,
+      'customer status created': r => r.status === 201,
     });
 
     if (response.status === 201) {
@@ -95,7 +95,7 @@ export default function prepareCustomers() {
 
     const response = utils.createCustomer(customerData);
     check(response, {
-      'customer created': (r) => r.status === 201,
+      'customer created': r => r.status === 201,
     });
 
     if (response.status === 201) {

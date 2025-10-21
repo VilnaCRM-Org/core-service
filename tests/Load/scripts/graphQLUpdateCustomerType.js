@@ -27,7 +27,7 @@ export function setup() {
 
   return {
     types: types,
-    totalTypes: types.length
+    totalTypes: types.length,
   };
 }
 
@@ -35,7 +35,7 @@ export default function updateCustomerType(data) {
   // Use counter to select different type for each iteration
   const type = data.types[counter.up() % data.totalTypes];
   const newValue = `UpdatedType_${Date.now()}`;
-  
+
   // Extract ULID from IRI
   const typeUlid = type.ulid || type['@id'].split('/').pop();
 
@@ -60,17 +60,15 @@ export default function updateCustomerType(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer type updated',
-    res => {
-      const body = JSON.parse(res.body);
-      return body.data &&
-             body.data.updateCustomerType &&
-             body.data.updateCustomerType.customerType &&
-             body.data.updateCustomerType.customerType.value === newValue;
-    }
-  );
+  utils.checkResponse(response, 'customer type updated', res => {
+    const body = JSON.parse(res.body);
+    return (
+      body.data &&
+      body.data.updateCustomerType &&
+      body.data.updateCustomerType.customerType &&
+      body.data.updateCustomerType.customerType.value === newValue
+    );
+  });
 }
 
 export function teardown(data) {
