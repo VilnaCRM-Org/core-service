@@ -43,22 +43,18 @@ export default function deleteCustomerType(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'customer type deleted',
-    res => {
-      if (res.status !== 200) {
-        console.error(`GraphQL delete failed with status ${res.status}: ${res.body}`);
-        return false;
-      }
-      const body = JSON.parse(res.body);
-      if (body.errors) {
-        console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
-        return false;
-      }
-      return body.data && body.data.deleteCustomerType && body.data.deleteCustomerType.customerType;
+  utils.checkResponse(response, 'customer type deleted', res => {
+    if (res.status !== 200) {
+      console.error(`GraphQL delete failed with status ${res.status}: ${res.body}`);
+      return false;
     }
-  );
+    const body = JSON.parse(res.body);
+    if (body.errors) {
+      console.error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
+      return false;
+    }
+    return body.data && body.data.deleteCustomerType && body.data.deleteCustomerType.customerType;
+  });
 }
 
 export function teardown(data) {
