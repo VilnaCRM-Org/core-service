@@ -321,7 +321,7 @@ type createCustomerPayload {
 "Updates a Customer."
 input updateCustomerInput {
   clientMutationId: String
-  id: String!
+  id: ID!
   initials: String
   email: String
   phone: String
@@ -369,7 +369,7 @@ type createCustomerStatusPayload {
 "Updates a CustomerStatus."
 input updateCustomerStatusInput {
   clientMutationId: String
-  id: String!
+  id: ID!
   value: String!
 }
 
@@ -411,7 +411,7 @@ type createCustomerTypePayload {
 "Updates a CustomerType."
 input updateCustomerTypeInput {
   clientMutationId: String
-  id: String!
+  id: ID!
   value: String!
 }
 
