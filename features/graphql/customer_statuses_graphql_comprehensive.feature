@@ -54,6 +54,89 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     And the GraphQL response should contain "data.customerStatuses.pageInfo.hasNextPage"
     And the GraphQL response should contain "data.customerStatuses.pageInfo.endCursor"
 
+  Scenario: Query customer statuses with cursor pagination, ordering, and ULID range filter
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatuses(first: 1, order: [{ulid: "DESC"}], ulid: [{lt: "01JKX8XGHVDZ46MWYMZT94YER6"}]) {
+        edges {
+          node {
+            id
+            value
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerStatuses.edges"
+    And the GraphQL response "data.customerStatuses.edges.0.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the GraphQL response "data.customerStatuses.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customerStatuses.pageInfo.endCursor"
+
+  Scenario: Query customer statuses with cursor pagination and ULID greater than filter
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatuses(first: 10, order: [{ulid: "ASC"}], ulid: [{gt: "01JKX8XGHVDZ46MWYMZT94YER4"}]) {
+        edges {
+          node {
+            id
+            value
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerStatuses.edges"
+    And the GraphQL response "data.customerStatuses.edges.0.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the GraphQL response "data.customerStatuses.edges.1.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
+
+  Scenario: Query customer statuses with cursor navigation using after parameter
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER7"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER8"
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER9"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatuses(first: 1, order: [{ulid: "DESC"}]) {
+        edges {
+          node {
+            id
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerStatuses.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customerStatuses.pageInfo.endCursor"
+
   Scenario: Query customer statuses with filtering by value
     Given create customer status with value "Premium"
     And create customer status with value "Standard"

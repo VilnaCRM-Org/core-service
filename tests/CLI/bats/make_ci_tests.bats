@@ -27,7 +27,7 @@ load 'bats-assert/load'
 
   # Should either work or show error about gh CLI
   if [ "$status" -ne 0 ]; then
-    assert_output --partial "GitHub CLI"
+    assert_output --partial "Auto-detecting PR"
   fi
 }
 

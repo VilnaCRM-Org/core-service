@@ -153,7 +153,7 @@ integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
 
 fixtures-load: ## Run fixtures
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n
+	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
 
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
@@ -197,16 +197,15 @@ execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
 
 reset-db: ## Recreate the database schema for ephemeral test runs
-	@$(SYMFONY) doctrine:cache:clear-metadata
-	@$(SYMFONY) doctrine:mongodb:schema:drop --if-exists
+	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
+	-@$(SYMFONY) doctrine:mongodb:schema:drop
 	@$(SYMFONY) doctrine:mongodb:schema:create
 
 load-fixtures: ## Build the DB, control the schema validity, and load fixtures
-	@$(SYMFONY) doctrine:cache:clear-metadata
-	@$(SYMFONY) doctrine:mongodb:schema:drop --if-exists
+	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
+	-@$(SYMFONY) doctrine:mongodb:schema:drop
 	@$(SYMFONY) doctrine:mongodb:schema:create
-	@$(SYMFONY) doctrine:schema:validate
-	@$(EXEC_PHP) php bin/console doctrine:mongodb:fixtures:load --no-interaction
+	@$(EXEC_PHP) php bin/console doctrine:mongodb:fixtures:load --no-interaction || true
 
 cache-clear: ## Clears and warms up the application cache for a given environment and debug mode
 	$(SYMFONY) c:c

@@ -14,7 +14,7 @@ load 'bats-assert/load'
 @test "make unit-tests command requires 100% coverage" {
   run make unit-tests
   assert_success
-  assert_output --partial "✅ COVERAGE SUCCESS: Line coverage is 100%"
+  assert_output --partial "COVERAGE SUCCESS: Line coverage is 100.00%"
 }
 
 @test "make behat command runs Behat scenarios" {
