@@ -12,7 +12,7 @@ export const options = scenarioUtils.getOptions();
 
 export function setup() {
   // Fetch existing customer types created by PrepareCustomers script
-  const response = http.get(`${utils.getBaseHttpUrl()}/customer_types?itemsPerPage=100`);
+  const response = http.get(`${utils.getBaseUrl()}/customer_types?itemsPerPage=100`);
 
   if (response.status !== 200) {
     throw new Error('Failed to fetch customer types for GraphQL update customer type load test.');
@@ -36,14 +36,14 @@ export default function updateCustomerType(data) {
   const type = data.types[counter.up() % data.totalTypes];
   const newValue = `UpdatedType_${Date.now()}`;
 
-  // Extract ULID from IRI
-  const typeUlid = type.ulid || type['@id'].split('/').pop();
+  // Use the full IRI for the ID
+  const typeIri = type['@id'];
 
   const mutation = `
     mutation {
       updateCustomerType(
         input: {
-          id: "${typeUlid}"
+          id: "${typeIri}"
           value: "${newValue}"
         }
       ) {

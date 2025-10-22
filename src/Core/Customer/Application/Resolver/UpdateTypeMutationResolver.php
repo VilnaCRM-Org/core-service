@@ -9,11 +9,9 @@ use App\Core\Customer\Application\Factory as CustomerFactory;
 use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
-use App\Core\Customer\Domain\Repository as CustomerRepository;
 use App\Core\Customer\Domain\ValueObject as CustomerValueObject;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Infrastructure\Factory\UlidFactory;
 
 final readonly class UpdateTypeMutationResolver implements MutationResolver
 {
@@ -22,8 +20,6 @@ final readonly class UpdateTypeMutationResolver implements MutationResolver
         private MutationInputValidator $validator,
         private CustomerTf\UpdateTypeMutationInputTransformer $inputTransformer,
         private CustomerFactory\UpdateTypeCommandFactoryInterface $factory,
-        private CustomerRepository\TypeRepositoryInterface $typeRepository,
-        private UlidFactory $ulids,
     ) {
     }
 
@@ -44,9 +40,11 @@ final readonly class UpdateTypeMutationResolver implements MutationResolver
         $mutationInput = $this->inputTransformer->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customerType = $this->typeRepository->find(
-            $this->ulids->create($input['id'])
-        ) ?? throw new CustomerTypeNotFoundException();
+        $customerType = $item;
+        
+        if (!$customerType instanceof CustomerType) {
+            throw CustomerTypeNotFoundException::withIri($input['id']);
+        }
 
         $command = $this->factory->create(
             $customerType,

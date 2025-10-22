@@ -76,7 +76,7 @@ export default function prepareCustomers() {
 
   // 3. Create sample customers
   console.log('Creating sample customers...');
-  const customerCount = 20;
+  const customerCount = 50;
   let customersCreated = 0;
 
   for (let i = 0; i < customerCount; i++) {

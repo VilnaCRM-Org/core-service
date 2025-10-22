@@ -99,7 +99,7 @@ Feature: GraphQL Customer CRUD Operations
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER4"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
         email: "updated@example.com"
         phone: "9876543210"
       }) {
