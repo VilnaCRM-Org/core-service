@@ -64,7 +64,7 @@ Feature: GraphQL CustomerStatus CRUD Operations
     """
     mutation {
       updateCustomerStatus(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER4"
+        id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
         value: "Updated"
       }) {
         customerStatus {

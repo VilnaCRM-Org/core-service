@@ -26,7 +26,7 @@ export default function deleteCustomerType(data) {
   
   const { '@id': id } = type;
 
-  const response = http.del(`http://localhost:80${id}`);
+  const response = http.del(`${utils.getBaseDomain()}${id}`);
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }

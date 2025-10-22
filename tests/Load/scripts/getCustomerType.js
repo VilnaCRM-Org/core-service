@@ -31,9 +31,7 @@ export default function getCustomerType(data) {
     return;
   }
 
-  // Extract just the ID part from the IRI
-  const typeId = data.typeId.replace('/api', '');
-  const response = http.get(`${utils.getBaseHttpUrl()}${typeId}`);
+  const response = http.get(`${utils.getBaseDomain()}${data.typeId}`);
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
@@ -41,7 +39,6 @@ export default function getCustomerType(data) {
 export function teardown(data) {
   // Clean up the test customer type
   if (data.typeId) {
-    const typeId = data.typeId.replace('/api', '');
-    http.del(`${utils.getBaseHttpUrl()}${typeId}`);
+    http.del(`${utils.getBaseDomain()}${data.typeId}`);
   }
 }

@@ -13,7 +13,7 @@ export const options = scenarioUtils.getOptions();
 
 export function setup() {
   // Fetch existing customer types created by PrepareCustomers script
-  const response = http.get(`${utils.getBaseHttpUrl()}/customer_types?itemsPerPage=100`);
+  const response = http.get(`${utils.getBaseUrl()}/customer_types?itemsPerPage=100`);
 
   if (response.status !== 200) {
     throw new Error('Failed to fetch customer types for update customer type load test.');

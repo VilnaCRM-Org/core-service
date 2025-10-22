@@ -160,7 +160,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         email: "updated.email@example.com"
       }) {
         customer {
@@ -181,7 +181,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         phone: "+9999999999"
       }) {
         customer {
@@ -201,7 +201,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         initials: "XY"
       }) {
         customer {
@@ -221,7 +221,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         leadSource: "NewCampaign"
       }) {
         customer {
@@ -241,7 +241,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         confirmed: false
       }) {
         customer {
@@ -262,7 +262,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         type: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER6"
       }) {
         customer {
@@ -286,7 +286,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         status: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER6"
       }) {
         customer {
@@ -309,7 +309,7 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         initials: "MU"
         email: "multi.update@example.com"
         phone: "+5555555555"

@@ -68,7 +68,7 @@ Feature: GraphQL CustomerType CRUD Operations
     """
     mutation {
       updateCustomerType(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER4"
+        id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
         value: "Updated Type"
       }) {
         customerType {
