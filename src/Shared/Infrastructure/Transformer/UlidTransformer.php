@@ -21,10 +21,8 @@ final readonly class UlidTransformer
             return null;
         }
 
-        if (is_string($value)) {
-            if (!SymfonyUlid::isValid($value)) {
-                return null;
-            }
+        if (is_string($value) && !SymfonyUlid::isValid($value)) {
+            return null;
         }
 
         $ulid = $value instanceof Ulid
