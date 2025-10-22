@@ -37,8 +37,8 @@ load 'bats-assert/load'
 @test "make behat should fail when scenarios fail" {
   mv tests/Behat/CustomerContext/CustomerContext.php tests/
   run make behat
-  mv tests/CustomerContext.php tests/Behat/CustomerContext
   assert_failure
+  mv tests/CustomerContext.php tests/Behat/CustomerContext
 }
 
 @test "make psalm should fail when there are errors" {
