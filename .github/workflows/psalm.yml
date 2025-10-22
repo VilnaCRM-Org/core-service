@@ -26,7 +26,7 @@ jobs:
         run: make psalm-security-report
 
       - name: Copy SARIF file from container
-        run: docker compose cp php:/app/results.sarif ./results.sarif
+        run: docker compose cp php:/srv/app/results.sarif ./results.sarif
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v3
