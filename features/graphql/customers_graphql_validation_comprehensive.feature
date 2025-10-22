@@ -371,7 +371,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         email: "invalid-email-format"
       }) {
         customer {
@@ -390,7 +390,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         email: "existing@example.com"
       }) {
         customer {
@@ -408,7 +408,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         initials: "  "
       }) {
         customer {
@@ -426,7 +426,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         type: "/api/customer_types/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -444,7 +444,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         status: "/api/customer_statuses/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -515,7 +515,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         email: "updated@example.com"
       }) {
         customer {
@@ -587,7 +587,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         confirmed: false
       }) {
         customer {
@@ -607,7 +607,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         confirmed: true
       }) {
         customer {

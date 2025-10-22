@@ -12,12 +12,11 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
+use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-
-use function assert;
 
 final readonly class UpdateCustomerMutationResolver implements MutationResolver
 {
@@ -27,7 +26,6 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         private UpdateCustomerMutationInputTransformer $inputTransformer,
         private UpdateCustomerCommandFactoryInterface $factory,
         private IriConverterInterface $iriConverter,
-        private CustomerRepositoryInterface $customers,
     ) {
     }
 
@@ -65,9 +63,10 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         $mutationInput = $this->inputTransformer->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customer = $this->customers->find($input['id']);
-        if ($customer === null) {
-            throw new CustomerNotFoundException();
+        $customer = $item;
+        
+        if (!$customer instanceof Customer) {
+            throw CustomerNotFoundException::withId($input['id']);
         }
 
         $customerUpdate = $this->createCustomerUpdate($customer, $input);
@@ -118,7 +117,10 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         $typeIri = $input['type'] ?? $this->getDefaultTypeIri($customer);
 
         $resource = $this->iriConverter->getResourceFromIri($typeIri);
-        assert($resource instanceof CustomerType);
+        
+        if (!$resource instanceof CustomerType) {
+            throw CustomerTypeNotFoundException::withIri($typeIri);
+        }
 
         return $resource;
     }
@@ -142,7 +144,10 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
             ?? $this->getDefaultStatusIri($customer);
 
         $resource = $this->iriConverter->getResourceFromIri($statusIri);
-        assert($resource instanceof CustomerStatus);
+        
+        if (!$resource instanceof CustomerStatus) {
+            throw CustomerStatusNotFoundException::withIri($statusIri);
+        }
 
         return $resource;
     }

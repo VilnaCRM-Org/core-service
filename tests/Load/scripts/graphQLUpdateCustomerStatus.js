@@ -12,7 +12,7 @@ export const options = scenarioUtils.getOptions();
 
 export function setup() {
   // Fetch existing customer statuses created by PrepareCustomers script
-  const response = http.get(`${utils.getBaseHttpUrl()}/customer_statuses?itemsPerPage=100`);
+  const response = http.get(`${utils.getBaseUrl()}/customer_statuses?itemsPerPage=100`);
 
   if (response.status !== 200) {
     throw new Error(
@@ -38,14 +38,14 @@ export default function updateCustomerStatus(data) {
   const status = data.statuses[counter.up() % data.totalStatuses];
   const newValue = `UpdatedStatus_${Date.now()}`;
 
-  // Extract ULID from IRI (e.g., "/api/customer_statuses/01K843..." -> "01K843...")
-  const statusUlid = status.ulid || status['@id'].split('/').pop();
+  // Use the full IRI for the ID
+  const statusIri = status['@id'];
 
   const mutation = `
     mutation {
       updateCustomerStatus(
         input: {
-          id: "${statusUlid}"
+          id: "${statusIri}"
           value: "${newValue}"
         }
       ) {

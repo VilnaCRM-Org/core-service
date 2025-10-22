@@ -34,7 +34,7 @@ export default function getCustomerStatuses() {
   const filters = ['', '?page=1', '?itemsPerPage=10', '?order[ulid]=desc', '?order[value]=asc'];
 
   const filter = filters[Math.floor(Math.random() * filters.length)];
-  const response = http.get(`${utils.getBaseHttpUrl()}/customer_statuses${filter}`);
+  const response = http.get(`${utils.getBaseUrl()}/customer_statuses${filter}`);
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
@@ -43,7 +43,7 @@ export function teardown(data) {
   // Clean up test customer statuses
   if (data.statusIds) {
     data.statusIds.forEach(statusId => {
-      http.del(`${utils.getBaseHttpUrl()}${statusId}`);
+      http.del(`${utils.getBaseDomain()}${statusId}`);
     });
   }
 }

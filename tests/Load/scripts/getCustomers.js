@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import InsertCustomersUtils from '../utils/insertCustomersUtils.js';
 import ScenarioUtils from '../utils/scenarioUtils.js';
 import Utils from '../utils/utils.js';
 
@@ -6,57 +7,30 @@ const scenarioName = 'getCustomers';
 
 const utils = new Utils();
 const scenarioUtils = new ScenarioUtils(utils, scenarioName);
+const insertCustomersUtils = new InsertCustomersUtils(utils, scenarioName);
+const customersToGetInOneRequest = utils.getConfig().endpoints[scenarioName].customersToGetInOneRequest;
 
-export const options = scenarioUtils.getOptions();
+const customers = insertCustomersUtils.loadInsertedCustomers();
 
 export function setup() {
-  // Create minimal customers without type/status dependencies to avoid database issues
-  const customers = [];
-
-  for (let i = 0; i < 3; i++) {
-    const customerData = {
-      initials: `ListTest Customer ${i}`,
-      email: `listtest_${i}_${Date.now()}@example.com`,
-      phone: `+1-555-000${i}`,
-      leadSource: 'Load Test',
-      confirmed: i % 2 === 0,
-      // No type or status - keep it simple
-    };
-
-    const response = utils.createCustomer(customerData);
-
-    if (response.status === 201) {
-      const customer = JSON.parse(response.body);
-      customers.push(customer['@id']);
-    }
-  }
-
   return {
-    customerIds: customers,
+    customers: customers,
   };
 }
 
-export default function getCustomers(data) {
-  // Test the customers collection endpoint with basic pagination
-  // Use simple filters that are guaranteed to work
-  const filters = ['', '?page=1', '?itemsPerPage=5'];
+export const options = scenarioUtils.getOptions();
 
-  // Use deterministic filter selection
-  const filterIndex = __ITER % filters.length;
-  const filter = filters[filterIndex];
+export default function getCustomers() {
+  let page = utils.getRandomNumber(1, 5);
 
-  // Always test the collection endpoint, not individual customers
-  const response = http.get(`${utils.getBaseHttpUrl()}/customers${filter}`);
+  const response = http.get(
+    `${utils.getBaseHttpUrl()}?page=${page}&itemsPerPage=${customersToGetInOneRequest}`,
+    utils.getJsonHeader()
+  );
 
-  // Only accept 200 - we need to fix any 500 errors
-  utils.checkResponse(response, 'is status 200', res => res.status === 200);
-}
-
-export function teardown(data) {
-  // Clean up test customers
-  if (data.customerIds) {
-    data.customerIds.forEach(customerId => {
-      http.del(`${utils.getBaseHttpUrl()}${customerId}`);
-    });
+  if (response.status === 500) {
+    console.error(`Still 500 error on page ${page}: ${response.body.substring(0, 300)}`);
   }
+
+  utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

@@ -160,7 +160,7 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     """
     mutation {
       updateCustomerStatus(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER4"
+        id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
         value: "UpdatedValue"
       }) {
         customerStatus {
@@ -250,7 +250,7 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     """
     mutation {
       updateCustomerStatus(input: {
-        id: "01ZZZZZZZZZZZZZZZZZZZZZZZZ"
+        id: "/api/customer_statuses/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
         value: "NonExistent"
       }) {
         customerStatus {
