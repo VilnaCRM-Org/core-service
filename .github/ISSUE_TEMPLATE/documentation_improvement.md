@@ -12,13 +12,13 @@ The `core-service` repository needs documentation improvements to match the comp
 
 - **Problem Statement**: Currently, the `core-service` README lacks several important sections that are present in `user-service`, making it harder for new developers to get started and understand the full capabilities of the service. The documentation should be enhanced to provide clear installation steps, endpoint URLs, and detailed explanations of features like template synchronization.
 
-- **Target Audience**: 
+- **Target Audience**:
   - New developers joining the VilnaCRM project
   - Contributors looking to set up the development environment
   - Users wanting to understand the template synchronization feature
   - Developers integrating with the service APIs
 
-- **Use Cases**: 
+- **Use Cases**:
   1. A new developer clones the repository and needs step-by-step instructions with specific commands and URLs to get started
   2. A contributor wants to understand how the template synchronization works and how to configure it
   3. A developer needs to find the GraphQL endpoint URL (if available) to test API queries
