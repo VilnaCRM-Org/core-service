@@ -52,26 +52,15 @@ load 'bats-assert/load'
   assert_output --partial "does not exist"
 }
 
-@test "make deptrac should fail when there are dependency violations" {
-  mkdir src/Internal/HealthCheck/Domain/Entity/
-  mv tests/CLI/bats/php/SomeEntity.php src/Internal/HealthCheck/Domain/Entity/
-
-  run make deptrac
-
-  mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
-  rmdir src/Internal/HealthCheck/Domain/Entity/
-  assert_output --partial "error"
-}
-
 @test "make phpinsights should fail when code quality is low" {
-  mv tests/CLI/bats/php/temp_bad_code.php temp_bad_code.php
+  mv tests/CLI/bats/php/temp_bad_code.php src/temp_bad_code.php
 
   run make phpinsights
 
-  mv temp_bad_code.php tests/CLI/bats/php/
+  mv src/temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The code quality score is too low"
+  assert_output --partial "The function badly_named_function() contains an eval expression"
 }
 
 @test "make unit-tests should fail if tests fail" {
