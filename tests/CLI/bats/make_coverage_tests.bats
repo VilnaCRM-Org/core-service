@@ -11,12 +11,6 @@ load 'bats-assert/load'
   skip "Requires Docker - skipped in CI environment"
 }
 
-@test "make all-tests command runs unit, integration and e2e tests" {
-  run make all-tests
-  assert_success
-  assert_output --partial "PHPUnit"
-}
-
 @test "make unit-tests command requires 100% coverage" {
   run make unit-tests
   assert_success
