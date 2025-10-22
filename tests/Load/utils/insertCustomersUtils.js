@@ -89,7 +89,9 @@ export default class InsertCustomersUtils {
             console.error(`Failed to parse customer response: ${error.message}`);
           }
         } else {
-          console.error(`Failed to create customer. Status: ${response.status}, Body: ${response.body}`);
+          console.error(
+            `Failed to create customer. Status: ${response.status}, Body: ${response.body}`
+          );
         }
       });
 
