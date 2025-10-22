@@ -9,6 +9,7 @@ use App\Core\Customer\Application\Factory as CustomerFactory;
 use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
+use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject as CustomerValueObject;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
@@ -20,6 +21,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
         private MutationInputValidator $validator,
         private CustomerTf\UpdateStatusMutationInputTransformer $inputs,
         private CustomerFactory\UpdateStatusCommandFactoryInterface $factory,
+        private StatusRepositoryInterface $repository,
     ) {
     }
 
@@ -40,8 +42,10 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
         $mutationInput = $this->inputs->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customerStatus = $item;
-        
+        $customerStatus = $item instanceof CustomerStatus
+            ? $item
+            : $this->repository->find($this->extractUlid($input['id']));
+
         if (!$customerStatus instanceof CustomerStatus) {
             throw CustomerStatusNotFoundException::withIri($input['id']);
         }
@@ -53,5 +57,13 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
         $this->commandBus->dispatch($command);
 
         return $customerStatus;
+    }
+
+    /**
+     * Extract ULID from IRI or return the value as-is if already a ULID.
+     */
+    private function extractUlid(string $idOrIri): string
+    {
+        return str_starts_with($idOrIri, '/') ? basename($idOrIri) : $idOrIri;
     }
 }

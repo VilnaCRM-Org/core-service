@@ -84,6 +84,7 @@ App\Core\Customer\Domain\Entity\Customer:
       name: update
       resolver: App\Core\Customer\Application\Resolver\UpdateCustomerMutationResolver
       deserialize: false
+      read: false
       write: false
       denormalizationContext:
         groups: []

@@ -58,6 +58,7 @@ App\Core\Customer\Domain\Entity\CustomerType:
       name: update
       resolver: App\Core\Customer\Application\Resolver\UpdateTypeMutationResolver
       deserialize: false
+      read: false
       write: false
       denormalizationContext:
         groups: []

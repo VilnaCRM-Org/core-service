@@ -15,7 +15,6 @@ use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class UpdateTypeMutationResolverTest extends UnitTestCase
@@ -25,15 +24,14 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
         $dependencies = $this->setupDependencies();
         $resolver = $this->createResolver($dependencies);
         $input = $this->generateInput();
+        $type = $this->createMock(CustomerType::class);
 
         $this->setupTransformerAndValidator($dependencies, $input);
-        $type = $this->createMock(CustomerType::class);
-        $this->setupRepositoryToReturnType($dependencies['repository'], $input, $type);
 
         $capturedUpdate = null;
         $this->setupFactoryAndCommandBus($dependencies, $type, $capturedUpdate);
 
-        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
+        $result = $resolver->__invoke($type, ['args' => ['input' => $input]]);
 
         self::assertSame($type, $result);
         self::assertInstanceOf(CustomerTypeUpdate::class, $capturedUpdate);
@@ -47,14 +45,13 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
         $input = $this->generateInput();
 
         $this->setupTransformerAndValidator($dependencies, $input);
-        $this->setupRepositoryToReturnNull($dependencies['repository'], $input);
         $this->expectNeverCalledFactoryAndCommandBus($dependencies);
 
         $this->expectException(CustomerTypeNotFoundException::class);
         $resolver->__invoke(null, ['args' => ['input' => $input]]);
     }
 
-    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> */
+    /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
     private function setupDependencies(): array
     {
         return [
@@ -63,11 +60,10 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             'transformer' => $this->createMock(UpdateTypeMutationInputTransformer::class),
             'factory' => $this->createMock(UpdateTypeCommandFactoryInterface::class),
             'repository' => $this->createMock(TypeRepositoryInterface::class),
-            'ulidFactory' => new UlidFactory(),
         ];
     }
 
-    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
     private function createResolver(array $deps): UpdateTypeMutationResolver
     {
         return new UpdateTypeMutationResolver(
@@ -76,7 +72,6 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             $deps['transformer'],
             $deps['factory'],
             $deps['repository'],
-            $deps['ulidFactory'],
         );
     }
 
@@ -90,7 +85,7 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
     }
 
     /**
-     * @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps
+     * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps
      * @param array<string, string> $input
      */
     private function setupTransformerAndValidator(array $deps, array $input): void
@@ -108,38 +103,7 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             ->with($mutationInput);
     }
 
-    /** @param array<string, string> $input */
-    private function setupRepositoryToReturnType(
-        \PHPUnit\Framework\MockObject\MockObject $repository,
-        array $input,
-        \PHPUnit\Framework\MockObject\MockObject $type
-    ): void {
-        $repository
-            ->expects(self::once())
-            ->method('find')
-            ->with($this->callback(static function ($ulid) use ($input) {
-                self::assertSame($input['id'], (string) $ulid);
-                return true;
-            }))
-            ->willReturn($type);
-    }
-
-    /** @param array<string, string> $input */
-    private function setupRepositoryToReturnNull(
-        \PHPUnit\Framework\MockObject\MockObject $repository,
-        array $input
-    ): void {
-        $repository
-            ->expects(self::once())
-            ->method('find')
-            ->with($this->callback(static function ($ulid) use ($input) {
-                self::assertSame($input['id'], (string) $ulid);
-                return true;
-            }))
-            ->willReturn(null);
-    }
-
-    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
     private function setupFactoryAndCommandBus(
         array $deps,
         \PHPUnit\Framework\MockObject\MockObject $type,
@@ -168,7 +132,7 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             ->with($this->isInstanceOf(UpdateCustomerTypeCommand::class));
     }
 
-    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject|UlidFactory> $deps */
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
     private function expectNeverCalledFactoryAndCommandBus(array $deps): void
     {
         $deps['commandBus']->expects(self::never())->method('dispatch');
