@@ -8,10 +8,10 @@ App\Core\Customer\Domain\Entity\Customer:
 
   properties:
     type:
-      readableLink: false
+      readableLink: true
       writableLink: false
     status:
-      readableLink: false
+      readableLink: true
       writableLink: false
 
   # REST Operations
@@ -84,13 +84,12 @@ App\Core\Customer\Domain\Entity\Customer:
       name: update
       resolver: App\Core\Customer\Application\Resolver\UpdateCustomerMutationResolver
       deserialize: false
-      read: false
       write: false
       denormalizationContext:
         groups: []
       extraArgs:
         id:
-          type: 'String!'
+          type: 'ID!'
         initials:
           type: 'String'
         email:

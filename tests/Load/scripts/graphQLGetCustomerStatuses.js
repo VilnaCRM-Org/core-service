@@ -11,7 +11,7 @@ export const options = scenarioUtils.getOptions();
 
 export function setup() {
   // Fetch existing customer statuses created by PrepareCustomers script
-  const response = http.get(`${utils.getBaseHttpUrl()}/customer_statuses?itemsPerPage=100`);
+  const response = http.get(`${utils.getBaseUrl()}/customer_statuses?itemsPerPage=100`);
 
   if (response.status !== 200) {
     throw new Error(

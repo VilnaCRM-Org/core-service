@@ -213,7 +213,7 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     """
     mutation {
       updateCustomerType(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER4"
+        id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
         value: "UpdatedValue"
       }) {
         customerType {
@@ -330,7 +330,7 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     """
     mutation {
       updateCustomerType(input: {
-        id: "01ZZZZZZZZZZZZZZZZZZZZZZZZ"
+        id: "/api/customer_types/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
         value: "NonExistent"
       }) {
         customerType {

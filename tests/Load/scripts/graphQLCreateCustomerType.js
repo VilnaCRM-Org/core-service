@@ -52,7 +52,7 @@ export function teardown(data) {
   // Clean up created types
   if (data.createdTypes) {
     data.createdTypes.forEach(typeId => {
-      http.del(`${utils.getBaseHttpUrl()}${typeId}`);
+      http.del(`${utils.getBaseDomain()}${typeId}`);
     });
   }
 }

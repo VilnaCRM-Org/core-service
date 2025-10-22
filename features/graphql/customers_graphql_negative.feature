@@ -245,7 +245,7 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01ZZZZZZZZZZZZZZZZZZZZZZZZ"
+        id: "/api/customers/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
         email: "nonexistent@example.com"
       }) {
         customer {
@@ -263,7 +263,7 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         type: "/api/customer_types/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -281,7 +281,7 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         status: "/api/customer_statuses/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -300,7 +300,7 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     mutation {
       updateCustomer(input: {
-        id: "01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
         email: "existing@example.com"
       }) {
         customer {

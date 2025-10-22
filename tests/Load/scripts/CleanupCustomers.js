@@ -47,7 +47,7 @@ export default function cleanupCustomers() {
     console.log(`Processing ${customers.length} customers from page ${page}...`);
 
     for (const customer of customers) {
-      const deleteResponse = http.del(`http://localhost:80${customer['@id']}`);
+      const deleteResponse = http.del(`${utils.getBaseDomain()}${customer['@id']}`);
 
       if (deleteResponse.status === 204) {
         customersDeleted++;
@@ -76,7 +76,7 @@ export default function cleanupCustomers() {
 
   while (hasMore) {
     const response = http.get(
-      `${utils.getBaseHttpUrl()}/customer_statuses?page=${page}&itemsPerPage=30`
+      `${utils.getBaseUrl()}/customer_statuses?page=${page}&itemsPerPage=30`
     );
 
     if (response.status !== 200) {
@@ -95,7 +95,7 @@ export default function cleanupCustomers() {
     console.log(`Processing ${statuses.length} statuses from page ${page}...`);
 
     for (const status of statuses) {
-      const deleteResponse = http.del(`http://localhost:80${status['@id']}`);
+      const deleteResponse = http.del(`${utils.getBaseDomain()}${status['@id']}`);
 
       if (deleteResponse.status === 204) {
         statusesDeleted++;
@@ -118,7 +118,7 @@ export default function cleanupCustomers() {
 
   while (hasMore) {
     const response = http.get(
-      `${utils.getBaseHttpUrl()}/customer_types?page=${page}&itemsPerPage=30`
+      `${utils.getBaseUrl()}/customer_types?page=${page}&itemsPerPage=30`
     );
 
     if (response.status !== 200) {
@@ -137,7 +137,7 @@ export default function cleanupCustomers() {
     console.log(`Processing ${types.length} types from page ${page}...`);
 
     for (const type of types) {
-      const deleteResponse = http.del(`http://localhost:80${type['@id']}`);
+      const deleteResponse = http.del(`${utils.getBaseDomain()}${type['@id']}`);
 
       if (deleteResponse.status === 204) {
         typesDeleted++;

@@ -19,6 +19,7 @@ export default class InsertCustomersUtils {
   *customersGenerator(numberOfCustomers, types, statuses) {
     for (let i = 0; i < numberOfCustomers; i++) {
       const customer = this.utils.generateCustomer(types, statuses);
+
       yield customer;
     }
   }
@@ -35,17 +36,14 @@ export default class InsertCustomersUtils {
     return batch;
   }
 
-  *requestGenerator(numberOfRequest, batchSize, types, statuses) {
-    for (let i = 0; i < numberOfRequest; i++) {
-      const batch = this.prepareCustomerBatch(batchSize, types, statuses);
-
-      const payload = JSON.stringify({
-        customers: batch,
-      });
+  *requestGenerator(numberOfCustomers, types, statuses) {
+    for (let i = 0; i < numberOfCustomers; i++) {
+      const customerData = this.utils.generateCustomer(types, statuses);
+      const payload = JSON.stringify(customerData);
 
       const request = {
         method: 'POST',
-        url: `${this.utils.getBaseHttpUrl()}/customers/batch`,
+        url: this.utils.getBaseHttpUrl(),
         body: payload,
         params: this.utils.getJsonHeader(),
       };
@@ -55,11 +53,10 @@ export default class InsertCustomersUtils {
   }
 
   prepareRequestBatch(numberOfCustomers, batchSize, types, statuses) {
-    const numberOfRequests = Math.ceil(numberOfCustomers / batchSize);
-    const generator = this.requestGenerator(numberOfRequests, batchSize, types, statuses);
+    const generator = this.requestGenerator(numberOfCustomers, types, statuses);
     const requestBatch = [];
 
-    for (let requestIndex = 0; requestIndex < numberOfRequests; requestIndex++) {
+    for (let i = 0; i < numberOfCustomers; i++) {
       const { value, done } = generator.next();
       if (done) break;
       requestBatch.push(value);
@@ -69,26 +66,40 @@ export default class InsertCustomersUtils {
   }
 
   insertCustomers(numberOfCustomers, types, statuses) {
-    const batchSize = Math.min(this.config.batchSize || 50, numberOfCustomers);
+    const batchSize = Math.min(this.config.batchSize, numberOfCustomers);
     const customers = [];
 
-    const requestBatch = this.prepareRequestBatch(numberOfCustomers, batchSize, types, statuses);
+    // Process customers in batches to avoid overwhelming the API
+    for (let offset = 0; offset < numberOfCustomers; offset += batchSize) {
+      const currentBatchSize = Math.min(batchSize, numberOfCustomers - offset);
+      const requestBatch = this.prepareRequestBatch(currentBatchSize, batchSize, types, statuses);
 
-    try {
       const responses = http.batch(requestBatch);
+
       responses.forEach(response => {
         if (response.status === 201) {
-          const responseData = JSON.parse(response.body);
-          // Handle both single customer and array responses
-          const customerData = Array.isArray(responseData) ? responseData : [responseData];
-          customerData.forEach(customer => {
+          try {
+            const customer = JSON.parse(response.body);
+            // Extract ID from @id IRI (e.g., /api/customers/01K85E6755EFKTKPFMK6WHF99V)
+            if (customer['@id']) {
+              customer.id = customer['@id'].split('/').pop();
+            }
             customers.push(customer);
-          });
+          } catch (error) {
+            console.error(`Failed to parse customer response: ${error.message}`);
+          }
+        } else {
+          console.error(`Failed to create customer. Status: ${response.status}, Body: ${response.body}`);
         }
       });
-    } catch (error) {
+
+      // Log progress
+      console.log(`Created ${customers.length}/${numberOfCustomers} customers`);
+    }
+
+    if (customers.length === 0) {
       throw new Error(
-        'Error occurred during customer insertion, try to lower batchSize in a config file'
+        'Failed to create any customers. Check API endpoint and ensure the service is running.'
       );
     }
 
@@ -96,6 +107,18 @@ export default class InsertCustomersUtils {
   }
 
   insertCustomerTypes() {
+    // Try to fetch existing types first
+    const getResponse = this.utils.getCustomerTypes();
+    if (getResponse.status === 200) {
+      const body = JSON.parse(getResponse.body);
+      // API Platform returns hydra:member array
+      const existingTypes = body['hydra:member'] || body;
+      if (existingTypes && existingTypes.length > 0) {
+        return existingTypes;
+      }
+    }
+
+    // If no existing types, create them
     const types = [
       { value: 'Premium' },
       { value: 'Standard' },
@@ -116,6 +139,18 @@ export default class InsertCustomersUtils {
   }
 
   insertCustomerStatuses() {
+    // Try to fetch existing statuses first
+    const getResponse = this.utils.getCustomerStatuses();
+    if (getResponse.status === 200) {
+      const body = JSON.parse(getResponse.body);
+      // API Platform returns hydra:member array
+      const existingStatuses = body['hydra:member'] || body;
+      if (existingStatuses && existingStatuses.length > 0) {
+        return existingStatuses;
+      }
+    }
+
+    // If no existing statuses, create them
     const statuses = [
       { value: 'Active' },
       { value: 'Inactive' },
@@ -137,15 +172,14 @@ export default class InsertCustomersUtils {
 
   countRequestForRampingRate(startRps, targetRps, duration) {
     const acceleration = (targetRps - startRps) / duration;
+
     return Math.round(startRps * duration + (acceleration * duration * duration) / 2);
   }
 
   prepareCustomers() {
     const types = this.insertCustomerTypes();
     const statuses = this.insertCustomerStatuses();
-    const totalNeeded = this.countTotalRequest();
-
-    return this.insertCustomers(totalNeeded, types, statuses);
+    return this.insertCustomers(this.countTotalRequest(), types, statuses);
   }
 
   countTotalRequest() {
@@ -181,7 +215,9 @@ export default class InsertCustomersUtils {
 
   countDefaultRequests(config) {
     const riseRequests = this.countRequestForRampingRate(0, config.rps, config.duration.rise);
+
     const plateauRequests = config.rps * config.duration.plateau;
+
     const fallRequests = this.countRequestForRampingRate(config.rps, 0, config.duration.fall);
 
     return riseRequests + plateauRequests + fallRequests;

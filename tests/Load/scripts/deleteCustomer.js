@@ -24,13 +24,9 @@ export default function deleteCustomer(data) {
   const customer = data.customers[counter.up() % data.customers.length];
   utils.checkCustomerIsDefined(customer);
 
-  const { '@id': id } = customer;
+  const { id } = customer;
 
-  const response = http.del(`http://localhost:80${id}`);
+  const response = http.del(`${utils.getBaseHttpUrl()}/${id}`, null, utils.getJsonHeader());
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
-}
-
-export function teardown(data) {
-  console.log(`Deleted customers during load test from pool of ${data.customers.length}`);
 }

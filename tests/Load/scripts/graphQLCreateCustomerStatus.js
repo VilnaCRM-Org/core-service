@@ -57,7 +57,7 @@ export function teardown(data) {
   // Clean up created statuses
   if (data.createdStatuses) {
     data.createdStatuses.forEach(statusId => {
-      http.del(`${utils.getBaseHttpUrl()}${statusId}`);
+      http.del(`${utils.getBaseDomain()}${statusId}`);
     });
   }
 }
