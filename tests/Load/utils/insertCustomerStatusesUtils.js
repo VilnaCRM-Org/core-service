@@ -21,7 +21,7 @@ export default class InsertCustomerStatusesUtils {
 
     for (let i = 0; i < numberOfStatuses; i++) {
       const statusData = {
-        value: `DeleteTestStatus_${i}_${Date.now()}`
+        value: `DeleteTestStatus_${i}_${Date.now()}`,
       };
 
       const response = this.utils.createCustomerStatus(statusData);
