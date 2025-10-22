@@ -8,7 +8,8 @@ const scenarioName = 'getCustomers';
 const utils = new Utils();
 const scenarioUtils = new ScenarioUtils(utils, scenarioName);
 const insertCustomersUtils = new InsertCustomersUtils(utils, scenarioName);
-const customersToGetInOneRequest = utils.getConfig().endpoints[scenarioName].customersToGetInOneRequest;
+const customersToGetInOneRequest =
+  utils.getConfig().endpoints[scenarioName].customersToGetInOneRequest;
 
 const customers = insertCustomersUtils.loadInsertedCustomers();
 
