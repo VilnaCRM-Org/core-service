@@ -54,6 +54,89 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     And the GraphQL response should contain "data.customerTypes.pageInfo.hasNextPage"
     And the GraphQL response should contain "data.customerTypes.pageInfo.endCursor"
 
+  Scenario: Query customer types with cursor pagination, ordering, and ULID range filter
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send the following GraphQL query:
+    """
+    {
+      customerTypes(first: 1, order: [{ulid: "DESC"}], ulid: [{lt: "01JKX8XGHVDZ46MWYMZT94YER6"}]) {
+        edges {
+          node {
+            id
+            value
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerTypes.edges"
+    And the GraphQL response "data.customerTypes.edges.0.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the GraphQL response "data.customerTypes.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customerTypes.pageInfo.endCursor"
+
+  Scenario: Query customer types with cursor pagination and ULID greater than filter
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send the following GraphQL query:
+    """
+    {
+      customerTypes(first: 10, order: [{ulid: "ASC"}], ulid: [{gt: "01JKX8XGHVDZ46MWYMZT94YER4"}]) {
+        edges {
+          node {
+            id
+            value
+          }
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerTypes.edges"
+    And the GraphQL response "data.customerTypes.edges.0.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the GraphQL response "data.customerTypes.edges.1.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
+
+  Scenario: Query customer types with cursor navigation using after parameter
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER7"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER8"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER9"
+    When I send the following GraphQL query:
+    """
+    {
+      customerTypes(first: 1, order: [{ulid: "DESC"}]) {
+        edges {
+          node {
+            id
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerTypes.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customerTypes.pageInfo.endCursor"
+
   Scenario: Query customer types with filtering by value
     Given create customer type with value "Premium"
     And create customer type with value "Standard"
