@@ -8,13 +8,10 @@ use RuntimeException;
 
 final class CustomerTypeNotFoundException extends RuntimeException
 {
-    private function __construct(string $message)
-    {
-        parent::__construct($message);
-    }
-
     public static function withIri(string $iri): self
     {
-        return new self(sprintf('Customer type with IRI "%s" not found', $iri));
+        return new self(
+            sprintf('Customer type with IRI "%s" not found', $iri)
+        );
     }
 }

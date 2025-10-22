@@ -17,17 +17,10 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($value === null) {
-            return;
-        }
-
-        if ($value === '') {
-            if ($constraint->isOptional()) {
+        if ($value === null || $value === '') {
+            if ($value === '' && !$constraint->isOptional()) {
                 return;
             }
-        }
-
-        if ($value === '') {
             return;
         }
 

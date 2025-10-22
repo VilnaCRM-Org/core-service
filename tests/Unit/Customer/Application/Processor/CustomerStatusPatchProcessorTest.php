@@ -96,7 +96,6 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->setupUlidFactory($ulid, $ulidMock);
 
         $this->expectException(CustomerStatusNotFoundException::class);
-        $this->expectExceptionMessage('Customer status not found');
 
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }

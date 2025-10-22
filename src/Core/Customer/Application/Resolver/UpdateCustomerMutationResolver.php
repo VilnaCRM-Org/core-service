@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Resolver;
 
 use ApiPlatform\GraphQl\Resolver\MutationResolverInterface as MutationResolver;
-use ApiPlatform\Metadata\IriConverterInterface;
+use App\Core\Customer\Application\Factory\CustomerUpdateFactoryInterface;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Transformer\UpdateCustomerMutationInputTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
-use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
-use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
-use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -24,8 +20,9 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         private CommandBusInterface $commandBus,
         private MutationInputValidator $validator,
         private UpdateCustomerMutationInputTransformer $inputTransformer,
-        private UpdateCustomerCommandFactoryInterface $factory,
-        private IriConverterInterface $iriConverter,
+        private UpdateCustomerCommandFactoryInterface $commandFactory,
+        private CustomerUpdateFactoryInterface $updateFactory,
+        private CustomerRepositoryInterface $repository,
     ) {
     }
 
@@ -63,100 +60,36 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         $mutationInput = $this->inputTransformer->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customer = $item;
-        
-        if (!$customer instanceof Customer) {
-            throw CustomerNotFoundException::withId($input['id']);
-        }
+        $customer = $this->findCustomer($item, $input['id']);
+        $customerUpdate = $this->updateFactory->create($customer, $input);
+        $command = $this->commandFactory->create($customer, $customerUpdate);
 
-        $customerUpdate = $this->createCustomerUpdate($customer, $input);
-
-        $command = $this->factory->create($customer, $customerUpdate);
         $this->commandBus->dispatch($command);
 
         return $customer;
     }
 
-    /**
-     * @param array{
-     *     id: string,
-     *     initials?: string|null,
-     *     email?: string|null,
-     *     phone?: string|null,
-     *     leadSource?: string|null,
-     *     type?: string|null,
-     *     status?: string|null,
-     *     confirmed?: bool|null
-     * } $input
-     */
-    private function createCustomerUpdate(
-        Customer $customer,
-        array $input
-    ): CustomerUpdate {
-        $customerType = $this->resolveCustomerType($customer, $input);
-        $customerStatus = $this->resolveCustomerStatus($customer, $input);
-
-        return new CustomerUpdate(
-            $input['initials'] ?? $customer->getInitials(),
-            $input['email'] ?? $customer->getEmail(),
-            $input['phone'] ?? $customer->getPhone(),
-            $input['leadSource'] ?? $customer->getLeadSource(),
-            $customerType,
-            $customerStatus,
-            $input['confirmed'] ?? $customer->isConfirmed()
-        );
-    }
-
-    /**
-     * @param array{type?: string|null} $input
-     */
-    private function resolveCustomerType(
-        Customer $customer,
-        array $input
-    ): CustomerType {
-        $typeIri = $input['type'] ?? $this->getDefaultTypeIri($customer);
-
-        $resource = $this->iriConverter->getResourceFromIri($typeIri);
-        
-        if (!$resource instanceof CustomerType) {
-            throw CustomerTypeNotFoundException::withIri($typeIri);
+    private function findCustomer(?object $item, string $id): Customer
+    {
+        if ($item instanceof Customer) {
+            return $item;
         }
 
-        return $resource;
-    }
+        $ulid = $this->extractUlid($id);
+        $customer = $this->repository->find($ulid);
 
-    private function getDefaultTypeIri(Customer $customer): string
-    {
-        return sprintf(
-            '/api/customer_types/%s',
-            $customer->getType()->getUlid()
-        );
+        if (!$customer instanceof Customer) {
+            throw CustomerNotFoundException::withId($id);
+        }
+
+        return $customer;
     }
 
     /**
-     * @param array{status?: string|null} $input
+     * Extract ULID from IRI or return the value as-is if already a ULID.
      */
-    private function resolveCustomerStatus(
-        Customer $customer,
-        array $input
-    ): CustomerStatus {
-        $statusIri = $input['status']
-            ?? $this->getDefaultStatusIri($customer);
-
-        $resource = $this->iriConverter->getResourceFromIri($statusIri);
-        
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($statusIri);
-        }
-
-        return $resource;
-    }
-
-    private function getDefaultStatusIri(Customer $customer): string
+    private function extractUlid(string $idOrIri): string
     {
-        return sprintf(
-            '/api/customer_statuses/%s',
-            $customer->getStatus()->getUlid()
-        );
+        return str_starts_with($idOrIri, '/') ? basename($idOrIri) : $idOrIri;
     }
 }
