@@ -117,9 +117,7 @@ export default function cleanupCustomers() {
   hasMore = true;
 
   while (hasMore) {
-    const response = http.get(
-      `${utils.getBaseUrl()}/customer_types?page=${page}&itemsPerPage=30`
-    );
+    const response = http.get(`${utils.getBaseUrl()}/customer_types?page=${page}&itemsPerPage=30`);
 
     if (response.status !== 200) {
       console.error(`Failed to fetch types page ${page}: ${response.status}`);
