@@ -1,5 +1,5 @@
 ---
-name: CI Workflow
+name: ci-workflow
 description: Run comprehensive CI checks before committing changes. Use when the user asks to run CI, run quality checks, validate code quality, or before finishing any task that involves code changes.
 ---
 

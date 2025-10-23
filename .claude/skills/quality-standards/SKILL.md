@@ -1,6 +1,6 @@
 ---
-name: Quality Standards
-description: Maintain and improve code quality standards, reduce cyclomatic complexity, fix PHPInsights issues, and ensure architectural compliance. Use when quality checks fail or when refactoring for better code quality.
+name: quality-standards
+description: Maintain and improve code quality standards without decreasing thresholds. Use when PHPInsights fails, cyclomatic complexity is too high, Psalm reports errors, Deptrac shows violations, mutation score drops, or when refactoring for better code quality. Covers complexity reduction strategies, architecture fixes, and SOLID principles.
 ---
 
 # Quality Standards Skill
