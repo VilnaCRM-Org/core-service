@@ -12,7 +12,7 @@ VilnaCRM Core Service - A modern PHP microservice template built with Symfony 7,
 
 ### Docker Environment
 
-```bash
+````bash
 make start          # Start docker containers
 make stop           # Stop docker containers
 make down           # Stop and remove containers
@@ -172,7 +172,7 @@ tests/
 ├── Behat/          # E2E BDD tests (Behat)
 ├── Load/           # k6 load testing scenarios
 └── CLI/            # Bash script tests (bats)
-```
+````
 
 - Unit tests: `PHPUNIT_TESTSUITE=Unit`
 - Integration tests: `PHPUNIT_TESTSUITE=Integration`

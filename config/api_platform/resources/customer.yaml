@@ -4,7 +4,7 @@ App\Core\Customer\Domain\Entity\Customer:
   normalizationContext:
     groups: ['output']
   paginationViaCursor:
-    - {field: 'ulid', direction: 'DESC'}
+    - { field: 'ulid', direction: 'DESC' }
 
   properties:
     type:
