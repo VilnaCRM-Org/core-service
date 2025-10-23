@@ -92,12 +92,12 @@ make smoke-load-tests
 
 ## Load Test Levels
 
-| Level | VUs | Duration | Success Rate | Purpose |
-|-------|-----|----------|--------------|---------|
-| **Smoke** | 2-5 | 10 seconds | 100% | Basic functionality verification |
-| **Average** | 10-20 | 2-3 minutes | >99% | Normal traffic simulation |
-| **Stress** | 30-80 | 5-15 minutes | >95% | Find breaking points |
-| **Spike** | 100-200 | 1-3 minutes | >90% | Test resilience under sudden load |
+| Level       | VUs     | Duration     | Success Rate | Purpose                           |
+| ----------- | ------- | ------------ | ------------ | --------------------------------- |
+| **Smoke**   | 2-5     | 10 seconds   | 100%         | Basic functionality verification  |
+| **Average** | 10-20   | 2-3 minutes  | >99%         | Normal traffic simulation         |
+| **Stress**  | 30-80   | 5-15 minutes | >95%         | Find breaking points              |
+| **Spike**   | 100-200 | 1-3 minutes  | >90%         | Test resilience under sudden load |
 
 ## Common Pitfalls
 

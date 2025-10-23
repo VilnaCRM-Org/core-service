@@ -60,9 +60,9 @@ function buildGraphQLQuery(data) {
     variables: {
       input: {
         name: `Resource_${randomString(8)}`,
-        dependency: data.dependency['@id']
-      }
-    }
+        dependency: data.dependency['@id'],
+      },
+    },
   };
 }
 ```
@@ -94,9 +94,9 @@ export default function graphQLCreateResource(data) {
         phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
         type: data.type['@id'],
         status: data.status['@id'],
-        confirmed: true
-      }
-    }
+        confirmed: true,
+      },
+    },
   };
 
   const response = utils.executeGraphQL(mutation);
@@ -118,6 +118,7 @@ export default function graphQLCreateResource(data) {
 ```
 
 **Validation**:
+
 - Check `response.status === 200`
 - Verify `body.data` contains expected data
 - Ensure `body.errors` is undefined or empty
@@ -141,8 +142,8 @@ export default function graphQLGetResource(data) {
       }
     }`,
     variables: {
-      id: data.customerIri
-    }
+      id: data.customerIri,
+    },
   };
 
   const response = utils.executeGraphQL(query);
@@ -180,8 +181,8 @@ export default function graphQLGetResources(data) {
     variables: {
       page: 1,
       itemsPerPage: 30,
-      status: data.status['@id']
-    }
+      status: data.status['@id'],
+    },
   };
 
   const response = utils.executeGraphQL(query);
@@ -213,9 +214,9 @@ export default function graphQLUpdateResource(data) {
     variables: {
       input: {
         id: data.customerIri,
-        initials: `Updated_${randomString(8)}`
-      }
-    }
+        initials: `Updated_${randomString(8)}`,
+      },
+    },
   };
 
   const response = utils.executeGraphQL(mutation);
@@ -244,9 +245,9 @@ export default function graphQLDeleteResource(data) {
     }`,
     variables: {
       input: {
-        id: data.customerIri
-      }
-    }
+        id: data.customerIri,
+      },
+    },
   };
 
   const response = utils.executeGraphQL(mutation);
@@ -273,10 +274,10 @@ const mutation = {
   query: `mutation CreateCustomer($input: CreateCustomerInput!) { ... }`,
   variables: {
     input: {
-      type: "/api/customer_types/01234", // Full IRI
-      status: "/api/customer_statuses/56789"
-    }
-  }
+      type: '/api/customer_types/01234', // Full IRI
+      status: '/api/customer_statuses/56789',
+    },
+  },
 };
 ```
 
@@ -300,8 +301,8 @@ const query = {
     customer(id: $id) { ... }
   }`,
   variables: {
-    id: data.customerIri // Use stored IRI
-  }
+    id: data.customerIri, // Use stored IRI
+  },
 };
 ```
 
@@ -341,10 +342,10 @@ function generateComplexInput(data) {
         street: `${Math.floor(Math.random() * 9999)} Main St`,
         city: 'Test City',
         country: 'US',
-        postalCode: `${Math.floor(Math.random() * 90000) + 10000}`
-      }
+        postalCode: `${Math.floor(Math.random() * 90000) + 10000}`,
+      },
     },
-    type: data.type['@id']
+    type: data.type['@id'],
   };
 }
 ```
@@ -445,15 +446,15 @@ const query = {
   }`,
   variables: {
     status: data.status['@id'],
-    page: 1
-  }
+    page: 1,
+  },
 };
 
 // ❌ BAD: Inline values in query string
 const query = {
   query: `query {
     customers(status: "${data.status['@id']}", page: 1) { ... }
-  }`
+  }`,
 };
 ```
 
@@ -470,7 +471,7 @@ const query = {
       initials
     }
   }`,
-  variables: { id: customerId }
+  variables: { id: customerId },
 };
 
 // ❌ BAD: Requesting all fields
@@ -490,7 +491,7 @@ const query = {
       // ... many more fields
     }
   }`,
-  variables: { id: customerId }
+  variables: { id: customerId },
 };
 ```
 
@@ -505,7 +506,7 @@ export default function graphQLMixedOperations(data) {
     () => graphQLCreateCustomer(data),
     () => graphQLGetCustomer(data),
     () => graphQLUpdateCustomer(data),
-    () => graphQLDeleteCustomer(data)
+    () => graphQLDeleteCustomer(data),
   ];
 
   operations[operationIndex]();

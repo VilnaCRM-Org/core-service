@@ -13,6 +13,7 @@ This guide covers MongoDB-specific features and patterns when using Doctrine ODM
 **Purpose**: Time-ordered, globally unique identifiers for MongoDB documents
 
 **Characteristics**:
+
 - 26-character string representation
 - Sortable by creation time
 - URL-safe (no special characters)
@@ -50,6 +51,7 @@ final class Customer
 ```
 
 **ULID Format**:
+
 ```
 01HQ5ZK3M7RXVB8F2N1JYKC9TG
 │├─────────┤│├──────────┤
@@ -64,6 +66,7 @@ final class Customer
 **Purpose**: RFC 4122 compliant UUIDs for domain entity identifiers
 
 **Characteristics**:
+
 - Standard UUID format (8-4-4-4-12)
 - UUID version 4 (random)
 - Widely compatible
@@ -93,19 +96,20 @@ final class Customer
 ```
 
 **UUID Format**:
+
 ```
 550e8400-e29b-41d4-a716-446655440000
 ```
 
 ### Choosing Between ULID and UUID
 
-| Use Case | Type | Reason |
-|----------|------|--------|
-| MongoDB _id field | ULID | Time-ordered, efficient indexing |
-| Public API identifiers | ULID | Shorter, URL-friendly |
-| Domain entity IDs | Either | Both work, ULID preferred |
-| Legacy system compatibility | UUID | Standard format |
-| Event sourcing | ULID | Time ordering important |
+| Use Case                    | Type   | Reason                           |
+| --------------------------- | ------ | -------------------------------- |
+| MongoDB \_id field          | ULID   | Time-ordered, efficient indexing |
+| Public API identifiers      | ULID   | Shorter, URL-friendly            |
+| Domain entity IDs           | Either | Both work, ULID preferred        |
+| Legacy system compatibility | UUID   | Standard format                  |
+| Event sourcing              | ULID   | Time ordering important          |
 
 ## Indexes
 
@@ -122,8 +126,9 @@ final class Customer
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.customers.createIndex({ "email": 1 })
+db.customers.createIndex({ email: 1 });
 ```
 
 #### Unique Index
@@ -138,8 +143,9 @@ db.customers.createIndex({ "email": 1 })
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.customers.createIndex({ "email": 1 }, { unique: true })
+db.customers.createIndex({ email: 1 }, { unique: true });
 ```
 
 #### Compound Index
@@ -155,11 +161,13 @@ db.customers.createIndex({ "email": 1 }, { unique: true })
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.customers.createIndex({ "status": 1, "type": 1, "created_at": -1 })
+db.customers.createIndex({ status: 1, type: 1, created_at: -1 });
 ```
 
 **Order Matters**: Compound indexes are used left-to-right. This index supports:
+
 - ✅ `{ status: "active" }`
 - ✅ `{ status: "active", type: "premium" }`
 - ✅ `{ status: "active", type: "premium", createdAt: { $gte: date } }`
@@ -179,11 +187,13 @@ db.customers.createIndex({ "status": 1, "type": 1, "created_at": -1 })
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.customers.createIndex({ "name": "text", "email": "text" })
+db.customers.createIndex({ name: 'text', email: 'text' });
 ```
 
 **Query Usage**:
+
 ```php
 $qb = $this->repository->createQueryBuilder();
 $qb->text('search term');  // Searches name and email
@@ -203,8 +213,9 @@ Index only documents that have the field:
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.customers.createIndex({ "tax_id": 1 }, { sparse: true })
+db.customers.createIndex({ tax_id: 1 }, { sparse: true });
 ```
 
 #### TTL Index (Time-To-Live)
@@ -221,13 +232,15 @@ Automatically delete documents after expiration:
 ```
 
 **MongoDB Command**:
+
 ```javascript
-db.sessions.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 3600 })
+db.sessions.createIndex({ expires_at: 1 }, { expireAfterSeconds: 3600 });
 ```
 
 ### Index Best Practices
 
 **1. Index Frequently Queried Fields**:
+
 ```xml
 <!-- ✅ Index fields used in WHERE clauses -->
 <index><key name="status"/></index>
@@ -235,6 +248,7 @@ db.sessions.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 3600 })
 ```
 
 **2. Use Compound Indexes for Multiple Field Queries**:
+
 ```xml
 <!-- ✅ For queries like: status = "active" AND type = "premium" -->
 <index>
@@ -244,11 +258,13 @@ db.sessions.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 3600 })
 ```
 
 **3. Avoid Too Many Indexes**:
+
 - Indexes slow down writes
 - Consume disk space
 - Aim for 3-5 indexes per collection max
 
 **4. Index Sort Fields**:
+
 ```xml
 <!-- ✅ For queries with ORDER BY created_at DESC -->
 <index>
@@ -257,6 +273,7 @@ db.sessions.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 3600 })
 ```
 
 **5. Use Unique Indexes for Constraints**:
+
 ```xml
 <!-- ✅ Enforce email uniqueness at database level -->
 <index>
@@ -504,12 +521,14 @@ final class Customer
 ```
 
 **Advantages**:
+
 - Simple string storage
 - Works with API Platform out of the box
 - Easy to query
 - No lazy loading complexity
 
 **Disadvantages**:
+
 - No referential integrity
 - Must manually validate references exist
 
@@ -520,6 +539,7 @@ final class Customer
 ```
 
 **Why Not Recommended**:
+
 - API Platform expects IRI strings
 - Lazy loading adds complexity
 - Performance overhead
@@ -527,18 +547,18 @@ final class Customer
 
 ## Field Types Reference
 
-| PHP Type | Doctrine Type | MongoDB BSON | Example |
-|----------|---------------|--------------|---------|
-| `string` | `string` | String | `"text"` |
-| `int` | `int` | Int32/Int64 | `42` |
-| `float` | `float` | Double | `3.14` |
-| `bool` | `boolean` | Boolean | `true` |
-| `array` | `collection` | Array | `[1, 2, 3]` |
-| `array` | `hash` | Object | `{"key": "value"}` |
-| `DateTime` | `date` | Date | `ISODate("2024-01-01T00:00:00Z")` |
-| `DateTimeImmutable` | `date_immutable` | Date | `ISODate("2024-01-01T00:00:00Z")` |
-| `Ulid` | `ulid` | String | `"01HQ5ZK3M7RXVB8F2N1JYKC9TG"` |
-| `Uuid` | `domain_uuid` | String | `"550e8400-e29b-41d4-a716-446655440000"` |
+| PHP Type            | Doctrine Type    | MongoDB BSON | Example                                  |
+| ------------------- | ---------------- | ------------ | ---------------------------------------- |
+| `string`            | `string`         | String       | `"text"`                                 |
+| `int`               | `int`            | Int32/Int64  | `42`                                     |
+| `float`             | `float`          | Double       | `3.14`                                   |
+| `bool`              | `boolean`        | Boolean      | `true`                                   |
+| `array`             | `collection`     | Array        | `[1, 2, 3]`                              |
+| `array`             | `hash`           | Object       | `{"key": "value"}`                       |
+| `DateTime`          | `date`           | Date         | `ISODate("2024-01-01T00:00:00Z")`        |
+| `DateTimeImmutable` | `date_immutable` | Date         | `ISODate("2024-01-01T00:00:00Z")`        |
+| `Ulid`              | `ulid`           | String       | `"01HQ5ZK3M7RXVB8F2N1JYKC9TG"`           |
+| `Uuid`              | `domain_uuid`    | String       | `"550e8400-e29b-41d4-a716-446655440000"` |
 
 ## MongoDB Transactions
 
@@ -584,7 +604,7 @@ private CustomerType $type;
 <index><key name="email" order="asc"/><option name="unique" value="true"/></index>
 ```
 
-### 4. Use ULID for MongoDB _id Fields
+### 4. Use ULID for MongoDB \_id Fields
 
 ```xml
 <field name="id" fieldName="id" id="true" type="ulid"/>

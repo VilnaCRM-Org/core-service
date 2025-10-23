@@ -6,7 +6,7 @@
 
 **Update**: `docs/advanced-configuration.md`
 
-```markdown
+````markdown
 ### NEW_CONFIG_OPTION
 
 **Type**: String
@@ -20,7 +20,7 @@ NEW_CONFIG_OPTION=custom_value
 \```
 
 **Validation**: Must be between 8-64 characters.
-```
+````
 
 **Update**: `docs/getting-started.md` if required for basic setup
 
@@ -60,6 +60,7 @@ NEW_CONFIG_OPTION=custom_value
 ### Optimization Name
 
 **Impact**:
+
 - Metric 1: Before → After
 - Metric 2: Before → After
 

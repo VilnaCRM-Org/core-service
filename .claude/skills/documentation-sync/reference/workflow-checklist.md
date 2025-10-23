@@ -115,13 +115,13 @@
 
 ## Quick Reference by Change Type
 
-| Change | Primary Docs | Commands |
-|--------|--------------|----------|
-| REST endpoint | `api-endpoints.md`, `user-guide.md` | `make generate-openapi-spec` |
-| GraphQL op | `api-endpoints.md`, `user-guide.md` | `make generate-graphql-spec` |
-| Entity | `design-and-architecture.md`, `developer-guide.md` | - |
-| Config | `advanced-configuration.md` | - |
-| Auth | `security.md`, `api-endpoints.md` | - |
-| Test | `testing.md` | - |
-| Performance | `performance.md` | - |
-| Domain | `design-and-architecture.md`, `glossary.md` | - |
+| Change        | Primary Docs                                       | Commands                     |
+| ------------- | -------------------------------------------------- | ---------------------------- |
+| REST endpoint | `api-endpoints.md`, `user-guide.md`                | `make generate-openapi-spec` |
+| GraphQL op    | `api-endpoints.md`, `user-guide.md`                | `make generate-graphql-spec` |
+| Entity        | `design-and-architecture.md`, `developer-guide.md` | -                            |
+| Config        | `advanced-configuration.md`                        | -                            |
+| Auth          | `security.md`, `api-endpoints.md`                  | -                            |
+| Test          | `testing.md`                                       | -                            |
+| Performance   | `performance.md`                                   | -                            |
+| Domain        | `design-and-architecture.md`, `glossary.md`        | -                            |

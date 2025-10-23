@@ -8,11 +8,21 @@ The `Utils` class in `tests/Load/utils/utils.js` provides common functionality f
 
 ```javascript
 class Utils {
-  getBaseHttpUrl() { /* ... */ }
-  getJsonHeader() { /* ... */ }
-  getMergePatchHeader() { /* ... */ }
-  checkResponse(response, description, validator) { /* ... */ }
-  executeGraphQL(query) { /* ... */ }
+  getBaseHttpUrl() {
+    /* ... */
+  }
+  getJsonHeader() {
+    /* ... */
+  }
+  getMergePatchHeader() {
+    /* ... */
+  }
+  checkResponse(response, description, validator) {
+    /* ... */
+  }
+  executeGraphQL(query) {
+    /* ... */
+  }
 }
 ```
 
@@ -115,7 +125,7 @@ export default class CustomerUtils extends Utils {
     return {
       customer: customer,
       type: type,
-      status: status
+      status: status,
     };
   }
 
@@ -151,11 +161,8 @@ export function setup() {
   return customerUtils.createCustomerWithDependencies();
 }
 
-export default function(data) {
-  const customerData = customerUtils.generateCustomerData(
-    data.type['@id'],
-    data.status['@id']
-  );
+export default function (data) {
+  const customerData = customerUtils.generateCustomerData(data.type['@id'], data.status['@id']);
   // ... rest of test
 }
 
@@ -225,7 +232,7 @@ export function setup() {
 
   return {
     type: JSON.parse(typeResponse.body),
-    category: JSON.parse(categoryResponse.body)
+    category: JSON.parse(categoryResponse.body),
   };
 }
 ```
@@ -246,7 +253,7 @@ export class ResourceFactory {
     const defaults = {
       email: `user_${Date.now()}@example.com`,
       name: `User_${randomString(8)}`,
-      active: true
+      active: true,
     };
 
     const userData = { ...defaults, ...overrides };
@@ -294,7 +301,7 @@ export class AuthHelper {
       JSON.stringify({
         grant_type: 'client_credentials',
         client_id: clientId,
-        client_secret: clientSecret
+        client_secret: clientSecret,
       }),
       this.utils.getJsonHeader()
     );
@@ -311,9 +318,9 @@ export class AuthHelper {
   getAuthHeader(token) {
     return {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/ld+json'
-      }
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/ld+json',
+      },
     };
   }
 }
@@ -332,7 +339,7 @@ export class ValidationHelper {
       'has initials': customer.initials !== undefined,
       'email format valid': /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email),
       'has type': customer.type !== undefined,
-      'has status': customer.status !== undefined
+      'has status': customer.status !== undefined,
     };
 
     const failed = Object.entries(checks)
@@ -348,9 +355,11 @@ export class ValidationHelper {
   }
 
   static validateCollection(collection, expectedMinSize = 0) {
-    return collection['hydra:member'] !== undefined &&
-           Array.isArray(collection['hydra:member']) &&
-           collection['hydra:totalItems'] >= expectedMinSize;
+    return (
+      collection['hydra:member'] !== undefined &&
+      Array.isArray(collection['hydra:member']) &&
+      collection['hydra:totalItems'] >= expectedMinSize
+    );
   }
 }
 ```
@@ -385,7 +394,7 @@ export class GraphQLQueryBuilder {
           }
         }
       }`,
-      variables: filters
+      variables: filters,
     };
   }
 
@@ -399,10 +408,9 @@ export class GraphQLQueryBuilder {
 
 ```javascript
 const queryBuilder = new GraphQLQueryBuilder(utils);
-const query = queryBuilder.buildCustomerQuery(
-  ['id', 'email'],
-  { status: '/api/customer_statuses/01234' }
-);
+const query = queryBuilder.buildCustomerQuery(['id', 'email'], {
+  status: '/api/customer_statuses/01234',
+});
 const response = queryBuilder.execute(query);
 ```
 
@@ -437,12 +445,12 @@ Each helper class should have a single responsibility:
 
 ```javascript
 // ✅ GOOD: Focused helpers
-class CustomerFactory { }
-class CustomerValidator { }
-class CustomerCleaner { }
+class CustomerFactory {}
+class CustomerValidator {}
+class CustomerCleaner {}
 
 // ❌ BAD: God class
-class CustomerEverything { }
+class CustomerEverything {}
 ```
 
 ### 2. Make Helpers Stateless
