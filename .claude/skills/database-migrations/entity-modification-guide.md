@@ -56,6 +56,7 @@ final class Customer
 ```
 
 **Key Points**:
+
 - New fields should be nullable (`?type`) to support existing documents
 - Add to constructor as optional parameters
 - Provide getters and update methods
@@ -111,10 +112,10 @@ App\Core\Customer\Domain\Entity\Customer:
     email:
       readable: true
       writable: true
-    company:  # NEW
+    company: # NEW
       readable: true
       writable: true
-    taxId:    # NEW
+    taxId: # NEW
       readable: true
       writable: true
 ```
@@ -124,6 +125,7 @@ App\Core\Customer\Domain\Entity\Customer:
 Update application layer if using DTOs:
 
 **CreateCustomerDto.php**:
+
 ```php
 final readonly class CreateCustomerDto
 {
@@ -138,6 +140,7 @@ final readonly class CreateCustomerDto
 ```
 
 **UpdateCustomerDto.php**:
+
 ```php
 final readonly class UpdateCustomerDto
 {
@@ -277,7 +280,7 @@ final class MigrateCustomerFieldCommand extends Command
 Then run manual MongoDB update:
 
 ```javascript
-db.customers.updateMany({}, { $rename: { "email": "email_address" } })
+db.customers.updateMany({}, { $rename: { email: 'email_address' } });
 ```
 
 ## Adding Indexes
@@ -307,9 +310,9 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 ```javascript
 // MongoDB shell
 db.customers.aggregate([
-  { $group: { _id: "$email", count: { $sum: 1 } } },
-  { $match: { count: { $gt: 1 } } }
-])
+  { $group: { _id: '$email', count: { $sum: 1 } } },
+  { $match: { count: { $gt: 1 } } },
+]);
 ```
 
 **Step 2: Clean up duplicates if needed**
@@ -375,7 +378,7 @@ public function getOldField(): string
 
 ```javascript
 // MongoDB shell
-db.customers.updateMany({}, { $unset: { "old_field": "" } })
+db.customers.updateMany({}, { $unset: { old_field: '' } });
 ```
 
 ## Adding Relationships

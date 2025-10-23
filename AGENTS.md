@@ -152,16 +152,19 @@ This repository includes comprehensive Claude Code Skills in the `.claude/skills
 ### Available Skills
 
 **Workflow Skills**:
+
 - **[ci-workflow](.claude/skills/ci-workflow/SKILL.md)**: Run comprehensive CI checks before committing
 - **[code-review](.claude/skills/code-review/SKILL.md)**: Systematically retrieve and address PR code review comments
 - **[testing-workflow](.claude/skills/testing-workflow/SKILL.md)**: Run and manage all test types (unit, integration, E2E, mutation, load)
 
 **Code Quality Skills**:
+
 - **[quality-standards](.claude/skills/quality-standards/SKILL.md)**: Maintain and improve code quality without decreasing thresholds
 - **[database-migrations](.claude/skills/database-migrations/SKILL.md)**: Create and manage MongoDB database migrations with Doctrine ODM
 - **[documentation-sync](.claude/skills/documentation-sync/SKILL.md)**: Keep documentation synchronized with code changes
 
 **Performance Skills**:
+
 - **[load-testing](.claude/skills/load-testing/SKILL.md)**: Create and manage K6 load tests for REST and GraphQL APIs
 
 ### Skill Structure
@@ -174,6 +177,7 @@ Skills follow Claude Code best practices with multi-file structure:
 - **Reference/**: Troubleshooting and advanced topics
 
 **Example**: The `load-testing` skill has:
+
 - `SKILL.md` (210 lines) - Core workflow
 - `rest-api-patterns.md` - REST API patterns
 - `graphql-patterns.md` - GraphQL patterns

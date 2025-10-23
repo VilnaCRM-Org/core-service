@@ -30,42 +30,42 @@ Activate this skill when:
 
 ### API and Integration
 
-| File | Purpose | Update When |
-|------|---------|-------------|
-| `docs/api-endpoints.md` | REST/GraphQL endpoints, schemas | API changes |
-| `docs/user-guide.md` | User-facing features | Feature changes |
-| `docs/security.md` | Auth, authorization | Security changes |
+| File                    | Purpose                         | Update When      |
+| ----------------------- | ------------------------------- | ---------------- |
+| `docs/api-endpoints.md` | REST/GraphQL endpoints, schemas | API changes      |
+| `docs/user-guide.md`    | User-facing features            | Feature changes  |
+| `docs/security.md`      | Auth, authorization             | Security changes |
 
 ### Architecture and Design
 
-| File | Purpose | Update When |
-|------|---------|-------------|
+| File                              | Purpose                 | Update When          |
+| --------------------------------- | ----------------------- | -------------------- |
 | `docs/design-and-architecture.md` | System design, patterns | Architecture changes |
-| `docs/developer-guide.md` | Dev patterns, examples | Dev workflow changes |
-| `docs/glossary.md` | Domain terminology | New domain concepts |
+| `docs/developer-guide.md`         | Dev patterns, examples  | Dev workflow changes |
+| `docs/glossary.md`                | Domain terminology      | New domain concepts  |
 
 ### Operations and Configuration
 
-| File | Purpose | Update When |
-|------|---------|-------------|
-| `docs/advanced-configuration.md` | Env vars, config | Config changes |
-| `docs/getting-started.md` | Setup, installation | Setup changes |
-| `docs/operational.md` | Monitoring, logging | Ops changes |
+| File                             | Purpose             | Update When    |
+| -------------------------------- | ------------------- | -------------- |
+| `docs/advanced-configuration.md` | Env vars, config    | Config changes |
+| `docs/getting-started.md`        | Setup, installation | Setup changes  |
+| `docs/operational.md`            | Monitoring, logging | Ops changes    |
 
 ### Development
 
-| File | Purpose | Update When |
-|------|---------|-------------|
-| `docs/testing.md` | Test strategies | Test changes |
+| File                  | Purpose                   | Update When      |
+| --------------------- | ------------------------- | ---------------- |
+| `docs/testing.md`     | Test strategies           | Test changes     |
 | `docs/performance.md` | Benchmarks, optimizations | Performance work |
-| `docs/onboarding.md` | New dev onboarding | Process changes |
+| `docs/onboarding.md`  | New dev onboarding        | Process changes  |
 
 ### Versioning
 
-| File | Purpose | Update When |
-|------|---------|-------------|
-| `docs/versioning.md` | Version info | Version bumps |
-| `docs/release-notes.md` | Changelog | Significant changes |
+| File                    | Purpose      | Update When         |
+| ----------------------- | ------------ | ------------------- |
+| `docs/versioning.md`    | Version info | Version bumps       |
+| `docs/release-notes.md` | Changelog    | Significant changes |
 
 ## Documentation Update Workflow
 
@@ -81,16 +81,16 @@ Activate this skill when:
 
 ### Common Update Scenarios
 
-| Change Type | Primary Docs | Commands | Guide |
-|-------------|--------------|----------|-------|
-| **REST Endpoint** | `api-endpoints.md` | `make generate-openapi-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md) |
-| **GraphQL Operation** | `api-endpoints.md` | `make generate-graphql-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md) |
-| **Database Schema** | `design-and-architecture.md` | - | [database-and-architecture.md](update-scenarios/database-and-architecture.md) |
-| **Domain Model** | `design-and-architecture.md`, `glossary.md` | - | [database-and-architecture.md](update-scenarios/database-and-architecture.md) |
-| **Configuration** | `advanced-configuration.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
-| **Authentication** | `security.md`, `api-endpoints.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
-| **Testing** | `testing.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
-| **Performance** | `performance.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| Change Type           | Primary Docs                                | Commands                     | Guide                                                                               |
+| --------------------- | ------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
+| **REST Endpoint**     | `api-endpoints.md`                          | `make generate-openapi-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md)                               |
+| **GraphQL Operation** | `api-endpoints.md`                          | `make generate-graphql-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md)                               |
+| **Database Schema**   | `design-and-architecture.md`                | -                            | [database-and-architecture.md](update-scenarios/database-and-architecture.md)       |
+| **Domain Model**      | `design-and-architecture.md`, `glossary.md` | -                            | [database-and-architecture.md](update-scenarios/database-and-architecture.md)       |
+| **Configuration**     | `advanced-configuration.md`                 | -                            | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Authentication**    | `security.md`, `api-endpoints.md`           | -                            | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Testing**           | `testing.md`                                | -                            | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Performance**       | `performance.md`                            | -                            | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
 
 **See detailed guides**: [update-scenarios/](update-scenarios/) directory
 
@@ -138,6 +138,7 @@ Before committing code with documentation updates:
 ### During Development
 
 **Documentation is code**:
+
 - Update docs in same PR as code changes
 - Test documentation examples
 - Validate links and references
@@ -145,6 +146,7 @@ Before committing code with documentation updates:
 ### During Code Review
 
 **Reviewers check**:
+
 - Documentation accuracy
 - Completeness of examples
 - Terminology consistency
@@ -153,6 +155,7 @@ Before committing code with documentation updates:
 ### During CI/CD
 
 **Automated checks**:
+
 - Documentation links validation
 - Example code syntax checking
 - Spec generation and validation

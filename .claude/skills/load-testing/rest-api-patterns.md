@@ -69,7 +69,7 @@ export default function createResource(data) {
   const resourceData = {
     name: `Resource_${randomString(8)}`,
     field1: `Value_${Date.now()}`,
-    dependency: data.dependency['@id']
+    dependency: data.dependency['@id'],
   };
 
   const response = http.post(
@@ -90,9 +90,7 @@ export default function createResource(data) {
 
 ```javascript
 export default function getResource(data) {
-  const response = http.get(
-    `${utils.getBaseHttpUrl()}${data.resourceIri}`
-  );
+  const response = http.get(`${utils.getBaseHttpUrl()}${data.resourceIri}`);
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }
@@ -122,7 +120,7 @@ export default function getResources(data) {
 ```javascript
 export default function updateResource(data) {
   const updates = {
-    name: `Updated_${randomString(8)}`
+    name: `Updated_${randomString(8)}`,
   };
 
   const response = http.patch(
@@ -142,7 +140,7 @@ export default function replaceResource(data) {
   const resourceData = {
     name: `Replaced_${randomString(8)}`,
     field1: `NewValue_${Date.now()}`,
-    dependency: data.dependency['@id']
+    dependency: data.dependency['@id'],
   };
 
   const response = http.put(
@@ -159,9 +157,7 @@ export default function replaceResource(data) {
 
 ```javascript
 export default function deleteResource(data) {
-  const response = http.del(
-    `${utils.getBaseHttpUrl()}${data.resourceIri}`
-  );
+  const response = http.del(`${utils.getBaseHttpUrl()}${data.resourceIri}`);
 
   utils.checkResponse(response, 'is status 204', res => res.status === 204);
 }
@@ -232,10 +228,10 @@ const email = `test_${Date.now()}@example.com`;
 
 ```javascript
 // For JSON-LD (default API Platform format)
-utils.getJsonHeader()  // Content-Type: application/ld+json
+utils.getJsonHeader(); // Content-Type: application/ld+json
 
 // For PATCH operations
-utils.getMergePatchHeader()  // Content-Type: application/merge-patch+json
+utils.getMergePatchHeader(); // Content-Type: application/merge-patch+json
 ```
 
 ### Error Handling

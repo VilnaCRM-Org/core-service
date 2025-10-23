@@ -7,11 +7,13 @@
 #### Issue: Script Not Found
 
 **Symptoms**:
+
 ```
 Error: scenario 'createCustomer' not found in config
 ```
 
 **Diagnosis**:
+
 ```bash
 ./tests/Load/get-load-test-scenarios.sh
 ```
@@ -19,11 +21,13 @@ Error: scenario 'createCustomer' not found in config
 **Solutions**:
 
 1. Verify script exists in `tests/Load/scripts/`:
+
    ```bash
    ls -la tests/Load/scripts/createCustomer.js
    ```
 
 2. Check configuration in `tests/Load/config.json.dist`:
+
    ```json
    {
      "scenarios": {
@@ -41,6 +45,7 @@ Error: scenario 'createCustomer' not found in config
 #### Issue: Import Path Errors
 
 **Symptoms**:
+
 ```
 Error: Cannot find module '../utils/utils.js'
 ```
@@ -51,7 +56,7 @@ Verify relative paths from script location:
 
 ```javascript
 // For scripts in tests/Load/scripts/
-import Utils from '../utils/utils.js';           // ✅ Correct
+import Utils from '../utils/utils.js'; // ✅ Correct
 import ScenarioUtils from '../utils/scenarioUtils.js'; // ✅ Correct
 
 // ❌ Wrong
@@ -62,6 +67,7 @@ import Utils from 'utils/utils.js';
 #### Issue: Invalid JavaScript Syntax
 
 **Symptoms**:
+
 ```
 SyntaxError: Unexpected token
 ```
@@ -75,6 +81,7 @@ SyntaxError: Unexpected token
 **Solution**:
 
 Run syntax validation:
+
 ```bash
 node --check tests/Load/scripts/yourScript.js
 ```
@@ -84,6 +91,7 @@ node --check tests/Load/scripts/yourScript.js
 #### Issue: Setup Returns Null/Undefined
 
 **Symptoms**:
+
 ```
 TypeError: Cannot read property '@id' of null
 ```
@@ -118,6 +126,7 @@ export function setup() {
 #### Issue: Teardown Doesn't Clean Up
 
 **Symptoms**:
+
 - Test data remains in database after tests
 - Database fills up over time
 
@@ -154,6 +163,7 @@ export function teardown(data) {
 #### Issue: All Requests Failing
 
 **Symptoms**:
+
 ```
 ✗ is status 201
   ↳  0% — ✓ 0 / ✗ 100
@@ -175,12 +185,14 @@ console.log('Request payload:', payload);
 **Common Causes**:
 
 1. **Wrong Base URL**:
+
    ```javascript
    // Check BASE_URL environment variable
    console.log('Base URL:', utils.getBaseHttpUrl());
    ```
 
 2. **Invalid Payload**:
+
    ```javascript
    // Validate JSON structure
    try {
@@ -191,6 +203,7 @@ console.log('Request payload:', payload);
    ```
 
 3. **Missing Headers**:
+
    ```javascript
    // Ensure Content-Type header is set
    console.log('Headers:', JSON.stringify(headers));
@@ -207,6 +220,7 @@ console.log('Request payload:', payload);
 #### Issue: Intermittent Failures
 
 **Symptoms**:
+
 ```
 ✗ is status 201
   ↳  95% — ✓ 95 / ✗ 5
@@ -215,20 +229,23 @@ console.log('Request payload:', payload);
 **Common Causes**:
 
 1. **Database Connection Pool Exhausted**:
+
    - Solution: Increase connection pool size or reduce VUs
 
 2. **Rate Limiting**:
+
    ```javascript
    // Add delay between requests
    import { sleep } from 'k6';
 
-   export default function() {
+   export default function () {
      createCustomer();
      sleep(0.1); // 100ms delay
    }
    ```
 
 3. **Resource Contention**:
+
    - Solution: Use unique test data per iteration
 
    ```javascript
@@ -243,8 +260,8 @@ console.log('Request payload:', payload);
    ```javascript
    export const options = {
      thresholds: {
-       'http_req_duration': ['p(95)<5000'] // Increase threshold
-     }
+       http_req_duration: ['p(95)<5000'], // Increase threshold
+     },
    };
    ```
 
@@ -253,6 +270,7 @@ console.log('Request payload:', payload);
 #### Issue: GraphQL Returns Errors
 
 **Symptoms**:
+
 ```javascript
 {
   "errors": [
@@ -299,47 +317,61 @@ if (!body.data) {
 **Common Causes**:
 
 1. **Field Name Typo**:
+
    ```graphql
    # ❌ Wrong
-   query { costumer { id } }
+   query {
+     costumer {
+       id
+     }
+   }
 
    # ✅ Correct
-   query { customer { id } }
+   query {
+     customer {
+       id
+     }
+   }
    ```
 
 2. **Missing Required Variables**:
+
    ```javascript
    // ❌ Missing variable
    const query = {
      query: `mutation CreateCustomer($input: CreateCustomerInput!) { ... }`,
-     variables: {} // Missing input variable
+     variables: {}, // Missing input variable
    };
 
    // ✅ Correct
    const query = {
      query: `mutation CreateCustomer($input: CreateCustomerInput!) { ... }`,
      variables: {
-       input: { /* ... */ }
-     }
+       input: {
+         /* ... */
+       },
+     },
    };
    ```
 
 3. **Wrong Variable Type**:
+
    ```javascript
    // ❌ String instead of ID
    variables: {
-     id: "customer-123"
+     id: 'customer-123';
    }
 
    // ✅ Use IRI format
    variables: {
-     id: "/api/customers/01234"
+     id: '/api/customers/01234';
    }
    ```
 
 #### Issue: GraphQL Response Validation Fails
 
 **Symptoms**:
+
 ```
 ✗ GraphQL operation successful
   ↳  100% — ✓ 0 / ✗ 100
@@ -385,6 +417,7 @@ utils.checkResponse(response, 'GraphQL operation successful', res => {
 #### Issue: Tests Run Too Slowly
 
 **Symptoms**:
+
 - Tests take much longer than configured duration
 - Low request throughput
 
@@ -401,6 +434,7 @@ iterations....................: 100
 **Solutions**:
 
 1. **Reduce Validation Overhead**:
+
    ```javascript
    // ❌ BAD: Parse body on every check
    utils.checkResponse(response, 'check', r => JSON.parse(r.body).id);
@@ -411,13 +445,15 @@ iterations....................: 100
    ```
 
 2. **Use Connection Pooling**:
+
    ```javascript
    export const options = {
-     noConnectionReuse: false  // Enable connection reuse
+     noConnectionReuse: false, // Enable connection reuse
    };
    ```
 
 3. **Reduce Setup Overhead**:
+
    ```javascript
    // ✅ Create dependencies once in setup
    export function setup() {
@@ -425,12 +461,13 @@ iterations....................: 100
    }
 
    // ❌ Don't create dependencies in default function
-   export default function() {
+   export default function () {
      const dep = createDependency(); // Created every iteration!
    }
    ```
 
 4. **Use REST for Setup/Teardown**:
+
    ```javascript
    // ✅ GOOD: REST is faster
    export function setup() {
@@ -448,12 +485,14 @@ iterations....................: 100
 #### Issue: High Memory Usage
 
 **Symptoms**:
+
 - K6 crashes with "out of memory" errors
 - Host system becomes unresponsive
 
 **Solutions**:
 
 1. **Limit Data Storage**:
+
    ```javascript
    // ❌ BAD: Store all responses
    const responses = [];
@@ -469,6 +508,7 @@ iterations....................: 100
    ```
 
 2. **Reduce VU Count**:
+
    ```bash
    # Start with lower VUs
    make smoke-load-tests  # 2-5 VUs
@@ -490,6 +530,7 @@ iterations....................: 100
 #### Issue: Connection Refused
 
 **Symptoms**:
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:27017
 ```
@@ -497,11 +538,13 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
 **Solutions**:
 
 1. Verify database is running:
+
    ```bash
    docker compose ps mongodb
    ```
 
 2. Check connection string:
+
    ```bash
    echo $DB_URL
    # Should be: mongodb://localhost:27017/test
@@ -515,12 +558,14 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
 #### Issue: Database Fills Up
 
 **Symptoms**:
+
 - Test database grows over time
 - Queries slow down
 
 **Solutions**:
 
 1. Verify teardown runs:
+
    ```javascript
    export function teardown(data) {
      console.log('Teardown running...');
@@ -530,6 +575,7 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
    ```
 
 2. Manual cleanup if needed:
+
    ```bash
    make setup-test-db  # Drops and recreates test database
    ```
@@ -551,6 +597,7 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
 #### Issue: Scenario Not in Config
 
 **Symptoms**:
+
 ```
 Error: Scenario 'myScenario' not found in config
 ```
@@ -587,6 +634,7 @@ Add scenario to `tests/Load/config.json.dist`:
 #### Issue: Invalid Configuration Format
 
 **Symptoms**:
+
 ```
 SyntaxError: Unexpected token in JSON
 ```
@@ -594,11 +642,13 @@ SyntaxError: Unexpected token in JSON
 **Solution**:
 
 Validate JSON:
+
 ```bash
 cat tests/Load/config.json.dist | jq .
 ```
 
 Ensure proper format:
+
 ```json
 {
   "scenarios": {
@@ -619,9 +669,9 @@ import { options } from './scenarioUtils.js';
 // Override options for debugging
 export const options = {
   ...options,
-  thresholds: {},  // Disable thresholds temporarily
-  vus: 1,          // Single VU for cleaner logs
-  duration: '10s'  // Short duration
+  thresholds: {}, // Disable thresholds temporarily
+  vus: 1, // Single VU for cleaner logs
+  duration: '10s', // Short duration
 };
 ```
 
@@ -635,7 +685,7 @@ k6 run --verbose tests/Load/scripts/yourScript.js
 
 ```javascript
 // Add temporary test code
-export default function(data) {
+export default function (data) {
   console.log('Testing data generation...');
   const testData = generateCustomerData(data);
   console.log('Generated:', JSON.stringify(testData, null, 2));

@@ -11,6 +11,7 @@
 3. Migration notes
 
 **Example**:
+
 ```markdown
 #### Customer Entity
 
@@ -36,17 +37,21 @@
 **Update**: `docs/glossary.md` with new domain terms
 
 **Example**:
+
 ```markdown
 ## Customer Management Context
 
 ### Aggregates
+
 - **Customer**: Root aggregate for customer data
 
 ### Commands
+
 - `CreateCustomerCommand`: Create new customer
 - `UpdateCustomerCommand`: Update customer details
 
 ### Events
+
 - `CustomerCreatedEvent`: Emitted when customer created
 - `CustomerUpdatedEvent`: Emitted when customer updated
 ```
