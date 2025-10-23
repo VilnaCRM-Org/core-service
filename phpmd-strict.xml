@@ -6,14 +6,16 @@
                      http://pmd.sf.net/ruleset_xml_schema.xsd"
          xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
     <description>
-        Strict complexity rules to identify files that need refactoring
+        Strict complexity rules to identify files that need refactoring.
+        Note: This ruleset is intentionally strict for code analysis and refactoring guidance.
+        It is not used as a blocking CI gate - violations are advisory.
     </description>
 
-    <!-- Cyclomatic Complexity - stricter threshold -->
+    <!-- Cyclomatic Complexity - stricter threshold for identifying refactoring candidates -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
         <properties>
-            <!-- Lower to 3 to catch even more methods -->
-            <property name="reportLevel" value="3"/>
+            <!-- Threshold of 6 catches complex methods while avoiding false positives on simple conditionals -->
+            <property name="reportLevel" value="6"/>
             <property name="showClassesComplexity" value="true"/>
             <property name="showMethodsComplexity" value="true"/>
         </properties>
