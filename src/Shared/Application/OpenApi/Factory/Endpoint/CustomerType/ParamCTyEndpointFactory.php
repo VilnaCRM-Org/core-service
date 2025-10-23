@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CrCTyReq;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpCTyReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CreateCustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CTyDelResp;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TyNFResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -26,7 +26,7 @@ final class ParamCTyEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types/{ulid}';
 
-    private Parameter $uuidWithExamplePathParam;
+    private Parameter $ulidWithExamplePathParam;
 
     private RequestBody $updateCustomerTypeRequest;
     private Response $validationResp;
@@ -40,17 +40,17 @@ final class ParamCTyEndpointFactory extends EndpointFactory
 
     public function __construct(
         private UuidUriCustTy $parameterFactory,
-        private UpCTyReq $updateCustomerTypeRequestFactory,
+        private UpdateCustomerTypeRequestFactory $updateCustomerTypeRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private TyNFResp $customerTyNFResp,
-        private CTyDelResp $deletedResponseFactory,
-        private CrCTyReq $replaceCustomerRequestFactory,
+        private CustomerTypeNotFoundResponseFactory $customerTyNFResp,
+        private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
+        private CreateCustomerTypeRequestFactory $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->uuidWithExamplePathParam =
+        $this->ulidWithExamplePathParam =
             $this->parameterFactory->getParameter();
 
         $this->updateCustomerTypeRequest =
@@ -102,7 +102,7 @@ final class ParamCTyEndpointFactory extends EndpointFactory
             $pathItem
                 ->withPatch(
                     $operationPatch
-                        ->withParameters([$this->uuidWithExamplePathParam])
+                        ->withParameters([$this->ulidWithExamplePathParam])
                         ->withRequestBody($this->updateCustomerTypeRequest)
                         ->withResponses($mergedResponses)
                 )
@@ -121,7 +121,7 @@ final class ParamCTyEndpointFactory extends EndpointFactory
             self::ENDPOINT_URI,
             $pathItem->withPut(
                 $operationPut
-                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
                     ->withRequestBody($this->replaceCustomerTypeRequest)
             )
@@ -136,7 +136,7 @@ final class ParamCTyEndpointFactory extends EndpointFactory
             self::ENDPOINT_URI,
             $pathItem->withDelete(
                 $operationDelete
-                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($this->getDeleteResponses())
             )
         );
@@ -154,7 +154,7 @@ final class ParamCTyEndpointFactory extends EndpointFactory
             self::ENDPOINT_URI,
             $pathItem->withGet(
                 $operationGet
-                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             )
         );

@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\CustomerStatusEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CrCStReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CreateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerStatusEndpointFactoryTest extends UnitTestCase
 {
-    private CrCStReq $createFactory;
+    private CreateCustomerStatusRequestFactory $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
     private InternalErrorFactory $internalErrorFactory;
@@ -61,7 +61,7 @@ final class CustomerStatusEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this
-            ->createMock(CrCStReq::class);
+            ->createMock(CreateCustomerStatusRequestFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this

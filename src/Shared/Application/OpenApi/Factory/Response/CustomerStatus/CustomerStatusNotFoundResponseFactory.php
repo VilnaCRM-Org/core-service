@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Response\Customer;
+namespace App\Shared\Application\OpenApi\Factory\Response\CustomerStatus;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
@@ -10,7 +10,8 @@ use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CNFResp implements ResponseFactoryInterface
+final class CustomerStatusNotFoundResponseFactory implements
+    ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
@@ -19,7 +20,7 @@ final class CNFResp implements ResponseFactoryInterface
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(
-            'Customer not found',
+            'CustomerStatus not found',
             [
                 $this->getTypeParam(),
                 $this->getTitleParam(),
@@ -53,7 +54,7 @@ final class CNFResp implements ResponseFactoryInterface
         return new Parameter(
             'detail',
             'string',
-            'Customer not found'
+            'CustomerStatus not found'
         );
     }
 

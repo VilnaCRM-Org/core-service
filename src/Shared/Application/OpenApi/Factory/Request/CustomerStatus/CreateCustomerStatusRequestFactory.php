@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
+namespace App\Shared\Application\OpenApi\Factory\Request\CustomerStatus;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
 
-final class CrCTyReq extends CustomerTypeRequestFactory
+final class CreateCustomerStatusRequestFactory extends
+    CustomerStatusRequestFactory
 {
     public function __construct(private RequestBuilder $requestBuilder)
     {
