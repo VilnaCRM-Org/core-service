@@ -21,28 +21,34 @@ final readonly class UlidTransformer
             return null;
         }
 
-        if (is_string($value) && !SymfonyUlid::isValid($value)) {
+        if ($this->isInvalidString($value)) {
             return null;
         }
 
-        $ulid = $value instanceof Ulid
-            ? $value
-            : $this->ulidFactory->create($value);
+        if (!($value instanceof Ulid)) {
+            $value = $this->ulidFactory->create($value);
+        }
 
-        return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
+        return new Binary($value->toBinary(), Binary::TYPE_GENERIC);
     }
 
     public function toPhpValue(mixed $binary): ?Ulid
     {
-        $symfonyUlid = $binary instanceof SymfonyUlid
-            ? $binary
-            : SymfonyUlid::fromBinary($binary);
+        if ($binary instanceof SymfonyUlid) {
+            return $this->transformFromSymfonyUlid($binary);
+        }
 
+        $symfonyUlid = SymfonyUlid::fromBinary($binary);
         return $this->transformFromSymfonyUlid($symfonyUlid);
     }
 
     public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
         return $this->ulidFactory->create((string) $symfonyUlid);
+    }
+
+    private function isInvalidString(mixed $value): bool
+    {
+        return is_string($value) && !SymfonyUlid::isValid($value);
     }
 }

@@ -284,26 +284,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function cleanupCreatedCustomersAndEntities(
         AfterScenarioScope $scope
     ): void {
-        foreach ($this->createdCustomerIds as $id) {
-            $this->deleteCustomerById($id);
-        }
-        $this->createdCustomerIds = [];
-
-        foreach ($this->createdStatusIds as $id) {
-            $status = $this->statusRepository->find($id);
-            if ($status !== null) {
-                $this->statusRepository->delete($status);
-            }
-        }
-        $this->createdStatusIds = [];
-
-        foreach ($this->createdTypeIds as $id) {
-            $type = $this->typeRepository->find($id);
-            if ($type !== null) {
-                $this->typeRepository->delete($type);
-            }
-        }
-        $this->createdTypeIds = [];
+        $this->cleanupCustomers();
+        $this->cleanupStatuses();
+        $this->cleanupTypes();
     }
 
     /**
@@ -342,6 +325,36 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function deleteTypeByValue(string $value): void
     {
         $this->typeRepository->deleteByValue($value);
+    }
+
+    private function cleanupCustomers(): void
+    {
+        foreach ($this->createdCustomerIds as $id) {
+            $this->deleteCustomerById($id);
+        }
+        $this->createdCustomerIds = [];
+    }
+
+    private function cleanupStatuses(): void
+    {
+        foreach ($this->createdStatusIds as $id) {
+            $status = $this->statusRepository->find($id);
+            if ($status !== null) {
+                $this->statusRepository->delete($status);
+            }
+        }
+        $this->createdStatusIds = [];
+    }
+
+    private function cleanupTypes(): void
+    {
+        foreach ($this->createdTypeIds as $id) {
+            $type = $this->typeRepository->find($id);
+            if ($type !== null) {
+                $this->typeRepository->delete($type);
+            }
+        }
+        $this->createdTypeIds = [];
     }
 
     /**
