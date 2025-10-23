@@ -45,7 +45,7 @@ export function setup() {
 
   // Use REST API (faster than GraphQL for bulk operations)
   const typeData = {
-    value: `TestType_${Date.now()}`
+    value: `TestType_${Date.now()}`,
   };
 
   const typeResponse = http.post(
@@ -65,7 +65,7 @@ export function setup() {
 
   // Create customer status
   const statusData = {
-    value: `TestStatus_${Date.now()}`
+    value: `TestStatus_${Date.now()}`,
   };
 
   const statusResponse = http.post(
@@ -91,7 +91,7 @@ export function setup() {
   return {
     type: type,
     status: status,
-    createdCustomers: [] // Track created customers for cleanup
+    createdCustomers: [], // Track created customers for cleanup
   };
 }
 
@@ -254,8 +254,8 @@ function buildCreateCustomerMutation(data) {
       }
     }`,
     variables: {
-      input: customerInput
-    }
+      input: customerInput,
+    },
   };
 }
 
@@ -282,8 +282,8 @@ function generateCustomerInput(data) {
     leadSource: leadSources[Math.floor(Math.random() * leadSources.length)],
 
     // IMPORTANT: Use full IRI format for GraphQL
-    type: data.type['@id'],      // e.g., "/api/customer_types/01234"
-    status: data.status['@id'],  // e.g., "/api/customer_statuses/56789"
+    type: data.type['@id'], // e.g., "/api/customer_types/01234"
+    status: data.status['@id'], // e.g., "/api/customer_statuses/56789"
 
     // Random confirmed status
     confirmed: Math.random() > 0.5,
@@ -313,8 +313,8 @@ function exampleQueryCustomer(customerId) {
       }
     }`,
     variables: {
-      id: customerId  // Full IRI: "/api/customers/01234"
-    }
+      id: customerId, // Full IRI: "/api/customers/01234"
+    },
   };
 
   const response = utils.executeGraphQL(query);
@@ -353,10 +353,10 @@ function exampleUpdateCustomer(customerId) {
     }`,
     variables: {
       input: {
-        id: customerId,  // Full IRI
-        initials: `Updated_${randomString(8)}`
-      }
-    }
+        id: customerId, // Full IRI
+        initials: `Updated_${randomString(8)}`,
+      },
+    },
   };
 
   const response = utils.executeGraphQL(mutation);
@@ -400,10 +400,10 @@ function exampleQueryCustomers(statusIri) {
       }
     }`,
     variables: {
-      status: statusIri,    // Filter by status IRI
+      status: statusIri, // Filter by status IRI
       page: 1,
-      itemsPerPage: 30
-    }
+      itemsPerPage: 30,
+    },
   };
 
   const response = utils.executeGraphQL(query);

@@ -7,11 +7,13 @@
 #### Issue: Schema Not Valid
 
 **Symptoms**:
+
 ```
 [ERROR] Schema is not valid
 ```
 
 **Diagnosis**:
+
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:validate
 ```
@@ -50,6 +52,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:validate
 #### Issue: Mapping File Not Found
 
 **Symptoms**:
+
 ```
 No mapping file found for class 'App\Core\Customer\Domain\Entity\Customer'
 ```
@@ -72,6 +75,7 @@ doctrine_mongodb:
 **Solutions**:
 
 1. **Verify file location**:
+
    ```bash
    ls -la config/doctrine/Customer.mongodb.xml
    ```
@@ -88,6 +92,7 @@ doctrine_mongodb:
 #### Issue: Connection Refused
 
 **Symptoms**:
+
 ```
 MongoDB\Driver\Exception\ConnectionTimeoutException: No suitable servers found
 ```
@@ -108,6 +113,7 @@ echo $DB_URL
 **Solutions**:
 
 **1. Container Not Running**:
+
 ```bash
 docker compose up -d mongodb
 ```
@@ -115,6 +121,7 @@ docker compose up -d mongodb
 **2. Wrong Connection String**:
 
 Check `.env`:
+
 ```
 DB_URL=mongodb://mongodb:27017
 ```
@@ -139,6 +146,7 @@ make start
 #### Issue: Authentication Failed
 
 **Symptoms**:
+
 ```
 Authentication failed
 ```
@@ -148,6 +156,7 @@ Authentication failed
 **1. Check Credentials**:
 
 In `.env`:
+
 ```
 DB_URL=mongodb://username:password@mongodb:27017/database?authSource=admin
 ```
@@ -165,6 +174,7 @@ docker compose up -d mongodb
 #### Issue: Duplicate Key Error
 
 **Symptoms**:
+
 ```
 E11000 duplicate key error collection: core_service.customers index: email_1 dup key: { email: "test@example.com" }
 ```
@@ -178,22 +188,24 @@ E11000 duplicate key error collection: core_service.customers index: email_1 dup
 ```javascript
 // MongoDB shell
 db.customers.aggregate([
-  { $group: { _id: "$email", count: { $sum: 1 } } },
-  { $match: { count: { $gt: 1 } } }
-])
+  { $group: { _id: '$email', count: { $sum: 1 } } },
+  { $match: { count: { $gt: 1 } } },
+]);
 ```
 
 **2. Remove Duplicates**:
 
 ```javascript
 // Keep first, remove rest
-db.customers.aggregate([
-  { $group: { _id: "$email", docs: { $push: "$_id" } } },
-  { $match: { "docs.1": { $exists: true } } }
-]).forEach(doc => {
-  doc.docs.shift();  // Keep first
-  db.customers.deleteMany({ _id: { $in: doc.docs } });
-});
+db.customers
+  .aggregate([
+    { $group: { _id: '$email', docs: { $push: '$_id' } } },
+    { $match: { 'docs.1': { $exists: true } } },
+  ])
+  .forEach(doc => {
+    doc.docs.shift(); // Keep first
+    db.customers.deleteMany({ _id: { $in: doc.docs } });
+  });
 ```
 
 **3. Update Application Code**:
@@ -214,6 +226,7 @@ public function handle(CreateCustomerCommand $command): void
 #### Issue: Index Creation Failed
 
 **Symptoms**:
+
 ```
 Index creation failed: ...
 ```
@@ -224,7 +237,7 @@ Index creation failed: ...
 
 ```javascript
 // MongoDB shell
-db.customers.dropIndex("email_1")
+db.customers.dropIndex('email_1');
 ```
 
 **2. Recreate Index via Doctrine**:
@@ -239,7 +252,7 @@ MongoDB has index limits (64 indexes per collection max).
 
 ```javascript
 // MongoDB shell
-db.customers.getIndexes().length
+db.customers.getIndexes().length;
 ```
 
 ### Migration Issues
@@ -247,6 +260,7 @@ db.customers.getIndexes().length
 #### Issue: Migration Already Applied
 
 **Symptoms**:
+
 ```
 Migration VERSION already executed
 ```
@@ -275,6 +289,7 @@ docker compose exec php bin/console doctrine:migrations:migrate
 #### Issue: Migration Failed Midway
 
 **Symptoms**:
+
 ```
 Migration VERSION failed
 ```
@@ -285,7 +300,7 @@ Migration VERSION failed
 
 ```javascript
 // MongoDB shell
-db.migration_versions.find()
+db.migration_versions.find();
 ```
 
 **2. Manual Rollback**:
@@ -311,6 +326,7 @@ mongorestore --host localhost:27017 --db core_service /path/to/backup
 #### Issue: Class Not Found
 
 **Symptoms**:
+
 ```
 Class "App\Core\Customer\Domain\Entity\Customer" not found
 ```
@@ -332,6 +348,7 @@ composer dump-autoload
 **3. Verify Namespace**:
 
 Ensure entity namespace matches file location:
+
 ```
 src/Core/Customer/Domain/Entity/Customer.php
 → App\Core\Customer\Domain\Entity\Customer
@@ -340,6 +357,7 @@ src/Core/Customer/Domain/Entity/Customer.php
 #### Issue: Property Not Accessible
 
 **Symptoms**:
+
 ```
 Property "name" in class "Customer" is not accessible
 ```
@@ -374,6 +392,7 @@ public function getName(): string
 #### Issue: Slow Queries
 
 **Symptoms**:
+
 - API endpoints taking >1 second
 - Database CPU high
 
@@ -383,8 +402,8 @@ Enable MongoDB profiling:
 
 ```javascript
 // MongoDB shell
-db.setProfilingLevel(2);  // Profile all operations
-db.system.profile.find().sort({ ts: -1 }).limit(10);  // View slow queries
+db.setProfilingLevel(2); // Profile all operations
+db.system.profile.find().sort({ ts: -1 }).limit(10); // View slow queries
 ```
 
 **Solutions**:
@@ -397,7 +416,7 @@ Find missing indexes from slow query log:
 db.system.profile.find({ millis: { $gt: 100 } }).forEach(doc => {
   printjson({
     query: doc.command,
-    time: doc.millis + "ms"
+    time: doc.millis + 'ms',
   });
 });
 ```
@@ -443,6 +462,7 @@ public function findPaginated(int $page, int $limit): array
 #### Issue: High Memory Usage
 
 **Symptoms**:
+
 ```
 Fatal error: Allowed memory size exhausted
 ```
@@ -496,6 +516,7 @@ foreach ($this->repository->createQueryBuilder()->getQuery()->getIterator() as $
 #### Issue: Test Data Persists
 
 **Symptoms**:
+
 - Tests fail due to existing data
 - Duplicate key errors in tests
 
@@ -540,6 +561,7 @@ private function clearDatabase(): void
 #### Issue: APP_ENV Not Set to 'test'
 
 **Symptoms**:
+
 - Tests modify production database
 - Unable to connect to test database
 
@@ -557,6 +579,7 @@ integration-tests:
 ```
 
 Check `.env.test`:
+
 ```
 APP_ENV=test
 DB_URL=mongodb://mongodb:27017/test_db
@@ -567,6 +590,7 @@ DB_URL=mongodb://mongodb:27017/test_db
 #### Issue: Container Exits Immediately
 
 **Symptoms**:
+
 ```
 mongodb exited with code 1
 ```
@@ -612,7 +636,7 @@ In `config/packages/doctrine_mongodb.yaml`:
 doctrine_mongodb:
   document_managers:
     default:
-      logging: true  # Enable query logging
+      logging: true # Enable query logging
 ```
 
 ### Use MongoDB Compass
@@ -634,6 +658,7 @@ docker compose exec php bin/console cache:pool:clear doctrine.odm.mongodb.metada
 ### Use Profiler in Development
 
 In `.env`:
+
 ```
 APP_ENV=dev
 APP_DEBUG=true
@@ -696,7 +721,7 @@ $this->documentManager->transactional(function ($dm) use ($customer, $order) {
 
 ```javascript
 // MongoDB shell - find unused indexes
-db.customers.aggregate([{ $indexStats: {} }])
+db.customers.aggregate([{ $indexStats: {} }]);
 ```
 
 ### 5. Regular Backups

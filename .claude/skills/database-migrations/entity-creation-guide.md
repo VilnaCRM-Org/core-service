@@ -105,19 +105,23 @@ final class Customer
 ### Key Principles
 
 **1. No Doctrine Annotations**
+
 - Keep domain layer clean
 - Use XML mappings for infrastructure concerns
 
 **2. Immutable by Default**
+
 - Use `private` properties
 - Return new instances for modifications when appropriate
 - Update `updatedAt` timestamp when state changes
 
 **3. Explicit Getters**
+
 - Provide clear, type-safe getters
 - Use `is*()` for boolean properties
 
 **4. Business Logic in Domain**
+
 - Encapsulate state changes in methods
 - Validate business rules in entity methods
 
@@ -188,19 +192,20 @@ Example: `config/doctrine/Customer.mongodb.xml`
 
 ### Field Mapping Reference
 
-| PHP Type | Doctrine Type | fieldName Convention |
-|----------|---------------|---------------------|
-| `string` | `string` | `snake_case` |
-| `int` | `int` | `snake_case` |
-| `float` | `float` | `snake_case` |
-| `bool` | `boolean` | `snake_case` |
+| PHP Type            | Doctrine Type    | fieldName Convention        |
+| ------------------- | ---------------- | --------------------------- |
+| `string`            | `string`         | `snake_case`                |
+| `int`               | `int`            | `snake_case`                |
+| `float`             | `float`          | `snake_case`                |
+| `bool`              | `boolean`        | `snake_case`                |
 | `DateTimeImmutable` | `date_immutable` | `{field}_at` for timestamps |
-| `DateTime` | `date` | `{field}_at` for timestamps |
-| `array` | `collection` | `snake_case` |
+| `DateTime`          | `date`           | `{field}_at` for timestamps |
+| `array`             | `collection`     | `snake_case`                |
 
 ### ID Strategy Options
 
 **`strategy="NONE"`** (Recommended):
+
 - Generate ID in application code
 - Use ULID type for time-ordered IDs
 - Full control over ID generation
@@ -210,10 +215,12 @@ Example: `config/doctrine/Customer.mongodb.xml`
 ```
 
 **`strategy="UUID"`**:
+
 - MongoDB generates UUID
 - Less control, auto-generated
 
 **`strategy="AUTO"`**:
+
 - MongoDB ObjectId (not recommended for our pattern)
 
 ## Step 3: Configure API Platform Resource
@@ -343,7 +350,7 @@ api_platform:
   mapping:
     paths:
       - '%kernel.project_dir%/config/api_platform'
-      - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'  # Add this line
+      - '%kernel.project_dir%/src/Core/Customer/Domain/Entity' # Add this line
       - '%kernel.project_dir%/src/Internal/Health/Domain/Entity'
 
   patch_formats:
@@ -395,6 +402,7 @@ make doctrine-migrations-migrate
 Visit: `https://localhost/api/docs`
 
 Verify:
+
 - Customer resource appears
 - Operations (GET, POST, PATCH, DELETE) listed
 - Schema shows all fields
@@ -427,14 +435,16 @@ Visit: `https://localhost/api/graphql`
 
 ```graphql
 mutation CreateCustomer {
-  createCustomer(input: {
-    name: "Test Customer"
-    email: "test@example.com"
-    phone: "+1-555-1234"
-    type: "/api/customer_types/01234"
-    status: "/api/customer_statuses/56789"
-    confirmed: false
-  }) {
+  createCustomer(
+    input: {
+      name: "Test Customer"
+      email: "test@example.com"
+      phone: "+1-555-1234"
+      type: "/api/customer_types/01234"
+      status: "/api/customer_statuses/56789"
+      confirmed: false
+    }
+  ) {
     customer {
       id
       name
