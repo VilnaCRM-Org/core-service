@@ -285,6 +285,9 @@ start-prod-loadtest: ## Start production environment with load testing capabilit
 stop-prod-loadtest: ## Stop production load testing environment
 	$(DOCKER_COMPOSE) -f docker-compose.loadtest.yml down --remove-orphans
 
+validate-configuration: ## Validate configuration structure and detect locked file modifications
+	@./scripts/validate-configuration.sh
+
 ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	@echo "🚀 Running comprehensive CI checks..."
 	@failed_checks=""; \
