@@ -26,7 +26,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_statuses/{ulid}';
 
-    private Parameter $uuidWithExamplePathParam;
+    private Parameter $ulidWithExamplePathParam;
 
     private RequestBody $updateCustomerStatusRequest;
     private Response $validationResp;
@@ -50,7 +50,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->uuidWithExamplePathParam =
+        $this->ulidWithExamplePathParam =
             $this->parameterFactory->getParameter();
 
         $this->updateCustomerStatusRequest =
@@ -102,7 +102,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
             $pathItem
                 ->withPatch(
                     $operationPatch
-                        ->withParameters([$this->uuidWithExamplePathParam])
+                        ->withParameters([$this->ulidWithExamplePathParam])
                         ->withRequestBody($this->updateCustomerStatusRequest)
                         ->withResponses($mergedResponses)
                 )
@@ -121,7 +121,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
             self::ENDPOINT_URI,
             $pathItem->withPut(
                 $operationPut
-                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
                     ->withRequestBody($this->replaceCustomerStatusRequest)
             )
@@ -135,7 +135,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withDelete(
                 $operationDelete
-                    ->withParameters([$this->uuidWithExamplePathParam])
+                    ->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($this->getDeleteResponses())
             ));
     }
@@ -150,7 +150,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
         );
         $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
             ->withGet(
-                $operationGet->withParameters([$this->uuidWithExamplePathParam])
+                $operationGet->withParameters([$this->ulidWithExamplePathParam])
                     ->withResponses($mergedResponses)
             ));
     }
