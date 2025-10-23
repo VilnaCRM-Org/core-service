@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\Type;
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TyNFResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -33,7 +33,7 @@ final class NotFoundFactoryTest extends UnitTestCase
             )
             ->willReturn($this->createStub(Response::class));
 
-        $factory = new TyNFResp($responseBuilderMock);
+        $factory = new CustomerTypeNotFoundResponseFactory($responseBuilderMock);
         $response = $factory->getResponse();
 
         $this->assertInstanceOf(Response::class, $response);

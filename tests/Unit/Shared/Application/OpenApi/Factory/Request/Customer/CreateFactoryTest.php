@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CrCReq;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CreateFactoryTest extends UnitTestCase
@@ -20,7 +20,7 @@ final class CreateFactoryTest extends UnitTestCase
             ->with($this->isType('array'))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $createFactory = new CrCReq($requestBuilderMock);
+        $createFactory = new CreateCustomerRequestFactory($requestBuilderMock);
 
         $requestBody = $createFactory->getRequest();
 

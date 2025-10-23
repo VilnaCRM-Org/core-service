@@ -12,6 +12,15 @@ use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
 abstract class CustomerTypeRequestFactory implements
     AbstractReqFactoryInterface
 {
+    private const DEFAULT_VALUE = 'Prospect';
+    private const DEFAULT_MAX_LENGTH = 255;
+
+    public function __construct(
+        private readonly string $defaultValue = self::DEFAULT_VALUE,
+        private readonly int $maxLength = self::DEFAULT_MAX_LENGTH
+    ) {
+    }
+
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(
@@ -33,6 +42,6 @@ abstract class CustomerTypeRequestFactory implements
 
     protected function getValueParam(): Parameter
     {
-        return new Parameter('value', 'string', 'Prospect', 255);
+        return new Parameter('value', 'string', $this->defaultValue, $this->maxLength);
     }
 }

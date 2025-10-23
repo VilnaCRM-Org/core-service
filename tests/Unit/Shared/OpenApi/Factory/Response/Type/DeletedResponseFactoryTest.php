@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\OpenApi\Factory\Response\Type;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CTyDelResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class DeletedResponseFactoryTest extends UnitTestCase
@@ -25,7 +25,7 @@ final class DeletedResponseFactoryTest extends UnitTestCase
             )
             ->willReturn($response);
 
-        $factory = new CTyDelResp($responseBuilder);
+        $factory = new CustomerTypeDeletedResponseFactory($responseBuilder);
 
         $this->assertSame($response, $factory->getResponse());
     }

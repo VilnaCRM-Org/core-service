@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Factory\Response\CustomerType;
+namespace App\Shared\Application\OpenApi\Factory\Response\Customer;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
@@ -10,7 +10,7 @@ use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class TyNFResp implements ResponseFactoryInterface
+final class CustomerNotFoundResponseFactory implements ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
@@ -19,7 +19,7 @@ final class TyNFResp implements ResponseFactoryInterface
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(
-            'CustomerType not found',
+            'Customer not found',
             [
                 $this->getTypeParam(),
                 $this->getTitleParam(),
@@ -53,7 +53,7 @@ final class TyNFResp implements ResponseFactoryInterface
         return new Parameter(
             'detail',
             'string',
-            'CustomerType not found'
+            'Customer not found'
         );
     }
 
