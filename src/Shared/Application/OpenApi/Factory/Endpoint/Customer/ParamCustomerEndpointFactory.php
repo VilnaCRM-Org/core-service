@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CrCReq;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\UpCReq;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CDelResp;
-use App\Shared\Application\OpenApi\Factory\Response\Customer\CNFResp;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -41,12 +41,12 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
 
     public function __construct(
         private UuidUriCustomerFactory $parameterFactory,
-        private UpCReq $updateCustomerRequestFactory,
+        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CNFResp $customerNotFoundResponseFactory,
-        private CDelResp $deletedResponseFactory,
-        private CrCReq $replaceCustomerRequestFactory,
+        private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
+        private CustomerDeletedResponseFactory $deletedResponseFactory,
+        private CreateCustomerRequestFactory $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory

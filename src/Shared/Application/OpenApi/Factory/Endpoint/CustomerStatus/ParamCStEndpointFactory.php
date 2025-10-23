@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CrCStReq;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpCStReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CreateCustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStDelResp;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CStNFResp;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -40,12 +40,12 @@ final class ParamCStEndpointFactory extends EndpointFactory
 
     public function __construct(
         private UuidUriCustSt $parameterFactory,
-        private UpCStReq $updateCustomerStatusRequestFactory,
+        private UpdateCustomerStatusRequestFactory $updateCustomerStatusRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CStNFResp $customerStatusNotFoundResponseFactory,
-        private CStDelResp $deletedResponseFactory,
-        private CrCStReq $replaceCustomerRequestFactory,
+        private CustomerStatusNotFoundResponseFactory $customerStatusNotFoundResponseFactory,
+        private CustomerStatusDeletedResponseFactory $deletedResponseFactory,
+        private CreateCustomerStatusRequestFactory $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,
