@@ -40,7 +40,7 @@ The VilnaCRM Core Service is designed to provide core business functionality wit
 1. `make build` (15-30 min, NEVER CANCEL)
 2. `make start` (5-10 min, includes MongoDB)
 3. `make install` (3-5 min, PHP dependencies)
-4. Verify: https://localhost/api/docs, https://localhost/api/graphql
+4. Verify: [API Docs](https://localhost/api/docs), [GraphQL](https://localhost/api/graphql)
 
 ### Essential Development Commands
 
@@ -322,14 +322,14 @@ Provides internal services like health checks and monitoring.
 
 2. **GraphQL Operations:**
 
-   - Test customer queries via GraphQL at https://localhost/api/graphql
+   - Test customer queries via GraphQL at [GraphQL Playground](https://localhost/api/graphql)
    - Test customer mutations via GraphQL
    - Verify proper error handling
 
 **Service Health Checks:**
 
-- Verify https://localhost/api/docs loads (API documentation)
-- Verify https://localhost/api/graphql loads (GraphQL playground)
+- Verify [API Docs](https://localhost/api/docs) loads (API documentation)
+- Verify [GraphQL Playground](https://localhost/api/graphql) loads (GraphQL playground)
 - Check MongoDB connectivity and schema status
 
 ### Load Testing Scenarios
@@ -377,7 +377,7 @@ The repository includes GitHub Actions workflows for:
 
 ### Source Code Organization
 
-```
+```text
 src/
 ├── Core/              # Core domain logic
 │   └── Customer/      # Customer bounded context
@@ -408,7 +408,7 @@ src/
 - Always check `config/routes/` after adding new endpoints
 - Review `src/Core/Customer/Application/` when modifying business logic
 
-## API Platform, Swagger, and OpenAPI Integration
+### API Platform, Swagger, and OpenAPI Integration
 
 ### API Platform Configuration
 
@@ -422,7 +422,7 @@ This service uses **API Platform 4** for REST API and GraphQL functionality. API
 
 ### Swagger/OpenAPI Documentation Best Practices
 
-**IMPORTANT: Use API Platform Built-in Functionality, NOT OpenAPI Library Directly**
+### Use API Platform Built-in Functionality, NOT OpenAPI Library Directly
 
 - **DO NOT** use `OpenApi\Annotations` (OA\*) annotations in DTOs
 - **DO** rely on API Platform's automatic schema generation
@@ -471,8 +471,8 @@ App\Core\Customer\Domain\Entity\Customer:
 
 ### Swagger UI Access
 
-- **REST API Docs**: https://localhost/api/docs
-- **GraphQL Playground**: https://localhost/api/graphql
+- **REST API Docs**: [https://localhost/api/docs](https://localhost/api/docs)
+- **GraphQL Playground**: [https://localhost/api/graphql](https://localhost/api/graphql)
 - **OpenAPI Spec**: Generated via `make generate-openapi-spec`
 - **GraphQL Spec**: Generated via `make generate-graphql-spec`
 
@@ -768,28 +768,28 @@ This command will output all unresolved comments in a readable format, showing:
 - **Action**: Apply the suggested changes exactly as provided
 - **Priority**: Address these first as they provide explicit solutions
 
-**B. LLM Prompts and Instructions (High Priority)**
+#### B. LLM Prompts and Instructions (High Priority)
 
 - Comments providing specific instructions on how to refactor
 - May include architectural guidance or implementation approaches
 - **Action**: Use these as detailed prompts for code generation/refactoring
 - **Priority**: Address after committable suggestions
 
-**C. Questions and Clarifications (Medium Priority)**
+#### C. Questions and Clarifications (Medium Priority)
 
 - Comments asking for explanation or clarification of implementation
 - **Action**: Reply with explanations and make code more self-documenting if needed
 - **Priority**: Can be addressed alongside code changes
 
-**D. General Feedback and Observations (Low Priority)**
+#### D. General Feedback and Observations (Low Priority)
 
 - Comments providing general observations or praise
 - **Action**: Consider for future improvements, no immediate action needed
 - **Priority**: Address if time permits
 
-##### 3. **Systematic Implementation Strategy**
+#### Systematic Implementation Strategy
 
-**For Committable Suggestions:**
+##### For Committable Suggestions:
 
 ```bash
 # Apply suggestion directly to the code
