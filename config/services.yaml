@@ -28,26 +28,26 @@ services:
         },
       ]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.order' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.order'}
 
   app.customer.mongodb.range_filter:
     parent: 'api_platform.doctrine_mongodb.odm.range_filter'
     class: App\Shared\Infrastructure\Filter\UlidRangeFilter
     arguments: [{ 'ulid': ~ }]
     tags:
-      - { name: 'api_platform.filter', id: 'mongodb.range' }
+      - {name: 'api_platform.filter', id: 'mongodb.range'}
 
   app.customer.mongodb.date_filter:
     parent: 'api_platform.doctrine_mongodb.odm.date_filter'
     arguments: [{ 'createdAt': ~, 'updatedAt': ~ }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.date'}
 
   app.customer.mongodb.boolean_filter:
     parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
     arguments: [{ 'confirmed': ~ }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.boolean' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.boolean'}
 
   app.customer.mongodb.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
@@ -63,31 +63,31 @@ services:
         },
       ]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.search' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.search'}
 
   app.customer_type.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.type.order' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.type.order'}
 
   app.customer_type.partial_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments: [{ 'value': 'partial' }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.type.partial_search' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.type.partial_search'}
 
   app.customer_status.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.status.order' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.status.order'}
 
   app.customer_status.partial_search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments: [{ 'value': 'partial' }]
     tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search' }
+      - {name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search'}
 
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
