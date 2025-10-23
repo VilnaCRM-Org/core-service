@@ -241,6 +241,7 @@ logs: ## Show all logs
 new-logs: ## Show live logs
 	@$(DOCKER_COMPOSE) logs --tail=0 --follow
 
+.PHONY: start
 start: up build-k6-docker ## Start docker with k6
 
 ps: ## Check docker containers
