@@ -37,8 +37,6 @@ return [
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
-                'src/Core/Customer/Application/Resolver/UpdateCustomerMutationResolver',
-                'src/Shared/Application/OpenApi/Factory/Endpoint/Customer/CustomerEndpointFactory',
             ],
             'ignoreComments' => true,
             'lineLimit' => 100,
