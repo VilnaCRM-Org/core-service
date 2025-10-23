@@ -7,10 +7,10 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
 abstract class CustomerTypeRequestFactory implements
-    AbstractReqFactoryInterface
+    RequestFactoryInterface
 {
     private const DEFAULT_VALUE = 'Prospect';
     private const DEFAULT_MAX_LENGTH = 255;
