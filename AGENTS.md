@@ -1,20 +1,19 @@
 # Repository Guidelines
 
-User Service is a PHP 8.3+ microservice built with Symfony 7.2, API Platform 4.1, and GraphQL. It provides user account management and authentication within the VilnaCRM ecosystem using OAuth Server, REST API, and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing with 193 test files across unit, integration, and E2E test suites.
+VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
 
 **CRITICAL: Always use make commands or docker exec into the PHP container. Never use direct PHP commands outside the container.**
 
-## What Is User Service?
+## What Is Core Service?
 
-The VilnaCRM User Service is designed to manage user accounts and authentication within the VilnaCRM ecosystem. It provides essential functionalities such as user registration and authentication, implemented with OAuth Server, REST API, and GraphQL, ensuring seamless integration with other components of the CRM system.
+The VilnaCRM Core Service is designed to provide core business functionality within the VilnaCRM ecosystem. It implements essential domain models and business logic with REST API and GraphQL interfaces, ensuring seamless integration with other components of the CRM system.
 
 ### Key Features
 
-- **User Registration**: Facilitates adding new users with validation and confirmation workflows
-- **Authentication**: Robust OAuth mechanisms with multiple grant types (Authorization Code, Client Credentials, Password)
+- **Customer Management**: Comprehensive customer entity management with types and statuses
 - **Flexibility**: REST API and GraphQL interfaces for versatile integration
-- **Localization**: Supports English and Ukrainian languages
 - **Modern Architecture**: Built on Hexagonal Architecture, DDD, CQRS, and Event-Driven principles
+- **High Quality**: 100% test coverage with mutation testing and comprehensive quality checks
 
 ### Design Principles
 
@@ -39,14 +38,13 @@ The VilnaCRM User Service is designed to manage user accounts and authentication
 ### Quick Start
 
 1. `make build` (15-30 min, NEVER CANCEL)
-2. `make start` (5-10 min, includes database, Redis, LocalStack)
+2. `make start` (5-10 min, includes MongoDB)
 3. `make install` (3-5 min, PHP dependencies)
-4. `make doctrine-migrations-migrate` (1-2 min)
-5. Verify: https://localhost/api/docs, https://localhost/api/graphql
+4. Verify: https://localhost/api/docs, https://localhost/api/graphql
 
 ### Essential Development Commands
 
-- `make start` -- Start all services (Docker containers, database, Redis)
+- `make start` -- Start all services (Docker containers, MongoDB)
 - `make stop` -- Stop all services
 - `make sh` -- Access PHP container shell for manual commands
 - `make install` -- Install PHP dependencies via Composer
@@ -56,14 +54,14 @@ The VilnaCRM User Service is designed to manage user accounts and authentication
 
 ### Testing Commands
 
-- `make unit-tests` -- Run unit tests (193 test files, 2-3 min)
-- `make integration-tests` -- Test database/external services (3-5 min)
-- `make behat` -- E2E tests via BDD scenarios (5-10 min)
-- `make all-tests` -- Run complete test suite (8-15 min, NEVER CANCEL)
-- `make setup-test-db` -- Create test database
-- `make tests-with-coverage` -- Generate code coverage (10-15 min)
+- `make unit-tests` -- Run unit tests with 100% coverage requirement
+- `make integration-tests` -- Test database/external services
+- `make behat` -- E2E tests via BDD scenarios
+- `make all-tests` -- Run complete test suite (unit, integration, e2e)
+- `make setup-test-db` -- Drop and recreate test MongoDB schema
+- `make tests-with-coverage` -- Generate code coverage report
 - `make coverage-html` -- Generate HTML coverage report
-- `make infection` -- Mutation testing with Infection (advanced quality check)
+- `make infection` -- Mutation testing with Infection (100% MSI required)
 
 ### Code Quality Commands (Run Before Every Commit)
 
@@ -88,12 +86,13 @@ The VilnaCRM User Service is designed to manage user accounts and authentication
 - `make phpcsfixer` -- Auto-fix PHP code style (PSR-12)
 - `make psalm` -- Static analysis for type safety
 - `make psalm-security` -- Security taint analysis
+- `make phpmd` -- PHP Mess Detector for complexity analysis
 - `make phpinsights` -- Code quality analysis
 - `make deptrac` -- Architecture dependency validation
-- `make unit-tests` -- Unit test suite
+- `make unit-tests` -- Unit test suite with 100% coverage
 - `make integration-tests` -- Integration test suite
 - `make behat` -- End-to-end BDD tests
-- `make infection` -- Mutation testing
+- `make infection` -- Mutation testing with 100% MSI requirement
 
 **Mandatory workflow before finishing tasks:**
 
@@ -115,22 +114,24 @@ The VilnaCRM User Service is designed to manage user accounts and authentication
 - `make spike-load-tests` -- Extreme spike testing
 - `make execute-load-tests-script scenario=<name>` -- Run specific scenario
 
-### Database & OAuth Commands
+### Database Commands
 
-- `make doctrine-migrations-migrate` -- Apply database migrations
-- `make doctrine-migrations-generate` -- Create new migration
-- `make create-oauth-client CLIENT_NAME=<name>` -- Create OAuth client
+- `make setup-test-db` -- Drop and recreate test MongoDB schema
+- `make reset-db` -- Recreate the database schema
 - `make load-fixtures` -- Load database fixtures
 
 ### Specification Generation
 
 - `make generate-openapi-spec` -- Export OpenAPI YAML specification
 - `make generate-graphql-spec` -- Export GraphQL specification
+- `make validate-openapi-spec` -- Validate OpenAPI spec with Spectral
+- `make openapi-diff` -- Compare OpenAPI spec against base reference
+- `make schemathesis-validate` -- Validate API against OpenAPI spec
 
 ## Schemathesis Validation Guidance
 
-- Always diagnose the failing request reported by `make schemathesis-validate`; reproduce it with `curl` and adjust `app:seed-schemathesis-data` plus the Symfony validators/DTOs so the API enforces the expected rules.
-- Seed deterministic data through `php bin/console app:seed-schemathesis-data` (the make target already calls it) and keep the OpenAPI description (request factories, serializer groups, schema builders, examples) consistent with those fixtures.
+- Always diagnose the failing request reported by `make schemathesis-validate`; reproduce it with `curl` and adjust Symfony validators/DTOs so the API enforces the expected rules.
+- Seed deterministic data and keep the OpenAPI description (request factories, serializer groups, schema builders, examples) consistent with those fixtures.
 - Do **not** introduce request listeners or per-user-agent logic to coerce Schemathesis payloads; fixes belong in validation or documentation so every client benefits.
 - Iterate on validation/schema changes until `make schemathesis-validate` completes without errors.
 
@@ -138,18 +139,62 @@ The VilnaCRM User Service is designed to manage user accounts and authentication
 
 1. Run `make schemathesis-validate`, capture every failing curl snippet, and replay it from within the PHP container to observe the actual response (status code, headers, body).
 2. Triage failures by category and address the root issue:
-   - **Invalid authentication accepted**: ensure the OAuth password grant refuses tampered secrets or unexpected parameters and that fixtures expose only legitimate credential pairs.
    - **500 errors / missing header handling**: add guards in listeners/transformers so unauthenticated flows return `application/problem+json` 401/400 responses rather than HTML error pages.
-   - **Schema-compliant payload rejected**: hydrate fixtures (users, tokens, OAuth codes) so documented examples reference real data, then align Symfony validators and command handlers with the schema contracts.
-   - **Repeated 404 warnings**: extend `app:seed-schemathesis-data` instead of skipping endpoints; create deterministic UUIDs/emails for `/api/users/{id}` flows and reuse them in OpenAPI examples.
+   - **Schema-compliant payload rejected**: hydrate fixtures so documented examples reference real data, then align Symfony validators and command handlers with the schema contracts.
+   - **Repeated 404 warnings**: extend fixture loading instead of skipping endpoints; create deterministic ULIDs/UUIDs for resource flows and reuse them in OpenAPI examples.
 3. Update OpenAPI examples and serializer groups so the documented payloads exactly match the seeded data (no placeholder values that Schemathesis cannot reach).
 4. Re-run `make generate-openapi-spec` if invoked in isolation, or just rerun `make schemathesis-validate`. Repeat until both **Examples** and **Coverage** phases report zero failures and zero warnings.
+
+## Claude Code Skills
+
+This repository includes comprehensive Claude Code Skills in the `.claude/skills/` directory to assist with development tasks.
+
+### Available Skills
+
+**Workflow Skills**:
+- **[ci-workflow](.claude/skills/ci-workflow/SKILL.md)**: Run comprehensive CI checks before committing
+- **[code-review](.claude/skills/code-review/SKILL.md)**: Systematically retrieve and address PR code review comments
+- **[testing-workflow](.claude/skills/testing-workflow/SKILL.md)**: Run and manage all test types (unit, integration, E2E, mutation, load)
+
+**Code Quality Skills**:
+- **[quality-standards](.claude/skills/quality-standards/SKILL.md)**: Maintain and improve code quality without decreasing thresholds
+- **[database-migrations](.claude/skills/database-migrations/SKILL.md)**: Create and manage MongoDB database migrations with Doctrine ODM
+- **[documentation-sync](.claude/skills/documentation-sync/SKILL.md)**: Keep documentation synchronized with code changes
+
+**Performance Skills**:
+- **[load-testing](.claude/skills/load-testing/SKILL.md)**: Create and manage K6 load tests for REST and GraphQL APIs
+
+### Skill Structure
+
+Skills follow Claude Code best practices with multi-file structure:
+
+- **Main SKILL.md**: Core workflow and quick reference (<300 lines)
+- **Supporting files**: Detailed patterns, examples, and reference guides
+- **Examples/**: Complete working code examples
+- **Reference/**: Troubleshooting and advanced topics
+
+**Example**: The `load-testing` skill has:
+- `SKILL.md` (210 lines) - Core workflow
+- `rest-api-patterns.md` - REST API patterns
+- `graphql-patterns.md` - GraphQL patterns
+- `examples/` - Complete working examples
+- `reference/` - Configuration, troubleshooting, extensions
+
+### Using Skills
+
+Skills are **model-invoked** - Claude automatically activates them based on context. You don't need to manually invoke skills; Claude recognizes when a skill is relevant based on:
+
+- Keywords in your request (e.g., "run tests", "create migration", "update docs")
+- Current task context
+- Skill descriptions
+
+**See [.claude/skills/README.md](.claude/skills/README.md)** for complete skill documentation and usage patterns.
 
 ## Architecture Deep Dive
 
 ### Bounded Contexts (DDD)
 
-The User Service is divided into 3 bounded contexts with predictable structure:
+The Core Service is divided into bounded contexts with predictable structure:
 
 #### 1. Shared Context
 
@@ -159,49 +204,46 @@ Provides foundational support across the service:
 - **Domain Layer**: Interfaces for Infrastructure, abstract classes, common entities
 - **Infrastructure Layer**: Message Buses, custom Doctrine types, retry strategies
 
-#### 2. User Context (Core Domain)
+#### 2. Core/Customer Context (Core Domain)
 
-Comprehensive user management functionality:
+Comprehensive customer management functionality:
 
 - **Application Layer**:
-  - Commands: RegisterUserCommand, ConfirmUserCommand, UpdateUserCommand, SendConfirmationEmailCommand
+  - Commands: Commands for customer operations
   - Command Handlers: Process business operations
   - HTTP Request Processors & GraphQL Resolvers
   - Event Listeners & Subscribers
 - **Domain Layer**:
-  - Entities: User, ConfirmationToken
-  - Aggregates: ConfirmationEmail
-  - Events: UserRegisteredEvent, UserConfirmedEvent, EmailChangedEvent, PasswordChangedEvent
-  - Value Objects: UserUpdate
-  - Domain Exceptions: UserNotFoundException, InvalidPasswordException, TokenNotFoundException
-- **Infrastructure Layer**: Repository implementations
+  - Entities: Customer, CustomerType, CustomerStatus
+  - Value Objects: CustomerUpdate, CustomerStatusUpdate
+  - Domain Events: Customer-related events
+  - Domain Exceptions: CustomerNotFoundException, CustomerTypeNotFoundException, CustomerStatusNotFoundException
+  - Repository Interfaces
+- **Infrastructure Layer**: Repository implementations (MongoDB)
 
-#### 3. OAuth Context
+#### 3. Internal Context
 
-Thin context for OAuth server integration:
-
-- Uses [OAuth2 Server Bundle](https://oauth2.thephpleague.com/) for implementation
-- Contains minimal entity mapping for OpenAPI documentation
+Provides internal services like health checks and monitoring.
 
 ### CQRS Implementation
 
-- **Commands**: Encapsulate write operations (RegisterUser, UpdateUser, etc.)
+- **Commands**: Encapsulate write operations implementing `CommandInterface`
 - **Queries**: Handle read operations (separate from commands)
-- **Handlers**: Process commands/queries with business logic
+- **Handlers**: Process commands/queries with business logic implementing `CommandHandlerInterface`
 - **Message Bus**: Routes commands/queries to appropriate handlers
 
 ### Event-Driven Architecture
 
-- **Domain Events**: Published from Domain layer or handlers
-- **Event Subscribers**: Handle events for system extensibility
-- **Available Events**: UserRegistered, UserConfirmed, EmailChanged, PasswordChanged, ConfirmationEmailSent
+- **Domain Events**: Published from Domain layer or handlers extending `DomainEvent`
+- **Event Subscribers**: Handle events for system extensibility implementing `DomainEventSubscriberInterface`
+- **Aggregates**: Use `AggregateRoot` to record and pull domain events
 
 ## Comprehensive Testing Strategy
 
 ### Testing Philosophy
 
 - **100% Unit & Integration Test Coverage** - All code paths covered
-- **0 Escaped Mutants** - Mutation testing with Infection ensures test quality
+- **0 Escaped Mutants** - Mutation testing with Infection ensures test quality (100% MSI)
 - **End-to-End Coverage** - BDD scenarios cover all user journeys
 - **Load Testing** - Performance validated under various load conditions
 
@@ -210,32 +252,33 @@ Thin context for OAuth server integration:
 1. **Unit Tests** (`make unit-tests`):
 
    - Focus on individual classes/methods with mocked dependencies
-   - 193 test files, 2-3 minutes runtime
+   - 100% coverage requirement enforced
    - Test business logic in isolation
+   - 2-3 minutes runtime
 
 2. **Integration Tests** (`make integration-tests`):
 
    - Test interactions between components (database, external services)
-   - Real database connections and services
+   - Real MongoDB connections
    - 3-5 minutes runtime
 
 3. **End-to-End Tests** (`make behat`):
 
    - BDD scenarios in Gherkin language in `/features` folder
-   - 6 feature files covering: user operations, GraphQL, OAuth, localization
-   - Test complete user journeys from UI to database
+   - Test complete user journeys from API to database
+   - 5-10 minutes runtime
 
 4. **Mutation Testing** (`make infection`):
 
    - Validates test quality by making code mutations
-   - Must maintain 0 escaped/uncovered mutants
+   - Must maintain 100% MSI (Mutation Score Indicator) with 0 escaped/uncovered mutants
    - Uses Infection framework for rigorous testing
 
 5. **Load Testing** (K6-based):
-   - **Smoke**: `make smoke-load-tests` (10 VUs, minimal load)
-   - **Average**: `make average-load-tests` (50 VUs, normal patterns)
-   - **Stress**: `make stress-load-tests` (300 VUs, high load)
-   - **Spike**: `make spike-load-tests` (400 VUs, extreme spikes)
+   - **Smoke**: `make smoke-load-tests` (minimal load)
+   - **Average**: `make average-load-tests` (normal patterns)
+   - **Stress**: `make stress-load-tests` (high load)
+   - **Spike**: `make spike-load-tests` (extreme spikes)
 
 ### Code Quality Standards
 
@@ -243,34 +286,22 @@ Thin context for OAuth server integration:
 - **Psalm**: Static analysis with security taint analysis (`make psalm-security`)
 - **Deptrac**: Architecture dependency validation, prevents unwanted coupling
 - **PHP CS Fixer**: PSR-12 compliance, auto-formatting
+- **PHPMD**: PHP Mess Detector for cyclomatic complexity analysis
 
 ## Security & Performance
 
 ### Security Practices
 
-- **Password Security**: Bcrypt hashing with configurable cost (PASSWORD_HASHING_COST=15)
-- **Confirmation Tokens**: Random hex tokens with 1-hour expiration (CONFIRMATION_TOKEN_LENGTH=10)
-- **OAuth Implementation**: Secure OAuth2 server with multiple grant types
-- **Dependency Scanning**: Snyk and Dependabot for vulnerability detection
+- **Dependency Scanning**: Regular security vulnerability checks
+- **Static Analysis**: Psalm security taint analysis
+- **Input Validation**: Comprehensive validation on all API inputs
+- **RFC 7807 Errors**: Standard problem+json error responses
 
 ### Performance Optimization
 
-- **Load Testing Results**: Service handles 400 RPS with P(99) < 100ms for most endpoints
-- **Database Optimization**: Doctrine ORM with proper indexing and migrations
-- **Caching Strategy**: Redis integration for session/cache management
-- **Container Efficiency**: FrankenPHP for high-performance PHP execution
-
-### OAuth Grant Types
-
-1. **Authorization Code**: Full OAuth flow with redirect (`/api/oauth/authorize`)
-2. **Client Credentials**: Service-to-service authentication
-3. **Password**: Direct username/password authentication (for trusted clients)
-
-### Localization Support
-
-- **Languages**: English (default) and Ukrainian
-- **Header**: `Accept-Language: en` or `Accept-Language: uk`
-- **Coverage**: API messages, error responses, validation messages
+- **Load Testing**: Service validated under various load conditions
+- **Database Optimization**: MongoDB with proper indexing
+- **Container Efficiency**: Docker-based deployment with optimized PHP
 
 ## Validation
 
@@ -278,56 +309,33 @@ Thin context for OAuth server integration:
 
 **ALWAYS run through at least one complete end-to-end scenario after making changes:**
 
-1. **User Registration and Confirmation Flow:**
+1. **Customer Management Flow:**
 
-   - Create a new user via REST API: `POST /api/users` with email/password
-   - Check that confirmation email is sent (check MailCatcher at http://localhost:1080)
-   - Extract confirmation token from email
-   - Confirm user registration: `POST /api/users/confirm` with token
-   - Verify user can authenticate via OAuth
+   - Create a new customer via REST API: `POST /api/customers`
+   - Retrieve customer via REST API: `GET /api/customers/{id}`
+   - Update customer information
+   - Verify customer status and type management
 
-2. **GraphQL User Operations:**
+2. **GraphQL Operations:**
 
-   - Register user via GraphQL mutation `registerUser` at https://localhost/api/graphql
-   - Check email in MailCatcher for confirmation token
-   - Confirm user via GraphQL mutation `confirmUser` with token
-   - Query user information via GraphQL query `user`
-   - Test user updates via `updateUser` mutation
-
-3. **OAuth Authentication Flow:**
-
-   - Create OAuth client: `make create-oauth-client clientName=test`
-   - Test OAuth authorization flow with test client credentials
-   - Verify JWT token generation and validation
-   - Test token refresh capabilities
-
-4. **Localization Testing:**
-   - Test API responses in different languages (features include user_localization.feature)
-   - Verify error messages are properly localized
-   - Test GraphQL localization support
+   - Test customer queries via GraphQL at https://localhost/api/graphql
+   - Test customer mutations via GraphQL
+   - Verify proper error handling
 
 **Service Health Checks:**
 
 - Verify https://localhost/api/docs loads (API documentation)
 - Verify https://localhost/api/graphql loads (GraphQL playground)
-- Verify http://localhost:8080/workspace/diagrams loads (architecture diagrams)
-- Check database connectivity and migrations status
+- Check MongoDB connectivity and schema status
 
 ### Load Testing Scenarios
 
-**All load tests require OAuth client setup and have 30-minute setup/teardown timeouts.**
+**All load tests use K6 framework.**
 
-- **Smoke tests:** `make smoke-load-tests` -- minimal load (10 VUs, 10 RPS, 10s duration). Takes 5-10 minutes.
-- **Average load:** `make average-load-tests` -- normal load patterns (50 VUs, 50 RPS, 30s total). Takes 15-25 minutes.
-- **Stress tests:** `make stress-load-tests` -- high load testing (150-300 VUs, 150-300 RPS). Takes 20-30 minutes.
-- **Spike tests:** `make spike-load-tests` -- extreme load spikes (400 VUs, 400 RPS). Takes 25-35 minutes.
-
-**Available load test endpoints:**
-
-- REST API: getUser, createUser, updateUser, deleteUser, confirmUser, oauth
-- GraphQL API: graphQLGetUser, graphQLCreateUser, graphQLUpdateUser, graphQLConfirmUser
-- Batch operations: createUserBatch (10 users per batch)
-- Health checks and email operations
+- **Smoke tests:** `make smoke-load-tests` -- minimal load validation
+- **Average load:** `make average-load-tests` -- normal usage patterns
+- **Stress tests:** `make stress-load-tests` -- high load testing
+- **Spike tests:** `make spike-load-tests` -- extreme load spikes
 
 ## Common Tasks
 
@@ -341,23 +349,22 @@ Thin context for OAuth server integration:
 
 ### Database Operations
 
-- Run migrations: `make doctrine-migrations-migrate`
-- Generate migration: `make doctrine-migrations-generate`
-- Load fixtures: `make load-fixtures`
 - Setup test database: `make setup-test-db`
+- Reset database: `make reset-db`
+- Load fixtures: `make load-fixtures`
 
 ### Build and Deployment
 
 - Clear cache: `make cache-clear`
-- Build for production: Use docker-compose.prod.yml
+- Warmup cache: `make cache-warmup`
 - Generate API specs: `make generate-openapi-spec` and `make generate-graphql-spec`
 
 ### CI/CD Integration
 
-The repository includes 15 GitHub Actions workflows for:
+The repository includes GitHub Actions workflows for:
 
 - Automated testing (PHPUnit, Behat, load tests)
-- Code quality checks (Psalm, PHPInsights, PHP CS Fixer)
+- Code quality checks (Psalm, PHPInsights, PHP CS Fixer, PHPMD)
 - Security scanning and dependency analysis
 - API specification validation and diff checking
 - Automated releases and template synchronization
@@ -368,13 +375,16 @@ The repository includes 15 GitHub Actions workflows for:
 
 ```
 src/
-├── Internal/           # Internal domain logic
-├── OAuth/             # OAuth authentication implementation
-├── Shared/            # Shared components and utilities
-└── User/              # User domain with DDD/CQRS structure
-    ├── Application/   # Application services, commands, queries
-    ├── Domain/        # Domain entities, value objects, repositories
-    └── Infrastructure/ # Database, external services integration
+├── Core/              # Core domain logic
+│   └── Customer/      # Customer bounded context
+│       ├── Application/   # Application services, commands
+│       ├── Domain/        # Domain entities, value objects, repositories
+│       └── Infrastructure/ # Database, external services integration
+├── Internal/          # Internal services (health checks, monitoring)
+└── Shared/            # Shared components and utilities
+    ├── Application/   # Application layer cross-cutting concerns
+    ├── Domain/        # Domain layer abstractions and interfaces
+    └── Infrastructure/ # Infrastructure layer implementations
 ```
 
 ### Important Files
@@ -390,20 +400,20 @@ src/
 ### Configuration Files to Check When Making Changes
 
 - Always check `config/api_platform/` after modifying API resources
-- Always check `config/doctrine/` after modifying entities
+- Always check `config/doctrine/` after modifying entities (XML mappings)
 - Always check `config/routes/` after adding new endpoints
-- Review `src/User/Application/` when modifying user business logic
+- Review `src/Core/Customer/Application/` when modifying business logic
 
 ## API Platform, Swagger, and OpenAPI Integration
 
 ### API Platform Configuration
 
-This service uses **API Platform 4.1** for REST API and GraphQL functionality. API Platform automatically generates OpenAPI documentation and provides Swagger UI interface.
+This service uses **API Platform 4** for REST API and GraphQL functionality. API Platform automatically generates OpenAPI documentation and provides Swagger UI interface.
 
 **Key Configuration Files:**
 
 - `config/api_platform/resources.yaml` - Main API resource definitions
-- Individual entity annotations (User, etc.)
+- Individual entity annotations (Customer, etc.)
 - DTO classes for input/output
 
 ### Swagger/OpenAPI Documentation Best Practices
@@ -420,7 +430,7 @@ This service uses **API Platform 4.1** for REST API and GraphQL functionality. A
 ```php
 <?php
 
-namespace App\User\Application\DTO;
+namespace App\Core\Customer\Application\DTO;
 
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -437,13 +447,13 @@ final readonly class ExampleDto
 **Correct API Platform Configuration:**
 
 ```yaml
-App\User\Domain\Entity\User:
+App\Core\Customer\Domain\Entity\Customer:
   operations:
     example_operation:
       class: 'ApiPlatform\Metadata\Post'
-      uriTemplate: '/users/{id}/example'
-      input: 'App\User\Application\DTO\ExampleDto'
-      processor: 'App\User\Application\Processor\ExampleProcessor'
+      uriTemplate: '/customers/{id}/example'
+      input: 'App\Core\Customer\Application\DTO\ExampleDto'
+      processor: 'App\Core\Customer\Application\Processor\ExampleProcessor'
       denormalizationContext:
         groups: ['example:write']
 ```
@@ -483,18 +493,18 @@ App\User\Domain\Entity\User:
 
 **CRITICAL TIMEOUT VALUES:**
 
-- Docker build: 45+ minutes (NEVER CANCEL)
-- Complete test suite: 30+ minutes (NEVER CANCEL)
-- Load tests: 45+ minutes (NEVER CANCEL)
-- Dependency installation: 10+ minutes (NEVER CANCEL)
-- Application startup: 15+ minutes (NEVER CANCEL)
+- Docker build: 30+ minutes (NEVER CANCEL)
+- Complete test suite: 20+ minutes (NEVER CANCEL)
+- Load tests: 30+ minutes (NEVER CANCEL)
+- Dependency installation: 5+ minutes (NEVER CANCEL)
+- Application startup: 10+ minutes (NEVER CANCEL)
 
 **Common Command Timings:**
 
 - `make build`: 15-30 minutes first time, 5-10 minutes subsequent
 - `make start`: 5-10 minutes
 - `make install`: 3-5 minutes
-- `make all-tests`: 8-15 minutes
+- `make all-tests` 10-15 minutes
 - `make phpcsfixer`: 1-2 minutes
 - `make psalm`: 2-3 minutes
 
@@ -502,59 +512,38 @@ App\User\Domain\Entity\User:
 
 ### Common Issues
 
-- **Docker build fails with "Permission denied"**: Network restrictions blocking Alpine repositories. Document as limitation and use local PHP development with `composer install --no-dev` and `APP_ENV=prod php bin/console`.
-- **MakerBundle not found**: Missing dev dependencies. Either run `composer install` with dev dependencies or set `APP_ENV=prod` to run in production mode.
-- **Database connection errors**: Ensure `make start` completed successfully and database container is healthy. Check `docker compose logs database`.
-- **Memory issues during tests**: Use `php -d memory_limit=-1` for memory-intensive operations like infection testing.
-- **GitHub rate limits during composer install**: Use `COMPOSER_NO_INTERACTION=1` or configure GitHub token.
-- **Load test OAuth errors**: Ensure OAuth client is created with `make create-oauth-client` before running load tests.
-- **Load test network errors**: K6 extension downloading requires external network access. In restricted environments, load tests may fail due to DNS/network limitations when trying to access `ingest.k6.io` for extension provisioning.
-
-### Network and Authentication
-
-- GitHub token may be required for Composer in CI environments
-- OAuth client configuration needed for load testing
-- MailCatcher (port 1080) required for email testing workflows
-- LocalStack (port 4566) provides AWS SQS simulation for message queues
+- **Docker build fails**: Network restrictions may be blocking repository access. Check network connectivity and firewall settings.
+- **Database connection errors**: Ensure `make start` completed successfully and MongoDB container is healthy. Check `docker compose logs`.
+- **Memory issues during tests**: Use `php -d memory_limit=-1` for memory-intensive operations like infection testing (already configured in Makefile).
+- **Load test errors**: Ensure test database is properly set up and service is running.
 
 ### Performance Optimization
 
 - Use `--no-dev` flag for production composer installs
-- Redis cache improves performance (separate databases for dev/test)
-- Database connection pooling configured for MariaDB 11.4
+- Database indexing configured for MongoDB
 - Symfony cache warmup recommended: `make cache-warmup`
 
 ## Environment Variables
 
 Key environment variables in `.env`:
 
-- `DATABASE_URL="mysql://root:root@database:3306/db?serverVersion=11.4"`
-- `REDIS_URL=redis://redis:6379/0`
-- `API_BASE_URL=https://localhost`
-- `STRUCTURIZR_PORT=8080` -- Architecture diagram service
-- AWS SQS configuration for message queues (LocalStack for development)
+- `APP_ENV` - Application environment (dev, test, prod)
+- `DB_URL` - MongoDB connection string
+- `AWS_SQS_*` - AWS SQS configuration for message queues
 
 Key environment variables in `.env.test`:
 
-- `REDIS_URL=redis://redis:6379/1` -- Separate Redis database for tests
-- `LOAD_TEST_CONFIG=tests/Load/config.json.dist` -- Load test configuration
-- Database and mailer settings configured in Docker Compose
-
-**Load Test Configuration:**
-
-- Test runs on `localhost:8081` with MailCatcher on port `1080`
-- Batch size: 5000 users for bulk operations
-- OAuth test client: `ClientName` with ID `ID123` and secret `Secret1`
-- Email verification: Max 300 retries with 30s delay between scenarios
+- Test-specific database configuration
+- Load test configuration
 
 ## Architecture and Design Patterns
 
 This application implements:
 
 - **Hexagonal Architecture**: Clear separation of domain, application, and infrastructure
-- **DDD (Domain-Driven Design)**: User domain with entities, value objects, and repositories
+- **DDD (Domain-Driven Design)**: Customer domain with entities, value objects, and repositories
 - **CQRS (Command Query Responsibility Segregation)**: Separate commands and queries
-- **Event Sourcing**: Domain events for user lifecycle events
+- **Event-Driven Design**: Domain events for entity lifecycle events
 - **API-First Design**: REST and GraphQL APIs using API Platform
 
 When making changes, respect these architectural boundaries and patterns.
@@ -585,7 +574,7 @@ public function validate($value, Constraint $constraint): void
         return;
     }
     if (!(strlen($value) >= 8 && strlen($value) <= 64)) {
-        $this->addViolation('password.invalid.length');
+        $this->addViolation('invalid.length');
     }
     // ... more complex conditions
 }
@@ -617,7 +606,7 @@ All code must pass these quality gates before commit:
 - **Psalm**: Static analysis with no errors
 - **PHP CS Fixer**: PSR-12 compliance
 - **Unit/Integration Tests**: 100% test coverage
-- **Mutation Testing**: 0 escaped mutants
+- **Mutation Testing**: 100% MSI (0 escaped mutants)
 
 ### Achieving 100% Mutation Testing Coverage
 
@@ -716,7 +705,7 @@ public function generateToken(): string
 
 **Target: 100% MSI (Mutation Score Indicator)**
 
-- 784/784 mutants killed (or equivalent for your codebase)
+- All mutants killed
 - Zero escaped mutants
 - All boundary conditions, default values, and logical operators tested
 
@@ -854,7 +843,7 @@ make infection              # Check mutation testing coverage
 
 - API documentation changes
 - README updates
-- Inline code comments for clarity
+- Inline code comments for clarity (only when absolutely necessary)
 - Architecture decision records
 
 **Verify changes meet requirements:**
@@ -934,7 +923,7 @@ When implementing new features or modifying existing ones:
 - **API Changes**: Update `docs/api-endpoints.md` with new endpoints, modified request/response schemas, authentication requirements, and examples
 - **Architecture Changes**: Update `docs/design-and-architecture.md` when adding new components, modifying existing patterns, or changing system interactions
 - **Configuration Changes**: Update `docs/advanced-configuration.md` when adding new environment variables, configuration options, or deployment parameters
-- **Performance Impact**: Update `docs/performance.md` and `docs/performance-frankenphp.md` when changes affect system performance or resource usage
+- **Performance Impact**: Update `docs/performance.md` when changes affect system performance or resource usage
 
 **2. Testing Documentation Updates**
 When adding or modifying tests:
@@ -999,8 +988,8 @@ When adding user-facing features:
 1. Update `docs/design-and-architecture.md` with:
 
    - Updated entity relationships
-   - New database tables or fields
-   - Migration considerations
+   - New collections or fields
+   - Schema considerations
 
 2. Update `docs/developer-guide.md` with:
    - New entity usage patterns
@@ -1039,7 +1028,7 @@ When adding user-facing features:
 ```markdown
 1. Update `docs/security.md` with:
 
-   - New OAuth flows or grant types
+   - New authentication flows
    - Permission changes
    - Security considerations
 
@@ -1067,8 +1056,6 @@ When adding user-facing features:
    - Performance benchmarks and improvements
    - New caching strategies
    - Resource usage optimizations
-
-2. Update `docs/php-fpm-vs-frankenphp.md` if runtime comparisons change
 ```
 
 ### Documentation Quality Standards
@@ -1085,14 +1072,14 @@ When adding user-facing features:
 - Document all public APIs, endpoints, and user-facing features
 - Include error handling and edge cases
 - Provide both basic and advanced usage examples
-- Update version information in `docs/versioning.md` when applicable
+- Update version information when applicable
 
 **Maintenance Requirements:**
 
 - Remove outdated information when features are deprecated
-- Update `docs/release-notes.md` with significant changes
+- Update release notes with significant changes
 - Ensure all links and references remain valid
-- Update screenshots or diagrams if UI/architecture changes
+- Update diagrams if architecture changes
 
 ### Documentation Validation Process
 
@@ -1122,16 +1109,16 @@ When adding user-facing features:
 **Integration with CI/CD:**
 
 - Documentation updates should be part of the same pull request as code changes
-- Consider the `make ci` command should validate documentation consistency
+- The `make ci` command validates code quality that affects documentation accuracy
 - Use the existing quality checks to ensure documentation standards
 
 **Version Synchronization:**
 
-- Keep documentation version aligned with application version in `docs/versioning.md`
-- Update `docs/release-notes.md` for each release with documentation changes
+- Keep documentation version aligned with application version
+- Update release notes for each release with documentation changes
 - Maintain backward compatibility notes in relevant documentation sections
 
-This comprehensive approach ensures that the `docs/` directory remains an accurate, up-to-date reflection of the codebase, providing developers and users with reliable documentation that evolves alongside the system.
+This comprehensive approach ensures that documentation remains an accurate, up-to-date reflection of the codebase, providing developers and users with reliable documentation that evolves alongside the system.
 
 ## Quality Standards Protection
 
@@ -1158,7 +1145,7 @@ This comprehensive approach ensures that the `docs/` directory remains an accura
 - When `make phpinsights` reports only `[ERROR] The complexity score is too low` without pointing to specific files, **run PHP Mess Detector first** to gather actionable hotspots:
   - `make phpmd`
   - If you are troubleshooting manually, you can invoke the same command directly to inspect results quickly.
-- Address every PHP MD finding (especially high cyclomatic complexity warnings) before re-running PHPInsights.
+- Address every PHPMD finding (especially high cyclomatic complexity warnings) before re-running PHPInsights.
 - After fixes, execute `make phpinsights` again; the complexity score must now meet or exceed the protected thresholds.
 
 **Test Coverage Requirements:**
@@ -1268,21 +1255,15 @@ private function isEmptyButNotOnlySpaces(string $value): bool
 
 - **Validators**: Use Symfony's built-in validators instead of custom validation classes
 - **Rate Limiting**: Use Symfony Rate Limiter component instead of custom rate limiting
-- **Caching**: Use Symfony Cache component for rate limiting and other caching needs
+- **Caching**: Use Symfony Cache component for caching needs
 - **API Platform**: Rely on automatic OpenAPI generation instead of manual `openapi.requestBody` decorations
-
-**Rate Limiting Migration:**
-
-- Replace custom database-based rate limiting with Symfony Rate Limiter
-- Store rate limiting data in Symfony Cache (Redis) instead of database tables
-- Remove violation of Single Responsibility Principle from tokens table
 
 ### Testing Standards
 
 **MANDATORY: Use Faker library for all test data generation:**
 
-- **No hardcoded values** in tests (emails, passwords, tokens, IDs, etc.)
-- **Faker integration** already available in `tests/Unit/UnitTestCase.php` and `tests/Integration/IntegrationTestCase.php`
+- **No hardcoded values** in tests (emails, names, tokens, IDs, etc.)
+- **Faker integration** available in test base classes
 - **Dynamic test data** ensures tests are more robust and realistic
 
 **Examples:**
@@ -1291,21 +1272,21 @@ private function isEmptyButNotOnlySpaces(string $value): bool
 // ❌ BAD: Hardcoded test values
 $email = 'test@example.com';
 $token = 'test_token_123';
-$password = 'password123';
+$name = 'Test Customer';
 
 // ✅ GOOD: Faker-generated values
 $email = $this->faker->unique()->email();
 $token = $this->faker->lexify('??????????');
-$password = $this->faker->password(12);
+$name = $this->faker->company();
 ```
 
-### Database Migrations
+### Database Schema Management
 
-**MANDATORY: Clean up empty migration files:**
+**MANDATORY: Clean MongoDB schema management:**
 
-- **Delete empty migrations** immediately if they contain no schema changes
-- **Empty migrations** with only boilerplate code and no actual schema modifications should be removed
-- **Check migration content** before committing to ensure they serve a purpose
+- **Doctrine ODM**: Use Doctrine MongoDB ODM for entity mapping
+- **XML Mappings**: Define entity mappings in `config/doctrine/` directory
+- **Schema Commands**: Use `make reset-db` and `make setup-test-db` for schema management
 
 ### API Platform Best Practices
 
@@ -1315,7 +1296,7 @@ $password = $this->faker->password(12);
 - **Automatic schema generation**: Let API Platform generate OpenAPI schemas from DTOs
 - **Empty response classes**: Use separate Empty DTO class for endpoints that don't return response bodies
 - **HTTP status codes**: Use appropriate HTTP status codes (204 No Content) instead of success messages
-- **No response messages**: For security operations like password reset, return only HTTP status codes
+- **No response messages**: For operations that don't return data, return only HTTP status codes
 
 ### Pluralization and Internationalization
 
@@ -1324,3 +1305,44 @@ $password = $this->faker->password(12);
 - **Time units**: Use correct singular/plural forms (1 hour vs 2 hours)
 - **Dynamic pluralization**: Implement logic to handle both singular and plural forms
 - **Consistent messaging**: Ensure all user-facing text follows proper grammar rules
+
+## Resolving PHPInsights Complexity Failures
+
+When `make phpinsights` reports complexity issues:
+
+1. **Run PHPMD first**: `make phpmd` to identify specific complexity hotspots
+2. **Analyze findings**: Review each high-complexity warning
+3. **Refactor**: Apply complexity reduction strategies (extract methods, strategy patterns, etc.)
+4. **Rerun PHPInsights**: `make phpinsights` must now pass with scores meeting thresholds
+5. **Verify**: Ensure all tests still pass after refactoring
+
+## Best Practices Summary
+
+**Before Every Commit:**
+
+1. Run `make ci` and ensure "✅ CI checks successfully passed!" message
+2. Verify 100% test coverage maintained
+3. Ensure 100% MSI (0 escaped mutants) in mutation testing
+4. Check that all quality metrics meet or exceed thresholds
+5. Update relevant documentation in `docs/` directory
+6. Use clear, descriptive commit messages following conventional commits
+
+**During Development:**
+
+1. Use make commands exclusively (never direct PHP commands)
+2. Write self-documenting code without inline comments
+3. Keep cyclomatic complexity below 5 per method
+4. Use Faker for all test data generation
+5. Follow DDD/CQRS/Hexagonal architecture patterns
+6. Respect bounded context boundaries
+7. Use Symfony and API Platform built-in features
+
+**Code Review:**
+
+1. Use `make pr-comments` to retrieve and address all feedback
+2. Prioritize committable suggestions first
+3. Run quality checks after each change
+4. Document architectural decisions
+5. Ensure backward compatibility when refactoring
+
+This comprehensive guide ensures consistent, high-quality development practices across the Core Service codebase while maintaining architectural integrity and code quality standards.
