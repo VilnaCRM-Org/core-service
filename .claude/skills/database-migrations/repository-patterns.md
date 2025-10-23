@@ -63,6 +63,7 @@ interface CustomerRepositoryInterface
 ```
 
 **Key Principles**:
+
 - Interface in **Domain layer** (no infrastructure dependencies)
 - Return domain entities, not arrays or DTOs
 - Method names describe business operations

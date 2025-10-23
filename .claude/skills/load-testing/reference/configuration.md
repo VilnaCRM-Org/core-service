@@ -43,12 +43,14 @@ Load test scenarios are configured in `tests/Load/config.json.dist`:
 ```
 
 **Characteristics**:
+
 - Minimal load (2-5 VUs)
 - Short duration (10 seconds)
 - 100% success rate expected
 - Quick validation that endpoints work
 
 **When to Use**:
+
 - Verifying new test scripts work correctly
 - CI/CD pipeline validation
 - Pre-deployment smoke checks
@@ -65,12 +67,14 @@ Load test scenarios are configured in `tests/Load/config.json.dist`:
 ```
 
 **Characteristics**:
+
 - Normal load (10-20 VUs)
 - Medium duration (2-3 minutes)
-- >99% success rate expected
+- > 99% success rate expected
 - Simulates typical production load
 
 **When to Use**:
+
 - Regular performance monitoring
 - Baseline performance measurement
 - Regression testing
@@ -87,12 +91,14 @@ Load test scenarios are configured in `tests/Load/config.json.dist`:
 ```
 
 **Characteristics**:
+
 - High load (30-80 VUs)
 - Extended duration (5-15 minutes)
-- >95% success rate expected
+- > 95% success rate expected
 - Identifies performance bottlenecks
 
 **When to Use**:
+
 - Capacity planning
 - Finding system limits
 - Performance optimization validation
@@ -109,12 +115,14 @@ Load test scenarios are configured in `tests/Load/config.json.dist`:
 ```
 
 **Characteristics**:
+
 - Extreme load (100-200 VUs)
 - Short duration (1-3 minutes)
-- >90% success rate expected
+- > 90% success rate expected
 - Tests system recovery
 
 **When to Use**:
+
 - Testing auto-scaling
 - Validating circuit breakers
 - Simulating traffic spikes
@@ -141,12 +149,12 @@ export const options = scenarioUtils.getOptions();
 
 ```javascript
 export const options = {
-  vus: 10,              // Number of virtual users
-  duration: '2m',       // Test duration
+  vus: 10, // Number of virtual users
+  duration: '2m', // Test duration
   thresholds: {
-    'http_req_duration': ['p(95)<500'], // 95% of requests under 500ms
-    'http_req_failed': ['rate<0.01']     // Less than 1% failure rate
-  }
+    http_req_duration: ['p(95)<500'], // 95% of requests under 500ms
+    http_req_failed: ['rate<0.01'], // Less than 1% failure rate
+  },
 };
 ```
 
@@ -155,22 +163,22 @@ export const options = {
 ```javascript
 export const options = {
   stages: [
-    { duration: '30s', target: 10 },  // Ramp up to 10 VUs
-    { duration: '2m', target: 10 },   // Stay at 10 VUs
-    { duration: '30s', target: 0 }    // Ramp down to 0 VUs
+    { duration: '30s', target: 10 }, // Ramp up to 10 VUs
+    { duration: '2m', target: 10 }, // Stay at 10 VUs
+    { duration: '30s', target: 0 }, // Ramp down to 0 VUs
   ],
   thresholds: {
-    'http_req_duration': ['p(95)<500', 'p(99)<1000'],
-    'http_req_failed': ['rate<0.01'],
-    'http_reqs': ['rate>10']  // Minimum 10 requests per second
+    http_req_duration: ['p(95)<500', 'p(99)<1000'],
+    http_req_failed: ['rate<0.01'],
+    http_reqs: ['rate>10'], // Minimum 10 requests per second
   },
   noConnectionReuse: false,
   userAgent: 'K6LoadTest/1.0',
-  insecureSkipTLSVerify: true,  // For local testing with self-signed certs
+  insecureSkipTLSVerify: true, // For local testing with self-signed certs
   tags: {
     test_type: 'performance',
-    environment: 'test'
-  }
+    environment: 'test',
+  },
 };
 ```
 
@@ -254,7 +262,7 @@ const customersCreated = new Counter('customers_created');
 const customerCreationTime = new Trend('customer_creation_time');
 const customerCreationErrors = new Rate('customer_creation_errors');
 
-export default function() {
+export default function () {
   const startTime = Date.now();
   const response = createCustomer();
 
@@ -286,28 +294,29 @@ customer_creation_errors...........: 0.32%
 import { group, check } from 'k6';
 import http from 'k6/http';
 
-export default function() {
+export default function () {
   group('Customer Creation', () => {
-    const response = http.post(
-      url,
-      payload,
-      { tags: { endpoint: 'create' } }
-    );
+    const response = http.post(url, payload, { tags: { endpoint: 'create' } });
 
-    check(response, {
-      'status is 201': (r) => r.status === 201
-    }, { endpoint: 'create' });
+    check(
+      response,
+      {
+        'status is 201': r => r.status === 201,
+      },
+      { endpoint: 'create' }
+    );
   });
 
   group('Customer Retrieval', () => {
-    const response = http.get(
-      url,
-      { tags: { endpoint: 'get' } }
-    );
+    const response = http.get(url, { tags: { endpoint: 'get' } });
 
-    check(response, {
-      'status is 200': (r) => r.status === 200
-    }, { endpoint: 'get' });
+    check(
+      response,
+      {
+        'status is 200': r => r.status === 200,
+      },
+      { endpoint: 'get' }
+    );
   });
 }
 ```
@@ -319,8 +328,8 @@ export const options = {
   thresholds: {
     'http_req_duration{endpoint:create}': ['p(95)<500'],
     'http_req_duration{endpoint:get}': ['p(95)<200'],
-    'http_req_failed{endpoint:create}': ['rate<0.01']
-  }
+    'http_req_failed{endpoint:create}': ['rate<0.01'],
+  },
 };
 ```
 
@@ -370,13 +379,13 @@ Use stages for realistic ramp-up/down:
 ```javascript
 export const options = {
   stages: [
-    { duration: '1m', target: 10 },   // Ramp up
-    { duration: '5m', target: 10 },   // Steady state
-    { duration: '1m', target: 50 },   // Spike
-    { duration: '2m', target: 50 },   // Sustained spike
-    { duration: '1m', target: 10 },   // Recovery
-    { duration: '1m', target: 0 }     // Ramp down
-  ]
+    { duration: '1m', target: 10 }, // Ramp up
+    { duration: '5m', target: 10 }, // Steady state
+    { duration: '1m', target: 50 }, // Spike
+    { duration: '2m', target: 50 }, // Sustained spike
+    { duration: '1m', target: 10 }, // Recovery
+    { duration: '1m', target: 0 }, // Ramp down
+  ],
 };
 ```
 
@@ -388,17 +397,17 @@ Define thresholds for all critical metrics:
 export const options = {
   thresholds: {
     // Response times
-    'http_req_duration': ['p(95)<500', 'p(99)<1000'],
+    http_req_duration: ['p(95)<500', 'p(99)<1000'],
 
     // Error rates
-    'http_req_failed': ['rate<0.01'],
+    http_req_failed: ['rate<0.01'],
 
     // Throughput
-    'http_reqs': ['rate>10'],
+    http_reqs: ['rate>10'],
 
     // Checks
-    'checks': ['rate>0.99']
-  }
+    checks: ['rate>0.99'],
+  },
 };
 ```
 

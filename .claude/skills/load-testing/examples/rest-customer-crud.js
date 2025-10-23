@@ -45,7 +45,7 @@ export function setup() {
 
   // Create customer type
   const typeData = {
-    value: `TestType_${Date.now()}`
+    value: `TestType_${Date.now()}`,
   };
 
   const typeResponse = http.post(
@@ -65,7 +65,7 @@ export function setup() {
 
   // Create customer status
   const statusData = {
-    value: `TestStatus_${Date.now()}`
+    value: `TestStatus_${Date.now()}`,
   };
 
   const statusResponse = http.post(
@@ -92,7 +92,7 @@ export function setup() {
   return {
     type: type,
     status: status,
-    createdCustomers: [] // Track created customers for cleanup
+    createdCustomers: [], // Track created customers for cleanup
   };
 }
 

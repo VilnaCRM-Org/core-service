@@ -49,6 +49,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:validate     # Valid
 ### Creating a New Entity
 
 **1. Define Entity** (Domain Layer):
+
 ```php
 namespace App\Core\Customer\Domain\Entity;
 
@@ -66,6 +67,7 @@ final class Customer
 ```
 
 **2. Create XML Mapping** (`config/doctrine/Customer.mongodb.xml`):
+
 ```xml
 <document name="App\Core\Customer\Domain\Entity\Customer" collection="customers">
     <field name="id" fieldName="id" id="true" type="ulid"/>
@@ -80,6 +82,7 @@ final class Customer
 ```
 
 **3. Configure API Platform** (`config/api_platform/resources/customer.yaml`):
+
 ```yaml
 App\Core\Customer\Domain\Entity\Customer:
   shortName: Customer
@@ -90,6 +93,7 @@ App\Core\Customer\Domain\Entity\Customer:
 ```
 
 **4. Update Schema**:
+
 ```bash
 make cache-clear
 docker compose exec php bin/console doctrine:mongodb:schema:update
@@ -109,6 +113,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 ### Creating Repositories
 
 **1. Define Interface** (Domain):
+
 ```php
 interface CustomerRepositoryInterface
 {
@@ -118,6 +123,7 @@ interface CustomerRepositoryInterface
 ```
 
 **2. Implement** (Infrastructure):
+
 ```php
 final class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -134,6 +140,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 ```
 
 **3. Register in `services.yaml`**:
+
 ```yaml
 App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
   alias: App\Core\Customer\Infrastructure\Repository\CustomerRepository
@@ -146,11 +153,13 @@ App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
 ### Custom Types
 
 **ULID** (`type="ulid"`):
+
 - Sortable, time-ordered identifiers
-- Used for MongoDB _id fields
+- Used for MongoDB \_id fields
 - Auto-generated, globally unique
 
 **DomainUuid** (`type="domain_uuid"`):
+
 - Standard UUID format
 - Used for domain identifiers
 - RFC 4122 compliant
@@ -246,18 +255,21 @@ final class CustomerRepositoryTest extends IntegrationTestCase
 ### Common Issues
 
 **Database Connection Errors**:
+
 ```bash
 docker compose ps mongodb
 docker compose logs mongodb
 ```
 
 **Schema Sync Issues**:
+
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:validate
 docker compose exec php bin/console doctrine:mongodb:schema:update --force
 ```
 
 **Migration Conflicts**:
+
 ```bash
 docker compose exec php bin/console doctrine:migrations:status
 docker compose exec php bin/console doctrine:migrations:migrate prev  # Rollback

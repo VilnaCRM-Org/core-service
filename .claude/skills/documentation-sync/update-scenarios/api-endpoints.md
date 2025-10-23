@@ -7,7 +7,8 @@
 **Update**: `docs/api-endpoints.md`
 
 1. **Endpoint Definition**:
-```markdown
+
+````markdown
 ### POST /api/customers
 
 Creates a new customer.
@@ -15,27 +16,29 @@ Creates a new customer.
 **Request**:
 \```json
 {
-  "name": "John Doe",
-  "email": "john@example.com"
+"name": "John Doe",
+"email": "john@example.com"
 }
 \```
 
 **Response**: 201 Created
 \```json
 {
-  "@id": "/api/customers/01HQ5ZK...",
-  "name": "John Doe",
-  "email": "john@example.com"
+"@id": "/api/customers/01HQ5ZK...",
+"name": "John Doe",
+"email": "john@example.com"
 }
 \```
 
 **Errors**:
+
 - 400: Invalid input
 - 401: Unauthorized
 - 409: Email already exists
-```
+````
 
 2. **Generate OpenAPI Spec**:
+
 ```bash
 make generate-openapi-spec
 ```
@@ -49,33 +52,35 @@ make generate-openapi-spec
 **Update**: `docs/api-endpoints.md`
 
 1. **Operation Definition**:
-```markdown
+
+````markdown
 ### Mutation: createCustomer
 
 \```graphql
 mutation CreateCustomer($input: CreateCustomerInput!) {
-  createCustomer(input: $input) {
-    customer {
-      id
-      name
-      email
-    }
-  }
+createCustomer(input: $input) {
+customer {
+id
+name
+email
+}
+}
 }
 \```
 
 **Input**:
 \```json
 {
-  "input": {
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
+"input": {
+"name": "John Doe",
+"email": "john@example.com"
+}
 }
 \```
-```
+````
 
 2. **Generate GraphQL Spec**:
+
 ```bash
 make generate-graphql-spec
 ```

@@ -147,6 +147,7 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 **Key commands**: `make doctrine-migrations-migrate`, `make doctrine-migrations-generate`, `make setup-test-db`
 
 **Structure**: Multi-file with supporting guides:
+
 - `entity-creation-guide.md` - Complete entity workflow
 - `entity-modification-guide.md` - Modifying entities safely
 - `repository-patterns.md` - Repository implementation
@@ -178,6 +179,7 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 **Key commands**: `make load-tests`, `make smoke-load-tests`, `make average-load-tests`, `make stress-load-tests`, `make spike-load-tests`
 
 **Structure**: Multi-file with comprehensive guides:
+
 - `rest-api-patterns.md` - REST API templates
 - `graphql-patterns.md` - GraphQL patterns
 - `examples/rest-customer-crud.js` - Complete REST example
@@ -228,6 +230,7 @@ Large skills use a multi-file approach following Claude Code best practices:
 - **`update-scenarios/`**: Scenario-specific patterns (e.g., for documentation-sync)
 
 **Example** - The `load-testing` skill structure:
+
 ```
 load-testing/
 ├── SKILL.md (210 lines)
