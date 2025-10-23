@@ -1,0 +1,7 @@
+config.json
+customers.json
+customer_statuses.json
+customer_types.json
+*.html
+results/*.json
+loadTestsResults/*.html
