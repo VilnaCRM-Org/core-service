@@ -94,17 +94,17 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getCreatedAt(): DateTimeInterface
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeInterface $createdAt): void
+    public function setCreatedAt(DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
-    public function getUpdatedAt(): DateTimeInterface
+    public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
     }

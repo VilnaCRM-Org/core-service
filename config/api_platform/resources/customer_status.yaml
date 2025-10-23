@@ -4,7 +4,7 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
   normalizationContext:
     groups: ['output']
   paginationViaCursor:
-    - { field: 'ulid', direction: 'DESC' }
+    - {field: 'ulid', direction: 'DESC'}
 
   # REST Operations
   operations:
