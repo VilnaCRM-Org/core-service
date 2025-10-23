@@ -7,10 +7,10 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerStatus;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
 abstract class CustomerStatusRequestFactory implements
-    AbstractReqFactoryInterface
+    RequestFactoryInterface
 {
     public function getRequest(): RequestBody
     {
