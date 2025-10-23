@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Status;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class UpdateTest extends UnitTestCase
@@ -20,7 +20,7 @@ final class UpdateTest extends UnitTestCase
             ->method('build')
             ->willReturn($requestBody);
 
-        $factory = new UpdateCustomerStatusRequestFactory($requestPatchBuilder);
+        $factory = new StatusUpdateRequestFactory($requestPatchBuilder);
 
         $this->assertSame($requestBody, $factory->getRequest());
     }

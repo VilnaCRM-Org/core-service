@@ -6,8 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerStatus;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
 
-final class CreateCustomerStatusRequestFactory extends
-    CustomerStatusRequestFactory
+final class StatusCreateRequestFactory extends CustomerStatusRequestFactory
 {
     public function __construct(private RequestBuilder $requestBuilder)
     {

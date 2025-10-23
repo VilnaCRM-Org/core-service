@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\Status;
 
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\StatusDeletedResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class DeletedFactoryTest extends UnitTestCase
@@ -24,7 +24,7 @@ final class DeletedFactoryTest extends UnitTestCase
             )
             ->willReturn($this->createStub(Response::class));
 
-        $factory = new CustomerStatusDeletedResponseFactory($responseBuilderMock);
+        $factory = new StatusDeletedResponseFactory($responseBuilderMock);
         $response = $factory->getResponse();
 
         $this->assertInstanceOf(Response::class, $response);

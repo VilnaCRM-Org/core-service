@@ -42,6 +42,11 @@ abstract class CustomerTypeRequestFactory implements
 
     protected function getValueParam(): Parameter
     {
-        return new Parameter('value', 'string', $this->defaultValue, $this->maxLength);
+        return new Parameter(
+            'value',
+            'string',
+            $this->defaultValue,
+            $this->maxLength
+        );
     }
 }
