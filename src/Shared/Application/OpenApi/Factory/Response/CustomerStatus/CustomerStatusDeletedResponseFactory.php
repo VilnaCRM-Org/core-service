@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
 
-final class CStDelResp implements
+final class CustomerStatusDeletedResponseFactory implements
     ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)

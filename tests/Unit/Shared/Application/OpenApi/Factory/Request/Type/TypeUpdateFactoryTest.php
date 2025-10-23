@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Type;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpCTyReq;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class TypeUpdateFactoryTest extends UnitTestCase
@@ -20,7 +20,7 @@ final class TypeUpdateFactoryTest extends UnitTestCase
             ->with($this->isType('array'))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $typeUpdateFactory = new UpCTyReq($requestBuilderMock);
+        $typeUpdateFactory = new UpdateCustomerTypeRequestFactory($requestBuilderMock);
         $requestBody = $typeUpdateFactory->getRequest();
 
         $this->assertInstanceOf(RequestBody::class, $requestBody);
