@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
 
-final class CreateCustomerTypeRequestFactory extends CustomerTypeRequestFactory
+final class TypeCreateRequestFactory extends CustomerTypeRequestFactory
 {
     public function __construct(
         private RequestBuilder $requestBuilder,

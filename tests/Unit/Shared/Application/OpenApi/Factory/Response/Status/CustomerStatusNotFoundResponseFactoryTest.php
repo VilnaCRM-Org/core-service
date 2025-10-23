@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\Status;
 use ApiPlatform\OpenApi\Model\Response;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\StatusNotFoundResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -27,7 +27,7 @@ final class FactoryTest extends UnitTestCase
             )
             ->willReturn($response);
 
-        $factory = new CustomerStatusNotFoundResponseFactory($responseBuilder);
+        $factory = new StatusNotFoundResponseFactory($responseBuilder);
 
         $this->assertSame($response, $factory->getResponse());
     }
@@ -35,7 +35,7 @@ final class FactoryTest extends UnitTestCase
     public function testGetTypeParam(): void
     {
         $responseBuilder = $this->createMock(ResponseBuilder::class);
-        $factory = new CustomerStatusNotFoundResponseFactory($responseBuilder);
+        $factory = new StatusNotFoundResponseFactory($responseBuilder);
 
         $param = $factory->getTypeParam();
 
@@ -51,7 +51,7 @@ final class FactoryTest extends UnitTestCase
     public function testGetTitleParam(): void
     {
         $responseBuilder = $this->createMock(ResponseBuilder::class);
-        $factory = new CustomerStatusNotFoundResponseFactory($responseBuilder);
+        $factory = new StatusNotFoundResponseFactory($responseBuilder);
 
         $param = $factory->getTitleParam();
 
@@ -64,7 +64,7 @@ final class FactoryTest extends UnitTestCase
     public function testGetDetailParam(): void
     {
         $responseBuilder = $this->createMock(ResponseBuilder::class);
-        $factory = new CustomerStatusNotFoundResponseFactory($responseBuilder);
+        $factory = new StatusNotFoundResponseFactory($responseBuilder);
 
         $param = $factory->getDetailParam();
 
@@ -77,7 +77,7 @@ final class FactoryTest extends UnitTestCase
     public function testGetStatusParam(): void
     {
         $responseBuilder = $this->createMock(ResponseBuilder::class);
-        $factory = new CustomerStatusNotFoundResponseFactory($responseBuilder);
+        $factory = new StatusNotFoundResponseFactory($responseBuilder);
 
         $param = $factory->getStatusParam();
 

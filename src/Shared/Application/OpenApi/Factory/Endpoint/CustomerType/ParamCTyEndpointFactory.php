@@ -10,11 +10,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\CreateCustomerTypeRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerType\UpdateCustomerTypeRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeCreateRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeUpdateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerType\CustomerTypeNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TypeDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerType\TypeNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -40,12 +40,12 @@ final class ParamCTyEndpointFactory extends EndpointFactory
 
     public function __construct(
         private UuidUriCustTy $parameterFactory,
-        private UpdateCustomerTypeRequestFactory $updateCustomerTypeRequestFactory,
+        private TypeUpdateRequestFactory $updateCustomerTypeRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
-        private CustomerTypeNotFoundResponseFactory $customerTyNFResp,
-        private CustomerTypeDeletedResponseFactory $deletedResponseFactory,
-        private CreateCustomerTypeRequestFactory $replaceCustomerRequestFactory,
+        private TypeNotFoundResponseFactory $customerTyNFResp,
+        private TypeDeletedResponseFactory $deletedResponseFactory,
+        private TypeCreateRequestFactory $replaceCustomerRequestFactory,
         private InternalErrorFactory $internalErrorFactory,
         private ForbiddenResponseFactory $forbiddenResponseFactory,
         private UnauthorizedResponseFactory $unauthorizedResponseFactory,

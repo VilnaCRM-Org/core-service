@@ -12,11 +12,11 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\ParamCStEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\CreateCustomerStatusRequestFactory;
-use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\UpdateCustomerStatusRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusDeletedResponseFactory;
-use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\CustomerStatusNotFoundResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\StatusDeletedResponseFactory;
+use App\Shared\Application\OpenApi\Factory\Response\CustomerStatus\StatusNotFoundResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
@@ -28,12 +28,12 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 final class ParamEndpointFactoryTest extends UnitTestCase
 {
     private UuidUriCustSt $parameterFactory;
-    private UpdateCustomerStatusRequestFactory $updateFactory;
+    private StatusUpdateRequestFactory $updateFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
-    private CustomerStatusNotFoundResponseFactory $notFoundFactory;
-    private CustomerStatusDeletedResponseFactory $deletedFactory;
-    private CreateCustomerStatusRequestFactory $replaceFactory;
+    private StatusNotFoundResponseFactory $notFoundFactory;
+    private StatusDeletedResponseFactory $deletedFactory;
+    private StatusCreateRequestFactory $replaceFactory;
     private InternalErrorFactory $internalErrorFactory;
     private ForbiddenResponseFactory $forbiddenResponseFactory;
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
@@ -78,17 +78,17 @@ final class ParamEndpointFactoryTest extends UnitTestCase
         $this->parameterFactory = $this
             ->createMock(UuidUriCustSt::class);
         $this->updateFactory = $this
-            ->createMock(UpdateCustomerStatusRequestFactory::class);
+            ->createMock(StatusUpdateRequestFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
             ->createMock(BadRequestResponseFactory::class);
         $this->notFoundFactory = $this
-            ->createMock(CustomerStatusNotFoundResponseFactory::class);
+            ->createMock(StatusNotFoundResponseFactory::class);
         $this->deletedFactory = $this
-            ->createMock(CustomerStatusDeletedResponseFactory::class);
+            ->createMock(StatusDeletedResponseFactory::class);
         $this->replaceFactory = $this
-            ->createMock(CreateCustomerStatusRequestFactory::class);
+            ->createMock(StatusCreateRequestFactory::class);
         $this->internalErrorFactory = $this
             ->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this
