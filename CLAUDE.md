@@ -87,7 +87,7 @@ make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
 
 ### Directory Structure
 
-```
+```text
 src/
 ├── Customer/              # Customer bounded context
 │   └── Domain/
