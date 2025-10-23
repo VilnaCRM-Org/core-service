@@ -1,443 +1,177 @@
 ---
-name: Documentation Synchronization
-description: Keep documentation in sync with code changes. Use when implementing features, modifying APIs, changing architecture, or adding configuration options to ensure docs/ directory stays updated.
+name: documentation-sync
+description: Keep documentation in sync with code changes. Use when implementing features, modifying APIs, changing architecture, adding configuration, updating security, or making any changes that affect user-facing or developer-facing documentation.
 ---
 
 # Documentation Synchronization Skill
 
-This skill ensures documentation in the `docs/` directory remains synchronized with codebase changes.
+## Overview
+
+This skill ensures documentation in the `docs/` directory remains synchronized with codebase changes, maintaining accuracy and completeness for both users and developers.
+
+## Core Principle
+
+**Documentation is part of the definition of done**. No code change is complete until the relevant documentation is updated.
 
 ## When to Use This Skill
 
 Activate this skill when:
 
-- Implementing new features or modifying existing ones
-- Adding or changing API endpoints (REST or GraphQL)
-- Modifying database schema or entities
-- Changing architecture or design patterns
-- Adding configuration options or environment variables
-- Implementing security or authentication changes
-- Adding new testing strategies
-- Making performance optimizations
+- **API Changes**: Adding/modifying REST or GraphQL endpoints
+- **Database Changes**: Adding entities, modifying schema
+- **Architecture Changes**: Changing design patterns, component structure
+- **Configuration Changes**: Adding environment variables, config options
+- **Security Changes**: Modifying authentication, authorization
+- **Testing Changes**: Adding test strategies, new test types
+- **Performance Changes**: Optimizations, benchmarking
+- **Feature Implementation**: New user-facing features
 
 ## Core Documentation Files
 
 ### API and Integration
 
-- `docs/api-endpoints.md` - API endpoints, schemas, examples
-- `docs/user-guide.md` - User-facing feature usage
-- `docs/security.md` - Authentication, authorization, security practices
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `docs/api-endpoints.md` | REST/GraphQL endpoints, schemas | API changes |
+| `docs/user-guide.md` | User-facing features | Feature changes |
+| `docs/security.md` | Auth, authorization | Security changes |
 
 ### Architecture and Design
 
-- `docs/design-and-architecture.md` - System design, components, patterns
-- `docs/developer-guide.md` - Development patterns, code examples
-- `docs/glossary.md` - Domain terms and definitions
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `docs/design-and-architecture.md` | System design, patterns | Architecture changes |
+| `docs/developer-guide.md` | Dev patterns, examples | Dev workflow changes |
+| `docs/glossary.md` | Domain terminology | New domain concepts |
 
 ### Operations and Configuration
 
-- `docs/advanced-configuration.md` - Environment variables, configuration
-- `docs/getting-started.md` - Setup and initial configuration
-- `docs/operational.md` - Monitoring, logging, maintenance
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `docs/advanced-configuration.md` | Env vars, config | Config changes |
+| `docs/getting-started.md` | Setup, installation | Setup changes |
+| `docs/operational.md` | Monitoring, logging | Ops changes |
 
 ### Development
 
-- `docs/testing.md` - Testing strategies, coverage, commands
-- `docs/performance.md` - Performance benchmarks, optimizations
-- `docs/onboarding.md` - New developer onboarding
-
-### Versioning and Changes
-
-- `docs/versioning.md` - Version information
-- `docs/release-notes.md` - Changelog and significant changes
-
-## Update Scenarios
-
-### When Adding New REST API Endpoints
-
-**Update** `docs/api-endpoints.md`:
-
-- Endpoint URL and HTTP method
-- Request/response schemas with examples
-- Authentication/authorization requirements
-- Error codes and responses
-- Rate limiting information
-
-**Update** `docs/user-guide.md`:
-
-- Usage examples for the new endpoint
-- Integration patterns
-
-**Update** `.github/openapi-spec/`:
-
-```bash
-make generate-openapi-spec
-```
-
-**Example**:
-
-```markdown
-### POST /api/users/confirm
-
-Confirms a user's email address using a confirmation token.
-
-**Request Body**:
-\`\`\`json
-{
-"token": "abc123def456"
-}
-\`\`\`
-
-**Response**: 204 No Content
-
-**Errors**:
-
-- 400 Bad Request: Invalid token format
-- 404 Not Found: Token not found or expired
-- 401 Unauthorized: Missing authentication
-
-**Authentication**: Required (OAuth Bearer token)
-```
-
-### When Adding New GraphQL Operations
-
-**Update** `docs/api-endpoints.md`:
-
-- Query/mutation schemas
-- Input/output types
-- Example requests and responses
-- Authentication requirements
-
-**Update** `.github/graphql-spec/`:
-
-```bash
-make generate-graphql-spec
-```
-
-**Update** `docs/user-guide.md`:
-
-- Client integration examples
-
-**Example**:
-
-```markdown
-### Mutation: confirmUser
-
-\`\`\`graphql
-mutation ConfirmUser($input: ConfirmUserInput!) {
-confirmUser(input: $input) {
-user {
-id
-email
-confirmed
-}
-}
-}
-\`\`\`
-
-**Input**:
-\`\`\`json
-{
-"input": {
-"token": "abc123def456"
-}
-}
-\`\`\`
-```
-
-### When Modifying Database Schema
-
-**Update** `docs/design-and-architecture.md`:
-
-- Updated entity relationships
-- New database tables or fields
-- Migration considerations
-
-**Update** `docs/developer-guide.md`:
-
-- New entity usage patterns
-- Repository method examples
-
-**Example**:
-
-```markdown
-#### User Entity
-
-The User entity represents registered users in the system.
-
-**Fields**:
-
-- `id`: UUID (primary key)
-- `email`: Unique email address
-- `password`: Bcrypt hashed password
-- `confirmed`: Boolean flag for email confirmation
-- `confirmationToken`: Token for email confirmation (nullable)
-- `createdAt`: Registration timestamp
-
-**Relationships**:
-
-- One-to-many with ConfirmationToken
-```
-
-### When Adding Configuration Options
-
-**Update** `docs/advanced-configuration.md`:
-
-- New environment variables
-- Configuration examples
-- Default values and validation rules
-- Docker compose updates if needed
-
-**Update** `docs/getting-started.md` (if required for basic setup)
-
-**Example**:
-
-```markdown
-### EMAIL_CONFIRMATION_TOKEN_LENGTH
-
-**Type**: Integer
-**Default**: 10
-**Required**: No
-
-Length of the random hex token generated for email confirmation.
-
-\`\`\`bash
-EMAIL_CONFIRMATION_TOKEN_LENGTH=16
-\`\`\`
-
-**Validation**: Must be between 8 and 32 characters.
-```
-
-### When Implementing Domain Features
-
-**Update** `docs/design-and-architecture.md`:
-
-- New domain models and aggregates
-- Command/query handlers
-- Domain events and their handlers
-- Bounded context interactions
-
-**Update** `docs/glossary.md`:
-
-- New domain terms
-
-**Update** `docs/developer-guide.md`:
-
-- Usage examples
-
-**Example**:
-
-```markdown
-## User Confirmation Bounded Context
-
-### Aggregates
-
-**ConfirmationEmail**: Manages the email confirmation workflow
-
-- **Commands**:
-
-  - `SendConfirmationEmailCommand`: Triggers email sending
-
-- **Events**:
-
-  - `ConfirmationEmailSentEvent`: Email successfully sent
-
-- **Handlers**:
-  - `SendConfirmationEmailHandler`: Processes email sending
-
-### Workflow
-
-1. User registers → `UserRegisteredEvent` emitted
-2. Event subscriber triggers `SendConfirmationEmailCommand`
-3. Handler generates token and sends email
-4. User clicks link → `ConfirmUserCommand` processed
-5. `UserConfirmedEvent` emitted
-```
-
-### When Modifying Authentication/Authorization
-
-**Update** `docs/security.md`:
-
-- New OAuth flows or grant types
-- Permission changes
-- Security considerations
-
-**Update** `docs/api-endpoints.md`:
-
-- Updated auth requirements per endpoint
-
-**Update** `docs/user-guide.md`:
-
-- Client authentication examples
-
-**Example**:
-
-```markdown
-### OAuth Password Grant
-
-Used for trusted first-party clients to authenticate users with username/password.
-
-**Endpoint**: `POST /api/oauth/token`
-
-**Request**:
-\`\`\`json
-{
-"grant_type": "password",
-"client_id": "your_client_id",
-"client_secret": "your_client_secret",
-"username": "user@example.com",
-"password": "userpassword"
-}
-\`\`\`
-
-**Security Considerations**:
-
-- Only use over HTTPS
-- Store client secrets securely
-- Implement rate limiting
-```
-
-### When Adding Testing Strategies
-
-**Update** `docs/testing.md`:
-
-- New test categories or patterns
-- Updated coverage requirements
-- New testing commands or procedures
-
-**Update** `docs/developer-guide.md` (if workflow changes)
-
-**Example**:
-
-```markdown
-### Contract Testing
-
-Added contract tests to verify API compatibility with client expectations.
-
-**Command**:
-\`\`\`bash
-make contract-tests
-\`\`\`
-
-**Location**: `tests/Contract/`
-
-**Purpose**: Ensure API responses match documented contracts using Schemathesis
-```
-
-### When Implementing Performance Optimizations
-
-**Update** `docs/performance.md`:
-
-- Performance benchmarks and improvements
-- New caching strategies
-- Resource usage optimizations
-
-**Update** `docs/php-fpm-vs-frankenphp.md` (if runtime comparisons change)
-
-**Example**:
-
-```markdown
-### Redis Caching for Rate Limiting
-
-Migrated rate limiting from database to Redis cache.
-
-**Performance Impact**:
-
-- 60% reduction in database queries
-- 40% improvement in rate limit check latency
-- P99 latency: 5ms → 2ms
-
-**Configuration**:
-\`\`\`bash
-REDIS_URL=redis://redis:6379/0
-\`\`\`
-```
-
-## Documentation Quality Standards
-
-### Consistency Requirements
-
-- Follow existing documentation structure and formatting
-- Use consistent terminology from `docs/glossary.md`
-- Include practical code examples with syntax highlighting
-- Add cross-references to related documentation sections
-
-### Completeness Requirements
-
-- Document all public APIs, endpoints, and user-facing features
-- Include error handling and edge cases
-- Provide both basic and advanced usage examples
-- Update version information in `docs/versioning.md` when applicable
-
-### Maintenance Requirements
-
-- Remove outdated information when features are deprecated
-- Update `docs/release-notes.md` with significant changes
-- Ensure all links and references remain valid
-- Update screenshots or diagrams if UI/architecture changes
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `docs/testing.md` | Test strategies | Test changes |
+| `docs/performance.md` | Benchmarks, optimizations | Performance work |
+| `docs/onboarding.md` | New dev onboarding | Process changes |
+
+### Versioning
+
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `docs/versioning.md` | Version info | Version bumps |
+| `docs/release-notes.md` | Changelog | Significant changes |
 
 ## Documentation Update Workflow
 
-### Before Committing Code Changes
+### Quick Reference
 
-1. **Review Documentation Impact**:
+**For each code change**:
 
-   - Identify which documentation files need updates
-   - List all affected docs files
+1. **Identify Impact**: Which docs need updates?
+2. **Update Content**: Follow scenario-specific patterns
+3. **Cross-Reference**: Ensure links remain valid
+4. **Validate Examples**: Test all code samples
+5. **Review Checklist**: Use pre-commit checklist
 
-2. **Update Relevant Files**:
+### Common Update Scenarios
 
-   - Make comprehensive updates to all affected documentation
-   - Ensure consistency across all docs
+| Change Type | Primary Docs | Commands | Guide |
+|-------------|--------------|----------|-------|
+| **REST Endpoint** | `api-endpoints.md` | `make generate-openapi-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md) |
+| **GraphQL Operation** | `api-endpoints.md` | `make generate-graphql-spec` | [api-endpoints.md](update-scenarios/api-endpoints.md) |
+| **Database Schema** | `design-and-architecture.md` | - | [database-and-architecture.md](update-scenarios/database-and-architecture.md) |
+| **Domain Model** | `design-and-architecture.md`, `glossary.md` | - | [database-and-architecture.md](update-scenarios/database-and-architecture.md) |
+| **Configuration** | `advanced-configuration.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Authentication** | `security.md`, `api-endpoints.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Testing** | `testing.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
+| **Performance** | `performance.md` | - | [configuration-and-operations.md](update-scenarios/configuration-and-operations.md) |
 
-3. **Cross-Reference Check**:
+**See detailed guides**: [update-scenarios/](update-scenarios/) directory
 
-   - Verify all internal links remain valid
-   - Check references between documentation files
+## Documentation Quality Standards
 
-4. **Example Validation**:
+### Consistency
 
-   - Test all code examples
-   - Ensure they work with current implementation
+- ✅ Follow existing doc structure and formatting
+- ✅ Use terminology from `docs/glossary.md`
+- ✅ Include code examples with syntax highlighting
+- ✅ Add cross-references to related sections
 
-5. **Consistency Check**:
-   - Verify terminology alignment with `docs/glossary.md`
-   - Follow existing formatting patterns
+### Completeness
 
-### Documentation Update Checklist
+- ✅ Document all public APIs and endpoints
+- ✅ Include error handling and edge cases
+- ✅ Provide basic and advanced examples
+- ✅ Update version info when needed
 
-Before committing:
+### Maintenance
 
-- [ ] API documentation updated for endpoint/schema changes
-- [ ] Architecture documentation reflects structural changes
-- [ ] Configuration documentation includes new options
-- [ ] Testing documentation covers new test scenarios
-- [ ] User guide includes new feature usage examples
-- [ ] Security documentation addresses new auth/security aspects
-- [ ] Performance documentation reflects optimization changes
-- [ ] Glossary updated with new domain terms
-- [ ] Release notes updated for significant changes
-- [ ] All code examples tested and validated
+- ✅ Remove outdated information
+- ✅ Update release notes for significant changes
+- ✅ Validate all links and references
+- ✅ Update diagrams if architecture changes
 
-## Integration with CI/CD
+**See detailed standards**: [reference/quality-standards.md](reference/quality-standards.md)
 
-### During Pull Requests
+## Pre-Commit Checklist
 
-- Documentation updates should be in the same PR as code changes
-- Reviewers verify documentation accuracy
-- CI validates documentation links and formatting
+Before committing code with documentation updates:
 
-### Version Synchronization
+- [ ] **Identify Impact**: Determine which docs need updates
+- [ ] **Update Content**: Apply scenario-specific patterns
+- [ ] **Cross-Reference**: Verify all links remain valid
+- [ ] **Test Examples**: Run all code examples
+- [ ] **Check Consistency**: Verify terminology matches glossary
+- [ ] **Update Specs**: Run `make generate-openapi-spec` or `make generate-graphql-spec` if needed
+- [ ] **Review Changes**: Ensure completeness and accuracy
 
-- Keep documentation version aligned with application version
-- Update `docs/versioning.md` for releases
-- Maintain backward compatibility notes
+**See complete workflow**: [reference/workflow-checklist.md](reference/workflow-checklist.md)
+
+## Integration with Development
+
+### During Development
+
+**Documentation is code**:
+- Update docs in same PR as code changes
+- Test documentation examples
+- Validate links and references
+
+### During Code Review
+
+**Reviewers check**:
+- Documentation accuracy
+- Completeness of examples
+- Terminology consistency
+- Link validity
+
+### During CI/CD
+
+**Automated checks**:
+- Documentation links validation
+- Example code syntax checking
+- Spec generation and validation
+
+## Supporting Files
+
+For detailed guides, examples, and standards:
+
+- **[update-scenarios/api-endpoints.md](update-scenarios/api-endpoints.md)** - REST and GraphQL documentation
+- **[update-scenarios/database-and-architecture.md](update-scenarios/database-and-architecture.md)** - Schema and design docs
+- **[update-scenarios/configuration-and-operations.md](update-scenarios/configuration-and-operations.md)** - Config, security, testing, performance
+- **[reference/quality-standards.md](reference/quality-standards.md)** - Documentation quality guidelines
+- **[reference/workflow-checklist.md](reference/workflow-checklist.md)** - Complete update workflow
 
 ## Success Criteria
 
-- All affected documentation files updated
-- Code examples tested and working
-- Internal links and references valid
-- Terminology consistent with glossary
-- Release notes updated for significant changes
-- Documentation reflects actual code behavior
+- ✅ All affected docs updated
+- ✅ Code examples tested and working
+- ✅ Links and references valid
+- ✅ Terminology consistent
+- ✅ Release notes updated
+- ✅ Docs reflect actual code behavior

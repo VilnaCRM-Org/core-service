@@ -1,5 +1,5 @@
 ---
-name: Code Review Workflow
+name: code-review
 description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
 ---
 

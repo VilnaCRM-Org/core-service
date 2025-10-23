@@ -1,6 +1,6 @@
 ---
-name: Testing Workflow
-description: Run and manage different types of tests (unit, integration, E2E, mutation, load tests). Use when running tests, debugging test failures, or ensuring test coverage.
+name: testing-workflow
+description: Run and manage different types of tests (unit, integration, E2E, mutation, load tests). Use when running tests, debugging test failures, ensuring test coverage, or fixing mutation testing issues. Covers PHPUnit, Behat, Infection, and K6 load tests.
 ---
 
 # Testing Workflow Skill
@@ -92,7 +92,7 @@ make spike-load-tests    # 25-35 min, extreme spikes
 make load-tests          # All load tests
 ```
 
-**Requirements**: OAuth client setup, 30-min timeouts
+**Requirements**: Test database setup, 30-min timeouts
 
 ## Test Coverage Workflow
 

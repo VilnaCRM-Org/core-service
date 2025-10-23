@@ -146,6 +146,46 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 
 **Key commands**: `make doctrine-migrations-migrate`, `make doctrine-migrations-generate`, `make setup-test-db`
 
+**Structure**: Multi-file with supporting guides:
+- `entity-creation-guide.md` - Complete entity workflow
+- `entity-modification-guide.md` - Modifying entities safely
+- `repository-patterns.md` - Repository implementation
+- `mongodb-specifics.md` - MongoDB features
+- `reference/troubleshooting.md` - Database issues
+
+---
+
+### 7. Load Testing (`load-testing/`)
+
+**Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
+
+**When activated**:
+
+- Creating load tests
+- Writing K6 scripts
+- Testing API performance
+- Debugging load test failures
+- Setting up performance monitoring
+
+**What it does**:
+
+- Provides patterns for REST and GraphQL load tests
+- Documents K6 script structure and configuration
+- Explains deterministic testing (no random operations)
+- Covers IRI handling and data generation
+- Troubleshoots common load testing issues
+
+**Key commands**: `make load-tests`, `make smoke-load-tests`, `make average-load-tests`, `make stress-load-tests`, `make spike-load-tests`
+
+**Structure**: Multi-file with comprehensive guides:
+- `rest-api-patterns.md` - REST API templates
+- `graphql-patterns.md` - GraphQL patterns
+- `examples/rest-customer-crud.js` - Complete REST example
+- `examples/graphql-customer-crud.js` - Complete GraphQL example
+- `reference/configuration.md` - K6 configuration
+- `reference/utils-extensions.md` - Extending Utils class
+- `reference/troubleshooting.md` - Common issues and solutions
+
 ---
 
 ## How Skills Work
@@ -171,11 +211,36 @@ Each Skill consists of:
 
   ```yaml
   ---
-  name: Skill Name
+  name: skill-name
   description: What this skill does and when to use it
   ---
   Detailed instructions...
   ```
+
+**Multi-file Structure** (for complex skills):
+
+Large skills use a multi-file approach following Claude Code best practices:
+
+- **Main `SKILL.md`**: Core workflow and quick reference (<300 lines)
+- **Supporting files**: Detailed patterns, guides, and reference documentation
+- **`examples/`**: Complete working code examples
+- **`reference/`**: Troubleshooting, configuration, and advanced topics
+- **`update-scenarios/`**: Scenario-specific patterns (e.g., for documentation-sync)
+
+**Example** - The `load-testing` skill structure:
+```
+load-testing/
+├── SKILL.md (210 lines)
+├── rest-api-patterns.md
+├── graphql-patterns.md
+├── examples/
+│   ├── rest-customer-crud.js
+│   └── graphql-customer-crud.js
+└── reference/
+    ├── configuration.md
+    ├── utils-extensions.md
+    └── troubleshooting.md
+```
 
 ### Creating New Skills
 
@@ -184,15 +249,18 @@ To add a new Skill:
 1. Create a directory: `.claude/skills/your-skill-name/`
 2. Create `SKILL.md` with YAML frontmatter
 3. Write clear description with usage triggers
-4. Provide detailed, actionable instructions
-5. Include examples and commands
+4. Keep main file concise (<300 lines for complex skills)
+5. Extract details into supporting files if needed
+6. Include examples and commands
 
 **Best practices**:
 
 - Keep Skills focused on single capabilities
+- Use lowercase-hyphen naming (e.g., `my-skill-name`)
 - Write specific descriptions with concrete trigger terms
-- Include relevant commands and examples
-- Test Skills with actual use cases
+- Main SKILL.md should be quick reference, details in supporting files
+- Include practical examples and actual commands
+- Test Skills with real use cases
 
 ## Skill vs CLAUDE.md vs AGENTS.md
 
@@ -203,30 +271,37 @@ To add a new Skill:
 - **Location**: Root directory
 - **Usage**: Automatic context for every conversation
 
-### AGENTS.md (1,327 lines)
+### AGENTS.md (1,300+ lines)
 
 - **Purpose**: Comprehensive repository guidelines and best practices
 - **Content**: Complete development workflow, quality standards, troubleshooting
 - **Location**: Root directory
 - **Usage**: Reference documentation for complex scenarios
 
-### Skills (1,933 lines total across 6 Skills)
+### Skills (7 skills with multi-file structure)
 
 - **Purpose**: Modular, reusable capabilities for specific workflows
-- **Content**: Step-by-step instructions for focused tasks
+- **Content**: Step-by-step instructions for focused tasks with supporting documentation
 - **Location**: `.claude/skills/`
 - **Usage**: Automatically activated when relevant to task
+- **Structure**: Main SKILL.md files (~200-400 lines each) + 17 supporting files
+- **Total**: 674 lines in main files + comprehensive supporting documentation
 
 ## Integration with Development Workflow
 
 Skills integrate seamlessly with the project's development workflow:
 
 1. **Before coding**: Documentation Sync Skill identifies what needs updating
-2. **During coding**: Quality Standards Skill maintains high code quality
-3. **After coding**: Testing Workflow ensures comprehensive coverage
-4. **Before commit**: CI Workflow validates all quality checks pass
+2. **During coding**:
+   - Quality Standards Skill maintains high code quality
+   - Database Migrations Skill guides entity and schema changes
+3. **After coding**:
+   - Testing Workflow ensures comprehensive coverage
+   - Load Testing Skill validates API performance
+4. **Before commit**:
+   - CI Workflow validates all quality checks pass
+   - Documentation Sync confirms docs are updated
 5. **During review**: Code Review Workflow handles PR feedback systematically
-6. **Schema changes**: Database Migrations Skill guides proper entity management
 
 ## Success Metrics
 
