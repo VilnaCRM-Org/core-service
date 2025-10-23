@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Domain\Bus\Event;
 
 use DateTimeImmutable;
+use DateTimeInterface;
 
 abstract class DomainEvent
 {
@@ -44,8 +45,8 @@ abstract class DomainEvent
         return $this->occurredOn;
     }
 
-    private function dateToString(\DateTimeInterface $date): string
+    private function dateToString(DateTimeInterface $date): string
     {
-        return $date->format(\DateTimeInterface::ATOM);
+        return $date->format(DateTimeInterface::ATOM);
     }
 }
