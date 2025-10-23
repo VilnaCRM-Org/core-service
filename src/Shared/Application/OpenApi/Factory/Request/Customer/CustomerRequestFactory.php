@@ -7,9 +7,9 @@ namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
+use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
-abstract class CustomerRequestFactory implements AbstractReqFactoryInterface
+abstract class CustomerRequestFactory implements RequestFactoryInterface
 {
     private const DEFAULT_CUSTOMER_TYPE_ID = '768e998b-31cb-419d-a02c-6ae9d5b4f447';
     private const DEFAULT_CUSTOMER_STATUS_ID = 'c27f0884-8b6f-45db-858d-9a987a1d20d7';
