@@ -10,8 +10,7 @@ use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class CustomerStatusNotFoundResponseFactory implements
-    ResponseFactoryInterface
+final class StatusNotFoundResponseFactory implements ResponseFactoryInterface
 {
     public function __construct(private ResponseBuilder $responseBuilder)
     {
