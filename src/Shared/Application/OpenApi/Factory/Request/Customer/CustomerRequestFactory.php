@@ -11,6 +11,9 @@ use App\Shared\Application\OpenApi\Factory\Request\AbstractReqFactoryInterface;
 
 abstract class CustomerRequestFactory implements AbstractReqFactoryInterface
 {
+    private const DEFAULT_CUSTOMER_TYPE_ID = '768e998b-31cb-419d-a02c-6ae9d5b4f447';
+    private const DEFAULT_CUSTOMER_STATUS_ID = 'c27f0884-8b6f-45db-858d-9a987a1d20d7';
+
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(
@@ -67,7 +70,7 @@ abstract class CustomerRequestFactory implements AbstractReqFactoryInterface
         return new Parameter(
             'type',
             'iri-reference',
-            '/api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447',
+            '/api/customer_types/' . self::DEFAULT_CUSTOMER_TYPE_ID,
             255
         );
     }
@@ -77,7 +80,7 @@ abstract class CustomerRequestFactory implements AbstractReqFactoryInterface
         return new Parameter(
             'status',
             'iri-reference',
-            '/api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7',
+            '/api/customer_statuses/' . self::DEFAULT_CUSTOMER_STATUS_ID,
             255
         );
     }
