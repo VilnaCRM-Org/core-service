@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\UriParameter;
 
-final class UuidUriCustomerFactory extends UuidUriParameterFactory
+final class UlidUriCustSt extends UlidUriParameterFactory
 {
     protected function getDescription(): string
     {
-        return 'Customer identifier';
+        return 'CustomerStatus identifier';
     }
 }
