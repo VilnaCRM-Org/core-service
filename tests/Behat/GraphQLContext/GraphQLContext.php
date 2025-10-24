@@ -73,7 +73,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     {
         $this->ensureResponseDataAvailable();
 
-        if (!$this->hasField($this->responseData, $field)) {
+        if (! $this->hasField($this->responseData, $field)) {
             throw new \RuntimeException(
                 sprintf('Field "%s" not found in response', $field)
             );
@@ -110,7 +110,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
 
         $actualValue = $this->getFieldValue($this->responseData, $path);
 
-        if (!str_contains((string) $actualValue, $value)) {
+        if (! str_contains((string) $actualValue, $value)) {
             throw new \RuntimeException(
                 sprintf('Expected %s to contain "%s", got "%s"', $path, $value, $actualValue)
             );
@@ -139,7 +139,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     {
         $this->ensureResponseDataAvailable();
 
-        if (!isset($this->responseData['errors'])) {
+        if (! isset($this->responseData['errors'])) {
             throw new \RuntimeException(
                 'Expected GraphQL response to contain errors, but none found'
             );
@@ -153,7 +153,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     {
         $this->ensureResponseDataAvailable();
 
-        if (!isset($this->responseData['errors'])) {
+        if (! isset($this->responseData['errors'])) {
             throw new \RuntimeException('No errors in GraphQL response');
         }
 
@@ -165,7 +165,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
             }
         }
 
-        if (!$found) {
+        if (! $found) {
             throw new \RuntimeException(
                 sprintf('Error message "%s" not found in errors', $message)
             );
@@ -291,7 +291,7 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
         $current = $data;
 
         foreach ($parts as $part) {
-            if (!is_array($current) || !array_key_exists($part, $current)) {
+            if (! is_array($current) || ! array_key_exists($part, $current)) {
                 throw new \RuntimeException(
                     sprintf('Path "%s" not found in response', $path)
                 );
