@@ -429,7 +429,7 @@ This service uses **API Platform 4** for REST API and GraphQL functionality. API
 - **DO** use Symfony Serializer Groups for input/output control
 - **DO** define proper denormalizationContext in API Platform configuration
 
-**Correct DTO Structure:**
+#### Correct DTO Structure:
 
 ```php
 <?php
@@ -448,7 +448,7 @@ final readonly class ExampleDto
 }
 ```
 
-**Correct API Platform Configuration:**
+#### Correct API Platform Configuration:
 
 ```yaml
 App\Core\Customer\Domain\Entity\Customer:
@@ -478,7 +478,8 @@ App\Core\Customer\Domain\Entity\Customer:
 
 ### Troubleshooting Swagger Issues
 
-**Problem**: Request body schema is empty in Swagger
+#### Problem: Request body schema is empty in Swagger
+
 **Solution**:
 
 1. Remove all `OpenApi\Annotations` (OA\*) from DTOs
@@ -486,7 +487,8 @@ App\Core\Customer\Domain\Entity\Customer:
 3. Verify denormalizationContext groups match DTO Groups annotations
 4. Check that input DTO is correctly specified in API Platform configuration
 
-**Problem**: Parameters not showing in Swagger
+#### Problem: Parameters not showing in Swagger
+
 **Solution**:
 
 1. Verify uriTemplate parameters match processor expectations
@@ -707,7 +709,7 @@ public function generateToken(): string
 5. **Maintain backward compatibility** when refactoring existing public APIs
 6. **Update interface signatures** to match implementation changes
 
-**Target: 100% MSI (Mutation Score Indicator)**
+#### Target: 100% MSI (Mutation Score Indicator)
 
 - All mutants killed
 - Zero escaped mutants
