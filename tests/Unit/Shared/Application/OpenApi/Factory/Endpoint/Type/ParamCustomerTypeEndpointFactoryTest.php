@@ -21,13 +21,13 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustTy;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustTy;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
 {
-    private UuidUriCustTy $parameterFactory;
+    private UlidUriCustTy $parameterFactory;
     private TypeUpdateRequestFactory $updateFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
@@ -76,7 +76,7 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this
-            ->createMock(UuidUriCustTy::class);
+            ->createMock(UlidUriCustTy::class);
         $this->updateFactory = $this
             ->createMock(TypeUpdateRequestFactory::class);
         $this->validationErrorFactory = $this
