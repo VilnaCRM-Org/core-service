@@ -12,7 +12,7 @@ use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
-use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
@@ -45,7 +45,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function __construct(
         private TypeRepositoryInterface $typeRepository,
         private StatusRepositoryInterface $statusRepository,
-        private UlidTransformer $ulidTransformer,
+        private UlidFactory $ulidFactory,
         private CustomerRepositoryInterface $customerRepository,
         private CustomerFactoryInterface $customerFactory,
         private StatusFactoryInterface $statusFactory,
@@ -103,6 +103,19 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Given ensure type exists with id :id
+     */
+    public function ensureTypeExistsWithId(string $id): void
+    {
+        $ulid = $this->ulidFactory->create($id);
+        $existingType = $this->typeRepository->find($ulid);
+
+        if ($existingType === null) {
+            $this->typeWithIdExists($id);
+        }
+    }
+
+    /**
      * @Given create status with id :id
      */
     public function statusWithIdExists(string $id): void
@@ -110,6 +123,19 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->getStatus($id);
         $this->statusRepository->save($status);
         $this->trackId($id, $this->createdStatusIds);
+    }
+
+    /**
+     * @Given ensure status exists with id :id
+     */
+    public function ensureStatusExistsWithId(string $id): void
+    {
+        $ulid = $this->ulidFactory->create($id);
+        $existingStatus = $this->statusRepository->find($ulid);
+
+        if ($existingStatus === null) {
+            $this->statusWithIdExists($id);
+        }
     }
 
     /**
@@ -237,7 +263,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $status = $this->statusRepository->find($id)
             ?? $this->statusFactory->create(
                 $value,
-                $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+                $this->ulidFactory->create($id)
             );
         $status->setValue($value);
         $this->statusRepository->save($status);
@@ -260,7 +286,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $type = $this->typeFactory->create(
             $this->faker->word(),
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            $this->ulidFactory->create($id)
         );
         $this->trackId($id, $this->createdTypeIds);
         return $type;
@@ -270,7 +296,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $status = $this->statusFactory->create(
             $this->faker->word(),
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            $this->ulidFactory->create($id)
         );
         $this->trackId($id, $this->createdStatusIds);
         return $status;
@@ -320,11 +346,35 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Then delete status with id :id
+     */
+    public function deleteStatusById(string $id): void
+    {
+        $ulid = $this->ulidFactory->create($id);
+        $status = $this->statusRepository->find($ulid);
+        if ($status !== null) {
+            $this->statusRepository->delete($status);
+        }
+    }
+
+    /**
      * @Then delete type with value :value
      */
     public function deleteTypeByValue(string $value): void
     {
         $this->typeRepository->deleteByValue($value);
+    }
+
+    /**
+     * @Then delete type with id :id
+     */
+    public function deleteTypeById(string $id): void
+    {
+        $ulid = $this->ulidFactory->create($id);
+        $type = $this->typeRepository->find($ulid);
+        if ($type !== null) {
+            $this->typeRepository->delete($type);
+        }
     }
 
     private function cleanupCustomers(): void
@@ -495,7 +545,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $type,
             $status,
             $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            $this->ulidFactory->create($id)
         );
         $this->customerRepository->save($customer);
         $this->trackId($id, $this->createdCustomerIds);
@@ -524,7 +574,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $type,
             $status,
             $confirmed,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            $this->ulidFactory->create($id)
         );
         $this->customerRepository->save($customer);
         $this->trackId($id, $this->createdCustomerIds);
@@ -546,7 +596,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $type,
             $status,
             true,
-            $this->ulidTransformer->transformFromSymfonyUlid(new Ulid($id))
+            $this->ulidFactory->create($id)
         );
         $customer->setLeadSource($leadSource);
         $this->customerRepository->save($customer);
