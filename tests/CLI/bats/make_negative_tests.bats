@@ -35,10 +35,22 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-  mv tests/Behat/CustomerContext/CustomerContext.php tests/
+  original_path="tests/Behat/CustomerContext/CustomerContext.php"
+  temp_path="tests/CustomerContext.php"
+  
+  cleanup() {
+    if [ -f "$temp_path" ]; then
+      mv "$temp_path" "$original_path"
+    fi
+  }
+  trap cleanup EXIT
+  
+  mv "$original_path" "$temp_path"
   run make behat
+  
+  mv "$temp_path" "$original_path"
+  
   assert_failure
-  mv tests/CustomerContext.php tests/Behat/CustomerContext
 }
 
 @test "make psalm should fail when there are errors" {
