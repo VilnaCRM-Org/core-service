@@ -6,14 +6,14 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustTy;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustTy;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerTypeFactoryTest extends UnitTestCase
 {
     private UriParameterBuilder $parameterBuilder;
     private Parameter $expectedParameter;
-    private UuidUriCustTy $factory;
+    private UlidUriCustTy $factory;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
         $this->setupParameterBuilderMock();
-        $this->factory = new UuidUriCustTy($this->parameterBuilder);
+        $this->factory = new UlidUriCustTy($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
