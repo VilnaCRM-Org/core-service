@@ -13,6 +13,8 @@
         <exclude name="TooManyPublicMethods"/>
         <exclude name="ExcessiveClassComplexity"/>
         <exclude name="ExcessiveMethodLength"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="TooManyFields"/>
     </rule>
 
     <rule ref="rulesets/cleancode.xml">
@@ -23,5 +25,6 @@
 
     <rule ref="rulesets/design.xml">
         <exclude name="CouplingBetweenObjects"/>
+        <exclude name="NumberOfChildren"/>
     </rule>
 </ruleset>
