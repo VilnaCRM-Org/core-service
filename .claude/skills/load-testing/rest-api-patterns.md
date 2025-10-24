@@ -208,8 +208,7 @@ function generateCustomerData(data) {
     type: data.type['@id'],
     status: data.status['@id'],
     confirmed: Math.random() > 0.5,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    // Note: createdAt and updatedAt are set by the server
   };
 }
 ```

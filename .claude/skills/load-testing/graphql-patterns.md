@@ -3,6 +3,7 @@
 ## Script Structure Template
 
 ```javascript
+import http from 'k6/http';
 import ScenarioUtils from '../utils/scenarioUtils.js';
 import Utils from '../utils/utils.js';
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
@@ -28,6 +29,8 @@ export function setup() {
 
 export default function graphQLOperationResource(data) {
   // Main GraphQL test logic
+  // Note: buildGraphQLQuery must be implemented per scenario (see below)
+  // Expected return: { query: string, variables?: object }
   const query = buildGraphQLQuery(data);
   const response = utils.executeGraphQL(query);
 
@@ -43,7 +46,16 @@ export default function graphQLOperationResource(data) {
 export function teardown(data) {
   // Use REST API for faster cleanup
   if (data.dependency) {
-    http.del(`${utils.getBaseHttpUrl()}${data.dependency['@id']}`);
+    try {
+      const deleteResponse = http.del(`${utils.getBaseHttpUrl()}${data.dependency['@id']}`);
+      if (deleteResponse.status !== 204 && deleteResponse.status !== 200 && deleteResponse.status !== 404) {
+        console.warn(`Failed to clean up dependency: ${deleteResponse.status} - ${data.dependency['@id']}`);
+      } else if (deleteResponse.status === 404) {
+        console.info(`Dependency already deleted: ${data.dependency['@id']}`);
+      }
+    } catch (e) {
+      console.error(`Error deleting dependency ${data.dependency['@id']}: ${e.message}`);
+    }
   }
 }
 
@@ -92,8 +104,8 @@ export default function graphQLCreateResource(data) {
         initials: `Customer_${randomString(8)}`,
         email: `test_${Date.now()}@example.com`,
         phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
-        type: data.type['@id'],
-        status: data.status['@id'],
+        type: data.type['@id'], // Full IRI from setup phase, e.g., '/api/customer_types/01K85E...'
+        status: data.status['@id'], // Full IRI from setup phase, e.g., '/api/customer_statuses/01K85E...'
         confirmed: true,
       },
     },
@@ -284,10 +296,10 @@ const mutation = {
 ### Extracting IRI from GraphQL Response
 
 ```javascript
-// GraphQL response typically returns just the ID
+// GraphQL response returns the full IRI
 const body = JSON.parse(response.body);
 const customerId = body.data.createCustomer.customer.id;
-// customerId might be: "/api/customers/01234" or just "01234" depending on API config
+// customerId will be the full IRI: "/api/customers/01K85E6755EFKTKPFMK6WHF99V"
 
 // Store for later use
 data.createdCustomers.push(customerId);
@@ -324,8 +336,7 @@ function generateCustomerInput(data) {
     type: data.type['@id'],
     status: data.status['@id'],
     confirmed: Math.random() > 0.5,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    // Note: createdAt and updatedAt are set by the server
   };
 }
 ```

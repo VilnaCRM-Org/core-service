@@ -280,7 +280,7 @@ export default function () {
 
 Custom metrics appear in K6 output:
 
-```
+```bash
 customers_created..................: 1523
 customer_creation_time.............: avg=125ms p(95)=250ms
 customer_creation_errors...........: 0.32%
