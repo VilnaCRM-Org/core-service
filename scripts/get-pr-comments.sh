@@ -311,7 +311,7 @@ check_dependencies() {
 # Enhanced authentication function
 authenticate_github() {
     local temp_auth=false
-    
+
     # Method 1: Environment token
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
         echo "→ Using GITHUB_TOKEN from environment"
@@ -320,7 +320,7 @@ authenticate_github() {
         echo "→ Using GH_TOKEN from environment"
         temp_auth=true
     fi
-    
+
     # Method 2: Check existing CLI authentication
     if ! $temp_auth && gh auth status --hostname "$GITHUB_HOST" &>/dev/null; then
         echo "→ Using existing GitHub CLI authentication"
@@ -334,7 +334,7 @@ authenticate_github() {
         echo "3. Show token setup help"
         echo "4. Exit"
         read -p "Choice (1-4): " choice
-        
+
         case $choice in
             1)
                 read -s -p "Enter GitHub Personal Access Token: " token
@@ -369,7 +369,7 @@ authenticate_github() {
                 ;;
         esac
     fi
-    
+
     # Final verification
     if ! gh auth status --hostname "$GITHUB_HOST" &>/dev/null; then
         echo "Error: GitHub authentication verification failed"
