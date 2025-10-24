@@ -43,8 +43,8 @@ return [
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
-                'tests/Behat/OAuthContext/OAuthContext.php',
-                'src/User/Infrastructure/Repository/MariaDBPasswordResetTokenRepository.php',
+                'tests/Behat/OAuthContext/OAuthContext',
+                'src/User/Infrastructure/Repository/MariaDBPasswordResetTokenRepository',
             ],
             'ignoreComments' => true,
             'lineLimit' => 100,
