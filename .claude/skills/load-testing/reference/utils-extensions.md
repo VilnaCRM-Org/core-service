@@ -79,8 +79,7 @@ export default class CustomerUtils extends Utils {
       type: typeIri,
       status: statusIri,
       confirmed: Math.random() > 0.5,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      // Note: createdAt and updatedAt are set by the server
     };
   }
 
@@ -95,6 +94,10 @@ export default class CustomerUtils extends Utils {
       return null;
     }
     const type = JSON.parse(typeResponse.body);
+    if (!type['@id']) {
+      console.error('Response missing @id field for customer type');
+      return null;
+    }
 
     // Create status
     const statusResponse = this.createCustomerStatus();
@@ -104,6 +107,11 @@ export default class CustomerUtils extends Utils {
       return null;
     }
     const status = JSON.parse(statusResponse.body);
+    if (!status['@id']) {
+      console.error('Response missing @id field for customer status');
+      http.del(`${this.getBaseHttpUrl()}${type['@id']}`);
+      return null;
+    }
 
     // Create customer
     const customerData = this.generateCustomerData(type['@id'], status['@id']);
@@ -133,14 +141,23 @@ export default class CustomerUtils extends Utils {
    * Clean up customer and dependencies
    */
   cleanupCustomerWithDependencies(data) {
-    if (data.customer) {
-      http.del(`${this.getBaseHttpUrl()}${data.customer['@id']}`);
+    if (data.customer && data.customer['@id']) {
+      const custResponse = http.del(`${this.getBaseHttpUrl()}${data.customer['@id']}`);
+      if (custResponse.status !== 204 && custResponse.status !== 200 && custResponse.status !== 404) {
+        console.error(`Failed to delete customer: ${custResponse.status} - ${data.customer['@id']}`);
+      }
     }
-    if (data.type) {
-      http.del(`${this.getBaseHttpUrl()}${data.type['@id']}`);
+    if (data.type && data.type['@id']) {
+      const typeResponse = http.del(`${this.getBaseHttpUrl()}${data.type['@id']}`);
+      if (typeResponse.status !== 204 && typeResponse.status !== 200 && typeResponse.status !== 404) {
+        console.error(`Failed to delete type: ${typeResponse.status} - ${data.type['@id']}`);
+      }
     }
-    if (data.status) {
-      http.del(`${this.getBaseHttpUrl()}${data.status['@id']}`);
+    if (data.status && data.status['@id']) {
+      const statusResponse = http.del(`${this.getBaseHttpUrl()}${data.status['@id']}`);
+      if (statusResponse.status !== 204 && statusResponse.status !== 200 && statusResponse.status !== 404) {
+        console.error(`Failed to delete status: ${statusResponse.status} - ${data.status['@id']}`);
+      }
     }
   }
 }
@@ -319,7 +336,7 @@ export class AuthHelper {
     return {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/ld+json',
+        'Content-Type': 'application/json',
       },
     };
   }
