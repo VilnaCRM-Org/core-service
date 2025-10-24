@@ -717,7 +717,7 @@ public function generateToken(): string
 
 ### Automated Code Review Comment Retrieval
 
-**CRITICAL: Always use `make pr-comments` to retrieve and address all code review comments systematically.**
+#### CRITICAL: Always use `make pr-comments` to retrieve and address all code review comments systematically.
 
 The repository provides a comprehensive code review workflow that enables automatic retrieval and systematic addressing of all unresolved comments on a Pull Request.
 
@@ -761,7 +761,7 @@ This command will output all unresolved comments in a readable format, showing:
 
 **Categorize each comment by type:**
 
-**A. Committable Suggestions (Highest Priority)**
+#### A. Committable Suggestions (Highest Priority)
 
 - Comments containing code suggestions that can be directly applied
 - Usually prefixed with "suggestion" or contain code blocks
@@ -787,9 +787,9 @@ This command will output all unresolved comments in a readable format, showing:
 - **Action**: Consider for future improvements, no immediate action needed
 - **Priority**: Address if time permits
 
-#### Systematic Implementation Strategy
+### Systematic Implementation Strategy
 
-##### For Committable Suggestions:
+#### For Committable Suggestions:
 
 ```bash
 # Apply suggestion directly to the code
@@ -802,7 +802,7 @@ git add .
 git commit -m "Apply code review suggestion: improve variable naming"
 ```
 
-**For LLM Prompts:**
+#### For LLM Prompts:
 
 ```bash
 # Use the comment as a detailed prompt for refactoring
@@ -814,7 +814,7 @@ git commit -m "Apply code review suggestion: improve variable naming"
 # 5. Verify with make ci
 ```
 
-**For Complex Refactoring Requests:**
+#### For Complex Refactoring Requests:
 
 ```bash
 # Break down large refactoring into smaller commits
@@ -825,7 +825,7 @@ git commit -m "Apply code review suggestion: improve variable naming"
 # 5. Update tests and documentation
 ```
 
-##### 4. **Quality Assurance After Each Change**
+#### 4. Quality Assurance After Each Change
 
 **MANDATORY: Run quality checks after addressing each comment or group of related comments:**
 
@@ -841,7 +841,7 @@ make unit-tests             # Verify tests pass
 make infection              # Check mutation testing coverage
 ```
 
-##### 5. **Documentation and Verification**
+#### 5. Documentation and Verification
 
 **Update documentation when comments suggest:**
 
@@ -857,7 +857,7 @@ make infection              # Check mutation testing coverage
 - Code quality metrics maintained
 - Architectural boundaries respected
 
-##### 6. **Comment Response Strategy**
+#### 6. Comment Response Strategy
 
 **Reply to comments systematically:**
 
@@ -868,20 +868,20 @@ make infection              # Check mutation testing coverage
 
 #### Advanced Code Review Patterns
 
-**Handling Conflicting Comments:**
+#### Handling Conflicting Comments:
 
 1. Prioritize architectural concerns over stylistic preferences
 2. Discuss conflicting suggestions with reviewers before implementing
 3. Document decisions in commit messages or PR comments
 
-**Large-Scale Refactoring:**
+#### Large-Scale Refactoring:
 
 1. Create separate commits for each logical change
 2. Maintain backward compatibility when possible
 3. Update tests incrementally with code changes
 4. Use feature flags for risky changes
 
-**Performance and Security Comments:**
+#### Performance and Security Comments:
 
 1. Address security concerns immediately with highest priority
 2. Benchmark performance changes when suggested
@@ -889,7 +889,7 @@ make infection              # Check mutation testing coverage
 
 #### Integration with Development Workflow
 
-**Before Starting Code Review Refactoring:**
+#### Before Starting Code Review Refactoring:
 
 ```bash
 git status                  # Ensure clean working directory
@@ -897,7 +897,7 @@ git pull origin main        # Get latest changes
 make pr-comments           # Get current comment status
 ```
 
-**During Refactoring:**
+#### During Refactoring:
 
 ```bash
 # Work on one comment or related group at a time
@@ -905,7 +905,7 @@ make pr-comments           # Get current comment status
 # Reference comment URLs in commit messages for traceability
 ```
 
-**After Completing All Comments:**
+#### After Completing All Comments:
 
 ```bash
 make ci                    # Full quality check
