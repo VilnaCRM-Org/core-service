@@ -95,8 +95,8 @@ You MUST follow this exact sequence:
 
 - **Never skip steps**: Every step in `make ci` must pass
 - **Fix only real errors**: Ignore warnings unless they cause CI failure
-- **Minimal changes**: Make the smallest possible change to fix each issue
-- **Preserve test configs**: Never modify files in `tests/` configuration or `behat.yml.dist`
+- **Minimal changes**: Make the smallest possible change to resolve each issue
+- **Maintain test configs**: Never modify files in `tests/` configuration or `behat.yml.dist`
 - **Respect architecture**: Maintain Hexagonal Architecture and DDD boundaries
 - **Two-pass verification**: Always run `make ci` twice before declaring success
 - **No premature completion**: Only finish when you have two consecutive green CI runs

@@ -8,7 +8,7 @@
 
 **Symptoms**:
 
-```
+```text
 Error: scenario 'createCustomer' not found in config
 ```
 
@@ -46,7 +46,7 @@ Error: scenario 'createCustomer' not found in config
 
 **Symptoms**:
 
-```
+```text
 Error: Cannot find module '../utils/utils.js'
 ```
 
@@ -68,7 +68,7 @@ import Utils from 'utils/utils.js';
 
 **Symptoms**:
 
-```
+```text
 SyntaxError: Unexpected token
 ```
 
@@ -92,7 +92,7 @@ node --check tests/Load/scripts/yourScript.js
 
 **Symptoms**:
 
-```
+```text
 TypeError: Cannot read property '@id' of null
 ```
 
@@ -211,17 +211,22 @@ console.log('Request payload:', payload);
 
 4. **Authentication Issues**:
    ```bash
-   # Check if endpoint requires authentication
+   # Check if endpoint requires authentication (REST API)
    curl -X POST https://localhost/api/customers \
      -H "Content-Type: application/ld+json" \
      -d '{"email":"test@example.com"}'
+   
+   # For GraphQL endpoint
+   curl -X POST https://localhost/api/graphql \
+     -H "Content-Type: application/json" \
+     -d '{"query":"{ customers { collection { id } } }"}'
    ```
 
 #### Issue: Intermittent Failures
 
 **Symptoms**:
 
-```
+```text
 ✗ is status 201
   ↳  95% — ✓ 95 / ✗ 5
 ```
@@ -372,7 +377,7 @@ if (!body.data) {
 
 **Symptoms**:
 
-```
+```text
 ✗ GraphQL operation successful
   ↳  100% — ✓ 0 / ✗ 100
 ```
@@ -425,7 +430,7 @@ utils.checkResponse(response, 'GraphQL operation successful', res => {
 
 Check K6 metrics:
 
-```
+```text
 http_req_duration.............: avg=5000ms  p(95)=8000ms
 http_reqs.....................: 10/s
 iterations....................: 100
@@ -531,7 +536,7 @@ iterations....................: 100
 
 **Symptoms**:
 
-```
+```text
 Error: connect ECONNREFUSED 127.0.0.1:27017
 ```
 
@@ -598,7 +603,7 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
 
 **Symptoms**:
 
-```
+```text
 Error: Scenario 'myScenario' not found in config
 ```
 
@@ -698,17 +703,22 @@ export default function (data) {
 ### Use curl to Replicate Requests
 
 ```bash
-# Export request details from script
+# REST API request (uses application/ld+json)
 curl -X POST https://localhost/api/customers \
   -H "Content-Type: application/ld+json" \
   -d '{"email":"test@example.com","type":"/api/customer_types/01234"}'
+
+# GraphQL request (uses application/json)
+curl -X POST https://localhost/api/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation { createCustomer(input: {email:\"test@example.com\"}) { customer { id } } }"}'
 ```
 
 ## Getting Help
 
 If issues persist:
 
-1. Check K6 documentation: https://k6.io/docs/
+1. Check K6 documentation: [https://k6.io/docs/](https://k6.io/docs/)
 2. Review load-testing skill files in `.claude/skills/load-testing/`
 3. Examine working examples in `tests/Load/scripts/`
 4. Check project-specific README in `tests/Load/`
