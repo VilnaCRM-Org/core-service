@@ -143,19 +143,33 @@ export default class CustomerUtils extends Utils {
   cleanupCustomerWithDependencies(data) {
     if (data.customer && data.customer['@id']) {
       const custResponse = http.del(`${this.getBaseHttpUrl()}${data.customer['@id']}`);
-      if (custResponse.status !== 204 && custResponse.status !== 200 && custResponse.status !== 404) {
-        console.error(`Failed to delete customer: ${custResponse.status} - ${data.customer['@id']}`);
+      if (
+        custResponse.status !== 204 &&
+        custResponse.status !== 200 &&
+        custResponse.status !== 404
+      ) {
+        console.error(
+          `Failed to delete customer: ${custResponse.status} - ${data.customer['@id']}`
+        );
       }
     }
     if (data.type && data.type['@id']) {
       const typeResponse = http.del(`${this.getBaseHttpUrl()}${data.type['@id']}`);
-      if (typeResponse.status !== 204 && typeResponse.status !== 200 && typeResponse.status !== 404) {
+      if (
+        typeResponse.status !== 204 &&
+        typeResponse.status !== 200 &&
+        typeResponse.status !== 404
+      ) {
         console.error(`Failed to delete type: ${typeResponse.status} - ${data.type['@id']}`);
       }
     }
     if (data.status && data.status['@id']) {
       const statusResponse = http.del(`${this.getBaseHttpUrl()}${data.status['@id']}`);
-      if (statusResponse.status !== 204 && statusResponse.status !== 200 && statusResponse.status !== 404) {
+      if (
+        statusResponse.status !== 204 &&
+        statusResponse.status !== 200 &&
+        statusResponse.status !== 404
+      ) {
         console.error(`Failed to delete status: ${statusResponse.status} - ${data.status['@id']}`);
       }
     }
