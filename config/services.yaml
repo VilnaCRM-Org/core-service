@@ -133,3 +133,11 @@ services:
   App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory:
     arguments:
       $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeCreateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
