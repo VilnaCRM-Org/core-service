@@ -13,8 +13,8 @@
         <field field-name="email" type="string" />
         <field field-name="phone" type="string" />
         <field field-name="leadSource" type="string" />
-        <field field-name="createdAt" type="date" />
-        <field field-name="updatedAt" type="date" />
+        <field field-name="createdAt" type="date_immutable" />
+        <field field-name="updatedAt" type="date_immutable" />
         <field field-name="confirmed" type="boolean" />
 
         <reference-one
