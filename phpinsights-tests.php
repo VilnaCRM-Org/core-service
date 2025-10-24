@@ -28,7 +28,6 @@ return [
         SuperfluousInterfaceNamingSniff::class,
         SuperfluousExceptionNamingSniff::class,
         ForbiddenSetterSniff::class,
-        NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
     ],
     'config' => [
@@ -73,8 +72,8 @@ return [
         ],
         CyclomaticComplexityIsHigh::class => [
             'exclude' => [
-                'src/Shared/Application/Validator/InitialsValidator.php',
-                'src/Shared/Application/Validator/PasswordValidator.php',
+                'src/Shared/Application/Validator/InitialsValidator',
+                'src/Shared/Application/Validator/PasswordValidator',
             ],
         ],
     ],
