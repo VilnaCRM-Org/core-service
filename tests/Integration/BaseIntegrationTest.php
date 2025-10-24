@@ -11,9 +11,6 @@ use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * @psalm-suppress UndefinedClass
- */
 abstract class BaseIntegrationTest extends ApiTestCase
 {
     protected Generator $faker;
@@ -27,9 +24,7 @@ abstract class BaseIntegrationTest extends ApiTestCase
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
         $dm = $this->container->get('doctrine_mongodb.odm.document_manager');
-        /** @psalm-suppress UndefinedClass */
         $purger = new MongoDBPurger($dm);
-        /** @psalm-suppress UndefinedClass */
         $purger->purge();
     }
 
