@@ -19,7 +19,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UuidUriCustSt;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustSt;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCStEndpointFactory extends EndpointFactory
@@ -39,7 +39,7 @@ final class ParamCStEndpointFactory extends EndpointFactory
     private RequestBody $replaceCustomerStatusRequest;
 
     public function __construct(
-        private UuidUriCustSt $parameterFactory,
+        private UlidUriCustSt $parameterFactory,
         private StatusUpdateRequestFactory $updateCustomerStatusRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
