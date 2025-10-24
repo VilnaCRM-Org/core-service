@@ -183,4 +183,16 @@ export default class Utils {
   getCustomerStatuses() {
     return http.get(`${this.baseUrl}/customer_statuses`, this.getJsonHeader());
   }
+
+  executeGraphQL(query) {
+    const payload = JSON.stringify(query);
+    return http.post(this.getBaseGraphQLUrl(), payload, this.getGraphQLHeader());
+  }
+
+  createDependency(dependencyData) {
+    // Generic method to create any dependency resource
+    // Can be used for types, statuses, or other dependencies
+    const payload = JSON.stringify(dependencyData);
+    return http.post(this.getBaseHttpUrl(), payload, this.getJsonHeader());
+  }
 }
