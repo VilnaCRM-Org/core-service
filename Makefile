@@ -343,3 +343,22 @@ else
 	@echo "Auto-detecting PR from current git branch..."
 	@GITHUB_HOST="$(GITHUB_HOST)" ./scripts/get-pr-comments.sh "$(FORMAT)"
 endif
+
+pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a GitHub Pull Request
+	@if ! command -v gh >/dev/null 2>&1; then \
+		echo "Error: GitHub CLI (gh) is required but not installed."; \
+		echo "Visit: https://cli.github.com/ for installation instructions"; \
+		exit 1; \
+	fi
+	@if ! command -v jq >/dev/null 2>&1; then \
+		echo "Error: jq is required but not installed."; \
+		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
+		exit 1; \
+	fi
+ifdef PR
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
+		./scripts/get-pr-comments-improved.sh "$(PR)" "$${FORMAT:-text}"
+else
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
+		./scripts/get-pr-comments-improved.sh "$${FORMAT:-text}"
+endif
