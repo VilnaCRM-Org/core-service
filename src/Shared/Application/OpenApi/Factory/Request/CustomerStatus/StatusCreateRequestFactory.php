@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\Request\CustomerStatus;
 
-use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 
 final class StatusCreateRequestFactory extends CustomerStatusRequestFactory
 {
-    public function __construct(private RequestBuilder $requestBuilder)
+    public function __construct(private RequestBuilderInterface $requestBuilder)
     {
     }
 
-    protected function getRequestBuilder(): RequestBuilder
+    protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;
     }
