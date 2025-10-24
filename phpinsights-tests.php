@@ -7,6 +7,7 @@ use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenNormalClasses;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterNotSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Strings\UnnecessaryStringConcatSniff;
+use NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
@@ -26,7 +27,7 @@ return [
         UnusedParameterSniff::class,
         SuperfluousInterfaceNamingSniff::class,
         SuperfluousExceptionNamingSniff::class,
-        SpaceAfterNotSniff::class,
+        ForbiddenSetterSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
     ],
@@ -64,7 +65,7 @@ return [
                 'src/User/Domain/Exception/DuplicateEmailException',
                 'src/Shared/Application/OpenApi/Factory/Response/DuplicateEmailFactory',
                 'src/Shared/Infrastructure/Bus/Command/CommandNotRegisteredException',
-                'src/Shared/Infrastructure/Bus/Event/EventNotRegisteredException.php',
+                'src/Shared/Infrastructure/Bus/Event/EventNotRegisteredException',
                 'tests/Unit/Shared/Application/OpenApi/Factory/Response/OAuthRedirectResponseFactoryTest',
                 'tests/Unit/Shared/Application/OpenApi/Factory/Response/UnsupportedGrantTypeResponseFactoryTest',
                 'tests/Behat/OAuthContext/OAuthContext',
