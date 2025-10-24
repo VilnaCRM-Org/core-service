@@ -6,7 +6,6 @@ namespace App\Core\Customer\Domain\Entity;
 
 use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTimeImmutable;
-use DateTimeInterface;
 
 class Customer implements CustomerInterface
 {
@@ -19,8 +18,8 @@ class Customer implements CustomerInterface
         private CustomerStatus $status,
         private ?bool $confirmed,
         private UlidInterface $ulid,
-        private DateTimeInterface $createdAt = new DateTimeImmutable(),
-        private DateTimeInterface $updatedAt = new DateTimeImmutable(),
+        private DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private DateTimeImmutable $updatedAt = new DateTimeImmutable(),
     ) {
     }
 

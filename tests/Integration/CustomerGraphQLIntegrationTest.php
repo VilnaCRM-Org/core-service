@@ -116,7 +116,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
             'id' => $this->extractUlidFromIri($customerIri),
             'initials' => 'Updated Customer',
             'email' => $this->faker->unique()->safeEmail(),
-            'confirmed' => !$initialData['confirmed'],
+            'confirmed' => ! $initialData['confirmed'],
         ];
 
         $response = $this->graphqlMutation(
