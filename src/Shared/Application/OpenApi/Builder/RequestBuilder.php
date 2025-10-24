@@ -18,9 +18,12 @@ final class RequestBuilder implements RequestBuilderInterface
     public function build(
         array $params,
         bool $required = true,
-        string $contentType = 'application/ld+json'
+        ?string $contentType = null
     ): RequestBody {
-        $content = $this->contextBuilder->build($params, $contentType);
+        $content = $this->contextBuilder->build(
+            $params,
+            $contentType ?? 'application/ld+json'
+        );
 
         return new RequestBody(
             content: $content,
@@ -33,7 +36,7 @@ final class RequestBuilder implements RequestBuilderInterface
      */
     public function buildRequired(
         array $params,
-        string $contentType = 'application/ld+json'
+        ?string $contentType = null
     ): RequestBody {
         return $this->build($params, true, $contentType);
     }
@@ -43,7 +46,7 @@ final class RequestBuilder implements RequestBuilderInterface
      */
     public function buildOptional(
         array $params,
-        string $contentType = 'application/ld+json'
+        ?string $contentType = null
     ): RequestBody {
         return $this->build($params, false, $contentType);
     }
