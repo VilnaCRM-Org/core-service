@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Factory\Request\CustomerType;
 
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
-use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
 
 final class TypeUpdateRequestFactory extends CustomerTypeRequestFactory
 {
     public function __construct(
-        private RequestPatchBuilder $requestBuilder,
+        private RequestBuilderInterface $requestBuilder,
         string $defaultValue = 'Prospect',
         int $maxLength = 255
     ) {
