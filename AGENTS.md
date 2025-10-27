@@ -619,6 +619,7 @@ All code must pass these quality gates before commit:
 ### Achieving 100% Mutation Testing Coverage
 
 #### Understanding mutation testing
+
 Mutation testing validates test quality by making small changes (mutations) to source code and checking if tests catch these changes. Escaped mutants indicate gaps in test coverage.
 
 #### When unit tests can't catch escaped mutants
@@ -926,6 +927,7 @@ This systematic approach ensures that all code review feedback is addressed thor
 ### Core Documentation Synchronization Rules
 
 ##### 1. Feature implementation documentation updates
+
 When implementing new features or modifying existing ones:
 
 - **API Changes**: Update `docs/api-endpoints.md` with new endpoints, modified request/response schemas, authentication requirements, and examples
@@ -934,6 +936,7 @@ When implementing new features or modifying existing ones:
 - **Performance Impact**: Update `docs/performance.md` when changes affect system performance or resource usage
 
 ##### 2. Testing documentation updates
+
 When adding or modifying tests:
 
 - **Test Coverage**: Update `docs/testing.md` with new test categories, testing strategies, or coverage requirements
@@ -941,6 +944,7 @@ When adding or modifying tests:
 - **BDD Scenarios**: Document new Behat scenarios or testing workflows
 
 ##### 3. Developer experience documentation updates
+
 When modifying development workflows:
 
 - **Getting Started**: Update `docs/getting-started.md` if setup procedures change
@@ -948,12 +952,14 @@ When modifying development workflows:
 - **Onboarding**: Update `docs/onboarding.md` if new team member procedures change
 
 ##### 4. Security and operational documentation updates
+
 When implementing security or operational changes:
 
 - **Security**: Update `docs/security.md` with new authentication methods, authorization rules, or security considerations
 - **Operational**: Update `docs/operational.md` with new monitoring, logging, or maintenance procedures
 
 ##### 5. User-facing documentation updates
+
 When adding user-facing features:
 
 - **User Guide**: Update `docs/user-guide.md` with new user workflows, features, or API usage examples
