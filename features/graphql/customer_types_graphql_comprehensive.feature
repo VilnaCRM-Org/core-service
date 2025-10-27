@@ -86,9 +86,9 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     And the GraphQL response should contain "data.customerTypes.pageInfo.endCursor"
 
   Scenario: Query customer types with cursor pagination and ULID greater than filter
-    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    And create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
-    And create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
+    Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4" and value "Type A"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER5" and value "Type B"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER6" and value "Type C"
     When I send the following GraphQL query:
     """
     {
@@ -98,18 +98,30 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
             id
             value
           }
+          cursor
         }
         pageInfo {
           hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
         }
+        totalCount
       }
     }
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customerTypes.edges"
+    And the GraphQL response "data.customerTypes.edges" should have 2 items
+    And the GraphQL response "data.customerTypes.totalCount" should be equal to 2
     And the GraphQL response "data.customerTypes.edges.0.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the GraphQL response "data.customerTypes.edges.0.node.value" should be equal to "Type B"
     And the GraphQL response "data.customerTypes.edges.1.node.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
+    And the GraphQL response "data.customerTypes.edges.1.node.value" should be equal to "Type C"
+    And the GraphQL response "data.customerTypes.pageInfo" should be an object with properties ["hasNextPage", "hasPreviousPage", "startCursor", "endCursor"]
+    And the GraphQL response "data.customerTypes.pageInfo.hasNextPage" should be "false"
+    And the GraphQL response "data.customerTypes.pageInfo.hasPreviousPage" should be "false"
 
   Scenario: Query customer types with cursor navigation using after parameter
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER7"
