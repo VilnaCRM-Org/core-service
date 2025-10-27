@@ -168,7 +168,7 @@ fetch_all_review_threads() {
           originalLine
           startLine
           originalStartLine
-          comments(first: 50) {
+          comments(first: 100) {
             nodes {
               id
               body

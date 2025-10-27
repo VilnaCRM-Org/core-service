@@ -123,6 +123,7 @@ export default function graphQLCreateResource(data) {
     if (res.status === 200) {
       const body = JSON.parse(res.body);
       if (body.data?.createCustomer?.customer) {
+        if (!data.createdCustomers) data.createdCustomers = [];
         data.createdCustomers.push(body.data.createCustomer.customer.id);
         return true;
       }

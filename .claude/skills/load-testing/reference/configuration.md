@@ -1,5 +1,7 @@
 # K6 Load Test Configuration
 
+> **K6 Version Compatibility**: Requires K6 >= 0.45.0. These examples are tested with K6 0.45.0+. Some features may not be available in older versions.
+
 ## Configuration File Structure
 
 Load test scenarios are configured in `tests/Load/config.json.dist`:
@@ -230,7 +232,7 @@ thresholds: {
 
 ### Base Configuration
 
-Set in `tests/Load/.env`:
+Create `tests/Load/.env` from the template (if `.env.dist` exists, copy it: `cp tests/Load/.env.dist tests/Load/.env`), or create a new `.env` file with the following configuration:
 
 ```bash
 # API Base URL
@@ -458,3 +460,16 @@ Before running load tests:
 // After
 "smoke": { "vus": 2, "duration": "10s" }
 ```
+
+## Metrics Export and Monitoring
+
+K6 supports exporting metrics to various backends for monitoring and analysis:
+
+- **InfluxDB**: Time-series database for K6 metrics. Use `--out influxdb=http://localhost:8086/k6` flag
+- **Prometheus**: Export metrics with `k6-remote` extension or InfluxDB bridge
+- **Grafana**: Visualize K6 metrics with official K6 dashboards
+
+For detailed setup instructions, see:
+- [K6 InfluxDB integration](https://k6.io/docs/results-output/real-time/influxdb/)
+- [K6 Prometheus integration](https://k6.io/docs/results-output/real-time/prometheus-remote-write/)
+- [K6 Grafana dashboards](https://k6.io/docs/results-output/grafana-dashboards/)
