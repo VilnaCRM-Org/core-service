@@ -222,6 +222,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
+    And the GraphQL response "data.createCustomer.customer.initials" should be "Very Long Initials Name"
     Then delete customer with email "longinitials@example.com"
 
   # ----- LeadSource Validation Tests -----

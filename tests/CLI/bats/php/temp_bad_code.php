@@ -21,15 +21,17 @@ class temp_bad_class
 
     // Method with high complexity
     public function complexMethod($a, $b, $c, $d, $e, $f, $g, $h) // Too many parameters
-    {if ($a) {
-        if ($b) {
-            if ($c) {
-                if ($d) {
-                    if ($e) {
-                        if ($f) {
-                            if ($g) {
-                                if ($h) {
-                                    echo 'too nested'; // High cyclomatic complexity
+    {
+        if ($a) {
+            if ($b) {
+                if ($c) {
+                    if ($d) {
+                        if ($e) {
+                            if ($f) {
+                                if ($g) {
+                                    if ($h) {
+                                        echo 'too nested'; // High cyclomatic complexity
+                                    }
                                 }
                             }
                         }
@@ -37,7 +39,6 @@ class temp_bad_class
                 }
             }
         }
-    }
 
         // Long method
         $x = 1;

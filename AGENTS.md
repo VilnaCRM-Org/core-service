@@ -2,7 +2,7 @@
 
 VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
 
-### Critical: Always use make commands or docker exec into the PHP container
+## Critical: Always use make commands or docker exec into the PHP container
 
 Never run PHP commands directly outside the container.
 
@@ -101,7 +101,7 @@ Never run PHP commands directly on the host system.
 1. Make your code changes
 2. Run `make ci` to execute all quality checks
 3. **CRITICAL**: The `make ci` command MUST output "✅ CI checks successfully passed!" at the end
-4. If you see "❌ CI checks failed:" message, you MUST fix the reported issues and rerun `make ci`
+4. If you see "❌ CI checks failed:" message, you must address the reported issues and rerun `make ci`
 5. **DO NOT finish the task** until you see "✅ CI checks successfully passed!" in the output
 6. Fix any issues reported by the checks iteratively
 7. Ensure all tests pass and code coverage is maintained
