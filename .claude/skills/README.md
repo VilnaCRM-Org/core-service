@@ -267,28 +267,28 @@ To add a new Skill:
 
 ## Skill vs CLAUDE.md vs AGENTS.md
 
-### CLAUDE.md (238 lines)
+### CLAUDE.md (Concise reference)
 
 - **Purpose**: Concise project instructions automatically loaded by Claude
 - **Content**: Essential project overview, commands, architecture basics
 - **Location**: Root directory
 - **Usage**: Automatic context for every conversation
 
-### AGENTS.md (1,300+ lines)
+### AGENTS.md (Comprehensive guidelines)
 
 - **Purpose**: Comprehensive repository guidelines and best practices
 - **Content**: Complete development workflow, quality standards, troubleshooting
 - **Location**: Root directory
 - **Usage**: Reference documentation for complex scenarios
 
-### Skills (7 skills with multi-file structure)
+### Skills (Modular skill set)
 
 - **Purpose**: Modular, reusable capabilities for specific workflows
 - **Content**: Step-by-step instructions for focused tasks with supporting documentation
 - **Location**: `.claude/skills/`
 - **Usage**: Automatically activated when relevant to task
-- **Structure**: Main SKILL.md files (~200-400 lines each) + 17 supporting files
-- **Total**: 674 lines in main files + comprehensive supporting documentation
+- **Structure**: Each Skill provides a focused quick-reference `SKILL.md` with additional supporting files for deeper guidance when needed
+- **Scope**: Combined Skills coverage spans detailed examples, troubleshooting guides, and workflow playbooks
 
 ## Integration with Development Workflow
 

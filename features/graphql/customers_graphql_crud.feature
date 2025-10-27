@@ -4,8 +4,8 @@ Feature: GraphQL Customer CRUD Operations
   I want to perform Create, Read, Update, and Delete operations using GraphQL mutations and queries
 
   Background:
-    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4" and value "Active"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4" and value "Premium"
 
   Scenario: Query a single customer by ID
     Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
@@ -61,6 +61,56 @@ Feature: GraphQL Customer CRUD Operations
     And the GraphQL response should contain "data.customers.edges"
     Then delete customer with email "user1@example.com"
     And delete customer with email "user2@example.com"
+
+  Scenario: Verify cursor-based pagination with multiple pages
+    Given create 15 customers
+    When I send the following GraphQL query:
+    """
+    {
+      customers(first: 10) {
+        edges {
+          node {
+            id
+            email
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customers.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customers.pageInfo.endCursor"
+    When I send a GraphQL query with first 10 and after endCursor
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customers.pageInfo.hasNextPage" should be "false"
+
+  Scenario: Verify pagination boundaries when requesting exact total
+    Given create 10 customers
+    When I send the following GraphQL query:
+    """
+    {
+      customers(first: 10) {
+        edges {
+          node {
+            id
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customers.pageInfo.hasNextPage" should be "false"
 
   Scenario: Create a new customer via GraphQL mutation
     When I send the following GraphQL mutation:
