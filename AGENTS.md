@@ -2,7 +2,9 @@
 
 VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
 
-**CRITICAL: Always use make commands or docker exec into the PHP container. Never use direct PHP commands outside the container.**
+### Critical: Always use make commands or docker exec into the PHP container
+
+Never run PHP commands directly outside the container.
 
 ## What Is Core Service?
 
@@ -27,13 +29,13 @@ The VilnaCRM Core Service is designed to provide core business functionality wit
 
 ### MANDATORY: Use Make Commands or Container Access Only
 
-**All development work MUST use either:**
+#### Approved execution methods
 
 1. **Make commands** (preferred): `make command-name`
 2. **Direct container access**: `docker compose exec php command`
 3. **Container shell**: `make sh` then run commands inside
 
-**NEVER run PHP commands directly on host system.**
+Never run PHP commands directly on the host system.
 
 ### Quick Start
 
@@ -72,13 +74,13 @@ The VilnaCRM Core Service is designed to provide core business functionality wit
 
 ### Comprehensive CI Quality Checks
 
-**IMPORTANT: Run comprehensive CI checks before finishing any task and committing changes:**
+#### Important: Run comprehensive CI checks before finishing any task and committing changes
 
-**Primary CI Command:**
+##### Primary CI command
 
 - `make ci` -- Run all comprehensive CI checks (composer validation, security analysis, code style, static analysis, architecture validation, complete test suite, mutation testing). **MUST output "✅ CI checks successfully passed!" at the end when all checks pass successfully. If any check fails, outputs "❌ CI checks failed:" with specific error details.**
 
-**Individual CI commands available:**
+##### Individual CI commands
 
 - `make composer-validate` -- Validate composer.json and composer.lock
 - `make check-requirements` -- Check Symfony requirements
@@ -94,7 +96,7 @@ The VilnaCRM Core Service is designed to provide core business functionality wit
 - `make behat` -- End-to-end BDD tests
 - `make infection` -- Mutation testing with 100% MSI requirement
 
-**Mandatory workflow before finishing tasks:**
+##### Mandatory workflow before finishing tasks
 
 1. Make your code changes
 2. Run `make ci` to execute all quality checks
@@ -192,7 +194,7 @@ Skills are **model-invoked** - Claude automatically activates them based on cont
 - Current task context
 - Skill descriptions
 
-**See [.claude/skills/README.md](.claude/skills/README.md)** for complete skill documentation and usage patterns.
+See [.claude/skills/README.md](.claude/skills/README.md) for complete skill documentation and usage patterns.
 
 ## Architecture Deep Dive
 
@@ -311,7 +313,7 @@ Provides internal services like health checks and monitoring.
 
 ### Manual Testing Scenarios
 
-**ALWAYS run through at least one complete end-to-end scenario after making changes:**
+#### Always run through at least one complete end-to-end scenario after making changes
 
 1. **Customer Management Flow:**
 
@@ -326,7 +328,7 @@ Provides internal services like health checks and monitoring.
    - Test customer mutations via GraphQL
    - Verify proper error handling
 
-**Service Health Checks:**
+#### Service health checks
 
 - Verify [API Docs](https://localhost/api/docs) loads (API documentation)
 - Verify [GraphQL Playground](https://localhost/api/graphql) loads (GraphQL playground)
@@ -334,7 +336,7 @@ Provides internal services like health checks and monitoring.
 
 ### Load Testing Scenarios
 
-**All load tests use K6 framework.**
+#### All load tests use the K6 framework
 
 - **Smoke tests:** `make smoke-load-tests` -- minimal load validation
 - **Average load:** `make average-load-tests` -- normal usage patterns
@@ -497,7 +499,7 @@ App\Core\Customer\Domain\Entity\Customer:
 
 ## Timing Expectations and Timeouts
 
-**CRITICAL TIMEOUT VALUES:**
+#### Critical timeout values
 
 - Docker build: 30+ minutes (NEVER CANCEL)
 - Complete test suite: 20+ minutes (NEVER CANCEL)
@@ -505,7 +507,7 @@ App\Core\Customer\Domain\Entity\Customer:
 - Dependency installation: 5+ minutes (NEVER CANCEL)
 - Application startup: 10+ minutes (NEVER CANCEL)
 
-**Common Command Timings:**
+#### Common command timings
 
 - `make build`: 15-30 minutes first time, 5-10 minutes subsequent
 - `make start`: 5-10 minutes
@@ -558,7 +560,7 @@ When making changes, respect these architectural boundaries and patterns.
 
 ### Code Quality and Complexity Management
 
-**MANDATORY: Always follow software engineering best practices to maintain code quality:**
+#### Mandatory: Always follow software engineering best practices to maintain code quality
 
 #### Cyclomatic Complexity Management
 
@@ -616,10 +618,10 @@ All code must pass these quality gates before commit:
 
 ### Achieving 100% Mutation Testing Coverage
 
-**Understanding Mutation Testing:**
+#### Understanding mutation testing
 Mutation testing validates test quality by making small changes (mutations) to source code and checking if tests catch these changes. Escaped mutants indicate gaps in test coverage.
 
-**When Unit Tests Can't Catch Escaped Mutants:**
+#### When unit tests can't catch escaped mutants
 
 If extending unit tests doesn't achieve 100% mutation score, consider refactoring the original classes to make them more testable:
 
@@ -919,11 +921,11 @@ This systematic approach ensures that all code review feedback is addressed thor
 
 ## Documentation Synchronization Requirements
 
-**MANDATORY: When making ANY code changes, adding features, or modifying functionality, you MUST update the corresponding documentation in the `docs/` directory to maintain synchronization between codebase and documentation.**
+#### Mandatory: Keep documentation in the `docs/` directory synchronized with code changes
 
 ### Core Documentation Synchronization Rules
 
-**1. Feature Implementation Documentation Updates**
+##### 1. Feature implementation documentation updates
 When implementing new features or modifying existing ones:
 
 - **API Changes**: Update `docs/api-endpoints.md` with new endpoints, modified request/response schemas, authentication requirements, and examples
@@ -931,27 +933,27 @@ When implementing new features or modifying existing ones:
 - **Configuration Changes**: Update `docs/advanced-configuration.md` when adding new environment variables, configuration options, or deployment parameters
 - **Performance Impact**: Update `docs/performance.md` when changes affect system performance or resource usage
 
-**2. Testing Documentation Updates**
+##### 2. Testing documentation updates
 When adding or modifying tests:
 
 - **Test Coverage**: Update `docs/testing.md` with new test categories, testing strategies, or coverage requirements
 - **Test Commands**: Update testing section if new make commands or testing procedures are introduced
 - **BDD Scenarios**: Document new Behat scenarios or testing workflows
 
-**3. Developer Experience Documentation Updates**
+##### 3. Developer experience documentation updates
 When modifying development workflows:
 
 - **Getting Started**: Update `docs/getting-started.md` if setup procedures change
 - **Developer Guide**: Update `docs/developer-guide.md` with new development patterns, tools, or workflows
 - **Onboarding**: Update `docs/onboarding.md` if new team member procedures change
 
-**4. Security and Operational Documentation Updates**
+##### 4. Security and operational documentation updates
 When implementing security or operational changes:
 
 - **Security**: Update `docs/security.md` with new authentication methods, authorization rules, or security considerations
 - **Operational**: Update `docs/operational.md` with new monitoring, logging, or maintenance procedures
 
-**5. User-Facing Documentation Updates**
+##### 5. User-facing documentation updates
 When adding user-facing features:
 
 - **User Guide**: Update `docs/user-guide.md` with new user workflows, features, or API usage examples
@@ -959,7 +961,7 @@ When adding user-facing features:
 
 ### Specific Documentation Update Scenarios
 
-**When adding new REST API endpoints:**
+##### When adding new REST API endpoints
 
 ```markdown
 1. Update `docs/api-endpoints.md` with:
@@ -974,7 +976,7 @@ When adding user-facing features:
 3. Update OpenAPI specification in `.github/openapi-spec/`
 ```
 
-**When adding new GraphQL operations:**
+##### When adding new GraphQL operations
 
 ```markdown
 1. Update `docs/api-endpoints.md` with:
@@ -988,7 +990,7 @@ When adding user-facing features:
 3. Update `docs/user-guide.md` with client integration examples
 ```
 
-**When modifying database schema:**
+##### When modifying the database schema
 
 ```markdown
 1. Update `docs/design-and-architecture.md` with:
@@ -1002,7 +1004,7 @@ When adding user-facing features:
    - Repository method examples
 ```
 
-**When adding new configuration options:**
+##### When adding new configuration options
 
 ```markdown
 1. Update `docs/advanced-configuration.md` with:
@@ -1015,7 +1017,7 @@ When adding user-facing features:
 2. Update `docs/getting-started.md` if required for basic setup
 ```
 
-**When implementing new domain features:**
+##### When implementing new domain features
 
 ```markdown
 1. Update `docs/design-and-architecture.md` with:
@@ -1029,7 +1031,7 @@ When adding user-facing features:
 3. Update `docs/developer-guide.md` with usage examples
 ```
 
-**When modifying authentication/authorization:**
+##### When modifying authentication or authorization
 
 ```markdown
 1. Update `docs/security.md` with:
@@ -1042,7 +1044,7 @@ When adding user-facing features:
 3. Update `docs/user-guide.md` with client authentication examples
 ```
 
-**When adding new testing strategies or tools:**
+##### When adding new testing strategies or tools
 
 ```markdown
 1. Update `docs/testing.md` with:
@@ -1054,7 +1056,7 @@ When adding user-facing features:
 2. Update `docs/developer-guide.md` if development workflow changes
 ```
 
-**When implementing performance optimizations:**
+##### When implementing performance optimizations
 
 ```markdown
 1. Update `docs/performance.md` with:
@@ -1066,21 +1068,21 @@ When adding user-facing features:
 
 ### Documentation Quality Standards
 
-**Consistency Requirements:**
+##### Consistency requirements
 
 - Follow existing documentation structure and formatting
 - Use consistent terminology from `docs/glossary.md`
 - Include practical code examples with proper syntax highlighting
 - Add cross-references to related documentation sections
 
-**Completeness Requirements:**
+##### Completeness requirements
 
 - Document all public APIs, endpoints, and user-facing features
 - Include error handling and edge cases
 - Provide both basic and advanced usage examples
 - Update version information when applicable
 
-**Maintenance Requirements:**
+##### Maintenance requirements
 
 - Remove outdated information when features are deprecated
 - Update release notes with significant changes
@@ -1089,7 +1091,7 @@ When adding user-facing features:
 
 ### Documentation Validation Process
 
-**Before committing code changes:**
+##### Before committing code changes
 
 1. **Review Documentation Impact**: Identify which documentation files need updates based on your code changes
 2. **Update Relevant Files**: Make comprehensive updates to all affected documentation
@@ -1097,7 +1099,7 @@ When adding user-facing features:
 4. **Example Validation**: Test all code examples and ensure they work with current implementation
 5. **Consistency Check**: Verify terminology alignment with `docs/glossary.md`
 
-**Documentation Update Checklist:**
+##### Documentation update checklist
 
 - [ ] API documentation updated for endpoint/schema changes
 - [ ] Architecture documentation reflects structural changes
@@ -1112,13 +1114,13 @@ When adding user-facing features:
 
 ### Automated Documentation Maintenance
 
-**Integration with CI/CD:**
+##### Integration with CI/CD
 
 - Documentation updates should be part of the same pull request as code changes
 - The `make ci` command validates code quality that affects documentation accuracy
 - Use the existing quality checks to ensure documentation standards
 
-**Version Synchronization:**
+##### Version synchronization
 
 - Keep documentation version aligned with application version
 - Update release notes for each release with documentation changes
@@ -1128,18 +1130,18 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 
 ## Quality Standards Protection
 
-**MANDATORY: Maintain or improve quality standards - NEVER decrease current quality levels:**
+#### Mandatory: Maintain or improve quality standards—never decrease current quality levels
 
 ### Protected Quality Metrics
 
-**PHPInsights Quality Requirements (phpinsights.php):**
+##### PHPInsights quality requirements (`phpinsights.php`)
 
 - **min-quality**: 100% (NEVER decrease below 100%)
 - **min-complexity**: 95% (NEVER decrease below 95%)
 - **min-architecture**: 100% (NEVER decrease below 100%)
 - **min-style**: 100% (NEVER decrease below 100%)
 
-**PHPInsights Test Quality Requirements (phpinsights-tests.php):**
+##### PHPInsights test quality requirements (`phpinsights-tests.php`)
 
 - **min-quality**: 95% (NEVER decrease below 95%)
 - **min-complexity**: 95% (NEVER decrease below 95%)
@@ -1154,13 +1156,13 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 - Address every PHPMD finding (especially high cyclomatic complexity warnings) before re-running PHPInsights.
 - After fixes, execute `make phpinsights` again; the complexity score must now meet or exceed the protected thresholds.
 
-**Test Coverage Requirements:**
+##### Test coverage requirements
 
 - **Unit test coverage**: 100% (NEVER decrease below 100%)
 - **Integration test coverage**: Must maintain comprehensive coverage
 - **Mutation testing (Infection)**: 100% MSI (NEVER decrease below 100% - 0 escaped mutants)
 
-**Prohibited Quality Downgrades:**
+##### Prohibited quality downgrades
 
 ```php
 // ❌ FORBIDDEN: Decreasing PHPInsights requirements
@@ -1180,7 +1182,7 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 }
 ```
 
-**Quality Enforcement Rules:**
+##### Quality enforcement rules
 
 1. **Never modify quality thresholds downward** in any configuration file:
 
@@ -1211,7 +1213,7 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 
 ### Quality Improvement Guidelines
 
-**When refactoring or adding features:**
+##### When refactoring or adding features
 
 - **Improve quality scores** when possible, but never decrease them
 - **Add more comprehensive tests** to catch edge cases
@@ -1219,7 +1221,7 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 - **Enhance architectural separation** following DDD/CQRS patterns
 - **Maintain backward compatibility** while improving code quality
 
-**If quality checks fail:**
+##### If quality checks fail
 
 1. **Fix the underlying issue** rather than lowering standards
 2. **Refactor complex code** to reduce complexity scores
@@ -1233,14 +1235,14 @@ This ensures the codebase maintains its high-quality standards while continuousl
 
 ### Code Comments and Self-Explanatory Code
 
-**MANDATORY: Remove all inline comments and write self-explanatory code:**
+#### Mandatory: Remove all inline comments and write self-explanatory code
 
 - **No inline comments** in PHP, JavaScript, Docker, or any other code files
 - **Self-explanatory code** should tell its own story through clear naming and structure
 - **Function extraction** is preferred over explanatory comments
 - If complex logic needs explanation, extract it into a method with a descriptive name
 
-**Examples:**
+##### Examples
 
 ```php
 // ❌ BAD: Inline comment explaining code
@@ -1257,7 +1259,7 @@ private function isEmptyButNotOnlySpaces(string $value): bool
 
 ### Symfony Built-in Features Preference
 
-**MANDATORY: Use Symfony and API Platform built-in features instead of custom implementations:**
+#### Mandatory: Use Symfony and API Platform built-in features instead of custom implementations
 
 - **Validators**: Use Symfony's built-in validators instead of custom validation classes
 - **Rate Limiting**: Use Symfony Rate Limiter component instead of custom rate-limiting
@@ -1266,13 +1268,13 @@ private function isEmptyButNotOnlySpaces(string $value): bool
 
 ### Testing Standards
 
-**MANDATORY: Use Faker library for all test data generation:**
+#### Mandatory: Use Faker library for all test data generation
 
 - **No hardcoded values** in tests (emails, names, tokens, IDs, etc.)
 - **Faker integration** available in test base classes
 - **Dynamic test data** ensures tests are more robust and realistic
 
-**Examples:**
+##### Examples
 
 ```php
 // ❌ BAD: Hardcoded test values
@@ -1288,7 +1290,7 @@ $name = $this->faker->company();
 
 ### Database Schema Management
 
-**MANDATORY: Clean MongoDB schema management:**
+#### Mandatory: Clean MongoDB schema management
 
 - **Doctrine ODM**: Use Doctrine MongoDB ODM for entity mapping
 - **XML Mappings**: Define entity mappings in `config/doctrine/` directory
@@ -1296,7 +1298,7 @@ $name = $this->faker->company();
 
 ### API Platform Best Practices
 
-**MANDATORY: Follow API Platform patterns for clean API design:**
+#### Mandatory: Follow API Platform patterns for clean API design
 
 - **Input DTOs**: Use `input:` parameter in API Platform configuration instead of `openapi.requestBody`
 - **Automatic schema generation**: Let API Platform generate OpenAPI schemas from DTOs
@@ -1306,7 +1308,7 @@ $name = $this->faker->company();
 
 ### Pluralization and Internationalization
 
-**MANDATORY: Proper pluralization for time units and user-facing text:**
+#### Mandatory: Proper pluralization for time units and user-facing text
 
 - **Time units**: Use correct singular/plural forms (1 hour vs 2 hours)
 - **Dynamic pluralization**: Implement logic to handle both singular and plural forms
@@ -1324,7 +1326,7 @@ When `make phpinsights` reports complexity issues:
 
 ## Best Practices Summary
 
-**Before Every Commit:**
+##### Before every commit
 
 1. Run `make ci` and ensure "✅ CI checks successfully passed!" message
 2. Verify 100% test coverage maintained
@@ -1333,7 +1335,7 @@ When `make phpinsights` reports complexity issues:
 5. Update relevant documentation in `docs/` directory
 6. Use clear, descriptive commit messages following conventional commits
 
-**During Development:**
+##### During development
 
 1. Use make commands exclusively (never direct PHP commands)
 2. Write self-documenting code without inline comments
@@ -1343,7 +1345,7 @@ When `make phpinsights` reports complexity issues:
 6. Respect bounded context boundaries
 7. Use Symfony and API Platform built-in features
 
-**Code Review:**
+##### Code review
 
 1. Use `make pr-comments` to retrieve and address all feedback
 2. Prioritize committable suggestions first
