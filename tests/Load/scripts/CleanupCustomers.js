@@ -62,7 +62,7 @@ export default function cleanupCustomers() {
     }
 
     // Check if there are more pages
-    hasMore = data['hydra:view'] && data['hydra:view']['hydra:next'];
+    hasMore = data.view && data.view.next;
     page++;
   }
 
