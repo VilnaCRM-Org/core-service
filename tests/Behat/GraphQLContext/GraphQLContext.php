@@ -315,6 +315,80 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Then the GraphQL response :path should have :count items
+     */
+    public function theGraphQLResponseShouldHaveItems(string $path, int $count): void
+    {
+        $this->ensureResponseDataAvailable();
+        $value = $this->getFieldValue($this->responseData, $path);
+
+        if (! is_array($value)) {
+            throw new \RuntimeException(sprintf('Expected %s to be an array, got %s', $path, gettype($value)));
+        }
+
+        if (count($value) !== $count) {
+            throw new \RuntimeException(sprintf('Expected %s to have %d items, got %d', $path, $count, count($value)));
+        }
+    }
+
+    /**
+     * @Then the GraphQL response :path should be equal to :value
+     */
+    public function theGraphQLResponseShouldBeEqualTo(string $path, string $value): void
+    {
+        $this->ensureResponseDataAvailable();
+        $actualValue = $this->getFieldValue($this->responseData, $path);
+
+        if ($this->isBooleanValue($value)) {
+            $this->assertBooleanValue($path, $value, $actualValue);
+            return;
+        }
+
+        if ($this->isNullValue($value)) {
+            $this->assertNullValue($path, $actualValue);
+            return;
+        }
+
+        $this->assertStringValue($path, $value, (string) $actualValue);
+    }
+
+    /**
+     * @Then the GraphQL response :path should be an object with properties :properties
+     * @Then the GraphQL response :path should be an object with properties [:properties]
+     * @Then /^the GraphQL response "([^"]*)" should be an object with properties \[([^\]]+)\]$/
+     */
+    public function theGraphQLResponseShouldBeAnObjectWithProperties(string $path, string $properties): void
+    {
+        $this->ensureResponseDataAvailable();
+        $value = $this->getFieldValue($this->responseData, $path);
+
+        if (! is_array($value)) {
+            throw new \RuntimeException(sprintf('Expected %s to be an array, got %s', $path, gettype($value)));
+        }
+
+        $properties = str_replace(['[', ']', '"', "'"], '', $properties);
+        $expectedProperties = array_map('trim', explode(',', $properties));
+        $missingProperties = [];
+
+        foreach ($expectedProperties as $property) {
+            if (! array_key_exists(trim($property), $value)) {
+                $missingProperties[] = $property;
+            }
+        }
+
+        if (! empty($missingProperties)) {
+            throw new \RuntimeException(
+                sprintf(
+                    'Expected %s to have properties: %s, but missing: %s',
+                    $path,
+                    implode(', ', $expectedProperties),
+                    implode(', ', $missingProperties)
+                )
+            );
+        }
+    }
+
+    /**
      * @param array<string, string|int|bool|float|array|null> $variables
      */
     private function sendGraphQLRequest(string $query, array $variables = []): void
@@ -410,15 +484,14 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
 
     /**
      * @param array<string, mixed> $data
-     * @return mixed
      */
-    private function getFieldValue(array $data, string $path)
+    private function getFieldValue(array $data, string $path): mixed
     {
         $parts = explode('.', $path);
         $current = $data;
 
         foreach ($parts as $part) {
-            if (!is_array($current) || !array_key_exists($part, $current)) {
+            if (! is_array($current) || ! array_key_exists($part, $current)) {
                 throw new \RuntimeException(sprintf('Path "%s" not found in response', $path));
             }
             $current = $current[$part];
@@ -426,79 +499,4 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
 
         return $current;
     }
-
-    /**
-     * @Then the GraphQL response :path should have :count items
-     */
-    public function theGraphQLResponseShouldHaveItems(string $path, int $count): void
-    {
-        $this->ensureResponseDataAvailable();
-        $value = $this->getFieldValue($this->responseData, $path);
-
-        if (!is_array($value)) {
-            throw new \RuntimeException(sprintf('Expected %s to be an array, got %s', $path, gettype($value)));
-        }
-
-        if (count($value) !== $count) {
-            throw new \RuntimeException(sprintf('Expected %s to have %d items, got %d', $path, $count, count($value)));
-        }
-    }
-
-    /**
-     * @Then the GraphQL response :path should be equal to :value
-     */
-    public function theGraphQLResponseShouldBeEqualTo(string $path, string $value): void
-    {
-        $this->ensureResponseDataAvailable();
-        $actualValue = $this->getFieldValue($this->responseData, $path);
-
-        if ($this->isBooleanValue($value)) {
-            $this->assertBooleanValue($path, $value, $actualValue);
-            return;
-        }
-
-        if ($this->isNullValue($value)) {
-            $this->assertNullValue($path, $actualValue);
-            return;
-        }
-
-        $this->assertStringValue($path, $value, (string) $actualValue);
-    }
-
-    /**
-     * @Then the GraphQL response :path should be an object with properties :properties
-     * @Then the GraphQL response :path should be an object with properties [:properties]
-     * @Then /^the GraphQL response "([^"]*)" should be an object with properties \[([^\]]+)\]$/
-     */
-    public function theGraphQLResponseShouldBeAnObjectWithProperties(string $path, string $properties): void
-    {
-        $this->ensureResponseDataAvailable();
-        $value = $this->getFieldValue($this->responseData, $path);
-
-        if (!is_array($value)) {
-            throw new \RuntimeException(sprintf('Expected %s to be an array, got %s', $path, gettype($value)));
-        }
-
-        $properties = str_replace(['[', ']', '"', "'"], '', $properties);
-        $expectedProperties = array_map('trim', explode(',', $properties));
-        $missingProperties = [];
-
-        foreach ($expectedProperties as $property) {
-            if (!array_key_exists(trim($property), $value)) {
-                $missingProperties[] = $property;
-            }
-        }
-
-        if (!empty($missingProperties)) {
-            throw new \RuntimeException(
-                sprintf(
-                    'Expected %s to have properties: %s, but missing: %s',
-                    $path,
-                    implode(', ', $expectedProperties),
-                    implode(', ', $missingProperties)
-                )
-            );
-        }
-    }
-
 }

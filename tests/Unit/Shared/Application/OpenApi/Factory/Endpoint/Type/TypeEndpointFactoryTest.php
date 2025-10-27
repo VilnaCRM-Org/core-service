@@ -10,7 +10,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\CTyEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerType\CustomerTypeEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
@@ -146,9 +146,9 @@ final class TypeEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): CTyEndpointFactory
+    private function createFactory(): CustomerTypeEndpointFactory
     {
-        return new CTyEndpointFactory(
+        return new CustomerTypeEndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,
