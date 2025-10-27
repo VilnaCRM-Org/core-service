@@ -333,11 +333,11 @@ authenticate_github() {
         echo "2. Interactive browser login"
         echo "3. Show token setup help"
         echo "4. Exit"
-        read -p "Choice (1-4): " choice
+        read -r -p "Choice (1-4): " choice
 
         case $choice in
             1)
-                read -s -p "Enter GitHub Personal Access Token: " token
+                read -r -s -p "Enter GitHub Personal Access Token: " token
                 echo ""
                 if echo "$token" | gh auth login --with-token --hostname "$GITHUB_HOST" 2>/dev/null; then
                     echo "✓ Token authentication successful"

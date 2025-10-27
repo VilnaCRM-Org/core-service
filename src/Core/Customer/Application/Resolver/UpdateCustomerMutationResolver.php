@@ -90,6 +90,11 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
      */
     private function extractUlid(string $idOrIri): string
     {
-        return str_starts_with($idOrIri, '/') ? basename($idOrIri) : $idOrIri;
+        if (!str_starts_with($idOrIri, '/')) {
+            return $idOrIri;
+        }
+
+        $path = parse_url($idOrIri, PHP_URL_PATH);
+        return $path !== null ? basename($path) : $idOrIri;
     }
 }

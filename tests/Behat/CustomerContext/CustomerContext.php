@@ -22,7 +22,6 @@ use DateInterval;
 use DateTime;
 use Faker\Factory;
 use Faker\Generator;
-use Symfony\Component\Uid\Ulid;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
 /**
