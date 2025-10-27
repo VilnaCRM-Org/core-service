@@ -98,6 +98,8 @@ export default function getResource(data) {
 
 **Get Collection with Filters**:
 
+This pattern assumes JSON-LD/Hydra-compliant API responses (standard for API Platform).
+
 ```javascript
 export default function getResources(data) {
   const url = `${utils.getBaseHttpUrl()}/resources?page=1&itemsPerPage=30`;
