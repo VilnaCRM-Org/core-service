@@ -174,6 +174,8 @@ export function teardown(data) {
 Add detailed response logging:
 
 ```javascript
+
+```javascript
 const response = http.post(url, payload, headers);
 
 console.log('Response status:', response.status);
@@ -263,6 +265,7 @@ console.log('Request payload:', payload);
    ```
 
 4. **Timeout Issues**:
+
    ```javascript
    export const options = {
      thresholds: {
@@ -521,6 +524,7 @@ iterations....................: 100
    ```
 
 3. **Use Smaller Payloads**:
+
    ```javascript
    // Only request fields you need
    query {
@@ -557,6 +561,7 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
    ```
 
 3. Test database connectivity:
+
    ```bash
    docker compose exec php vendor/bin/doctrine mongodb:schema:validate
    ```
@@ -587,6 +592,7 @@ Error: connect ECONNREFUSED 127.0.0.1:27017
    ```
 
 3. Add cleanup to test script:
+
    ```javascript
    export function teardown(data) {
      // Clean up all created resources
@@ -641,7 +647,7 @@ Add scenario to `tests/Load/config.json.dist`:
 
 **Symptoms**:
 
-```
+```text
 SyntaxError: Unexpected token in JSON
 ```
 
