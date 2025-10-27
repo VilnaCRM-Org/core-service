@@ -73,18 +73,22 @@
 ### Domain-Driven Design with Event Sourcing
 
 #### Pattern Description
+
 Migrated the Customer bounded context from CRUD repositories to event-sourced aggregates to unlock audit trails and replay.
 
 #### Implementation
+
 - Customer aggregate publishes `CustomerCreatedEvent` and `CustomerUpdatedEvent`
 - Repository coordinates between event store and projection layer
 - Snapshot strategy reduces replay time for high-frequency aggregates
 
 #### Benefits & Trade-offs
+
 - **Benefits**: Full audit trail, temporal queries, event-driven integrations
 - **Trade-offs**: Increased complexity, eventual consistency in projections, additional storage overhead
 
 #### Migration Path
+
 1. Implement event-sourced aggregate alongside existing CRUD repository
 1. Dual-write to both systems during transition period
 1. Backfill historical data as events
