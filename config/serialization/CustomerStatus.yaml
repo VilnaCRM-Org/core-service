@@ -14,7 +14,7 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
     ulid:
       groups: ['output']
       description: Read-only unique identifier (ULID format), auto-generated on creation
-      
+
     value:
       groups: ['output', 'write:customerStatus']
       description: The display value of the customer status (e.g., 'Active', 'Inactive')
