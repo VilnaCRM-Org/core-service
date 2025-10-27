@@ -55,7 +55,7 @@ App\Core\Customer\Domain\Entity\CustomerType:
       extraArgs:
         value:
           type: 'String!'
-    update_mutation:
+    ApiPlatform\Metadata\GraphQl\Mutation#update:
       class: ApiPlatform\Metadata\GraphQl\Mutation
       name: update
       resolver: App\Core\Customer\Application\Resolver\UpdateTypeMutationResolver

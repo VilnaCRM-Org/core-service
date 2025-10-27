@@ -1,5 +1,9 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
   attributes:
+    # Serialization groups configuration:
+    # - 'output': Readable in all REST and GraphQL contexts
+    # - 'write:customerStatus': Writable in customer status operations
+    # Note: ulid is read-only (auto-generated, not writable via API)
     ulid:
       groups: ['output']
     value:
