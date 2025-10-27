@@ -37,13 +37,13 @@ Creates a new customer.
 - 409: Email already exists
 ````
 
-2. **Generate OpenAPI Spec**:
+1. **Generate OpenAPI Spec**:
 
 ```bash
 make generate-openapi-spec
 ```
 
-3. **Update User Guide**: Add usage examples to `docs/user-guide.md`
+1. **Update User Guide**: Add usage examples to `docs/user-guide.md`
 
 ## GraphQL Operations
 
@@ -79,18 +79,18 @@ email
 \```
 ````
 
-2. **Generate GraphQL Spec**:
+1. **Generate GraphQL Spec**:
 
 ```bash
 make generate-graphql-spec
 ```
 
-3. **Update User Guide**: Add client integration examples
+1. **Update User Guide**: Add client integration examples
 
 ## Authentication Documentation
 
 **When auth requirements change**:
 
 1. Update `docs/security.md` with auth flow
-2. Update `docs/api-endpoints.md` with endpoint auth requirements
-3. Update `docs/user-guide.md` with client examples
+1. Update `docs/api-endpoints.md` with endpoint auth requirements
+1. Update `docs/user-guide.md` with client examples

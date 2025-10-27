@@ -40,9 +40,10 @@ final readonly class CustomerTypePutProcessor implements ProcessorInterface
         array $context = []
     ): CustomerType {
         $ulid = $uriVariables['ulid'];
+        $iri = sprintf('/api/customer_types/%s', $ulid);
         $customerType = $this->repository->find(
             $this->ulidTransformer->create($ulid)
-        ) ?? throw CustomerTypeNotFoundException::withIri($ulid);
+        ) ?? throw CustomerTypeNotFoundException::withIri($iri);
 
         $this->dispatchCommand($customerType, $data->value);
 

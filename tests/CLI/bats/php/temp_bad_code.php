@@ -75,7 +75,7 @@ class temp_bad_class
 $global_var = "bad"; // Snake case for variable
 
 while (true) {
-    new ConstructorPropertyPromotionSingleLineDocblockIndentOK();
+    new temp_bad_class();
     echo 'infinite loop';
     break; // Just to prevent actual infinite loop during analysis
 }

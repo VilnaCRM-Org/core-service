@@ -737,6 +737,6 @@ If issues persist:
 
 1. Check Doctrine ODM documentation: https://www.doctrine-project.org/projects/mongodb-odm.html
 2. Check MongoDB documentation: https://www.mongodb.com/docs/
-3. Review `docs/design-and-architecture.md` for project-specific patterns
+3. Review [`AGENTS.md`](../../../../AGENTS.md) for project-specific patterns and workflows
 4. Check project GitHub issues
 5. Review API Platform MongoDB documentation
