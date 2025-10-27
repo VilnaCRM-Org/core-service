@@ -151,19 +151,19 @@ This repository includes comprehensive Claude Code Skills in the `.claude/skills
 
 ### Available Skills
 
-**Workflow Skills**:
+#### Workflow Skills
 
 - **[ci-workflow](.claude/skills/ci-workflow/SKILL.md)**: Run comprehensive CI checks before committing
 - **[code-review](.claude/skills/code-review/SKILL.md)**: Systematically retrieve and address PR code review comments
 - **[testing-workflow](.claude/skills/testing-workflow/SKILL.md)**: Run and manage all test types (unit, integration, E2E, mutation, load)
 
-**Code Quality Skills**:
+#### Code Quality Skills
 
 - **[quality-standards](.claude/skills/quality-standards/SKILL.md)**: Maintain and improve code quality without decreasing thresholds
 - **[database-migrations](.claude/skills/database-migrations/SKILL.md)**: Create and manage MongoDB database migrations with Doctrine ODM
 - **[documentation-sync](.claude/skills/documentation-sync/SKILL.md)**: Keep documentation synchronized with code changes
 
-**Performance Skills**:
+#### Performance Skills
 
 - **[load-testing](.claude/skills/load-testing/SKILL.md)**: Create and manage K6 load tests for REST and GraphQL APIs
 
@@ -176,7 +176,7 @@ Skills follow Claude Code best practices with multi-file structure:
 - **Examples/**: Complete working code examples
 - **Reference/**: Troubleshooting and advanced topics
 
-**Example**: The `load-testing` skill has:
+##### Example: The `load-testing` skill has
 
 - `SKILL.md` (210 lines) - Core workflow
 - `rest-api-patterns.md` - REST API patterns
@@ -412,9 +412,9 @@ src/
 
 ### API Platform Configuration
 
-This service uses **API Platform 4** for REST API and GraphQL functionality. API Platform automatically generates OpenAPI documentation and provides Swagger UI interface.
+This service uses **API Platform 4** for REST API and GraphQL functionality. API Platform automatically generates OpenAPI documentation and provides Swagger UI.
 
-**Key Configuration Files:**
+#### Key Configuration Files
 
 - `config/api_platform/resources.yaml` - Main API resource definitions
 - Individual entity annotations (Customer, etc.)
@@ -471,8 +471,8 @@ App\Core\Customer\Domain\Entity\Customer:
 
 ### Swagger UI Access
 
-- **REST API Docs**: [https://localhost/api/docs](https://localhost/api/docs)
-- **GraphQL Playground**: [https://localhost/api/graphql](https://localhost/api/graphql)
+- **REST API Docs**: [API Docs](https://localhost/api/docs)
+- **GraphQL Playground**: [GraphQL Playground](https://localhost/api/graphql)
 - **OpenAPI Spec**: Generated via `make generate-openapi-spec`
 - **GraphQL Spec**: Generated via `make generate-graphql-spec`
 
@@ -480,7 +480,7 @@ App\Core\Customer\Domain\Entity\Customer:
 
 #### Problem: Request body schema is empty in Swagger
 
-**Solution**:
+##### Solution
 
 1. Remove all `OpenApi\Annotations` (OA\*) from DTOs
 2. Ensure Serializer Groups are properly defined
@@ -489,7 +489,7 @@ App\Core\Customer\Domain\Entity\Customer:
 
 #### Problem: Parameters not showing in Swagger
 
-**Solution**:
+##### Solution
 
 1. Verify uriTemplate parameters match processor expectations
 2. Check that path parameters are properly handled in processors
@@ -700,7 +700,7 @@ public function generateToken(): string
 }
 ```
 
-**Mutation Testing Strategy:**
+#### Mutation Testing Strategy
 
 1. **Run `make infection`** to identify escaped mutants
 2. **Analyze mutant types**: Constructor parameters, boundary conditions, logical operators
@@ -725,7 +725,7 @@ The repository provides a comprehensive code review workflow that enables automa
 
 #### Using the PR Comments Command
 
-**Basic usage:**
+##### Basic usage
 
 ```bash
 make pr-comments                    # Auto-detect PR from current branch
@@ -734,7 +734,7 @@ make pr-comments FORMAT=json        # Get comments in JSON format
 make pr-comments FORMAT=markdown    # Get comments in Markdown format
 ```
 
-**Command features:**
+##### Command features
 
 - **Auto-detection**: Automatically detects PR number from current git branch
 - **Multiple formats**: Text (default), JSON, and Markdown output options
@@ -744,7 +744,7 @@ make pr-comments FORMAT=markdown    # Get comments in Markdown format
 
 #### Code Review Refactoring Workflow
 
-**MANDATORY: Follow this systematic approach for addressing code review feedback:**
+##### MANDATORY: Follow this Systematic Approach for Addressing Code Review Feedback
 
 ##### 1. **Retrieve All Code Review Comments**
 
@@ -761,7 +761,7 @@ This command will output all unresolved comments in a readable format, showing:
 
 ##### 2. **Analyze Comment Types and Prioritize**
 
-**Categorize each comment by type:**
+Categorize each comment by type:
 
 #### A. Committable Suggestions (Highest Priority)
 
@@ -791,7 +791,7 @@ This command will output all unresolved comments in a readable format, showing:
 
 ### Systematic Implementation Strategy
 
-#### For Committable Suggestions:
+#### For Committable Suggestions
 
 ```bash
 # Apply suggestion directly to the code
@@ -804,7 +804,7 @@ git add .
 git commit -m "Apply code review suggestion: improve variable naming"
 ```
 
-#### For LLM Prompts:
+#### For LLM Prompts
 
 ```bash
 # Use the comment as a detailed prompt for refactoring
@@ -816,7 +816,7 @@ git commit -m "Apply code review suggestion: improve variable naming"
 # 5. Verify with make ci
 ```
 
-#### For Complex Refactoring Requests:
+#### For Complex Refactoring Requests
 
 ```bash
 # Break down large refactoring into smaller commits
@@ -829,7 +829,7 @@ git commit -m "Apply code review suggestion: improve variable naming"
 
 #### 4. Quality Assurance After Each Change
 
-**MANDATORY: Run quality checks after addressing each comment or group of related comments:**
+#### MANDATORY: Run quality checks after addressing each comment or group of related comments
 
 ```bash
 # For code changes
@@ -845,14 +845,14 @@ make infection              # Check mutation testing coverage
 
 #### 5. Documentation and Verification
 
-**Update documentation when comments suggest:**
+##### Update Documentation When Comments Suggest
 
 - API documentation changes
 - README updates
 - Inline code comments for clarity (only when absolutely necessary)
 - Architecture decision records
 
-**Verify changes meet requirements:**
+##### Verify Changes Meet Requirements
 
 - All tests pass with expected coverage
 - No regressions introduced
@@ -861,7 +861,7 @@ make infection              # Check mutation testing coverage
 
 #### 6. Comment Response Strategy
 
-**Reply to comments systematically:**
+##### Reply to Comments Systematically
 
 - **Questions**: Provide clear, concise answers
 - **Implemented suggestions**: Reply with commit hash that addresses the comment
@@ -1227,7 +1227,7 @@ This comprehensive approach ensures that documentation remains an accurate, up-t
 4. **Update architecture** to resolve dependency violations
 5. **Follow SOLID principles** to improve design quality
 
-This ensures the codebase maintains its high quality standards while continuously improving over time.
+This ensures the codebase maintains its high-quality standards while continuously improving over time.
 
 ## Additional Development Guidelines
 
@@ -1260,8 +1260,8 @@ private function isEmptyButNotOnlySpaces(string $value): bool
 **MANDATORY: Use Symfony and API Platform built-in features instead of custom implementations:**
 
 - **Validators**: Use Symfony's built-in validators instead of custom validation classes
-- **Rate Limiting**: Use Symfony Rate Limiter component instead of custom rate limiting
-- **Caching**: Use Symfony Cache component for caching needs
+- **Rate Limiting**: Use Symfony Rate Limiter component instead of custom rate-limiting
+- **Caching**: Use Symfony Cache component for rate-limiting and other caching needs
 - **API Platform**: Rely on automatic OpenAPI generation instead of manual `openapi.requestBody` decorations
 
 ### Testing Standards
