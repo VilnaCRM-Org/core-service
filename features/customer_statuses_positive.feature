@@ -159,6 +159,8 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     Then the response status code should be equal to 400
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
+    And the JSON node "title" should exist
+    And the JSON node "detail" should exist
 
   # ----- PUT /api/customer_statuses/{ulid} – Replace Resource (Positive Tests) -----
 
@@ -188,6 +190,8 @@ Feature: CustomerStatus Collection and Resource Endpoints with Detailed JSON Val
     Then the response status code should be equal to 400
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
+    And the JSON node "title" should exist
+    And the JSON node "detail" should exist
 
   # ----- PATCH /api/customer_statuses/{ulid} – Partial Update (Positive Tests) -----
 
