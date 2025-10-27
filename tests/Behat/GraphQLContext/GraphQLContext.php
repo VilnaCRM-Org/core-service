@@ -118,6 +118,85 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Then the GraphQL response :path should match regex :pattern
+     */
+    public function theGraphQLResponseFieldShouldMatchRegex(string $path, string $pattern): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        $actualValue = $this->getFieldValue($this->responseData, $path);
+
+        if (preg_match($pattern, (string) $actualValue) !== 1) {
+            throw new \RuntimeException(
+                sprintf('Expected %s to match pattern "%s", got "%s"', $path, $pattern, $actualValue)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL error :index message should contain :message
+     */
+    public function theGraphQLErrorAtIndexMessageShouldContain(int $index, string $message): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (! isset($this->responseData['errors'][$index]['message'])) {
+            throw new \RuntimeException(
+                sprintf('No error found at index %d', $index)
+            );
+        }
+
+        $errorMessage = $this->responseData['errors'][$index]['message'];
+        if (! str_contains($errorMessage, $message)) {
+            throw new \RuntimeException(
+                sprintf('Expected error message to contain "%s", got "%s"', $message, $errorMessage)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL error :index extensions code should be :code
+     */
+    public function theGraphQLErrorExtensionsCodeShouldBe(int $index, string $code): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (! isset($this->responseData['errors'][$index]['extensions']['code'])) {
+            throw new \RuntimeException(
+                sprintf('No error extensions code found at index %d', $index)
+            );
+        }
+
+        $actualCode = $this->responseData['errors'][$index]['extensions']['code'];
+        if ($actualCode !== $code) {
+            throw new \RuntimeException(
+                sprintf('Expected error code "%s", got "%s"', $code, $actualCode)
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL error :index path :pathIndex should be :value
+     */
+    public function theGraphQLErrorPathShouldBe(int $index, int $pathIndex, string $value): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (! isset($this->responseData['errors'][$index]['path'][$pathIndex])) {
+            throw new \RuntimeException(
+                sprintf('No error path found at index %d, path index %d', $index, $pathIndex)
+            );
+        }
+
+        $actualPath = $this->responseData['errors'][$index]['path'][$pathIndex];
+        if ($actualPath !== $value) {
+            throw new \RuntimeException(
+                sprintf('Expected error path "%s", got "%s"', $value, $actualPath)
+            );
+        }
+    }
+
+    /**
      * @Then the GraphQL response should not have errors
      */
     public function theGraphQLResponseShouldNotHaveErrors(): void

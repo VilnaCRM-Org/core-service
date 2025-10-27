@@ -4,8 +4,8 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
   I want to verify comprehensive validation rules and edge cases
 
   Background:
-    Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given ensure status exists with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And ensure type exists with id "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Email Validation Tests -----
 
@@ -507,6 +507,8 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.createCustomer.customer.createdAt"
     And the GraphQL response should contain "data.createCustomer.customer.updatedAt"
+    And the GraphQL response "data.createCustomer.customer.createdAt" should match regex "/^\d{4}-\d{2}-\d{2}T/"
+    And the GraphQL response "data.createCustomer.customer.updatedAt" should match regex "/^\d{4}-\d{2}-\d{2}T/"
     Then delete customer with email "timestamps@example.com"
 
   Scenario: Update customer and verify updatedAt changes
