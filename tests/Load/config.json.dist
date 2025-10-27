@@ -4,11 +4,11 @@
     "delayBetweenScenarios": 60,
     "batchSize": 50,
     "customersFileName": "customers.json",
-    "customersFileLocation": "loadTests/",
+    "customersFileLocation": "/loadTests/",
     "customerStatusesFileName": "customer_statuses.json",
-    "customerStatusesFileLocation": "loadTests/",
+    "customerStatusesFileLocation": "/loadTests/",
     "customerTypesFileName": "customer_types.json",
-    "customerTypesFileLocation": "loadTests/",
+    "customerTypesFileLocation": "/loadTests/",
     "endpoints": {
         "health": {
             "setupTimeoutInMinutes": 30,
@@ -676,7 +676,6 @@
         },
         "graphQLGetCustomers": {
             "setupTimeoutInMinutes": 30,
-            "customersToGetInOneRequest": 10,
             "teardownTimeoutInMinutes": 30,
             "smoke": {
                 "threshold": 200,
