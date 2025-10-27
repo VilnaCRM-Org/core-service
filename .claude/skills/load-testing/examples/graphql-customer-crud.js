@@ -49,7 +49,7 @@ export function setup() {
   };
 
   const typeResponse = http.post(
-    `${utils.getBaseHttpUrl()}/api/customer_types`,
+    `${utils.getBaseUrl()}/customer_types`,
     JSON.stringify(typeData),
     utils.getJsonHeader()
   );
@@ -69,7 +69,7 @@ export function setup() {
   };
 
   const statusResponse = http.post(
-    `${utils.getBaseHttpUrl()}/api/customer_statuses`,
+    `${utils.getBaseUrl()}/customer_statuses`,
     JSON.stringify(statusData),
     utils.getJsonHeader()
   );
@@ -79,7 +79,7 @@ export function setup() {
     console.error(`Response: ${statusResponse.body}`);
 
     // Clean up type before returning
-    http.del(`${utils.getBaseHttpUrl()}${type['@id']}`);
+    http.del(`${utils.getBaseDomain()}${type['@id']}`);
     return { type: null, status: null };
   }
 
@@ -192,7 +192,7 @@ export function teardown(data) {
     console.log(`Cleaning up ${data.createdCustomers.length} customers...`);
 
     data.createdCustomers.forEach(customerIri => {
-      const response = http.del(`${utils.getBaseHttpUrl()}${customerIri}`);
+      const response = http.del(`${utils.getBaseDomain()}${customerIri}`);
 
       if (response.status === 204) {
         console.log(`Deleted customer: ${customerIri}`);
@@ -204,7 +204,7 @@ export function teardown(data) {
 
   // Clean up customer status
   if (data.status) {
-    const response = http.del(`${utils.getBaseHttpUrl()}${data.status['@id']}`);
+    const response = http.del(`${utils.getBaseDomain()}${data.status['@id']}`);
 
     if (response.status === 204) {
       console.log(`Deleted status: ${data.status['@id']}`);
@@ -215,7 +215,7 @@ export function teardown(data) {
 
   // Clean up customer type
   if (data.type) {
-    const response = http.del(`${utils.getBaseHttpUrl()}${data.type['@id']}`);
+    const response = http.del(`${utils.getBaseDomain()}${data.type['@id']}`);
 
     if (response.status === 204) {
       console.log(`Deleted type: ${data.type['@id']}`);

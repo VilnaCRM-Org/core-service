@@ -265,12 +265,6 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
 
-validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
-	./scripts/validate-openapi-spec.sh
-
-openapi-diff: generate-openapi-spec ## Compare the generated OpenAPI spec against the base reference using OpenAPI Diff
-	./scripts/openapi-diff.sh $(or $(base_ref),origin/main)
-
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
 	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)
 
