@@ -385,13 +385,13 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     And the GraphQL response should have errors
 
   Scenario: Attempt to update customer with duplicate email
-    Given create customer with email "original@example.com"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERA" and email "original@example.com"
     And create customer with email "existing@example.com"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERA"
         email: "existing@example.com"
       }) {
         customer {
@@ -402,14 +402,16 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should have errors
+    Then delete customer with email "original@example.com"
+    And delete customer with email "existing@example.com"
 
   Scenario: Attempt to update customer with initials containing only spaces
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERB"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERB"
         initials: "  "
       }) {
         customer {
@@ -422,12 +424,12 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     And the GraphQL response should have errors
 
   Scenario: Attempt to update customer with non-existent type
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERC"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERC"
         type: "/api/customer_types/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -440,12 +442,12 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     And the GraphQL response should have errors
 
   Scenario: Attempt to update customer with non-existent status
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERD"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERD"
         status: "/api/customer_statuses/01ZZZZZZZZZZZZZZZZZZZZZZZZ"
       }) {
         customer {
@@ -513,12 +515,12 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then delete customer with email "timestamps@example.com"
 
   Scenario: Update customer and verify updatedAt changes
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERE"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERE"
         email: "updated@example.com"
       }) {
         customer {
@@ -531,6 +533,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.updateCustomer.customer.updatedAt"
+    Then delete customer with email "updated@example.com"
 
   # ----- Confirmed Field Tests -----
 
@@ -585,12 +588,12 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then delete customer with email "confirmedfalse@example.com"
 
   Scenario: Update customer confirmed from true to false
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERF"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERF"
         confirmed: false
       }) {
         customer {
@@ -605,12 +608,12 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "false"
 
   Scenario: Update customer confirmed from false to true
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERG"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERG"
         confirmed: true
       }) {
         customer {
