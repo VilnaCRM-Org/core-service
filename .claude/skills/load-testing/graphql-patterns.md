@@ -48,8 +48,14 @@ export function teardown(data) {
   if (data.dependency) {
     try {
       const deleteResponse = http.del(`${utils.getBaseHttpUrl()}${data.dependency['@id']}`);
-      if (deleteResponse.status !== 204 && deleteResponse.status !== 200 && deleteResponse.status !== 404) {
-        console.warn(`Failed to clean up dependency: ${deleteResponse.status} - ${data.dependency['@id']}`);
+      if (
+        deleteResponse.status !== 204 &&
+        deleteResponse.status !== 200 &&
+        deleteResponse.status !== 404
+      ) {
+        console.warn(
+          `Failed to clean up dependency: ${deleteResponse.status} - ${data.dependency['@id']}`
+        );
       } else if (deleteResponse.status === 404) {
         console.info(`Dependency already deleted: ${data.dependency['@id']}`);
       }
