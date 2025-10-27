@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\UriParameter;
 
-final class UlidUriCustTy extends UlidUriParameterFactory
+final class UlidUriCustomerType extends UlidUriParameterFactory
 {
     protected function getDescription(): string
     {
