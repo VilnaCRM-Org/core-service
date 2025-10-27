@@ -92,6 +92,7 @@ make phpcsfixer
 3. **Address each high-complexity finding**
 
 4. **Re-run PHPInsights**:
+
    ```bash
    make phpinsights
    ```

@@ -176,12 +176,12 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Update customer phone
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERA"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERA"
         phone: "+9999999999"
       }) {
         customer {
@@ -194,14 +194,15 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.phone" should be "+9999999999"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERA"
 
   Scenario: Update customer initials
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERB"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERB"
         initials: "XY"
       }) {
         customer {
@@ -214,14 +215,15 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.initials" should be "XY"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERB"
 
   Scenario: Update customer leadSource
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERC"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERC"
         leadSource: "NewCampaign"
       }) {
         customer {
@@ -234,14 +236,15 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.leadSource" should be "NewCampaign"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERC"
 
   Scenario: Update customer confirmed status from true to false
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERD"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERD"
         confirmed: false
       }) {
         customer {
@@ -254,15 +257,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "false"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERD"
 
   Scenario: Update customer type
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERE"
     And create type with id "01JKX8XGHVDZ46MWYMZT94YER6"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERE"
         type: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER6"
       }) {
         customer {
@@ -278,15 +282,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.updateCustomer.customer.type.id"
     And the GraphQL response "data.updateCustomer.customer.type.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERE"
 
   Scenario: Update customer status
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERF"
     And create status with id "01JKX8XGHVDZ46MWYMZT94YER6"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERF"
         status: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER6"
       }) {
         customer {
@@ -302,14 +307,15 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.updateCustomer.customer.status.id"
     And the GraphQL response "data.updateCustomer.customer.status.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
+    And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERF"
 
   Scenario: Update multiple customer fields at once
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERG"
     When I send the following GraphQL mutation:
     """
     mutation {
       updateCustomer(input: {
-        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5"
+        id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERG"
         initials: "MU"
         email: "multi.update@example.com"
         phone: "+5555555555"

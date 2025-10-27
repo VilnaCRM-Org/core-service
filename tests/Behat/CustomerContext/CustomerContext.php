@@ -194,6 +194,20 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Given create customer with id :id and email :email
+     */
+    public function customerWithIdAndEmailExists(string $id, string $email): void
+    {
+        $this->createAndSaveCustomerDefault(
+            $id,
+            $this->faker->lexify('??'),
+            $email,
+            $this->faker->e164PhoneNumber(),
+            'defaultSource'
+        );
+    }
+
+    /**
      * @Given create customer with phone :phone
      */
     public function customerWithPhoneExists(string $phone): void
