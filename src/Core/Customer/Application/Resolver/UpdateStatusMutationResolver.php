@@ -19,7 +19,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
     public function __construct(
         private CommandBusInterface $commandBus,
         private MutationInputValidator $validator,
-        private CustomerTf\UpdateStatusMutationInputTransformer $inputs,
+        private CustomerTf\UpdateStatusMutationInputTransformer $inputTransformer,
         private CustomerFactory\UpdateStatusCommandFactoryInterface $factory,
         private StatusRepositoryInterface $repository,
     ) {
@@ -39,7 +39,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
     {
         /** @var array{id: string, value: string} $input */
         $input = $context['args']['input'];
-        $mutationInput = $this->inputs->transform($input);
+        $mutationInput = $this->inputTransformer->transform($input);
         $this->validator->validate($mutationInput);
 
         $customerStatus = $item instanceof CustomerStatus

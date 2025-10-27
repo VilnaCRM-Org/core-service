@@ -42,7 +42,7 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         $ulid = $uriVariables['ulid'];
         $customerType = $this->repository->find(
             $this->ulidFactory->create($ulid)
-        ) ?? throw new CustomerTypeNotFoundException();
+        ) ?? throw CustomerTypeNotFoundException::withIri($ulid);
 
         $newValue = $this->getNewValue($data->value, $customerType->getValue());
 

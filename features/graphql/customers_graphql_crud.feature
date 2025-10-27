@@ -59,6 +59,8 @@ Feature: GraphQL Customer CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    Then delete customer with email "user1@example.com"
+    And delete customer with email "user2@example.com"
 
   Scenario: Create a new customer via GraphQL mutation
     When I send the following GraphQL mutation:
