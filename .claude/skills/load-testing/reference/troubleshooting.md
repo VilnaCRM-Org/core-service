@@ -210,12 +210,13 @@ console.log('Request payload:', payload);
    ```
 
 4. **Authentication Issues**:
+
    ```bash
    # Check if endpoint requires authentication (REST API)
    curl -X POST https://localhost/api/customers \
      -H "Content-Type: application/ld+json" \
      -d '{"email":"test@example.com"}'
-   
+
    # For GraphQL endpoint
    curl -X POST https://localhost/api/graphql \
      -H "Content-Type: application/json" \
