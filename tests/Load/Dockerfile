@@ -1,6 +1,6 @@
 FROM golang:1.24-alpine AS builder
 
-RUN apk add --no-cache git=2.47.1-r0
+RUN apk add --no-cache git
 
 RUN go install go.k6.io/xk6/cmd/xk6@v0.11.0 && \
     xk6 build --with github.com/avitalique/xk6-file@v1.7.0 \
@@ -8,9 +8,7 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.11.0 && \
 
 FROM grafana/k6:0.54.0
 
-USER root
 COPY --from=builder /go/k6 /usr/bin/k6
-USER 12345
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD k6 version || exit 1
