@@ -470,6 +470,7 @@ K6 supports exporting metrics to various backends for monitoring and analysis:
 - **Grafana**: Visualize K6 metrics with official K6 dashboards
 
 For detailed setup instructions, see:
+
 - [K6 InfluxDB integration](https://k6.io/docs/results-output/real-time/influxdb/)
 - [K6 Prometheus integration](https://k6.io/docs/results-output/real-time/prometheus-remote-write/)
 - [K6 Grafana dashboards](https://k6.io/docs/results-output/grafana-dashboards/)
