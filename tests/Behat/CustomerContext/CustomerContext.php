@@ -24,9 +24,6 @@ use Faker\Factory;
 use Faker\Generator;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
-/**
- * @psalm-suppress UndefinedClass
- */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     /** @var array<string> */
