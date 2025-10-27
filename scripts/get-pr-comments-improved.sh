@@ -241,9 +241,14 @@ process_threads() {
     # Extract ALL comments from ALL unresolved threads (using stdin to avoid argument size limits)
     local all_comments
     all_comments=$(echo "$threads" | jq --arg pr_number "$pr_number" "
-        map(select(.isResolved == false))
-        | map($outdated_filter)
-        | map(select(.comments.nodes | length > 0))
+        map(select(
+            (.isResolved == false) and
+            (.comments | type == \"object\") and
+            (.comments.nodes != null) and
+            (.comments.nodes | type == \"array\") and
+            (.comments.nodes | length > 0) and
+            ($outdated_filter)
+        ))
         | map(
             .comments.nodes[] as \$comment | {
                 id: \$comment.id,

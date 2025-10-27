@@ -12,7 +12,6 @@ use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
-use SlevomatCodingStandard\Sniffs\TypeHints\ReturnTypeHintSniff;
 
 return [
     'preset' => 'symfony',
@@ -30,11 +29,6 @@ return [
         UseSpacingSniff::class,
     ],
     'config' => [
-        ReturnTypeHintSniff::class => [
-            'exclude' => [
-                'src/User/Domain/Repository/UserRepositoryInterface',
-            ],
-        ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
@@ -43,8 +37,6 @@ return [
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
-                'tests/Behat/OAuthContext/OAuthContext',
-                'src/User/Infrastructure/Repository/MariaDBPasswordResetTokenRepository',
             ],
             'ignoreComments' => true,
             'lineLimit' => 100,
@@ -53,24 +45,17 @@ return [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
-                'src/User/Domain/Entity/User',
             ],
         ],
         UnnecessaryStringConcatSniff::class => [
             'exclude' => [
-                'src/Shared/Application/OpenApi/Factory/Response/UnsupportedTypeFactory',
-                'src/User/Domain/Exception/DuplicateEmailException',
                 'src/Shared/Infrastructure/Bus/Command/CommandNotRegisteredException',
                 'src/Shared/Infrastructure/Bus/Event/EventNotRegisteredException',
-                'tests/Unit/Shared/Application/OpenApi/Factory/Response/OAuthRedirectResponseFactoryTest',
-                'tests/Unit/Shared/Application/OpenApi/Factory/Response/UnsupportedGrantTypeResponseFactoryTest',
-                'tests/Behat/OAuthContext/OAuthContext',
             ],
         ],
         CyclomaticComplexityIsHigh::class => [
             'exclude' => [
                 'src/Shared/Application/Validator/InitialsValidator',
-                'src/Shared/Application/Validator/PasswordValidator',
             ],
         ],
     ],

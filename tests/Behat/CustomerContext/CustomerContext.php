@@ -102,6 +102,19 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Given create type with id :id and value :value
+     */
+    public function typeWithIdAndValueExists(string $id, string $value): void
+    {
+        $type = $this->typeFactory->create(
+            $value,
+            $this->ulidFactory->create($id)
+        );
+        $this->typeRepository->save($type);
+        $this->trackId($id, $this->createdTypeIds);
+    }
+
+    /**
      * @Given ensure type exists with id :id
      */
     public function ensureTypeExistsWithId(string $id): void
@@ -120,6 +133,19 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function statusWithIdExists(string $id): void
     {
         $status = $this->getStatus($id);
+        $this->statusRepository->save($status);
+        $this->trackId($id, $this->createdStatusIds);
+    }
+
+    /**
+     * @Given create status with id :id and value :value
+     */
+    public function statusWithIdAndValueExists(string $id, string $value): void
+    {
+        $status = $this->statusFactory->create(
+            $value,
+            $this->ulidFactory->create($id)
+        );
         $this->statusRepository->save($status);
         $this->trackId($id, $this->createdStatusIds);
     }
@@ -251,6 +277,24 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $this->faker->word(),
             filter_var($confirmed, FILTER_VALIDATE_BOOLEAN)
         );
+    }
+
+    /**
+     * @Given create :count customers
+     */
+    public function createMultipleCustomers(int $count): void
+    {
+        for ($i = 0; $i < $count; $i++) {
+            $id = (string) $this->faker->ulid();
+            $this->createAndSaveCustomerWithConfirmationStatus(
+                $id,
+                $this->faker->lexify('??'),
+                $this->faker->email(),
+                $this->faker->e164PhoneNumber(),
+                $this->faker->word(),
+                true
+            );
+        }
     }
 
     /**

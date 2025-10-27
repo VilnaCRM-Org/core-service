@@ -50,6 +50,35 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @When I send a GraphQL query with first :first and after endCursor
+     */
+    public function iSendGraphQLQueryWithPagination(int $first): void
+    {
+        $endCursor = $this->getFieldValue($this->responseData, 'data.customers.pageInfo.endCursor');
+
+        $query = sprintf(
+            '{
+                customers(first: %d, after: "%s") {
+                    edges {
+                        node {
+                            id
+                            email
+                        }
+                    }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
+                }
+            }',
+            $first,
+            $endCursor
+        );
+
+        $this->sendGraphQLRequest($query);
+    }
+
+    /**
      * @Then the GraphQL response status code should be :statusCode
      */
     public function theGraphQLResponseStatusCodeShouldBe(int $statusCode): void
@@ -221,6 +250,26 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
         if (! isset($this->responseData['errors'])) {
             throw new \RuntimeException(
                 'Expected GraphQL response to contain errors, but none found'
+            );
+        }
+    }
+
+    /**
+     * @Then the GraphQL response errors should contain field :field
+     */
+    public function theGraphQLResponseErrorsShouldContainField(string $field): void
+    {
+        $this->ensureResponseDataAvailable();
+
+        if (! isset($this->responseData['errors']) || empty($this->responseData['errors'])) {
+            throw new \RuntimeException('No errors in GraphQL response');
+        }
+
+        $errorsString = json_encode($this->responseData['errors']);
+
+        if (strpos($errorsString, '"' . $field . '"') === false) {
+            throw new \RuntimeException(
+                sprintf('Field "%s" not found in GraphQL errors', $field)
             );
         }
     }

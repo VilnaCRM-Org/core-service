@@ -8,10 +8,9 @@ RUN go install go.k6.io/xk6/cmd/xk6@v0.11.0 && \
 
 FROM grafana/k6:0.54.0
 
-RUN adduser -D -u 1000 loadtester
-USER loadtester
-
+USER root
 COPY --from=builder /go/k6 /usr/bin/k6
+USER 12345
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD k6 version || exit 1

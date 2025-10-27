@@ -12,7 +12,7 @@ VilnaCRM Core Service - A modern PHP microservice template built with Symfony 7,
 
 ### Docker Environment
 
-````bash
+```bash
 make start          # Start docker containers
 make stop           # Stop docker containers
 make down           # Stop and remove containers
@@ -20,14 +20,14 @@ make build          # Build docker images from scratch
 make sh             # Access PHP container shell
 make logs           # Show all logs
 make new-logs       # Show live logs
-```bash
+```
 
 ### Dependency Management
 
 ```bash
 make install        # Install dependencies from composer.lock
 make update         # Update dependencies per composer.json
-```bash
+```
 
 ### Code Quality & Static Analysis
 
@@ -38,7 +38,7 @@ make psalm-security # Run Psalm security/taint analysis
 make phpinsights    # Run PHP quality checks
 make deptrac        # Validate architectural boundaries
 make composer-validate  # Validate composer files
-```bash
+```
 
 ### Testing
 
@@ -52,7 +52,7 @@ make infection          # Run mutation testing
 
 # Setup test database
 make setup-test-db      # Drop and recreate test MongoDB schema
-```bash
+```
 
 ### Load Testing
 
@@ -66,7 +66,7 @@ make load-tests         # Run all load tests
 # AWS-based load testing
 make aws-load-tests         # Execute load tests on AWS
 make aws-load-tests-cleanup # Clean up AWS resources
-```bash
+```
 
 ### Symfony Commands
 
@@ -74,14 +74,14 @@ make aws-load-tests-cleanup # Clean up AWS resources
 make cache-clear    # Clear Symfony cache
 make cache-warmup   # Warmup cache
 make commands       # List all Symfony console commands
-```bash
+```
 
 ### API Documentation
 
 ```bash
 make generate-openapi-spec   # Export OpenAPI spec to .github/openapi-spec/spec.yaml
 make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
-```text
+```
 
 ## Architecture
 
