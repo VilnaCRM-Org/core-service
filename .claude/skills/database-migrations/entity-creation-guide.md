@@ -104,23 +104,23 @@ final class Customer
 
 ### Key Principles
 
-**1. No Doctrine Annotations**
+#### 1. No Doctrine Annotations
 
 - Keep domain layer clean
 - Use XML mappings for infrastructure concerns
 
-**2. Immutable by Default**
+#### 2. Immutable by Default
 
 - Use `private` properties
 - Return new instances for modifications when appropriate
 - Update `updatedAt` timestamp when state changes
 
-**3. Explicit Getters**
+#### 3. Explicit Getters
 
 - Provide clear, type-safe getters
 - Use `is*()` for boolean properties
 
-**4. Business Logic in Domain**
+#### 4. Business Logic in Domain
 
 - Encapsulate state changes in methods
 - Validate business rules in entity methods

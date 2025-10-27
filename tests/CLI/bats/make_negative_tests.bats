@@ -72,7 +72,7 @@ load 'bats-assert/load'
   mv src/temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The function badly_named_function() contains an eval expression"
+  assert_output --partial "The method anotherBadMethod() has a Cyclomatic Complexity of 10"
 }
 
 @test "make unit-tests should fail if tests fail" {

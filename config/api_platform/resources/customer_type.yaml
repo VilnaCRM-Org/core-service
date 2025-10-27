@@ -48,6 +48,8 @@ App\Core\Customer\Domain\Entity\CustomerType:
       name: create
       resolver: App\Core\Customer\Application\Resolver\CreateTypeMutationResolver
       deserialize: false
+      read: false
+      write: false
       denormalizationContext:
         groups: []
       extraArgs:

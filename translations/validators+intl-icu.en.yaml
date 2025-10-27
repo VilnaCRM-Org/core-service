@@ -6,3 +6,4 @@ email:
     unique: 'This email address is already registered'
 initials:
   spaces: 'Initials can not consist only of spaces'
+  invalid: 'Initials must contain only uppercase letters (A-Z), optionally separated by dots'
