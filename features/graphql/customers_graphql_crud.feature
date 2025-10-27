@@ -8,7 +8,7 @@ Feature: GraphQL Customer CRUD Operations
     And create type with id "01JKX8XGHVDZ46MWYMZT94YER4" and value "Premium"
 
   Scenario: Query a single customer by ID
-    Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send the following GraphQL query:
     """
     {
@@ -146,7 +146,7 @@ Feature: GraphQL Customer CRUD Operations
     Then delete customer with email "graphql@example.com"
 
   Scenario: Update a customer via GraphQL mutation
-    Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send the following GraphQL mutation:
     """
     mutation {
@@ -169,7 +169,7 @@ Feature: GraphQL Customer CRUD Operations
     And the GraphQL response "data.updateCustomer.customer.phone" should be "9876543210"
 
   Scenario: Delete a customer via GraphQL mutation
-    Given create customer with id 01JKX8XGHVDZ46MWYMZT94YER4
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     When I send the following GraphQL mutation:
     """
     mutation {

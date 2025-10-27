@@ -7,7 +7,9 @@
  * Features:
  * - Setup function creates required dependencies
  * - Main function performs the target operation (create customer)
- * - Teardown function cleans up all test data
+ * - Teardown function cleans up test dependencies (type and status)
+ * - Note: Customer cleanup not tracked due to concurrency limitations
+ *   Manual cleanup may be needed after test runs
  * - Proper IRI handling
  * - Realistic data generation
  * - Comprehensive response validation
@@ -92,7 +94,6 @@ export function setup() {
   return {
     type: type,
     status: status,
-    createdCustomers: [], // Track created customers for cleanup
   };
 }
 
@@ -136,9 +137,6 @@ export default function restCustomerExample(data) {
           return false;
         }
 
-        // Store IRI for cleanup
-        data.createdCustomers.push(customer['@id']);
-
         return true;
       } catch (e) {
         console.error('Failed to parse response:', e);
@@ -164,21 +162,6 @@ export function teardown(data) {
   if (!data) {
     console.log('No data to clean up');
     return;
-  }
-
-  // Clean up created customers
-  if (data.createdCustomers && data.createdCustomers.length > 0) {
-    console.log(`Cleaning up ${data.createdCustomers.length} customers...`);
-
-    data.createdCustomers.forEach(customerIri => {
-      const response = http.del(`${utils.getBaseDomain()}${customerIri}`);
-
-      if (response.status === 204) {
-        console.log(`Deleted customer: ${customerIri}`);
-      } else {
-        console.warn(`Failed to delete customer ${customerIri}: ${response.status}`);
-      }
-    });
   }
 
   // Clean up customer status
