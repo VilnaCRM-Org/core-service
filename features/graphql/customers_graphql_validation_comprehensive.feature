@@ -606,6 +606,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "false"
+    Then delete customer with id "01JKX8XGHVDZ46MWYMZT94YERF"
 
   Scenario: Update customer confirmed from false to true
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERG"
