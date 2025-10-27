@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\ParamCStEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\ParamCustomerStatusEndpointFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
@@ -21,13 +21,13 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustSt;
+use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustomerStatus;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamEndpointFactoryTest extends UnitTestCase
 {
-    private UlidUriCustSt $parameterFactory;
+    private UlidUriCustomerStatus $parameterFactory;
     private StatusUpdateRequestFactory $updateFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
@@ -76,7 +76,7 @@ final class ParamEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->parameterFactory = $this
-            ->createMock(UlidUriCustSt::class);
+            ->createMock(UlidUriCustomerStatus::class);
         $this->updateFactory = $this
             ->createMock(StatusUpdateRequestFactory::class);
         $this->validationErrorFactory = $this
@@ -166,9 +166,9 @@ final class ParamEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): ParamCStEndpointFactory
+    private function createFactory(): ParamCustomerStatusEndpointFactory
     {
-        return new ParamCStEndpointFactory(
+        return new ParamCustomerStatusEndpointFactory(
             $this->parameterFactory,
             $this->updateFactory,
             $this->validationErrorFactory,
