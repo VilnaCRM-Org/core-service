@@ -5,7 +5,7 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
 
   # ----- Query Operations - Positive Cases -----
 
-  Scenario: Query a single customer status with all fields
+  Scenario: Query customer statuses collection filtered by value
     Given create customer status with value "Active"
     When I send the following GraphQL query:
     """
@@ -53,6 +53,9 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     And the GraphQL response should contain "data.customerStatuses.edges"
     And the GraphQL response should contain "data.customerStatuses.pageInfo.hasNextPage"
     And the GraphQL response should contain "data.customerStatuses.pageInfo.endCursor"
+    Then delete status with id "01JKX8XGHVDZ46MWYMZT94YER1"
+    And delete status with id "01JKX8XGHVDZ46MWYMZT94YER2"
+    And delete status with id "01JKX8XGHVDZ46MWYMZT94YER3"
 
   Scenario: Query customer statuses with cursor pagination, ordering, and ULID range filter
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -220,6 +223,7 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customerStatus.id"
     And the GraphQL response should contain "data.customerStatus.value"
+    Then delete status with id "01JKX8XGHVDZ46MWYMZT94YER4"
 
   # ----- Mutation Operations - Positive Cases -----
 
@@ -263,6 +267,7 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomerStatus.customerStatus.value" should be "UpdatedValue"
     And the GraphQL response "data.updateCustomerStatus.customerStatus.id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    Then delete status with id "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Delete a customer status
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER5"

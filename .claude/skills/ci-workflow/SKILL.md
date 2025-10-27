@@ -77,7 +77,7 @@ The `make ci` command runs these checks in sequence:
 
 **CRITICAL**: Keep fixing issues and re-running `make ci` until you see:
 
-```
+```text
 ✅ CI checks successfully passed!
 ```
 
