@@ -238,7 +238,7 @@ class User { }
 **Solution**: Move annotations to XML mapping
 
 ```xml
-<!-- config/doctrine/User.orm.xml -->
+<!-- config/doctrine/User.mongodb.xml -->
 <doctrine-mongo-mapping>
     <document name="App\User\Domain\Entity\User">
         <!-- mappings here -->
