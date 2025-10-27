@@ -14,7 +14,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].status.value" should be equal to "Inactive"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].status.value" should be equal to "Active"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=desc"
 
