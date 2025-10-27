@@ -173,7 +173,7 @@ export function teardown(data) {
 
 Add detailed response logging:
 
-```javascript
+````javascript
 
 ```javascript
 const response = http.post(url, payload, headers);
@@ -182,7 +182,7 @@ console.log('Response status:', response.status);
 console.log('Response body:', response.body);
 console.log('Request URL:', url);
 console.log('Request payload:', payload);
-```
+````
 
 **Common Causes**:
 
