@@ -42,8 +42,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should contain "0123456789"
     And the JSON node "initials" should contain "Name Surname"
     And the JSON node "leadSource" should contain "Google"
-    And the JSON node "type" should exist
-    And the JSON node "status" should exist
+    And the JSON node "type.@id" should exist
+    And the JSON node "type.@id" should match "/^\\/api\\/customer_types\\/.+$/"
+    And the JSON node "status.@id" should exist
+    And the JSON node "status.@id" should match "/^\\/api\\/customer_statuses\\/.+$/"
     And the JSON node "confirmed" should be true
     Then delete customer with email "postcustomer@example.com"
 
@@ -121,8 +123,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should be equal to "0123456789"
     And the JSON node "initials" should be equal to "AB"
     And the JSON node "leadSource" should be equal to "LinkedIn"
-    And the JSON node "type" should exist
-    And the JSON node "status" should exist
+    And the JSON node "type.@id" should exist
+    And the JSON node "type.@id" should match "/^\\/api\\/customer_types\\/.+$/"
+    And the JSON node "status.@id" should exist
+    And the JSON node "status.@id" should match "/^\\/api\\/customer_statuses\\/.+$/"
     And the JSON node "confirmed" should be true
 
   Scenario: Replace a customer resource with updated email
@@ -149,8 +153,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "phone" should be equal to "0123456789"
     And the JSON node "initials" should be equal to "CA"
     And the JSON node "leadSource" should be equal to "Google"
-    And the JSON node "type" should exist
-    And the JSON node "status" should exist
+    And the JSON node "type.@id" should exist
+    And the JSON node "type.@id" should match "/^\\/api\\/customer_types\\/.+$/"
+    And the JSON node "status.@id" should exist
+    And the JSON node "status.@id" should match "/^\\/api\\/customer_statuses\\/.+$/"
     And the JSON node "confirmed" should be true
 
   Scenario: Replace a customer resource with all updated fields (verify complete replacement)
