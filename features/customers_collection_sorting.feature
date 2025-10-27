@@ -124,7 +124,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].type.value" should be equal to "Basic"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type.value" should be equal to "VIP"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Btype.value%5D=asc"
 
@@ -133,7 +135,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with type value "Basic" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
     When I send a GET request to "/api/customers?order[type.value]=desc"
     Then the response status code should be equal to 200
+    And the JSON node "member[0].type.value" should be equal to "VIP"
     And the response should be in JSON
+    And the JSON node "member[1].type.value" should be equal to "Basic"
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "totalItems" should be equal to the number 2

@@ -105,7 +105,7 @@ RUN apk add --no-cache \
     bash \
     make
 
-RUN curl -sS https://get.symfony.com/cli/installer | bash \
+RUN set -o pipefail && curl -sS https://get.symfony.com/cli/installer | bash \
  && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 ENV APP_ENV=dev XDEBUG_MODE=off
