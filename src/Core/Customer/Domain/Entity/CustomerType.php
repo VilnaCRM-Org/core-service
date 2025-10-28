@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Domain\Entity;
 
+use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType implements CustomerTypeInterface
@@ -32,5 +33,10 @@ class CustomerType implements CustomerTypeInterface
     public function setValue(string $value): void
     {
         $this->value = $value;
+    }
+
+    public function update(CustomerTypeUpdate $updateData): void
+    {
+        $this->value = $updateData->value;
     }
 }

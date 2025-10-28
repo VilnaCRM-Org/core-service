@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Domain\Entity;
 
 use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
@@ -55,6 +56,20 @@ final class CustomerTypeTest extends UnitTestCase
         $this->assertSame($initialValue, $customerType->getValue());
 
         $customerType->setValue($newValue);
+
+        $this->assertSame($newValue, $customerType->getValue());
+    }
+
+    public function testUpdate(): void
+    {
+        $initialValue = $this->faker->word();
+        $newValue = $this->faker->word();
+
+        $ulid = $this->createMock(Ulid::class);
+        $customerType = new CustomerType($initialValue, $ulid);
+
+        $updateData = new CustomerTypeUpdate($newValue);
+        $customerType->update($updateData);
 
         $this->assertSame($newValue, $customerType->getValue());
     }
