@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat\CustomerContext;
 
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
 use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
@@ -13,42 +11,53 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Tests\Behat\CustomerContext\Builder\CustomerTestDataBuilder;
+use App\Tests\Behat\CustomerContext\Cleaner\TestDataCleaner;
+use App\Tests\Behat\CustomerContext\Factory\TestEntityFactory;
+use App\Tests\Behat\CustomerContext\Manager\EntityManager;
+use App\Tests\Behat\CustomerContext\Mapper\DateUrlMapper;
 use App\Tests\Unit\UlidProvider;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use DateInterval;
-use DateTime;
 use Faker\Factory;
 use Faker\Generator;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
-    /** @var array<string> */
-    private array $createdCustomerIds = [];
-    /** @var array<string> */
-    private array $createdStatusIds = [];
-    /** @var array<string> */
-    private array $createdTypeIds = [];
-
     private Generator $faker;
+    private CustomerTestDataBuilder $customerBuilder;
+    private TestEntityFactory $entityFactory;
+    private TestDataCleaner $dataCleaner;
+    private EntityManager $entityManager;
+    private DateUrlMapper $dateUrlMapper;
 
     /** @psalm-suppress UndefinedClass */
     private RestContext $restContext;
 
     public function __construct(
-        private TypeRepositoryInterface $typeRepository,
-        private StatusRepositoryInterface $statusRepository,
-        private UlidFactory $ulidFactory,
-        private CustomerRepositoryInterface $customerRepository,
-        private CustomerFactoryInterface $customerFactory,
-        private StatusFactoryInterface $statusFactory,
-        private TypeFactoryInterface $typeFactory,
+        TypeRepositoryInterface $typeRepository,
+        StatusRepositoryInterface $statusRepository,
+        UlidFactory $ulidFactory,
+        CustomerRepositoryInterface $customerRepository,
+        CustomerFactoryInterface $customerFactory,
+        StatusFactoryInterface $statusFactory,
+        TypeFactoryInterface $typeFactory,
     ) {
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
+
+        $this->initializeHelpers(
+            $typeRepository,
+            $statusRepository,
+            $ulidFactory,
+            $customerRepository,
+            $customerFactory,
+            $statusFactory,
+            $typeFactory
+        );
     }
 
     /**
@@ -63,13 +72,21 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @AfterScenario
+     */
+    public function cleanupCreatedCustomersAndEntities(AfterScenarioScope $scope): void
+    {
+        $this->dataCleaner->cleanupAll();
+    }
+
+    /**
      * @When I send a GET data request to :url
      *
      * @psalm-suppress UndefinedClass
      */
     public function iSendAGetDataRequestTo(string $url): void
     {
-        $mappedUrl = $this->mapDynamicDates($url);
+        $mappedUrl = $this->dateUrlMapper->map($url);
         $mappedUrl = getenv('BASE_URL') . $mappedUrl;
         $this->restContext->iSendARequestTo('GET', $mappedUrl);
     }
@@ -79,13 +96,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithIdExists(string $id): void
     {
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word()
-        );
+        $this->createCustomerWithDefaults($id);
     }
 
     /**
@@ -93,9 +104,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function typeWithIdExists(string $id): void
     {
-        $type = $this->getCustomerType($id);
-        $this->typeRepository->save($type);
-        $this->trackId($id, $this->createdTypeIds);
+        $type = $this->entityFactory->createType($id);
+        $this->entityManager->saveType($type);
+        $this->dataCleaner->trackType($id);
     }
 
     /**
@@ -103,12 +114,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function typeWithIdAndValueExists(string $id, string $value): void
     {
-        $type = $this->typeFactory->create(
-            $value,
-            $this->ulidFactory->create($id)
-        );
-        $this->typeRepository->save($type);
-        $this->trackId($id, $this->createdTypeIds);
+        $type = $this->entityFactory->createType($id, $value);
+        $this->entityManager->saveType($type);
+        $this->dataCleaner->trackType($id);
     }
 
     /**
@@ -116,8 +124,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function ensureTypeExistsWithId(string $id): void
     {
-        $ulid = $this->ulidFactory->create($id);
-        $existingType = $this->typeRepository->find($ulid);
+        $ulid = $this->entityFactory->createUlid($id);
+        $existingType = $this->entityManager->findType($ulid);
 
         if ($existingType === null) {
             $this->typeWithIdExists($id);
@@ -129,9 +137,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function statusWithIdExists(string $id): void
     {
-        $status = $this->getStatus($id);
-        $this->statusRepository->save($status);
-        $this->trackId($id, $this->createdStatusIds);
+        $status = $this->entityFactory->createStatus($id);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackStatus($id);
     }
 
     /**
@@ -139,12 +147,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function statusWithIdAndValueExists(string $id, string $value): void
     {
-        $status = $this->statusFactory->create(
-            $value,
-            $this->ulidFactory->create($id)
-        );
-        $this->statusRepository->save($status);
-        $this->trackId($id, $this->createdStatusIds);
+        $status = $this->entityFactory->createStatus($id, $value);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackStatus($id);
     }
 
     /**
@@ -152,8 +157,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function ensureStatusExistsWithId(string $id): void
     {
-        $ulid = $this->ulidFactory->create($id);
-        $existingStatus = $this->statusRepository->find($ulid);
+        $ulid = $this->entityFactory->createUlid($id);
+        $existingStatus = $this->entityManager->findStatus($ulid);
 
         if ($existingStatus === null) {
             $this->statusWithIdExists($id);
@@ -166,13 +171,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithInitialsExists(string $initials): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $initials,
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word()
-        );
+        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withInitials($initials));
     }
 
     /**
@@ -181,12 +180,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithEmailExists(string $email): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
+        $this->createCustomerWithBuilder(
             $id,
-            $this->faker->lexify('??'),
-            $email,
-            $this->faker->e164PhoneNumber(),
-            'defaultSource'
+            static fn ($builder) => $builder->withEmail($email)->withLeadSource('defaultSource')
         );
     }
 
@@ -195,12 +191,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function customerWithIdAndEmailExists(string $id, string $email): void
     {
-        $this->createAndSaveCustomerDefault(
+        $this->createCustomerWithBuilder(
             $id,
-            $this->faker->lexify('??'),
-            $email,
-            $this->faker->e164PhoneNumber(),
-            'defaultSource'
+            static fn ($builder) => $builder->withEmail($email)->withLeadSource('defaultSource')
         );
     }
 
@@ -210,13 +203,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithPhoneExists(string $phone): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerDefault(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $phone,
-            $this->faker->word()
-        );
+        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withPhone($phone));
     }
 
     /**
@@ -225,53 +212,24 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithLeadSourceExists(string $leadSource): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerWithLeadSource(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $leadSource
-        );
+        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withLeadSource($leadSource));
     }
 
     /**
      * @Given create customer with type value :type and status value :status and id :id
      */
-    public function customerWithTypeStatusAndIdExists(
-        string $type,
-        string $status,
-        string $id
-    ): void {
-        $this->createAndSaveCustomerWithValues(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            true,
-            $type,
-            $status
-        );
+    public function customerWithTypeStatusAndIdExists(string $type, string $status, string $id): void
+    {
+        $this->createCustomerWithTypeAndStatus($id, $type, $status);
     }
 
     /**
      * @Given customer with type value :typeValue and status value :statusValue exists
      */
-    public function customerWithTypeAndStatusExists(
-        string $typeValue,
-        string $statusValue
-    ): void {
+    public function customerWithTypeAndStatusExists(string $typeValue, string $statusValue): void
+    {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerWithValues(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            true,
-            $typeValue,
-            $statusValue
-        );
+        $this->createCustomerWithTypeAndStatus($id, $typeValue, $statusValue);
     }
 
     /**
@@ -280,14 +238,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithConfirmedExists(string $confirmed): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createAndSaveCustomerWithConfirmationStatus(
-            $id,
-            $this->faker->lexify('??'),
-            $this->faker->email(),
-            $this->faker->e164PhoneNumber(),
-            $this->faker->word(),
-            filter_var($confirmed, FILTER_VALIDATE_BOOLEAN)
-        );
+        $isConfirmed = filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
+        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withConfirmed($isConfirmed));
     }
 
     /**
@@ -297,14 +249,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         for ($i = 0; $i < $count; $i++) {
             $id = (string) $this->faker->ulid();
-            $this->createAndSaveCustomerWithConfirmationStatus(
-                $id,
-                $this->faker->lexify('??'),
-                $this->faker->email(),
-                $this->faker->e164PhoneNumber(),
-                $this->faker->word(),
-                true
-            );
+            $this->createCustomerWithDefaults($id);
         }
     }
 
@@ -314,14 +259,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerStatusWithValueExists(string $value): void
     {
         $id = (string) $this->faker->ulid();
-        $status = $this->statusRepository->find($id)
-            ?? $this->statusFactory->create(
-                $value,
-                $this->ulidFactory->create($id)
-            );
-        $status->setValue($value);
-        $this->statusRepository->save($status);
-        $this->trackId($id, $this->createdStatusIds);
+        $status = $this->entityFactory->createStatus($id, $value);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackStatus($id);
     }
 
     /**
@@ -330,43 +270,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerTypeWithValueExists(string $value): void
     {
         $id = (string) $this->faker->ulid();
-        $type = $this->getCustomerType($id);
-        $type->setValue($value);
-        $this->typeRepository->save($type);
-        $this->trackId($id, $this->createdTypeIds);
-    }
-
-    public function getCustomerType(string $id): CustomerType
-    {
-        $type = $this->typeFactory->create(
-            $this->faker->word(),
-            $this->ulidFactory->create($id)
-        );
-        $this->trackId($id, $this->createdTypeIds);
-        return $type;
-    }
-
-    public function getStatus(string $id): CustomerStatus
-    {
-        $status = $this->statusFactory->create(
-            $this->faker->word(),
-            $this->ulidFactory->create($id)
-        );
-        $this->trackId($id, $this->createdStatusIds);
-        return $status;
-    }
-
-    /**
-     * Cleanup after each scenario.
-     *
-     * @AfterScenario
-     */
-    public function cleanupCreatedCustomersAndEntities(
-        AfterScenarioScope $scope
-    ): void {
-        $this->cleanupCustomers();
-        $this->cleanupStatuses();
-        $this->cleanupTypes();
+        $type = $this->entityFactory->createType($id, $value);
+        $this->entityManager->saveType($type);
+        $this->dataCleaner->trackType($id);
     }
 
     /**
@@ -374,9 +280,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerById(mixed $id): void
     {
-        $customer = $this->customerRepository->find($id);
+        $customer = $this->entityManager->findCustomer($id);
         if ($customer !== null) {
-            $this->customerRepository->delete($customer);
+            $this->entityManager->deleteCustomer($customer);
         }
     }
 
@@ -385,9 +291,9 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerByEmail(string $email): void
     {
-        $customer = $this->customerRepository->findByEmail($email);
+        $customer = $this->entityManager->findCustomerByEmail($email);
         if ($customer !== null) {
-            $this->customerRepository->delete($customer);
+            $this->entityManager->deleteCustomer($customer);
         }
     }
 
@@ -396,7 +302,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteStatusByValue(string $value): void
     {
-        $this->statusRepository->deleteByValue($value);
+        $this->entityManager->deleteStatusByValue($value);
     }
 
     /**
@@ -404,10 +310,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteStatusById(string $id): void
     {
-        $ulid = $this->ulidFactory->create($id);
-        $status = $this->statusRepository->find($ulid);
+        $ulid = $this->entityFactory->createUlid($id);
+        $status = $this->entityManager->findStatus($ulid);
         if ($status !== null) {
-            $this->statusRepository->delete($status);
+            $this->entityManager->deleteStatus($status);
         }
     }
 
@@ -416,7 +322,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteTypeByValue(string $value): void
     {
-        $this->typeRepository->deleteByValue($value);
+        $this->entityManager->deleteTypeByValue($value);
     }
 
     /**
@@ -424,236 +330,105 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteTypeById(string $id): void
     {
-        $ulid = $this->ulidFactory->create($id);
-        $type = $this->typeRepository->find($ulid);
+        $ulid = $this->entityFactory->createUlid($id);
+        $type = $this->entityManager->findType($ulid);
         if ($type !== null) {
-            $this->typeRepository->delete($type);
+            $this->entityManager->deleteType($type);
         }
     }
 
-    private function cleanupCustomers(): void
+    private function initializeHelpers(
+        TypeRepositoryInterface $typeRepository,
+        StatusRepositoryInterface $statusRepository,
+        UlidFactory $ulidFactory,
+        CustomerRepositoryInterface $customerRepository,
+        CustomerFactoryInterface $customerFactory,
+        StatusFactoryInterface $statusFactory,
+        TypeFactoryInterface $typeFactory
+    ): void {
+        $this->entityManager = new EntityManager(
+            $customerRepository,
+            $statusRepository,
+            $typeRepository
+        );
+        $this->entityFactory = new TestEntityFactory(
+            $typeFactory,
+            $statusFactory,
+            $ulidFactory,
+            $this->faker
+        );
+        $this->customerBuilder = new CustomerTestDataBuilder($customerFactory, $this->faker);
+        $this->dataCleaner = new TestDataCleaner(
+            $customerRepository,
+            $statusRepository,
+            $typeRepository,
+            $ulidFactory
+        );
+        $this->dateUrlMapper = new DateUrlMapper();
+    }
+
+    private function createCustomerWithDefaults(string $id): void
     {
-        foreach ($this->createdCustomerIds as $id) {
-            $this->deleteCustomerById($id);
-        }
-        $this->createdCustomerIds = [];
+        [$type, $status] = $this->entityFactory->createTypeAndStatus($id);
+        $this->entityManager->saveType($type);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackType($id);
+        $this->dataCleaner->trackStatus($id);
+
+        $customer = $this->customerBuilder
+            ->reset()
+            ->withUlid($this->entityFactory->createUlid($id))
+            ->withType($type)
+            ->withStatus($status)
+            ->build();
+
+        $this->entityManager->saveCustomer($customer);
+        $this->dataCleaner->trackCustomer($id);
     }
 
-    private function cleanupStatuses(): void
+    private function createCustomerWithBuilder(string $id, callable $configurator): void
     {
-        foreach ($this->createdStatusIds as $id) {
-            $status = $this->statusRepository->find($id);
-            if ($status !== null) {
-                $this->statusRepository->delete($status);
-            }
-        }
-        $this->createdStatusIds = [];
+        [$type, $status] = $this->entityFactory->createTypeAndStatus($id);
+        $this->entityManager->saveType($type);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackType($id);
+        $this->dataCleaner->trackStatus($id);
+
+        $builder = $this->customerBuilder
+            ->reset()
+            ->withUlid($this->entityFactory->createUlid($id))
+            ->withType($type)
+            ->withStatus($status);
+
+        $customer = $configurator($builder)->build();
+
+        $this->entityManager->saveCustomer($customer);
+        $this->dataCleaner->trackCustomer($id);
     }
 
-    private function cleanupTypes(): void
-    {
-        foreach ($this->createdTypeIds as $id) {
-            $type = $this->typeRepository->find($id);
-            if ($type !== null) {
-                $this->typeRepository->delete($type);
-            }
-        }
-        $this->createdTypeIds = [];
-    }
-
-    /**
-     * @param array<string> $storage  The array to store IDs.
-     */
-    private function trackId(string $id, array &$storage): void
-    {
-        if (! in_array($id, $storage, true)) {
-            $storage[] = $id;
-        }
-    }
-
-    /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
-     */
-    private function prepareCustomerEntitiesDefault(string $id): array
-    {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
-
-        $type->setValue($this->faker->word());
-        $status->setValue($this->faker->word());
-
-        $this->typeRepository->save($type);
-        $this->statusRepository->save($status);
-
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
-
-        return [$type, $status];
-    }
-
-    private function mapDynamicDates(string $url): string
-    {
-        $pattern = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
-
-        if (! preg_match_all($pattern, $url, $matches, PREG_SET_ORDER)) {
-            return $url;
-        }
-
-        foreach ($matches as $match) {
-            $url = $this->replaceDatePlaceholder($url, $match);
-        }
-
-        return $url;
-    }
-
-    /**
-     * @param array<string> $match
-     */
-    private function replaceDatePlaceholder(string $url, array $match): string
-    {
-        $dateTimeFormat = $match[1];
-        $dateTimeInterval = $match[2];
-        $date = $this->calculateDate($dateTimeInterval);
-        $formattedDate = $date->format($dateTimeFormat);
-
-        return str_replace($match[0], $formattedDate, $url);
-    }
-
-    private function calculateDate(string $interval): DateTime
-    {
-        $date = new DateTime();
-        $isNegative = str_starts_with($interval, '-');
-        $intervalString = $this->extractIntervalString($interval, $isNegative);
-        $dateInterval = new DateInterval($intervalString);
-
-        return $this->applyDateInterval($date, $dateInterval, $isNegative);
-    }
-
-    private function extractIntervalString(string $interval, bool $isNegative): string
-    {
-        return $isNegative ? substr($interval, 1) : $interval;
-    }
-
-    private function applyDateInterval(
-        DateTime $date,
-        DateInterval $dateInterval,
-        bool $isNegative
-    ): DateTime {
-        return $isNegative ? $date->sub($dateInterval) : $date->add($dateInterval);
-    }
-
-    /**
-     * @return array{0: CustomerType, 1: CustomerStatus}
-     */
-    private function prepareCustomerWithValues(
+    private function createCustomerWithTypeAndStatus(
         string $id,
         string $typeValue,
         string $statusValue
-    ): array {
-        $type = $this->getCustomerType($id);
-        $status = $this->getStatus($id);
-
-        $type->setValue($typeValue);
-        $status->setValue($statusValue);
-
-        $this->typeRepository->save($type);
-        $this->statusRepository->save($status);
-
-        $this->trackId($id, $this->createdTypeIds);
-        $this->trackId($id, $this->createdStatusIds);
-
-        return [$type, $status];
-    }
-
-    private function createAndSaveCustomerDefault(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource
     ): void {
-        $this->createAndSaveCustomerWithConfirmationStatus(
-            $id,
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            true
-        );
-    }
-
-    private function createAndSaveCustomerWithConfirmationStatus(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidFactory->create($id)
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
-
-    private function createAndSaveCustomerWithValues(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed,
-        string $typeValue,
-        string $statusValue
-    ): void {
-        [$type, $status] = $this->prepareCustomerWithValues(
+        [$type, $status] = $this->entityFactory->createTypeAndStatusWithValues(
             $id,
             $typeValue,
             $statusValue
         );
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            $confirmed,
-            $this->ulidFactory->create($id)
-        );
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
-    }
+        $this->entityManager->saveType($type);
+        $this->entityManager->saveStatus($status);
+        $this->dataCleaner->trackType($id);
+        $this->dataCleaner->trackStatus($id);
 
-    private function createAndSaveCustomerWithLeadSource(
-        string $id,
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource
-    ): void {
-        [$type, $status] = $this->prepareCustomerEntitiesDefault($id);
-        $customer = $this->customerFactory->create(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
-            $type,
-            $status,
-            true,
-            $this->ulidFactory->create($id)
-        );
-        $customer->setLeadSource($leadSource);
-        $this->customerRepository->save($customer);
-        $this->trackId($id, $this->createdCustomerIds);
+        $customer = $this->customerBuilder
+            ->reset()
+            ->withUlid($this->entityFactory->createUlid($id))
+            ->withType($type)
+            ->withStatus($status)
+            ->build();
+
+        $this->entityManager->saveCustomer($customer);
+        $this->dataCleaner->trackCustomer($id);
     }
 }
