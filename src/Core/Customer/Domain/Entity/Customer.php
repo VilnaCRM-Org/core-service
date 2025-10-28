@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Domain\Entity;
 
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTimeImmutable;
 
@@ -121,5 +122,17 @@ class Customer implements CustomerInterface
     public function setConfirmed(bool $confirmed): void
     {
         $this->confirmed = $confirmed;
+    }
+
+    public function update(CustomerUpdate $updateData): void
+    {
+        $this->initials = $updateData->newInitials;
+        $this->email = $updateData->newEmail;
+        $this->phone = $updateData->newPhone;
+        $this->leadSource = $updateData->newLeadSource;
+        $this->type = $updateData->newType;
+        $this->status = $updateData->newStatus;
+        $this->confirmed = $updateData->newConfirmed;
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

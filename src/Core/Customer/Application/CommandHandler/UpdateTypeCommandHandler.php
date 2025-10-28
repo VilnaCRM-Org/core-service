@@ -18,7 +18,7 @@ final readonly class UpdateTypeCommandHandler implements
 
     public function __invoke(UpdateCustomerTypeCommand $command): void
     {
-        $command->customerType->setValue($command->update->value);
+        $command->customerType->update($command->update);
         $this->repository->save($command->customerType);
     }
 }

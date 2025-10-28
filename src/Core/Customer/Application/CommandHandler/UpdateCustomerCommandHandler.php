@@ -18,17 +18,7 @@ final readonly class UpdateCustomerCommandHandler implements
 
     public function __invoke(UpdateCustomerCommand $command): void
     {
-        $customer = $command->customer;
-        $updateData = $command->updateData;
-
-        $customer->setInitials($updateData->newInitials);
-        $customer->setEmail($updateData->newEmail);
-        $customer->setPhone($updateData->newPhone);
-        $customer->setLeadSource($updateData->newLeadSource);
-        $customer->setType($updateData->newType);
-        $customer->setStatus($updateData->newStatus);
-        $customer->setConfirmed($updateData->newConfirmed);
-
-        $this->repository->save($customer);
+        $command->customer->update($command->updateData);
+        $this->repository->save($command->customer);
     }
 }
