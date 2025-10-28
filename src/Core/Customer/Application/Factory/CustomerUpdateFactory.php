@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Factory;
 
-use App\Core\Customer\Application\Service\CustomerRelationResolverInterface;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 
@@ -12,7 +12,7 @@ final readonly class CustomerUpdateFactory implements
     CustomerUpdateFactoryInterface
 {
     public function __construct(
-        private CustomerRelationResolverInterface $relationResolver,
+        private CustomerRelationTransformerInterface $relationResolver,
     ) {
     }
 
