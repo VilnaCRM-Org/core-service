@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Core\Customer\Application\Service;
+namespace App\Core\Customer\Application\Transformer;
 
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 
-interface CustomerRelationResolverInterface
+interface CustomerRelationTransformerInterface
 {
     public function resolveType(
         ?string $typeIri,

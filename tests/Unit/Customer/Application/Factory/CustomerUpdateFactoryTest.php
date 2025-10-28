@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Factory\CustomerUpdateFactory;
-use App\Core\Customer\Application\Service\CustomerRelationResolverInterface;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -60,10 +60,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->assertPartialFieldsResult($result, $testData);
     }
 
-    /** @return array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
+    /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupAllFieldsTestData(): array
     {
-        $relationResolver = $this->createMock(CustomerRelationResolverInterface::class);
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
@@ -87,11 +87,11 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     }
 
     /**
-     * @param array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData
+     * @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData
      * @param array<string, string|bool> $input
      */
     private function setupRelationResolverForAllFields(
-        CustomerRelationResolverInterface $resolver,
+        CustomerRelationTransformerInterface $resolver,
         Customer $customer,
         array $input,
         CustomerType $customerType,
@@ -107,7 +107,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             ->willReturn($customerStatus);
     }
 
-    /** @param array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
+    /** @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
     private function assertAllFieldsResult(CustomerUpdate $result, array $testData): void
     {
         self::assertInstanceOf(CustomerUpdate::class, $result);
@@ -120,10 +120,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertTrue($result->newConfirmed);
     }
 
-    /** @return array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
+    /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupMissingFieldsTestData(): array
     {
-        $relationResolver = $this->createMock(CustomerRelationResolverInterface::class);
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createExistingData();
 
@@ -161,7 +161,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $customer->method('isConfirmed')->willReturn($existingData['confirmed']);
     }
 
-    /** @param array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
+    /** @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
     private function assertMissingFieldsResult(CustomerUpdate $result, array $testData): void
     {
         self::assertInstanceOf(CustomerUpdate::class, $result);
@@ -174,10 +174,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertFalse($result->newConfirmed);
     }
 
-    /** @return array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
+    /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupPartialFieldsTestData(): array
     {
-        $relationResolver = $this->createMock(CustomerRelationResolverInterface::class);
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
         $existingData = ['initials' => 'EF', 'leadSource' => 'partner', 'confirmed' => true];
 
@@ -197,7 +197,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     }
 
     private function setupRelationResolverMocks(
-        CustomerRelationResolverInterface $resolver,
+        CustomerRelationTransformerInterface $resolver,
         Customer $customer,
         CustomerType $type,
         CustomerStatus $status
@@ -212,7 +212,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             ->willReturn($status);
     }
 
-    /** @param array<string, CustomerUpdateFactory|CustomerRelationResolverInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
+    /** @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
     private function assertPartialFieldsResult(CustomerUpdate $result, array $testData): void
     {
         self::assertInstanceOf(CustomerUpdate::class, $result);
