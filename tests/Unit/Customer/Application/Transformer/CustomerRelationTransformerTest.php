@@ -52,6 +52,12 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
         $iriConverter
             ->expects(self::once())
+            ->method('getIriFromResource')
+            ->with($existingType)
+            ->willReturn($expectedIri);
+
+        $iriConverter
+            ->expects(self::once())
             ->method('getResourceFromIri')
             ->with($expectedIri)
             ->willReturn($customerType);
@@ -113,6 +119,12 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         $customer->method('getStatus')->willReturn($existingStatus);
 
         $expectedIri = '/api/customer_statuses/' . $statusUlid;
+
+        $iriConverter
+            ->expects(self::once())
+            ->method('getIriFromResource')
+            ->with($existingStatus)
+            ->willReturn($expectedIri);
 
         $iriConverter
             ->expects(self::once())
