@@ -51,17 +51,15 @@ final readonly class CustomerRelationTransformer implements
 
     private function getDefaultTypeIri(Customer $customer): string
     {
-        return sprintf(
-            '/api/customer_types/%s',
-            $customer->getType()->getUlid()
+        return $this->iriConverter->getIriFromResource(
+            $customer->getType()
         );
     }
 
     private function getDefaultStatusIri(Customer $customer): string
     {
-        return sprintf(
-            '/api/customer_statuses/%s',
-            $customer->getStatus()->getUlid()
+        return $this->iriConverter->getIriFromResource(
+            $customer->getStatus()
         );
     }
 }
