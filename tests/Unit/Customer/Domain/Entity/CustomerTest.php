@@ -8,6 +8,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
@@ -113,5 +114,31 @@ final class CustomerTest extends UnitTestCase
 
         $this->customer->setConfirmed(false);
         $this->assertFalse($this->customer->isConfirmed());
+    }
+
+    public function testUpdate(): void
+    {
+        $newType = $this->createMock(CustomerType::class);
+        $newStatus = $this->createMock(CustomerStatus::class);
+
+        $updateData = new CustomerUpdate(
+            newInitials: 'New Name',
+            newEmail: 'new@email.com',
+            newPhone: '+1234567890',
+            newLeadSource: 'newsletter',
+            newType: $newType,
+            newStatus: $newStatus,
+            newConfirmed: true,
+        );
+
+        $this->customer->update($updateData);
+
+        $this->assertEquals('New Name', $this->customer->getInitials());
+        $this->assertEquals('new@email.com', $this->customer->getEmail());
+        $this->assertEquals('+1234567890', $this->customer->getPhone());
+        $this->assertEquals('newsletter', $this->customer->getLeadSource());
+        $this->assertEquals($newType, $this->customer->getType());
+        $this->assertEquals($newStatus, $this->customer->getStatus());
+        $this->assertTrue($this->customer->isConfirmed());
     }
 }
