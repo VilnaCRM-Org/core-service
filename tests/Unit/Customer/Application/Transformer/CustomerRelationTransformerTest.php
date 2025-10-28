@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Customer\Application\Service;
+namespace App\Tests\Unit\Customer\Application\Transformer;
 
 use ApiPlatform\Metadata\IriConverterInterface;
-use App\Core\Customer\Application\Service\CustomerRelationResolver;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -13,12 +13,12 @@ use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Tests\Unit\UnitTestCase;
 
-final class CustomerRelationResolverTest extends UnitTestCase
+final class CustomerRelationTransformerTest extends UnitTestCase
 {
     public function testResolveTypeWithProvidedIri(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
@@ -38,7 +38,7 @@ final class CustomerRelationResolverTest extends UnitTestCase
     public function testResolveTypeWithNullIriUsesDefault(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
@@ -64,7 +64,7 @@ final class CustomerRelationResolverTest extends UnitTestCase
     public function testResolveTypeThrowsWhenInvalidResourceReturned(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
@@ -82,7 +82,7 @@ final class CustomerRelationResolverTest extends UnitTestCase
     public function testResolveStatusWithProvidedIri(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
@@ -102,7 +102,7 @@ final class CustomerRelationResolverTest extends UnitTestCase
     public function testResolveStatusWithNullIriUsesDefault(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
@@ -128,7 +128,7 @@ final class CustomerRelationResolverTest extends UnitTestCase
     public function testResolveStatusThrowsWhenInvalidResourceReturned(): void
     {
         $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationResolver($iriConverter);
+        $resolver = new CustomerRelationTransformer($iriConverter);
 
         $customer = $this->createMock(Customer::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
