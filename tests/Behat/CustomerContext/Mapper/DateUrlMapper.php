@@ -19,7 +19,10 @@ final readonly class DateUrlMapper
 
         return array_reduce(
             $matches,
-            fn (string $currentUrl, array $match) => $this->replaceDatePlaceholder($currentUrl, $match),
+            fn (string $currentUrl, array $match) => $this->replaceDatePlaceholder(
+                $currentUrl,
+                $match
+            ),
             $url
         );
     }

@@ -91,14 +91,16 @@ final class IriTransformerTest extends UnitTestCase
 
     public function testTransformFromIriWithUuid(): void
     {
-        $result = $this->transformer->transform('/api/customers/550e8400-e29b-41d4-a716-446655440000');
+        $iri = '/api/customers/550e8400-e29b-41d4-a716-446655440000';
+        $result = $this->transformer->transform($iri);
 
         self::assertSame('550e8400-e29b-41d4-a716-446655440000', $result);
     }
 
     public function testTransformHandlesSpecialCharactersInPath(): void
     {
-        $result = $this->transformer->transform('/api/customers/01HQZX_special-id.test');
+        $iri = '/api/customers/01HQZX_special-id.test';
+        $result = $this->transformer->transform($iri);
 
         self::assertSame('01HQZX_special-id.test', $result);
     }
