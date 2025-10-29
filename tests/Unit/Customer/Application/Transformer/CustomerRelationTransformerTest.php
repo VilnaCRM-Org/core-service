@@ -49,18 +49,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         $customer->method('getType')->willReturn($existingType);
 
         $expectedIri = '/api/customer_types/' . $typeUlid;
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getIriFromResource')
-            ->with($existingType)
-            ->willReturn($expectedIri);
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getResourceFromIri')
-            ->with($expectedIri)
-            ->willReturn($customerType);
+        $this->setupIriConverter($iriConverter, $existingType, $expectedIri, $customerType);
 
         $result = $resolver->resolveType(null, $customer);
 
@@ -119,18 +108,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         $customer->method('getStatus')->willReturn($existingStatus);
 
         $expectedIri = '/api/customer_statuses/' . $statusUlid;
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getIriFromResource')
-            ->with($existingStatus)
-            ->willReturn($expectedIri);
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getResourceFromIri')
-            ->with($expectedIri)
-            ->willReturn($customerStatus);
+        $this->setupIriConverter($iriConverter, $existingStatus, $expectedIri, $customerStatus);
 
         $result = $resolver->resolveStatus(null, $customer);
 
@@ -153,5 +131,24 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
         $this->expectException(CustomerStatusNotFoundException::class);
         $resolver->resolveStatus($statusIri, $customer);
+    }
+
+    private function setupIriConverter(
+        IriConverterInterface $iriConverter,
+        object $resource,
+        string $iri,
+        object $returnedResource
+    ): void {
+        $iriConverter
+            ->expects(self::once())
+            ->method('getIriFromResource')
+            ->with($resource)
+            ->willReturn($iri);
+
+        $iriConverter
+            ->expects(self::once())
+            ->method('getResourceFromIri')
+            ->with($iri)
+            ->willReturn($returnedResource);
     }
 }

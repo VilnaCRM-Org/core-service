@@ -11,7 +11,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\ParamCustomerStatusEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus as CS;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
@@ -166,9 +166,9 @@ final class ParamEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): ParamCustomerStatusEndpointFactory
+    private function createFactory(): CS\ParamCustomerStatusEndpointFactory
     {
-        return new ParamCustomerStatusEndpointFactory(
+        return new CS\ParamCustomerStatusEndpointFactory(
             $this->parameterFactory,
             $this->updateFactory,
             $this->validationErrorFactory,

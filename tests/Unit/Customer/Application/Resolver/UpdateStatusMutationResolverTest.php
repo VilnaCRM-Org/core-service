@@ -57,25 +57,11 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
         $dependencies = $this->setupDependencies();
         $resolver = $this->createResolver($dependencies);
         $ulid = $this->faker->uuid();
-        $input = [
-            'id' => '/api/customer_statuses/' . $ulid,
-            'value' => $this->faker->word(),
-        ];
+        $input = ['id' => '/api/customer_statuses/' . $ulid, 'value' => $this->faker->word()];
         $status = $this->createMock(CustomerStatus::class);
 
         $this->setupTransformerAndValidator($dependencies, $input);
-
-        $dependencies['iriTransformer']
-            ->expects(self::once())
-            ->method('transform')
-            ->with($input['id'])
-            ->willReturn($ulid);
-
-        $dependencies['repository']
-            ->expects(self::once())
-            ->method('find')
-            ->with($ulid)
-            ->willReturn($status);
+        $this->setupIriTransformerAndRepository($dependencies, $input['id'], $ulid, $status);
 
         $capturedUpdate = null;
         $this->setupFactoryAndCommandBus($dependencies, $status, $capturedUpdate);
@@ -175,5 +161,25 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
     {
         $deps['commandBus']->expects(self::never())->method('dispatch');
         $deps['factory']->expects(self::never())->method('create');
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
+    private function setupIriTransformerAndRepository(
+        array $deps,
+        string $iri,
+        string $ulid,
+        CustomerStatus $status
+    ): void {
+        $deps['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->with($iri)
+            ->willReturn($ulid);
+
+        $deps['repository']
+            ->expects(self::once())
+            ->method('find')
+            ->with($ulid)
+            ->willReturn($status);
     }
 }
