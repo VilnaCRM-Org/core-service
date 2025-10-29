@@ -132,8 +132,15 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
         $iriConverter
             ->expects(self::exactly(2))
             ->method('getResourceFromIri')
-            ->withConsecutive([$input['status']], [$input['type']])
-            ->willReturnOnConsecutiveCalls($entities['customerStatus'], $entities['customerType']);
+            ->willReturnCallback(function (string $iri) use ($input, $entities) {
+                if ($iri === $input['status']) {
+                    return $entities['customerStatus'];
+                }
+                if ($iri === $input['type']) {
+                    return $entities['customerType'];
+                }
+                throw new \RuntimeException('Unexpected IRI: ' . $iri);
+            });
     }
 
     /**
