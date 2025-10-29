@@ -40,13 +40,22 @@ final readonly class CustomerUpdateFactory implements
         );
 
         return new CustomerUpdate(
-            $input['initials'] ?? $customer->getInitials(),
-            $input['email'] ?? $customer->getEmail(),
-            $input['phone'] ?? $customer->getPhone(),
-            $input['leadSource'] ?? $customer->getLeadSource(),
+            $this->getStringValue($input['initials'] ?? null, $customer->getInitials()),
+            $this->getStringValue($input['email'] ?? null, $customer->getEmail()),
+            $this->getStringValue($input['phone'] ?? null, $customer->getPhone()),
+            $this->getStringValue($input['leadSource'] ?? null, $customer->getLeadSource()),
             $customerType,
             $customerStatus,
             $input['confirmed'] ?? $customer->isConfirmed()
         );
+    }
+
+    /**
+     * Returns the new value if it's not empty/whitespace-only, otherwise returns the default value.
+     * This prevents GraphQL mutations from overwriting existing values with blank strings.
+     */
+    private function getStringValue(?string $newValue, string $defaultValue): string
+    {
+        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
     }
 }

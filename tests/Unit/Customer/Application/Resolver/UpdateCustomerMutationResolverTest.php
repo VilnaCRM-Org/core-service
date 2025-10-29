@@ -14,6 +14,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Application\Transformer\IriTransformerInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -73,6 +74,12 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 
         $this->setupTransformerAndValidatorMocks($dependencies, $input);
 
+        $dependencies['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->with($input['id'])
+            ->willReturn($ulid);
+
         $dependencies['repository']
             ->expects(self::once())
             ->method('find')
@@ -110,6 +117,11 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
      */
     private function setupRepositoryMock(array $deps, string $ulid, Customer $customer): void
     {
+        $deps['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->willReturn($ulid);
+
         $deps['repository']
             ->expects(self::once())
             ->method('find')
@@ -179,6 +191,7 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             'commandFactory' => $this->createMock(UpdateCustomerCommandFactoryInterface::class),
             'updateFactory' => $this->createMock(CustomerUpdateFactoryInterface::class),
             'repository' => $this->createMock(CustomerRepositoryInterface::class),
+            'iriTransformer' => $this->createMock(IriTransformerInterface::class),
         ];
     }
 
@@ -192,6 +205,7 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
             $mocks['commandFactory'],
             $mocks['updateFactory'],
             $mocks['repository'],
+            $mocks['iriTransformer'],
         );
     }
 

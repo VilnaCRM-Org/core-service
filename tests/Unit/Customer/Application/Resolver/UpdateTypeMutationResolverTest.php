@@ -13,6 +13,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
+use App\Shared\Application\Transformer\IriTransformerInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -63,6 +64,13 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
         $type = $this->createMock(CustomerType::class);
 
         $this->setupTransformerAndValidator($dependencies, $input);
+
+        $dependencies['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->with($input['id'])
+            ->willReturn($ulid);
+
         $dependencies['repository']
             ->expects(self::once())
             ->method('find')
@@ -88,6 +96,7 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             'transformer' => $this->createMock(UpdateTypeMutationInputTransformer::class),
             'factory' => $this->createMock(UpdateTypeCommandFactoryInterface::class),
             'repository' => $this->createMock(TypeRepositoryInterface::class),
+            'iriTransformer' => $this->createMock(IriTransformerInterface::class),
         ];
     }
 
@@ -100,6 +109,7 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
             $deps['transformer'],
             $deps['factory'],
             $deps['repository'],
+            $deps['iriTransformer'],
         );
     }
 
