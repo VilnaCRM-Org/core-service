@@ -60,6 +60,36 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->assertPartialFieldsResult($result, $testData);
     }
 
+    public function testCreateWithEmptyStringsUsesExistingCustomerData(): void
+    {
+        $testData = $this->setupEmptyStringsTestData();
+        $this->setupRelationResolverMocks(
+            $testData['relationResolver'],
+            $testData['customer'],
+            $testData['type'],
+            $testData['status']
+        );
+
+        $result = $testData['factory']->create($testData['customer'], $testData['input']);
+
+        $this->assertEmptyStringsResult($result, $testData);
+    }
+
+    public function testCreateWithWhitespaceOnlyStringsUsesExistingCustomerData(): void
+    {
+        $testData = $this->setupWhitespaceStringsTestData();
+        $this->setupRelationResolverMocks(
+            $testData['relationResolver'],
+            $testData['customer'],
+            $testData['type'],
+            $testData['status']
+        );
+
+        $result = $testData['factory']->create($testData['customer'], $testData['input']);
+
+        $this->assertWhitespaceStringsResult($result, $testData);
+    }
+
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupAllFieldsTestData(): array
     {
@@ -223,5 +253,93 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertSame($testData['type'], $result->newType);
         self::assertSame($testData['status'], $result->newStatus);
         self::assertTrue($result->newConfirmed);
+    }
+
+    /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
+    private function setupEmptyStringsTestData(): array
+    {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $customer = $this->createMock(Customer::class);
+        $existingData = [
+            'initials' => 'GH',
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'leadSource' => 'direct',
+            'confirmed' => true,
+        ];
+
+        $this->setupCustomerMockForExistingData($customer, $existingData);
+
+        return [
+            'factory' => new CustomerUpdateFactory($relationResolver),
+            'relationResolver' => $relationResolver,
+            'customer' => $customer,
+            'type' => $this->createMock(CustomerType::class),
+            'status' => $this->createMock(CustomerStatus::class),
+            'input' => [
+                'initials' => '',
+                'email' => '',
+                'phone' => '',
+                'leadSource' => '',
+            ],
+            'existingData' => $existingData,
+        ];
+    }
+
+    /** @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
+    private function assertEmptyStringsResult(CustomerUpdate $result, array $testData): void
+    {
+        self::assertInstanceOf(CustomerUpdate::class, $result);
+        self::assertSame($testData['existingData']['initials'], $result->newInitials);
+        self::assertSame($testData['existingData']['email'], $result->newEmail);
+        self::assertSame($testData['existingData']['phone'], $result->newPhone);
+        self::assertSame($testData['existingData']['leadSource'], $result->newLeadSource);
+        self::assertSame($testData['type'], $result->newType);
+        self::assertSame($testData['status'], $result->newStatus);
+        self::assertTrue($result->newConfirmed);
+    }
+
+    /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
+    private function setupWhitespaceStringsTestData(): array
+    {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $customer = $this->createMock(Customer::class);
+        $existingData = [
+            'initials' => 'IJ',
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'leadSource' => 'campaign',
+            'confirmed' => false,
+        ];
+
+        $this->setupCustomerMockForExistingData($customer, $existingData);
+
+        return [
+            'factory' => new CustomerUpdateFactory($relationResolver),
+            'relationResolver' => $relationResolver,
+            'customer' => $customer,
+            'type' => $this->createMock(CustomerType::class),
+            'status' => $this->createMock(CustomerStatus::class),
+            'input' => [
+                'initials' => '   ',
+                'email' => "\t\n",
+                'phone' => '  ',
+                'leadSource' => "\n\t ",
+            ],
+            'existingData' => $existingData,
+        ];
+    }
+
+    /** @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData */
+    private function assertWhitespaceStringsResult(CustomerUpdate $result, array $testData): void
+    {
+        self::assertInstanceOf(CustomerUpdate::class, $result);
+        self::assertSame($testData['existingData']['initials'], $result->newInitials);
+        self::assertSame($testData['existingData']['email'], $result->newEmail);
+        self::assertSame($testData['existingData']['phone'], $result->newPhone);
+        self::assertSame($testData['existingData']['leadSource'], $result->newLeadSource);
+        self::assertSame($testData['type'], $result->newType);
+        self::assertSame($testData['status'], $result->newStatus);
+        self::assertFalse($result->newConfirmed);
     }
 }

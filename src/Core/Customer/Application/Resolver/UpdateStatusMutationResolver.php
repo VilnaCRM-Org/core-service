@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject as CustomerValueObject;
+use App\Shared\Application\Transformer\IriTransformerInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -22,6 +23,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
         private CustomerTf\UpdateStatusMutationInputTransformer $inputTransformer,
         private CustomerFactory\UpdateStatusCommandFactoryInterface $factory,
         private StatusRepositoryInterface $repository,
+        private IriTransformerInterface $iriTransformer,
     ) {
     }
 
@@ -44,7 +46,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
 
         $customerStatus = $item instanceof CustomerStatus
             ? $item
-            : $this->repository->find($this->extractUlid($input['id']));
+            : $this->repository->find($this->iriTransformer->transform($input['id']));
 
         if (!$customerStatus instanceof CustomerStatus) {
             throw CustomerStatusNotFoundException::withIri($input['id']);
@@ -57,13 +59,5 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
         $this->commandBus->dispatch($command);
 
         return $customerStatus;
-    }
-
-    /**
-     * Extract ULID from IRI or return the value as-is if already a ULID.
-     */
-    private function extractUlid(string $idOrIri): string
-    {
-        return str_starts_with($idOrIri, '/') ? basename($idOrIri) : $idOrIri;
     }
 }
