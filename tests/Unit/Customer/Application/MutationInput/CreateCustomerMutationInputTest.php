@@ -24,6 +24,25 @@ final class CreateCustomerMutationInputTest extends UnitTestCase
         $this->assertAllFieldsAreNull($input);
     }
 
+    public function testConstructorWithPartialData(): void
+    {
+        $initials = $this->faker->lexify('??');
+        $email = $this->faker->email();
+
+        $input = new CreateCustomerMutationInput(
+            initials: $initials,
+            email: $email
+        );
+
+        self::assertSame($initials, $input->initials);
+        self::assertSame($email, $input->email);
+        self::assertNull($input->phone);
+        self::assertNull($input->leadSource);
+        self::assertNull($input->type);
+        self::assertNull($input->status);
+        self::assertNull($input->confirmed);
+    }
+
     /** @return array<string, string|bool> */
     private function generateTestData(): array
     {

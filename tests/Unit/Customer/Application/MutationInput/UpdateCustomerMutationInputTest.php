@@ -24,6 +24,25 @@ final class UpdateCustomerMutationInputTest extends UnitTestCase
         $this->assertAllFieldsAreNull($input);
     }
 
+    public function testConstructorWithPartialData(): void
+    {
+        $phone = $this->faker->phoneNumber();
+        $confirmed = $this->faker->boolean();
+
+        $input = new UpdateCustomerMutationInput(
+            phone: $phone,
+            confirmed: $confirmed
+        );
+
+        self::assertNull($input->initials);
+        self::assertNull($input->email);
+        self::assertSame($phone, $input->phone);
+        self::assertNull($input->leadSource);
+        self::assertNull($input->type);
+        self::assertNull($input->status);
+        self::assertSame($confirmed, $input->confirmed);
+    }
+
     /** @return array<string, string|bool> */
     private function generateTestData(): array
     {
