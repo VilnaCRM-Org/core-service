@@ -51,6 +51,34 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
         $resolver->__invoke(null, ['args' => ['input' => $input]]);
     }
 
+    public function testInvokeWithIriIdExtractsUlid(): void
+    {
+        $dependencies = $this->setupDependencies();
+        $resolver = $this->createResolver($dependencies);
+        $ulid = $this->faker->uuid();
+        $input = [
+            'id' => '/api/customer_types/' . $ulid,
+            'value' => $this->faker->word(),
+        ];
+        $type = $this->createMock(CustomerType::class);
+
+        $this->setupTransformerAndValidator($dependencies, $input);
+        $dependencies['repository']
+            ->expects(self::once())
+            ->method('find')
+            ->with($ulid)
+            ->willReturn($type);
+
+        $capturedUpdate = null;
+        $this->setupFactoryAndCommandBus($dependencies, $type, $capturedUpdate);
+
+        $result = $resolver->__invoke(null, ['args' => ['input' => $input]]);
+
+        self::assertSame($type, $result);
+        self::assertInstanceOf(CustomerTypeUpdate::class, $capturedUpdate);
+        self::assertSame($input['value'], $capturedUpdate->value);
+    }
+
     /** @return array<string, \PHPUnit\Framework\MockObject\MockObject> */
     private function setupDependencies(): array
     {
