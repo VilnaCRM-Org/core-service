@@ -13,6 +13,7 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
+use App\Shared\Application\Transformer\IriTransformerInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
@@ -63,6 +64,13 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
         $status = $this->createMock(CustomerStatus::class);
 
         $this->setupTransformerAndValidator($dependencies, $input);
+
+        $dependencies['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->with($input['id'])
+            ->willReturn($ulid);
+
         $dependencies['repository']
             ->expects(self::once())
             ->method('find')
@@ -88,6 +96,7 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
             'transformer' => $this->createMock(UpdateStatusMutationInputTransformer::class),
             'factory' => $this->createMock(UpdateStatusCommandFactoryInterface::class),
             'repository' => $this->createMock(StatusRepositoryInterface::class),
+            'iriTransformer' => $this->createMock(IriTransformerInterface::class),
         ];
     }
 
@@ -100,6 +109,7 @@ final class UpdateStatusMutationResolverTest extends UnitTestCase
             $deps['transformer'],
             $deps['factory'],
             $deps['repository'],
+            $deps['iriTransformer'],
         );
     }
 
