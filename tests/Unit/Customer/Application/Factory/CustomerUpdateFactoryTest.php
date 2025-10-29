@@ -90,6 +90,66 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->assertWhitespaceStringsResult($result, $testData);
     }
 
+    public function testGetStringValueReturnsNewValueWhenNotEmpty(): void
+    {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $factory = new CustomerUpdateFactory($relationResolver);
+        $customer = $this->createMock(Customer::class);
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+
+        $customer->method('getInitials')->willReturn('OLD');
+        $customer->method('getEmail')->willReturn('old@test.com');
+        $customer->method('getPhone')->willReturn('+000');
+        $customer->method('getLeadSource')->willReturn('old-source');
+        $customer->method('isConfirmed')->willReturn(false);
+
+        $relationResolver->method('resolveType')->willReturn($type);
+        $relationResolver->method('resolveStatus')->willReturn($status);
+
+        $result = $factory->create($customer, [
+            'initials' => 'NEW',
+            'email' => 'new@test.com',
+            'phone' => '+111',
+            'leadSource' => 'new-source',
+        ]);
+
+        self::assertSame('NEW', $result->newInitials);
+        self::assertSame('new@test.com', $result->newEmail);
+        self::assertSame('+111', $result->newPhone);
+        self::assertSame('new-source', $result->newLeadSource);
+    }
+
+    public function testGetStringValueReturnsDefaultWhenNull(): void
+    {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $factory = new CustomerUpdateFactory($relationResolver);
+        $customer = $this->createMock(Customer::class);
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+
+        $customer->method('getInitials')->willReturn('DEFAULT');
+        $customer->method('getEmail')->willReturn('default@test.com');
+        $customer->method('getPhone')->willReturn('+999');
+        $customer->method('getLeadSource')->willReturn('default-source');
+        $customer->method('isConfirmed')->willReturn(true);
+
+        $relationResolver->method('resolveType')->willReturn($type);
+        $relationResolver->method('resolveStatus')->willReturn($status);
+
+        $result = $factory->create($customer, [
+            'initials' => null,
+            'email' => null,
+            'phone' => null,
+            'leadSource' => null,
+        ]);
+
+        self::assertSame('DEFAULT', $result->newInitials);
+        self::assertSame('default@test.com', $result->newEmail);
+        self::assertSame('+999', $result->newPhone);
+        self::assertSame('default-source', $result->newLeadSource);
+    }
+
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupAllFieldsTestData(): array
     {
