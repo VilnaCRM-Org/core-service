@@ -12,6 +12,6 @@ coverage:
         informational: false
 
 comment:
-  layout: "reach,diff,flags,tree,files"
+  layout: 'reach,diff,flags,tree,files'
   behavior: default
   require_changes: false
