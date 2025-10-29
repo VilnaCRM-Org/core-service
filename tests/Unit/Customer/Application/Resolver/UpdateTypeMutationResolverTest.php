@@ -57,25 +57,11 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
         $dependencies = $this->setupDependencies();
         $resolver = $this->createResolver($dependencies);
         $ulid = $this->faker->uuid();
-        $input = [
-            'id' => '/api/customer_types/' . $ulid,
-            'value' => $this->faker->word(),
-        ];
+        $input = ['id' => '/api/customer_types/' . $ulid, 'value' => $this->faker->word()];
         $type = $this->createMock(CustomerType::class);
 
         $this->setupTransformerAndValidator($dependencies, $input);
-
-        $dependencies['iriTransformer']
-            ->expects(self::once())
-            ->method('transform')
-            ->with($input['id'])
-            ->willReturn($ulid);
-
-        $dependencies['repository']
-            ->expects(self::once())
-            ->method('find')
-            ->with($ulid)
-            ->willReturn($type);
+        $this->setupIriTransformerAndRepository($dependencies, $input['id'], $ulid, $type);
 
         $capturedUpdate = null;
         $this->setupFactoryAndCommandBus($dependencies, $type, $capturedUpdate);
@@ -175,5 +161,25 @@ final class UpdateTypeMutationResolverTest extends UnitTestCase
     {
         $deps['commandBus']->expects(self::never())->method('dispatch');
         $deps['factory']->expects(self::never())->method('create');
+    }
+
+    /** @param array<string, \PHPUnit\Framework\MockObject\MockObject> $deps */
+    private function setupIriTransformerAndRepository(
+        array $deps,
+        string $iri,
+        string $ulid,
+        CustomerType $type
+    ): void {
+        $deps['iriTransformer']
+            ->expects(self::once())
+            ->method('transform')
+            ->with($iri)
+            ->willReturn($ulid);
+
+        $deps['repository']
+            ->expects(self::once())
+            ->method('find')
+            ->with($ulid)
+            ->willReturn($type);
     }
 }
