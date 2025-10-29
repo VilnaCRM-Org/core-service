@@ -171,7 +171,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithInitialsExists(string $initials): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withInitials($initials));
+        $this->createCustomerWithBuilder(
+            $id,
+            static fn ($builder) => $builder->withInitials($initials)
+        );
     }
 
     /**
@@ -212,14 +215,20 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithLeadSourceExists(string $leadSource): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withLeadSource($leadSource));
+        $this->createCustomerWithBuilder(
+            $id,
+            static fn ($builder) => $builder->withLeadSource($leadSource)
+        );
     }
 
     /**
      * @Given create customer with type value :type and status value :status and id :id
      */
-    public function customerWithTypeStatusAndIdExists(string $type, string $status, string $id): void
-    {
+    public function customerWithTypeStatusAndIdExists(
+        string $type,
+        string $status,
+        string $id
+    ): void {
         $this->createCustomerWithTypeAndStatus($id, $type, $status);
     }
 
@@ -239,7 +248,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $id = (string) $this->faker->ulid();
         $isConfirmed = filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
-        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withConfirmed($isConfirmed));
+        $this->createCustomerWithBuilder(
+            $id,
+            static fn ($builder) => $builder->withConfirmed($isConfirmed)
+        );
     }
 
     /**

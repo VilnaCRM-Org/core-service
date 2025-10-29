@@ -260,13 +260,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
-        $existingData = [
-            'initials' => 'GH',
-            'email' => $this->faker->email(),
-            'phone' => $this->faker->phoneNumber(),
-            'leadSource' => 'direct',
-            'confirmed' => true,
-        ];
+        $existingData = $this->createExistingCustomerData();
 
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
@@ -276,12 +270,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
             'status' => $this->createMock(CustomerStatus::class),
-            'input' => [
-                'initials' => '',
-                'email' => '',
-                'phone' => '',
-                'leadSource' => '',
-            ],
+            'input' => ['initials' => '', 'email' => '', 'phone' => '', 'leadSource' => ''],
             'existingData' => $existingData,
         ];
     }
@@ -304,13 +293,11 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
-        $existingData = [
+        $existingData = $this->createCustomerDataWithOverrides([
             'initials' => 'IJ',
-            'email' => $this->faker->email(),
-            'phone' => $this->faker->phoneNumber(),
             'leadSource' => 'campaign',
             'confirmed' => false,
-        ];
+        ]);
 
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
@@ -320,12 +307,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
             'status' => $this->createMock(CustomerStatus::class),
-            'input' => [
-                'initials' => '   ',
-                'email' => "\t\n",
-                'phone' => '  ',
-                'leadSource' => "\n\t ",
-            ],
+            'input' => $this->createWhitespaceInput(),
             'existingData' => $existingData,
         ];
     }
@@ -341,5 +323,44 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertSame($testData['type'], $result->newType);
         self::assertSame($testData['status'], $result->newStatus);
         self::assertFalse($result->newConfirmed);
+    }
+
+    /** @return array<string, string|bool> */
+    private function createExistingCustomerData(): array
+    {
+        return [
+            'initials' => 'GH',
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'leadSource' => 'direct',
+            'confirmed' => true,
+        ];
+    }
+
+    /**
+     * @param array<string, string|bool> $overrides
+     *
+     * @return array<string, string|bool>
+     */
+    private function createCustomerDataWithOverrides(array $overrides): array
+    {
+        return array_merge([
+            'initials' => 'GH',
+            'email' => $this->faker->email(),
+            'phone' => $this->faker->phoneNumber(),
+            'leadSource' => 'direct',
+            'confirmed' => true,
+        ], $overrides);
+    }
+
+    /** @return array<string, string> */
+    private function createWhitespaceInput(): array
+    {
+        return [
+            'initials' => '   ',
+            'email' => "\t\n",
+            'phone' => '  ',
+            'leadSource' => "\n\t ",
+        ];
     }
 }

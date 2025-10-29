@@ -37,10 +37,14 @@ final class ErrorValidator
     /**
      * @param array<string, mixed> $responseData
      */
-    public function assertErrorMessageContains(array $responseData, int $index, string $message): void
-    {
-        Assert::keyExists($responseData, 'errors', sprintf('No error found at index %d', $index));
-        Assert::keyExists($responseData['errors'], $index, sprintf('No error found at index %d', $index));
+    public function assertErrorMessageContains(
+        array $responseData,
+        int $index,
+        string $message
+    ): void {
+        $errorMessage = sprintf('No error found at index %d', $index);
+        Assert::keyExists($responseData, 'errors', $errorMessage);
+        Assert::keyExists($responseData['errors'], $index, $errorMessage);
         Assert::keyExists(
             $responseData['errors'][$index],
             'message',
@@ -60,26 +64,8 @@ final class ErrorValidator
      */
     public function assertErrorExtensionsCode(array $responseData, int $index, string $code): void
     {
-        Assert::keyExists(
-            $responseData,
-            'errors',
-            sprintf('No error found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'],
-            $index,
-            sprintf('No error found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'][$index],
-            'extensions',
-            sprintf('No error extensions found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'][$index]['extensions'],
-            'code',
-            sprintf('No error extensions code found at index %d', $index)
-        );
+        $this->assertErrorExists($responseData, $index);
+        $this->assertExtensionsCodeExists($responseData, $index);
 
         $actualCode = $responseData['errors'][$index]['extensions']['code'];
         Assert::eq(
@@ -98,26 +84,8 @@ final class ErrorValidator
         int $pathIndex,
         string $value
     ): void {
-        Assert::keyExists(
-            $responseData,
-            'errors',
-            sprintf('No error found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'],
-            $index,
-            sprintf('No error found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'][$index],
-            'path',
-            sprintf('No error path found at index %d', $index)
-        );
-        Assert::keyExists(
-            $responseData['errors'][$index]['path'],
-            $pathIndex,
-            sprintf('No error path found at index %d, path index %d', $index, $pathIndex)
-        );
+        $this->assertErrorExists($responseData, $index);
+        $this->assertPathExists($responseData, $index, $pathIndex);
 
         $actualPath = $responseData['errors'][$index]['path'][$pathIndex];
         Assert::eq(
@@ -158,5 +126,43 @@ final class ErrorValidator
         );
 
         Assert::notEmpty($found, sprintf('Error message "%s" not found in errors', $message));
+    }
+
+    /** @param array<string, mixed> $responseData */
+    private function assertErrorExists(array $responseData, int $index): void
+    {
+        $errorMessage = sprintf('No error found at index %d', $index);
+        Assert::keyExists($responseData, 'errors', $errorMessage);
+        Assert::keyExists($responseData['errors'], $index, $errorMessage);
+    }
+
+    /** @param array<string, mixed> $responseData */
+    private function assertPathExists(array $responseData, int $index, int $pathIndex): void
+    {
+        Assert::keyExists(
+            $responseData['errors'][$index],
+            'path',
+            sprintf('No error path found at index %d', $index)
+        );
+        Assert::keyExists(
+            $responseData['errors'][$index]['path'],
+            $pathIndex,
+            sprintf('No error path found at index %d, path index %d', $index, $pathIndex)
+        );
+    }
+
+    /** @param array<string, mixed> $responseData */
+    private function assertExtensionsCodeExists(array $responseData, int $index): void
+    {
+        Assert::keyExists(
+            $responseData['errors'][$index],
+            'extensions',
+            sprintf('No error extensions found at index %d', $index)
+        );
+        Assert::keyExists(
+            $responseData['errors'][$index]['extensions'],
+            'code',
+            sprintf('No error extensions code found at index %d', $index)
+        );
     }
 }
