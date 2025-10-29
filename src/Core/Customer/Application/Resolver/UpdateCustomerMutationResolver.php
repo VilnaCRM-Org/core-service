@@ -11,6 +11,7 @@ use App\Core\Customer\Application\Transformer\UpdateCustomerMutationInputTransfo
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Shared\Application\Transformer\IriTransformerInterface;
 use App\Shared\Application\Validator\MutationInputValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
@@ -23,6 +24,7 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         private UpdateCustomerCommandFactoryInterface $commandFactory,
         private CustomerUpdateFactoryInterface $updateFactory,
         private CustomerRepositoryInterface $repository,
+        private IriTransformerInterface $iriTransformer,
     ) {
     }
 
@@ -75,7 +77,7 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
             return $item;
         }
 
-        $ulid = $this->extractUlid($id);
+        $ulid = $this->iriTransformer->transform($id);
         $customer = $this->repository->find($ulid);
 
         if (!$customer instanceof Customer) {
@@ -83,18 +85,5 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         }
 
         return $customer;
-    }
-
-    /**
-     * Extract ULID from IRI or return the value as-is if already a ULID.
-     */
-    private function extractUlid(string $idOrIri): string
-    {
-        if (!str_starts_with($idOrIri, '/')) {
-            return $idOrIri;
-        }
-
-        $path = parse_url($idOrIri, PHP_URL_PATH);
-        return $path !== null ? basename($path) : $idOrIri;
     }
 }
