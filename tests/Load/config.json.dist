@@ -3,6 +3,7 @@
     "apiPort": "80",
     "delayBetweenScenarios": 60,
     "batchSize": 50,
+    "resultsDirectory": "results",
     "customersFileName": "customers.json",
     "customersFileLocation": "/loadTests/",
     "customerStatusesFileName": "customer_statuses.json",

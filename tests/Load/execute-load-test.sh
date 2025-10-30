@@ -33,9 +33,23 @@ runStress=$4
 runSpike=$5
 htmlPrefix=$6
 
+# Read results directory from config
+CONFIG_FILE="./tests/Load/config.json.dist"
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: config.json not found. Please copy config.json.dist to config.json"
+    exit 1
+fi
+
+RESULTS_DIR=$(grep -o '"resultsDirectory"[[:space:]]*:[[:space:]]*"[^"]*"' "$CONFIG_FILE" | sed 's/.*"resultsDirectory"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+
+if [ -z "$RESULTS_DIR" ]; then
+    echo "Error: resultsDirectory not found in config.json"
+    exit 1
+fi
+
 K6="docker run --user $(id -u):$(id -g) -v ./tests/Load:/loadTests --net=host --rm \
     k6 run --summary-trend-stats='avg,min,med,max,p(95),p(99)' \
-    --out 'web-dashboard=period=1s&export=/loadTests/loadTestsResults/${htmlPrefix}${scenario}.html'"
+    --out 'web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario}.html'"
 
 # Prepare customers for all Customer scenarios EXCEPT create scenarios
 if [[ $scenario != "createCustomer" && $scenario != "graphQLCreateCustomer" && $scenario =~ ^(.*Customer)$ && ! $scenario =~ (CustomerStatus|CustomerType) ]]; then
