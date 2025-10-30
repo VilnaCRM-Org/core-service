@@ -266,7 +266,16 @@ generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
 
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
-	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url http://localhost \
+		--phases=examples \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url http://localhost \
+		--phases=coverage \
+		--header 'X-Schemathesis-Test: cleanup-customers'
 
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
