@@ -5,6 +5,8 @@ include .env.test
 PROJECT       = core-service
 GIT_AUTHOR    = Kravalg
 
+# API URL for Schemathesis (use http locally due to SSL handshake issues, https in CI)
+API_URL       ?= http://localhost
 # TLS verification for Schemathesis (disabled for local self-signed certs, override in CI)
 TLS_VERIFY    ?= --tls-verify=false
 
@@ -268,12 +270,12 @@ generate-openapi-spec: ## Generate OpenAPI specification
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
-		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url http://localhost \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
 		--phases=examples \
 		--header 'X-Schemathesis-Test: cleanup-customers'
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
-		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url http://localhost \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
 		--phases=coverage \
 		--header 'X-Schemathesis-Test: cleanup-customers'
 
