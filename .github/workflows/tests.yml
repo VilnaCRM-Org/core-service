@@ -22,20 +22,18 @@ jobs:
       - name: Start application
         run: make start
 
-      - name: Execute Unit and Integration tests
-        run: make tests-with-coverage
-
-      - name: Execute Integration internal negative tests
-        run: make negative-tests-with-coverage
+      - name: Execute all tests with coverage
+        run: make coverage-xml
 
       - name: Copy coverage report to host
-        run: docker cp core-service-php-1:/coverage/coverage.xml /tmp
+        run: docker cp core-service-php-1:/srv/app/coverage/coverage.xml /tmp/coverage.xml
 
       - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: /tmp/coverage.xml
+          flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
