@@ -44,30 +44,36 @@ final class SchemathesisFixtures
     // Customer Type - Default type
     public const CUSTOMER_TYPE_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0A1';
     public const CUSTOMER_TYPE_NAME = 'Individual';
-    public const CUSTOMER_TYPE_DESCRIPTION = 'Individual customer type for schemathesis testing';
+    public const CUSTOMER_TYPE_DESCRIPTION =
+        'Individual customer type for schemathesis testing';
 
     // Customer Type for Updates
     public const UPDATE_CUSTOMER_TYPE_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0A2';
     public const UPDATE_CUSTOMER_TYPE_NAME = 'Business';
-    public const UPDATE_CUSTOMER_TYPE_DESCRIPTION = 'Business customer type for schemathesis testing';
+    public const UPDATE_CUSTOMER_TYPE_DESCRIPTION =
+        'Business customer type for schemathesis testing';
 
     // Customer Type for Deletion
     public const DELETE_CUSTOMER_TYPE_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0A3';
     public const DELETE_CUSTOMER_TYPE_NAME = 'Enterprise';
-    public const DELETE_CUSTOMER_TYPE_DESCRIPTION = 'Enterprise customer type for schemathesis testing';
+    public const DELETE_CUSTOMER_TYPE_DESCRIPTION =
+        'Enterprise customer type for schemathesis testing';
 
     // Customer Status - Default status
     public const CUSTOMER_STATUS_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0B1';
     public const CUSTOMER_STATUS_NAME = 'Active';
-    public const CUSTOMER_STATUS_DESCRIPTION = 'Active customer status for schemathesis testing';
+    public const CUSTOMER_STATUS_DESCRIPTION =
+        'Active customer status for schemathesis testing';
 
     // Customer Status for Updates
     public const UPDATE_CUSTOMER_STATUS_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0B2';
     public const UPDATE_CUSTOMER_STATUS_NAME = 'Pending';
-    public const UPDATE_CUSTOMER_STATUS_DESCRIPTION = 'Pending customer status for schemathesis testing';
+    public const UPDATE_CUSTOMER_STATUS_DESCRIPTION =
+        'Pending customer status for schemathesis testing';
 
     // Customer Status for Deletion
     public const DELETE_CUSTOMER_STATUS_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0B3';
     public const DELETE_CUSTOMER_STATUS_NAME = 'Inactive';
-    public const DELETE_CUSTOMER_STATUS_DESCRIPTION = 'Inactive customer status for schemathesis testing';
+    public const DELETE_CUSTOMER_STATUS_DESCRIPTION =
+        'Inactive customer status for schemathesis testing';
 }
