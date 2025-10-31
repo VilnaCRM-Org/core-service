@@ -5,6 +5,8 @@ include .env.test
 PROJECT       = core-service
 GIT_AUTHOR    = Kravalg
 
+# API URL for Schemathesis (use http locally due to SSL handshake issues, https in CI)
+API_URL       ?= http://localhost
 # TLS verification for Schemathesis (disabled for local self-signed certs, override in CI)
 TLS_VERIFY    ?= --tls-verify=false
 
@@ -266,7 +268,16 @@ generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
 
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
-	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=examples \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--header 'X-Schemathesis-Test: cleanup-customers'
 
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
@@ -313,6 +324,8 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣1️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
+	echo "1️⃣2️⃣ Validating API with Schemathesis..."; \
+	if ! make schemathesis-validate; then failed_checks="$$failed_checks\n❌ Schemathesis API validation"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
 		echo "💥 CI checks completed with failures:"; \

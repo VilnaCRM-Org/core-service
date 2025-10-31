@@ -1,15 +1,16 @@
-name: Mutation testing
+name: Schemathesis API Validation
 
 on:
   pull_request:
 
 jobs:
-  infection:
-    name: Infection
+  schemathesis:
+    name: Schemathesis
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -18,5 +19,8 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Run infection
-        run: CI=1 make infection
+      - name: Start Application
+        run: make start
+
+      - name: Run Schemathesis Validation
+        run: make schemathesis-validate
