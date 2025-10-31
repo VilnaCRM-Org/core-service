@@ -324,6 +324,8 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣1️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
+	echo "1️⃣2️⃣ Validating API with Schemathesis..."; \
+	if ! make schemathesis-validate; then failed_checks="$$failed_checks\n❌ Schemathesis API validation"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
 		echo "💥 CI checks completed with failures:"; \
