@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Command;
 
-use Doctrine\ODM\MongoDB\DocumentManager;
+use App\Shared\Infrastructure\Database\DatabaseCleaner;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,11 +19,17 @@ final class SeedSchemathesisDataCommand extends Command
 {
     private const COMMAND_DESCRIPTION = 'Seed schemathesis reference data.';
 
+    private const COLLECTIONS_TO_DROP = [
+        'Customer',
+        'CustomerType',
+        'CustomerStatus',
+    ];
+
     public function __construct(
         private readonly SchemathesisCustomerTypeSeeder $typeSeeder,
         private readonly SchemathesisCustomerStatusSeeder $statusSeeder,
         private readonly SchemathesisCustomerSeeder $customerSeeder,
-        private readonly DocumentManager $documentManager,
+        private readonly DatabaseCleaner $databaseCleaner,
     ) {
         parent::__construct();
     }
@@ -34,7 +40,7 @@ final class SeedSchemathesisDataCommand extends Command
     ): int {
         $io = new SymfonyStyle($input, $output);
 
-        $this->resetPersistentState();
+        $this->databaseCleaner->dropCollections(self::COLLECTIONS_TO_DROP);
 
         // Seed types and statuses first
         $types = $this->typeSeeder->seedTypes();
@@ -46,25 +52,5 @@ final class SeedSchemathesisDataCommand extends Command
         $io->success('Schemathesis reference data has been seeded.');
 
         return Command::SUCCESS;
-    }
-
-    private function resetPersistentState(): void
-    {
-        // Drop all collections for MongoDB
-        $collections = [
-            'Customer',
-            'CustomerType',
-            'CustomerStatus',
-        ];
-
-        foreach ($collections as $collection) {
-            try {
-                $this->documentManager->getDocumentCollection($collection)->drop();
-            } catch (\Exception) {
-                // Collection might not exist yet, that's okay
-            }
-        }
-
-        $this->documentManager->clear();
     }
 }

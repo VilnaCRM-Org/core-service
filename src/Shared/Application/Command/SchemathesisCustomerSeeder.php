@@ -77,79 +77,52 @@ final readonly class SchemathesisCustomerSeeder
 
         foreach (self::CUSTOMER_DEFINITIONS as $key => $definition) {
             $results[$key] = $this->seedCustomer(
-                $definition['id'],
-                $definition['email'],
-                $definition['initials'],
-                $definition['phone'],
-                $definition['leadSource'],
+                $definition,
                 $defaultType,
-                $defaultStatus,
-                $definition['confirmed']
+                $defaultStatus
             );
         }
 
         return $results;
     }
 
+    /**
+     * @param array{id: string, email: string, initials: string, phone: string, leadSource: string, confirmed: bool} $definition
+     */
     private function seedCustomer(
-        string $id,
-        string $email,
-        string $initials,
-        string $phone,
-        string $leadSource,
+        array $definition,
         CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed
+        CustomerStatus $status
     ): CustomerInterface {
-        $customer = $this->customerRepository->find($id);
+        $customer = $this->customerRepository->find($definition['id']);
 
         if ($customer === null) {
-            $customer = $this->createCustomer(
-                $id,
-                $email,
-                $initials,
-                $phone,
-                $leadSource,
-                $type,
-                $status,
-                $confirmed
-            );
-        } else {
-            $this->updateCustomer(
-                $customer,
-                $email,
-                $initials,
-                $phone,
-                $leadSource,
-                $type,
-                $status,
-                $confirmed
-            );
+            return $this->createCustomer($definition, $type, $status);
         }
+
+        $this->updateCustomer($customer, $definition, $type, $status);
 
         return $customer;
     }
 
+    /**
+     * @param array{id: string, email: string, initials: string, phone: string, leadSource: string, confirmed: bool} $definition
+     */
     private function createCustomer(
-        string $id,
-        string $email,
-        string $initials,
-        string $phone,
-        string $leadSource,
+        array $definition,
         CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed
+        CustomerStatus $status
     ): CustomerInterface {
-        $ulid = $this->ulidFactory->create($id);
+        $ulid = $this->ulidFactory->create($definition['id']);
 
         $customer = new Customer(
-            $initials,
-            $email,
-            $phone,
-            $leadSource,
+            $definition['initials'],
+            $definition['email'],
+            $definition['phone'],
+            $definition['leadSource'],
             $type,
             $status,
-            $confirmed,
+            $definition['confirmed'],
             $ulid
         );
 
@@ -158,23 +131,22 @@ final readonly class SchemathesisCustomerSeeder
         return $customer;
     }
 
+    /**
+     * @param array{id: string, email: string, initials: string, phone: string, leadSource: string, confirmed: bool} $definition
+     */
     private function updateCustomer(
         CustomerInterface $customer,
-        string $email,
-        string $initials,
-        string $phone,
-        string $leadSource,
+        array $definition,
         CustomerType $type,
-        CustomerStatus $status,
-        bool $confirmed
+        CustomerStatus $status
     ): void {
-        $customer->setEmail($email);
-        $customer->setInitials($initials);
-        $customer->setPhone($phone);
-        $customer->setLeadSource($leadSource);
+        $customer->setEmail($definition['email']);
+        $customer->setInitials($definition['initials']);
+        $customer->setPhone($definition['phone']);
+        $customer->setLeadSource($definition['leadSource']);
         $customer->setType($type);
         $customer->setStatus($status);
-        $customer->setConfirmed($confirmed);
+        $customer->setConfirmed($definition['confirmed']);
 
         $this->customerRepository->save($customer);
     }

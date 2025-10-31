@@ -54,10 +54,10 @@ final readonly class SchemathesisCustomerTypeSeeder
         $type = $this->typeRepository->find($id);
 
         if ($type === null) {
-            $type = $this->createType($id, $value);
-        } else {
-            $this->updateType($type, $value);
+            return $this->createType($id, $value);
         }
+
+        $this->updateType($type, $value);
 
         return $type;
     }

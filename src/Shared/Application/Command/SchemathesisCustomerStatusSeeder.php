@@ -54,10 +54,10 @@ final readonly class SchemathesisCustomerStatusSeeder
         $status = $this->statusRepository->find($id);
 
         if ($status === null) {
-            $status = $this->createStatus($id, $value);
-        } else {
-            $this->updateStatus($status, $value);
+            return $this->createStatus($id, $value);
         }
+
+        $this->updateStatus($status, $value);
 
         return $status;
     }
