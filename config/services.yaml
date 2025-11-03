@@ -126,8 +126,7 @@ services:
 
   App\Shared\Application\OpenApi\OpenApiSchemaDecorator:
     decorates: 'api_platform.openapi.factory'
-    arguments:
-      ['@App\Shared\Application\OpenApi\OpenApiSchemaDecorator.inner']
+    arguments: ['@App\Shared\Application\OpenApi\OpenApiSchemaDecorator.inner']
     autoconfigure: false
 
   App\Shared\Application\OpenApi\OpenApiFactory:
