@@ -124,8 +124,14 @@ services:
           key: '%env(AWS_SQS_KEY)%'
           secret: '%env(AWS_SQS_SECRET)%'
 
-  App\Shared\Application\OpenApi\OpenApiFactory:
+  App\Shared\Application\OpenApi\OpenApiSchemaDecorator:
     decorates: 'api_platform.openapi.factory'
+    arguments:
+      ['@App\Shared\Application\OpenApi\OpenApiSchemaDecorator.inner']
+    autoconfigure: false
+
+  App\Shared\Application\OpenApi\OpenApiFactory:
+    decorates: 'App\Shared\Application\OpenApi\OpenApiSchemaDecorator'
     arguments:
       ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
     autoconfigure: false

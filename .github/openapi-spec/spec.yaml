@@ -34,10 +34,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -56,10 +56,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -78,10 +78,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -100,10 +100,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -633,10 +633,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -655,11 +655,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -683,10 +683,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -705,10 +705,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -727,10 +727,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -758,27 +758,20 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 status:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
               required:
                 - email
                 - phone
@@ -788,12 +781,12 @@ paths:
                 - status
                 - confirmed
             example:
-              email: customer@example.com
+              email: new-customer@example.com
               phone: '0123456789'
               initials: 'Name Surname'
               leadSource: Google
-              type: /api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447
-              status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
+              type: /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+              status: /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
               confirmed: true
         required: true
       deprecated: false
@@ -816,10 +809,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -838,10 +831,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -860,10 +853,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -882,10 +875,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -933,10 +926,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -955,11 +948,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -983,10 +976,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1005,10 +998,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1027,10 +1020,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1049,10 +1042,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1093,27 +1086,20 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 status:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
               required:
                 - email
                 - phone
@@ -1123,12 +1109,12 @@ paths:
                 - status
                 - confirmed
             example:
-              email: customer@example.com
+              email: new-customer@example.com
               phone: '0123456789'
               initials: 'Name Surname'
               leadSource: Google
-              type: /api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447
-              status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
+              type: /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+              status: /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
               confirmed: true
         required: true
       deprecated: false
@@ -1150,10 +1136,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1172,10 +1158,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1194,10 +1180,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1216,10 +1202,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1267,10 +1253,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1289,11 +1275,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1317,10 +1303,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1339,10 +1325,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1361,10 +1347,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1383,10 +1369,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1427,27 +1413,20 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 status:
                   type: iri-reference
                   maxLength: 255
-                  format: null
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
               required: []
             example:
               email: customer@example.com
@@ -1485,10 +1464,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1507,10 +1486,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1529,10 +1508,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1551,10 +1530,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1720,10 +1699,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1742,11 +1721,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1770,10 +1749,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1792,10 +1771,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1814,10 +1793,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1841,7 +1820,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -1867,10 +1845,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1889,10 +1867,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1911,10 +1889,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1933,10 +1911,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1984,10 +1962,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2006,11 +1984,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2034,10 +2012,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2056,10 +2034,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2078,10 +2056,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2100,10 +2078,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2140,7 +2118,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2165,10 +2142,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2187,10 +2164,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2209,10 +2186,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2231,10 +2208,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2282,10 +2259,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2304,11 +2281,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2332,10 +2309,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2354,10 +2331,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2376,10 +2353,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2398,10 +2375,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2438,7 +2415,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2471,10 +2447,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2493,10 +2469,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2515,10 +2491,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2537,10 +2513,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2706,10 +2682,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2728,11 +2704,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2756,10 +2732,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2778,10 +2754,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2800,10 +2776,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2827,7 +2803,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2853,10 +2828,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2875,10 +2850,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2897,10 +2872,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2919,10 +2894,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2970,10 +2945,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2992,11 +2967,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3020,10 +2995,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3042,10 +3017,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3064,10 +3039,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3086,10 +3061,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3126,7 +3101,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -3151,10 +3125,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3173,10 +3147,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3195,10 +3169,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3217,10 +3191,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3268,10 +3242,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3290,11 +3264,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3318,10 +3292,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3340,10 +3314,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3362,10 +3336,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3384,10 +3358,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3424,7 +3398,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -3867,33 +3840,9 @@ components:
           readOnly: true
           type: string
     UlidInterface.jsonld-output:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
-              type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
+      type: string
+      description: 'ULID (Universally Unique Lexicographically Sortable Identifier)'
+      example: 01K8XS6ASF9JENWM7KFCC626PH
   responses: {  }
   parameters: {  }
   examples: {  }
