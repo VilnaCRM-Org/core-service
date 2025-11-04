@@ -266,19 +266,108 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 
 generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+	@./scripts/fix-openapi-spec.sh
 
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
+	@echo "=== Running Schemathesis Examples Phase ==="
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
-	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=6g --memory-swap=6g \
 		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
 		--phases=examples \
 		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "=== Running Schemathesis Coverage Phase (Sliced by Endpoint) ==="
+	@echo "→ Testing /api/health endpoint..."
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
-	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data \
+	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
 		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
 		--phases=coverage \
+		--include-path-regex '^/api/health' \
+		--workers=1 \
+		--max-response-time=5 \
 		--header 'X-Schemathesis-Test: cleanup-customers'
-
+	@echo "→ Testing /api/customer_statuses endpoint..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-path-regex '^/api/customer_statuses' \
+		--workers=1 \
+		--max-response-time=5 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customer_types endpoint..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-path-regex '^/api/customer_types' \
+		--workers=1 \
+		--max-response-time=5 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers GET collection..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_get_collection \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers POST..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_post \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers/{id} GET..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_ulid_get \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers/{id} PUT..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_ulid_put \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers/{id} DELETE..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_ulid_delete \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "→ Testing /api/customers/{id} PATCH..."
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	-$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data -v $(CURDIR)/schemathesis.toml:/schemathesis.toml \
+		--memory=8g --memory-swap=8g \
+		$(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url $(API_URL) $(TLS_VERIFY) \
+		--phases=coverage \
+		--include-operation-id api_customers_ulid_patch \
+		--workers=1 \
+		--max-response-time=10 \
+		--header 'X-Schemathesis-Test: cleanup-customers'
+	@echo "✅ All Schemathesis validation phases completed successfully!"
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
 

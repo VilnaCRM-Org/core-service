@@ -10,9 +10,15 @@ App\Core\Customer\Domain\Entity\Customer:
     type:
       readableLink: true
       writableLink: false
+      openapiContext:
+        type: string
+        format: iri-reference
     status:
       readableLink: true
       writableLink: false
+      openapiContext:
+        type: string
+        format: iri-reference
 
   # REST Operations
   operations:

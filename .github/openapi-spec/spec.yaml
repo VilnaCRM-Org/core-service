@@ -765,10 +765,12 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 status:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
@@ -1093,10 +1095,12 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 status:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
@@ -1420,10 +1424,12 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 status:
-                  type: iri-reference
+                  type: string
+                  format: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
@@ -3466,8 +3472,6 @@ components:
         - email
         - phone
         - leadSource
-        - type
-        - status
       properties:
         initials:
           maxLength: 255
@@ -3493,13 +3497,11 @@ components:
             - string
             - 'null'
         type:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
         status:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
         confirmed:
           type:
             - boolean
