@@ -9,6 +9,17 @@ use ApiPlatform\OpenApi\OpenApi;
 
 final class TagDescriptionAugmenter
 {
+    public function augment(OpenApi $openApi): OpenApi
+    {
+        $tagDescriptions = $this->getTagDescriptions();
+
+        $tags = array_map(
+            static fn (Tag $tag) => self::augmentTag($tag, $tagDescriptions),
+            $openApi->getTags()
+        );
+
+        return $openApi->withTags($tags);
+    }
     /**
      * @return array<string, string>
      */
@@ -22,26 +33,15 @@ final class TagDescriptionAugmenter
         ];
     }
 
-    public function augment(OpenApi $openApi): OpenApi
-    {
-        $tagDescriptions = $this->getTagDescriptions();
-
-        $tags = array_map(
-            static fn (Tag $tag) => self::augmentTag($tag, $tagDescriptions),
-            $openApi->getTags()
-        );
-
-        return $openApi->withTags($tags);
-    }
-
     /**
      * @param array<string, string> $descriptions
      */
     private static function augmentTag(Tag $tag, array $descriptions): Tag
     {
         $tagName = $tag->getName();
+        $description = $tag->getDescription();
 
-        if (isset($descriptions[$tagName]) && empty($tag->getDescription())) {
+        if (isset($descriptions[$tagName]) && ($description === null || $description === '')) {
             return $tag->withDescription($descriptions[$tagName]);
         }
 

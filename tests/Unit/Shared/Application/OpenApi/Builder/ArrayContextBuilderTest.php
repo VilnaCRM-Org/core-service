@@ -89,13 +89,9 @@ final class ArrayContextBuilderTest extends UnitTestCase
                 'properties' => [
                     'name' => [
                         'type' => 'string',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                     'age' => [
                         'type' => 'integer',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                 ],
             ],
@@ -114,8 +110,6 @@ final class ArrayContextBuilderTest extends UnitTestCase
                 'properties' => [
                     'address' => [
                         'type' => 'object',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                 ],
             ],

@@ -33,7 +33,7 @@ final class ParameterTest extends UnitTestCase
         $this->assertEquals($name, $parameter->name);
         $this->assertEquals($type, $parameter->type);
         $this->assertEquals($example, $parameter->example);
-        $this->assertTrue($parameter->required);
+        $this->assertTrue($parameter->isRequired());
     }
 
     public function testOptionalCreatesParameterWithRequiredFalse(): void
@@ -47,6 +47,6 @@ final class ParameterTest extends UnitTestCase
         $this->assertEquals($name, $parameter->name);
         $this->assertEquals($type, $parameter->type);
         $this->assertEquals($example, $parameter->example);
-        $this->assertFalse($parameter->required);
+        $this->assertFalse($parameter->isRequired());
     }
 }
