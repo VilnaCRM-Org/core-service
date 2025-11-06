@@ -12,7 +12,8 @@ final readonly class Parameter
         public string|int|array|bool $example,
         public ?int $maxLength = null,
         public ?string $format = null,
-        public bool $required = true
+        public bool $required = true,
+        public ?array $items = null
     ) {
     }
 
@@ -21,9 +22,10 @@ final readonly class Parameter
         string $type,
         string|int|array|bool $example,
         ?int $maxLength = null,
-        ?string $format = null
+        ?string $format = null,
+        ?array $items = null
     ): self {
-        return new self($name, $type, $example, $maxLength, $format, true);
+        return new self($name, $type, $example, $maxLength, $format, true, $items);
     }
 
     public static function optional(
@@ -31,8 +33,9 @@ final readonly class Parameter
         string $type,
         string|int|array|bool $example,
         ?int $maxLength = null,
-        ?string $format = null
+        ?string $format = null,
+        ?array $items = null
     ): self {
-        return new self($name, $type, $example, $maxLength, $format, false);
+        return new self($name, $type, $example, $maxLength, $format, false, $items);
     }
 }
