@@ -765,12 +765,10 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 status:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
@@ -1095,12 +1093,10 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 status:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
@@ -1424,12 +1420,10 @@ paths:
                   type: string
                   maxLength: 255
                 type:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 status:
-                  type: string
-                  format: iri-reference
+                  type: iri-reference
                   maxLength: 255
                 confirmed:
                   type: boolean
