@@ -11,8 +11,8 @@ use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 
 abstract class CustomerRequestFactory implements RequestFactoryInterface
 {
-    private const DEFAULT_CUSTOMER_TYPE_ID = '768e998b-31cb-419d-a02c-6ae9d5b4f447';
-    private const DEFAULT_CUSTOMER_STATUS_ID = 'c27f0884-8b6f-45db-858d-9a987a1d20d7';
+    private const DEFAULT_CUSTOMER_TYPE_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0A1';
+    private const DEFAULT_CUSTOMER_STATUS_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0B1';
 
     public function getRequest(): RequestBody
     {
@@ -49,7 +49,7 @@ abstract class CustomerRequestFactory implements RequestFactoryInterface
         return new Parameter(
             'email',
             'string',
-            'customer@example.com',
+            'new-customer@example.com',
             255,
             'email'
         );
