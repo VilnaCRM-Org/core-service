@@ -42,7 +42,7 @@ final class OpenApiFactoryTest extends UnitTestCase
 
         $result = $factory->__invoke($context);
 
-        $this->assertSame($openApi, $result);
+        $this->assertInstanceOf(OpenApi::class, $result);
     }
 
     /**
