@@ -1,0 +1,45 @@
+name: OpenAPI Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-openapi:
+    name: Validate OpenAPI Specification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Generate OpenAPI Spec
+        run: |
+          docker-compose up -d
+          docker-compose exec -T php bin/console api:openapi:export --output=.github/openapi-spec/spec.yaml --no-interaction
+          docker-compose down
+
+      - name: Validate OpenAPI Spec with Spectral
+        run: spectral lint .github/openapi-spec/spec.yaml --ruleset .spectral.yaml --format stylish
+
+      - name: Upload OpenAPI Spec as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: .github/openapi-spec/spec.yaml
+          retention-days: 30
