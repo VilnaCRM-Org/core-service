@@ -17,25 +17,37 @@ App\Core\Customer\Domain\Entity\Customer:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
+      description: 'Retrieves the collection of Customer resources'
+      summary: 'Get Customer collection'
       filters:
         - customer.mongodb.search
         - customer.mongodb.order
         - customer.mongodb.date
         - customer.mongodb.boolean
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Get:
+      description: 'Retrieves a Customer resource by its unique identifier'
+      summary: 'Get a single Customer'
     ApiPlatform\Metadata\Put:
+      description: 'Replaces the Customer resource'
+      summary: 'Update a Customer'
       input: App\Core\Customer\Application\DTO\CustomerPut
       processor: App\Core\Customer\Application\Processor\CustomerPutProcessor
       denormalizationContext:
         allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
+      description: 'Updates the Customer resource partially'
+      summary: 'Partially update a Customer'
       input: App\Core\Customer\Application\DTO\CustomerPatch
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      description: 'Removes the Customer resource'
+      summary: 'Delete a Customer'
     ApiPlatform\Metadata\Post:
+      description: 'Creates a Customer resource'
+      summary: 'Create a new Customer'
       input: App\Core\Customer\Application\DTO\CustomerCreate
       processor: App\Core\Customer\Application\Processor\CreateCustomerProcessor
       denormalizationContext:

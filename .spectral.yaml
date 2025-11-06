@@ -80,9 +80,9 @@ rules:
           type: object
           additionalProperties: true
           patternProperties:
-            '^2\d{2}$':
+            '^2\\d{2}$':
               type: object
-              minProperties: 1
+          minProperties: 1
 
   operation-requires-problem-response:
     description: 'Operations must document at least one client error response (4xx) to set expectations.'
@@ -96,9 +96,9 @@ rules:
           type: object
           additionalProperties: true
           patternProperties:
-            '^4\d{2}$':
+            '^4\\d{2}$':
               type: object
-              minProperties: 1
+          minProperties: 1
 
   parameter-description-required:
     description: 'All parameters must include a description.'

@@ -9,23 +9,35 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
+      description: 'Retrieves the collection of CustomerStatus resources'
+      summary: 'Get CustomerStatus collection'
       filters:
         - customer.mongodb.status.order
         - customer.mongodb.status.partial_search
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Get:
+      description: 'Retrieves a CustomerStatus resource by its unique identifier'
+      summary: 'Get a single CustomerStatus'
     ApiPlatform\Metadata\Put:
+      description: 'Replaces the CustomerStatus resource'
+      summary: 'Update a CustomerStatus'
       input: App\Core\Customer\Application\DTO\StatusPut
       processor: App\Core\Customer\Application\Processor\CustomerStatusPutProcessor
       denormalizationContext:
         allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
+      description: 'Updates the CustomerStatus resource partially'
+      summary: 'Partially update a CustomerStatus'
       input: App\Core\Customer\Application\DTO\StatusPatch
       processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      description: 'Removes the CustomerStatus resource'
+      summary: 'Delete a CustomerStatus'
     ApiPlatform\Metadata\Post:
+      description: 'Creates a CustomerStatus resource'
+      summary: 'Create a new CustomerStatus'
       input: App\Core\Customer\Application\DTO\StatusCreate
       processor: App\Core\Customer\Application\Processor\CreateStatusProcessor
       denormalizationContext:
