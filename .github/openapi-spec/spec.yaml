@@ -1207,7 +1207,7 @@ paths:
           description: Customer resource deleted
           content:
             application/problem+json:
-              example: ''
+              example: {}
           headers: {}
         '401':
           description: Unauthorized
@@ -1549,7 +1549,6 @@ paths:
                   format: iri-reference
                 confirmed:
                   type: boolean
-              required: []
             example:
               email: customer@example.com
               phone: '0123456789'
@@ -2379,7 +2378,7 @@ paths:
           description: CustomerStatus resource deleted
           content:
             application/problem+json:
-              example: ''
+              example: {}
           headers: {}
         '401':
           description: Unauthorized
@@ -3526,7 +3525,7 @@ paths:
           description: CustomerType resource deleted
           content:
             application/problem+json:
-              example: ''
+              example: {}
           headers: {}
         '401':
           description: Unauthorized
