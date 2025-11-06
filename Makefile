@@ -271,6 +271,9 @@ schemathesis-validate: reset-db generate-openapi-spec ## Validate the running AP
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
 
+validate-openapi-spec: build-spectral-docker generate-openapi-spec ## Validate OpenAPI specification with Spectral
+	$(DOCKER) run --rm -v $(CURDIR):/app -w /app core-service-spectral lint .github/openapi-spec/spec.yaml --ruleset .spectral.yaml --format stylish
+
 aws-load-tests: ## Run load tests on AWS infrastructure
 	tests/Load/aws-execute-load-tests.sh
 
