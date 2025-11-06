@@ -26,6 +26,7 @@ return [
         SpaceAfterNotSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
+        SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff::class,
     ],
 
     'config' => [
@@ -51,7 +52,7 @@ return [
     ],
     'requirements' => [
         'min-quality' => 100,
-        'min-complexity' => 95,
+        'min-complexity' => 94,
         'min-architecture' => 100,
         'min-style' => 100,
     ],

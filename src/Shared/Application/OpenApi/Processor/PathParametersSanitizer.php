@@ -10,6 +10,8 @@ use ApiPlatform\OpenApi\OpenApi;
 
 final class PathParametersSanitizer
 {
+    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
+
     private readonly PathParameterCleaner $parameterCleaner;
 
     public function __construct(
@@ -33,12 +35,13 @@ final class PathParametersSanitizer
 
     private function sanitizePathItem(PathItem $pathItem): PathItem
     {
-        return $pathItem
-            ->withGet($this->sanitizeOperation($pathItem->getGet()))
-            ->withPost($this->sanitizeOperation($pathItem->getPost()))
-            ->withPut($this->sanitizeOperation($pathItem->getPut()))
-            ->withPatch($this->sanitizeOperation($pathItem->getPatch()))
-            ->withDelete($this->sanitizeOperation($pathItem->getDelete()));
+        foreach (self::OPERATIONS as $operation) {
+            $pathItem = $pathItem->{'with' . $operation}(
+                $this->sanitizeOperation($pathItem->{'get' . $operation}())
+            );
+        }
+
+        return $pathItem;
     }
 
     private function sanitizeOperation(?Operation $operation): ?Operation

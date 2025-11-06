@@ -20,10 +20,14 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __construct(
         private OpenApiFactoryInterface $decorated,
         private iterable $endpointFactories,
-        private PathParametersSanitizer $pathParametersSanitizer = new PathParametersSanitizer(),
-        private ParameterDescriptionAugmenter $parameterDescriptionAugmenter = new ParameterDescriptionAugmenter(),
-        private IriReferenceTypeFixer $iriReferenceTypeFixer = new IriReferenceTypeFixer(),
-        private TagDescriptionAugmenter $tagDescriptionAugmenter = new TagDescriptionAugmenter()
+        private PathParametersSanitizer $pathParametersSanitizer
+            = new PathParametersSanitizer(),
+        private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
+            = new ParameterDescriptionAugmenter(),
+        private IriReferenceTypeFixer $iriReferenceTypeFixer
+            = new IriReferenceTypeFixer(),
+        private TagDescriptionAugmenter $tagDescriptionAugmenter
+            = new TagDescriptionAugmenter()
     ) {
     }
 
@@ -40,8 +44,6 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         $this->parameterDescriptionAugmenter->augment($openApi);
         $openApi = $this->tagDescriptionAugmenter->augment($openApi);
         $this->iriReferenceTypeFixer->fix($openApi);
-        $openApi = $this->pathParametersSanitizer->sanitize($openApi);
-
-        return $openApi;
+        return $this->pathParametersSanitizer->sanitize($openApi);
     }
 }
