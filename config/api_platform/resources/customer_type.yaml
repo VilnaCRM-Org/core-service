@@ -9,23 +9,35 @@ App\Core\Customer\Domain\Entity\CustomerType:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
+      description: 'Retrieves the collection of CustomerType resources'
+      summary: 'Get CustomerType collection'
       filters:
         - customer.mongodb.type.order
         - customer.mongodb.type.partial_search
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Get:
+      description: 'Retrieves a CustomerType resource by its unique identifier'
+      summary: 'Get a single CustomerType'
     ApiPlatform\Metadata\Put:
+      description: 'Replaces the CustomerType resource'
+      summary: 'Update a CustomerType'
       input: App\Core\Customer\Application\DTO\TypePut
       processor: App\Core\Customer\Application\Processor\CustomerTypePutProcessor
       denormalizationContext:
         allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
+      description: 'Updates the CustomerType resource partially'
+      summary: 'Partially update a CustomerType'
       input: App\Core\Customer\Application\DTO\TypePatch
       processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
       denormalizationContext:
         allow_extra_attributes: true
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      description: 'Removes the CustomerType resource'
+      summary: 'Delete a CustomerType'
     ApiPlatform\Metadata\Post:
+      description: 'Creates a CustomerType resource'
+      summary: 'Create a new CustomerType'
       input: App\Core\Customer\Application\DTO\TypeCreate
       processor: App\Core\Customer\Application\Processor\CreateTypeProcessor
       denormalizationContext:

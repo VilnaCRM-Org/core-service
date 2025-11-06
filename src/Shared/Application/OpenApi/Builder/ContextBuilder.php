@@ -62,11 +62,23 @@ final class ContextBuilder
         array &$properties,
         Parameter $param
     ): void {
-        $properties[$param->name] = [
+        $propertySchema = [
             'type' => $param->type,
-            'maxLength' => $param->maxLength,
-            'format' => $param->format,
         ];
+
+        if ($param->maxLength !== null) {
+            $propertySchema['maxLength'] = $param->maxLength;
+        }
+
+        if ($param->format !== null) {
+            $propertySchema['format'] = $param->format;
+        }
+
+        if ($param->items !== null) {
+            $propertySchema['items'] = $param->items;
+        }
+
+        $properties[$param->name] = $propertySchema;
     }
 
     /**
