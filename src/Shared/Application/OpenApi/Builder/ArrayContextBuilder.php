@@ -25,7 +25,7 @@ final class ArrayContextBuilder
             $required = [];
 
             foreach ($params as $param) {
-                if ($param->required) {
+                if ($param->isRequired()) {
                     $required[] = $param->name;
                 }
                 $this->addParameterToItems($items, $param);
@@ -43,11 +43,14 @@ final class ArrayContextBuilder
      */
     private function addParameterToItems(array &$items, Parameter $param): void
     {
-        $items[$param->name] = [
-            'type' => $param->type,
-            'maxLength' => $param->maxLength,
-            'format' => $param->format,
-        ];
+        $items[$param->name] = array_filter(
+            [
+                'type' => $param->type,
+                'maxLength' => $param->maxLength,
+                'format' => $param->format,
+            ],
+            static fn ($value) => $value !== null
+        );
     }
 
     /**

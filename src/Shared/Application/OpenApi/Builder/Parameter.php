@@ -19,7 +19,7 @@ final readonly class Parameter
 
     public function isRequired(): bool
     {
-        return $this->requirement->toBool();
+        return $this->requirement === Requirement::REQUIRED;
     }
 
     public static function required(

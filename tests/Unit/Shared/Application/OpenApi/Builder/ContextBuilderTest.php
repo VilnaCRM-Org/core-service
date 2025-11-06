@@ -26,7 +26,7 @@ final class ContextBuilderTest extends UnitTestCase
         $this->assertEquals(
             new ArrayObject([
                 'application/problem+json' => [
-                    'example' => '',
+                    'example' => new ArrayObject(),
                 ],
             ]),
             $content
@@ -79,13 +79,9 @@ final class ContextBuilderTest extends UnitTestCase
             'properties' => [
                 'name' => [
                     'type' => 'string',
-                    'maxLength' => null,
-                    'format' => null,
                 ],
                 'age' => [
                     'type' => 'integer',
-                    'maxLength' => null,
-                    'format' => null,
                 ],
             ],
             'required' => ['name', 'age'],
@@ -102,8 +98,6 @@ final class ContextBuilderTest extends UnitTestCase
             'properties' => [
                 'address' => [
                     'type' => 'object',
-                    'maxLength' => null,
-                    'format' => null,
                 ],
             ],
             'required' => ['address'],

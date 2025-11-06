@@ -39,7 +39,8 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
                 'propertyPath' => 'some_property',
                 'message' => 'This value should not be blank.',
                 'code' => 'c1051bb4-d103-4f74-8988-acbcafc7fdc3',
-            ]],
+            ],
+            ],
             items: [
                 'type' => 'object',
                 'properties' => [
