@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Builder;
 
 use function array_combine;
-
 use function array_filter;
 use function array_map;
 use function array_values;
