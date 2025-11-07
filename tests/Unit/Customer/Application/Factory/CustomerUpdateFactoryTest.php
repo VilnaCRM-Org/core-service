@@ -92,22 +92,9 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
 
     public function testGetStringValueReturnsNewValueWhenNotEmpty(): void
     {
-        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $factory = new CustomerUpdateFactory($relationResolver);
-        $customer = $this->createMock(Customer::class);
-        $type = $this->createMock(CustomerType::class);
-        $status = $this->createMock(CustomerStatus::class);
+        $mocks = $this->setupBasicMocks('OLD', 'old@test.com', '+000', 'old-source', false);
 
-        $customer->method('getInitials')->willReturn('OLD');
-        $customer->method('getEmail')->willReturn('old@test.com');
-        $customer->method('getPhone')->willReturn('+000');
-        $customer->method('getLeadSource')->willReturn('old-source');
-        $customer->method('isConfirmed')->willReturn(false);
-
-        $relationResolver->method('resolveType')->willReturn($type);
-        $relationResolver->method('resolveStatus')->willReturn($status);
-
-        $result = $factory->create($customer, [
+        $result = $mocks['factory']->create($mocks['customer'], [
             'initials' => 'NEW',
             'email' => 'new@test.com',
             'phone' => '+111',
@@ -122,22 +109,9 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
 
     public function testGetStringValueReturnsDefaultWhenNull(): void
     {
-        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $factory = new CustomerUpdateFactory($relationResolver);
-        $customer = $this->createMock(Customer::class);
-        $type = $this->createMock(CustomerType::class);
-        $status = $this->createMock(CustomerStatus::class);
+        $mocks = $this->setupBasicMocks('DEFAULT', 'default@test.com', '+999', 'default-source', true);
 
-        $customer->method('getInitials')->willReturn('DEFAULT');
-        $customer->method('getEmail')->willReturn('default@test.com');
-        $customer->method('getPhone')->willReturn('+999');
-        $customer->method('getLeadSource')->willReturn('default-source');
-        $customer->method('isConfirmed')->willReturn(true);
-
-        $relationResolver->method('resolveType')->willReturn($type);
-        $relationResolver->method('resolveStatus')->willReturn($status);
-
-        $result = $factory->create($customer, [
+        $result = $mocks['factory']->create($mocks['customer'], [
             'initials' => null,
             'email' => null,
             'phone' => null,
@@ -148,6 +122,34 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertSame('default@test.com', $result->newEmail);
         self::assertSame('+999', $result->newPhone);
         self::assertSame('default-source', $result->newLeadSource);
+    }
+
+    /**
+     * @return array{factory: CustomerUpdateFactory, customer: Customer, type: CustomerType, status: CustomerStatus}
+     */
+    private function setupBasicMocks(
+        string $initials,
+        string $email,
+        string $phone,
+        string $leadSource,
+        bool $confirmed
+    ): array {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $factory = new CustomerUpdateFactory($relationResolver);
+        $customer = $this->createMock(Customer::class);
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+
+        $customer->method('getInitials')->willReturn($initials);
+        $customer->method('getEmail')->willReturn($email);
+        $customer->method('getPhone')->willReturn($phone);
+        $customer->method('getLeadSource')->willReturn($leadSource);
+        $customer->method('isConfirmed')->willReturn($confirmed);
+
+        $relationResolver->method('resolveType')->willReturn($type);
+        $relationResolver->method('resolveStatus')->willReturn($status);
+
+        return ['factory' => $factory, 'customer' => $customer, 'type' => $type, 'status' => $status];
     }
 
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
