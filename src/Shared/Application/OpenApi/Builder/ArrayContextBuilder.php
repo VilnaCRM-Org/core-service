@@ -13,29 +13,47 @@ final class ArrayContextBuilder
      */
     public function build(array $params): ArrayObject
     {
-        $content = new ArrayObject([
-            'application/ld+json' => [
-                'example' => [''],
-            ],
-        ]);
-
-        if (count($params) > 0) {
-            $items = [];
-            $example = [];
-            $required = [];
-
-            foreach ($params as $param) {
-                if ($param->isRequired()) {
-                    $required[] = $param->name;
-                }
-                $this->addParameterToItems($items, $param);
-                $example[$param->name] = $param->example;
-            }
-
-            $content = $this->buildContent($items, $example, $required);
+        if (count($params) === 0) {
+            return new ArrayObject([
+                'application/ld+json' => [
+                    'example' => [''],
+                ],
+            ]);
         }
 
-        return $content;
+        $collection = $this->buildParamsCollection($params);
+
+        return $this->buildContent(
+            $collection['items'],
+            $collection['example'],
+            $collection['required']
+        );
+    }
+
+    /**
+     * @param array<Parameter> $params
+     *
+     * @return array{items: array<string, string>, example: array<string, mixed>, required: array<string>}
+     */
+    private function buildParamsCollection(array $params): array
+    {
+        $items = [];
+        $example = [];
+        $required = [];
+
+        foreach ($params as $param) {
+            if ($param->isRequired()) {
+                $required[] = $param->name;
+            }
+            $this->addParameterToItems($items, $param);
+            $example[$param->name] = $param->example;
+        }
+
+        return [
+            'items' => $items,
+            'example' => $example,
+            'required' => $required,
+        ];
     }
 
     /**
