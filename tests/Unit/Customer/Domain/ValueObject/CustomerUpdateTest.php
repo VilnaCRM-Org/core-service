@@ -8,7 +8,9 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory as UlidFactoryInterface;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Uid\Factory\UlidFactory;
 
@@ -22,8 +24,11 @@ final class CustomerUpdateTest extends UnitTestCase
         parent::setUp();
 
         $this->ulidFactory = new UlidFactory();
+        $ulidFactoryInterface = new UlidFactoryInterface();
         $this->ulidTransformer = new UlidTransformer(
-            new UlidFactoryInterface()
+            $ulidFactoryInterface,
+            new UlidValidator(),
+            new UlidConverter($ulidFactoryInterface)
         );
     }
 

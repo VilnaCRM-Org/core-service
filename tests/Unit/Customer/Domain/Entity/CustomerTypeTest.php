@@ -9,6 +9,8 @@ use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerTypeTest extends UnitTestCase
@@ -18,7 +20,8 @@ final class CustomerTypeTest extends UnitTestCase
         $expectedValue = $this->faker->word();
         $expectedUlid = $this->faker->ulid();
 
-        $ulidTransformer = new UlidTransformer(new UlidFactory());
+        $ulidFactory = new UlidFactory();
+        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
         $ulid = $ulidTransformer->transformFromSymfonyUlid($expectedUlid);
 
         $customerType = new CustomerType($expectedValue, $ulid);
@@ -32,7 +35,8 @@ final class CustomerTypeTest extends UnitTestCase
         $expectedValue = $this->faker->word();
         $initialUlid = $this->faker->ulid();
 
-        $ulidTransformer = new UlidTransformer(new UlidFactory());
+        $ulidFactory = new UlidFactory();
+        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
         $ulid = $ulidTransformer->transformFromSymfonyUlid($initialUlid);
 
         $customerType = new CustomerType($expectedValue, $ulid);

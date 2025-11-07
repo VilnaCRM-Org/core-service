@@ -7,9 +7,11 @@ namespace App\Shared\Application\OpenApi;
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
+use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Processor\PathParametersSanitizer;
+use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionAugmenter;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
@@ -24,11 +26,13 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             = new PathParametersSanitizer(),
         private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
             = new ParameterDescriptionAugmenter(),
-        private IriReferenceTypeFixer $iriReferenceTypeFixer
-            = new IriReferenceTypeFixer(),
+        private ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
         private TagDescriptionAugmenter $tagDescriptionAugmenter
             = new TagDescriptionAugmenter()
     ) {
+        $this->iriReferenceTypeFixer ??= new IriReferenceTypeFixer(
+            new ContentPropertyProcessor(new PropertyTypeFixer())
+        );
     }
 
     /**

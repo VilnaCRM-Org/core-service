@@ -749,7 +749,6 @@ paths:
           headers: {  }
       summary: 'Creates a Customer resource.'
       description: 'Creates a Customer resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -906,13 +905,12 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customers_ulid_put
@@ -1071,13 +1069,12 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/ld+json:
@@ -1233,13 +1230,12 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customers_ulid_patch
@@ -1398,13 +1394,12 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/merge-patch+json:
@@ -1814,7 +1809,6 @@ paths:
           headers: {  }
       summary: 'Creates a CustomerStatus resource.'
       description: 'Creates a CustomerStatus resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -1939,13 +1933,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
@@ -2104,13 +2097,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/ld+json:
@@ -2234,13 +2226,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
@@ -2399,13 +2390,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/merge-patch+json:
@@ -2791,7 +2781,6 @@ paths:
           headers: {  }
       summary: 'Creates a CustomerType resource.'
       description: 'Creates a CustomerType resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -2916,13 +2905,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
       operationId: api_customer_types_ulid_put
@@ -3081,13 +3069,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/ld+json:
@@ -3211,13 +3198,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
@@ -3376,13 +3362,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
+          example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
           application/merge-patch+json:
@@ -3410,7 +3395,6 @@ paths:
           description: 'Health check failed.'
       summary: 'Retrieves a HealthCheck resource.'
       description: 'Retrieves a HealthCheck resource.'
-      parameters: []
       deprecated: false
 components:
   schemas:

@@ -6,7 +6,9 @@ namespace App\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValidator;
 use Doctrine\ODM\MongoDB\Types\Type;
 use MongoDB\BSON\Binary;
 
@@ -24,8 +26,14 @@ final class UlidType extends Type
         if ($value instanceof Binary) {
             return $value;
         }
-        return (new UlidTransformer(new UlidFactory()))
-            ->toDatabaseValue($value);
+        $ulidFactory = new UlidFactory();
+        $transformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidConverter($ulidFactory)
+        );
+
+        return $transformer->toDatabaseValue($value);
     }
 
     public function convertToPHPValue(mixed $value): ?Ulid
@@ -37,7 +45,8 @@ final class UlidType extends Type
             return $value;
         }
         $binary = $value instanceof Binary ? $value->getData() : $value;
-        return (new UlidTransformer(new UlidFactory()))
+        $ulidFactory = new UlidFactory();
+        return (new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory)))
             ->toPhpValue($binary);
     }
 
@@ -56,8 +65,11 @@ final class UlidType extends Type
     {
         return <<<'PHP'
 $return = $value ? (function($value) {
+    $ulidFactory = new \App\Shared\Infrastructure\Factory\UlidFactory();
     $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
-    new \App\Shared\Infrastructure\Factory\UlidFactory()
+        $ulidFactory,
+        new \App\Shared\Infrastructure\Transformer\UlidValidator(),
+        new \App\Shared\Infrastructure\Transformer\UlidConverter($ulidFactory)
     );
     $binary = $value instanceof \MongoDB\BSON\Binary ? $value
     ->getData() : $value;
