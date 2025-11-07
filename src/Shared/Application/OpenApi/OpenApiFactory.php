@@ -16,6 +16,8 @@ use App\Shared\Application\OpenApi\Processor\TagDescriptionAugmenter;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
+    private IriReferenceTypeFixer $iriReferenceTypeFixer;
+
     /**
      * @param iterable<EndpointFactoryInterface> $endpointFactories
      */
@@ -26,11 +28,17 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             = new PathParametersSanitizer(),
         private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
             = new ParameterDescriptionAugmenter(),
-        private ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
+        ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
         private TagDescriptionAugmenter $tagDescriptionAugmenter
             = new TagDescriptionAugmenter()
     ) {
-        $this->iriReferenceTypeFixer ??= new IriReferenceTypeFixer(
+        $this->iriReferenceTypeFixer = $iriReferenceTypeFixer
+            ?? $this->createDefaultIriReferenceTypeFixer();
+    }
+
+    private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
+    {
+        return new IriReferenceTypeFixer(
             new ContentPropertyProcessor(new PropertyTypeFixer())
         );
     }

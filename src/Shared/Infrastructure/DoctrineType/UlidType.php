@@ -26,14 +26,8 @@ final class UlidType extends Type
         if ($value instanceof Binary) {
             return $value;
         }
-        $ulidFactory = new UlidFactory();
-        $transformer = new UlidTransformer(
-            $ulidFactory,
-            new UlidValidator(),
-            new UlidConverter($ulidFactory)
-        );
 
-        return $transformer->toDatabaseValue($value);
+        return $this->createTransformer()->toDatabaseValue($value);
     }
 
     public function convertToPHPValue(mixed $value): ?Ulid
@@ -44,10 +38,25 @@ final class UlidType extends Type
         if ($value instanceof Ulid) {
             return $value;
         }
-        $binary = $value instanceof Binary ? $value->getData() : $value;
+
+        return $this->createTransformer()->toPhpValue(
+            $this->extractBinaryData($value)
+        );
+    }
+
+    private function createTransformer(): UlidTransformer
+    {
         $ulidFactory = new UlidFactory();
-        return (new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory)))
-            ->toPhpValue($binary);
+        return new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidConverter($ulidFactory)
+        );
+    }
+
+    private function extractBinaryData(mixed $value): mixed
+    {
+        return $value instanceof Binary ? $value->getData() : $value;
     }
 
     public function closureToMongo(): string

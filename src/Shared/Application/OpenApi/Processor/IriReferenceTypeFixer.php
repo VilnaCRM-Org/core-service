@@ -42,15 +42,22 @@ final class IriReferenceTypeFixer
 
     private function fixOperation(?Operation $operation): ?Operation
     {
-        $content = $operation?->getRequestBody()?->getContent();
+        $content = $this->extractContent($operation);
 
         if (!$content instanceof ArrayObject) {
             return $operation;
         }
 
-        return $this->contentProcessor->process($content)
-            ? $this->createUpdatedOperation($operation, $content)
-            : $operation;
+        if (!$this->contentProcessor->process($content)) {
+            return $operation;
+        }
+
+        return $this->createUpdatedOperation($operation, $content);
+    }
+
+    private function extractContent(?Operation $operation): mixed
+    {
+        return $operation?->getRequestBody()?->getContent();
     }
 
     private function createUpdatedOperation(
