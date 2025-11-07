@@ -395,4 +395,37 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         $type = $content['application/json']['schema']['properties'][$fieldName]['type'];
         $this->assertEquals('string', $type);
     }
+
+    public function testFixReturnsDifferentOperationWhenModified(): void
+    {
+        $properties = ['relation' => ['type' => 'iri-reference']];
+        $content = $this->createContentWithProperties($properties);
+        $requestBody = new RequestBody('Test request body', $content);
+        $originalOperation = (new Operation('test', [], [], 'Test'))->withRequestBody($requestBody);
+        $openApi = $this->createOpenApiWithOperation($originalOperation);
+
+        $this->fixer->fix($openApi);
+        $resultOperation = $openApi->getPaths()->getPath('/test')->getPost();
+
+        // Verify the operation was actually modified (new instance created)
+        $this->assertNotSame($originalOperation, $resultOperation);
+        $this->assertEquals('string', $this->getResultProperties($openApi)['relation']['type']);
+    }
+
+    public function testFixReturnsSameOperationWhenNotModified(): void
+    {
+        $properties = ['name' => ['type' => 'string']];
+        $content = $this->createContentWithProperties($properties);
+        $requestBody = new RequestBody('Test request body', $content);
+        $originalOperation = (new Operation('test', [], [], 'Test'))->withRequestBody($requestBody);
+        $openApi = $this->createOpenApiWithOperation($originalOperation);
+
+        $this->fixer->fix($openApi);
+        $resultOperation = $openApi->getPaths()->getPath('/test')->getPost();
+
+        // Verify operation was not modified when no iri-reference exists
+        $originalContent = $originalOperation->getRequestBody()->getContent()->getArrayCopy();
+        $resultContent = $resultOperation->getRequestBody()->getContent()->getArrayCopy();
+        $this->assertEquals($originalContent, $resultContent);
+    }
 }

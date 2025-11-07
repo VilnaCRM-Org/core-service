@@ -290,6 +290,28 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
     }
 
+    public function testAugmentWithOperationWithEmptyParametersArray(): void
+    {
+        // Create an operation with an explicitly empty parameters array
+        $operation = (new Operation('test', [], [], 'Test operation'))->withParameters([]);
+        $pathItem = (new PathItem())->withGet($operation);
+        $paths = new Paths();
+        $paths->addPath('/test', $pathItem);
+
+        $openApi = new OpenApi(
+            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            [],
+            $paths
+        );
+
+        $this->augmenter->augment($openApi);
+
+        $result = $openApi->getPaths()->getPath('/test')->getGet();
+
+        // The operation should be returned with empty parameters, not modified
+        $this->assertEmpty($result->getParameters());
+    }
+
     /**
      * @param array<Parameter> $parameters
      */
