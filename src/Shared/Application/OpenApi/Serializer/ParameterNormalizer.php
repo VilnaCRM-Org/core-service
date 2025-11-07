@@ -47,6 +47,9 @@ final class ParameterNormalizer implements NormalizerInterface
         return $data instanceof Parameter;
     }
 
+    /**
+     * @return array<string, bool>
+     */
     public function getSupportedTypes(?string $format): array
     {
         return [
