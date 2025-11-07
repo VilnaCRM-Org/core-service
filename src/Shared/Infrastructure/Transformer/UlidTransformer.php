@@ -35,6 +35,11 @@ final readonly class UlidTransformer
             ? $binary
             : SymfonyUlid::fromBinary($binary);
 
+        return $this->transformFromSymfonyUlid($symfonyUlid);
+    }
+
+    public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
+    {
         return $this->ulidFactory->create((string) $symfonyUlid);
     }
 }
