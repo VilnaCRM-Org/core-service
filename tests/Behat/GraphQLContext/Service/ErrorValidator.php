@@ -9,7 +9,7 @@ use Webmozart\Assert\Assert;
 final class ErrorValidator
 {
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertNoErrors(array $responseData): void
     {
@@ -23,7 +23,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertHasErrors(array $responseData): void
     {
@@ -35,7 +35,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertErrorMessageContains(
         array $responseData,
@@ -60,7 +60,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertErrorExtensionsCode(array $responseData, int $index, string $code): void
     {
@@ -76,7 +76,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertErrorPath(
         array $responseData,
@@ -96,7 +96,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertErrorsContainField(array $responseData, string $field): void
     {
@@ -113,7 +113,7 @@ final class ErrorValidator
     }
 
     /**
-     * @param array<string, mixed> $responseData
+     * @param array<string, string|int|bool|array|null> $responseData
      */
     public function assertAnyErrorContainsMessage(array $responseData, string $message): void
     {
@@ -128,7 +128,7 @@ final class ErrorValidator
         Assert::notEmpty($found, sprintf('Error message "%s" not found in errors', $message));
     }
 
-    /** @param array<string, mixed> $responseData */
+    /** @param array<string, string|int|bool|array|null> $responseData */
     private function assertErrorExists(array $responseData, int $index): void
     {
         $errorMessage = sprintf('No error found at index %d', $index);
@@ -136,7 +136,7 @@ final class ErrorValidator
         Assert::keyExists($responseData['errors'], $index, $errorMessage);
     }
 
-    /** @param array<string, mixed> $responseData */
+    /** @param array<string, string|int|bool|array|null> $responseData */
     private function assertPathExists(array $responseData, int $index, int $pathIndex): void
     {
         Assert::keyExists(
@@ -151,7 +151,7 @@ final class ErrorValidator
         );
     }
 
-    /** @param array<string, mixed> $responseData */
+    /** @param array<string, string|int|bool|array|null> $responseData */
     private function assertExtensionsCodeExists(array $responseData, int $index): void
     {
         Assert::keyExists(
