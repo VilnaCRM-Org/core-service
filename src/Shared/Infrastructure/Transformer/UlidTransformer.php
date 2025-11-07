@@ -11,29 +11,33 @@ use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final readonly class UlidTransformer
 {
-    public function __construct(private UlidFactory $ulidFactory)
-    {
+    public function __construct(
+        private UlidFactory $ulidFactory,
+        private UlidValidator $validator,
+        private UlidConverter $converter
+    ) {
     }
 
-    public function toDatabaseValue(mixed $value): ?Binary
+    /**
+     * @param array<mixed>|string|int|float|bool|object|null $value
+     */
+    public function toDatabaseValue(array|string|int|float|bool|object|null $value): ?Binary
     {
-        if ($value === null) {
+        if (!$this->validator->isValid($value)) {
             return null;
         }
 
-        if (is_string($value) && !SymfonyUlid::isValid($value)) {
-            return null;
-        }
+        $ulid = $this->converter->toUlid($value);
 
-        $ulid = $value instanceof Ulid ? $value : $this->ulidFactory->create($value);
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPhpValue(mixed $binary): ?Ulid
+    /**
+     * @param array<mixed>|string|int|float|bool|object|null $binary
+     */
+    public function toPhpValue(array|string|int|float|bool|object|null $binary): Ulid
     {
-        $symfonyUlid = $binary instanceof SymfonyUlid
-            ? $binary
-            : SymfonyUlid::fromBinary($binary);
+        $symfonyUlid = $this->converter->fromBinary($binary);
 
         return $this->transformFromSymfonyUlid($symfonyUlid);
     }

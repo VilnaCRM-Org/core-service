@@ -105,6 +105,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
+
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
@@ -264,8 +265,7 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 
 generate-openapi-spec:
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
-	@echo "Cleaning OpenAPI spec..."
-	@bash scripts/clean-openapi-spec.sh .github/openapi-spec/spec.yaml
+	@docker compose exec php chown $(shell id -u):$(shell id -g) .github/openapi-spec/spec.yaml
 
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
 	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)

@@ -9,7 +9,9 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -20,7 +22,9 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fixer = new IriReferenceTypeFixer();
+        $propertyTypeFixer = new PropertyTypeFixer();
+        $contentProcessor = new ContentPropertyProcessor($propertyTypeFixer);
+        $this->fixer = new IriReferenceTypeFixer($contentProcessor);
     }
 
     public function testFixWithEmptyPaths(): void
