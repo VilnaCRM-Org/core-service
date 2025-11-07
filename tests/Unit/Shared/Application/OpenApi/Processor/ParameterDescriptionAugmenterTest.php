@@ -293,8 +293,8 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
     public function testAugmentWithOperationWithEmptyParametersArray(): void
     {
         // Create an operation with an explicitly empty parameters array
-        $operation = (new Operation('test', [], [], 'Test operation'))->withParameters([]);
-        $pathItem = (new PathItem())->withGet($operation);
+        $originalOperation = (new Operation('test', [], [], 'Test operation'))->withParameters([]);
+        $pathItem = (new PathItem())->withGet($originalOperation);
         $paths = new Paths();
         $paths->addPath('/test', $pathItem);
 
@@ -308,7 +308,8 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
 
         $result = $openApi->getPaths()->getPath('/test')->getGet();
 
-        // The operation should be returned with empty parameters, not modified
+        // The operation should be returned unchanged (same instance)
+        $this->assertSame($originalOperation, $result);
         $this->assertEmpty($result->getParameters());
     }
 
