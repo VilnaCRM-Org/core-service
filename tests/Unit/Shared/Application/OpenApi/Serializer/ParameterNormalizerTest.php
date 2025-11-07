@@ -108,4 +108,19 @@ final class ParameterNormalizerTest extends UnitTestCase
         $this->assertArrayHasKey(Parameter::class, $types);
         $this->assertTrue($types[Parameter::class]);
     }
+
+    public function testNormalizeParameterWithNonArrayDataPassesThrough(): void
+    {
+        $parameter = new Parameter('test', 'path');
+
+        $this->decorated
+            ->expects($this->once())
+            ->method('normalize')
+            ->with($parameter, null, [])
+            ->willReturn('string-result');
+
+        $result = $this->normalizer->normalize($parameter, null, []);
+
+        $this->assertEquals('string-result', $result);
+    }
 }
