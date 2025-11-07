@@ -27,7 +27,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
     {
         $paths = new Paths();
         $openApi = new OpenApi(
-            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            new \ApiPlatform\OpenApi\Model\Info(
+                'Test',
+                '1.0.0'
+            ),
             [],
             $paths
         );
@@ -44,7 +47,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         $paths->addPath('/test', $pathItem);
 
         $openApi = new OpenApi(
-            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            new \ApiPlatform\OpenApi\Model\Info(
+                'Test',
+                '1.0.0'
+            ),
             [],
             $paths
         );
@@ -68,7 +74,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         $paths->addPath('/test', $pathItem);
 
         $openApi = new OpenApi(
-            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            new \ApiPlatform\OpenApi\Model\Info(
+                'Test',
+                '1.0.0'
+            ),
             [],
             $paths
         );
@@ -95,7 +104,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         $paths->addPath('/test', $pathItem);
 
         $openApi = new OpenApi(
-            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            new \ApiPlatform\OpenApi\Model\Info(
+                'Test',
+                '1.0.0'
+            ),
             [],
             $paths
         );
@@ -111,7 +123,8 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         $properties = ['relation' => ['type' => 'iri-reference'], 'name' => ['type' => 'string']];
         $content = $this->createContentWithProperties($properties);
         $requestBody = new RequestBody('Test request body', $content);
-        $operation = (new Operation('test', [], [], 'Test'))->withRequestBody($requestBody);
+        $operation = (new Operation('test', [], [], 'Test'))
+            ->withRequestBody($requestBody);
         $openApi = $this->createOpenApiWithOperation($operation);
 
         $this->fixer->fix($openApi);
@@ -186,7 +199,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
 
         $resultProps = $this->getResultProperties($openApi);
         $this->assertArrayNotHasKey('type', $resultProps['field']);
-        $this->assertEquals('A field without type', $resultProps['field']['description']);
+        $this->assertEquals(
+            'A field without type',
+            $resultProps['field']['description']
+        );
     }
 
     public function testFixWithMultiplePaths(): void
@@ -238,9 +254,15 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
 
         $resultProperties = $this->getResultProperties($openApi);
         $this->assertEquals('string', $resultProperties['relation']['type']);
-        $this->assertEquals('iri-reference', $resultProperties['relation']['format']);
+        $this->assertEquals(
+            'iri-reference',
+            $resultProperties['relation']['format']
+        );
         $this->assertEquals('string', $resultProperties['normalField']['type']);
-        $this->assertArrayNotHasKey('format', $resultProperties['normalField']);
+        $this->assertArrayNotHasKey(
+            'format',
+            $resultProperties['normalField']
+        );
     }
 
     public function testFixPreservesOtherPropertiesWhenConvertingIriReference(): void
@@ -282,8 +304,10 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         ]);
     }
 
-    private function createOpenApiWithOperation(Operation $operation, string $path = '/test'): OpenApi
-    {
+    private function createOpenApiWithOperation(
+        Operation $operation,
+        string $path = '/test'
+    ): OpenApi {
         $pathItem = (new PathItem())->withPost($operation);
         $paths = new Paths();
         $paths->addPath($path, $pathItem);
@@ -335,8 +359,11 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
         );
     }
 
-    private function assertPathIriReferenceFixed(OpenApi $openApi, string $path, string $method): void
-    {
+    private function assertPathIriReferenceFixed(
+        OpenApi $openApi,
+        string $path,
+        string $method
+    ): void {
         $pathItem = $openApi->getPaths()->getPath($path);
         $operation = match ($method) {
             'Get' => $pathItem->getGet(),
