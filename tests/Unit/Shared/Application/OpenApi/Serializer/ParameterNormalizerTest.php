@@ -31,19 +31,8 @@ final class ParameterNormalizerTest extends UnitTestCase
             schema: ['type' => 'string']
         );
 
-        $this->decorated
-            ->expects($this->once())
-            ->method('normalize')
-            ->with($parameter, null, [])
-            ->willReturn([
-                'name' => 'id',
-                'in' => 'path',
-                'description' => 'Resource ID',
-                'required' => true,
-                'allowEmptyValue' => false, // This should be removed
-                'allowReserved' => false, // This should be removed
-                'schema' => ['type' => 'string'],
-            ]);
+        $mockData = $this->createPathParameterMockData();
+        $this->setupDecoratedNormalizer($parameter, $mockData);
 
         $result = $this->normalizer->normalize($parameter, null, []);
 
@@ -122,5 +111,33 @@ final class ParameterNormalizerTest extends UnitTestCase
         $result = $this->normalizer->normalize($parameter, null, []);
 
         $this->assertEquals('string-result', $result);
+    }
+
+    /**
+     * @return array<string, string|bool|array<string, string>>
+     */
+    private function createPathParameterMockData(): array
+    {
+        return [
+            'name' => 'id',
+            'in' => 'path',
+            'description' => 'Resource ID',
+            'required' => true,
+            'allowEmptyValue' => false,
+            'allowReserved' => false,
+            'schema' => ['type' => 'string'],
+        ];
+    }
+
+    /**
+     * @param array<string, string|bool|array<string, string>> $mockData
+     */
+    private function setupDecoratedNormalizer(Parameter $parameter, array $mockData): void
+    {
+        $this->decorated
+            ->expects($this->once())
+            ->method('normalize')
+            ->with($parameter, null, [])
+            ->willReturn($mockData);
     }
 }

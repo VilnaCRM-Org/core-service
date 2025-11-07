@@ -91,26 +91,9 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
     public function testFixWithOperationWithEmptyContent(): void
     {
         $requestBody = new RequestBody('Test request body', null);
-
-        $operation = (new Operation(
-            'testOperation',
-            [],
-            [],
-            'Test operation'
-        ))->withRequestBody($requestBody);
-
-        $pathItem = (new PathItem())->withPost($operation);
-        $paths = new Paths();
-        $paths->addPath('/test', $pathItem);
-
-        $openApi = new OpenApi(
-            new \ApiPlatform\OpenApi\Model\Info(
-                'Test',
-                '1.0.0'
-            ),
-            [],
-            $paths
-        );
+        $operation = (new Operation('testOperation', [], [], 'Test operation'))
+            ->withRequestBody($requestBody);
+        $openApi = $this->createOpenApiWithOperation($operation);
 
         $this->fixer->fix($openApi);
 
@@ -182,7 +165,8 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
 
         $this->fixer->fix($openApi);
 
-        $fixedContent = $openApi->getPaths()->getPath('/test')->getPost()->getRequestBody()->getContent();
+        $requestBody = $openApi->getPaths()->getPath('/test')->getPost()->getRequestBody();
+        $fixedContent = $requestBody->getContent();
         $this->assertArrayHasKey('schema', $fixedContent['application/json']);
         $this->assertArrayNotHasKey('properties', $fixedContent['application/json']['schema']);
     }
