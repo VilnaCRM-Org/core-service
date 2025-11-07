@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\Validator;
 
 use App\Shared\Application\Validator\Initials;
 use App\Shared\Application\Validator\InitialsValidator;
+use App\Shared\Application\Validator\ValidationSkipChecker;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -24,7 +25,8 @@ final class InitialsValidatorTest extends UnitTestCase
         parent::setUp();
         $this->context = $this->createMock(ExecutionContextInterface::class);
         $this->translator = $this->createMock(TranslatorInterface::class);
-        $this->validator = new InitialsValidator($this->translator);
+        $skipChecker = new ValidationSkipChecker();
+        $this->validator = new InitialsValidator($this->translator, $skipChecker);
         $this->validator->initialize($this->context);
         $this->constraint = $this->createMock(Initials::class);
     }
