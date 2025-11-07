@@ -92,24 +92,44 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
 
     public function testGetStringValueReturnsNewValueWhenNotEmpty(): void
     {
-        $mocks = $this->setupBasicMocks('OLD', 'old@test.com', '+000', 'old-source', false);
+        $oldInitials = $this->faker->lexify('??');
+        $oldEmail = $this->faker->email();
+        $oldPhone = $this->faker->phoneNumber();
+        $oldSource = $this->faker->word();
+        $mocks = $this->setupBasicMocks($oldInitials, $oldEmail, $oldPhone, $oldSource, false);
+
+        $newInitials = $this->faker->lexify('??');
+        $newEmail = $this->faker->email();
+        $newPhone = $this->faker->phoneNumber();
+        $newSource = $this->faker->word();
 
         $result = $mocks['factory']->create($mocks['customer'], [
-            'initials' => 'NEW',
-            'email' => 'new@test.com',
-            'phone' => '+111',
-            'leadSource' => 'new-source',
+            'initials' => $newInitials,
+            'email' => $newEmail,
+            'phone' => $newPhone,
+            'leadSource' => $newSource,
         ]);
 
-        self::assertSame('NEW', $result->newInitials);
-        self::assertSame('new@test.com', $result->newEmail);
-        self::assertSame('+111', $result->newPhone);
-        self::assertSame('new-source', $result->newLeadSource);
+        self::assertSame($newInitials, $result->newInitials);
+        self::assertSame($newEmail, $result->newEmail);
+        self::assertSame($newPhone, $result->newPhone);
+        self::assertSame($newSource, $result->newLeadSource);
     }
 
     public function testGetStringValueReturnsDefaultWhenNull(): void
     {
-        $mocks = $this->setupBasicMocks('DEFAULT', 'default@test.com', '+999', 'default-source', true);
+        $defaultInitials = $this->faker->lexify('??');
+        $defaultEmail = $this->faker->email();
+        $defaultPhone = $this->faker->phoneNumber();
+        $defaultSource = $this->faker->word();
+
+        $mocks = $this->setupBasicMocks(
+            $defaultInitials,
+            $defaultEmail,
+            $defaultPhone,
+            $defaultSource,
+            true
+        );
 
         $result = $mocks['factory']->create($mocks['customer'], [
             'initials' => null,
@@ -118,10 +138,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             'leadSource' => null,
         ]);
 
-        self::assertSame('DEFAULT', $result->newInitials);
-        self::assertSame('default@test.com', $result->newEmail);
-        self::assertSame('+999', $result->newPhone);
-        self::assertSame('default-source', $result->newLeadSource);
+        self::assertSame($defaultInitials, $result->newInitials);
+        self::assertSame($defaultEmail, $result->newEmail);
+        self::assertSame($defaultPhone, $result->newPhone);
+        self::assertSame($defaultSource, $result->newLeadSource);
     }
 
     /**
@@ -149,7 +169,12 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $relationResolver->method('resolveType')->willReturn($type);
         $relationResolver->method('resolveStatus')->willReturn($status);
 
-        return ['factory' => $factory, 'customer' => $customer, 'type' => $type, 'status' => $status];
+        return [
+            'factory' => $factory,
+            'customer' => $customer,
+            'type' => $type,
+            'status' => $status,
+        ];
     }
 
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
@@ -167,10 +192,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
             'customerType' => $customerType,
             'customerStatus' => $customerStatus,
             'input' => [
-                'initials' => 'AB',
+                'initials' => $this->faker->lexify('??'),
                 'email' => $this->faker->email(),
                 'phone' => $this->faker->phoneNumber(),
-                'leadSource' => 'website',
+                'leadSource' => $this->faker->word(),
                 'type' => '/api/customer_types/' . $this->faker->uuid(),
                 'status' => '/api/customer_statuses/' . $this->faker->uuid(),
                 'confirmed' => true,
@@ -235,10 +260,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createExistingData(): array
     {
         return [
-            'initials' => 'CD',
+            'initials' => $this->faker->lexify('??'),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => 'referral',
+            'leadSource' => $this->faker->word(),
             'confirmed' => false,
         ];
     }
@@ -271,7 +296,11 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
-        $existingData = ['initials' => 'EF', 'leadSource' => 'partner', 'confirmed' => true];
+        $existingData = [
+            'initials' => $this->faker->lexify('??'),
+            'leadSource' => $this->faker->word(),
+            'confirmed' => true,
+        ];
 
         $customer->method('getInitials')->willReturn($existingData['initials']);
         $customer->method('getLeadSource')->willReturn($existingData['leadSource']);
@@ -356,8 +385,8 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createCustomerDataWithOverrides([
-            'initials' => 'IJ',
-            'leadSource' => 'campaign',
+            'initials' => $this->faker->lexify('??'),
+            'leadSource' => $this->faker->word(),
             'confirmed' => false,
         ]);
 
@@ -391,10 +420,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createExistingCustomerData(): array
     {
         return [
-            'initials' => 'GH',
+            'initials' => $this->faker->lexify('??'),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => 'direct',
+            'leadSource' => $this->faker->word(),
             'confirmed' => true,
         ];
     }
@@ -407,10 +436,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createCustomerDataWithOverrides(array $overrides): array
     {
         return array_merge([
-            'initials' => 'GH',
+            'initials' => $this->faker->lexify('??'),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => 'direct',
+            'leadSource' => $this->faker->word(),
             'confirmed' => true,
         ], $overrides);
     }

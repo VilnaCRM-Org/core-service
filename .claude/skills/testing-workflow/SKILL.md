@@ -229,15 +229,137 @@ make setup-test-db
 
 ### Use Faker for Test Data
 
-**MANDATORY**: Never hardcode test values
+**MANDATORY**: All unit tests MUST use Faker - never hardcode test values.
+
+All unit tests extend `UnitTestCase` which provides `$this->faker` with built-in `UlidProvider`.
+
+#### Available Faker Methods
+
+**Email & Contact**:
+```php
+$email = $this->faker->email();              // john.doe@example.com
+$phone = $this->faker->phoneNumber();        // +1-234-567-8900
+$username = $this->faker->userName();        // john.doe
+```
+
+**Text & Names**:
+```php
+$name = $this->faker->name();                // John Doe
+$firstName = $this->faker->firstName();      // John
+$lastName = $this->faker->lastName();        // Doe
+$word = $this->faker->word();                // referral
+$sentence = $this->faker->sentence();        // A complete sentence
+$text = $this->faker->text(200);             // 200 characters of text
+```
+
+**Patterns & Custom Strings**:
+```php
+$initials = $this->faker->lexify('??');      // AB, CD, XY (2 random letters)
+$code = $this->faker->lexify('???');         // ABC, XYZ (3 random letters)
+$pattern = $this->faker->bothify('??-####'); // AB-1234
+$digits = $this->faker->numerify('####');    // 1234
+```
+
+**Numbers & Booleans**:
+```php
+$int = $this->faker->numberBetween(1, 100);  // Random int 1-100
+$bool = $this->faker->boolean();             // true or false
+$float = $this->faker->randomFloat(2, 0, 100); // 45.67
+```
+
+**Dates & Times**:
+```php
+$date = $this->faker->dateTime();            // DateTime object
+$dateString = $this->faker->date();          // 2024-01-15
+$timestamp = $this->faker->unixTime();       // 1704967200
+```
+
+**UUIDs and ULIDs** (Custom Provider):
+```php
+$uuid = $this->faker->uuid();                // Standard UUID v4
+$ulid = $this->faker->ulid();                // ULID object (custom provider)
+```
+
+**URLs & IRIs**:
+```php
+$url = $this->faker->url();                  // https://example.com
+$iri = '/api/customers/' . $this->faker->uuid(); // /api/customers/uuid-here
+```
+
+**Unique Values**:
+```php
+$uniqueEmail = $this->faker->unique()->email();
+$uniqueUsername = $this->faker->unique()->userName();
+```
+
+#### Common Test Patterns
+
+**✅ GOOD Examples**:
 
 ```php
-// ❌ BAD
-$email = 'test@example.com';
+// Instead of hardcoded initials
+public function testCustomerInitials(): void
+{
+    $initials = $this->faker->lexify('??');
+    $customer = new Customer($initials, /* ... */);
 
-// ✅ GOOD
-$email = $this->faker->unique()->email();
+    self::assertSame($initials, $customer->getInitials());
+}
+
+// Instead of hardcoded emails
+public function testUniqueEmail(): void
+{
+    $email1 = $this->faker->unique()->email();
+    $email2 = $this->faker->unique()->email();
+
+    self::assertNotEquals($email1, $email2);
+}
+
+// Instead of hardcoded strings
+public function testLeadSource(): void
+{
+    $oldSource = $this->faker->word();
+    $newSource = $this->faker->word();
+
+    $customer->updateLeadSource($newSource);
+    self::assertSame($newSource, $customer->getLeadSource());
+}
+
+// Using ULID provider
+public function testCustomerUlid(): void
+{
+    $ulid = $this->faker->ulid();
+    $customer = Customer::create($ulid, /* ... */);
+
+    self::assertEquals($ulid, $customer->getUlid());
+}
 ```
+
+**❌ BAD Examples**:
+
+```php
+// ❌ Never hardcode values
+$email = 'test@example.com';
+$initials = 'AB';
+$phone = '+1234567890';
+$leadSource = 'website';
+
+// ❌ Never use sequential values
+$customer1 = new Customer('ABC-001');
+$customer2 = new Customer('ABC-002');
+
+// ❌ Never reuse values across tests
+public function testA(): void { $email = 'same@example.com'; }
+public function testB(): void { $email = 'same@example.com'; }
+```
+
+#### Why Use Faker?
+
+1. **Prevents Test Coupling**: Each test run uses different data
+2. **Catches Edge Cases**: Random data reveals assumptions in code
+3. **More Realistic**: Real-world data patterns vs. hardcoded "test" values
+4. **No Value Reuse**: `unique()` prevents accidental duplicate data
+5. **Self-Documenting**: Faker method names describe data type clearly
 
 ### Maintain 100% Coverage
 
