@@ -18,6 +18,8 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Uid\Ulid;
@@ -43,7 +45,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->createMock(IriConverterInterface::class);
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
-        $this->ulidTransformer = new UlidTransformer(new UlidFactory());
+        $ulidFactory = new UlidFactory();
+        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
         $this->processor = new CustomerPutProcessor(
             $this->repository,
             $this->commandBus,

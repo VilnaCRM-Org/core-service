@@ -18,12 +18,8 @@ final class PathParameterCleaner
             return $parameter;
         }
 
-        return new Model\Parameter(
-            name: $parameter->getName(),
-            in: $parameter->getIn(),
-            description: $parameter->getDescription(),
-            required: $parameter->getRequired(),
-            schema: $parameter->getSchema()
-        );
+        // The ParameterNormalizer removes allowEmptyValue and allowReserved during serialization
+        // This method just validates it's a path parameter - no additional cleaning needed
+        return $parameter;
     }
 }
