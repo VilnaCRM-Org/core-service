@@ -236,6 +236,7 @@ All unit tests extend `UnitTestCase` which provides `$this->faker` with built-in
 #### Available Faker Methods
 
 **Email & Contact**:
+
 ```php
 $email = $this->faker->email();              // john.doe@example.com
 $phone = $this->faker->phoneNumber();        // +1-234-567-8900
@@ -243,6 +244,7 @@ $username = $this->faker->userName();        // john.doe
 ```
 
 **Text & Names**:
+
 ```php
 $name = $this->faker->name();                // John Doe
 $firstName = $this->faker->firstName();      // John
@@ -253,6 +255,7 @@ $text = $this->faker->text(200);             // 200 characters of text
 ```
 
 **Patterns & Custom Strings**:
+
 ```php
 $initials = $this->faker->lexify('??');      // AB, CD, XY (2 random letters)
 $code = $this->faker->lexify('???');         // ABC, XYZ (3 random letters)
@@ -261,6 +264,7 @@ $digits = $this->faker->numerify('####');    // 1234
 ```
 
 **Numbers & Booleans**:
+
 ```php
 $int = $this->faker->numberBetween(1, 100);  // Random int 1-100
 $bool = $this->faker->boolean();             // true or false
@@ -268,6 +272,7 @@ $float = $this->faker->randomFloat(2, 0, 100); // 45.67
 ```
 
 **Dates & Times**:
+
 ```php
 $date = $this->faker->dateTime();            // DateTime object
 $dateString = $this->faker->date();          // 2024-01-15
@@ -275,18 +280,21 @@ $timestamp = $this->faker->unixTime();       // 1704967200
 ```
 
 **UUIDs and ULIDs** (Custom Provider):
+
 ```php
 $uuid = $this->faker->uuid();                // Standard UUID v4
 $ulid = $this->faker->ulid();                // ULID object (custom provider)
 ```
 
 **URLs & IRIs**:
+
 ```php
 $url = $this->faker->url();                  // https://example.com
 $iri = '/api/customers/' . $this->faker->uuid(); // /api/customers/uuid-here
 ```
 
 **Unique Values**:
+
 ```php
 $uniqueEmail = $this->faker->unique()->email();
 $uniqueUsername = $this->faker->unique()->userName();
