@@ -32,7 +32,7 @@ final class InitialsValidator extends ConstraintValidator
             return true;
         }
 
-        if ($value === '' && !$constraint->isOptional()) {
+        if ($value === '' && $constraint->isOptional()) {
             return true;
         }
 

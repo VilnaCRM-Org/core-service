@@ -37,69 +37,37 @@ final class IriReferenceTypeFixer
 
     private function fixOperation(?Operation $operation): ?Operation
     {
-        return match (true) {
-            $operation === null => null,
-            $operation->getRequestBody() === null => $operation,
-            $operation->getRequestBody()->getContent() === null => $operation,
-            default => $this->processOperationContent($operation),
-        };
-    }
+        $content = $operation?->getRequestBody()?->getContent();
 
-    private function processOperationContent(Operation $operation): Operation
-    {
-        $requestBody = $operation->getRequestBody();
-        $content = $requestBody->getContent();
-        $modified = false;
-
-        foreach ($content as $mediaType => $mediaTypeObject) {
-            $fixedProperties = $this->fixProperties($mediaTypeObject);
-            if ($fixedProperties !== null) {
-                $content[$mediaType]['schema']['properties'] = $fixedProperties;
-                $modified = true;
-            }
+        if (!$content instanceof ArrayObject) {
+            return $operation;
         }
+
+        $modified = $this->fixContentProperties($content);
 
         return $modified
             ? $operation->withRequestBody(
-                $requestBody->withContent(new ArrayObject($content->getArrayCopy()))
+                $operation->getRequestBody()->withContent(new ArrayObject($content->getArrayCopy()))
             )
             : $operation;
     }
 
-    /**
-     * @param array<string, mixed> $mediaTypeObject
-     *
-     * @return array<string, mixed>|null
-     */
-    private function fixProperties(array $mediaTypeObject): ?array
+    private function fixContentProperties(ArrayObject $content): bool
     {
-        if (!isset($mediaTypeObject['schema']['properties'])) {
-            return null;
+        $modified = false;
+
+        foreach ($content as $mediaType => $mediaTypeObject) {
+            foreach ($mediaTypeObject['schema']['properties'] ?? [] as $propName => $propSchema) {
+                if (($propSchema['type'] ?? null) === 'iri-reference') {
+                    $content[$mediaType]['schema']['properties'][$propName] = array_merge(
+                        $propSchema,
+                        ['type' => 'string', 'format' => 'iri-reference']
+                    );
+                    $modified = true;
+                }
+            }
         }
 
-        $properties = $mediaTypeObject['schema']['properties'];
-        $fixedProperties = array_map(
-            static fn ($propSchema) => self::fixProperty($propSchema),
-            $properties
-        );
-
-        return $fixedProperties === $properties ? null : $fixedProperties;
-    }
-
-    /**
-     * @param array<string, mixed> $propSchema
-     *
-     * @return array<string, mixed>
-     */
-    private static function fixProperty(array $propSchema): array
-    {
-        return match (true) {
-            !isset($propSchema['type']) => $propSchema,
-            $propSchema['type'] !== 'iri-reference' => $propSchema,
-            default => array_merge($propSchema, [
-                'type' => 'string',
-                'format' => 'iri-reference',
-            ]),
-        };
+        return $modified;
     }
 }
