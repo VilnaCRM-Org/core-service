@@ -15,7 +15,8 @@ final class ParameterNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param Parameter $object
+     * @param array<string, bool|int|string> $context
      */
     public function normalize(
         mixed $object,
@@ -37,7 +38,8 @@ final class ParameterNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param object $data
+     * @param array<string, bool|int|string> $context
      */
     public function supportsNormalization(
         mixed $data,

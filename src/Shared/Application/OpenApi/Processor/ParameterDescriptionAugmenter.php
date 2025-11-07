@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 
@@ -156,15 +157,18 @@ final class ParameterDescriptionAugmenter
     }
 
     /**
-     * @param array<mixed> $parameters
+     * @param array<int, Parameter> $parameters
      * @param array<string, string> $descriptions
      *
-     * @return array<mixed>
+     * @return array<int, Parameter>
      */
     private function augmentParameters(array $parameters, array $descriptions): array
     {
         return array_map(
-            static fn ($parameter) => self::augmentParameter($parameter, $descriptions),
+            static fn (Parameter $parameter): Parameter => self::augmentParameter(
+                $parameter,
+                $descriptions
+            ),
             $parameters
         );
     }
@@ -172,7 +176,7 @@ final class ParameterDescriptionAugmenter
     /**
      * @param array<string, string> $descriptions
      */
-    private static function augmentParameter(mixed $parameter, array $descriptions): mixed
+    private static function augmentParameter(Parameter $parameter, array $descriptions): Parameter
     {
         $paramName = $parameter->getName();
         $description = $parameter->getDescription();
