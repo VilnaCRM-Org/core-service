@@ -20,6 +20,7 @@ final class TagDescriptionAugmenter
 
         return $openApi->withTags($tags);
     }
+
     /**
      * @return array<string, string>
      */
