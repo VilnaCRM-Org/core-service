@@ -8,6 +8,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Processor\OperationDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Processor\PathParametersSanitizer;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionAugmenter;
@@ -24,6 +25,8 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             = new PathParametersSanitizer(),
         private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
             = new ParameterDescriptionAugmenter(),
+        private OperationDescriptionAugmenter $operationDescriptionAugmenter
+            = new OperationDescriptionAugmenter(),
         private IriReferenceTypeFixer $iriReferenceTypeFixer
             = new IriReferenceTypeFixer(),
         private TagDescriptionAugmenter $tagDescriptionAugmenter
@@ -42,6 +45,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         }
 
         $this->parameterDescriptionAugmenter->augment($openApi);
+        $this->operationDescriptionAugmenter->augment($openApi);
         $openApi = $this->tagDescriptionAugmenter->augment($openApi);
         $this->iriReferenceTypeFixer->fix($openApi);
         return $this->pathParametersSanitizer->sanitize($openApi);
