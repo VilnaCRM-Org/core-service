@@ -36,13 +36,6 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             ?? $this->createDefaultIriReferenceTypeFixer();
     }
 
-    private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
-    {
-        return new IriReferenceTypeFixer(
-            new ContentPropertyProcessor(new PropertyTypeFixer())
-        );
-    }
-
     /**
      * @param array<string, string> $context
      */
@@ -57,5 +50,12 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         $openApi = $this->tagDescriptionAugmenter->augment($openApi);
         $this->iriReferenceTypeFixer->fix($openApi);
         return $this->pathParametersSanitizer->sanitize($openApi);
+    }
+
+    private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
+    {
+        return new IriReferenceTypeFixer(
+            new ContentPropertyProcessor(new PropertyTypeFixer())
+        );
     }
 }

@@ -44,21 +44,6 @@ final class UlidType extends Type
         );
     }
 
-    private function createTransformer(): UlidTransformer
-    {
-        $ulidFactory = new UlidFactory();
-        return new UlidTransformer(
-            $ulidFactory,
-            new UlidValidator(),
-            new UlidConverter($ulidFactory)
-        );
-    }
-
-    private function extractBinaryData(mixed $value): mixed
-    {
-        return $value instanceof Binary ? $value->getData() : $value;
-    }
-
     public function closureToMongo(): string
     {
         return <<<'PHP'
@@ -88,5 +73,20 @@ $return = $value ? (function($value) {
     return $transformer->transformFromSymfonyUlid($binary);
 })($value) : null;
 PHP;
+    }
+
+    private function createTransformer(): UlidTransformer
+    {
+        $ulidFactory = new UlidFactory();
+        return new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidConverter($ulidFactory)
+        );
+    }
+
+    private function extractBinaryData(mixed $value): mixed
+    {
+        return $value instanceof Binary ? $value->getData() : $value;
     }
 }

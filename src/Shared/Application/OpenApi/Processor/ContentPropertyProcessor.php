@@ -21,9 +21,8 @@ final class ContentPropertyProcessor
         $modified = false;
 
         foreach ($content as $mediaType => $mediaTypeObject) {
-            if ($this->processMediaType($content, $mediaType, $mediaTypeObject)) {
-                $modified = true;
-            }
+            $wasModified = $this->processMediaType($content, $mediaType, $mediaTypeObject);
+            $modified = $wasModified || $modified;
         }
 
         return $modified;
@@ -41,11 +40,13 @@ final class ContentPropertyProcessor
         $modified = false;
 
         foreach ($properties as $propName => $propSchema) {
-            if ($this->propertyTypeFixer->needsFix($propSchema)) {
-                $content[$mediaType]['schema']['properties'][$propName] =
-                    $this->propertyTypeFixer->fix($propSchema);
-                $modified = true;
+            if (!$this->propertyTypeFixer->needsFix($propSchema)) {
+                continue;
             }
+
+            $content[$mediaType]['schema']['properties'][$propName] =
+                $this->propertyTypeFixer->fix($propSchema);
+            $modified = true;
         }
 
         return $modified;

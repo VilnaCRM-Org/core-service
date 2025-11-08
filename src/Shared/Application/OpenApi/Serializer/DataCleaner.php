@@ -18,9 +18,9 @@ final class DataCleaner
     /**
      * Recursively remove null values and empty arrays from the data.
      *
-     * @param array<mixed> $data
+     * @param array<array-key, mixed> $data
      *
-     * @return array<mixed>
+     * @return array<array-key, mixed>
      */
     public function clean(array $data): array
     {
@@ -40,18 +40,38 @@ final class DataCleaner
     /**
      * Process a single value, returning null if it should be filtered out.
      *
-     * @param array<mixed>|string|int|float|bool|null $value
+     * @param mixed $value
      *
-     * @return array<mixed>|string|int|float|bool|null
+     * @return mixed
      */
-    private function processValue(string|int $key, array|string|int|float|bool|null $value): array|string|int|float|bool|null
-    {
+    private function processValue(
+        string|int $key,
+        array|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
         if ($this->valueFilter->shouldRemove($key, $value)) {
             return null;
         }
 
-        return is_array($value)
-            ? $this->arrayProcessor->process($key, $value, fn (array $data): array => $this->clean($data))
-            : $value;
+        return $this->processArrayOrValue($key, $value);
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    private function processArrayOrValue(
+        string|int $key,
+        array|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        return $this->arrayProcessor->process(
+            $key,
+            $value,
+            fn (array $data): array => $this->clean($data)
+        );
     }
 }

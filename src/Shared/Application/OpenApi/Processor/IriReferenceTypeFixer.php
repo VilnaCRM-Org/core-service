@@ -32,12 +32,18 @@ final class IriReferenceTypeFixer
     private function fixPathItem(PathItem $pathItem): PathItem
     {
         foreach (self::OPERATIONS as $operation) {
-            $pathItem = $pathItem->{'with' . $operation}(
-                $this->fixOperation($pathItem->{'get' . $operation}())
-            );
+            $pathItem = $this->fixSingleOperation($pathItem, $operation);
         }
 
         return $pathItem;
+    }
+
+    private function fixSingleOperation(PathItem $pathItem, string $operation): PathItem
+    {
+        $currentOperation = $pathItem->{'get' . $operation}();
+        $fixedOperation = $this->fixOperation($currentOperation);
+
+        return $pathItem->{'with' . $operation}($fixedOperation);
     }
 
     private function fixOperation(?Operation $operation): ?Operation

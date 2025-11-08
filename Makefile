@@ -101,6 +101,15 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd src ansi phpmd.xml --exclude vendor
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
+analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
+	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
+
+analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
+	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
+
+analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
+	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
+
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php

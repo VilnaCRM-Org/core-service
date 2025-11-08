@@ -16,9 +16,6 @@ final class InitialsValidator extends ConstraintValidator
     ) {
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if ($this->skipChecker->shouldSkip($value, $constraint)) {
@@ -30,9 +27,6 @@ final class InitialsValidator extends ConstraintValidator
         }
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
     private function isOnlyWhitespace(array|string|int|float|bool|null $value): bool
     {
         return is_string($value) && trim($value) === '';
