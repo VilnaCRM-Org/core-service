@@ -63,7 +63,11 @@ final class UlidRangeFilter extends AbstractFilter implements
      */
     private function normalizeValues(mixed $value): array
     {
-        return is_array($value) ? $value : [$value];
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return [$value];
     }
 
     /**

@@ -35,14 +35,8 @@ final class ValueFilter
         string|int $key,
         array|string|int|float|bool|null $value
     ): bool {
-        if (!is_array($value)) {
-            return false;
-        }
-
-        if ($value !== []) {
-            return false;
-        }
-
-        return $this->emptyValueChecker->shouldRemoveEmptyArray($key);
+        return is_array($value)
+            && $value === []
+            && $this->emptyValueChecker->shouldRemoveEmptyArray($key);
     }
 }

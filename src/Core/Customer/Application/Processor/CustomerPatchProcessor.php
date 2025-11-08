@@ -64,62 +64,14 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         CustomerPatch $data,
         Customer $customer
     ): CustomerUpdate {
-        $newInitials = $this->updateInitials($data, $customer);
-        $newEmail = $this->updateEmail($data, $customer);
-        $newPhone = $this->updatePhone($data, $customer);
-        $newLeadSource = $this->updateLeadSource($data, $customer);
-        $newType = $this->updateType($data, $customer);
-        $newStatus = $this->updateStatus($data, $customer);
-        $newConfirmed = $data->confirmed ?? $customer->isConfirmed();
-
         return new CustomerUpdate(
-            newInitials: $newInitials,
-            newEmail: $newEmail,
-            newPhone: $newPhone,
-            newLeadSource: $newLeadSource,
-            newType: $newType,
-            newStatus: $newStatus,
-            newConfirmed: $newConfirmed
-        );
-    }
-
-    private function updateInitials(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->initials,
-            $customer->getInitials()
-        );
-    }
-
-    private function updateEmail(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->email,
-            $customer->getEmail()
-        );
-    }
-
-    private function updatePhone(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->phone,
-            $customer->getPhone()
-        );
-    }
-
-    private function updateLeadSource(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->leadSource,
-            $customer->getLeadSource()
+            newInitials: $this->getNewValue($data->initials, $customer->getInitials()),
+            newEmail: $this->getNewValue($data->email, $customer->getEmail()),
+            newPhone: $this->getNewValue($data->phone, $customer->getPhone()),
+            newLeadSource: $this->getNewValue($data->leadSource, $customer->getLeadSource()),
+            newType: $this->updateType($data, $customer),
+            newStatus: $this->updateStatus($data, $customer),
+            newConfirmed: $data->confirmed ?? $customer->isConfirmed()
         );
     }
 

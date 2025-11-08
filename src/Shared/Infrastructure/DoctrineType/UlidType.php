@@ -87,6 +87,10 @@ PHP;
 
     private function extractBinaryData(mixed $value): mixed
     {
-        return $value instanceof Binary ? $value->getData() : $value;
+        if ($value instanceof Binary) {
+            return $value->getData();
+        }
+
+        return $value;
     }
 }

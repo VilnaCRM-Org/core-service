@@ -6,6 +6,8 @@ namespace App\Core\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 
 final readonly class CustomerUpdateFactory implements
@@ -29,25 +31,50 @@ final readonly class CustomerUpdateFactory implements
      */
     public function create(Customer $customer, array $input): CustomerUpdate
     {
-        $customerType = $this->relationResolver->resolveType(
-            $input['type'] ?? null,
-            $customer
-        );
-
-        $customerStatus = $this->relationResolver->resolveStatus(
-            $input['status'] ?? null,
-            $customer
-        );
-
         return new CustomerUpdate(
-            $this->getStringValue($input['initials'] ?? null, $customer->getInitials()),
-            $this->getStringValue($input['email'] ?? null, $customer->getEmail()),
-            $this->getStringValue($input['phone'] ?? null, $customer->getPhone()),
-            $this->getStringValue($input['leadSource'] ?? null, $customer->getLeadSource()),
-            $customerType,
-            $customerStatus,
-            $input['confirmed'] ?? $customer->isConfirmed()
+            $this->resolveInitials($input, $customer),
+            $this->resolveEmail($input, $customer),
+            $this->resolvePhone($input, $customer),
+            $this->resolveLeadSource($input, $customer),
+            $this->resolveType($input, $customer),
+            $this->resolveStatus($input, $customer),
+            $this->resolveConfirmed($input, $customer)
         );
+    }
+
+    private function resolveInitials(array $input, Customer $customer): string
+    {
+        return $this->getStringValue($input['initials'] ?? null, $customer->getInitials());
+    }
+
+    private function resolveEmail(array $input, Customer $customer): string
+    {
+        return $this->getStringValue($input['email'] ?? null, $customer->getEmail());
+    }
+
+    private function resolvePhone(array $input, Customer $customer): string
+    {
+        return $this->getStringValue($input['phone'] ?? null, $customer->getPhone());
+    }
+
+    private function resolveLeadSource(array $input, Customer $customer): string
+    {
+        return $this->getStringValue($input['leadSource'] ?? null, $customer->getLeadSource());
+    }
+
+    private function resolveType(array $input, Customer $customer): CustomerType
+    {
+        return $this->relationResolver->resolveType($input['type'] ?? null, $customer);
+    }
+
+    private function resolveStatus(array $input, Customer $customer): CustomerStatus
+    {
+        return $this->relationResolver->resolveStatus($input['status'] ?? null, $customer);
+    }
+
+    private function resolveConfirmed(array $input, Customer $customer): bool
+    {
+        return $input['confirmed'] ?? $customer->isConfirmed();
     }
 
     /**

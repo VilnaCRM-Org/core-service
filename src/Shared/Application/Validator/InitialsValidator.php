@@ -29,7 +29,11 @@ final class InitialsValidator extends ConstraintValidator
 
     private function isOnlyWhitespace(array|string|int|float|bool|null $value): bool
     {
-        return is_string($value) && trim($value) === '';
+        if (!is_string($value)) {
+            return false;
+        }
+
+        return trim($value) === '';
     }
 
     private function addWhitespaceViolation(): void

@@ -13,11 +13,19 @@ final class UlidValidator
 {
     public function isValid(array|string|int|float|bool|object|null $value): bool
     {
-        return $value !== null && $this->isValidStringUlid($value);
+        if ($value === null) {
+            return false;
+        }
+
+        return $this->isValidStringUlid($value);
     }
 
     private function isValidStringUlid(array|string|int|float|bool|object|null $value): bool
     {
-        return !is_string($value) || SymfonyUlid::isValid($value);
+        if (!is_string($value)) {
+            return true;
+        }
+
+        return SymfonyUlid::isValid($value);
     }
 }

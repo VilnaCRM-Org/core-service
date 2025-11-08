@@ -22,13 +22,23 @@ final class CreateCustomerMutationInputTransformer
     public function transform(array $args): CreateCustomerMutationInput
     {
         return new CreateCustomerMutationInput(
-            $args['initials'] ?? null,
-            $args['email'] ?? null,
-            $args['phone'] ?? null,
-            $args['leadSource'] ?? null,
-            $args['type'] ?? null,
-            $args['status'] ?? null,
-            $args['confirmed'] ?? null
+            $this->extractString($args, 'initials'),
+            $this->extractString($args, 'email'),
+            $this->extractString($args, 'phone'),
+            $this->extractString($args, 'leadSource'),
+            $this->extractString($args, 'type'),
+            $this->extractString($args, 'status'),
+            $this->extractBool($args, 'confirmed')
         );
+    }
+
+    private function extractString(array $args, string $key): ?string
+    {
+        return $args[$key] ?? null;
+    }
+
+    private function extractBool(array $args, string $key): ?bool
+    {
+        return $args[$key] ?? null;
     }
 }

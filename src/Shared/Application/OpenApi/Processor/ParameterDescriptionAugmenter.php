@@ -189,7 +189,11 @@ final class ParameterDescriptionAugmenter
 
     private static function hasDescription(Parameter $parameter): bool
     {
-        $description = $parameter->getDescription();
-        return $description !== null && $description !== '';
+        return !self::isDescriptionEmpty($parameter->getDescription());
+    }
+
+    private static function isDescriptionEmpty(?string $description): bool
+    {
+        return $description === null || $description === '';
     }
 }

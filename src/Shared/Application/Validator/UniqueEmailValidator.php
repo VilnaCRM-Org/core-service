@@ -28,7 +28,11 @@ final class UniqueEmailValidator extends ConstraintValidator
 
     private function isEmailAlreadyUsed(mixed $value): bool
     {
-        return $value !== null && $this->customerRepository->findByEmail($value) !== null;
+        if ($value === null) {
+            return false;
+        }
+
+        return $this->customerRepository->findByEmail($value) !== null;
     }
 
     private function addViolation(string $message): void

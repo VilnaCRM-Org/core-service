@@ -24,8 +24,7 @@ final readonly class CustomerRelationTransformer implements
         Customer $customer
     ): CustomerType {
         $iri = $typeIri ?? $this->getDefaultTypeIri($customer);
-
-        $resource = $this->iriConverter->getResourceFromIri($iri);
+        $resource = $this->convertIriToResource($iri);
 
         if (!$resource instanceof CustomerType) {
             throw CustomerTypeNotFoundException::withIri($iri);
@@ -39,8 +38,7 @@ final readonly class CustomerRelationTransformer implements
         Customer $customer
     ): CustomerStatus {
         $iri = $statusIri ?? $this->getDefaultStatusIri($customer);
-
-        $resource = $this->iriConverter->getResourceFromIri($iri);
+        $resource = $this->convertIriToResource($iri);
 
         if (!$resource instanceof CustomerStatus) {
             throw CustomerStatusNotFoundException::withIri($iri);
@@ -61,5 +59,10 @@ final readonly class CustomerRelationTransformer implements
         return $this->iriConverter->getIriFromResource(
             $customer->getStatus()
         );
+    }
+
+    private function convertIriToResource(string $iri): mixed
+    {
+        return $this->iriConverter->getResourceFromIri($iri);
     }
 }

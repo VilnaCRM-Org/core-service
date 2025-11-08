@@ -55,6 +55,10 @@ final class ArrayValueProcessor
      */
     private function applyParameterCleaning(string|int $key, array $value): array
     {
-        return $key === 'parameters' ? $this->parameterCleaner->clean($value) : $value;
+        if ($key === 'parameters') {
+            return $this->parameterCleaner->clean($value);
+        }
+
+        return $value;
     }
 }
