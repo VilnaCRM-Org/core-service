@@ -39,7 +39,11 @@ final class ParameterNormalizer implements NormalizerInterface
 
     private function shouldSkipProcessing(mixed $object, mixed $data): bool
     {
-        return !$object instanceof Parameter || !is_array($data);
+        if (!$object instanceof Parameter) {
+            return true;
+        }
+
+        return !is_array($data);
     }
 
     /**

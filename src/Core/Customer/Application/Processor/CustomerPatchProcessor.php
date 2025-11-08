@@ -115,7 +115,11 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
 
     private function hasValidContent(?string $value): bool
     {
-        return $value !== null && strlen(trim($value)) > 0;
+        if ($value === null) {
+            return false;
+        }
+
+        return strlen(trim($value)) > 0;
     }
 
     private function getCustomerType(

@@ -88,6 +88,10 @@ final readonly class CustomerUpdateFactory implements
 
     private function hasValidContent(?string $value): bool
     {
-        return $value !== null && strlen(trim($value)) > 0;
+        if ($value === null) {
+            return false;
+        }
+
+        return strlen(trim($value)) > 0;
     }
 }

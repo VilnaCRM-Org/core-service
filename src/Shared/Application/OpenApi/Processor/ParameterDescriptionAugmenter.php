@@ -194,6 +194,10 @@ final class ParameterDescriptionAugmenter
 
     private static function isDescriptionEmpty(?string $description): bool
     {
-        return $description === null || $description === '';
+        if ($description === null) {
+            return true;
+        }
+
+        return $description === '';
     }
 }

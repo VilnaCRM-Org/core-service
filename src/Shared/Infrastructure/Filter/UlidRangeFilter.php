@@ -138,7 +138,10 @@ final class UlidRangeFilter extends AbstractFilter implements
         string $property,
         string $resourceClass
     ): bool {
-        return $this->isPropertyEnabled($property, $resourceClass)
-            && $this->isPropertyMapped($property, $resourceClass, true);
+        if (!$this->isPropertyEnabled($property, $resourceClass)) {
+            return false;
+        }
+
+        return $this->isPropertyMapped($property, $resourceClass, true);
     }
 }
