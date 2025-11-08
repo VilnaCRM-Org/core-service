@@ -40,6 +40,10 @@ final class ValidationSkipChecker
         array|string|int|float|bool|null $value,
         Constraint $constraint
     ): bool {
-        return $constraint->isOptional() || $value === '';
+        if ($constraint->isOptional()) {
+            return true;
+        }
+
+        return $value === '';
     }
 }

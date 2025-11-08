@@ -127,18 +127,22 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         CustomerPatch $data,
         Customer $customer
     ): CustomerType {
-        return $data->type
-            ? $this->getCustomerType($data->type)
-            : $customer->getType();
+        if ($data->type === null) {
+            return $customer->getType();
+        }
+
+        return $this->getCustomerType($data->type);
     }
 
     private function updateStatus(
         CustomerPatch $data,
         Customer $customer
     ): CustomerStatus {
-        return $data->status
-            ? $this->getCustomerStatus($data->status)
-            : $customer->getStatus();
+        if ($data->status === null) {
+            return $customer->getStatus();
+        }
+
+        return $this->getCustomerStatus($data->status);
     }
 
     private function dispatchUpdateCommand(
@@ -154,9 +158,12 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         ?string $newValue,
         string $defaultValue
     ): string {
-        return strlen(trim($newValue ?? '')) > 0
-            ? $newValue
-            : $defaultValue;
+        return $this->hasValidContent($newValue) ? $newValue : $defaultValue;
+    }
+
+    private function hasValidContent(?string $value): bool
+    {
+        return $value !== null && strlen(trim($value)) > 0;
     }
 
     private function getCustomerType(

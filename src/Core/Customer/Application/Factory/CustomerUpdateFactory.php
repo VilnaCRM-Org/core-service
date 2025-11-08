@@ -56,12 +56,11 @@ final readonly class CustomerUpdateFactory implements
      */
     private function getStringValue(?string $newValue, string $defaultValue): string
     {
-        $trimmed = trim($newValue ?? '');
+        return $this->hasValidContent($newValue) ? $newValue : $defaultValue;
+    }
 
-        if (strlen($trimmed) > 0) {
-            return $newValue;
-        }
-
-        return $defaultValue;
+    private function hasValidContent(?string $value): bool
+    {
+        return $value !== null && strlen(trim($value)) > 0;
     }
 }
