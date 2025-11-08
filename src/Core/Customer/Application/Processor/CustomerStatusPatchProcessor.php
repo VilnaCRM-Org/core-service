@@ -56,7 +56,12 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
         ?string $newValue,
         string $defaultValue
     ): string {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
+        return $this->hasValidContent($newValue) ? $newValue : $defaultValue;
+    }
+
+    private function hasValidContent(?string $value): bool
+    {
+        return $value !== null && strlen(trim($value)) > 0;
     }
 
     private function dispatchCommand(
