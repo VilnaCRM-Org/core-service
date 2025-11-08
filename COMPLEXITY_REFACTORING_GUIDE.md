@@ -1,10 +1,13 @@
 # Code Complexity Refactoring Task
 
 ## Objective
+
 Systematically refactor the most complex classes in the codebase to reduce cyclomatic complexity and improve code maintainability while maintaining 100% test coverage and mutation testing standards.
 
 ## Background
+
 This repository has strict quality standards enforced by PHPInsights:
+
 - **Cyclomatic complexity must be below 5 per method**
 - **100% test coverage requirement**
 - **100% MSI (Mutation Score Indicator) - 0 escaped mutants**
@@ -15,6 +18,7 @@ This repository has strict quality standards enforced by PHPInsights:
 The repository includes a complexity analysis tool based on **PHPMetrics** - a professional static analysis tool that provides accurate cyclomatic complexity calculations and additional metrics.
 
 ### Usage Commands
+
 ```bash
 # Analyze top 20 most complex classes (default)
 make analyze-complexity
@@ -30,7 +34,9 @@ make analyze-complexity-csv N=20
 ```
 
 ### Script Output
+
 The script provides PHPMetrics-based metrics for each class:
+
 - **Class name** - Full namespace and class name
 - **CCN (Cyclomatic Complexity Number)** - Total decision points in the class
 - **WMC (Weighted Method Count)** - Sum of all method complexities
@@ -43,12 +49,14 @@ The script provides PHPMetrics-based metrics for each class:
 ## Refactoring Workflow
 
 ### Step 1: Identify High-Complexity Classes
+
 ```bash
 # Run complexity analysis to get top 20 classes
 make analyze-complexity N=20
 ```
 
 Focus on classes with:
+
 - Average complexity > 5 per method
 - Total complexity significantly higher than method count
 - Multiple methods with complex logic
@@ -58,11 +66,13 @@ Focus on classes with:
 For each identified class:
 
 1. **Read the class implementation**
+
    - Understand the business logic and purpose
    - Identify complex methods (conditional logic, nested loops, multiple boolean operators)
    - Check dependencies and architectural context
 
 2. **Review existing tests**
+
    - Ensure comprehensive test coverage exists
    - Understand tested scenarios and edge cases
    - Identify gaps in test coverage
@@ -79,16 +89,19 @@ For each identified class:
 For each refactoring:
 
 1. **Make targeted changes**
+
    - Apply one refactoring pattern at a time
    - Keep changes minimal and focused
    - Maintain backward compatibility
 
 2. **Update tests**
+
    - Ensure existing tests still pass
    - Add tests for extracted methods/classes
    - Maintain 100% coverage
 
 3. **Verify quality**
+
    ```bash
    # Run quality checks after each refactoring
    make phpcsfixer        # Fix code style
@@ -117,11 +130,13 @@ make ci
 ## Common Refactoring Patterns
 
 ### Pattern 1: Extract Method
+
 **Before:**
+
 ```php
 public function validate($value): bool
 {
-    if (!$value || strlen($value) < 8 || strlen($value) > 64 || 
+    if (!$value || strlen($value) < 8 || strlen($value) > 64 ||
         !preg_match('/[A-Z]/', $value) || !preg_match('/[0-9]/', $value)) {
         return false;
     }
@@ -130,6 +145,7 @@ public function validate($value): bool
 ```
 
 **After:**
+
 ```php
 public function validate($value): bool
 {
@@ -162,7 +178,9 @@ private function hasDigit(string $value): bool
 ```
 
 ### Pattern 2: Strategy Pattern for Complex Conditionals
+
 **Before:**
+
 ```php
 public function process($type, $data)
 {
@@ -177,6 +195,7 @@ public function process($type, $data)
 ```
 
 **After:**
+
 ```php
 public function process($type, $data)
 {
@@ -191,7 +210,9 @@ class AddressProcessingStrategy { /* ... */ }
 ```
 
 ### Pattern 3: Guard Clauses
+
 **Before:**
+
 ```php
 public function calculate($value)
 {
@@ -207,6 +228,7 @@ public function calculate($value)
 ```
 
 **After:**
+
 ```php
 public function calculate($value)
 {
@@ -224,7 +246,9 @@ public function calculate($value)
 ```
 
 ### Pattern 4: Extract Validation Classes
+
 **Before:**
+
 ```php
 class CustomerService
 {
@@ -237,6 +261,7 @@ class CustomerService
 ```
 
 **After:**
+
 ```php
 class CustomerService
 {
@@ -256,16 +281,19 @@ class CustomerValidator
 ## Quality Standards to Maintain
 
 ### PHPInsights Requirements
+
 - **min-quality**: 100%
 - **min-complexity**: 95%
 - **min-architecture**: 100%
 - **min-style**: 100%
 
 ### Test Coverage Requirements
+
 - **Unit test coverage**: 100%
 - **Mutation testing**: 100% MSI (0 escaped mutants)
 
 ### Architecture Boundaries
+
 - Respect hexagonal architecture layers
 - Follow DDD bounded contexts
 - Maintain CQRS separation
@@ -274,6 +302,7 @@ class CustomerValidator
 ## Prohibited Actions
 
 ❌ **DO NOT**:
+
 - Decrease quality thresholds in configuration files
 - Skip or suppress failing tests
 - Remove test coverage
@@ -283,6 +312,7 @@ class CustomerValidator
 - Break backward compatibility without justification
 
 ✅ **DO**:
+
 - Extract methods to reduce complexity
 - Create strategy classes for complex logic
 - Use composition over inheritance
@@ -326,7 +356,7 @@ make analyze-complexity N=20
 
 # 3. Verify after each refactoring
 make phpcsfixer
-make psalm  
+make psalm
 make unit-tests
 make infection
 

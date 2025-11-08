@@ -5,6 +5,7 @@ Track code quality improvements over time, monitor trends, and ensure sustained 
 ## Overview
 
 Monitoring PHPInsights metrics helps you:
+
 - **Track improvements** over time
 - **Prevent degradation** through early detection
 - **Identify problem areas** that need attention
@@ -37,11 +38,13 @@ vendor/bin/phpinsights --format=json | jq '{
 ```
 
 ### View Baseline
+
 ```bash
 cat .metrics/baseline.json
 ```
 
 Expected output:
+
 ```json
 {
   "date": "2025-11-08",
@@ -69,6 +72,7 @@ make phpinsights
 ```
 
 **Captainhook Configuration** (captainhook.json):
+
 ```json
 {
   "pre-commit": {
@@ -107,6 +111,7 @@ make analyze-complexity N=10
 ```
 
 **Track daily changes**:
+
 ```bash
 # Save today's complexity snapshot
 make analyze-complexity-json N=20 > .metrics/complexity-$(date +%Y-%m-%d).json
@@ -120,6 +125,7 @@ fi
 ```
 
 **Focus your refactoring**:
+
 - Classes with CCN > 15: Priority refactoring targets
 - Classes that appeared in top 10 multiple days: Chronic issues
 - New entries in top 10: Recent complexity increases
@@ -196,11 +202,13 @@ fi
 ```
 
 **Make it executable**:
+
 ```bash
 chmod +x scripts/weekly-quality-report.sh
 ```
 
 **Run weekly**:
+
 ```bash
 ./scripts/weekly-quality-report.sh
 ```
@@ -441,6 +449,7 @@ echo "╚═══════════════════════�
 ```
 
 **Run dashboard**:
+
 ```bash
 chmod +x scripts/quality-dashboard.sh
 ./scripts/quality-dashboard.sh
@@ -463,11 +472,13 @@ make analyze-complexity-json N=50 > hotspots.json
 ```
 
 **Analyze the results**:
+
 - Focus on classes with CCN > 15 first
 - Check Max Method Complexity > 10
 - Review Maintainability Index < 65
 
 **Export for reporting**:
+
 ```bash
 # CSV format for spreadsheets
 make analyze-complexity-csv N=20 > complexity-hotspots.csv
@@ -710,6 +721,7 @@ Already configured via Captainhook (`captainhook.json`):
 ```
 
 Reinstall hooks:
+
 ```bash
 vendor/bin/captainhook install
 ```
@@ -729,6 +741,7 @@ vendor/bin/captainhook install
 ---
 
 **See Also**:
+
 - [troubleshooting.md](troubleshooting.md) - Fix issues that arise
 - [refactoring-strategies.md](../refactoring-strategies.md) - Reduce complexity
 - [complexity-metrics.md](complexity-metrics.md) - Understand metrics

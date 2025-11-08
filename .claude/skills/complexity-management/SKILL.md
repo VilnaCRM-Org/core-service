@@ -10,6 +10,7 @@ Maintain exceptional code quality standards using PHPInsights in this Symfony-ba
 ## When to Use This Skill
 
 Use this skill when:
+
 - PHPInsights checks fail (`make phpinsights` returns errors)
 - Cyclomatic complexity exceeds thresholds
 - Code quality score drops below 100%
@@ -50,6 +51,7 @@ Use this skill when:
 ```
 
 **Protected thresholds are non-negotiable**:
+
 - min-quality: 100% (never lower)
 - min-complexity: 94% (never lower)
 - min-architecture: 100% (never lower)
@@ -80,6 +82,7 @@ make analyze-complexity-csv N=15 > complexity.csv
 ```
 
 **Output shows** for each class:
+
 - **CCN (Cyclomatic Complexity)**: > 15 is critical
 - **WMC (Weighted Method Count)**: Sum of all method complexities
 - **Avg Complexity**: CCN ÷ Methods (target: < 5)
@@ -125,6 +128,7 @@ PHPInsights provides four scores:
 ### 4. Prioritize Fixes
 
 **Priority Order:**
+
 1. **CRITICAL (Complexity > 15)**: Immediate refactoring required
 2. **HIGH (Architecture violations)**: Breaks hexagonal/DDD boundaries
 3. **MEDIUM (Complexity 10-15)**: Plan refactoring
@@ -158,12 +162,14 @@ make phpinsights
 **Problem**: Method has too many decision points (if/else/switch/loops)
 
 **First, identify which classes need refactoring**:
+
 ```bash
 # Find top 10 most complex classes
 make analyze-complexity N=10
 ```
 
 **Solutions**:
+
 1. **Extract methods**: Break complex method into smaller private methods
 2. **Strategy pattern**: Replace conditionals with polymorphism
 3. **Early returns**: Reduce nesting with guard clauses
@@ -176,12 +182,14 @@ See [refactoring-strategies.md](refactoring-strategies.md) for DDD/CQRS-specific
 **Problem**: Layer dependencies violated (e.g., Domain depending on Infrastructure)
 
 **Solutions**:
+
 1. **Review layer boundaries**: Domain → Application → Infrastructure
 2. **Use interfaces**: Define contracts in Domain, implement in Infrastructure
 3. **Dependency injection**: Inject dependencies through constructors
 4. **Repository pattern**: Keep data access in Infrastructure layer
 
 **Project Architecture**:
+
 ```
 src/{BoundedContext}/
 ├── Domain/           # No external dependencies
@@ -201,6 +209,7 @@ src/{BoundedContext}/
 **Problem**: Code doesn't meet PSR-12 or Symfony coding standards
 
 **Solutions**:
+
 ```bash
 # Auto-fix most style issues
 make phpcsfixer
@@ -214,6 +223,7 @@ make phpinsights
 **Problem**: Lines exceed configured limit (100 chars)
 
 **Config**:
+
 ```php
 LineLengthSniff::class => [
     'lineLimit' => 100,
@@ -222,6 +232,7 @@ LineLengthSniff::class => [
 ```
 
 **Solutions**:
+
 1. Break long method calls into multiple lines
 2. Extract complex expressions into variables
 3. Use named parameters (PHP 8+)

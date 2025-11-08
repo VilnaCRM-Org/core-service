@@ -17,13 +17,13 @@ make analyze-complexity N=10
 
 The command shows these metrics for each class:
 
-| Metric | Critical Threshold | What It Means |
-|--------|-------------------|---------------|
-| **CCN** (Cyclomatic Complexity) | > 15 | Total decision points - REFACTOR IMMEDIATELY |
-| **WMC** (Weighted Method Count) | > 50 | Sum of all method complexities |
-| **Avg Complexity** | > 5 | CCN ÷ Methods - Target is < 5 |
-| **Max Complexity** | > 10 | Highest single method complexity |
-| **Maintainability Index** | < 65 | 0-100 scale (higher is better) |
+| Metric                          | Critical Threshold | What It Means                                |
+| ------------------------------- | ------------------ | -------------------------------------------- |
+| **CCN** (Cyclomatic Complexity) | > 15               | Total decision points - REFACTOR IMMEDIATELY |
+| **WMC** (Weighted Method Count) | > 50               | Sum of all method complexities               |
+| **Avg Complexity**              | > 5                | CCN ÷ Methods - Target is < 5                |
+| **Max Complexity**              | > 10               | Highest single method complexity             |
+| **Maintainability Index**       | < 65               | 0-100 scale (higher is better)               |
 
 ### 3. Apply the Right Pattern
 
@@ -153,6 +153,7 @@ final readonly class UpdateCustomerCommandHandler implements CommandHandlerInter
 **Complexity**: 2 (excellent for Application layer)
 
 **Benefits**:
+
 - Handler focuses on orchestration
 - Business rules encapsulated in domain
 - Easier to test (domain logic isolated)
@@ -258,6 +259,7 @@ class Customer extends AggregateRoot
 ```
 
 **Benefits**:
+
 - Entity complexity reduced from 8 to 2
 - Value Object is reusable across entities
 - Validation tested once in Value Object
@@ -341,6 +343,7 @@ class Order extends AggregateRoot
 ```
 
 **Benefits**:
+
 - Entity complexity reduced from 6 to 1
 - Status behavior centralized
 - Type-safe status transitions
@@ -440,6 +443,7 @@ class Order extends AggregateRoot
 ```
 
 **Benefits**:
+
 - Entity complexity: 15 → 1
 - Logic broken into testable units
 - Discount calculation reusable
@@ -559,6 +563,7 @@ $customers = $this->repository->findBySpecification(
 ```
 
 **Benefits**:
+
 - Repository complexity: 10 → 1
 - Specifications are composable
 - Each specification is testable
@@ -664,6 +669,7 @@ final readonly class UpdateMailingListOnEmailChanged implements DomainEventSubsc
 ```
 
 **Benefits**:
+
 - Each subscriber: complexity 1
 - Easy to test in isolation
 - Easy to enable/disable features
@@ -749,6 +755,7 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 ```
 
 **Benefits**:
+
 - Processor complexity: 8 → 1
 - Business logic in domain
 - Consistent with CQRS pattern
@@ -763,6 +770,7 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 **Acceptable complexity**: 5-10 for business logic
 
 **When to refactor**:
+
 - Extract to Value Objects if > 10
 - Use Domain Services if multiple entities involved
 - Apply Strategy pattern for complex conditionals
@@ -772,6 +780,7 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 **Acceptable complexity**: 1-3 for orchestration
 
 **When to refactor**:
+
 - Always extract to Domain if complexity > 3
 - Command Handlers should just orchestrate
 - Event Subscribers should do one thing
@@ -781,6 +790,7 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 **Acceptable complexity**: 3-5 for technical concerns
 
 **When to refactor**:
+
 - Use Specification pattern for query complexity
 - Extract to separate classes if > 5
 - Repository methods should be simple
@@ -790,17 +800,20 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 ## Refactoring Checklist
 
 Before refactoring:
+
 - [ ] Run tests to establish baseline: `make unit-tests && make integration-tests`
 - [ ] Run PHPInsights to measure current complexity: `make phpinsights`
 - [ ] Identify hotspots: Methods with complexity > 10
 
 During refactoring:
+
 - [ ] Maintain test coverage (don't delete tests)
 - [ ] Refactor one method at a time
 - [ ] Run tests after each change
 - [ ] Verify PHPInsights score improves
 
 After refactoring:
+
 - [ ] All tests pass: `make unit-tests && make integration-tests`
 - [ ] PHPInsights passes: `make phpinsights` (94%+ complexity, 100% other metrics)
 - [ ] Deptrac passes: `make deptrac` (no layer violations)
@@ -810,15 +823,15 @@ After refactoring:
 
 ## Quick Reference: Complexity Targets by Layer
 
-| Layer | Acceptable Complexity | Refactor If > | Strategy |
-|-------|----------------------|---------------|----------|
-| Domain Entity | 5-10 | 10 | Extract to Value Objects, Domain Services |
-| Domain Service | 3-7 | 7 | Split responsibilities, Strategy pattern |
-| Command Handler | 1-3 | 3 | Move logic to Domain |
-| Event Subscriber | 1-2 | 2 | One subscriber per responsibility |
-| Repository | 1-5 | 5 | Specification pattern |
-| API Processor | 1-2 | 2 | Delegate to Command Handlers |
-| Value Object | 1-5 | 5 | Split validation logic |
+| Layer            | Acceptable Complexity | Refactor If > | Strategy                                  |
+| ---------------- | --------------------- | ------------- | ----------------------------------------- |
+| Domain Entity    | 5-10                  | 10            | Extract to Value Objects, Domain Services |
+| Domain Service   | 3-7                   | 7             | Split responsibilities, Strategy pattern  |
+| Command Handler  | 1-3                   | 3             | Move logic to Domain                      |
+| Event Subscriber | 1-2                   | 2             | One subscriber per responsibility         |
+| Repository       | 1-5                   | 5             | Specification pattern                     |
+| API Processor    | 1-2                   | 2             | Delegate to Command Handlers              |
+| Value Object     | 1-5                   | 5             | Split validation logic                    |
 
 ---
 

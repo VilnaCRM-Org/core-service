@@ -1,9 +1,11 @@
 # 🤖 AI AGENT: REFACTOR COMPLEXITY NOW
 
 ## YOUR MISSION
+
 Reduce cyclomatic complexity in the top 20 most complex classes to < 5 per method while maintaining 100% test coverage and 100% mutation score.
 
 ## START HERE
+
 ```bash
 make analyze-complexity N=20
 ```
@@ -11,8 +13,9 @@ make analyze-complexity N=20
 ## WORKFLOW (Repeat for Each Class)
 
 ### 1️⃣ ANALYZE
+
 - Read class implementation
-- Review existing tests  
+- Review existing tests
 - Identify complex methods (high if/else, loops, boolean operators)
 
 ### 2️⃣ REFACTOR (Pick One Pattern)
@@ -23,28 +26,34 @@ make analyze-complexity N=20
 **Extract Validator** - Move validation to separate classes
 
 ### 3️⃣ TEST
+
 ```bash
 make phpcsfixer && make psalm && make unit-tests && make infection
 ```
+
 ALL must pass. Fix issues immediately.
 
 ### 4️⃣ COMMIT
+
 ```bash
 git add . && git commit -m "Refactor: reduce complexity in ClassName using [pattern]"
 ```
 
 ### 5️⃣ VERIFY (Every 5 Classes)
+
 ```bash
 make ci
 ```
+
 MUST output: **"✅ CI checks successfully passed!"**
 
 ## QUICK PATTERNS
 
 ### Extract Method
+
 ```php
 // BEFORE (complexity: 8)
-if (!$value || strlen($value) < 8 || strlen($value) > 64 || 
+if (!$value || strlen($value) < 8 || strlen($value) > 64 ||
     !preg_match('/[A-Z]/', $value)) return false;
 
 // AFTER (complexity: 1 each)
@@ -57,6 +66,7 @@ private function hasValidLength(?string $value): bool {
 ```
 
 ### Strategy Pattern
+
 ```php
 // BEFORE (complexity: 12)
 if ($type === 'email') { /* 15 lines */ }
@@ -67,6 +77,7 @@ return $this->strategyFactory->create($type)->process($data);
 ```
 
 ### Guard Clauses
+
 ```php
 // BEFORE (nested, complexity: 4)
 if ($value !== null) {
@@ -84,6 +95,7 @@ return $value * 2;
 ```
 
 ## RULES
+
 ✅ Refactor ONE class at a time
 ✅ Keep changes minimal and surgical
 ✅ Write self-documenting code (NO comments)
@@ -96,12 +108,14 @@ return $value * 2;
 ❌ NO breaking architectural boundaries
 
 ## TARGETS
+
 - **Avg complexity per method: < 5**
 - **PHPInsights complexity: ≥ 95%**
 - **Unit test coverage: 100%**
 - **Mutation testing MSI: 100%**
 
 ## SUCCESS PER CLASS
+
 - ✅ Complexity < 5 per method
 - ✅ All tests pass (100% coverage)
 - ✅ Mutation testing: 100% MSI
@@ -110,9 +124,11 @@ return $value * 2;
 - ✅ Clear commit message
 
 ## GO!
+
 ```bash
 make analyze-complexity N=20
 ```
+
 Start with class #1. Refactor systematically. Verify constantly. Commit frequently.
 
 **Full Guide**: `COMPLEXITY_REFACTORING_GUIDE.md`

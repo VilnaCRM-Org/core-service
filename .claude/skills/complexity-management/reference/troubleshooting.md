@@ -7,6 +7,7 @@ Common PHPInsights failures and their solutions specific to this project's Symfo
 When `make phpinsights` fails:
 
 1. **Identify which dimension failed**:
+
    ```
    [CODE] 100.0 pts       ✅
    [COMPLEXITY] 89.3 pts  ❌ (requires 94%)
@@ -15,6 +16,7 @@ When `make phpinsights` fails:
    ```
 
 2. **Read the specific violations**:
+
    ```
    ✗ [Complexity] Line 45: Method has cyclomatic complexity of 15
    ✗ [Style] Line 120: Line exceeds 100 characters
@@ -41,6 +43,7 @@ When `make phpinsights` fails:
 ### Example: Wrong vs Right Approach
 
 **❌ WRONG - Lowering Threshold** (FORBIDDEN):
+
 ```php
 // phpinsights.php
 'requirements' => [
@@ -49,6 +52,7 @@ When `make phpinsights` fails:
 ```
 
 **✅ RIGHT - Fix the Code**:
+
 ```bash
 # 1. Find which classes are complex
 make analyze-complexity N=10
@@ -79,21 +83,25 @@ Before fixing complexity issues, identify which classes need attention.
 ### Use `make analyze-complexity`
 
 **Find top 20 most complex classes** (default):
+
 ```bash
 make analyze-complexity
 ```
 
 **Find top 10 classes**:
+
 ```bash
 make analyze-complexity N=10
 ```
 
 **Export as JSON** (for tracking or CI/CD):
+
 ```bash
 make analyze-complexity-json N=20 > complexity-report.json
 ```
 
 **Export as CSV** (for spreadsheets):
+
 ```bash
 make analyze-complexity-csv N=15 > complexity.csv
 ```
@@ -102,19 +110,20 @@ make analyze-complexity-csv N=15 > complexity.csv
 
 The command shows for each class:
 
-| Metric | What It Means | Critical Threshold |
-|--------|---------------|-------------------|
-| **CCN** (Cyclomatic Complexity) | Total decision points in class | > 15 |
-| **WMC** (Weighted Method Count) | Sum of all method complexities | > 50 |
-| **Methods** | Number of methods in class | > 20 |
-| **LLOC** | Logical Lines of Code | > 200 |
-| **Avg Complexity** | CCN ÷ Methods | > 5 |
-| **Max Complexity** | Highest single method complexity | > 10 |
-| **Maintainability Index** | 0-100 (higher is better) | < 65 |
+| Metric                          | What It Means                    | Critical Threshold |
+| ------------------------------- | -------------------------------- | ------------------ |
+| **CCN** (Cyclomatic Complexity) | Total decision points in class   | > 15               |
+| **WMC** (Weighted Method Count) | Sum of all method complexities   | > 50               |
+| **Methods**                     | Number of methods in class       | > 20               |
+| **LLOC**                        | Logical Lines of Code            | > 200              |
+| **Avg Complexity**              | CCN ÷ Methods                    | > 5                |
+| **Max Complexity**              | Highest single method complexity | > 10               |
+| **Maintainability Index**       | 0-100 (higher is better)         | < 65               |
 
 ### Prioritize Refactoring
 
 **Focus on these first**:
+
 1. **CCN > 15**: CRITICAL - Immediate refactoring required
 2. **Max Complexity > 10**: HIGH - Single method too complex
 3. **Avg Complexity > 5**: MEDIUM - Generally complex class
@@ -149,6 +158,7 @@ make phpinsights              # Verify all checks pass
 ### ❌ "Function/Method has cyclomatic complexity of X (maximum: Y)"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Application/CommandHandler/UpdateCustomerCommandHandler.php
   Line 25: Method `__invoke` has cyclomatic complexity of 12 (maximum: 10)
@@ -159,6 +169,7 @@ make phpinsights              # Verify all checks pass
 **Solutions**:
 
 #### Solution 1: Extract Methods
+
 ```php
 // Before (complexity: 12)
 public function handle(UpdateCustomerCommand $command): void
@@ -193,6 +204,7 @@ private function updateEmail(Customer $customer, string $email): void
 ```
 
 #### Solution 2: Early Returns
+
 ```php
 // Before (complexity: 6)
 public function canRefund(Order $order): bool
@@ -223,6 +235,7 @@ public function canRefund(Order $order): bool
 ```
 
 #### Solution 3: Move to Domain Layer
+
 ```php
 // Before: Logic in Application layer (CommandHandler)
 // Complexity: 10 in handler
@@ -256,6 +269,7 @@ class Customer
 ### ❌ "Class has too many public methods (X, maximum: Y)"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Domain/Repository/CustomerRepository.php
   Class has 25 public methods (maximum: 20)
@@ -266,6 +280,7 @@ class Customer
 **Solutions**:
 
 #### Solution 1: Split Repository by Concern
+
 ```php
 // Before: God Repository
 interface CustomerRepository
@@ -299,6 +314,7 @@ $vipCustomers = $queryRepo->findBySpecification(new VipCustomersSpec());
 ```
 
 #### Solution 2: Extract to Service
+
 ```php
 // Before: Entity with too many methods
 class Customer
@@ -336,6 +352,7 @@ final readonly class CustomerAnalyticsService
 ### ❌ "Function/Method lines of code (X) exceeds Y lines"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Application/CommandHandler/CreateCustomerCommandHandler.php
   Line 20: Method `__invoke` lines of code (125) exceeds 100 lines
@@ -346,6 +363,7 @@ final readonly class CustomerAnalyticsService
 **Solutions**:
 
 #### Extract Private Methods
+
 ```php
 // Before: 125 lines
 public function __invoke(CreateCustomerCommand $command): void
@@ -376,6 +394,7 @@ private function publishEvents(Customer $customer): void { /* ... */ }
 ### ❌ "Class lines of code (X) exceeds Y lines"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Domain/Entity/Customer.php
   Class lines of code (650) exceeds 400 lines
@@ -386,6 +405,7 @@ private function publishEvents(Customer $customer): void { /* ... */ }
 **Solutions**:
 
 #### Extract Value Objects
+
 ```php
 // Before: All logic in entity (650 lines)
 class Customer
@@ -441,6 +461,7 @@ final readonly class Address { /* validation + geocoding */ }
 ### ❌ "Class has coupling between objects of X (threshold: Y)"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Application/Service/CustomerService.php
   Class has coupling between objects of 18 (threshold: 13)
@@ -451,6 +472,7 @@ final readonly class Address { /* validation + geocoding */ }
 **Solutions**:
 
 #### Facade Pattern
+
 ```php
 // Before: 18 dependencies
 class CustomerService
@@ -484,6 +506,7 @@ class CustomerService
 ```
 
 #### Split Service Responsibilities
+
 ```php
 // Before: One service doing too much
 class CustomerService
@@ -507,6 +530,7 @@ class CustomerAnalyticsService { calculateValue(), generateReport() }
 ### ❌ "Property X is not used"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Domain/Entity/Customer.php
   Line 45: Property `createdAt` is not used
@@ -517,6 +541,7 @@ class CustomerAnalyticsService { calculateValue(), generateReport() }
 **Solutions**:
 
 #### Remove Unused Property
+
 ```php
 // If truly unused, remove it
 class Customer
@@ -530,6 +555,7 @@ class Customer
 ```
 
 #### Add Getter if Needed
+
 ```php
 // If it should be used, add getter
 class Customer
@@ -550,6 +576,7 @@ class Customer
 ### ❌ "Line exceeds 100 characters"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Application/Transformer/CustomerTransformer.php
   Line 45: Line exceeds 100 characters (found 127, limit 100)
@@ -560,6 +587,7 @@ class Customer
 **Solutions**:
 
 #### Break Method Calls
+
 ```php
 // Before (127 chars)
 $customer = $this->customerFactory->create($command->name, $command->email, $command->phone, $command->address, $command->country);
@@ -575,6 +603,7 @@ $customer = $this->customerFactory->create(
 ```
 
 #### Break Array Definitions
+
 ```php
 // Before (110 chars)
 $config = ['host' => 'localhost', 'port' => 5432, 'database' => 'customers', 'username' => 'admin'];
@@ -589,6 +618,7 @@ $config = [
 ```
 
 #### Extract Variables
+
 ```php
 // Before (105 chars)
 return $this->repository->findBySpecification(new VipCustomersSpec(), new ActiveSubscriptionSpec());
@@ -600,6 +630,7 @@ return $this->repository->findBySpecification($vipSpec, $activeSpec);
 ```
 
 #### Use Named Parameters (PHP 8+)
+
 ```php
 // Before (120 chars)
 $invoice = Invoice::create($customer, $items, $taxRate, $shippingCost, $discountPercentage, $paymentTerms);
@@ -616,6 +647,7 @@ $invoice = Invoice::create(
 ```
 
 **Auto-fix**: Many style issues can be auto-fixed:
+
 ```bash
 make phpcsfixer
 make phpinsights  # Verify fixes
@@ -626,6 +658,7 @@ make phpinsights  # Verify fixes
 ### ❌ "Missing visibility keyword on property/method"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Domain/Entity/Customer.php
   Line 20: Property `email` must have visibility (public/protected/private)
@@ -634,6 +667,7 @@ make phpinsights  # Verify fixes
 **Root Cause**: PHP allows properties without visibility (defaults to public in old PHP)
 
 **Solution**:
+
 ```php
 // Before
 class Customer
@@ -653,6 +687,7 @@ class Customer
 ### ❌ "Final keyword should be on classes"
 
 **Error Example**:
+
 ```
 ✗ src/Customer/Application/CommandHandler/CreateCustomerCommandHandler.php
   Class should be declared final
@@ -661,6 +696,7 @@ class Customer
 **Root Cause**: Symfony preset prefers final classes (prevent inheritance)
 
 **Solution**:
+
 ```php
 // Before
 class CreateCustomerCommandHandler implements CommandHandlerInterface
@@ -676,6 +712,7 @@ final class CreateCustomerCommandHandler implements CommandHandlerInterface
 ```
 
 **Exception**: Some classes are intentionally not final (see phpinsights.php config):
+
 - `InMemorySymfonyCommandBus`
 - `InMemorySymfonyEventBus`
 - `Customer` entity (may be proxied by Doctrine)
@@ -689,6 +726,7 @@ final class CreateCustomerCommandHandler implements CommandHandlerInterface
 **Status**: **Disabled in this project**
 
 This sniff is removed in `phpinsights.php`:
+
 ```php
 'remove' => [
     SuperfluousInterfaceNamingSniff::class,  // Allow "Interface" suffix
@@ -704,6 +742,7 @@ This sniff is removed in `phpinsights.php`:
 **Status**: **Disabled in this project**
 
 This sniff is removed in `phpinsights.php`:
+
 ```php
 'remove' => [
     SuperfluousExceptionNamingSniff::class,  // Allow "Exception" suffix
@@ -719,6 +758,7 @@ This sniff is removed in `phpinsights.php`:
 **Status**: **Disabled in this project**
 
 This sniff is removed in `phpinsights.php`:
+
 ```php
 'remove' => [
     ForbiddenSetterSniff::class,  // Allow setters where needed
@@ -736,6 +776,7 @@ This sniff is removed in `phpinsights.php`:
 **Status**: **Disabled in this project**
 
 This sniff is removed in `phpinsights.php`:
+
 ```php
 'remove' => [
     UnusedParameterSniff::class,  // Allow unused params in interfaces
@@ -755,6 +796,7 @@ This sniff is removed in `phpinsights.php`:
 **Root Cause**: Dependencies not installed
 
 **Solution**:
+
 ```bash
 # Install dependencies
 make install
@@ -775,6 +817,7 @@ vendor/bin/phpinsights --version
 **Solutions**:
 
 #### Increase PHP Memory Limit
+
 ```bash
 # Temporary (one-time)
 php -d memory_limit=512M vendor/bin/phpinsights
@@ -784,6 +827,7 @@ memory_limit = 512M
 ```
 
 #### Analyze Specific Directory
+
 ```bash
 # Instead of entire src/
 vendor/bin/phpinsights analyse src/Customer
@@ -798,12 +842,15 @@ vendor/bin/phpinsights analyse src/Customer
 **Solution**:
 
 #### Set Timeout
+
 ```bash
 timeout 300 make phpinsights  # 5 minute timeout
 ```
 
 #### Exclude Problem Files
+
 Update `phpinsights.php`:
+
 ```php
 'exclude' => [
     'vendor',
@@ -823,6 +870,7 @@ Update `phpinsights.php`:
 **Solution**:
 
 #### Check PHP Version Consistency
+
 ```bash
 # Local
 php -v
@@ -832,6 +880,7 @@ php -v
 ```
 
 #### Verify Extensions
+
 ```bash
 # Check required extensions
 php -m | grep -E 'mbstring|xml|dom|simplexml'
@@ -844,17 +893,20 @@ php -m | grep -E 'mbstring|xml|dom|simplexml'
 When PHPInsights fails and the error is unclear:
 
 ### Step 1: Run with Verbosity
+
 ```bash
 vendor/bin/phpinsights -v
 ```
 
 ### Step 2: Generate JSON Report
+
 ```bash
 vendor/bin/phpinsights --format=json > report.json
 cat report.json | jq '.issues[] | select(.severity == "error")'
 ```
 
 ### Step 3: Isolate the Issue
+
 ```bash
 # Test specific file
 vendor/bin/phpinsights analyse src/path/to/problematic/File.php -v
@@ -864,6 +916,7 @@ vendor/bin/phpinsights analyse src/Customer/Domain
 ```
 
 ### Step 4: Check Configuration
+
 ```bash
 # Verify phpinsights.php is being loaded
 vendor/bin/phpinsights --config-path=phpinsights.php -v
@@ -878,12 +931,14 @@ vendor/bin/phpinsights --config-path=phpinsights.php -v
 If you must temporarily disable a specific check:
 
 ### Option 1: Inline Suppression
+
 ```php
 // @phpinsights-ignore-next-line
 public function complexMethod() { }
 ```
 
 ### Option 2: Update phpinsights.php
+
 ```php
 'config' => [
     SomeSniff::class => [
@@ -895,6 +950,7 @@ public function complexMethod() { }
 ```
 
 **WARNING**: Never lower the global thresholds in `requirements`:
+
 ```php
 'requirements' => [
     'min-quality' => 100,      // NEVER LOWER
@@ -909,12 +965,14 @@ public function complexMethod() { }
 ## Prevention Strategies
 
 ### Run PHPInsights Before Committing
+
 ```bash
 # Add to pre-commit hook (captainhook.json already configured)
 make phpinsights || exit 1
 ```
 
 ### Run on Changed Files Only
+
 ```bash
 # Get changed files
 git diff --name-only --diff-filter=ACMR | grep '\.php$' > changed.txt
@@ -926,6 +984,7 @@ cat changed.txt | xargs vendor/bin/phpinsights analyse
 ### IDE Integration
 
 Configure PHPStorm to show PHPInsights warnings in real-time:
+
 1. Settings → PHP → Quality Tools → PHP Insights
 2. Point to `vendor/bin/phpinsights`
 3. Enable inspections
@@ -944,6 +1003,7 @@ If you encounter an issue not covered here:
 ---
 
 **See Also**:
+
 - [refactoring-strategies.md](../refactoring-strategies.md) - How to fix complexity issues
 - [complexity-metrics.md](complexity-metrics.md) - Understanding what metrics mean
 - [monitoring.md](monitoring.md) - Tracking improvements over time

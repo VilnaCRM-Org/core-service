@@ -5,6 +5,7 @@ Understanding what PHPInsights measures and how to interpret each metric in the 
 ## Overview
 
 PHPInsights analyzes code across four dimensions:
+
 1. **Code Quality** (100% required)
 2. **Complexity** (94% required)
 3. **Architecture** (100% required)
@@ -23,12 +24,14 @@ Each dimension consists of multiple metrics and checks from various tools (PHP_C
 **Formula**: `Edges - Nodes + 2` in the control flow graph
 
 **Thresholds**:
+
 - **1-4**: Simple, easy to test
 - **5-7**: Moderate complexity, still manageable
 - **8-10**: Complex, consider refactoring
 - **11+**: Very complex, immediate refactoring needed
 
 **Example**:
+
 ```php
 // Cyclomatic Complexity: 1 (no branches)
 public function getTotal(): float
@@ -68,6 +71,7 @@ public function getShippingCost(): float
 ```
 
 **Project Context**:
+
 - **Command Handlers**: Target complexity 1-3 (orchestration only)
 - **Domain Entities**: Acceptable 5-10 (business logic)
 - **Value Objects**: Target complexity 1-5 (validation)
@@ -84,11 +88,13 @@ public function getShippingCost(): float
 **Formula**: Multiplicative combination of decision points
 
 **Thresholds**:
+
 - **< 200**: Acceptable
 - **200-1000**: High, consider refactoring
 - **> 1000**: Extreme, immediate action required
 
 **Example**:
+
 ```php
 // NPath: 8 (2 × 2 × 2)
 public function process($a, $b, $c)
@@ -138,11 +144,13 @@ public function validate($status, $type, $flag)
 **Difference from Cyclomatic**: Penalizes nested structures more heavily
 
 **Key factors**:
+
 - **Nesting**: Each level of nesting adds +1
 - **Breaks in linear flow**: if/else/switch/loops add +1
 - **Logical operators**: && and || add +1
 
 **Example**:
+
 ```php
 // Cognitive Complexity: 1
 public function isEligible(): bool
@@ -190,6 +198,7 @@ public function validate($data): bool
 ```
 
 **Reduction strategies**:
+
 - Use early returns to avoid nesting
 - Extract nested logic to separate methods
 - Replace nested conditionals with polymorphism
@@ -203,12 +212,14 @@ public function validate($data): bool
 **What it measures**: Lines of code per method (excluding blank lines and comments)
 
 **Thresholds**:
+
 - **< 20 lines**: Ideal
 - **20-50 lines**: Acceptable
 - **50-100 lines**: Consider refactoring
 - **> 100 lines**: Immediate refactoring needed
 
 **Project Context**:
+
 - **Command Handlers**: Typically 10-20 lines
 - **Domain Methods**: 10-50 lines
 - **Test methods**: Can be longer (setup/assertions)
@@ -220,12 +231,14 @@ public function validate($data): bool
 **What it measures**: Total lines per class
 
 **Thresholds**:
+
 - **< 200 lines**: Good
 - **200-400 lines**: Acceptable
 - **400-600 lines**: Large, consider splitting
 - **> 600 lines**: God class, refactor immediately
 
 **Project Context**:
+
 - **Entities**: 100-300 lines (business logic concentrated)
 - **Value Objects**: 50-150 lines (validation + behavior)
 - **Repositories**: 100-200 lines (query methods)
@@ -238,12 +251,14 @@ public function validate($data): bool
 **What it measures**: Total public/protected/private methods in a class
 
 **Thresholds**:
+
 - **< 10 methods**: Good
 - **10-20 methods**: Acceptable
 - **20-30 methods**: Consider splitting
 - **> 30 methods**: Too many responsibilities
 
 **Reduction strategies**:
+
 - Split into multiple classes (Single Responsibility Principle)
 - Extract related methods into separate services
 - Use composition over inheritance
@@ -258,11 +273,13 @@ public function validate($data): bool
 **Efferent Coupling (Ce)**: Number of classes this class depends on
 
 **Thresholds**:
+
 - **< 10**: Good
 - **10-15**: Moderate
 - **> 15**: High coupling, consider refactoring
 
 **Example**:
+
 ```php
 // High Efferent Coupling (Ce = 12)
 class OrderService
@@ -295,6 +312,7 @@ class OrderService
 ```
 
 **Project Architecture Impact**:
+
 - **Domain Layer**: Should have LOW efferent coupling (no external dependencies)
 - **Application Layer**: Moderate coupling (depends on Domain + Infrastructure)
 - **Infrastructure Layer**: Can have higher coupling (technical concerns)
@@ -306,11 +324,13 @@ class OrderService
 **What it measures**: Levels in the inheritance tree
 
 **Thresholds**:
+
 - **0-2**: Good (composition over inheritance)
 - **3-4**: Acceptable
 - **> 4**: Too deep, consider composition
 
 **Project Context**:
+
 ```
 AggregateRoot (1)
   └── Customer (2)  ✅ Good depth
@@ -322,6 +342,7 @@ AggregateRoot (1)
 ```
 
 **Prefer composition**:
+
 ```php
 // ❌ Deep inheritance
 class PremiumCustomer extends Customer extends Entity extends AggregateRoot { }
@@ -342,10 +363,12 @@ class Customer extends AggregateRoot
 **Calculation**: Methods that don't share instance variables indicate low cohesion
 
 **Thresholds**:
+
 - **Low LCOM**: Good cohesion
 - **High LCOM**: Poor cohesion, split class
 
 **Example**:
+
 ```php
 // High LCOM (low cohesion)
 class UserManager
@@ -381,6 +404,7 @@ class User
 **What it checks**: PHP Framework Interop Group coding standards
 
 Key rules:
+
 - 4 spaces for indentation (no tabs)
 - Opening braces on new line for classes
 - Opening braces on same line for methods
@@ -399,6 +423,7 @@ Key rules:
 **Exceptions**: Comments can be longer (`ignoreComments: true`)
 
 **Reduction strategies**:
+
 ```php
 // ❌ Too long (>100 chars)
 $result = $this->repository->findBySpecification(new ActiveCustomersSpec(), new VipCustomersSpec(), new MinimumBalanceSpec(Money::fromFloat(1000)));
@@ -439,6 +464,7 @@ Each metric contributes to the overall score:
 ```
 
 **How to prioritize**:
+
 1. Start with highest complexity violations
 2. Focus on Application layer (should be simple)
 3. Then tackle Domain layer violations
@@ -451,6 +477,7 @@ Each metric contributes to the overall score:
 ### Complexity affects Quality
 
 High complexity typically correlates with:
+
 - Longer methods
 - More parameters
 - Higher coupling
@@ -461,6 +488,7 @@ High complexity typically correlates with:
 ### Architecture affects Complexity
 
 Proper layer separation reduces complexity:
+
 - Domain contains complex business logic (acceptable)
 - Application orchestrates simply (low complexity)
 - Infrastructure handles technical concerns (moderate)
@@ -474,6 +502,7 @@ Proper layer separation reduces complexity:
 ### Domain Layer
 
 **Expected metrics**:
+
 - Cyclomatic complexity: 5-10 (business logic)
 - Class length: 100-300 lines
 - Coupling: Low efferent, variable afferent
@@ -483,6 +512,7 @@ Proper layer separation reduces complexity:
 ### Application Layer
 
 **Expected metrics**:
+
 - Cyclomatic complexity: 1-3 (orchestration)
 - Class length: 30-100 lines
 - Coupling: Moderate (depends on Domain + Infrastructure)
@@ -492,6 +522,7 @@ Proper layer separation reduces complexity:
 ### Infrastructure Layer
 
 **Expected metrics**:
+
 - Cyclomatic complexity: 1-5 (technical)
 - Class length: 50-200 lines
 - Coupling: Can be higher (technical integrations)
@@ -502,19 +533,20 @@ Proper layer separation reduces complexity:
 
 ## Quick Reference Table
 
-| Metric | Target | Warning | Critical | Action |
-|--------|--------|---------|----------|--------|
-| Cyclomatic Complexity | 1-7 | 8-10 | 11+ | Extract methods, Strategy pattern |
-| NPath Complexity | <200 | 200-1000 | 1000+ | Same as Cyclomatic + aggressive refactoring |
-| Cognitive Complexity | 1-5 | 6-10 | 11+ | Reduce nesting, early returns |
-| Method Length | <50 | 50-100 | 100+ | Extract methods |
-| Class Length | <250 | 250-400 | 400+ | Split responsibilities |
-| Class Coupling | <10 | 10-15 | 15+ | Use interfaces, dependency injection |
-| Depth of Inheritance | 0-2 | 3-4 | 5+ | Prefer composition |
+| Metric                | Target | Warning  | Critical | Action                                      |
+| --------------------- | ------ | -------- | -------- | ------------------------------------------- |
+| Cyclomatic Complexity | 1-7    | 8-10     | 11+      | Extract methods, Strategy pattern           |
+| NPath Complexity      | <200   | 200-1000 | 1000+    | Same as Cyclomatic + aggressive refactoring |
+| Cognitive Complexity  | 1-5    | 6-10     | 11+      | Reduce nesting, early returns               |
+| Method Length         | <50    | 50-100   | 100+     | Extract methods                             |
+| Class Length          | <250   | 250-400  | 400+     | Split responsibilities                      |
+| Class Coupling        | <10    | 10-15    | 15+      | Use interfaces, dependency injection        |
+| Depth of Inheritance  | 0-2    | 3-4      | 5+       | Prefer composition                          |
 
 ---
 
 **See Also**:
+
 - [refactoring-strategies.md](../refactoring-strategies.md) - How to reduce complexity
 - [troubleshooting.md](troubleshooting.md) - Common issues and fixes
 - [PHPInsights Documentation](https://phpinsights.com/get-started/)
