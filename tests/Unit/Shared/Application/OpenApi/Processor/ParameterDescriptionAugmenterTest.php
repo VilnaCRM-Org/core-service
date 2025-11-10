@@ -286,8 +286,110 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $result = $openApi->getPaths()->getPath('/test')->getGet();
         $resultParams = $result->getParameters();
 
-        // Empty string should be treated as no description and be replaced
         $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
+    }
+
+    public function testAugmentWithNullDescription(): void
+    {
+        $parameter = new Parameter('page', 'query');
+
+        $operation = (new Operation('test', [], [], 'Test'))->withParameters([$parameter]);
+        $pathItem = (new PathItem())->withGet($operation);
+        $paths = new Paths();
+        $paths->addPath('/test', $pathItem);
+
+        $openApi = new OpenApi(
+            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            [],
+            $paths
+        );
+
+        $this->augmenter->augment($openApi);
+
+        $result = $openApi->getPaths()->getPath('/test')->getGet();
+        $resultParams = $result->getParameters();
+
+        $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
+    }
+
+    public function testAugmentPreservesEmptyDescriptionForUnknownParameter(): void
+    {
+        $parameter = new Parameter('unknown_parameter', 'query');
+
+        $operation = (new Operation('test', [], [], 'Test'))->withParameters([$parameter]);
+        $pathItem = (new PathItem())->withGet($operation);
+        $paths = new Paths();
+        $paths->addPath('/test', $pathItem);
+
+        $openApi = new OpenApi(
+            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            [],
+            $paths
+        );
+
+        $this->augmenter->augment($openApi);
+
+        $result = $openApi->getPaths()->getPath('/test')->getGet();
+        $resultParams = $result->getParameters();
+
+        $description = $resultParams[0]->getDescription();
+        $this->assertTrue($description === null || $description === '');
+    }
+
+    public function testIsDescriptionEmptyWithNull(): void
+    {
+        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $method = $reflection->getMethod('isDescriptionEmpty');
+        $method->setAccessible(true);
+        
+        $result = $method->invoke(null, null);
+        
+        $this->assertTrue($result);
+    }
+
+    public function testIsDescriptionEmptyWithEmptyString(): void
+    {
+        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $method = $reflection->getMethod('isDescriptionEmpty');
+        $method->setAccessible(true);
+        
+        $result = $method->invoke(null, '');
+        
+        $this->assertTrue($result);
+    }
+
+    public function testIsDescriptionEmptyWithNonEmptyString(): void
+    {
+        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $method = $reflection->getMethod('isDescriptionEmpty');
+        $method->setAccessible(true);
+        
+        $result = $method->invoke(null, 'Some description');
+        
+        $this->assertFalse($result);
+    }
+
+    public function testHasDescriptionReturnsTrueForNonEmptyDescription(): void
+    {
+        $parameter = (new Parameter('test_param', 'query'))->withDescription('Test description');
+
+        $operation = (new Operation('test', [], [], 'Test'))->withParameters([$parameter]);
+        $pathItem = (new PathItem())->withGet($operation);
+        $paths = new Paths();
+        $paths->addPath('/test', $pathItem);
+
+        $openApi = new OpenApi(
+            new \ApiPlatform\OpenApi\Model\Info('Test', '1.0.0'),
+            [],
+            $paths
+        );
+
+        $this->augmenter->augment($openApi);
+
+        $result = $openApi->getPaths()->getPath('/test')->getGet();
+        $firstParam = $result->getParameters()[0];
+
+        $this->assertEquals('Test description', $firstParam->getDescription());
     }
 
     public function testAugmentWithOperationWithEmptyParametersArray(): void

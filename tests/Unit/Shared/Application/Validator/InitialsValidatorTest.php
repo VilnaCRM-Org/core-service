@@ -94,4 +94,15 @@ final class InitialsValidatorTest extends UnitTestCase
             $this->constraint
         );
     }
+
+    public function testNonStringValueDoesNotValidate(): void
+    {
+        $this->context->expects($this->never())
+            ->method('buildViolation');
+
+        $this->validator->validate(
+            123,
+            $this->constraint
+        );
+    }
 }
