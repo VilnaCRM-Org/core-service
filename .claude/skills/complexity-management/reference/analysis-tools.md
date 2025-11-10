@@ -26,6 +26,7 @@ make analyze-complexity N=50
 **Output format**: Human-readable table with color-coded metrics
 
 **Example output**:
+
 ```
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                TOP 10 MOST COMPLEX CLASSES (PHPMetrics)                     ║
@@ -57,6 +58,7 @@ make analyze-complexity-json N=20 > .metrics/complexity-$(date +%Y-%m-%d).json
 **Output format**: JSON array
 
 **Example**:
+
 ```json
 [
   {
@@ -74,6 +76,7 @@ make analyze-complexity-json N=20 > .metrics/complexity-$(date +%Y-%m-%d).json
 ```
 
 **Use cases**:
+
 - CI/CD integration
 - Trend analysis
 - Automated reporting
@@ -94,6 +97,7 @@ libreoffice complexity-report.csv
 **Output format**: CSV with headers
 
 **Example**:
+
 ```csv
 Rank,Class,CCN,WMC,Methods,LLOC,AvgComplexity,MaxComplexity,Maintainability
 1,App\Core\Customer\Application\Factory\CustomerUpdateFactory,10,20,11,45,3.33,8,77.13
@@ -101,6 +105,7 @@ Rank,Class,CCN,WMC,Methods,LLOC,AvgComplexity,MaxComplexity,Maintainability
 ```
 
 **Use cases**:
+
 - Visual analysis in Excel/LibreOffice
 - Sorting and filtering
 - Charts and graphs
@@ -115,11 +120,13 @@ Rank,Class,CCN,WMC,Methods,LLOC,AvgComplexity,MaxComplexity,Maintainability
 **Includes**: if, else, for, foreach, while, case, catch, try, ternary operators, && and ||
 
 **Thresholds**:
+
 - **1-7**: ✅ Good
 - **8-15**: ⚠️ Consider refactoring
 - **16+**: 🔴 Critical - immediate action required
 
 **Example**:
+
 ```php
 // CCN = 3
 public function example($value)
@@ -140,11 +147,13 @@ public function example($value)
 **Formula**: WMC = Σ(complexity of each method)
 
 **Thresholds**:
+
 - **< 20**: ✅ Good
 - **20-50**: ⚠️ Moderate
 - **> 50**: 🔴 High - split class
 
 **Interpretation**:
+
 - High WMC indicates overall class complexity
 - Combined with method count, shows if complexity is concentrated or distributed
 
@@ -153,11 +162,13 @@ public function example($value)
 **What**: Total number of methods (public + protected + private) in the class
 
 **Thresholds**:
+
 - **< 10**: ✅ Good
 - **10-20**: ⚠️ Acceptable
 - **> 20**: 🔴 Too many - consider splitting
 
 **Interpretation**:
+
 - High method count may indicate too many responsibilities
 - Consider Single Responsibility Principle
 
@@ -166,11 +177,13 @@ public function example($value)
 **What**: Count of executable code lines (excludes blank lines, comments, declarations)
 
 **Thresholds**:
+
 - **< 100**: ✅ Good
 - **100-200**: ⚠️ Moderate
 - **> 200**: 🔴 Large - consider splitting
 
 **Interpretation**:
+
 - Pure measure of actual code volume
 - Different from physical lines (which include whitespace/comments)
 
@@ -179,11 +192,13 @@ public function example($value)
 **Formula**: CCN ÷ Number of Methods
 
 **Thresholds**:
+
 - **< 5**: ✅ Target met
 - **5-10**: ⚠️ Approaching limit
 - **> 10**: 🔴 Exceeds standards
 
 **Interpretation**:
+
 - **Key metric** for PHPInsights compliance
 - Target: < 5 for this project
 - Shows if complexity is evenly distributed or concentrated
@@ -193,11 +208,13 @@ public function example($value)
 **What**: Highest cyclomatic complexity of any single method in the class
 
 **Thresholds**:
+
 - **1-5**: ✅ Excellent
 - **6-10**: ⚠️ Watch this method
 - **> 10**: 🔴 Refactor this method immediately
 
 **Interpretation**:
+
 - Identifies the "worst offender" method
 - This method should be refactored first
 - Even if average is low, a high max indicates a problem
@@ -209,6 +226,7 @@ public function example($value)
 **Scale**: 0-100 (higher is better)
 
 **Thresholds**:
+
 - **> 85**: ✅ Highly maintainable
 - **65-85**: ⚠️ Moderately maintainable
 - **< 65**: 🔴 Difficult to maintain
@@ -216,6 +234,7 @@ public function example($value)
 **Formula**: Based on Halstead metrics, cyclomatic complexity, and lines of code
 
 **Interpretation**:
+
 - Overall health indicator
 - < 20 indicates "legacy code" difficulty
 - Combines multiple factors for holistic view
@@ -267,16 +286,19 @@ Results are formatted based on requested format (table, JSON, CSV).
 ### How They Work Together
 
 **PHPMetrics** (via `make analyze-complexity`):
+
 - Identifies WHICH classes are complex
 - Provides ranking and prioritization
 - Gives detailed metrics per class
 
 **PHPInsights** (via `make phpinsights`):
+
 - Enforces complexity thresholds
 - Checks code quality, architecture, style
 - Must pass for CI/CD
 
 **Workflow**:
+
 ```bash
 # 1. Find complex classes
 make analyze-complexity N=10
@@ -367,6 +389,7 @@ make analyze-complexity-csv N=50 > reports/complexity-$DATE.csv
 ### "Command not found: phpmetrics"
 
 **Solution**:
+
 ```bash
 composer install
 # PHPMetrics installed via composer.json
@@ -375,6 +398,7 @@ composer install
 ### "Out of memory"
 
 **Solution**:
+
 ```bash
 # Increase PHP memory limit
 php -d memory_limit=512M vendor/bin/phpmetrics ...
@@ -385,6 +409,7 @@ php -d memory_limit=512M vendor/bin/phpmetrics ...
 **Cause**: Invalid source directory or no PHP files
 
 **Solution**:
+
 ```bash
 # Verify source path
 ls src/  # Should show PHP files
@@ -398,6 +423,7 @@ vendor/bin/phpmetrics --report-text src/
 **Cause**: PHPMetrics JSON output corrupted
 
 **Solution**:
+
 ```bash
 # Regenerate clean JSON
 rm /tmp/phpmetrics.json
@@ -471,6 +497,7 @@ diff .metrics/sprint-start.json .metrics/sprint-end.json
 ---
 
 **See Also**:
+
 - [complexity-metrics.md](complexity-metrics.md) - Detailed metric explanations
 - [quick-start.md](quick-start.md) - Fast-track refactoring workflow
 - [monitoring.md](monitoring.md) - Long-term tracking strategies

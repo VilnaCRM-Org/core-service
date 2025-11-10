@@ -13,6 +13,7 @@ Replace iterative loops with functional array operations to reduce cyclomatic co
 #### Example: CustomerUpdateFactory (CCN: 10 → 5)
 
 **BEFORE** (Complexity: 10, 11 methods):
+
 ```php
 public function create(Customer $customer, array $input): CustomerUpdate
 {
@@ -32,6 +33,7 @@ private function resolveInitials(array $input, Customer $customer): string {
 ```
 
 **AFTER** (Complexity: 5, 4 methods using `array_reduce`):
+
 ```php
 public function create(Customer $customer, array $input): CustomerUpdate
 {
@@ -62,6 +64,7 @@ private function resolveStringFields(array $input, Customer $customer): array
 ```
 
 **Results**:
+
 - ✅ Reduced from 11 methods to 4 (-64%)
 - ✅ Complexity: 10 → 5 (-50%)
 - ✅ Maintainability: 77.13 → 98.01 (+27%)
@@ -75,6 +78,7 @@ Replace nested `if/else` with `match` expressions for cleaner logic.
 #### Example: DataCleaner (CCN: 5 → 4)
 
 **BEFORE**:
+
 ```php
 private function processValue(string|int $key, mixed $value): mixed
 {
@@ -91,6 +95,7 @@ private function processValue(string|int $key, mixed $value): mixed
 ```
 
 **AFTER** (Using match):
+
 ```php
 private function processValue(string|int $key, mixed $value): mixed
 {
@@ -107,6 +112,7 @@ private function processValue(string|int $key, mixed $value): mixed
 ```
 
 **Results**:
+
 - ✅ More declarative and functional
 - ✅ Reduced nesting (flat structure)
 - ✅ Complexity reduced by 1
@@ -120,6 +126,7 @@ Eliminate code duplication using generic template methods.
 #### Example: CustomerRelationTransformer (CCN: 5 → 4, Methods: 6 → 3)
 
 **BEFORE** (Duplicate methods):
+
 ```php
 public function resolveType(?string $typeIri, Customer $customer): CustomerType
 {
@@ -148,6 +155,7 @@ public function resolveStatus(?string $statusIri, Customer $customer): CustomerS
 ```
 
 **AFTER** (Generic template method):
+
 ```php
 public function resolveType(?string $typeIri, Customer $customer): CustomerType
 {
@@ -193,6 +201,7 @@ private function resolveRelation(
 ```
 
 **Results**:
+
 - ✅ Eliminated 3 duplicate methods
 - ✅ Type-safe with PHP generics (`@template`)
 - ✅ Complexity: 5 → 4
@@ -206,6 +215,7 @@ Replace loops with `array_diff_key`, `array_filter`, `array_map`, etc.
 #### Example: ParameterCleaner (CCN: 5 → 2, Methods: 5 → 2)
 
 **BEFORE**:
+
 ```php
 private function removeDisallowedProperties(array $parameter): array
 {
@@ -233,6 +243,7 @@ private function isPathParameter(array $parameter): bool
 ```
 
 **AFTER** (One method with `array_diff_key` and `match`):
+
 ```php
 private function cleanParameter(mixed $parameter): mixed
 {
@@ -245,6 +256,7 @@ private function cleanParameter(mixed $parameter): mixed
 ```
 
 **Results**:
+
 - ✅ 5 methods → 2 methods (-60%)
 - ✅ Complexity: 5 → 2 (-60%)
 - ✅ Ultra-clean functional approach
@@ -310,6 +322,7 @@ $value = $this->fieldResolver->resolve($input['email'] ?? null, $customer->getEm
 ```
 
 **Results**:
+
 - ✅ Eliminated duplicate code in 2+ classes
 - ✅ Single source of truth for validation logic
 - ✅ 100% test coverage in one place
@@ -324,6 +337,7 @@ Replace `foreach` with `array_reduce` for cleaner functional code.
 #### Example: ContentPropertyProcessor (CCN: 6 → 5)
 
 **BEFORE**:
+
 ```php
 public function process(ArrayObject $content): bool
 {
@@ -342,6 +356,7 @@ public function process(ArrayObject $content): bool
 ```
 
 **AFTER** (Using `array_reduce`):
+
 ```php
 public function process(ArrayObject $content): bool
 {
@@ -358,6 +373,7 @@ public function process(ArrayObject $content): bool
 ```
 
 **Results**:
+
 - ✅ Pure functional approach
 - ✅ No mutable state
 - ✅ Complexity: 6 → 5
@@ -366,16 +382,16 @@ public function process(ArrayObject $content): bool
 
 ## 📋 Quick Reference: Modern PHP Patterns
 
-| Pattern | When to Use | Complexity Reduction | Example |
-|---------|-------------|----------------------|---------|
-| **`array_reduce`** | Replace loops with accumulation | -1 to -3 | Field resolution, data aggregation |
-| **`array_map`** | Transform collections | -1 to -2 | Data transformation |
-| **`array_filter`** | Filter collections | -1 | Remove invalid data |
-| **`array_diff_key`** | Remove keys from arrays | -2 to -3 | Property removal |
-| **`match` expression** | Replace if/else chains | -1 to -3 | State machines, type handling |
-| **PHP Generics** | Eliminate duplicate methods | -2 to -5 | Template methods |
-| **Named Parameters** | Improve readability | 0 (but clearer) | Constructor calls |
-| **Spread Operator** | Merge arrays cleanly | -1 | Combining results |
+| Pattern                | When to Use                     | Complexity Reduction | Example                            |
+| ---------------------- | ------------------------------- | -------------------- | ---------------------------------- |
+| **`array_reduce`**     | Replace loops with accumulation | -1 to -3             | Field resolution, data aggregation |
+| **`array_map`**        | Transform collections           | -1 to -2             | Data transformation                |
+| **`array_filter`**     | Filter collections              | -1                   | Remove invalid data                |
+| **`array_diff_key`**   | Remove keys from arrays         | -2 to -3             | Property removal                   |
+| **`match` expression** | Replace if/else chains          | -1 to -3             | State machines, type handling      |
+| **PHP Generics**       | Eliminate duplicate methods     | -2 to -5             | Template methods                   |
+| **Named Parameters**   | Improve readability             | 0 (but clearer)      | Constructor calls                  |
+| **Spread Operator**    | Merge arrays cleanly            | -1                   | Combining results                  |
 
 ---
 

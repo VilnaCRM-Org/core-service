@@ -5,6 +5,7 @@ Fast-track guide for code agents to systematically reduce complexity. Start here
 ## 🎯 Your Mission
 
 Reduce cyclomatic complexity to meet PHPInsights standards:
+
 - **Target**: 94% complexity minimum
 - **Method complexity**: < 5 average per method
 - **Maintain**: 100% test coverage, 100% mutation score
@@ -35,6 +36,7 @@ cat tests/Unit/path/to/ComplexClassTest.php
 ```
 
 **Focus on**:
+
 - Methods with complexity > 10
 - Nested conditionals (3+ levels deep)
 - Long methods (> 50 lines)
@@ -54,6 +56,7 @@ Pick ONE pattern and apply it:
 See [refactoring-strategies.md](../refactoring-strategies.md) for detailed examples.
 
 **Keep changes**:
+
 - ✅ Minimal and surgical
 - ✅ One pattern at a time
 - ✅ Self-documenting (NO comments needed)
@@ -218,6 +221,7 @@ Your refactoring is complete when:
 ## 🚫 STRICT RULES
 
 ### DO:
+
 ✅ Refactor ONE class at a time
 ✅ Keep changes minimal and surgical
 ✅ Write self-documenting code
@@ -227,6 +231,7 @@ Your refactoring is complete when:
 ✅ Commit frequently with clear messages
 
 ### DO NOT:
+
 ❌ Decrease quality thresholds in phpinsights.php
 ❌ Skip failing tests
 ❌ Add inline comments to explain complex code (refactor instead)
@@ -247,6 +252,7 @@ Your refactoring is complete when:
 6. **Repeat** for next class
 
 **After 5-10 classes**:
+
 ```bash
 make ci  # Full CI to ensure no regressions
 ```
@@ -274,6 +280,7 @@ diff complexity-before.json complexity-after.json
 ## ⏱️ Example Timeline
 
 **Per class** (typical):
+
 - 5 min: Analyze and identify pattern
 - 10 min: Apply refactoring
 - 5 min: Run tests and verify
