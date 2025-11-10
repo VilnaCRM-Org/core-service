@@ -24,54 +24,33 @@ final class DataCleaner
      */
     public function clean(array $data): array
     {
-        $cleaned = [];
-
+        $result = [];
         foreach ($data as $key => $value) {
-            $processedValue = $this->processValue($key, $value);
-
-            if ($processedValue !== null) {
-                $cleaned[$key] = $processedValue;
+            $processed = $this->processValue($key, $value);
+            if ($processed !== null) {
+                $result[$key] = $processed;
             }
         }
-
-        return $cleaned;
+        return $result;
     }
 
     /**
      * Process a single value, returning null if it should be filtered out.
      *
-     * @param mixed $value
-     *
-     * @return mixed
+     * @return array<array-key, mixed>|string|int|float|bool|null
      */
     private function processValue(
         string|int $key,
         array|string|int|float|bool|null $value
     ): array|string|int|float|bool|null {
-        if ($this->valueFilter->shouldRemove($key, $value)) {
-            return null;
-        }
-
-        return $this->processArrayOrValue($key, $value);
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    private function processArrayOrValue(
-        string|int $key,
-        array|string|int|float|bool|null $value
-    ): array|string|int|float|bool|null {
-        if (!is_array($value)) {
-            return $value;
-        }
-
-        return $this->arrayProcessor->process(
-            $key,
-            $value,
-            fn (array $data): array => $this->clean($data)
-        );
+        return match (true) {
+            $this->valueFilter->shouldRemove($key, $value) => null,
+            is_array($value) => $this->arrayProcessor->process(
+                $key,
+                $value,
+                fn (array $data): array => $this->clean($data)
+            ),
+            default => $value,
+        };
     }
 }

@@ -32,11 +32,17 @@ final class UpdateCustomerMutationInputTransformer
         );
     }
 
+    /**
+     * @param array<string, string|bool|null> $args
+     */
     private function extractString(array $args, string $key): ?string
     {
         return $args[$key] ?? null;
     }
 
+    /**
+     * @param array<string, string|bool|null> $args
+     */
     private function extractBool(array $args, string $key): ?bool
     {
         return $args[$key] ?? null;

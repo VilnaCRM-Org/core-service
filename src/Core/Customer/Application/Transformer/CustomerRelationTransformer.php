@@ -19,50 +19,47 @@ final readonly class CustomerRelationTransformer implements
     ) {
     }
 
-    public function resolveType(
-        ?string $typeIri,
-        Customer $customer
-    ): CustomerType {
-        $iri = $typeIri ?? $this->getDefaultTypeIri($customer);
-        $resource = $this->convertIriToResource($iri);
-
-        if (!$resource instanceof CustomerType) {
-            throw CustomerTypeNotFoundException::withIri($iri);
-        }
-
-        return $resource;
-    }
-
-    public function resolveStatus(
-        ?string $statusIri,
-        Customer $customer
-    ): CustomerStatus {
-        $iri = $statusIri ?? $this->getDefaultStatusIri($customer);
-        $resource = $this->convertIriToResource($iri);
-
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($iri);
-        }
-
-        return $resource;
-    }
-
-    private function getDefaultTypeIri(Customer $customer): string
+    public function resolveType(?string $typeIri, Customer $customer): CustomerType
     {
-        return $this->iriConverter->getIriFromResource(
-            $customer->getType()
+        return $this->resolveRelation(
+            $typeIri,
+            $customer->getType(),
+            CustomerType::class,
+            static fn (string $iri) => CustomerTypeNotFoundException::withIri($iri)
         );
     }
 
-    private function getDefaultStatusIri(Customer $customer): string
+    public function resolveStatus(?string $statusIri, Customer $customer): CustomerStatus
     {
-        return $this->iriConverter->getIriFromResource(
-            $customer->getStatus()
+        return $this->resolveRelation(
+            $statusIri,
+            $customer->getStatus(),
+            CustomerStatus::class,
+            static fn (string $iri) => CustomerStatusNotFoundException::withIri($iri)
         );
     }
 
-    private function convertIriToResource(string $iri): mixed
-    {
-        return $this->iriConverter->getResourceFromIri($iri);
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $expectedClass
+     * @param callable(string): \Exception $exceptionFactory
+     *
+     * @return T
+     */
+    private function resolveRelation(
+        ?string $iri,
+        object $default,
+        string $expectedClass,
+        callable $exceptionFactory
+    ): object {
+        $resolvedIri = $iri ?? $this->iriConverter->getIriFromResource($default);
+        $resource = $this->iriConverter->getResourceFromIri($resolvedIri);
+
+        if (!$resource instanceof $expectedClass) {
+            throw $exceptionFactory($resolvedIri);
+        }
+
+        return $resource;
     }
 }

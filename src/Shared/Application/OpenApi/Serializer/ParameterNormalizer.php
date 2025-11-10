@@ -37,15 +37,6 @@ final class ParameterNormalizer implements NormalizerInterface
         return $data;
     }
 
-    private function shouldSkipProcessing(mixed $object, mixed $data): bool
-    {
-        if (!$object instanceof Parameter) {
-            return true;
-        }
-
-        return !is_array($data);
-    }
-
     /**
      * @param object $data
      * @param array<string, bool|int|string> $context
@@ -66,5 +57,14 @@ final class ParameterNormalizer implements NormalizerInterface
         return [
             Parameter::class => true,
         ];
+    }
+
+    private function shouldSkipProcessing(mixed $object, mixed $data): bool
+    {
+        if (!$object instanceof Parameter) {
+            return true;
+        }
+
+        return !is_array($data);
     }
 }

@@ -30,45 +30,10 @@ final class ParameterCleaner
     private function cleanParameter(
         array|string|int|float|bool|null $parameter
     ): array|string|int|float|bool|null {
-        if (!$this->shouldCleanParameter($parameter)) {
-            return $parameter;
-        }
-
-        return $this->removeDisallowedProperties($parameter);
-    }
-
-    private function shouldCleanParameter(array|string|int|float|bool|null $parameter): bool
-    {
-        if (!is_array($parameter)) {
-            return false;
-        }
-
-        return $this->isPathParameter($parameter);
-    }
-
-    /**
-     * @param array<array-key, mixed> $parameter
-     */
-    private function isPathParameter(array $parameter): bool
-    {
-        if (!isset($parameter['in'])) {
-            return false;
-        }
-
-        return $parameter['in'] === 'path';
-    }
-
-    /**
-     * @param array<array-key, mixed> $parameter
-     *
-     * @return array<array-key, mixed>
-     */
-    private function removeDisallowedProperties(array $parameter): array
-    {
-        foreach (self::DISALLOWED_PATH_PROPERTIES as $property) {
-            unset($parameter[$property]);
-        }
-
-        return $parameter;
+        return match (true) {
+            !is_array($parameter) => $parameter,
+            !isset($parameter['in']) || $parameter['in'] !== 'path' => $parameter,
+            default => array_diff_key($parameter, array_flip(self::DISALLOWED_PATH_PROPERTIES)),
+        };
     }
 }

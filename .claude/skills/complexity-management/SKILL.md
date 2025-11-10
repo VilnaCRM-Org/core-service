@@ -21,6 +21,10 @@ Use this skill when:
 - Refactoring existing code for better maintainability
 - Before committing code changes (proactive quality check)
 
+## ⚡ Quick Start
+
+**New to complexity refactoring?** Start with the [Quick Start Guide](reference/quick-start.md) for a fast-track workflow with immediate action steps.
+
 ## Protected Quality Thresholds
 
 **CRITICAL**: These thresholds are defined in `phpinsights.php` and must NEVER be lowered:
@@ -88,6 +92,8 @@ make analyze-complexity-csv N=15 > complexity.csv
 - **Avg Complexity**: CCN ÷ Methods (target: < 5)
 - **Max Complexity**: Highest complexity of any single method
 - **Maintainability Index**: 0-100 (target: > 65)
+
+**See**: [analysis-tools.md](reference/analysis-tools.md) for complete tools documentation
 
 ### 2. Run PHPInsights Analysis
 
@@ -346,9 +352,19 @@ After running this skill, verify:
 
 ## Additional Resources
 
-- **Detailed Refactoring Patterns**: [refactoring-strategies.md](refactoring-strategies.md)
-- **Understanding Metrics**: [reference/complexity-metrics.md](reference/complexity-metrics.md)
-- **Troubleshooting Guide**: [reference/troubleshooting.md](reference/troubleshooting.md)
-- **Tracking Improvements**: [reference/monitoring.md](reference/monitoring.md)
+### Quick References
+
+- **⚡ Quick Start**: [quick-start.md](reference/quick-start.md) - Fast-track workflow for immediate action
+- **🔧 Analysis Tools**: [analysis-tools.md](reference/analysis-tools.md) - Complete guide to complexity analysis commands
+
+### Detailed Guides
+
+- **Refactoring Patterns**: [refactoring-strategies.md](refactoring-strategies.md) - Modern PHP patterns with real-world examples
+- **Understanding Metrics**: [reference/complexity-metrics.md](reference/complexity-metrics.md) - What each metric means
+- **Troubleshooting**: [reference/troubleshooting.md](reference/troubleshooting.md) - Common issues and solutions
+- **Monitoring**: [reference/monitoring.md](reference/monitoring.md) - Track improvements over time
+
+### External Resources
+
 - **PHPInsights Documentation**: https://phpinsights.com/
 - **Project Architecture**: See CLAUDE.md for hexagonal/DDD/CQRS patterns

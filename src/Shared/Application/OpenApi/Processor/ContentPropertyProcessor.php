@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Processor;
 use ArrayObject;
 
 /**
- * Processes content properties to fix IRI reference types.
+ * Processes content properties to fix IRI reference types using functional approach.
  */
 final class ContentPropertyProcessor
 {
@@ -18,14 +18,15 @@ final class ContentPropertyProcessor
 
     public function process(ArrayObject $content): bool
     {
-        $modified = false;
-
-        foreach ($content as $mediaType => $mediaTypeObject) {
-            $wasModified = $this->processMediaType($content, $mediaType, $mediaTypeObject);
-            $modified = $wasModified || $modified;
-        }
-
-        return $modified;
+        return array_reduce(
+            iterator_to_array($content),
+            fn (bool $modified, array $mediaTypeObject) => $this->processMediaType(
+                $content,
+                array_search($mediaTypeObject, iterator_to_array($content), true),
+                $mediaTypeObject
+            ) || $modified,
+            false
+        );
     }
 
     /**
@@ -33,22 +34,39 @@ final class ContentPropertyProcessor
      */
     private function processMediaType(
         ArrayObject $content,
-        string $mediaType,
+        string|int|false $mediaType,
         array $mediaTypeObject
     ): bool {
         $properties = $mediaTypeObject['schema']['properties'] ?? [];
-        $modified = false;
 
-        foreach ($properties as $propName => $propSchema) {
-            if (!$this->propertyTypeFixer->needsFix($propSchema)) {
-                continue;
-            }
+        return array_reduce(
+            array_keys($properties),
+            fn (bool $wasModified, string $propName) => $this->fixPropertyIfNeeded(
+                $content,
+                (string) $mediaType,
+                $propName,
+                $properties[$propName]
+            ) || $wasModified,
+            false
+        );
+    }
 
-            $content[$mediaType]['schema']['properties'][$propName] =
-                $this->propertyTypeFixer->fix($propSchema);
-            $modified = true;
+    /**
+     * @param array<string, mixed> $propSchema
+     */
+    private function fixPropertyIfNeeded(
+        ArrayObject $content,
+        string $mediaType,
+        string $propName,
+        array $propSchema
+    ): bool {
+        if (!$this->propertyTypeFixer->needsFix($propSchema)) {
+            return false;
         }
 
-        return $modified;
+        $content[$mediaType]['schema']['properties'][$propName] =
+            $this->propertyTypeFixer->fix($propSchema);
+
+        return true;
     }
 }

@@ -8,9 +8,9 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValidator;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerTypeTest extends UnitTestCase
