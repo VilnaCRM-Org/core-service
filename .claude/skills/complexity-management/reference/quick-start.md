@@ -51,7 +51,7 @@ Pick ONE pattern and apply it:
 **Pattern 3: Strategy Pattern** - Replace conditionals with strategy classes
 **Pattern 4: Match Expressions** - Use PHP 8.1+ match for cleaner logic
 **Pattern 5: Functional Composition** - Use array_reduce/array_map/array_filter
-**Pattern 6: Extract Shared Service** - Eliminate duplicate code (DRY)
+**Pattern 6: Extract to Application Layer** - Eliminate duplication with Validators/Transformers/Factories (must comply with deptrac)
 
 See [refactoring-strategies.md](../refactoring-strategies.md) for detailed examples.
 

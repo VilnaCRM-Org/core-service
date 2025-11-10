@@ -15,7 +15,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Service\StringFieldResolver;
+use App\Shared\Application\Validator\StringFieldValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -30,7 +30,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private UpdateCustomerCommandFactoryInterface $commandFactory,
         private IriConverterInterface $iriConverter,
         private UlidFactory $ulidTransformer,
-        private StringFieldResolver $fieldResolver,
+        private StringFieldValidator $fieldResolver,
     ) {
     }
 

@@ -15,7 +15,7 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Shared\Application\Service\StringFieldResolver;
+use App\Shared\Application\Validator\StringFieldValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
@@ -41,7 +41,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $this->ulidFactory = new UlidFactory();
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $this->processor = new CustomerPatchProcessor(
             $this->repository,
             $this->commandBus,

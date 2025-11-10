@@ -313,7 +313,9 @@ interface CustomerQueryRepository
 $vipCustomers = $queryRepo->findBySpecification(new VipCustomersSpec());
 ```
 
-#### Solution 2: Extract to Service
+#### Solution 2: Extract to Domain Service
+
+> ⚠️ **Important**: Only use Domain Services for cross-aggregate/cross-entity business logic. Do NOT create Application layer "Services" - use CommandHandlers, Processors, Transformers, or Validators instead.
 
 ```php
 // Before: Entity with too many methods
@@ -323,21 +325,22 @@ class Customer
     public function changeName($name) { }
     public function changeEmail($email) { }
 
-    // Calculation methods (should be service)
+    // Calculation methods (should be Domain Service)
     public function calculateLifetimeValue() { }
     public function predictChurnProbability() { }
     public function recommendProducts() { }
     // ... etc
 }
 
-// After: Extract to domain services
+// After: Extract to Domain Service
 class Customer
 {
     public function changeName($name) { }
     public function changeEmail($email) { }
 }
 
-// Separate service
+// Separate Domain Service (lives in Domain layer)
+// src/Customer/Domain/Service/CustomerAnalyticsService.php
 final readonly class CustomerAnalyticsService
 {
     public function calculateLifetimeValue(Customer $customer): Money { }
@@ -463,19 +466,21 @@ final readonly class Address { /* validation + geocoding */ }
 **Error Example**:
 
 ```
-✗ src/Customer/Application/Service/CustomerService.php
+✗ src/Customer/Application/CommandHandler/CreateCustomerCommandHandler.php
   Class has coupling between objects of 18 (threshold: 13)
 ```
 
 **Root Cause**: Too many dependencies injected
+
+> ⚠️ **Architecture Note**: If you see an Application layer "Service" with many dependencies, this indicates an anemic domain model anti-pattern. Refactor to use CommandHandlers (Application layer) with Domain logic in entities/aggregates.
 
 **Solutions**:
 
 #### Facade Pattern
 
 ```php
-// Before: 18 dependencies
-class CustomerService
+// Before: 18 dependencies in CommandHandler
+class CreateCustomerCommandHandler
 {
     public function __construct(
         private CustomerRepository $repo,
@@ -484,8 +489,8 @@ class CustomerService
         private EventDispatcher $events,
         private Logger $logger,
         private Cache $cache,
-        private PricingService $pricing,
-        private InventoryService $inventory,
+        private PricingCalculator $pricing,
+        private InventoryChecker $inventory,
         private ShippingCalculator $shipping,
         private TaxCalculator $tax,
         // ... 8 more
@@ -493,36 +498,40 @@ class CustomerService
 }
 
 // After: Grouped dependencies via facades
-class CustomerService
+class CreateCustomerCommandHandler
 {
     public function __construct(
         private CustomerRepository $repo,
         private NotificationFacade $notifications,    // Email + SMS + Push
         private CalculationFacade $calculations,      // Pricing + Tax + Shipping
-        private EventPublisher $events,
+        private CommandBusInterface $commandBus,
         private LoggerInterface $logger,
     ) {}
 }
 ```
 
-#### Split Service Responsibilities
+#### Split CommandHandler Responsibilities
 
 ```php
-// Before: One service doing too much
-class CustomerService
+// Before: One CommandHandler doing too much (ANTI-PATTERN!)
+// DON'T DO THIS - This is an anemic domain model
+class CustomerCommandHandler
 {
-    public function create() { }
-    public function update() { }
-    public function delete() { }
+    public function handleCreate() { }
+    public function handleUpdate() { }
+    public function handleDelete() { }
     public function sendEmail() { }
     public function calculateValue() { }
-    public function generateReport() { }
 }
 
-// After: Separate services
-class CustomerWriteService { create(), update(), delete() }
-class CustomerNotificationService { sendEmail(), sendSms() }
-class CustomerAnalyticsService { calculateValue(), generateReport() }
+// After: Separate CommandHandlers (one per command)
+class CreateCustomerCommandHandler { /* handles CreateCustomerCommand */ }
+class UpdateCustomerCommandHandler { /* handles UpdateCustomerCommand */ }
+class DeleteCustomerCommandHandler { /* handles DeleteCustomerCommand */ }
+
+// Notifications and analytics belong elsewhere:
+// - Notifications: Event Subscribers listening to domain events
+// - Analytics: Domain Services or separate bounded context
 ```
 
 ---

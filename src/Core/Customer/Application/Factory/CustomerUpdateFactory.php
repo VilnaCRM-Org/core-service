@@ -7,14 +7,14 @@ namespace App\Core\Customer\Application\Factory;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Service\StringFieldResolver;
+use App\Shared\Application\Validator\StringFieldValidator;
 
 final readonly class CustomerUpdateFactory implements
     CustomerUpdateFactoryInterface
 {
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
-        private StringFieldResolver $fieldResolver,
+        private StringFieldValidator $fieldResolver,
     ) {
     }
 

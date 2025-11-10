@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Service;
+namespace App\Shared\Application\Validator;
 
 /**
- * Resolves string field values with validation against empty/whitespace-only values.
+ * Validates string field values against empty/whitespace-only values.
  * Prevents GraphQL mutations from overwriting existing values with blank strings.
  */
-final readonly class StringFieldResolver
+final readonly class StringFieldValidator
 {
     /**
      * Returns the new value if it has valid content (not null, empty, or whitespace-only),

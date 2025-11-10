@@ -9,7 +9,6 @@ use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
-use SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
 
 return [
@@ -30,14 +29,6 @@ return [
     ],
 
     'config' => [
-        DisallowMixedTypeHintSniff::class => [
-            'exclude' => [
-                'src/Shared/Application/OpenApi',
-                'src/Shared/Application/Validator',
-                'src/Shared/Infrastructure/Filter',
-                'src/Shared/Infrastructure/DoctrineType',
-            ],
-        ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',

@@ -2,6 +2,27 @@
 
 Detailed refactoring patterns specific to this project's hexagonal architecture, Domain-Driven Design, and CQRS implementation.
 
+## 🏛️ Architecture Reference
+
+This project follows the **Hexagonal Architecture (Ports & Adapters)** with **DDD** and **CQRS** patterns based on:
+
+- 📚 **Reference Implementation**: [CodelyTV PHP DDD Example](https://github.com/CodelyTV/php-ddd-example)
+- 🛡️ **Architecture Enforcement**: Deptrac validates layer boundaries (see `deptrac.yaml`)
+
+### Key Architectural Principles
+
+1. **No Anemic Domain Models**: Business logic belongs in Domain entities/aggregates, NOT in Application "services"
+2. **Application Layer Components**: Use Validators, Transformers, Factories, Processors, Resolvers (NOT generic "Services")
+3. **Deptrac Compliance**: All classes MUST match the regex patterns defined in `deptrac.yaml` to be recognized in their layer
+4. **Layer Dependencies** (enforced by deptrac):
+   - **Domain**: No dependencies (pure business logic)
+   - **Application**: Can depend on Domain + Infrastructure
+   - **Infrastructure**: Can depend on Domain + Application
+
+> ⚠️ **Critical**: When creating new classes, ensure they match deptrac's layer patterns or they will show as "uncovered" violations!
+
+---
+
 ## ⚡ NEW: Modern PHP Refactoring Patterns (Real-World Proven)
 
 These patterns were successfully used to achieve **94% complexity** in PHPInsights (from 93.5%).
@@ -263,11 +284,21 @@ private function cleanParameter(mixed $parameter): mixed
 
 ---
 
-### Pattern: Extract Shared Service (DRY Principle)
+### Pattern: Extract to Application Layer (DRY Principle)
 
-Create reusable services to eliminate code duplication.
+Create reusable components in the Application layer to eliminate code duplication. Use the appropriate type based on responsibility: **Validator**, **Transformer**, **Factory**, etc.
 
-#### Example: StringFieldResolver Service
+> ⚠️ **Important**: We do NOT use "Services" for anemic domain model logic. While Services are valid in DDD (Domain Services for cross-aggregate business logic), in this codebase we use specific Application layer components instead. This prevents the anemic domain model anti-pattern.
+>
+> **Allowed Application Layer Components** (must match deptrac patterns):
+> - `Validator\*` - Validation logic (e.g., StringFieldValidator)
+> - `Transformer\*` - Data transformation
+> - `Factory\*` - Object creation
+> - `Processor\*` - API Platform processors
+> - `Resolver\*` - GraphQL resolvers
+> - See `deptrac.yaml` for complete list
+
+#### Example: StringFieldValidator (Validation Logic)
 
 **Problem**: Multiple classes had duplicate validation logic:
 
@@ -293,11 +324,11 @@ private function hasValidContent(?string $value): bool {
 }
 ```
 
-**Solution**: Extracted to shared service:
+**Solution**: Extracted to Application layer component (Validator in this case):
 
 ```php
-// src/Shared/Application/Service/StringFieldResolver.php
-final readonly class StringFieldResolver
+// src/Shared/Application/Validator/StringFieldValidator.php
+final readonly class StringFieldValidator
 {
     public function resolve(?string $newValue, string $defaultValue): string
     {
@@ -315,7 +346,7 @@ final readonly class StringFieldResolver
 
 // Usage in both classes
 public function __construct(
-    private StringFieldResolver $fieldResolver,
+    private StringFieldValidator $fieldResolver,
 ) {}
 
 $value = $this->fieldResolver->resolve($input['email'] ?? null, $customer->getEmail());
@@ -327,6 +358,16 @@ $value = $this->fieldResolver->resolve($input['email'] ?? null, $customer->getEm
 - ✅ Single source of truth for validation logic
 - ✅ 100% test coverage in one place
 - ✅ Reusable across entire codebase
+- ✅ Complies with deptrac Application layer rules
+- ✅ Avoids anemic domain model anti-pattern
+
+**Choosing the Right Component Type**:
+- Validation logic → `Validator\*`
+- Data transformation → `Transformer\*`
+- Object creation → `Factory\*`
+- Cross-aggregate business logic → `Domain\Service\*` (Domain layer, NOT Application!)
+- API Platform state changes → `Processor\*`
+- GraphQL field resolution → `Resolver\*`
 
 ---
 
@@ -1191,6 +1232,71 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 - Use Specification pattern for query complexity
 - Extract to separate classes if > 5
 - Repository methods should be simple
+
+---
+
+## Deptrac Architecture Enforcement
+
+Deptrac validates that your code follows the hexagonal architecture rules defined in `deptrac.yaml`.
+
+### Running Deptrac
+
+```bash
+make deptrac
+```
+
+### Understanding Deptrac Output
+
+**Violations** (❌ MUST BE 0):
+- Classes in one layer accessing forbidden layers
+- Example: Domain layer depending on Infrastructure
+
+**Uncovered** (❌ MUST BE 0):
+- Classes that don't match ANY layer regex pattern
+- This happens when using wrong naming conventions
+
+**Example of Uncovered Violation**:
+```
+Uncovered: App\Shared\Application\Service\StringFieldResolver
+```
+
+This class was in the wrong namespace. The fix:
+- ❌ `Shared\Application\Service\*` → Not in deptrac patterns
+- ✅ `Shared\Application\Validator\*` → Matches Application layer regex
+
+### Deptrac Layer Patterns (from `deptrac.yaml`)
+
+**Application Layer** must match:
+```regex
+.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*
+.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer).*
+```
+
+**Domain Layer** must match:
+```regex
+.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*
+```
+
+**Infrastructure Layer** must match:
+```regex
+.*\\Infrastructure\\(Bus|Transformer|Factory|Repository).*
+```
+
+### Common Deptrac Fixes
+
+1. **"Uncovered" error**: Class doesn't match any layer pattern
+   - Solution: Use correct namespace (Validator, Transformer, Factory, etc.)
+   - Don't use generic "Service" namespace
+
+2. **"Violation" error**: Layer dependency rules broken
+   - Solution: Move logic to correct layer
+   - Domain should NEVER depend on Application or Infrastructure
+
+3. **New Application Layer class**:
+   - ✅ Use: `Application\Validator\*`, `Application\Transformer\*`, `Application\Factory\*`
+   - ❌ Avoid: `Application\Service\*`, `Application\Helper\*`
+
+> 💡 **Tip**: Always run `make deptrac` after refactoring to ensure architectural compliance!
 
 ---
 

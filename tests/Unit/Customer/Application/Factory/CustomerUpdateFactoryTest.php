@@ -10,7 +10,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Service\StringFieldResolver;
+use App\Shared\Application\Validator\StringFieldValidator;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerUpdateFactoryTest extends UnitTestCase
@@ -156,7 +156,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         bool $confirmed
     ): array {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $factory = new CustomerUpdateFactory($relationResolver, $fieldResolver);
         $customer = $this->createMock(Customer::class);
         $type = $this->createMock(CustomerType::class);
@@ -183,7 +183,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupAllFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
@@ -244,7 +244,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupMissingFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createExistingData();
 
@@ -299,7 +299,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupPartialFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = [
             'initials' => $this->faker->lexify('??'),
@@ -355,7 +355,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupEmptyStringsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createExistingCustomerData();
 
@@ -389,7 +389,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupWhitespaceStringsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldResolver();
+        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createCustomerDataWithOverrides([
             'initials' => $this->faker->lexify('??'),
