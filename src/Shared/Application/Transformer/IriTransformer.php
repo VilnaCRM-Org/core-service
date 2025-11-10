@@ -19,7 +19,7 @@ final readonly class IriTransformer implements IriTransformerInterface
     {
         $path = parse_url($iri, PHP_URL_PATH);
 
-        if ($path === null) {
+        if (!$path) {
             return $iri;
         }
 

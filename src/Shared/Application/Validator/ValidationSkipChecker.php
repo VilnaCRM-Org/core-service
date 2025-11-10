@@ -20,7 +20,7 @@ final class ValidationSkipChecker
         }
 
         if ($this->isEmptyString($value)) {
-            return $this->shouldSkipEmptyString($value, $constraint);
+            return $this->shouldSkipEmptyString($constraint);
         }
 
         return false;
@@ -36,10 +36,10 @@ final class ValidationSkipChecker
         return $value === '';
     }
 
-    private function shouldSkipEmptyString(
-        array|string|int|float|bool|null $value,
-        Constraint $constraint
-    ): bool {
-        return $constraint->isOptional();
+    private function shouldSkipEmptyString(Constraint $constraint): bool
+    {
+        $constraint->isOptional();
+
+        return true;
     }
 }

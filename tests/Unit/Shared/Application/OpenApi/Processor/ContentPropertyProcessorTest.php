@@ -133,4 +133,23 @@ final class ContentPropertyProcessorTest extends UnitTestCase
 
         $this->assertFalse($result);
     }
+
+    public function testProcessHandlesNumericKey(): void
+    {
+        $content = new ArrayObject([
+            0 => [
+                'schema' => [
+                    'properties' => [
+                        'relation' => ['type' => 'iri-reference'],
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = $this->processor->process($content);
+
+        $this->assertTrue($result);
+        $this->assertEquals('string', $content[0]['schema']['properties']['relation']['type']);
+        $this->assertEquals('iri-reference', $content[0]['schema']['properties']['relation']['format']);
+    }
 }
