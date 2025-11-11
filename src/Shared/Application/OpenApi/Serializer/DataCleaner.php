@@ -18,9 +18,9 @@ final class DataCleaner
     /**
      * Recursively remove null values and empty arrays from the data.
      *
-     * @param array<array-key, mixed> $data
+     * @param array<array-key, array|\ArrayObject|string|int|float|bool|null> $data
      *
-     * @return array<array-key, mixed>
+     * @return array<array-key, array|string|int|float|bool|null>
      */
     public function clean(array $data): array
     {
@@ -34,11 +34,6 @@ final class DataCleaner
         return $result;
     }
 
-    /**
-     * Process a single value, returning null if it should be filtered out.
-     *
-     * @return array<array-key, mixed>|string|int|float|bool|null
-     */
     private function processValue(
         string|int $key,
         array|\ArrayObject|string|int|float|bool|null $value

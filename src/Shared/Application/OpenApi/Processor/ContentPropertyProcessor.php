@@ -12,61 +12,27 @@ use ArrayObject;
 final class ContentPropertyProcessor
 {
     public function __construct(
-        private readonly PropertyTypeFixer $propertyTypeFixer
+        private readonly MediaTypePropertyProcessor $mediaTypeProcessor
     ) {
     }
 
     public function process(ArrayObject $content): bool
     {
-        return array_reduce(
+        $mediaTypes = array_filter(
             iterator_to_array($content),
-            fn (bool $modified, array $mediaTypeObject) => $this->processMediaType(
-                $content,
-                array_search($mediaTypeObject, iterator_to_array($content), true),
-                $mediaTypeObject
-            ) || $modified,
-            false
+            static fn ($mediaTypeObject): bool => is_array($mediaTypeObject)
         );
-    }
 
-    /**
-     * @param array<string, mixed> $mediaTypeObject
-     */
-    private function processMediaType(
-        ArrayObject $content,
-        string|int|false $mediaType,
-        array $mediaTypeObject
-    ): bool {
-        $properties = $mediaTypeObject['schema']['properties'] ?? [];
+        $wasModified = false;
 
-        return array_reduce(
-            array_keys($properties),
-            fn (bool $wasModified, string $propName) => $this->fixPropertyIfNeeded(
+        foreach ($mediaTypes as $mediaType => $mediaTypeObject) {
+            $wasModified = $this->mediaTypeProcessor->process(
                 $content,
                 (string) $mediaType,
-                $propName,
-                $properties[$propName]
-            ) || $wasModified,
-            false
-        );
-    }
-
-    /**
-     * @param array<string, mixed> $propSchema
-     */
-    private function fixPropertyIfNeeded(
-        ArrayObject $content,
-        string $mediaType,
-        string $propName,
-        array $propSchema
-    ): bool {
-        if (!$this->propertyTypeFixer->needsFix($propSchema)) {
-            return false;
+                $mediaTypeObject
+            ) || $wasModified;
         }
 
-        $content[$mediaType]['schema']['properties'][$propName] =
-            $this->propertyTypeFixer->fix($propSchema);
-
-        return true;
+        return $wasModified;
     }
 }

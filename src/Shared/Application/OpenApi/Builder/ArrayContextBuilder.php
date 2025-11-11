@@ -33,47 +33,83 @@ final class ArrayContextBuilder
     /**
      * @param array<Parameter> $params
      *
-     * @return array{items: array<string, string>, example: array<string, mixed>, required: array<string>}
+     * @return array{
+     *     items: array<string, string>,
+     *     example: array<string, string|int|array|bool|null>,
+     *     required: array<string>
+     * }
      */
     private function buildParamsCollection(array $params): array
     {
-        $items = [];
-        $example = [];
-        $required = [];
-
-        foreach ($params as $param) {
-            if ($param->isRequired()) {
-                $required[] = $param->name;
-            }
-            $this->addParameterToItems($items, $param);
-            $example[$param->name] = $param->example;
-        }
-
         return [
-            'items' => $items,
-            'example' => $example,
-            'required' => $required,
+            'items' => $this->buildItems($params),
+            'example' => $this->buildExample($params),
+            'required' => $this->collectRequired($params),
         ];
     }
 
     /**
-     * @param array<string, string> $items
+     * @param array<Parameter> $params
+     *
+     * @return array<string, array<string, string|int>>
      */
-    private function addParameterToItems(array &$items, Parameter $param): void
+    private function buildItems(array $params): array
     {
-        $items[$param->name] = array_filter(
-            [
-                'type' => $param->type,
-                'maxLength' => $param->maxLength,
-                'format' => $param->format,
-            ],
-            static fn ($value) => $value !== null
+        return array_reduce(
+            $params,
+            static function (array $carry, Parameter $param): array {
+                $carry[$param->name] = array_filter(
+                    [
+                        'type' => $param->type,
+                        'maxLength' => $param->maxLength,
+                        'format' => $param->format,
+                    ],
+                    static fn ($value) => $value !== null
+                );
+
+                return $carry;
+            },
+            []
+        );
+    }
+
+    /**
+     * @param array<Parameter> $params
+     *
+     * @return array<string, string|int|array|bool|null>
+     */
+    private function buildExample(array $params): array
+    {
+        return array_reduce(
+            $params,
+            static function (array $carry, Parameter $param): array {
+                $carry[$param->name] = $param->example;
+
+                return $carry;
+            },
+            []
+        );
+    }
+
+    /**
+     * @param array<Parameter> $params
+     *
+     * @return array<int, string>
+     */
+    private function collectRequired(array $params): array
+    {
+        return array_map(
+            static fn (Parameter $param): string => $param->name,
+            array_filter(
+                $params,
+                static fn (Parameter $param): bool => $param->isRequired()
+            )
         );
     }
 
     /**
      * @param array<string, string> $items
-     * @param array<string, string|int|array> $example
+     * @param array<string, string|int|array|bool|null> $example
      * @param array<string> $required
      */
     private function buildContent(

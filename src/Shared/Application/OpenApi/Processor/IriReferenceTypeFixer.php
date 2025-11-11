@@ -22,9 +22,13 @@ final class IriReferenceTypeFixer
         foreach (array_keys($openApi->getPaths()->getPaths()) as $path) {
             $pathItem = $openApi->getPaths()->getPath($path);
 
-            foreach (self::OPERATIONS as $operation) {
-                $pathItem = $this->fixOperation($pathItem, $operation);
-            }
+            $pathItem = array_reduce(
+                self::OPERATIONS,
+                function (PathItem $item, string $operation): PathItem {
+                    return $this->fixOperation($item, $operation);
+                },
+                $pathItem
+            );
 
             $openApi->getPaths()->addPath($path, $pathItem);
         }
@@ -35,11 +39,10 @@ final class IriReferenceTypeFixer
         $currentOperation = $pathItem->{'get' . $operation}();
         $content = $currentOperation?->getRequestBody()?->getContent();
 
-        if (!$content instanceof ArrayObject) {
-            return $pathItem;
-        }
-
-        if (!$this->contentProcessor->process($content)) {
+        if (
+            !$content instanceof ArrayObject
+            || !$this->contentProcessor->process($content)
+        ) {
             return $pathItem;
         }
 

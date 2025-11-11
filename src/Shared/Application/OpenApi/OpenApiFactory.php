@@ -9,10 +9,14 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
+use App\Shared\Application\OpenApi\Processor\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Processor\PathParametersSanitizer;
 use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionAugmenter;
+use ArrayObject;
+use Traversable;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
@@ -30,7 +34,9 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             = new ParameterDescriptionAugmenter(),
         ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
         private TagDescriptionAugmenter $tagDescriptionAugmenter
-            = new TagDescriptionAugmenter()
+            = new TagDescriptionAugmenter(),
+        private OpenApiExtensionsApplier $extensionsApplier
+            = new OpenApiExtensionsApplier()
     ) {
         $this->iriReferenceTypeFixer = $iriReferenceTypeFixer
             ?? $this->createDefaultIriReferenceTypeFixer();
@@ -42,20 +48,54 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-        foreach ($this->endpointFactories as $endpointFactory) {
-            $endpointFactory->createEndpoint($openApi);
-        }
+        $factories = $this->endpointFactories instanceof Traversable
+            ? iterator_to_array($this->endpointFactories)
+            : $this->endpointFactories;
+
+        array_walk(
+            $factories,
+            static function (EndpointFactoryInterface $endpointFactory) use ($openApi): void {
+                $endpointFactory->createEndpoint($openApi);
+            }
+        );
 
         $this->parameterDescriptionAugmenter->augment($openApi);
         $openApi = $this->tagDescriptionAugmenter->augment($openApi);
         $this->iriReferenceTypeFixer->fix($openApi);
-        return $this->pathParametersSanitizer->sanitize($openApi);
+        $openApi = $this->pathParametersSanitizer->sanitize($openApi);
+
+        return $this->normalizeOpenApi($openApi);
+    }
+
+    private function normalizeOpenApi(OpenApi $openApi): OpenApi
+    {
+        $webhooks = $openApi->getWebhooks();
+        $normalizedOpenApi = new OpenApi(
+            $openApi->getInfo(),
+            $openApi->getServers(),
+            $openApi->getPaths(),
+            $openApi->getComponents(),
+            $openApi->getSecurity(),
+            $openApi->getTags(),
+            $openApi->getExternalDocs(),
+            $openApi->getJsonSchemaDialect(),
+            $webhooks instanceof ArrayObject && $webhooks->count() > 0
+                ? $webhooks
+                : new ArrayObject()
+        );
+
+        return $this->extensionsApplier->apply(
+            $normalizedOpenApi,
+            $openApi->getExtensionProperties()
+        );
     }
 
     private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
     {
         return new IriReferenceTypeFixer(
-            new ContentPropertyProcessor(new PropertyTypeFixer())
+            new ContentPropertyProcessor(
+                new MediaTypePropertyProcessor(new PropertyTypeFixer())
+            )
         );
     }
 }
