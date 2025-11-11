@@ -3760,4 +3760,4 @@ tags:
   -
     name: HealthCheck
     description: 'Health check endpoints for monitoring'
-webhooks: []
+webhooks: {  }

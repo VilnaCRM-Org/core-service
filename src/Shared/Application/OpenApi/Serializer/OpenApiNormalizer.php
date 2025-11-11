@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Serializer;
 
 use ApiPlatform\OpenApi\OpenApi;
+use stdClass;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
@@ -33,7 +34,13 @@ final class OpenApiNormalizer implements NormalizerInterface
             return $data;
         }
 
-        return $this->dataCleaner->clean($data);
+        $cleaned = $this->dataCleaner->clean($data);
+
+        if (isset($cleaned['webhooks']) && $cleaned['webhooks'] === []) {
+            $cleaned['webhooks'] = new stdClass();
+        }
+
+        return $cleaned;
     }
 
     /**
