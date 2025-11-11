@@ -14,9 +14,9 @@ final class ParameterCleaner
     /**
      * Clean parameters array by removing invalid properties from path parameters.
      *
-     * @param array<array-key, mixed> $parameters
+     * @param array<array-key, string|int|float|bool|array|null> $parameters
      *
-     * @return array<array-key, mixed>
+     * @return array<array-key, string|int|float|bool|array|null>
      */
     public function clean(array $parameters): array
     {

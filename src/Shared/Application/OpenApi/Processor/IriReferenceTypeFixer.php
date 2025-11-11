@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
-use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
@@ -22,58 +21,34 @@ final class IriReferenceTypeFixer
     {
         foreach (array_keys($openApi->getPaths()->getPaths()) as $path) {
             $pathItem = $openApi->getPaths()->getPath($path);
-            $openApi->getPaths()->addPath(
-                $path,
-                $this->fixPathItem($pathItem)
-            );
+
+            foreach (self::OPERATIONS as $operation) {
+                $pathItem = $this->fixOperation($pathItem, $operation);
+            }
+
+            $openApi->getPaths()->addPath($path, $pathItem);
         }
     }
 
-    private function fixPathItem(PathItem $pathItem): PathItem
-    {
-        foreach (self::OPERATIONS as $operation) {
-            $pathItem = $this->fixSingleOperation($pathItem, $operation);
-        }
-
-        return $pathItem;
-    }
-
-    private function fixSingleOperation(PathItem $pathItem, string $operation): PathItem
+    private function fixOperation(PathItem $pathItem, string $operation): PathItem
     {
         $currentOperation = $pathItem->{'get' . $operation}();
-        $fixedOperation = $this->fixOperation($currentOperation);
-
-        return $pathItem->{'with' . $operation}($fixedOperation);
-    }
-
-    private function fixOperation(?Operation $operation): ?Operation
-    {
-        $content = $this->extractContent($operation);
+        $content = $currentOperation?->getRequestBody()?->getContent();
 
         if (!$content instanceof ArrayObject) {
-            return $operation;
+            return $pathItem;
         }
 
         if (!$this->contentProcessor->process($content)) {
-            return $operation;
+            return $pathItem;
         }
 
-        return $this->createUpdatedOperation($operation, $content);
-    }
-
-    private function extractContent(?Operation $operation): mixed
-    {
-        return $operation?->getRequestBody()?->getContent();
-    }
-
-    private function createUpdatedOperation(
-        Operation $operation,
-        ArrayObject $content
-    ): Operation {
-        return $operation->withRequestBody(
-            $operation->getRequestBody()->withContent(
+        $updatedOperation = $currentOperation->withRequestBody(
+            $currentOperation->getRequestBody()->withContent(
                 new ArrayObject($content->getArrayCopy())
             )
         );
+
+        return $pathItem->{'with' . $operation}($updatedOperation);
     }
 }

@@ -80,7 +80,7 @@ final class UlidTypeTest extends UnitTestCase
     public function testConvertToPHPValueWithNonBinaryValue(): void
     {
         $ulidType = $this->getUlidTypeInstance();
-        
+
         $binaryString = hex2bin('0189a7e5d3f4e2a3b4c5d6e7f8901234');
 
         $result = $ulidType->convertToPHPValue($binaryString);

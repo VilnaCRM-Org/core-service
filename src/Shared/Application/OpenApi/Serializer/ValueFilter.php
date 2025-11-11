@@ -16,8 +16,6 @@ final class ValueFilter
 
     /**
      * Check if a value should be removed.
-     *
-     * @param mixed $value
      */
     public function shouldRemove(string|int $key, array|string|int|float|bool|null $value): bool
     {
@@ -28,9 +26,6 @@ final class ValueFilter
         return $this->isRemovableEmptyArray($key, $value);
     }
 
-    /**
-     * @param mixed $value
-     */
     private function isRemovableEmptyArray(
         string|int $key,
         array|string|int|float|bool|null $value

@@ -26,7 +26,7 @@ final class UniqueEmailValidator extends ConstraintValidator
         }
     }
 
-    private function isEmailAlreadyUsed(mixed $value): bool
+    private function isEmailAlreadyUsed(?string $value): bool
     {
         if ($value === null) {
             return false;

@@ -59,7 +59,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, string|int|float|bool|array|null>
      */
     private function normalizeValues(mixed $value): array
     {
@@ -71,7 +71,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     }
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, string|int|float|bool|array|null> $values
      */
     private function applyUlidFilters(
         string $property,

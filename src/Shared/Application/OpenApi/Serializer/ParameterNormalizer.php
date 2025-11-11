@@ -59,8 +59,10 @@ final class ParameterNormalizer implements NormalizerInterface
         ];
     }
 
-    private function shouldSkipProcessing(mixed $object, mixed $data): bool
-    {
+    private function shouldSkipProcessing(
+        object $object,
+        array|string|int|float|bool|\ArrayObject|null $data
+    ): bool {
         if (!$object instanceof Parameter) {
             return true;
         }

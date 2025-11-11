@@ -321,11 +321,13 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
 	echo "9️⃣  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "🔟 Running complete test suite (unit, integration, e2e)..."; \
+	echo "🔟 Validating OpenAPI specification..."; \
+	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
+	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
-	echo "1️⃣1️⃣ Running mutation testing with Infection..."; \
+	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \

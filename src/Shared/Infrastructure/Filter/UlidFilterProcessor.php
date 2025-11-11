@@ -12,7 +12,7 @@ final class UlidFilterProcessor
     public function process(
         string $property,
         string $operator,
-        mixed $rawValue,
+        string|array|int|float|bool|null $rawValue,
         Builder $builder
     ): void {
         if (!$this->canProcess($property, $rawValue)) {
@@ -24,7 +24,7 @@ final class UlidFilterProcessor
         $this->applyOperator($operator, $parsedValue, $property, $builder);
     }
 
-    private function canProcess(string $property, mixed $rawValue): bool
+    private function canProcess(string $property, string|array|int|float|bool|null $rawValue): bool
     {
         if (!$this->isUlidProperty($property)) {
             return false;

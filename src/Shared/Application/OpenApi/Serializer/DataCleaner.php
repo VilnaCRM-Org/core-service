@@ -41,8 +41,13 @@ final class DataCleaner
      */
     private function processValue(
         string|int $key,
-        array|string|int|float|bool|null $value
+        array|\ArrayObject|string|int|float|bool|null $value
     ): array|string|int|float|bool|null {
+        //Convert ArrayObject to array
+        if ($value instanceof \ArrayObject) {
+            $value = $value->getArrayCopy();
+        }
+
         return match (true) {
             $this->valueFilter->shouldRemove($key, $value) => null,
             is_array($value) => $this->arrayProcessor->process(

@@ -341,9 +341,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke(null, null);
-        
+
         $this->assertTrue($result);
     }
 
@@ -352,9 +352,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke(null, '');
-        
+
         $this->assertTrue($result);
     }
 
@@ -363,9 +363,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke(null, 'Some description');
-        
+
         $this->assertFalse($result);
     }
 
