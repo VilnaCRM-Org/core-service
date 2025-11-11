@@ -291,6 +291,7 @@ Create reusable components in the Application layer to eliminate code duplicatio
 > ⚠️ **Important**: We do NOT use "Services" for anemic domain model logic. While Services are valid in DDD (Domain Services for cross-aggregate business logic), in this codebase we use specific Application layer components instead. This prevents the anemic domain model anti-pattern.
 >
 > **Allowed Application Layer Components** (must match deptrac patterns):
+>
 > - `Validator\*` - Validation logic (e.g., StringFieldValidator)
 > - `Transformer\*` - Data transformation
 > - `Factory\*` - Object creation
@@ -362,6 +363,7 @@ $value = $this->fieldResolver->resolve($input['email'] ?? null, $customer->getEm
 - ✅ Avoids anemic domain model anti-pattern
 
 **Choosing the Right Component Type**:
+
 - Validation logic → `Validator\*`
 - Data transformation → `Transformer\*`
 - Object creation → `Factory\*`
@@ -1248,36 +1250,43 @@ make deptrac
 ### Understanding Deptrac Output
 
 **Violations** (❌ MUST BE 0):
+
 - Classes in one layer accessing forbidden layers
 - Example: Domain layer depending on Infrastructure
 
 **Uncovered** (❌ MUST BE 0):
+
 - Classes that don't match ANY layer regex pattern
 - This happens when using wrong naming conventions
 
 **Example of Uncovered Violation**:
+
 ```
 Uncovered: App\Shared\Application\Service\StringFieldResolver
 ```
 
 This class was in the wrong namespace. The fix:
+
 - ❌ `Shared\Application\Service\*` → Not in deptrac patterns
 - ✅ `Shared\Application\Validator\*` → Matches Application layer regex
 
 ### Deptrac Layer Patterns (from `deptrac.yaml`)
 
 **Application Layer** must match:
+
 ```regex
 .*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*
 .*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer).*
 ```
 
 **Domain Layer** must match:
+
 ```regex
 .*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*
 ```
 
 **Infrastructure Layer** must match:
+
 ```regex
 .*\\Infrastructure\\(Bus|Transformer|Factory|Repository).*
 ```
@@ -1285,10 +1294,12 @@ This class was in the wrong namespace. The fix:
 ### Common Deptrac Fixes
 
 1. **"Uncovered" error**: Class doesn't match any layer pattern
+
    - Solution: Use correct namespace (Validator, Transformer, Factory, etc.)
    - Don't use generic "Service" namespace
 
 2. **"Violation" error**: Layer dependency rules broken
+
    - Solution: Move logic to correct layer
    - Domain should NEVER depend on Application or Infrastructure
 
@@ -1484,6 +1495,7 @@ public function process(ArrayObject $content): bool
 ```
 
 **Why**: Each method adds base complexity (even if body is simple). PHPInsights counts both:
+
 - Individual method complexity
 - Total class complexity
 
@@ -1551,15 +1563,18 @@ $newInitials = $input['initials'] ?? $customer->getInitials();
 Ask yourself these questions:
 
 1. **Is the current code maintainable?**
+
    - ✅ Yes → Consider if 0.1% is worth potential readability loss
    - ❌ No → Refactor for both quality AND complexity
 
 2. **What's the average CCN?**
+
    - < 1.2 → Excellent! The gap may be acceptable
    - 1.2-1.5 → Good, minor optimizations may help
    - \> 1.5 → Significant room for improvement
 
 3. **Are there classes with CCN > 6?**
+
    - Yes → Focus on these first (bigger impact)
    - No → You're dealing with micro-optimizations
 
@@ -1570,6 +1585,7 @@ Ask yourself these questions:
 #### Options for the Final 0.1%
 
 **Option A: Accept Current Quality**
+
 ```
 ✅ Complexity: 93.9% (avg CCN: 1.18)
 ✅ Code: 100%
@@ -1582,6 +1598,7 @@ Ask yourself these questions:
 **Option B: Strategic Micro-Optimization**
 
 Target only the highest-impact changes:
+
 1. Find the ONE class with highest CCN (use `make analyze-complexity N=5`)
 2. Apply ONE proven pattern (combine conditions, inline helper)
 3. Verify improvement
@@ -1598,6 +1615,7 @@ Target only the highest-impact changes:
 ```
 
 **When to adjust**: If you've exhausted optimization options and:
+
 - Average CCN < 1.2
 - No individual classes > 6 CCN
 - All other metrics at 100%
@@ -1608,6 +1626,7 @@ Target only the highest-impact changes:
 ### 📊 Real-World Case Study: 93.8% → 93.9%
 
 **Starting Point**:
+
 - Complexity: 93.8%
 - Avg CCN: 1.19
 - Classes > 5 CCN: 3
@@ -1615,17 +1634,21 @@ Target only the highest-impact changes:
 **Changes Applied**:
 
 1. **UlidType** - Combined conditionals
+
    ```php
    // Before: 2 separate ifs (CCN: 5)
    // After: 1 combined condition (CCN: 4)
    ```
+
    Impact: +0.05%
 
 2. **IriReferenceTypeFixer** - Inlined helpers
+
    ```php
    // Before: 7 methods (CCN: 5)
    // After: 2 methods (CCN: 5)
    ```
+
    Impact: +0.05%
 
 3. **DataCleaner** - Fixed ArrayObject handling (no CCN impact)
@@ -1638,6 +1661,7 @@ Target only the highest-impact changes:
 **Final Score**: 93.9%
 
 **Lessons Learned**:
+
 - Small optimizations compound
 - Not all changes improve scores
 - Maintain test coverage throughout
