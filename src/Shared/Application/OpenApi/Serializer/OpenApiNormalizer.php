@@ -36,11 +36,7 @@ final class OpenApiNormalizer implements NormalizerInterface
 
         $cleaned = $this->dataCleaner->clean($data);
 
-        if (isset($cleaned['webhooks']) && $cleaned['webhooks'] === []) {
-            $cleaned['webhooks'] = new stdClass();
-        }
-
-        return $cleaned;
+        return $this->normalizeWebhooks($cleaned);
     }
 
     /**
@@ -62,5 +58,21 @@ final class OpenApiNormalizer implements NormalizerInterface
         return [
             OpenApi::class => true,
         ];
+    }
+
+    /**
+     * Ensures webhooks field is serialized as empty object {} instead of empty array [].
+     *
+     * @param array<array-key, array|string|int|float|bool|\ArrayObject|null> $data
+     *
+     * @return array<array-key, array|string|int|float|bool|\ArrayObject|stdClass|null>
+     */
+    private function normalizeWebhooks(array $data): array
+    {
+        if (isset($data['webhooks']) && $data['webhooks'] === []) {
+            $data['webhooks'] = new stdClass();
+        }
+
+        return $data;
     }
 }
