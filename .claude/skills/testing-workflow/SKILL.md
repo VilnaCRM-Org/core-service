@@ -17,15 +17,15 @@ Execute appropriate test suite and ensure 100% pass rate with required coverage.
 
 ## Test Commands Quick Reference
 
-| Test Type | Command | Runtime | Coverage | Location |
-|-----------|---------|---------|----------|----------|
-| Unit | `make unit-tests` | 2-3 min | 100% | tests/Unit/ |
-| Integration | `make integration-tests` | 3-5 min | Full | tests/Integration/ |
-| E2E (Behat) | `make behat` | 5-10 min | BDD | features/ |
-| All Tests | `make all-tests` | 8-15 min | 100% | All |
-| Mutation | `make infection` | Variable | 100% MSI | Unit tests |
-| Load (smoke) | `make smoke-load-tests` | 5-10 min | - | tests/Load/ |
-| Load (all) | `make load-tests` | 30+ min | - | tests/Load/ |
+| Test Type    | Command                  | Runtime  | Coverage | Location           |
+| ------------ | ------------------------ | -------- | -------- | ------------------ |
+| Unit         | `make unit-tests`        | 2-3 min  | 100%     | tests/Unit/        |
+| Integration  | `make integration-tests` | 3-5 min  | Full     | tests/Integration/ |
+| E2E (Behat)  | `make behat`             | 5-10 min | BDD      | features/          |
+| All Tests    | `make all-tests`         | 8-15 min | 100%     | All                |
+| Mutation     | `make infection`         | Variable | 100% MSI | Unit tests         |
+| Load (smoke) | `make smoke-load-tests`  | 5-10 min | -        | tests/Load/        |
+| Load (all)   | `make load-tests`        | 30+ min  | -        | tests/Load/        |
 
 ## Execution Workflow
 
@@ -45,13 +45,13 @@ make all-tests            # For comprehensive check
 
 Identify failure type and apply fix:
 
-| Failure Type | Debug Command | Common Fixes |
-|--------------|---------------|--------------|
-| Assertion failure | PHPUnit output | Fix logic, update test expectations |
-| Coverage < 100% | Coverage report | Add missing test cases |
-| Escaped mutants | `make infection` output | Test edge cases, strengthen assertions |
-| Behat scenario | Feature output | Fix application logic or step definitions |
-| Type error | Stack trace | Fix type hints, mock returns |
+| Failure Type      | Debug Command           | Common Fixes                              |
+| ----------------- | ----------------------- | ----------------------------------------- |
+| Assertion failure | PHPUnit output          | Fix logic, update test expectations       |
+| Coverage < 100%   | Coverage report         | Add missing test cases                    |
+| Escaped mutants   | `make infection` output | Test edge cases, strengthen assertions    |
+| Behat scenario    | Feature output          | Fix application logic or step definitions |
+| Type error        | Stack trace             | Fix type hints, mock returns              |
 
 ### Step 4: Fix and Re-test
 
@@ -97,12 +97,14 @@ $this->faker->unique()->ulid();
 ```
 
 **Available**:
+
 - `$this->faker->ulid()` - Domain ULID via custom provider
 - All standard Faker methods (email, name, word, etc.)
 
 ## Load Testing
 
 **Commands**:
+
 ```bash
 make smoke-load-tests      # Minimal load, 5-10 min
 make average-load-tests    # Normal traffic, 15-25 min
@@ -111,6 +113,7 @@ make spike-load-tests      # Extreme spikes, 25-35 min
 ```
 
 **Prerequisites**:
+
 - Test database seeded (`make setup-test-db`)
 - Docker containers running (`make start`)
 - K6 Docker image built
@@ -118,6 +121,7 @@ make spike-load-tests      # Extreme spikes, 25-35 min
 ## Constraints (Parameters)
 
 **NEVER**:
+
 - Cancel long-running tests mid-execution
 - Commit with failing tests
 - Accept coverage < 100%
@@ -125,6 +129,7 @@ make spike-load-tests      # Extreme spikes, 25-35 min
 - Run tests outside Docker (use `make` commands)
 
 **ALWAYS**:
+
 - Use Faker for dynamic test data
 - Mock external dependencies in unit tests
 - Use real DB in integration tests
@@ -133,12 +138,14 @@ make spike-load-tests      # Extreme spikes, 25-35 min
 ## Format (Output)
 
 **Unit Tests Success**:
+
 ```
 OK (X tests, Y assertions)
 ✅ COVERAGE SUCCESS: Line coverage is 100%
 ```
 
 **Mutation Testing Success**:
+
 ```
 100% MSI
 0 escaped mutants
