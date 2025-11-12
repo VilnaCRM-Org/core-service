@@ -46,16 +46,43 @@ final class UlidRangeFilter extends AbstractFilter implements
         ?Operation $operation = null,
         array &$context = []
     ): void {
-        $ulidFilterProcessor = new UlidFilterProcessor();
         $denormProp = $this->denormalizePropertyName($property);
         if (!$this->isFilterableProperty($denormProp, $resourceClass)) {
             return;
         }
 
-        $values = is_array($value) ? $value : [$value];
+        $this->applyUlidFilters(
+            $denormProp,
+            $this->normalizeValues($value),
+            $aggregationBuilder
+        );
+    }
+
+    /**
+     * @return array<string, string|int|float|bool|array|null>
+     */
+    private function normalizeValues(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return [$value];
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|array|null> $values
+     */
+    private function applyUlidFilters(
+        string $property,
+        array $values,
+        Builder $aggregationBuilder
+    ): void {
+        $ulidFilterProcessor = new UlidFilterProcessor();
+
         foreach ($values as $operator => $rawValue) {
             $ulidFilterProcessor->process(
-                $denormProp,
+                $property,
                 (string) $operator,
                 $rawValue,
                 $aggregationBuilder
@@ -111,7 +138,10 @@ final class UlidRangeFilter extends AbstractFilter implements
         string $property,
         string $resourceClass
     ): bool {
-        return $this->isPropertyEnabled($property, $resourceClass)
-            && $this->isPropertyMapped($property, $resourceClass, true);
+        if (!$this->isPropertyEnabled($property, $resourceClass)) {
+            return false;
+        }
+
+        return $this->isPropertyMapped($property, $resourceClass, true);
     }
 }

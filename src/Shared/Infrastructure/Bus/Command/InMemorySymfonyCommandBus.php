@@ -36,7 +36,12 @@ class InMemorySymfonyCommandBus implements CommandBusInterface
         } catch (NoHandlerForMessageException) {
             throw new CommandNotRegisteredException($command);
         } catch (HandlerFailedException $error) {
-            throw $error->getPrevious() ?? $error;
+            throw $this->extractOriginalError($error);
         }
+    }
+
+    private function extractOriginalError(HandlerFailedException $error): \Throwable
+    {
+        return $error->getPrevious() ?? $error;
     }
 }

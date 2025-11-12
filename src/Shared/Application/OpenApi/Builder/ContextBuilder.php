@@ -74,11 +74,11 @@ final class ContextBuilder
                             'properties' => $properties,
                             'required' => $this->emptyArrayToNull($required),
                         ],
-                        static fn (mixed $value) => $value !== null
+                        static fn (string|int|float|bool|array|null $value) => $value !== null
                     ),
                     'example' => $this->emptyArrayToNull($example),
                 ],
-                static fn (mixed $value) => $value !== null
+                static fn (string|int|float|bool|array|null $value) => $value !== null
             ),
         ]);
     }
@@ -123,7 +123,7 @@ final class ContextBuilder
 
         return array_filter(
             $combined,
-            static fn (mixed $value) => $value !== null
+            static fn (string|int|float|bool|array|null $value) => $value !== null
         );
     }
 

@@ -10,9 +10,9 @@ namespace App\Shared\Application\OpenApi\Processor;
 final class PropertyTypeFixer
 {
     /**
-     * @param array<string, mixed> $propSchema
+     * @param array<string, string|int|float|bool|array|null> $propSchema
      *
-     * @return array<string, mixed>
+     * @return array<string, string|int|float|bool|array|null>
      */
     public function fix(array $propSchema): array
     {
@@ -23,7 +23,7 @@ final class PropertyTypeFixer
     }
 
     /**
-     * @param array<string, mixed> $propSchema
+     * @param array<string, string|int|float|bool|array|null> $propSchema
      */
     public function needsFix(array $propSchema): bool
     {

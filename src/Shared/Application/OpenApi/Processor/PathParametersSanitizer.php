@@ -51,12 +51,15 @@ final class PathParametersSanitizer
             !\is_array($operation->getParameters()) => $operation,
             default => $operation->withParameters(
                 array_map(
-                    fn (mixed $parameter) => $this->parameterCleaner->clean(
-                        $parameter
-                    ),
+                    $this->sanitizeParameter(...),
                     $operation->getParameters()
                 )
             ),
         };
+    }
+
+    private function sanitizeParameter(\ApiPlatform\OpenApi\Model\Parameter|array $parameter): mixed
+    {
+        return $this->parameterCleaner->clean($parameter);
     }
 }

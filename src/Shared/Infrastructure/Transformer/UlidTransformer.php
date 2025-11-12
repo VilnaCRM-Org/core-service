@@ -18,9 +18,6 @@ final readonly class UlidTransformer
     ) {
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|object|null $value
-     */
     public function toDatabaseValue(array|string|int|float|bool|object|null $value): ?Binary
     {
         if (!$this->validator->isValid($value)) {
@@ -32,9 +29,6 @@ final readonly class UlidTransformer
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|object|null $binary
-     */
     public function toPhpValue(array|string|int|float|bool|object|null $binary): Ulid
     {
         $symfonyUlid = $this->converter->fromBinary($binary);

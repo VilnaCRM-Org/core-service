@@ -23,26 +23,36 @@ final class ArrayResponseBuilder implements ResponseBuilderInterface
         array $params,
         array $headers
     ): Response {
-        $content = $this->contextBuilder->build($params);
-        $headersArray = new ArrayObject();
-
-        if (count($headers) > 0) {
-            foreach ($headers as $header) {
-                $headersArray[$header->name] = new Model\Header(
-                    description: $header->description,
-                    schema: [
-                        'type' => $header->type,
-                        'format' => $header->format,
-                        'example' => $header->example,
-                    ]
-                );
-            }
-        }
-
         return new Response(
             description: $description,
-            content: $content,
-            headers: $headersArray
+            content: $this->contextBuilder->build($params),
+            headers: $this->buildHeadersArray($headers)
+        );
+    }
+
+    /**
+     * @param array<Header> $headers
+     */
+    private function buildHeadersArray(array $headers): ArrayObject
+    {
+        $headersArray = new ArrayObject();
+
+        foreach ($headers as $header) {
+            $headersArray[$header->name] = $this->createHeaderModel($header);
+        }
+
+        return $headersArray;
+    }
+
+    private function createHeaderModel(Header $header): Model\Header
+    {
+        return new Model\Header(
+            description: $header->description,
+            schema: [
+                'type' => $header->type,
+                'format' => $header->format,
+                'example' => $header->example,
+            ]
         );
     }
 }

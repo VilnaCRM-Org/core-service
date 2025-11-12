@@ -101,6 +101,15 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd src ansi phpmd.xml --exclude vendor
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
+analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
+	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
+
+analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
+	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
+
+analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
+	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
+
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
@@ -312,11 +321,13 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
 	echo "9️⃣  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "🔟 Running complete test suite (unit, integration, e2e)..."; \
+	echo "🔟 Validating OpenAPI specification..."; \
+	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
+	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
-	echo "1️⃣1️⃣ Running mutation testing with Infection..."; \
+	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
@@ -408,4 +419,3 @@ pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments
 		echo "⚠️  No unresolved comments found in this PR"; \
 		echo "📄 Report saved to: $$output_file"; \
 	fi
-

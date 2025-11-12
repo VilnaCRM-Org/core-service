@@ -441,4 +441,24 @@ final class OpenApiNormalizerTest extends UnitTestCase
         $this->assertArrayHasKey('schemas', $result['components']);
         $this->assertArrayNotHasKey('responses', $result['components']);
     }
+
+    public function testNormalizeConvertsEmptyWebhooksArrayToObject(): void
+    {
+        $openApi = $this->createMock(OpenApi::class);
+        $decoratedOutput = [
+            'openapi' => '3.1.0',
+            'info' => ['title' => 'API', 'version' => '1.0.0'],
+            'webhooks' => [],
+        ];
+
+        $this->decorated
+            ->expects($this->once())
+            ->method('normalize')
+            ->willReturn($decoratedOutput);
+
+        $result = $this->normalizer->normalize($openApi);
+
+        $this->assertArrayHasKey('webhooks', $result);
+        $this->assertInstanceOf(\stdClass::class, $result['webhooks']);
+    }
 }
