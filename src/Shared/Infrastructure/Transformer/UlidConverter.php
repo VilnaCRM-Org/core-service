@@ -18,9 +18,6 @@ final class UlidConverter
     ) {
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|object|null $value
-     */
     public function toUlid(array|string|int|float|bool|object|null $value): Ulid
     {
         return $value instanceof Ulid
@@ -28,9 +25,6 @@ final class UlidConverter
             : $this->ulidFactory->create($value);
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|object|null $binary
-     */
     public function fromBinary(array|string|int|float|bool|object|null $binary): SymfonyUlid
     {
         return $binary instanceof SymfonyUlid

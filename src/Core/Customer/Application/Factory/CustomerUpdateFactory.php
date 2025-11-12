@@ -7,12 +7,14 @@ namespace App\Core\Customer\Application\Factory;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Application\Validator\StringFieldValidator;
 
 final readonly class CustomerUpdateFactory implements
     CustomerUpdateFactoryInterface
 {
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
+        private StringFieldValidator $fieldResolver,
     ) {
     }
 
@@ -29,33 +31,58 @@ final readonly class CustomerUpdateFactory implements
      */
     public function create(Customer $customer, array $input): CustomerUpdate
     {
-        $customerType = $this->relationResolver->resolveType(
-            $input['type'] ?? null,
-            $customer
-        );
+        $fields = $this->resolveStringFields($input, $customer);
 
-        $customerStatus = $this->relationResolver->resolveStatus(
-            $input['status'] ?? null,
-            $customer
-        );
+        return new CustomerUpdate(...$fields, ...$this->resolveRelations($input, $customer));
+    }
 
-        return new CustomerUpdate(
-            $this->getStringValue($input['initials'] ?? null, $customer->getInitials()),
-            $this->getStringValue($input['email'] ?? null, $customer->getEmail()),
-            $this->getStringValue($input['phone'] ?? null, $customer->getPhone()),
-            $this->getStringValue($input['leadSource'] ?? null, $customer->getLeadSource()),
-            $customerType,
-            $customerStatus,
-            $input['confirmed'] ?? $customer->isConfirmed()
+    /**
+     * @param array<string, string|bool|null> $input
+     *
+     * @return array{newInitials: string, newEmail: string, newPhone: string, newLeadSource: string}
+     */
+    private function resolveStringFields(array $input, Customer $customer): array
+    {
+        $fields = [
+            'initials' => ['key' => 'newInitials', 'getter' => 'getInitials'],
+            'email' => ['key' => 'newEmail', 'getter' => 'getEmail'],
+            'phone' => ['key' => 'newPhone', 'getter' => 'getPhone'],
+            'leadSource' => ['key' => 'newLeadSource', 'getter' => 'getLeadSource'],
+        ];
+
+        return array_reduce(
+            array_keys($fields),
+            fn (array $result, string $field) => array_merge($result, [
+                $fields[$field]['key'] => $this->fieldResolver->resolve(
+                    $input[$field] ?? null,
+                    $customer->{$fields[$field]['getter']}()
+                ),
+            ]),
+            []
         );
     }
 
     /**
-     * Returns the new value if it's not empty/whitespace-only, otherwise returns the default value.
-     * This prevents GraphQL mutations from overwriting existing values with blank strings.
+     * @param array<string, string|bool|null> $input
+     *
+     * @return array{
+     *     newType: \App\Core\Customer\Domain\Entity\CustomerType,
+     *     newStatus: \App\Core\Customer\Domain\Entity\CustomerStatus,
+     *     newConfirmed: bool
+     * }
      */
-    private function getStringValue(?string $newValue, string $defaultValue): string
+    private function resolveRelations(array $input, Customer $customer): array
     {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
+        return [
+            'newType' => $this->relationResolver->resolveType(
+                $input['type'] ?? null,
+                $customer
+            ),
+            'newStatus' => $this->relationResolver->resolveStatus(
+                $input['status'] ?? null,
+                $customer
+            ),
+            'newConfirmed' => $input['confirmed'] ?? $customer->isConfirmed(),
+        ];
     }
 }

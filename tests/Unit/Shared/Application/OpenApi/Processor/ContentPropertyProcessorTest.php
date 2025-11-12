@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
+use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
@@ -17,7 +18,8 @@ final class ContentPropertyProcessorTest extends UnitTestCase
     {
         parent::setUp();
         $propertyTypeFixer = new PropertyTypeFixer();
-        $this->processor = new ContentPropertyProcessor($propertyTypeFixer);
+        $mediaTypeProcessor = new MediaTypePropertyProcessor($propertyTypeFixer);
+        $this->processor = new ContentPropertyProcessor($mediaTypeProcessor);
     }
 
     public function testProcessReturnsTrueWhenIriReferenceFixed(): void
@@ -109,6 +111,34 @@ final class ContentPropertyProcessorTest extends UnitTestCase
         $this->assertEquals('string', $content['application/xml']['schema']['properties']['xmlRelation']['type']);
     }
 
+    public function testProcessIgnoresNonArrayMediaTypesAndProperties(): void
+    {
+        $content = new ArrayObject([
+            'application/json' => [
+                'schema' => [
+                    'properties' => [
+                        'relation' => ['type' => 'iri-reference'],
+                        'invalid' => 'value',
+                    ],
+                ],
+            ],
+            'text/plain' => null,
+        ]);
+
+        $result = $this->processor->process($content);
+
+        $this->assertTrue($result);
+        $this->assertEquals(
+            'string',
+            $content['application/json']['schema']['properties']['relation']['type']
+        );
+        $this->assertSame(
+            'value',
+            $content['application/json']['schema']['properties']['invalid']
+        );
+        $this->assertNull($content['text/plain']);
+    }
+
     public function testProcessHandlesSchemaWithoutProperties(): void
     {
         $content = new ArrayObject([
@@ -132,5 +162,24 @@ final class ContentPropertyProcessorTest extends UnitTestCase
         $result = $this->processor->process($content);
 
         $this->assertFalse($result);
+    }
+
+    public function testProcessHandlesNumericKey(): void
+    {
+        $content = new ArrayObject([
+            0 => [
+                'schema' => [
+                    'properties' => [
+                        'relation' => ['type' => 'iri-reference'],
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = $this->processor->process($content);
+
+        $this->assertTrue($result);
+        $this->assertEquals('string', $content[0]['schema']['properties']['relation']['type']);
+        $this->assertEquals('iri-reference', $content[0]['schema']['properties']['relation']['format']);
     }
 }

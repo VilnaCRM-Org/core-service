@@ -283,4 +283,21 @@ final class DataCleanerTest extends UnitTestCase
         $this->assertTrue($result['boolean']);
         $this->assertEquals(3.14, $result['float']);
     }
+
+    public function testCleanHandlesArrayObjectValues(): void
+    {
+        $arrayObject = new \ArrayObject(['key1' => 'value1', 'key2' => null]);
+        $data = [
+            'nested' => $arrayObject,
+        ];
+
+        $result = $this->cleaner->clean($data);
+
+        // ArrayObject should be converted to array and null values should be removed
+        $this->assertArrayHasKey('nested', $result);
+        $this->assertIsArray($result['nested']);
+        $this->assertArrayHasKey('key1', $result['nested']);
+        $this->assertArrayNotHasKey('key2', $result['nested']);
+        $this->assertEquals('value1', $result['nested']['key1']);
+    }
 }

@@ -11,9 +11,6 @@ use Symfony\Component\Validator\Constraint;
  */
 final class ValidationSkipChecker
 {
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
     public function shouldSkip(
         array|string|int|float|bool|null $value,
         Constraint $constraint
@@ -23,35 +20,26 @@ final class ValidationSkipChecker
         }
 
         if ($this->isEmptyString($value)) {
-            return $this->shouldSkipEmptyString($value, $constraint);
+            return $this->shouldSkipEmptyString($constraint);
         }
 
         return false;
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
     private function isNullValue(array|string|int|float|bool|null $value): bool
     {
         return $value === null;
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
     private function isEmptyString(array|string|int|float|bool|null $value): bool
     {
         return $value === '';
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
-    private function shouldSkipEmptyString(
-        array|string|int|float|bool|null $value,
-        Constraint $constraint
-    ): bool {
-        return $constraint->isOptional() || $value === '';
+    private function shouldSkipEmptyString(Constraint $constraint): bool
+    {
+        $constraint->isOptional();
+
+        return true;
     }
 }

@@ -11,8 +11,6 @@ interface StatusRepositoryInterface
     public function save(CustomerStatus $customerStatus): void;
 
     /**
-     * @param string $id
-     *
      * @return CustomerStatus
      */
     public function find(

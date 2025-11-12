@@ -12,7 +12,17 @@ final readonly class IriTransformer implements IriTransformerInterface
             return $idOrIri;
         }
 
-        $path = parse_url($idOrIri, PHP_URL_PATH);
-        return $path !== null ? basename($path) : $idOrIri;
+        return $this->extractBasename($idOrIri);
+    }
+
+    private function extractBasename(string $iri): string
+    {
+        $path = parse_url($iri, PHP_URL_PATH);
+
+        if (!$path) {
+            return $iri;
+        }
+
+        return basename($path);
     }
 }
