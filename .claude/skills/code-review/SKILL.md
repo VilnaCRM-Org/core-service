@@ -29,12 +29,12 @@ make pr-comments FORMAT=json  # JSON output
 
 ### Step 2: Categorize Comments
 
-| Type | Identifier | Priority | Action |
-|------|-----------|----------|--------|
-| Committable Suggestion | Code block, "```suggestion" | Highest | Apply immediately, commit separately |
-| LLM Prompt | "🤖 Prompt for AI Agents" | High | Execute prompt, implement changes |
-| Question | Ends with "?" | Medium | Answer inline or via code change |
-| General Feedback | Discussion, recommendation | Low | Consider and improve |
+| Type                   | Identifier                  | Priority | Action                               |
+| ---------------------- | --------------------------- | -------- | ------------------------------------ |
+| Committable Suggestion | Code block, "```suggestion" | Highest  | Apply immediately, commit separately |
+| LLM Prompt             | "🤖 Prompt for AI Agents"   | High     | Execute prompt, implement changes    |
+| Question               | Ends with "?"               | Medium   | Answer inline or via code change     |
+| General Feedback       | Discussion, recommendation  | Low      | Consider and improve                 |
 
 ### Step 3: Apply Changes Systematically
 
@@ -42,6 +42,7 @@ make pr-comments FORMAT=json  # JSON output
 
 1. Apply code change exactly as suggested
 2. Commit with reference:
+
    ```bash
    git commit -m "Apply review suggestion: [brief description]
 
@@ -88,6 +89,7 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 ## Constraints (Parameters)
 
 **NEVER**:
+
 - Skip committable suggestions
 - Batch unrelated changes in one commit
 - Ignore LLM prompts from reviewers
@@ -95,6 +97,7 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Leave questions unanswered
 
 **ALWAYS**:
+
 - Apply suggestions exactly as provided
 - Commit each suggestion separately with URL reference
 - Run `make ci` after implementing changes
@@ -103,6 +106,7 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 ## Format (Output)
 
 **Commit Message Template**:
+
 ```
 Apply review suggestion: [concise description]
 
@@ -112,6 +116,7 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
 ```
 
 **Final Verification**:
+
 ```bash
 ✅ make pr-comments shows 0 unresolved
 ✅ make ci shows "CI checks successfully passed!"

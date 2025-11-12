@@ -34,13 +34,13 @@ make ci
 
 Identify failing check from output and apply fix:
 
-| Check | Command | Fix |
-|-------|---------|-----|
-| Code style | `make phpcsfixer` | Apply auto-fixes |
-| Static analysis | `make psalm` | Fix type errors |
+| Check           | Command            | Fix                                 |
+| --------------- | ------------------ | ----------------------------------- |
+| Code style      | `make phpcsfixer`  | Apply auto-fixes                    |
+| Static analysis | `make psalm`       | Fix type errors                     |
 | Quality metrics | `make phpinsights` | Reduce complexity, fix architecture |
-| Tests | `make unit-tests` | Debug failing tests |
-| Mutations | `make infection` | Add missing test cases |
+| Tests           | `make unit-tests`  | Debug failing tests                 |
+| Mutations       | `make infection`   | Add missing test cases              |
 
 ### Step 4: Re-run
 
@@ -53,6 +53,7 @@ Repeat Steps 2-4 until success message appears.
 ## Constraints (Parameters)
 
 **NEVER decrease these thresholds**:
+
 - min-quality: 100%
 - min-complexity: 95%
 - min-architecture: 100%
@@ -61,6 +62,7 @@ Repeat Steps 2-4 until success message appears.
 - test coverage: 100%
 
 **DO NOT**:
+
 - Lower quality thresholds
 - Skip failing checks
 - Commit without "✅ CI checks successfully passed!" message
@@ -69,6 +71,7 @@ Repeat Steps 2-4 until success message appears.
 ## Format (Output)
 
 **Required final output**:
+
 ```
 ✅ CI checks successfully passed!
 ```
