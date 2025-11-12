@@ -25,6 +25,10 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
 
         $iriConverter
+            ->expects(self::never())
+            ->method('getIriFromResource');
+
+        $iriConverter
             ->expects(self::once())
             ->method('getResourceFromIri')
             ->with($typeIri)
@@ -82,6 +86,10 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         $customer = $this->createMock(Customer::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
+
+        $iriConverter
+            ->expects(self::never())
+            ->method('getIriFromResource');
 
         $iriConverter
             ->expects(self::once())

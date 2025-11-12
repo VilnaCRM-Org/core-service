@@ -25,7 +25,7 @@ final class ArrayValueProcessorTest extends UnitTestCase
 
     public function testProcessReturnsNullForEmptyRemovableArray(): void
     {
-        $recursiveCleaner = fn (array $data): array => $data;
+        $recursiveCleaner = static fn (array $data): array => $data;
 
         $result = $this->processor->process('extensionProperties', [], $recursiveCleaner);
 
@@ -43,7 +43,7 @@ final class ArrayValueProcessorTest extends UnitTestCase
             ],
         ];
 
-        $recursiveCleaner = fn (array $data): array => $data;
+        $recursiveCleaner = static fn (array $data): array => $data;
 
         $result = $this->processor->process('parameters', $parameters, $recursiveCleaner);
 
@@ -58,8 +58,8 @@ final class ArrayValueProcessorTest extends UnitTestCase
             'nested' => ['value' => 'test'],
         ];
 
-        $recursiveCleaner = function (array $data): array {
-            return array_map(fn ($value) => is_array($value) ? ['cleaned' => true] : $value, $data);
+        $recursiveCleaner = static function (array $data): array {
+            return array_map(static fn ($value) => is_array($value) ? ['cleaned' => true] : $value, $data);
         };
 
         $result = $this->processor->process('customKey', $data, $recursiveCleaner);
@@ -74,7 +74,7 @@ final class ArrayValueProcessorTest extends UnitTestCase
             'item' => null,
         ];
 
-        $recursiveCleaner = fn (array $data): array => []; // Cleaner returns empty array
+        $recursiveCleaner = static fn (array $data): array => []; // Cleaner returns empty array
 
         $result = $this->processor->process('responses', $data, $recursiveCleaner);
 
@@ -87,7 +87,7 @@ final class ArrayValueProcessorTest extends UnitTestCase
             'value' => 'test',
         ];
 
-        $recursiveCleaner = fn (array $data): array => $data;
+        $recursiveCleaner = static fn (array $data): array => $data;
 
         $result = $this->processor->process('customKey', $data, $recursiveCleaner);
 
@@ -105,7 +105,7 @@ final class ArrayValueProcessorTest extends UnitTestCase
             ],
         ];
 
-        $recursiveCleaner = fn (array $data): array => $data;
+        $recursiveCleaner = static fn (array $data): array => $data;
 
         $result = $this->processor->process('otherKey', $data, $recursiveCleaner);
 

@@ -77,6 +77,11 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
             return $item;
         }
 
+        return $this->findCustomerById($id);
+    }
+
+    private function findCustomerById(string $id): Customer
+    {
         $ulid = $this->iriTransformer->transform($id);
         $customer = $this->repository->find($ulid);
 

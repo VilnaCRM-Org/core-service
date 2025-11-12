@@ -101,6 +101,28 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
+    public function testProcessPreservesExistingValueWhenNewValueIsNull(): void
+    {
+        $existingValue = $this->faker->word();
+        $dto = new TypePatch(null);
+        $operation = $this->createMock(Operation::class);
+        $ulid = (string) $this->faker->ulid();
+        $customerType = $this->createMock(CustomerType::class);
+        $command = $this
+            ->createMock(UpdateCustomerTypeCommand::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->setupDependencies($customerType, $existingValue, $command);
+        $this->setupCustomerType($customerType, $existingValue);
+
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
+
+        $this->assertSame($customerType, $result);
+    }
+
     private function createDto(): TypePatch
     {
         return new TypePatch(

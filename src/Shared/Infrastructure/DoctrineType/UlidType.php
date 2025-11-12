@@ -23,31 +23,20 @@ final class UlidType extends Type
 
     public function convertToDatabaseValue(mixed $value): ?Binary
     {
-        if ($value instanceof Binary) {
-            return $value;
-        }
-        $ulidFactory = new UlidFactory();
-        $transformer = new UlidTransformer(
-            $ulidFactory,
-            new UlidValidator(),
-            new UlidConverter($ulidFactory)
-        );
-
-        return $transformer->toDatabaseValue($value);
+        return $value instanceof Binary
+            ? $value
+            : $this->createTransformer()->toDatabaseValue($value);
     }
 
     public function convertToPHPValue(mixed $value): ?Ulid
     {
-        if ($value === null) {
-            return null;
-        }
-        if ($value instanceof Ulid) {
+        if ($value === null || $value instanceof Ulid) {
             return $value;
         }
-        $binary = $value instanceof Binary ? $value->getData() : $value;
-        $ulidFactory = new UlidFactory();
-        return (new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory)))
-            ->toPhpValue($binary);
+
+        return $this->createTransformer()->toPhpValue(
+            $this->extractBinaryData($value)
+        );
     }
 
     public function closureToMongo(): string
@@ -79,5 +68,20 @@ $return = $value ? (function($value) {
     return $transformer->transformFromSymfonyUlid($binary);
 })($value) : null;
 PHP;
+    }
+
+    private function createTransformer(): UlidTransformer
+    {
+        $ulidFactory = new UlidFactory();
+        return new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidConverter($ulidFactory)
+        );
+    }
+
+    private function extractBinaryData(mixed $value): mixed
+    {
+        return $value instanceof Binary ? $value->getData() : $value;
     }
 }
