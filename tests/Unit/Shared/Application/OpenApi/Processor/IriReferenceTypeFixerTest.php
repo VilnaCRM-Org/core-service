@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
@@ -23,7 +24,8 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
     {
         parent::setUp();
         $propertyTypeFixer = new PropertyTypeFixer();
-        $contentProcessor = new ContentPropertyProcessor($propertyTypeFixer);
+        $mediaTypeProcessor = new MediaTypePropertyProcessor($propertyTypeFixer);
+        $contentProcessor = new ContentPropertyProcessor($mediaTypeProcessor);
         $this->fixer = new IriReferenceTypeFixer($contentProcessor);
     }
 

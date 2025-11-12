@@ -16,21 +16,28 @@ final class ValueFilter
 
     /**
      * Check if a value should be removed.
-     *
-     * @param array<mixed>|string|int|float|bool|null $value
      */
     public function shouldRemove(string|int $key, array|string|int|float|bool|null $value): bool
     {
-        return $value === null || $this->isRemovableEmptyArray($key, $value);
+        if ($value === null) {
+            return true;
+        }
+
+        return $this->isRemovableEmptyArray($key, $value);
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $value
-     */
-    private function isRemovableEmptyArray(string|int $key, array|string|int|float|bool|null $value): bool
-    {
-        return is_array($value)
-            && $value === []
-            && $this->emptyValueChecker->shouldRemoveEmptyArray($key);
+    private function isRemovableEmptyArray(
+        string|int $key,
+        array|string|int|float|bool|null $value
+    ): bool {
+        if (!is_array($value)) {
+            return false;
+        }
+
+        if ($value !== []) {
+            return false;
+        }
+
+        return $this->emptyValueChecker->shouldRemoveEmptyArray($key);
     }
 }

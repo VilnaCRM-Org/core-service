@@ -104,4 +104,12 @@ final class IriTransformerTest extends UnitTestCase
 
         self::assertSame('01HQZX_special-id.test', $result);
     }
+
+    public function testTransformHandlesMalformedUrlWithNoPath(): void
+    {
+        $iri = '//';
+        $result = $this->transformer->transform($iri);
+
+        self::assertSame('//', $result);
+    }
 }

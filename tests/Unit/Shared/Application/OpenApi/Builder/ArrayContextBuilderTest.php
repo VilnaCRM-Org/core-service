@@ -78,6 +78,17 @@ final class ArrayContextBuilderTest extends UnitTestCase
         );
     }
 
+    public function testBuildDoesNotMarkOptionalParametersAsRequired(): void
+    {
+        $requiredParam = Parameter::required('id', 'string', $this->faker->uuid());
+        $optionalParam = Parameter::optional('reference', 'string', $this->faker->uuid());
+
+        $content = $this->contextBuilder->build([$requiredParam, $optionalParam]);
+        $schema = $content['application/ld+json']['schema'];
+
+        $this->assertSame(['id'], $schema['required']);
+    }
+
     /**
      * @return  array<string,string|array<string>>
      */

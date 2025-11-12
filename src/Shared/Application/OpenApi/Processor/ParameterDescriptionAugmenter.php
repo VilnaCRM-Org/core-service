@@ -179,13 +179,25 @@ final class ParameterDescriptionAugmenter
     private static function augmentParameter(Parameter $parameter, array $descriptions): Parameter
     {
         $paramName = $parameter->getName();
-        $description = $parameter->getDescription();
-        $hasDescription = $description !== null && $description !== '';
 
         return match (true) {
             !isset($descriptions[$paramName]) => $parameter,
-            $hasDescription => $parameter,
+            self::hasDescription($parameter) => $parameter,
             default => $parameter->withDescription($descriptions[$paramName]),
         };
+    }
+
+    private static function hasDescription(Parameter $parameter): bool
+    {
+        return !self::isDescriptionEmpty($parameter->getDescription());
+    }
+
+    private static function isDescriptionEmpty(?string $description): bool
+    {
+        if ($description === null) {
+            return true;
+        }
+
+        return $description === '';
     }
 }

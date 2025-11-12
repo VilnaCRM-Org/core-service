@@ -18,40 +18,39 @@ final class DataCleaner
     /**
      * Recursively remove null values and empty arrays from the data.
      *
-     * @param array<mixed> $data
+     * @param array<array-key, array|\ArrayObject|string|int|float|bool|null> $data
      *
-     * @return array<mixed>
+     * @return array<array-key, array|string|int|float|bool|null>
      */
     public function clean(array $data): array
     {
-        $cleaned = [];
-
+        $result = [];
         foreach ($data as $key => $value) {
-            $processedValue = $this->processValue($key, $value);
-
-            if ($processedValue !== null) {
-                $cleaned[$key] = $processedValue;
+            $processed = $this->processValue($key, $value);
+            if ($processed !== null) {
+                $result[$key] = $processed;
             }
         }
-
-        return $cleaned;
+        return $result;
     }
 
-    /**
-     * Process a single value, returning null if it should be filtered out.
-     *
-     * @param array<mixed>|string|int|float|bool|null $value
-     *
-     * @return array<mixed>|string|int|float|bool|null
-     */
-    private function processValue(string|int $key, array|string|int|float|bool|null $value): array|string|int|float|bool|null
-    {
-        if ($this->valueFilter->shouldRemove($key, $value)) {
-            return null;
+    private function processValue(
+        string|int $key,
+        array|\ArrayObject|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
+        //Convert ArrayObject to array
+        if ($value instanceof \ArrayObject) {
+            $value = $value->getArrayCopy();
         }
 
-        return is_array($value)
-            ? $this->arrayProcessor->process($key, $value, fn (array $data): array => $this->clean($data))
-            : $value;
+        return match (true) {
+            $this->valueFilter->shouldRemove($key, $value) => null,
+            is_array($value) => $this->arrayProcessor->process(
+                $key,
+                $value,
+                fn (array $data): array => $this->clean($data)
+            ),
+            default => $value,
+        };
     }
 }

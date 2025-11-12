@@ -12,9 +12,9 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValidator;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

@@ -40,12 +40,24 @@ final class TagDescriptionAugmenter
     private static function augmentTag(Tag $tag, array $descriptions): Tag
     {
         $tagName = $tag->getName();
-        $description = $tag->getDescription();
 
-        if (isset($descriptions[$tagName]) && ($description === null || $description === '')) {
-            return $tag->withDescription($descriptions[$tagName]);
+        if (!isset($descriptions[$tagName])) {
+            return $tag;
         }
 
-        return $tag;
+        if (!self::isDescriptionEmpty($tag->getDescription())) {
+            return $tag;
+        }
+
+        return $tag->withDescription($descriptions[$tagName]);
+    }
+
+    private static function isDescriptionEmpty(?string $description): bool
+    {
+        if ($description === null) {
+            return true;
+        }
+
+        return $description === '';
     }
 }

@@ -14,51 +14,26 @@ final class ParameterCleaner
     /**
      * Clean parameters array by removing invalid properties from path parameters.
      *
-     * @param array<mixed> $parameters
+     * @param array<array-key, string|int|float|bool|array|null> $parameters
      *
-     * @return array<mixed>
+     * @return array<array-key, string|int|float|bool|array|null>
      */
     public function clean(array $parameters): array
     {
-        return array_map(
-            fn (array|string|int|float|bool|null $parameter): array|string|int|float|bool|null => $this->cleanParameter($parameter),
-            $parameters
-        );
+        $cleaner = fn (
+            array|string|int|float|bool|null $parameter
+        ): array|string|int|float|bool|null => $this->cleanParameter($parameter);
+
+        return array_map($cleaner, $parameters);
     }
 
-    /**
-     * @param array<mixed>|string|int|float|bool|null $parameter
-     *
-     * @return array<mixed>|string|int|float|bool|null
-     */
-    private function cleanParameter(array|string|int|float|bool|null $parameter): array|string|int|float|bool|null
-    {
-        if (!is_array($parameter) || !$this->isPathParameter($parameter)) {
-            return $parameter;
-        }
-
-        return $this->removeDisallowedProperties($parameter);
-    }
-
-    /**
-     * @param array<mixed> $parameter
-     */
-    private function isPathParameter(array $parameter): bool
-    {
-        return isset($parameter['in']) && $parameter['in'] === 'path';
-    }
-
-    /**
-     * @param array<mixed> $parameter
-     *
-     * @return array<mixed>
-     */
-    private function removeDisallowedProperties(array $parameter): array
-    {
-        foreach (self::DISALLOWED_PATH_PROPERTIES as $property) {
-            unset($parameter[$property]);
-        }
-
-        return $parameter;
+    private function cleanParameter(
+        array|string|int|float|bool|null $parameter
+    ): array|string|int|float|bool|null {
+        return match (true) {
+            !is_array($parameter) => $parameter,
+            !isset($parameter['in']) || $parameter['in'] !== 'path' => $parameter,
+            default => array_diff_key($parameter, array_flip(self::DISALLOWED_PATH_PROPERTIES)),
+        };
     }
 }

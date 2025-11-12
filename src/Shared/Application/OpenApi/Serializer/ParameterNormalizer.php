@@ -25,7 +25,7 @@ final class ParameterNormalizer implements NormalizerInterface
     ): array|string|int|float|bool|\ArrayObject|null {
         $data = $this->decorated->normalize($object, $format, $context);
 
-        if (!$object instanceof Parameter || !is_array($data)) {
+        if ($this->shouldSkipProcessing($object, $data)) {
             return $data;
         }
 
@@ -57,5 +57,16 @@ final class ParameterNormalizer implements NormalizerInterface
         return [
             Parameter::class => true,
         ];
+    }
+
+    private function shouldSkipProcessing(
+        object $object,
+        array|string|int|float|bool|\ArrayObject|null $data
+    ): bool {
+        if (!$object instanceof Parameter) {
+            return true;
+        }
+
+        return !is_array($data);
     }
 }

@@ -100,6 +100,27 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
+    public function testProcessPreservesExistingValueWhenNewValueIsNull(): void
+    {
+        $existingValue = $this->faker->word();
+        $dto = new StatusPatch(null);
+        $operation = $this->createMock(Operation::class);
+        $ulid = (string) $this->faker->ulid();
+        $customerStatus = $this->createMock(CustomerStatus::class);
+        $command = $this->createMock(UpdateCustomerStatusCommand::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerStatus, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->setupDependencies($customerStatus, $existingValue, $command);
+        $this->setupCustomerStatus($customerStatus, $existingValue);
+
+        $result = $this->processor
+            ->process($dto, $operation, ['ulid' => $ulid]);
+
+        $this->assertSame($customerStatus, $result);
+    }
+
     private function createDto(): StatusPatch
     {
         return new StatusPatch(

@@ -15,6 +15,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Application\Validator\StringFieldValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -29,6 +30,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private UpdateCustomerCommandFactoryInterface $commandFactory,
         private IriConverterInterface $iriConverter,
         private UlidFactory $ulidTransformer,
+        private StringFieldValidator $fieldResolver,
     ) {
     }
 
@@ -44,7 +46,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $context = []
     ): Customer {
         $customer = $this->retrieveCustomer($uriVariables);
-        $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
+        $customerUpdate = $this->buildCustomerUpdate($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
         return $customer;
     }
@@ -60,85 +62,43 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         ) ?? throw new CustomerNotFoundException();
     }
 
-    private function prepareCustomerUpdate(
+    private function buildCustomerUpdate(
         CustomerPatch $data,
         Customer $customer
     ): CustomerUpdate {
-        $newInitials = $this->updateInitials($data, $customer);
-        $newEmail = $this->updateEmail($data, $customer);
-        $newPhone = $this->updatePhone($data, $customer);
-        $newLeadSource = $this->updateLeadSource($data, $customer);
-        $newType = $this->updateType($data, $customer);
-        $newStatus = $this->updateStatus($data, $customer);
-        $newConfirmed = $data->confirmed ?? $customer->isConfirmed();
-
         return new CustomerUpdate(
-            newInitials: $newInitials,
-            newEmail: $newEmail,
-            newPhone: $newPhone,
-            newLeadSource: $newLeadSource,
-            newType: $newType,
-            newStatus: $newStatus,
-            newConfirmed: $newConfirmed
+            newInitials: $this->fieldResolver->resolve(
+                $data->initials,
+                $customer->getInitials()
+            ),
+            newEmail: $this->fieldResolver->resolve($data->email, $customer->getEmail()),
+            newPhone: $this->fieldResolver->resolve($data->phone, $customer->getPhone()),
+            newLeadSource: $this->fieldResolver->resolve(
+                $data->leadSource,
+                $customer->getLeadSource()
+            ),
+            newType: $this->resolveType($data->type, $customer),
+            newStatus: $this->resolveStatus($data->status, $customer),
+            newConfirmed: $data->confirmed ?? $customer->isConfirmed()
         );
     }
 
-    private function updateInitials(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->initials,
-            $customer->getInitials()
-        );
+    private function resolveType(?string $typeIri, Customer $customer): CustomerType
+    {
+        if ($typeIri === null) {
+            return $customer->getType();
+        }
+
+        return $this->iriConverter->getResourceFromIri($typeIri);
     }
 
-    private function updateEmail(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->email,
-            $customer->getEmail()
-        );
-    }
+    private function resolveStatus(?string $statusIri, Customer $customer): CustomerStatus
+    {
+        if ($statusIri === null) {
+            return $customer->getStatus();
+        }
 
-    private function updatePhone(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->phone,
-            $customer->getPhone()
-        );
-    }
-
-    private function updateLeadSource(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->leadSource,
-            $customer->getLeadSource()
-        );
-    }
-
-    private function updateType(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerType {
-        return $data->type
-            ? $this->getCustomerType($data->type)
-            : $customer->getType();
-    }
-
-    private function updateStatus(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerStatus {
-        return $data->status
-            ? $this->getCustomerStatus($data->status)
-            : $customer->getStatus();
+        return $this->iriConverter->getResourceFromIri($statusIri);
     }
 
     private function dispatchUpdateCommand(
@@ -148,26 +108,5 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         $this->commandBus->dispatch(
             $this->commandFactory->create($customer, $update)
         );
-    }
-
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return strlen(trim($newValue ?? '')) > 0
-            ? $newValue
-            : $defaultValue;
-    }
-
-    private function getCustomerType(
-        string $typeIri
-    ): CustomerType {
-        return $this->iriConverter->getResourceFromIri($typeIri);
-    }
-
-    private function getCustomerStatus(
-        string $statusIri
-    ): CustomerStatus {
-        return $this->iriConverter->getResourceFromIri($statusIri);
     }
 }
