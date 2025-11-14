@@ -26,6 +26,7 @@ This document provides comprehensive explanations and step-by-step workflows ref
 **Allowed Dependencies**: NONE (pure PHP only)
 
 **Contains**:
+
 - **Entities**: Objects with identity (e.g., `Customer`, `Product`, `Order`)
 - **Value Objects**: Immutable objects without identity (e.g., `Email`, `Money`, `Address`)
 - **Aggregates**: Clusters of entities treated as a single unit (extend `AggregateRoot`)
@@ -35,6 +36,7 @@ This document provides comprehensive explanations and step-by-step workflows ref
 - **Factory Interfaces**: Complex object creation contracts
 
 **Strict Rules**:
+
 - ❌ NO Symfony components (`Symfony\*`)
 - ❌ NO Doctrine annotations/attributes (`Doctrine\*`)
 - ❌ NO API Platform decorators (`ApiPlatform\*`)
@@ -44,6 +46,7 @@ This document provides comprehensive explanations and step-by-step workflows ref
 - ✅ Pure business logic ONLY
 
 **Example Domain Entity**:
+
 ```php
 // src/Customer/Domain/Entity/Customer.php
 namespace App\Customer\Domain\Entity;
@@ -98,6 +101,7 @@ class Customer extends AggregateRoot
 **Allowed Dependencies**: Domain, Infrastructure, Symfony, API Platform, GraphQL, Logging
 
 **Contains**:
+
 - **Command Handlers**: Execute write operations (implement `CommandHandlerInterface`)
 - **Event Subscribers**: React to domain events (implement `DomainEventSubscriberInterface`)
 - **DTOs**: Data transfer between layers (can use Symfony validation)
@@ -108,6 +112,7 @@ class Customer extends AggregateRoot
 - **Factory Implementations**: Build domain objects from external data
 
 **Rules**:
+
 - ❌ NO business logic (delegate to Domain)
 - ✅ Orchestrate workflows
 - ✅ Transform data between layers
@@ -115,6 +120,7 @@ class Customer extends AggregateRoot
 - ✅ Use dependency injection
 
 **Example Command Handler**:
+
 ```php
 // src/Customer/Application/CommandHandler/CreateCustomerHandler.php
 namespace App\Customer\Application\CommandHandler;
@@ -158,6 +164,7 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
 **Allowed Dependencies**: Domain, Application, Symfony, Doctrine, Logging
 
 **Contains**:
+
 - **Repository Implementations**: Concrete persistence logic (Doctrine ODM)
 - **Message Bus Implementations**: Command/Event bus with Symfony Messenger
 - **Doctrine Types**: Custom database types (e.g., `UlidType`, `DomainUuidType`)
@@ -166,12 +173,14 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
 - **Retry Strategies**: For message handling
 
 **Rules**:
+
 - ✅ Implement interfaces from Domain
 - ✅ Handle persistence details
 - ✅ Manage external communications
 - ❌ NO business logic
 
 **Example Repository Implementation**:
+
 ```php
 // src/Customer/Infrastructure/Repository/CustomerRepository.php
 namespace App\Customer\Infrastructure\Repository;
@@ -210,6 +219,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 ### Step 1: Identify Bounded Context
 
 **Questions to answer**:
+
 - Does this entity belong to an existing context (e.g., `Customer`, `Catalog`, `Order`)?
 - Or do you need to create a new bounded context?
 - What is the business domain for this entity?
@@ -221,6 +231,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 **Location**: `src/{Context}/Domain/Entity/{Entity}.php`
 
 **Tasks**:
+
 1. Create the entity class
 2. Identify Value Objects needed (e.g., `Money`, `ProductName`)
 3. Define business rules and invariants
@@ -228,6 +239,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 5. Design business methods (not setters!)
 
 **Example**:
+
 ```php
 // src/Catalog/Domain/Entity/Product.php
 namespace App\Catalog\Domain\Entity;
@@ -288,11 +300,13 @@ class Product extends AggregateRoot
 **Location**: `src/{Context}/Domain/Repository/{Entity}RepositoryInterface.php`
 
 **Tasks**:
+
 1. Define `save()` method
 2. Define `findById()` method
 3. Add custom finders as needed (e.g., `findByName()`, `findByCriteria()`)
 
 **Example**:
+
 ```php
 // src/Catalog/Domain/Repository/ProductRepositoryInterface.php
 namespace App\Catalog\Domain\Repository;
@@ -315,12 +329,14 @@ interface ProductRepositoryInterface
 **Location**: `config/doctrine/{Entity}.orm.xml`
 
 **Tasks**:
+
 1. Create XML mapping file
 2. Map entity fields to database
 3. Map Value Object embeds
 4. Define ID strategy
 
 **Example**:
+
 ```xml
 <!-- config/doctrine/Product.orm.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
@@ -339,11 +355,13 @@ interface ProductRepositoryInterface
 **Location**: `src/{Context}/Infrastructure/Repository/{Entity}Repository.php`
 
 **Tasks**:
+
 1. Implement the repository interface
 2. Inject Doctrine `DocumentManager`
 3. Implement persistence methods
 
 **Example**:
+
 ```php
 // src/Catalog/Infrastructure/Repository/ProductRepository.php
 namespace App\Catalog\Infrastructure\Repository;
@@ -374,11 +392,13 @@ final class ProductRepository implements ProductRepositoryInterface
 **Location**: `src/{Context}/Application/Command/{Action}{Entity}Command.php`
 
 **Tasks**:
+
 1. Create command implementing `CommandInterface`
 2. Make it readonly and immutable
 3. Use primitive types or Ulid for properties
 
 **Example**:
+
 ```php
 // src/Catalog/Application/Command/CreateProductCommand.php
 namespace App\Catalog\Application\Command;
@@ -402,6 +422,7 @@ final readonly class CreateProductCommand implements CommandInterface
 **Location**: `src/{Context}/Application/CommandHandler/{Action}{Entity}Handler.php`
 
 **Tasks**:
+
 1. Create handler implementing `CommandHandlerInterface`
 2. Inject repository
 3. Transform command data to domain objects
@@ -415,6 +436,7 @@ final readonly class CreateProductCommand implements CommandInterface
 **Location**: `src/{Context}/Domain/Event/{Entity}{Action}.php`
 
 **Example**:
+
 ```php
 // src/Catalog/Domain/Event/ProductCreated.php
 namespace App\Catalog\Domain\Event;
@@ -445,6 +467,7 @@ final readonly class ProductCreated extends DomainEvent
 **Location**: `src/{Context}/Application/EventSubscriber/{Action}On{Event}.php`
 
 **Example**:
+
 ```php
 // src/Catalog/Application/EventSubscriber/NotifyWarehouseOnProductCreated.php
 namespace App\Catalog\Application\EventSubscriber;
@@ -472,6 +495,7 @@ final readonly class NotifyWarehouseOnProductCreated implements DomainEventSubsc
 ### Step 10: Verify Architecture
 
 **Run Deptrac**:
+
 ```bash
 make deptrac
 ```
@@ -479,6 +503,7 @@ make deptrac
 **Expected**: Zero violations. If violations exist, fix the code (never change `deptrac.yaml`).
 
 **Run Tests**:
+
 ```bash
 make unit-tests
 make integration-tests
@@ -504,6 +529,7 @@ make integration-tests
 #### Violation Type 1: Domain → Symfony (Validators)
 
 **Symptom**:
+
 ```
 Domain must not depend on Symfony
 src/Customer/Domain/Entity/Customer.php:15
@@ -511,6 +537,7 @@ src/Customer/Domain/Entity/Customer.php:15
 ```
 
 **Problem Code**:
+
 ```php
 namespace App\Customer\Domain\Entity;
 
@@ -527,6 +554,7 @@ class Customer
 ```
 
 **Solution**: Extract validation to Value Objects
+
 ```php
 // Domain entity
 namespace App\Customer\Domain\Entity;
@@ -570,6 +598,7 @@ final readonly class Email
 ```
 
 **Optional**: If Symfony validation needed for API input, use DTOs in Application layer:
+
 ```php
 // Application/DTO/CreateCustomerDTO.php
 namespace App\Customer\Application\DTO;
@@ -589,6 +618,7 @@ final class CreateCustomerDTO
 #### Violation Type 2: Domain → Doctrine (Annotations)
 
 **Symptom**:
+
 ```
 Domain must not depend on Doctrine
 src/Product/Domain/Entity/Product.php:10
@@ -596,6 +626,7 @@ src/Product/Domain/Entity/Product.php:10
 ```
 
 **Problem Code**:
+
 ```php
 namespace App\Product\Domain\Entity;
 
@@ -613,6 +644,7 @@ class Product
 ```
 
 **Solution**: Use XML mappings
+
 ```php
 // Pure domain entity (NO Doctrine imports)
 namespace App\Product\Domain\Entity;
@@ -639,6 +671,7 @@ class Product
 #### Violation Type 3: Domain → API Platform (Attributes)
 
 **Symptom**:
+
 ```
 Domain must not depend on ApiPlatform
 src/Customer/Domain/Entity/Customer.php:8
@@ -646,6 +679,7 @@ src/Customer/Domain/Entity/Customer.php:8
 ```
 
 **Problem Code**:
+
 ```php
 namespace App\Customer\Domain\Entity;
 
@@ -660,6 +694,7 @@ class Customer
 ```
 
 **Solution Option 1**: Configure in YAML
+
 ```php
 // Pure domain entity
 namespace App\Customer\Domain\Entity;
@@ -673,13 +708,14 @@ class Customer
 ```yaml
 # config/packages/api_platform.yaml
 resources:
-    App\Customer\Domain\Entity\Customer:
-        operations:
-            get:
-                method: GET
+  App\Customer\Domain\Entity\Customer:
+    operations:
+      get:
+        method: GET
 ```
 
 **Solution Option 2**: Use DTOs in Application layer
+
 ```php
 // Application/DTO/CustomerDTO.php
 namespace App\Customer\Application\DTO;
@@ -697,12 +733,14 @@ final class CustomerDTO
 #### Violation Type 4: Infrastructure → Application (Handler)
 
 **Symptom**:
+
 ```
 Infrastructure must not depend on Application (Command Handler)
 src/Customer/Infrastructure/EventListener/CustomerListener.php:25
 ```
 
 **Problem Code**:
+
 ```php
 namespace App\Customer\Infrastructure\EventListener;
 
@@ -722,6 +760,7 @@ class CustomerListener
 ```
 
 **Solution**: Use Command Bus
+
 ```php
 namespace App\Customer\Infrastructure\EventListener;
 
@@ -741,6 +780,7 @@ class CustomerListener
 ```
 
 **Better Solution**: Use Domain Events
+
 ```php
 // Domain entity records event
 class Customer extends AggregateRoot
@@ -787,6 +827,7 @@ See [examples/ directory](examples/) for complete, working code examples:
 **Location**: `config/doctrine/{EntityName}.orm.xml`
 
 **Basic Template**:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
@@ -816,6 +857,7 @@ See [examples/ directory](examples/) for complete, working code examples:
 **Location**: `src/Shared/Infrastructure/DoctrineType/`
 
 **Example: Ulid Type**:
+
 ```php
 namespace App\Shared\Infrastructure\DoctrineType;
 
@@ -837,10 +879,11 @@ final class UlidType extends Type
 ```
 
 **Register in `config/doctrine.yaml`**:
+
 ```yaml
 doctrine_mongodb:
-    types:
-        ulid: App\Shared\Infrastructure\DoctrineType\UlidType
+  types:
+    ulid: App\Shared\Infrastructure\DoctrineType\UlidType
 ```
 
 ---
@@ -875,14 +918,15 @@ abstract readonly class DomainEvent
 ### Event Subscriber Auto-Registration
 
 **In `config/services.yaml`**:
+
 ```yaml
 _instanceof:
-    App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface:
-        tags: ['app.event_subscriber']
+  App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface:
+    tags: ['app.event_subscriber']
 
 App\Shared\Infrastructure\Bus\Event\EventBusFactory:
-    arguments:
-        - !tagged_iterator app.event_subscriber
+  arguments:
+    - !tagged_iterator app.event_subscriber
 ```
 
 ### Event Dispatching Flow
@@ -938,6 +982,7 @@ $products = $repository->findByCriteria($criteria);
 **Why it's wrong**: Handlers are for orchestration, not business rules.
 
 **Example (WRONG)**:
+
 ```php
 class UpdateCustomerStatusHandler
 {
@@ -957,6 +1002,7 @@ class UpdateCustomerStatusHandler
 ```
 
 **Correct Approach**:
+
 ```php
 // Handler orchestrates
 class UpdateCustomerStatusHandler
@@ -995,6 +1041,7 @@ class Customer extends AggregateRoot
 **Why it's wrong**: Domain becomes a data bag; logic scatters across handlers.
 
 **Example (WRONG)**:
+
 ```php
 class Order
 {
@@ -1024,6 +1071,7 @@ class AddOrderItemHandler
 ```
 
 **Correct Approach**:
+
 ```php
 class Order extends AggregateRoot
 {
@@ -1063,6 +1111,7 @@ class AddOrderItemHandler
 **Why it's wrong**: Validation duplicated, primitive obsession, weak types.
 
 **Example (WRONG)**:
+
 ```php
 class Customer
 {
@@ -1089,6 +1138,7 @@ class Customer
 ```
 
 **Correct Approach**:
+
 ```php
 // Value Object encapsulates validation
 final readonly class Email

@@ -35,15 +35,16 @@ Infrastructure → Application → Domain
      External      Use Cases   Business Logic
 ```
 
-| Layer | Can Depend On | Cannot Depend On | Contains |
-|-------|---------------|------------------|----------|
-| **Domain** | NOTHING | Everything | Entities, Value Objects, Repository Interfaces, Domain Events |
-| **Application** | Domain, Infrastructure, Symfony, API Platform | N/A | Command Handlers, Event Subscribers, DTOs, Transformers |
-| **Infrastructure** | Domain, Application, Symfony, Doctrine | N/A | Repository Implementations, Message Bus, Doctrine Types |
+| Layer              | Can Depend On                                 | Cannot Depend On | Contains                                                      |
+| ------------------ | --------------------------------------------- | ---------------- | ------------------------------------------------------------- |
+| **Domain**         | NOTHING                                       | Everything       | Entities, Value Objects, Repository Interfaces, Domain Events |
+| **Application**    | Domain, Infrastructure, Symfony, API Platform | N/A              | Command Handlers, Event Subscribers, DTOs, Transformers       |
+| **Infrastructure** | Domain, Application, Symfony, Doctrine        | N/A              | Repository Implementations, Message Bus, Doctrine Types       |
 
 ## Critical Rules
 
 ### 1. Domain Layer Purity
+
 - ❌ **NO** external dependencies (Symfony, Doctrine, API Platform)
 - ❌ **NO** framework imports or attributes
 - ✅ Pure PHP business logic only
@@ -51,6 +52,7 @@ Infrastructure → Application → Domain
 - ✅ Define repository interfaces (not implementations)
 
 ### 2. Deptrac Violations
+
 **When Deptrac fails:**
 
 1. Read violation message carefully
@@ -59,6 +61,7 @@ Infrastructure → Application → Domain
 4. **NEVER change `deptrac.yaml`**
 
 **Common fixes:**
+
 - Domain → Symfony: Extract validation to Value Objects
 - Domain → Doctrine: Use XML mappings in `config/doctrine/`
 - Domain → API Platform: Move to Application layer or YAML config
@@ -67,6 +70,7 @@ Infrastructure → Application → Domain
 ### 3. Rich Domain Models (Not Anemic)
 
 ❌ **Wrong (Anemic)**:
+
 ```php
 class Customer {
     public function setName(string $name): void { $this->name = $name; }
@@ -74,6 +78,7 @@ class Customer {
 ```
 
 ✅ **Correct (Rich)**:
+
 ```php
 class Customer extends AggregateRoot {
     public function changeName(string $newName): void {
@@ -87,6 +92,7 @@ class Customer extends AggregateRoot {
 ### 4. Value Objects for Validation
 
 ❌ **Wrong**:
+
 ```php
 class Customer {
     #[Assert\Email] // Framework in domain!
@@ -95,6 +101,7 @@ class Customer {
 ```
 
 ✅ **Correct**:
+
 ```php
 class Customer {
     private Email $email; // Value Object validates itself
@@ -112,6 +119,7 @@ final readonly class Email {
 ## CQRS Pattern Quick Start
 
 ### Commands (Write Operations)
+
 ```php
 // Application/Command/CreateCustomerCommand.php
 final readonly class CreateCustomerCommand implements CommandInterface {
@@ -124,6 +132,7 @@ final readonly class CreateCustomerCommand implements CommandInterface {
 ```
 
 ### Command Handlers (Orchestration)
+
 ```php
 // Application/CommandHandler/CreateCustomerHandler.php
 final readonly class CreateCustomerHandler implements CommandHandlerInterface {
@@ -144,15 +153,17 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface {
 ```
 
 **Auto-registration** in `config/services.yaml`:
+
 ```yaml
 _instanceof:
-    App\Shared\Domain\Bus\Command\CommandHandlerInterface:
-        tags: ['app.command_handler']
+  App\Shared\Domain\Bus\Command\CommandHandlerInterface:
+    tags: ['app.command_handler']
 ```
 
 ## Repository Pattern (Hexagonal)
 
 ### Interface (Domain Layer)
+
 ```php
 // Domain/Repository/CustomerRepositoryInterface.php
 interface CustomerRepositoryInterface {
@@ -162,6 +173,7 @@ interface CustomerRepositoryInterface {
 ```
 
 ### Implementation (Infrastructure Layer)
+
 ```php
 // Infrastructure/Repository/CustomerRepository.php
 final class CustomerRepository implements CustomerRepositoryInterface {
@@ -177,6 +189,7 @@ final class CustomerRepository implements CustomerRepositoryInterface {
 ## Domain Events Pattern
 
 ### Recording Events in Aggregates
+
 ```php
 class Customer extends AggregateRoot {
     public function __construct(Ulid $id, Email $email, string $name) {
@@ -191,6 +204,7 @@ class Customer extends AggregateRoot {
 ```
 
 ### Event Subscribers (Application Layer)
+
 ```php
 // Application/EventSubscriber/SendWelcomeEmailOnCustomerCreated.php
 final readonly class SendWelcomeEmailOnCustomerCreated implements DomainEventSubscriberInterface {
@@ -211,6 +225,7 @@ final readonly class SendWelcomeEmailOnCustomerCreated implements DomainEventSub
 For detailed workflow with all steps, see [REFERENCE.md - Creating New Entity](REFERENCE.md#creating-a-new-entity).
 
 **Quick steps:**
+
 1. Create entity in `{Context}/Domain/Entity/` (pure PHP)
 2. Define repository interface in `{Context}/Domain/Repository/`
 3. Create XML mapping in `config/doctrine/{Entity}.orm.xml`
@@ -223,6 +238,7 @@ For detailed workflow with all steps, see [REFERENCE.md - Creating New Entity](R
 For complete examples and solutions, see [REFERENCE.md - Fixing Violations](REFERENCE.md#fixing-deptrac-violations).
 
 **Quick process:**
+
 1. Run `make deptrac`
 2. Read violation message
 3. Identify wrong dependency
@@ -247,22 +263,27 @@ Before completing any task:
 ## Anti-Patterns to Avoid
 
 ### 1. Business Logic in Handlers
+
 ❌ Don't put validation/business rules in handlers
 ✅ Delegate to domain methods
 
 ### 2. Framework Dependencies in Domain
+
 ❌ No Symfony, Doctrine, API Platform in domain
 ✅ Pure PHP with Value Objects
 
 ### 3. Anemic Domain Models
+
 ❌ No getters/setters without behavior
 ✅ Rich models with business methods
 
 ### 4. Modifying Deptrac
+
 ❌ NEVER change `deptrac.yaml` to silence violations
 ✅ Always fix the code architecture
 
 ### 5. Not Using Value Objects
+
 ❌ String primitives with scattered validation
 ✅ Value Objects that validate themselves
 

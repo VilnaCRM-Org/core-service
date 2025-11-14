@@ -5,9 +5,11 @@ This directory contains comprehensive code examples demonstrating Domain-Driven 
 ## Files Overview
 
 ### 01-entity-example.php
+
 **Complete Rich Domain Entity Example**
 
 Demonstrates:
+
 - Rich domain model (NOT anemic)
 - Business logic encapsulated in entity methods
 - Aggregate root pattern with domain events
@@ -17,15 +19,18 @@ Demonstrates:
 - NO external dependencies (pure PHP)
 
 Key Concepts:
+
 - `extends AggregateRoot` for event recording
 - Business methods (not setters): `publish()`, `changePrice()`, `rename()`
 - Domain events: `ProductCreated`, `ProductPriceChanged`, `ProductPublished`
 - Immutable value objects: `ProductName`, `Money`, `ProductStatus`
 
 ### 02-value-object-examples.php
+
 **Value Object Patterns**
 
 Demonstrates:
+
 - Immutable value objects (readonly classes)
 - Self-validating in constructor
 - Equality based on value, not identity
@@ -33,21 +38,25 @@ Demonstrates:
 - Named constructors for type safety
 
 Examples:
+
 - `ProductName`: String validation with min/max length
 - `Money`: Currency handling with arithmetic operations
 - `ProductStatus`: Enum-like status with type-safe constructors
 - `Email`: Email validation and domain extraction
 
 Key Principles:
+
 - Once created, always valid
 - NO setters (immutable)
 - `equals()` method for value comparison
 - Rich behavior (not just data containers)
 
 ### 03-cqrs-pattern-example.php
+
 **CQRS Pattern (Command Query Responsibility Segregation)**
 
 Demonstrates:
+
 - Commands (write operations): `CreateProductCommand`, `UpdateProductPriceCommand`
 - Command Handlers: Orchestration without business logic
 - Repository pattern: Interface in Domain, implementation in Infrastructure
@@ -56,6 +65,7 @@ Demonstrates:
 - Complete flow: DTO → Command → Handler → Domain → Repository
 
 Key Concepts:
+
 - Commands are immutable DTOs representing intent
 - Handlers implement `CommandHandlerInterface`
 - Handlers orchestrate, domain contains logic
@@ -63,14 +73,17 @@ Key Concepts:
 - Hexagonal architecture: Ports (interfaces) and Adapters (implementations)
 
 ### 04-fixing-deptrac-violations.php
+
 **Common Deptrac Violations and Fixes**
 
 Demonstrates:
+
 - **BEFORE/AFTER** code for common violations
 - How to identify and fix architectural issues
 - Why you should NEVER modify `deptrac.yaml`
 
 Violations Covered:
+
 1. Domain → Symfony (validators): Fix with Value Objects
 2. Domain → Doctrine (annotations): Fix with XML mappings
 3. Domain → API Platform (attributes): Fix with config/YAML or DTOs
@@ -78,6 +91,7 @@ Violations Covered:
 5. Anemic domain models: Fix by moving logic to entities
 
 Step-by-Step Workflow:
+
 - Run `make deptrac`
 - Read violation message
 - Identify the problem
@@ -93,6 +107,7 @@ When working on a task:
 
 1. **Creating an Entity?**
    → Reference `01-entity-example.php`
+
    - Extend `AggregateRoot`
    - Use named constructors
    - Business logic in methods, not setters
@@ -100,6 +115,7 @@ When working on a task:
 
 2. **Need Validation?**
    → Reference `02-value-object-examples.php`
+
    - Create Value Object
    - Validate in constructor
    - Make it immutable (readonly)
@@ -107,6 +123,7 @@ When working on a task:
 
 3. **Implementing a Use Case?**
    → Reference `03-cqrs-pattern-example.php`
+
    - Create Command (intent)
    - Create Handler (orchestration)
    - Call domain methods
@@ -121,6 +138,7 @@ When working on a task:
 ### For Developers
 
 These examples serve as:
+
 - **Templates** for new features
 - **Reference** for architectural patterns
 - **Training material** for onboarding
@@ -135,14 +153,17 @@ Infrastructure → Application → Domain
 ```
 
 ### Domain Layer
+
 - **Allowed**: Pure PHP, domain value objects
 - **Forbidden**: Symfony, Doctrine, API Platform, ANY framework
 
 ### Application Layer
+
 - **Allowed**: Domain, Infrastructure, Symfony, API Platform, GraphQL
 - **Forbidden**: Business logic (delegate to Domain)
 
 ### Infrastructure Layer
+
 - **Allowed**: Domain, Application, Symfony, Doctrine
 - **Forbidden**: Business logic (delegate to Domain)
 
@@ -170,21 +191,21 @@ Before committing code, ensure:
 
 ## Common Patterns Summary
 
-| Pattern | Domain | Application | Infrastructure |
-|---------|--------|-------------|----------------|
-| Entities | ✅ Define | ❌ | ❌ |
-| Value Objects | ✅ Define | ❌ | ❌ |
-| Repository Interface | ✅ Define | ❌ | ❌ |
-| Repository Implementation | ❌ | ❌ | ✅ Implement |
-| Commands | ❌ | ✅ Define | ❌ |
-| Command Handlers | ❌ | ✅ Implement | ❌ |
-| Domain Events | ✅ Define | ❌ | ❌ |
-| Event Subscribers | ❌ | ✅ Implement | ❌ |
-| DTOs | ❌ | ✅ Define | ❌ |
-| Transformers | ❌ | ✅ Implement | ❌ |
-| API Processors | ❌ | ✅ Implement | ❌ |
-| Doctrine Mappings | ❌ | ❌ | ✅ Config (XML) |
-| Message Bus Impl | ❌ | ❌ | ✅ Implement |
+| Pattern                   | Domain    | Application  | Infrastructure  |
+| ------------------------- | --------- | ------------ | --------------- |
+| Entities                  | ✅ Define | ❌           | ❌              |
+| Value Objects             | ✅ Define | ❌           | ❌              |
+| Repository Interface      | ✅ Define | ❌           | ❌              |
+| Repository Implementation | ❌        | ❌           | ✅ Implement    |
+| Commands                  | ❌        | ✅ Define    | ❌              |
+| Command Handlers          | ❌        | ✅ Implement | ❌              |
+| Domain Events             | ✅ Define | ❌           | ❌              |
+| Event Subscribers         | ❌        | ✅ Implement | ❌              |
+| DTOs                      | ❌        | ✅ Define    | ❌              |
+| Transformers              | ❌        | ✅ Implement | ❌              |
+| API Processors            | ❌        | ✅ Implement | ❌              |
+| Doctrine Mappings         | ❌        | ❌           | ✅ Config (XML) |
+| Message Bus Impl          | ❌        | ❌           | ✅ Implement    |
 
 ---
 
