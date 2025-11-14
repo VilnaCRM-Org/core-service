@@ -7,6 +7,10 @@ description: Maintain and improve code quality using PHPInsights without decreas
 
 Maintain exceptional code quality standards using PHPInsights in this Symfony-based microservice. This skill ensures complexity stays manageable while preserving hexagonal architecture, DDD patterns, and CQRS design.
 
+**Related Skills**:
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For proper layer separation and architectural patterns
+- [developing-openapi-specs](../developing-openapi-specs/SKILL.md) - For OpenAPI-specific complexity reduction techniques
+
 ## When to Use This Skill
 
 Use this skill when:

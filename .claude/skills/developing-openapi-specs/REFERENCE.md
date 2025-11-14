@@ -1,19 +1,8 @@
-# OpenAPI Development Skill
+# OpenAPI Development Reference Guide
 
-## Description
+**Detailed patterns, step-by-step guides, and examples for developing OpenAPI specifications.**
 
-Guide for contributing to the OpenAPI layer at `src/Shared/Application/OpenApi/`. This skill covers architecture patterns, best practices, and complexity management techniques adopted from the user-service repository.
-
-## When to Use This Skill
-
-Use this skill when:
-
-- Adding new OpenAPI endpoint factories
-- Creating new processors for spec transformation
-- Adding parameter descriptions or validation
-- Modifying OpenAPI generation logic
-- Fixing OpenAPI validation errors
-- Reducing cyclomatic complexity in OpenAPI code
+This document provides comprehensive implementation details referenced from [SKILL.md](SKILL.md). For quick patterns and overview, see the main skill file.
 
 ## Architecture Overview
 
