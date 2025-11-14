@@ -10,6 +10,7 @@ description: Guide for contributing to the OpenAPI layer using processor pattern
 This skill covers architecture patterns, complexity management techniques, and best practices for maintaining OpenAPI specifications while keeping code quality high.
 
 **Related Skills**:
+
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Domain layer must stay pure; OpenAPI code belongs in Application layer
 
 ## When to Use This Skill
@@ -28,7 +29,7 @@ The OpenAPI layer follows a **Processor Pattern** with clear separation of conce
 ```
 src/Shared/Application/OpenApi/
 ├── Builder/              # Schema and parameter builders
-├── Factory/              
+├── Factory/
 │   ├── Endpoint/         # Custom endpoint factories
 │   ├── Request/          # Request body schemas
 │   ├── Response/         # Response schemas
@@ -214,6 +215,7 @@ make unit-tests                  # Run tests
 ```
 
 **Expected Results**:
+
 - OpenAPI validation: "No results with severity 'hint' or higher"
 - PHPInsights: Code 100%, Complexity ≥94%, Architecture 100%, Style 100%
 - Unit tests: 100% coverage
@@ -227,6 +229,7 @@ OpenAPI code belongs in the **Application layer**:
 - See [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) for layer rules
 
 OpenAPI components can depend on:
+
 - Domain entities (for type information)
 - Symfony/API Platform components
 - DTOs and transformers
