@@ -18,6 +18,8 @@ This skill guides you through creating and managing database migrations for Mong
 - Repository implementations in **Infrastructure layer** (`{Context}/Infrastructure/Repository/`)
 - XML mappings are infrastructure concern (`config/doctrine/`)
 
+**Related Skill**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For comprehensive DDD patterns, layer responsibilities, and Deptrac compliance
+
 ### 2. MongoDB Schema Management
 
 - Use XML mappings for all entity metadata (not annotations)

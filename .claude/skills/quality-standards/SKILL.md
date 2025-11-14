@@ -67,6 +67,8 @@ make psalm-security  # Security taint analysis
 make deptrac
 ```
 
+**Related Skill**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For fixing Deptrac violations by refactoring architecture (never modify deptrac.yaml)
+
 ### Run PHP CS Fixer
 
 ```bash
