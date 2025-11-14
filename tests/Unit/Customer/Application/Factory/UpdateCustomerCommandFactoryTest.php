@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Customer\Infrastructure\Factory;
+namespace App\Tests\Unit\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactory;
