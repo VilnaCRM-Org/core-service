@@ -24,6 +24,7 @@ Activate automatically when:
 ## Quick Start: Complete CRUD in 10 Steps
 
 > **Template Syntax Note**: Throughout this guide, placeholders like `{Entity}`, `{Context}`, and `{entity}` should be replaced with your actual values. For example:
+>
 > - `{Entity}` → `Customer` (PascalCase class name)
 > - `{Context}` → `Customer` (bounded context/module name)
 > - `{entity}` → `customer` (lowercase for configs/filters)
