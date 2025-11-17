@@ -47,7 +47,6 @@ One sentence stating the primary goal.
 ```bash
 command
 ```
-````
 
 #### Step 2: [Check/Verify]
 
@@ -93,7 +92,6 @@ Exact output format or success message
 - [ ] Specific verifiable step 1
 - [ ] Specific verifiable step 2
 - [ ] Specific verifiable step 3
-
 ````
 
 ## Before/After Example
@@ -113,7 +111,7 @@ You should activate this skill when you need to...
 - Long explanation
 - More context
 - Historical background
-````
+```
 
 **Problems**:
 
@@ -144,7 +142,6 @@ Create entity with XML mapping and verify schema.
 // Domain/Entity/YourEntity.php
 class YourEntity { /* ... */ }
 ```
-````
 
 ### Step 2: Create XML Mapping
 
@@ -164,8 +161,7 @@ make setup-test-db
 
 - Modify existing migrations
 - Skip XML validation
-
-```
+````
 
 **Results**:
 - Clear goal
@@ -192,12 +188,16 @@ When refactoring a skill to KERNEL:
 
 ## Metrics to Track
 
-- **Before**: [original line count]
-- **After**: [new line count]
-- **Reduction**: [percentage]
+When refactoring a skill, track these metrics:
+
+- **Before**: Original line count (e.g., 401 lines)
+- **After**: New line count (e.g., 153 lines)
+- **Reduction**: Percentage decrease (e.g., 62%)
 - **Success criteria added**: Yes/No
 - **Constraints explicit**: Yes/No
 - **Verification checklist**: Yes/No
+
+Example from testing-workflow refactoring: 401→153 lines (62% reduction)
 
 ## Remaining Skills to Refactor
 
@@ -224,16 +224,13 @@ For skills like `openapi-development` (842 lines):
 4. **Link to details**: `See reference/pattern-details.md for examples`
 
 Example structure:
-```
 
+```
 skill-name/
 ├── SKILL.md (follows KERNEL, <200 lines)
 ├── reference/
 │ ├── detailed-patterns.md
 │ └── troubleshooting.md
 └── examples/
-└── complete-example.md
-
-```
-
+    └── complete-example.md
 ```
