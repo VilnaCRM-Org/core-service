@@ -182,11 +182,12 @@ When you see a Deptrac violation, use this map to know where to move or refactor
 
 **Violation**: `uses Symfony\Component\Validator\Constraints`
 
-| FROM (Wrong) | TO (Correct) |
-|--------------|--------------|
+| FROM (Wrong)                                                     | TO (Correct)                                                            |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `src/Customer/Domain/Entity/Customer.php` with `#[Assert\Email]` | Create `src/Customer/Domain/ValueObject/Email.php` with self-validation |
 
 **Move validation from**:
+
 ```
 Customer.php                    →   Email.php (new Value Object)
 ├─ #[Assert\Email] email        →   ├─ filter_var() validation
@@ -203,11 +204,12 @@ Customer.php                    →   Email.php (new Value Object)
 
 **Violation**: `uses Doctrine\ODM\MongoDB\Mapping\Annotations`
 
-| FROM (Wrong) | TO (Correct) |
-|--------------|--------------|
+| FROM (Wrong)                                                     | TO (Correct)                           |
+| ---------------------------------------------------------------- | -------------------------------------- |
 | `src/Customer/Domain/Entity/Customer.php` with `#[ODM\Document]` | `config/doctrine/Customer.mongodb.xml` |
 
 **Move annotations to XML**:
+
 ```
 Customer.php                    →   config/doctrine/Customer.mongodb.xml
 ├─ #[ODM\Document]              →   <document name="..." collection="...">
@@ -222,11 +224,12 @@ Customer.php                    →   config/doctrine/Customer.mongodb.xml
 
 **Violation**: `uses ApiPlatform\Metadata\ApiResource`
 
-| FROM (Wrong) | TO (Correct) |
-|--------------|--------------|
+| FROM (Wrong)                                                    | TO (Correct)                                                                                                   |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `src/Customer/Domain/Entity/Customer.php` with `#[ApiResource]` | Option 1: `config/api_platform/Customer.yaml`<br>Option 2: `src/Customer/Application/DTO/CustomerResource.php` |
 
 **Option 1: Move to YAML config**:
+
 ```
 Customer.php                    →   config/api_platform/Customer.yaml
 ├─ #[ApiResource(...)]          →   resources:
@@ -236,6 +239,7 @@ Customer.php                    →   config/api_platform/Customer.yaml
 ```
 
 **Option 2: Move to Application DTO**:
+
 ```
 Customer.php (Domain)           →   CustomerResource.php (Application/DTO/)
 └─ Clean entity, no API         →   ├─ #[ApiResource]
@@ -249,11 +253,12 @@ Customer.php (Domain)           →   CustomerResource.php (Application/DTO/)
 
 **Violation**: `uses App\...\Application\CommandHandler\...Handler`
 
-| FROM (Wrong) | TO (Correct) |
-|--------------|--------------|
+| FROM (Wrong)                                                                                     | TO (Correct)                               |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------ |
 | `src/Customer/Infrastructure/EventListener/DoctrineListener.php`<br>injecting `SendEmailHandler` | Use `CommandBusInterface` or Domain Events |
 
 **Refactor to use bus**:
+
 ```
 DoctrineListener.php            →   DoctrineListener.php (refactored)
 ├─ SendEmailHandler $handler    →   CommandBusInterface $commandBus
@@ -261,6 +266,7 @@ DoctrineListener.php            →   DoctrineListener.php (refactored)
 ```
 
 **Better: Use Domain Events**:
+
 ```
 DoctrineListener.php            →   DELETE (no longer needed)
 
@@ -372,13 +378,13 @@ src/Shared/Domain/
 
 ## Summary: Fix Violation → Move File
 
-| Violation Type | Source File | Destination |
-|----------------|-------------|-------------|
-| Domain → Symfony Validator | Entity with `#[Assert]` | New Value Object in Domain/ValueObject/ |
-| Domain → Doctrine | Entity with `#[ODM]` | XML mapping in config/doctrine/ |
-| Domain → API Platform | Entity with `#[ApiResource]` | YAML in config/api_platform/ OR DTO in Application/DTO/ |
-| Infrastructure → Handler | Direct handler injection | Use CommandBusInterface |
-| Application → External Service | Direct service call | Create Domain interface, Infrastructure implementation |
+| Violation Type                 | Source File                  | Destination                                             |
+| ------------------------------ | ---------------------------- | ------------------------------------------------------- |
+| Domain → Symfony Validator     | Entity with `#[Assert]`      | New Value Object in Domain/ValueObject/                 |
+| Domain → Doctrine              | Entity with `#[ODM]`         | XML mapping in config/doctrine/                         |
+| Domain → API Platform          | Entity with `#[ApiResource]` | YAML in config/api_platform/ OR DTO in Application/DTO/ |
+| Infrastructure → Handler       | Direct handler injection     | Use CommandBusInterface                                 |
+| Application → External Service | Direct service call          | Create Domain interface, Infrastructure implementation  |
 
 ---
 

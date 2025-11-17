@@ -162,18 +162,19 @@ This skill covers processor patterns for OpenAPI.
 
 ## Common Confusions
 
-| Confusion | Clarification |
-|-----------|--------------|
-| deptrac-fixer vs implementing-ddd-architecture | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture |
-| testing-workflow vs load-testing | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing |
-| quality-standards vs complexity-management | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management |
-| ci-workflow vs testing-workflow | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow |
+| Confusion                                      | Clarification                                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| deptrac-fixer vs implementing-ddd-architecture | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                 |
+| testing-workflow vs load-testing               | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing |
+| quality-standards vs complexity-management     | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management    |
+| ci-workflow vs testing-workflow                | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                      |
 
 ## Multiple Skills for One Task
 
 Some tasks benefit from multiple skills:
 
 ### Creating a complete new feature:
+
 1. **implementing-ddd-architecture** - Design domain model
 2. **database-migrations** - Configure persistence
 3. **testing-workflow** - Write tests
@@ -181,11 +182,13 @@ Some tasks benefit from multiple skills:
 5. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
+
 1. **deptrac-fixer** - Fix the violations
 2. **implementing-ddd-architecture** - Understand why (if needed)
 3. **ci-workflow** - Verify fix
 
 ### Performance optimization:
+
 1. **load-testing** - Create performance tests
 2. **complexity-management** - Reduce code complexity
 3. **ci-workflow** - Ensure quality maintained

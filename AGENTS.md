@@ -179,6 +179,7 @@ This repository includes comprehensive Claude Code Skills in the `.claude/skills
 #### Skill Decision Guide
 
 For choosing the right skill, see **[.claude/skills/SKILL-DECISION-GUIDE.md](.claude/skills/SKILL-DECISION-GUIDE.md)** which provides:
+
 - Decision tree for common scenarios
 - Skill relationship map
 - When to use which skill
@@ -382,12 +383,12 @@ public function handle(): void
 
 **Quick Reference**:
 
-| Violation Type               | Solution                          |
-| ---------------------------- | --------------------------------- |
-| Domain → Symfony Validator   | Value Objects with self-validation |
-| Domain → Doctrine            | XML mappings in config/doctrine/  |
-| Domain → API Platform        | YAML config or Application DTOs  |
-| Infrastructure → Handler     | CommandBusInterface injection     |
+| Violation Type             | Solution                           |
+| -------------------------- | ---------------------------------- |
+| Domain → Symfony Validator | Value Objects with self-validation |
+| Domain → Doctrine          | XML mappings in config/doctrine/   |
+| Domain → API Platform      | YAML config or Application DTOs    |
+| Infrastructure → Handler   | CommandBusInterface injection      |
 
 For comprehensive Deptrac fixing guidance, see the [deptrac-fixer skill](.claude/skills/deptrac-fixer/SKILL.md).
 

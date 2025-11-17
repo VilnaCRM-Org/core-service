@@ -43,6 +43,7 @@ Domain must not depend on Symfony
 ```
 
 **Extract**:
+
 - **Violating Layer**: Domain
 - **Forbidden Dependency**: Symfony
 - **File**: `src/Customer/Domain/Entity/Customer.php:15`
@@ -68,17 +69,18 @@ Infrastructure → Application → Domain
   External       Use Cases    Pure Business
 ```
 
-| From Layer     | Can Depend On                                       | CANNOT Depend On |
-| -------------- | --------------------------------------------------- | ---------------- |
-| **Domain**     | NOTHING                                             | Everything       |
-| **Application**| Domain, Infrastructure, Symfony, API Platform, etc. | N/A              |
-| **Infrastructure** | Domain, Application, Symfony, Doctrine, etc.   | N/A              |
+| From Layer         | Can Depend On                                       | CANNOT Depend On |
+| ------------------ | --------------------------------------------------- | ---------------- |
+| **Domain**         | NOTHING                                             | Everything       |
+| **Application**    | Domain, Infrastructure, Symfony, API Platform, etc. | N/A              |
+| **Infrastructure** | Domain, Application, Symfony, Doctrine, etc.        | N/A              |
 
 ## Common Violation Patterns
 
 ### Pattern 1: Domain → Symfony (Validation)
 
 **Violation**:
+
 ```
 Domain must not depend on Symfony
   src/Customer/Domain/Entity/Customer.php
@@ -126,6 +128,7 @@ final readonly class Email
 ### Pattern 2: Domain → Doctrine (Annotations)
 
 **Violation**:
+
 ```
 Domain must not depend on Doctrine
   src/Product/Domain/Entity/Product.php
@@ -160,6 +163,7 @@ class Product
 ```
 
 **XML Mapping** (`config/doctrine/Product.mongodb.xml`):
+
 ```xml
 <doctrine-mongo-mapping>
     <document name="App\Product\Domain\Entity\Product" collection="products">
@@ -171,6 +175,7 @@ class Product
 ### Pattern 3: Domain → API Platform
 
 **Violation**:
+
 ```
 Domain must not depend on ApiPlatform
   src/Customer/Domain/Entity/Customer.php
@@ -209,6 +214,7 @@ final class CustomerResource
 ### Pattern 4: Domain → External Library
 
 **Violation**:
+
 ```
 Domain must not depend on MongoDB\BSON
   src/Customer/Domain/Entity/Customer.php
@@ -240,6 +246,7 @@ class Customer
 ### Pattern 5: Infrastructure → Application Handler
 
 **Violation**:
+
 ```
 Infrastructure must not depend on Application (direct handler call)
   src/Customer/Infrastructure/EventListener/CustomerListener.php
@@ -290,6 +297,7 @@ make deptrac 2>&1 | grep "must not depend on"
 ### Step 2: Categorize by Type
 
 Group violations by pattern:
+
 - Domain → Framework (most critical)
 - Infrastructure → Application
 - Application → Infrastructure (rare but possible)
@@ -297,6 +305,7 @@ Group violations by pattern:
 ### Step 3: Fix in Order
 
 **Priority**:
+
 1. Domain → external dependencies
 2. Infrastructure → Application
 3. Other layer violations
@@ -304,6 +313,7 @@ Group violations by pattern:
 ### Step 4: Verify Incrementally
 
 After each fix:
+
 ```bash
 make deptrac
 ```
@@ -329,7 +339,7 @@ Before refactoring to fix violation:
 # NEVER DO THIS
 ruleset:
   Domain:
-    - Symfony  # Adding exception to silence violation
+    - Symfony # Adding exception to silence violation
 ```
 
 ### DON'T: Wrap Framework Code
@@ -424,6 +434,7 @@ When fixing violations, you need to know WHERE files should go. See [CODELY-STRU
 - Real-world examples from CodelyTV's php-ddd-example
 
 **Quick reference**:
+
 ```
 Domain Layer (NO framework imports!)
 ├── Entity/      → Aggregate roots and entities
