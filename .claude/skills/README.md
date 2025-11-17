@@ -328,6 +328,40 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 
 ---
 
+### 12. API Platform CRUD (`api-platform-crud/`)
+
+**Purpose**: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns
+
+**When activated**:
+
+- Adding new API resources (entities with REST endpoints)
+- Implementing CRUD operations (Create, Read, Update, Delete)
+- Creating DTOs for input/output transformation
+- Configuring API Platform operations, filters, or pagination
+- Working with state processors or providers
+- Setting up GraphQL alongside REST
+
+**What it does**:
+
+- Guides complete CRUD implementation in 10 steps
+- Provides YAML-based resource configuration patterns
+- Documents DTO patterns for Create, Put, Patch operations
+- Explains state processor implementation with CQRS
+- Covers filter and pagination configuration
+- Shows IRI resolution for entity references
+- Includes complete Customer entity example
+
+**Key commands**: `make cache-clear`, `make generate-openapi-spec`, `make deptrac`
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and 10-step guide)
+- `examples/complete-customer-crud.md` (Full working example)
+- `reference/filters-and-pagination.md` (Filter configuration)
+- `reference/troubleshooting.md` (Common issues and solutions)
+
+---
+
 ## How Skills Work
 
 ### Automatic Discovery
