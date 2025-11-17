@@ -1,21 +1,27 @@
 ---
 name: quality-standards
-description: Maintain and improve code quality standards without decreasing thresholds. Use when PHPInsights fails, cyclomatic complexity is too high, Psalm reports errors, Deptrac shows violations, mutation score drops, or when refactoring for better code quality. Covers complexity reduction strategies, architecture fixes, and SOLID principles.
+description: Overview of protected quality thresholds and quick reference for all quality tools. Use when you need to understand quality metrics, run comprehensive quality checks, or learn which specialized skill to use. For specific issues, use dedicated skills (deptrac-fixer for Deptrac, complexity-management for PHPInsights, testing-workflow for coverage).
 ---
 
 # Quality Standards Skill
 
-This skill guides maintaining and improving code quality standards without ever decreasing current quality levels.
+This skill provides an overview of protected quality thresholds and guides you to the appropriate specialized skill for specific issues.
 
 ## When to Use This Skill
 
 Activate this skill when:
 
-- PHPInsights reports quality issues
-- Cyclomatic complexity is too high
-- Deptrac reports architecture violations
-- Code quality needs improvement
-- Refactoring for better maintainability
+- You need to understand what quality metrics are protected
+- Running comprehensive quality checks (`make ci`)
+- Learning which specialized skill to use for specific issues
+- Quick reference for all quality tool commands
+
+**For specific issues, use these specialized skills:**
+
+- **Deptrac violations** → Use [deptrac-fixer](../deptrac-fixer/SKILL.md) skill
+- **High cyclomatic complexity** → Use [complexity-management](../complexity-management/SKILL.md) skill
+- **Test coverage issues** → Use [testing-workflow](../testing-workflow/SKILL.md) skill
+- **Architecture violations** → Use [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) skill
 
 ## Protected Quality Metrics
 
@@ -67,7 +73,9 @@ make psalm-security  # Security taint analysis
 make deptrac
 ```
 
-**Related Skill**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For fixing Deptrac violations by refactoring architecture (never modify deptrac.yaml)
+**Specialized Skills for Deptrac Issues**:
+- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Diagnose and fix violations automatically (recommended)
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Understand proper layer architecture
 
 ### Run PHP CS Fixer
 

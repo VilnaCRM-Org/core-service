@@ -1,6 +1,6 @@
 ---
 name: implementing-ddd-architecture
-description: Enforces Domain-Driven Design and Hexagonal Architecture patterns in PHP projects. Use when creating entities, value objects, aggregates, resolving Deptrac violations, implementing CQRS patterns, or ensuring proper layer separation (Domain/Application/Infrastructure). Ensures business logic stays in domain, prevents framework dependencies in domain layer, and maintains architectural boundaries.
+description: Design and implement DDD patterns (entities, value objects, aggregates, CQRS). Use when creating new domain objects, implementing bounded contexts, designing repository interfaces, or learning proper layer separation. For fixing existing Deptrac violations, use the deptrac-fixer skill instead.
 ---
 
 # Implementing DDD Architecture
@@ -15,13 +15,14 @@ Activate automatically when:
 
 - Creating/modifying entities, value objects, or aggregates
 - Implementing bounded contexts or modules
-- Refactoring code to follow DDD principles
-- **Resolving Deptrac architectural violations** (most common)
+- Designing new domain models from scratch
 - Designing repository interfaces and implementations
 - Implementing CQRS patterns (Commands/Handlers)
 - Working with domain events and event subscribers
-- Ensuring layer separation (Domain/Application/Infrastructure)
+- Learning proper layer separation (Domain/Application/Infrastructure)
 - Code review for architectural compliance
+
+**For fixing existing Deptrac violations**, use [deptrac-fixer skill](../deptrac-fixer/SKILL.md) - it provides step-by-step fix patterns.
 
 ## Core Principle
 
@@ -292,6 +293,7 @@ Before completing any task:
 For comprehensive documentation, complete code examples, and detailed patterns:
 
 - **[REFERENCE.md](REFERENCE.md)** - Detailed layer responsibilities, complete workflows, pattern explanations
+- **[DIRECTORY-STRUCTURE.md](DIRECTORY-STRUCTURE.md)** - Where to place files based on CodelyTV patterns
 - **[examples/](examples/)** - Working code examples:
   - `01-entity-example.php` - Complete rich domain entity
   - `02-value-object-examples.php` - Value Object patterns
@@ -299,11 +301,34 @@ For comprehensive documentation, complete code examples, and detailed patterns:
   - `04-fixing-deptrac-violations.php` - Before/after fixes for violations
   - `README.md` - Examples overview and usage guide
 
+## Related Skills
+
+- **[deptrac-fixer](../deptrac-fixer/SKILL.md)** - Diagnose and fix Deptrac violations automatically
+- **[quality-standards](../quality-standards/SKILL.md)** - Maintain code quality without decreasing thresholds
+- **[database-migrations](../database-migrations/SKILL.md)** - Entity creation and modification with MongoDB
+
 ## Project References
 
 - **CLAUDE.md** (project root) - Development commands and make targets
 - **deptrac.yaml** (project root) - Layer definitions and rules
 - [CodelyTV PHP DDD Example](https://github.com/CodelyTV/php-ddd-example) - Reference implementation
+
+## CodelyTV Architecture Pattern
+
+This project follows the **CodelyTV DDD structure**:
+
+```
+src/
+├── {BoundedContext}/              # e.g., Mooc, Backoffice, Customer
+│   ├── {Module}/                  # e.g., Courses, Videos, Orders
+│   │   ├── Application/           # Use cases (Create/, Find/, Update/)
+│   │   ├── Domain/                # Pure business (Entity, ValueObject, Event)
+│   │   └── Infrastructure/        # Technical (Repository implementations)
+│   └── Shared/                    # Shared within context
+└── Shared/                        # Shared kernel (cross-context)
+```
+
+See **[DIRECTORY-STRUCTURE.md](DIRECTORY-STRUCTURE.md)** for detailed file placement guide.
 
 ---
 

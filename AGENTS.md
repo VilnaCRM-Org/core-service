@@ -157,17 +157,31 @@ This repository includes comprehensive Claude Code Skills in the `.claude/skills
 
 - **[ci-workflow](.claude/skills/ci-workflow/SKILL.md)**: Run comprehensive CI checks before committing
 - **[code-review](.claude/skills/code-review/SKILL.md)**: Systematically retrieve and address PR code review comments
-- **[testing-workflow](.claude/skills/testing-workflow/SKILL.md)**: Run and manage all test types (unit, integration, E2E, mutation, load)
+- **[testing-workflow](.claude/skills/testing-workflow/SKILL.md)**: Run and manage functional tests (unit, integration, E2E, mutation)
 
-#### Code Quality Skills
+#### Architecture & Code Quality Skills
 
-- **[quality-standards](.claude/skills/quality-standards/SKILL.md)**: Maintain and improve code quality without decreasing thresholds
+- **[implementing-ddd-architecture](.claude/skills/implementing-ddd-architecture/SKILL.md)**: Design and implement DDD patterns (entities, value objects, aggregates, CQRS)
+- **[deptrac-fixer](.claude/skills/deptrac-fixer/SKILL.md)**: Diagnose and fix Deptrac architectural violations automatically
+- **[quality-standards](.claude/skills/quality-standards/SKILL.md)**: Overview of protected quality thresholds and tool references
+- **[complexity-management](.claude/skills/complexity-management/SKILL.md)**: Reduce cyclomatic complexity using PHPInsights and refactoring strategies
+- **[developing-openapi-specs](.claude/skills/developing-openapi-specs/SKILL.md)**: Contribute to OpenAPI layer using processor patterns
+
+#### Database & Documentation Skills
+
 - **[database-migrations](.claude/skills/database-migrations/SKILL.md)**: Create and manage MongoDB database migrations with Doctrine ODM
 - **[documentation-sync](.claude/skills/documentation-sync/SKILL.md)**: Keep documentation synchronized with code changes
 
 #### Performance Skills
 
 - **[load-testing](.claude/skills/load-testing/SKILL.md)**: Create and manage K6 load tests for REST and GraphQL APIs
+
+#### Skill Decision Guide
+
+For choosing the right skill, see **[.claude/skills/SKILL-DECISION-GUIDE.md](.claude/skills/SKILL-DECISION-GUIDE.md)** which provides:
+- Decision tree for common scenarios
+- Skill relationship map
+- When to use which skill
 
 ### Skill Structure
 
@@ -198,6 +212,24 @@ See [.claude/skills/README.md](.claude/skills/README.md) for complete skill docu
 
 ## Architecture Deep Dive
 
+### Layer Dependency Rules (CRITICAL)
+
+The architecture enforces strict layer boundaries via Deptrac. **These rules are non-negotiable**:
+
+```text
+Infrastructure → Application → Domain
+      ↓              ↓           ↓
+  External       Use Cases    Pure Business
+```
+
+| From Layer         | Can Depend On                                       | CANNOT Depend On |
+| ------------------ | --------------------------------------------------- | ---------------- |
+| **Domain**         | NOTHING (pure PHP only)                             | Everything       |
+| **Application**    | Domain, Infrastructure, Symfony, API Platform, etc. | N/A              |
+| **Infrastructure** | Domain, Application, Symfony, Doctrine, etc.        | N/A              |
+
+**CRITICAL**: Domain layer must have NO framework imports (Symfony, Doctrine, API Platform, MongoDB). Violations are detected by `make deptrac`.
+
 ### Bounded Contexts (DDD)
 
 The Core Service is divided into bounded contexts with predictable structure:
@@ -207,25 +239,28 @@ The Core Service is divided into bounded contexts with predictable structure:
 Provides foundational support across the service:
 
 - **Application Layer**: Cross-cutting concerns (Validators, Exception Normalizers, OpenAPI docs)
-- **Domain Layer**: Interfaces for Infrastructure, abstract classes, common entities
+- **Domain Layer**: Interfaces for Infrastructure, abstract classes, common entities (**NO framework imports**)
 - **Infrastructure Layer**: Message Buses, custom Doctrine types, retry strategies
 
 #### 2. Core/Customer Context (Core Domain)
 
 Comprehensive customer management functionality:
 
-- **Application Layer**:
-  - Commands: Commands for customer operations
-  - Command Handlers: Process business operations
+- **Application Layer** (CAN use Symfony, API Platform):
+  - Commands: Commands for customer operations (implementing `CommandInterface`)
+  - Command Handlers: Process business operations (implementing `CommandHandlerInterface`)
   - HTTP Request Processors & GraphQL Resolvers
-  - Event Listeners & Subscribers
-- **Domain Layer**:
-  - Entities: Customer, CustomerType, CustomerStatus
-  - Value Objects: CustomerUpdate, CustomerStatusUpdate
-  - Domain Events: Customer-related events
-  - Domain Exceptions: CustomerNotFoundException, CustomerTypeNotFoundException, CustomerStatusNotFoundException
-  - Repository Interfaces
-- **Infrastructure Layer**: Repository implementations (MongoDB)
+  - Event Subscribers (implementing `DomainEventSubscriberInterface`)
+  - DTOs with Symfony validation attributes (`#[Assert\...]` allowed here)
+- **Domain Layer** (**NO framework imports**):
+  - Entities: Customer, CustomerType, CustomerStatus (pure PHP, no Doctrine annotations)
+  - Value Objects: Self-validating using pure PHP (filter_var, preg_match, etc.)
+  - Domain Events: Customer-related events extending `DomainEvent`
+  - Domain Exceptions: CustomerNotFoundException, etc.
+  - Repository Interfaces: Contracts only, not implementations
+- **Infrastructure Layer** (Implements Domain interfaces):
+  - Repository implementations (MongoDB using Doctrine ODM)
+  - XML mappings in `config/doctrine/` (NOT annotations in entities)
 
 #### 3. Internal Context
 
@@ -243,6 +278,118 @@ Provides internal services like health checks and monitoring.
 - **Domain Events**: Published from Domain layer or handlers extending `DomainEvent`
 - **Event Subscribers**: Handle events for system extensibility implementing `DomainEventSubscriberInterface`
 - **Aggregates**: Use `AggregateRoot` to record and pull domain events
+
+### Deptrac Violation Patterns and Quick Fixes
+
+When `make deptrac` reports violations, use these patterns to fix them. **NEVER modify `deptrac.yaml` to bypass violations - always fix the code.**
+
+#### Pattern 1: Domain → Symfony Validation
+
+```text
+Domain must not depend on Symfony
+  src/Customer/Domain/Entity/Customer.php
+    uses Symfony\Component\Validator\Constraints as Assert
+```
+
+**Fix**: Extract validation to Value Objects
+
+```php
+// BEFORE (WRONG) - Symfony in Domain
+#[Assert\Email]
+private string $email;
+
+// AFTER (CORRECT) - Value Object validates itself
+private Email $email;
+
+// Email.php in Domain/ValueObject/
+final readonly class Email
+{
+    public function __construct(private string $value)
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidEmailException($value);
+        }
+    }
+}
+```
+
+#### Pattern 2: Domain → Doctrine Annotations
+
+```text
+Domain must not depend on Doctrine
+  src/Product/Domain/Entity/Product.php
+    uses Doctrine\ODM\MongoDB\Mapping\Annotations as ODM
+```
+
+**Fix**: Use XML mappings in `config/doctrine/`
+
+```php
+// BEFORE (WRONG) - Doctrine in Domain
+#[ODM\Document(collection: 'products')]
+class Product { ... }
+
+// AFTER (CORRECT) - Pure PHP entity
+class Product { ... }
+```
+
+```xml
+<!-- config/doctrine/Product.mongodb.xml -->
+<document name="App\Product\Domain\Entity\Product" collection="products">
+    <field name="id" type="ulid" id="true" strategy="NONE"/>
+</document>
+```
+
+#### Pattern 3: Domain → API Platform
+
+```text
+Domain must not depend on ApiPlatform
+  src/Customer/Domain/Entity/Customer.php
+    uses ApiPlatform\Metadata\ApiResource
+```
+
+**Fix**: Move to YAML config or Application DTOs
+
+```yaml
+# config/api_platform/resources.yaml
+App\Customer\Domain\Entity\Customer:
+  operations:
+    get:
+      method: GET
+```
+
+#### Pattern 4: Infrastructure → Application Handler
+
+```text
+Infrastructure must not depend on Application (direct handler call)
+  src/Customer/Infrastructure/EventListener/CustomerListener.php
+    uses App\Customer\Application\CommandHandler\SendEmailHandler
+```
+
+**Fix**: Use Command Bus pattern
+
+```php
+// BEFORE (WRONG) - Direct handler injection
+private SendEmailHandler $handler;
+
+// AFTER (CORRECT) - Bus pattern
+private CommandBusInterface $commandBus;
+
+public function handle(): void
+{
+    $this->commandBus->dispatch(new SendEmailCommand(...));
+}
+```
+
+**Quick Reference**:
+
+| Violation Type               | Solution                          |
+| ---------------------------- | --------------------------------- |
+| Domain → Symfony Validator   | Value Objects with self-validation |
+| Domain → Doctrine            | XML mappings in config/doctrine/  |
+| Domain → API Platform        | YAML config or Application DTOs  |
+| Infrastructure → Handler     | CommandBusInterface injection     |
+
+For comprehensive Deptrac fixing guidance, see the [deptrac-fixer skill](.claude/skills/deptrac-fixer/SKILL.md).
 
 ## Comprehensive Testing Strategy
 
@@ -379,19 +526,107 @@ The repository includes GitHub Actions workflows for:
 
 ### Source Code Organization
 
+This project follows the **CodelyTV DDD structure** pattern. Each bounded context follows the same hierarchical organization:
+
 ```text
 src/
-├── Core/              # Core domain logic
-│   └── Customer/      # Customer bounded context
-│       ├── Application/   # Application services, commands
-│       ├── Domain/        # Domain entities, value objects, repositories
-│       └── Infrastructure/ # Database, external services integration
-├── Internal/          # Internal services (health checks, monitoring)
-└── Shared/            # Shared components and utilities
-    ├── Application/   # Application layer cross-cutting concerns
-    ├── Domain/        # Domain layer abstractions and interfaces
-    └── Infrastructure/ # Infrastructure layer implementations
+├── Core/                           # Core domain logic
+│   └── Customer/                   # Customer bounded context (Module)
+│       ├── Application/            # Use Cases Layer
+│       │   ├── Command/            # Commands (write operations)
+│       │   │   ├── CreateCustomerCommand.php
+│       │   │   └── UpdateCustomerCommand.php
+│       │   ├── CommandHandler/     # Handle commands
+│       │   │   ├── CreateCustomerHandler.php
+│       │   │   └── UpdateCustomerHandler.php
+│       │   ├── DTO/                # Data Transfer Objects
+│       │   │   └── CustomerInput.php
+│       │   ├── EventSubscriber/    # React to domain events
+│       │   │   └── SendWelcomeEmailOnCustomerCreated.php
+│       │   ├── Processor/          # API Platform processors
+│       │   │   └── CreateCustomerProcessor.php
+│       │   ├── Resolver/           # GraphQL resolvers
+│       │   └── Transformer/        # Data transformers
+│       │
+│       ├── Domain/                 # Pure Business Logic Layer (NO framework imports!)
+│       │   ├── Entity/             # Domain entities (Aggregate Roots)
+│       │   │   └── Customer.php    # NO Doctrine annotations!
+│       │   ├── ValueObject/        # Self-validating value objects
+│       │   │   ├── Email.php       # Validates itself without Symfony
+│       │   │   └── CustomerName.php
+│       │   ├── Event/              # Domain events
+│       │   │   └── CustomerCreated.php
+│       │   ├── Repository/         # Repository INTERFACES only
+│       │   │   └── CustomerRepositoryInterface.php
+│       │   ├── Exception/          # Domain exceptions
+│       │   │   └── InvalidEmailException.php
+│       │   └── Collection/         # Domain collections
+│       │
+│       └── Infrastructure/         # Technical Implementation Layer
+│           └── Repository/         # Repository implementations
+│               └── MongoDBCustomerRepository.php
+│
+├── Internal/                       # Internal services
+│   └── HealthCheck/                # Health monitoring
+│
+└── Shared/                         # Shared Kernel (cross-context)
+    ├── Application/
+    │   ├── OpenApi/                # OpenAPI configuration
+    │   └── Transformer/            # Shared transformers
+    │
+    ├── Domain/
+    │   ├── Aggregate/
+    │   │   └── AggregateRoot.php   # Base for aggregates
+    │   ├── Bus/
+    │   │   ├── Command/
+    │   │   │   ├── CommandInterface.php
+    │   │   │   ├── CommandBusInterface.php
+    │   │   │   └── CommandHandlerInterface.php
+    │   │   └── Event/
+    │   │       ├── DomainEvent.php
+    │   │       ├── EventBusInterface.php
+    │   │       └── DomainEventSubscriberInterface.php
+    │   ├── ValueObject/
+    │   │   └── Ulid.php            # Shared value objects
+    │   └── Exception/
+    │       └── DomainException.php
+    │
+    └── Infrastructure/
+        ├── Bus/                    # Bus implementations
+        │   ├── Command/
+        │   └── Event/
+        └── DoctrineType/           # Custom Doctrine types
+            ├── UlidType.php
+            └── DomainUuidType.php
+
+config/
+└── doctrine/                       # Doctrine XML mappings (NOT in Domain layer!)
+    ├── Customer.mongodb.xml        # Customer entity mapping
+    └── Product.mongodb.xml         # Product entity mapping
 ```
+
+#### File Placement Rules (CodelyTV Pattern)
+
+**Domain Layer** - Pure PHP, NO framework dependencies:
+
+- `Entity/` → Aggregate roots and entities
+- `ValueObject/` → Self-validating value objects (Email.php, Money.php)
+- `Event/` → Domain events (CustomerCreated.php)
+- `Repository/` → Interfaces ONLY (CustomerRepositoryInterface.php)
+- `Exception/` → Domain exceptions (InvalidEmailException.php)
+
+**Application Layer** - CAN use Symfony, API Platform:
+
+- `Command/` → CreateCustomerCommand.php
+- `CommandHandler/` → CreateCustomerHandler.php
+- `EventSubscriber/` → SendEmailOnCustomerCreated.php
+- `DTO/` → CustomerInput.php (with #[Assert] allowed)
+- `Processor/` → CreateCustomerProcessor.php
+
+**Infrastructure Layer** - Implements Domain interfaces:
+
+- `Repository/` → MongoDBCustomerRepository.php
+- `config/doctrine/` → Customer.mongodb.xml (XML mappings)
 
 ### Important Files
 

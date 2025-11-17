@@ -71,24 +71,25 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 
 ### 4. Quality Standards (`quality-standards/`)
 
-**Purpose**: Maintain and improve code quality without decreasing standards
+**Purpose**: Overview of protected quality thresholds and quick reference for all quality tools
 
 **When activated**:
 
-- PHPInsights reports quality issues
-- Cyclomatic complexity is too high
-- Architecture violations detected
-- Code quality needs improvement
+- Need to understand what quality metrics are protected
+- Running comprehensive quality checks (`make ci`)
+- Learning which specialized skill to use for specific issues
 
 **What it does**:
 
-- Protects quality metrics (never allows lowering thresholds)
-- Reduces cyclomatic complexity with refactoring strategies
-- Fixes architecture violations (Deptrac layer rules)
-- Improves code quality score (removes duplication, improves naming)
-- Enforces SOLID principles and best practices
+- Documents all protected quality thresholds
+- Provides quick reference for all quality tool commands
+- Directs users to specialized skills for specific issues:
+  - **Deptrac violations** → deptrac-fixer
+  - **High complexity** → complexity-management
+  - **Test coverage** → testing-workflow
+  - **Architecture patterns** → implementing-ddd-architecture
 
-**Key commands**: `make phpinsights`, `make phpmd`, `make psalm`, `make deptrac`
+**Key commands**: `make ci`, `make phpinsights`, `make psalm`, `make deptrac`
 
 **Protected thresholds**:
 
@@ -187,6 +188,143 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 - `reference/configuration.md` - K6 configuration
 - `reference/utils-extensions.md` - Extending Utils class
 - `reference/troubleshooting.md` - Common issues and solutions
+
+---
+
+### 8. Implementing DDD Architecture (`implementing-ddd-architecture/`)
+
+**Purpose**: Design and implement DDD patterns (entities, value objects, aggregates, CQRS)
+
+**When activated**:
+
+- Creating new entities, value objects, or aggregates
+- Implementing bounded contexts or modules
+- Designing repository interfaces and implementations
+- Learning proper layer separation (Domain/Application/Infrastructure)
+- Code review for architectural compliance
+
+**What it does**:
+
+- Guides creation of rich domain models (not anemic)
+- Implements CQRS pattern with Commands and Handlers
+- Configures Domain Events and Event Subscribers
+- Provides CodelyTV-style directory structure patterns
+- Documents where to place new files
+
+**Note**: For fixing existing Deptrac violations, use **deptrac-fixer** skill instead.
+
+**Key commands**: `make deptrac`
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` - Core patterns and quick reference
+- `REFERENCE.md` - Detailed workflows and layer responsibilities
+- `DIRECTORY-STRUCTURE.md` - File placement based on CodelyTV patterns
+- `examples/` - Complete working code examples (entities, value objects, CQRS)
+
+**Layer dependencies**:
+
+- Domain: NO external dependencies (pure PHP)
+- Application: Domain, Infrastructure, Symfony, API Platform
+- Infrastructure: Domain, Application, Symfony, Doctrine
+
+---
+
+### 9. Deptrac Fixer (`deptrac-fixer/`)
+
+**Purpose**: Diagnose and fix Deptrac architectural violations automatically
+
+**When activated**:
+
+- `make deptrac` reports violations
+- Error message containing "must not depend on"
+- Domain layer has framework imports (Symfony, Doctrine, API Platform)
+- Infrastructure directly calls Application handlers
+- Any architectural boundary violation
+
+**What it does**:
+
+- Parses Deptrac violation messages and identifies root cause
+- Provides step-by-step fix strategies for each violation type
+- Creates Value Objects to replace framework validation
+- Configures XML mappings instead of Doctrine annotations
+- Uses Command/Event Bus instead of direct handler calls
+
+**Note**: To understand DDD architecture patterns (why layers exist), see **implementing-ddd-architecture** skill.
+
+**Key principle**: **Fix the code, NEVER modify `deptrac.yaml`**
+
+**Key commands**: `make deptrac`
+
+**Structure**: Multi-file with comprehensive examples:
+
+- `SKILL.md` - Core diagnostic and fix patterns
+- `REFERENCE.md` - Advanced patterns and edge cases
+- `CODELY-STRUCTURE.md` - **CodelyTV directory hierarchy** (ls -la style)
+- `examples/01-domain-symfony-validation.php` - Fixing validator violations
+- `examples/02-domain-doctrine-annotations.php` - Removing Doctrine imports
+- `examples/03-domain-api-platform.php` - Moving API Platform config
+- `examples/04-infrastructure-handler.php` - Using bus pattern
+
+**Common fixes**:
+
+- Domain → Symfony: Extract validation to Value Objects
+- Domain → Doctrine: Use XML mappings in `config/doctrine/`
+- Domain → API Platform: Move to YAML config or Application DTOs
+- Infrastructure → Handler: Use CommandBusInterface instead
+
+---
+
+### 10. Complexity Management (`complexity-management/`)
+
+**Purpose**: Maintain and improve code quality using PHPInsights without decreasing thresholds
+
+**When activated**:
+
+- PHPInsights fails with complexity issues
+- Cyclomatic complexity is too high
+- Code quality score drops
+- Refactoring for better maintainability
+
+**What it does**:
+
+- Identifies high complexity methods using PHPMD
+- Provides refactoring strategies (Extract Method, Strategy Pattern, Early Returns)
+- Maintains 94% complexity and 100% quality/architecture/style scores
+- Documents complexity metrics and monitoring
+
+**Key commands**: `make phpinsights`, `make phpmd`
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` - Core workflow and strategies
+- `refactoring-strategies.md` - Detailed refactoring patterns
+- `reference/complexity-metrics.md` - Understanding metrics
+- `reference/analysis-tools.md` - Tool usage guide
+- `reference/monitoring.md` - Tracking quality over time
+- `reference/troubleshooting.md` - Common issues
+
+---
+
+### 11. Developing OpenAPI Specs (`developing-openapi-specs/`)
+
+**Purpose**: Guide for contributing to the OpenAPI layer using processor pattern
+
+**When activated**:
+
+- Adding endpoint factories or processors
+- Writing parameter descriptions
+- Reducing cyclomatic complexity in OpenAPI code
+- Fixing OpenAPI validation errors
+
+**What it does**:
+
+- Documents processor pattern architecture
+- Guides functional programming approach for OpenAPI
+- Covers endpoint factories and builders
+- Ensures OpenAPI spec validation passes
+
+**Key commands**: `make generate-openapi-spec`, `./scripts/validate-openapi-spec.sh`
 
 ---
 
