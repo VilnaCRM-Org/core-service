@@ -19,13 +19,13 @@ This directory contains practical before/after examples for fixing common Deptra
 
 ## Quick Reference
 
-| Violation Pattern | Example File | Key Solution |
-|-------------------|-------------|--------------|
-| Domain → Symfony Validator | 01 | Value Objects with self-validation |
-| Domain → Doctrine | 02 | XML mappings in config/doctrine/ |
-| Domain → API Platform | 03 | YAML config or Application DTOs |
-| Infrastructure → Handler | 04 | CommandBusInterface injection |
-| All Combined | 05 | Complete refactoring workflow |
+| Violation Pattern          | Example File | Key Solution                       |
+| -------------------------- | ------------ | ---------------------------------- |
+| Domain → Symfony Validator | 01           | Value Objects with self-validation |
+| Domain → Doctrine          | 02           | XML mappings in config/doctrine/   |
+| Domain → API Platform      | 03           | YAML config or Application DTOs    |
+| Infrastructure → Handler   | 04           | CommandBusInterface injection      |
+| All Combined               | 05           | Complete refactoring workflow      |
 
 ## Directory Structure Guide
 

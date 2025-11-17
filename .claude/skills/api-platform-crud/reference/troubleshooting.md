@@ -9,21 +9,24 @@
 **Causes & Solutions**:
 
 1. **Resource directory not registered**:
+
 ```yaml
 # config/packages/api_platform.yaml
 api_platform:
   resource_class_directories:
     - '%kernel.project_dir%/src/Core/Customer/Domain/Entity'
-    - '%kernel.project_dir%/src/Core/NewContext/Domain/Entity'  # Add this
+    - '%kernel.project_dir%/src/Core/NewContext/Domain/Entity' # Add this
 ```
 
 2. **YAML configuration syntax error**:
+
 ```bash
 php bin/console cache:clear
 # Check for YAML syntax errors in output
 ```
 
 3. **Missing resource configuration file**:
+
 ```bash
 ls config/api_platform/resources/
 # Ensure {entity}.yaml exists
@@ -36,12 +39,14 @@ ls config/api_platform/resources/
 **Common Causes**:
 
 1. **Processor not found**:
+
 ```yaml
 # Ensure processor class path is correct
 processor: App\Core\Context\Application\Processor\CreateEntityProcessor
 ```
 
 2. **Processor not implementing correct interface**:
+
 ```php
 use ApiPlatform\State\ProcessorInterface;
 
@@ -55,6 +60,7 @@ final readonly class CreateEntityProcessor implements ProcessorInterface
 ```
 
 3. **Missing service autowiring**:
+
 ```bash
 make cache-clear
 # Services should auto-wire, check for syntax errors
@@ -77,6 +83,7 @@ final readonly class EntityCreate
 ```
 
 And validation configuration exists:
+
 ```yaml
 # config/validator/Entity.yaml
 App\Core\Context\Application\DTO\EntityCreate:
@@ -92,11 +99,13 @@ App\Core\Context\Application\DTO\EntityCreate:
 **Solutions**:
 
 1. **Ensure entity exists**:
+
 ```bash
 # Check database
 ```
 
 2. **Correct IRI format**:
+
 ```php
 // Processor
 /** @var EntityType $type */
@@ -104,6 +113,7 @@ $type = $this->iriConverter->getResourceFromIri($data->type);
 ```
 
 3. **Check resource configuration** - referenced entity must be an API resource:
+
 ```yaml
 # config/api_platform/resources/entity_type.yaml
 App\Core\Context\Domain\Entity\EntityType:
@@ -119,19 +129,22 @@ App\Core\Context\Domain\Entity\EntityType:
 **Solutions**:
 
 1. **Check validation file exists**:
+
 ```bash
 ls config/validator/
 ```
 
 2. **Namespace matches DTO class**:
+
 ```yaml
-App\Core\Context\Application\DTO\EntityCreate:  # Exact namespace
+App\Core\Context\Application\DTO\EntityCreate: # Exact namespace
   properties:
     name:
       - NotBlank: ~
 ```
 
 3. **Clear cache**:
+
 ```bash
 make cache-clear
 ```
@@ -143,15 +156,17 @@ make cache-clear
 **Solutions**:
 
 1. **Check serialization groups**:
+
 ```yaml
 # config/serialization/Entity.yaml
 App\Core\Context\Domain\Entity\Entity:
   attributes:
     name:
-      groups: ['output']  # Must include 'output' for GET responses
+      groups: ['output'] # Must include 'output' for GET responses
 ```
 
 2. **Ensure normalization context set**:
+
 ```yaml
 # config/api_platform/resources/entity.yaml
 normalizationContext:
@@ -159,6 +174,7 @@ normalizationContext:
 ```
 
 3. **Verify property visibility**:
+
 ```php
 // Entity getters must be public
 public function getName(): string { return $this->name; }
@@ -171,25 +187,28 @@ public function getName(): string { return $this->name; }
 **Solutions**:
 
 1. **Filter registered correctly**:
+
 ```yaml
 # config/services.yaml
 app.entity.mongodb.search_filter:
   tags:
-    - { name: 'api_platform.filter', id: 'entity.mongodb.search' }  # Correct ID
+    - { name: 'api_platform.filter', id: 'entity.mongodb.search' } # Correct ID
 ```
 
 2. **Filter applied to operation**:
+
 ```yaml
 # config/api_platform/resources/entity.yaml
 ApiPlatform\Metadata\GetCollection:
   filters:
-    - entity.mongodb.search  # Matches filter ID
+    - entity.mongodb.search # Matches filter ID
 ```
 
 3. **Property name matches entity**:
+
 ```yaml
 arguments:
-  - name: 'exact'  # Must match entity property name
+  - name: 'exact' # Must match entity property name
 ```
 
 ### 8. Command Handler Not Called
@@ -199,6 +218,7 @@ arguments:
 **Solutions**:
 
 1. **Handler tagged correctly** (should auto-tag):
+
 ```yaml
 # config/services.yaml
 _instanceof:
@@ -207,11 +227,13 @@ _instanceof:
 ```
 
 2. **Command dispatched properly**:
+
 ```php
 $this->commandBus->dispatch(new CreateEntityCommand($entity));
 ```
 
-3. **Handler __invoke method exists**:
+3. **Handler \_\_invoke method exists**:
+
 ```php
 public function __invoke(CreateEntityCommand $command): void
 {
@@ -238,6 +260,7 @@ See [deptrac-fixer skill](../../deptrac-fixer/SKILL.md) for fixes.
 **Solutions**:
 
 1. **Resolver registered**:
+
 ```yaml
 ApiPlatform\Metadata\GraphQl\Mutation:
   name: create
@@ -246,6 +269,7 @@ ApiPlatform\Metadata\GraphQl\Mutation:
 ```
 
 2. **Resolver implements correct interface**:
+
 ```php
 use ApiPlatform\GraphQl\Resolver\MutationResolverInterface;
 
@@ -259,6 +283,7 @@ final class CreateEntityMutationResolver implements MutationResolverInterface
 ```
 
 3. **extraArgs defined** for input fields:
+
 ```yaml
 extraArgs:
   name:

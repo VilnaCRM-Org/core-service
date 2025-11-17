@@ -13,6 +13,7 @@
 ```
 
 **Example**:
+
 ```
 Domain must not depend on Doctrine
   src/Customer/Domain/Entity/Customer.php:8
@@ -21,13 +22,13 @@ Domain must not depend on Doctrine
 
 ### Violation Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `uses` | Import statement | `uses Symfony\Component\...` |
-| `extends` | Class inheritance | `extends DoctrineRepository` |
-| `implements` | Interface implementation | `implements SymfonyInterface` |
-| `instanceof` | Type checking | `if ($x instanceof DoctrineType)` |
-| `static` | Static method call | `DoctrineClass::method()` |
+| Type         | Description              | Example                           |
+| ------------ | ------------------------ | --------------------------------- |
+| `uses`       | Import statement         | `uses Symfony\Component\...`      |
+| `extends`    | Class inheritance        | `extends DoctrineRepository`      |
+| `implements` | Interface implementation | `implements SymfonyInterface`     |
+| `instanceof` | Type checking            | `if ($x instanceof DoctrineType)` |
+| `static`     | Static method call       | `DoctrineClass::method()`         |
 
 ## Complete Fix Patterns
 
@@ -36,6 +37,7 @@ Domain must not depend on Doctrine
 #### 1.1 Domain → Symfony Validator
 
 **Violation**:
+
 ```php
 namespace App\Customer\Domain\Entity;
 
@@ -172,6 +174,7 @@ final class InvalidCustomerNameException extends DomainException
 #### 1.2 Domain → Doctrine ODM Annotations
 
 **Violation**:
+
 ```php
 namespace App\Product\Domain\Entity;
 
@@ -265,6 +268,7 @@ final class CategoryCollection
 #### 1.3 Domain → API Platform
 
 **Violation**:
+
 ```php
 namespace App\Customer\Domain\Entity;
 
@@ -360,6 +364,7 @@ final class CustomerResource
 #### 2.1 Infrastructure → Application Handler (Direct Call)
 
 **Violation**:
+
 ```php
 namespace App\Customer\Infrastructure\Doctrine\EventListener;
 
@@ -454,6 +459,7 @@ final class UpdateSearchIndexOnCustomerCreated implements DomainEventSubscriberI
 #### 3.1 Extracting Business Logic from Handler to Domain
 
 **Before (Handler with business logic)**:
+
 ```php
 namespace App\Order\Application\CommandHandler;
 
@@ -485,6 +491,7 @@ class PlaceOrderHandler implements CommandHandlerInterface
 ```
 
 **After (Business logic in domain)**:
+
 ```php
 // Domain Entity
 namespace App\Order\Domain\Entity;
@@ -549,6 +556,7 @@ make deptrac 2>&1 | grep -A 2 "Customer.php"
 ```
 
 Fix order:
+
 1. Remove all framework imports first
 2. Create necessary Value Objects
 3. Update constructors and methods

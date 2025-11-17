@@ -234,34 +234,34 @@ src/
 
 ### Domain Layer
 
-| Type | Naming Pattern | Example |
-|------|----------------|---------|
-| Entity | `{EntityName}.php` | `Customer.php` |
-| Value Object | `{ConceptName}.php` | `Email.php`, `Money.php` |
-| Domain Event | `{Entity}{PastTenseAction}.php` | `CustomerCreated.php` |
+| Type                 | Naming Pattern                    | Example                           |
+| -------------------- | --------------------------------- | --------------------------------- |
+| Entity               | `{EntityName}.php`                | `Customer.php`                    |
+| Value Object         | `{ConceptName}.php`               | `Email.php`, `Money.php`          |
+| Domain Event         | `{Entity}{PastTenseAction}.php`   | `CustomerCreated.php`             |
 | Repository Interface | `{Entity}RepositoryInterface.php` | `CustomerRepositoryInterface.php` |
-| Domain Exception | `{SpecificError}Exception.php` | `InvalidEmailException.php` |
-| Collection | `{Entity}Collection.php` | `CustomerCollection.php` |
+| Domain Exception     | `{SpecificError}Exception.php`    | `InvalidEmailException.php`       |
+| Collection           | `{Entity}Collection.php`          | `CustomerCollection.php`          |
 
 ### Application Layer
 
-| Type | Naming Pattern | Example |
-|------|----------------|---------|
-| Command | `{Action}{Entity}Command.php` | `CreateCustomerCommand.php` |
-| Command Handler | `{Action}{Entity}Handler.php` | `CreateCustomerHandler.php` |
-| Event Subscriber | `{Action}On{Event}.php` | `SendEmailOnCustomerCreated.php` |
-| DTO | `{Entity}{Type}.php` | `CustomerInput.php`, `CustomerOutput.php` |
-| Processor | `{Action}{Entity}Processor.php` | `CreateCustomerProcessor.php` |
-| Transformer | `{From}To{To}Transformer.php` | `CustomerToArrayTransformer.php` |
+| Type             | Naming Pattern                  | Example                                   |
+| ---------------- | ------------------------------- | ----------------------------------------- |
+| Command          | `{Action}{Entity}Command.php`   | `CreateCustomerCommand.php`               |
+| Command Handler  | `{Action}{Entity}Handler.php`   | `CreateCustomerHandler.php`               |
+| Event Subscriber | `{Action}On{Event}.php`         | `SendEmailOnCustomerCreated.php`          |
+| DTO              | `{Entity}{Type}.php`            | `CustomerInput.php`, `CustomerOutput.php` |
+| Processor        | `{Action}{Entity}Processor.php` | `CreateCustomerProcessor.php`             |
+| Transformer      | `{From}To{To}Transformer.php`   | `CustomerToArrayTransformer.php`          |
 
 ### Infrastructure Layer
 
-| Type | Naming Pattern | Example |
-|------|----------------|---------|
-| Repository | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php` |
-| Doctrine Type | `{ConceptName}Type.php` | `UlidType.php` |
-| External Service | `{Provider}{Service}.php` | `StripePaymentService.php` |
-| Bus Implementation | `{Framework}{Type}Bus.php` | `SymfonyCommandBus.php` |
+| Type               | Naming Pattern                       | Example                         |
+| ------------------ | ------------------------------------ | ------------------------------- |
+| Repository         | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php` |
+| Doctrine Type      | `{ConceptName}Type.php`              | `UlidType.php`                  |
+| External Service   | `{Provider}{Service}.php`            | `StripePaymentService.php`      |
+| Bus Implementation | `{Framework}{Type}Bus.php`           | `SymfonyCommandBus.php`         |
 
 ## Creating New Files: Step-by-Step
 

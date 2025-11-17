@@ -11,7 +11,7 @@ app.entity.mongodb.search_filter:
   arguments:
     - name: 'exact'
       email: 'exact'
-      status.value: 'exact'  # Nested property
+      status.value: 'exact' # Nested property
   tags:
     - { name: 'api_platform.filter', id: 'entity.mongodb.search' }
 ```
@@ -45,6 +45,7 @@ app.entity.mongodb.date_filter:
 ```
 
 **Usage**:
+
 - `GET /api/entities?createdAt[after]=2024-01-01`
 - `GET /api/entities?createdAt[before]=2024-12-31`
 - `GET /api/entities?createdAt[strictly_after]=2024-01-01T00:00:00`
@@ -74,6 +75,7 @@ app.mongodb.range_filter:
 ```
 
 **Usage**:
+
 - `GET /api/entities?price[gt]=100&price[lt]=500`
 - `GET /api/entities?quantity[gte]=10&quantity[lte]=100`
 
@@ -105,6 +107,7 @@ App\Core\Context\Domain\Entity\Entity:
 ```
 
 **Benefits:**
+
 - Efficient for large datasets
 - No offset performance penalty
 - Consistent results with concurrent writes
@@ -153,8 +156,8 @@ Improves performance by not computing total count. Suitable when total count is 
 ```yaml
 app.customer.mongodb.search_filter:
   arguments:
-    - type.value: 'exact'      # Customer → CustomerType.value
-      status.value: 'exact'    # Customer → CustomerStatus.value
+    - type.value: 'exact' # Customer → CustomerType.value
+      status.value: 'exact' # Customer → CustomerStatus.value
 ```
 
 ### Multiple Strategies
@@ -162,11 +165,11 @@ app.customer.mongodb.search_filter:
 ```yaml
 app.entity.mongodb.search_filter:
   arguments:
-    - name: 'partial'          # Contains
-      email: 'exact'           # Exact match
-      description: 'start'     # Starts with
-      code: 'end'              # Ends with
-      tags: 'word_start'       # Word boundary start
+    - name: 'partial' # Contains
+      email: 'exact' # Exact match
+      description: 'start' # Starts with
+      code: 'end' # Ends with
+      tags: 'word_start' # Word boundary start
 ```
 
 ## GraphQL Filter Integration
@@ -203,6 +206,7 @@ api_platform:
 ## Filter Debugging
 
 Check available filters in OpenAPI documentation:
+
 ```bash
 make generate-openapi-spec
 ```

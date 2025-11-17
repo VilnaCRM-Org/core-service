@@ -340,20 +340,21 @@ App\Entity\{Entity}:
 ```
 
 **Benefits:**
+
 - Domain entities remain framework-agnostic
 - API configuration is centralized and versionable
 - Supports DDD/hexagonal architecture
 
 ### Operation Types
 
-| Operation | HTTP Method | Purpose | Input DTO | Processor Required |
-|-----------|-------------|---------|-----------|-------------------|
-| GetCollection | GET | List resources | None | No (default provider) |
-| Get | GET | Single resource | None | No (default provider) |
-| Post | POST | Create resource | {Entity}Create | Yes |
-| Put | PUT | Full replacement | {Entity}Put | Yes |
-| Patch | PATCH | Partial update | {Entity}Patch | Yes |
-| Delete | DELETE | Remove resource | None | No (default) |
+| Operation     | HTTP Method | Purpose          | Input DTO      | Processor Required    |
+| ------------- | ----------- | ---------------- | -------------- | --------------------- |
+| GetCollection | GET         | List resources   | None           | No (default provider) |
+| Get           | GET         | Single resource  | None           | No (default provider) |
+| Post          | POST        | Create resource  | {Entity}Create | Yes                   |
+| Put           | PUT         | Full replacement | {Entity}Put    | Yes                   |
+| Patch         | PATCH       | Partial update   | {Entity}Patch  | Yes                   |
+| Delete        | DELETE      | Remove resource  | None           | No (default)          |
 
 ### Pagination Configuration
 

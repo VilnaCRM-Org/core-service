@@ -74,6 +74,7 @@ make deptrac
 ```
 
 **Specialized Skills for Deptrac Issues**:
+
 - [deptrac-fixer](../deptrac-fixer/SKILL.md) - Diagnose and fix violations automatically (recommended)
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Understand proper layer architecture
 

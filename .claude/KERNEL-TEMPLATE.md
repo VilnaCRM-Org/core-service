@@ -13,7 +13,7 @@ Use this template to refactor remaining skills following the KERNEL methodology.
 
 ## Standard Skill Template
 
-```markdown
+````markdown
 ---
 name: skill-name
 description: One sentence. Use when [trigger scenarios].
@@ -38,7 +38,7 @@ One sentence stating the primary goal.
 ### Quick Reference Table (if applicable)
 
 | Item | Command/Value | Description |
-|------|---------------|-------------|
+| ---- | ------------- | ----------- |
 
 ### Execution Steps
 
@@ -47,6 +47,7 @@ One sentence stating the primary goal.
 ```bash
 command
 ```
+````
 
 #### Step 2: [Check/Verify]
 
@@ -68,11 +69,13 @@ Repeat until success criteria met.
 ## Constraints (Parameters)
 
 **NEVER**:
+
 - Specific things NOT to do
 - Antipatterns to avoid
 - Prohibited actions
 
 **ALWAYS**:
+
 - Required patterns
 - Mandatory steps
 - Quality gates
@@ -80,6 +83,7 @@ Repeat until success criteria met.
 ## Format (Output)
 
 **Expected Output**:
+
 ```
 Exact output format or success message
 ```
@@ -89,7 +93,8 @@ Exact output format or success message
 - [ ] Specific verifiable step 1
 - [ ] Specific verifiable step 2
 - [ ] Specific verifiable step 3
-```
+
+````
 
 ## Before/After Example
 
@@ -108,9 +113,10 @@ You should activate this skill when you need to...
 - Long explanation
 - More context
 - Historical background
-```
+````
 
 **Problems**:
+
 - Too much context
 - Unclear goal
 - No success criteria
@@ -118,7 +124,7 @@ You should activate this skill when you need to...
 
 ### ✅ After KERNEL (Concise)
 
-```markdown
+````markdown
 ## Context (Input)
 
 - Entity needs database persistence
@@ -138,6 +144,7 @@ Create entity with XML mapping and verify schema.
 // Domain/Entity/YourEntity.php
 class YourEntity { /* ... */ }
 ```
+````
 
 ### Step 2: Create XML Mapping
 
@@ -154,8 +161,10 @@ make setup-test-db
 ## Constraints
 
 **NEVER**:
+
 - Modify existing migrations
 - Skip XML validation
+
 ```
 
 **Results**:
@@ -216,11 +225,15 @@ For skills like `openapi-development` (842 lines):
 
 Example structure:
 ```
+
 skill-name/
 ├── SKILL.md (follows KERNEL, <200 lines)
 ├── reference/
-│   ├── detailed-patterns.md
-│   └── troubleshooting.md
+│ ├── detailed-patterns.md
+│ └── troubleshooting.md
 └── examples/
-    └── complete-example.md
+└── complete-example.md
+
+```
+
 ```
