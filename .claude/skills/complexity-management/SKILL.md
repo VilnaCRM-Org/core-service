@@ -9,6 +9,7 @@ Maintain exceptional code quality standards using PHPInsights in this Symfony-ba
 
 **Related Skills**:
 
+- [quality-standards](../quality-standards/SKILL.md) - Overview of all protected quality thresholds
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For proper layer separation and architectural patterns
 - [developing-openapi-specs](../developing-openapi-specs/SKILL.md) - For OpenAPI-specific complexity reduction techniques
 

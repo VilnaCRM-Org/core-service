@@ -1,6 +1,6 @@
 ---
 name: testing-workflow
-description: Run and manage different types of tests (unit, integration, E2E, mutation, load tests). Use when running tests, debugging test failures, ensuring test coverage, or fixing mutation testing issues. Covers PHPUnit, Behat, Infection, and K6 load tests.
+description: Run and manage functional tests (unit, integration, E2E, mutation). Use when running tests, debugging test failures, ensuring test coverage, or fixing mutation testing issues. Covers PHPUnit, Behat, and Infection. For K6 load/performance tests, use the load-testing skill instead.
 ---
 
 # Testing Workflow Skill
@@ -15,17 +15,19 @@ description: Run and manage different types of tests (unit, integration, E2E, mu
 
 Execute appropriate test suite and ensure 100% pass rate with required coverage.
 
+**Note**: For K6 load/performance testing, see [load-testing skill](../load-testing/SKILL.md).
+
 ## Test Commands Quick Reference
 
-| Test Type    | Command                  | Runtime  | Coverage | Location           |
-| ------------ | ------------------------ | -------- | -------- | ------------------ |
-| Unit         | `make unit-tests`        | 2-3 min  | 100%     | tests/Unit/        |
-| Integration  | `make integration-tests` | 3-5 min  | Full     | tests/Integration/ |
-| E2E (Behat)  | `make behat`             | 5-10 min | BDD      | features/          |
-| All Tests    | `make all-tests`         | 8-15 min | 100%     | All                |
-| Mutation     | `make infection`         | Variable | 100% MSI | Unit tests         |
-| Load (smoke) | `make smoke-load-tests`  | 5-10 min | -        | tests/Load/        |
-| Load (all)   | `make load-tests`        | 30+ min  | -        | tests/Load/        |
+| Test Type   | Command                  | Runtime  | Coverage | Location           |
+| ----------- | ------------------------ | -------- | -------- | ------------------ |
+| Unit        | `make unit-tests`        | 2-3 min  | 100%     | tests/Unit/        |
+| Integration | `make integration-tests` | 3-5 min  | Full     | tests/Integration/ |
+| E2E (Behat) | `make behat`             | 5-10 min | BDD      | features/          |
+| All Tests   | `make all-tests`         | 8-15 min | 100%     | All                |
+| Mutation    | `make infection`         | Variable | 100% MSI | Unit tests         |
+
+**Load Testing**: Use [load-testing skill](../load-testing/SKILL.md) for K6 performance tests.
 
 ## Execution Workflow
 
