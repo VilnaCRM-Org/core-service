@@ -6,6 +6,112 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 
 Never run PHP commands directly outside the container.
 
+## 🚨 CRITICAL FOR OPENAI/GPT/CODEX AGENTS - READ THIS FIRST! 🚨
+
+**BEFORE attempting to fix ANY issue in this repository, you MUST follow this workflow:**
+
+### Mandatory Workflow for AI Agents
+
+1. **READ** → `.claude/skills/AI-AGENT-GUIDE.md` (comprehensive guide for non-Claude agents)
+2. **IDENTIFY** → Use `.claude/skills/SKILL-DECISION-GUIDE.md` to find the correct skill for your task
+3. **EXECUTE** → Read the specific skill file (e.g., `.claude/skills/deptrac-fixer/SKILL.md`)
+4. **FOLLOW** → Execute the step-by-step instructions in the skill file exactly as written
+
+### ❌ DO NOT:
+- Fix issues directly from AGENTS.md without reading the skills
+- Skip the skill decision guide
+- Guess the fix based on general DDD knowledge
+- Use only partial information from this file
+
+### ✅ DO:
+- Always start with `.claude/skills/AI-AGENT-GUIDE.md`
+- Use the decision tree in `SKILL-DECISION-GUIDE.md`
+- Read the complete skill file for your specific task
+- Check supporting files (`reference/`, `examples/`) as referenced in the skill
+
+### Example: Fixing Deptrac Violations
+
+**WRONG APPROACH:**
+```
+1. See Deptrac violation in output
+2. Remove framework imports from Domain
+3. Add validation logic to Domain entity ❌ INCORRECT!
+```
+
+**CORRECT APPROACH:**
+```
+1. Read .claude/skills/AI-AGENT-GUIDE.md
+2. Read .claude/skills/SKILL-DECISION-GUIDE.md → Points to "deptrac-fixer"
+3. Read .claude/skills/deptrac-fixer/SKILL.md
+4. Follow Pattern 1: Domain → Symfony
+   - Remove ALL validation from Domain
+   - Use YAML config at config/validator/{Entity}.yaml
+   - Pure Domain entity with NO business validation
+```
+
+**Why This Matters:**
+- The skills contain the **ACTUAL architecture patterns** used in this codebase
+- AGENTS.md is a **reference**, not a complete fix guide
+- Skills are **regularly updated** with correct patterns
+- Following skills ensures **consistency** with the codebase
+
+### Validation Architecture (CRITICAL)
+
+**Domain Layer:**
+- ❌ NO validation logic (no `filter_var`, no `strlen`, no assertions)
+- ❌ NO Symfony validation (`#[Assert\...]`)
+- ✅ Pure PHP entities with primitive types
+- ✅ Accept parameters directly in constructor
+
+**Application Layer:**
+- ✅ YAML validation config at `config/validator/{Entity}.yaml`
+- ✅ Clean DTOs with public properties
+- ✅ Custom validators in `Application/Validator/`
+
+**Example (From Actual Codebase):**
+
+```php
+// ❌ WRONG - Domain with validation
+namespace App\Customer\Domain\Entity;
+
+class Customer
+{
+    private function assertEmail(string $email): void
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidEmailException();
+        }
+    }
+}
+
+// ✅ CORRECT - Pure Domain entity
+namespace App\Customer\Domain\Entity;
+
+class Customer
+{
+    private string $email;
+
+    public function __construct(string $email)
+    {
+        $this->email = $email; // No validation!
+    }
+}
+```
+
+```yaml
+# ✅ CORRECT - Validation in config/validator/Customer.yaml
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
+```
+
+**See `config/validator/Customer.yaml` for complete real-world example.**
+
+---
+
 ## What Is Core Service?
 
 The VilnaCRM Core Service is designed to provide core business functionality within the VilnaCRM ecosystem. It implements essential domain models and business logic with REST API and GraphQL interfaces, ensuring seamless integration with other components of the CRM system.
