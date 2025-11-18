@@ -226,6 +226,7 @@ Skills are **model-invoked** - Claude automatically activates them based on cont
 **Key difference**: While Claude Code invokes skills automatically via its `Skill` tool, OpenAI and other agents need to manually read and follow skill markdown files.
 
 **Example**: To run CI checks:
+
 - Read `.claude/skills/ci-workflow/SKILL.md`
 - Execute `make ci` as instructed
 - Follow fix patterns if checks fail

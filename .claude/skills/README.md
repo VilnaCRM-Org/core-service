@@ -5,12 +5,15 @@ This directory contains modular **AI-agnostic Skills** that work with any AI cod
 ## For Different AI Agents
 
 ### Claude Code Users
+
 Skills are automatically discovered and invoked when relevant. You don't need to do anything special.
 
 ### OpenAI, GitHub Copilot, Cursor, and Other AI Agents
+
 **Start here**: Read [AI-AGENT-GUIDE.md](AI-AGENT-GUIDE.md) for complete cross-platform usage instructions.
 
 **Quick start**:
+
 1. Read [SKILL-DECISION-GUIDE.md](SKILL-DECISION-GUIDE.md) to choose the right skill
 2. Open the skill's `SKILL.md` file
 3. Follow the execution steps
@@ -382,13 +385,13 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 These skills work across different AI agents:
 
-| AI Agent | How It Works |
-|----------|-------------|
-| **Claude Code** | Automatic discovery and invocation via `Skill` tool |
+| AI Agent                 | How It Works                                              |
+| ------------------------ | --------------------------------------------------------- |
+| **Claude Code**          | Automatic discovery and invocation via `Skill` tool       |
 | **OpenAI (GPT-4/CODEX)** | Manual: Read skill markdown files and follow instructions |
-| **GitHub Copilot** | Manual: Read skill markdown files for guidance |
-| **Cursor** | Manual: Use as reference documentation |
-| **Other AI agents** | Manual: Read markdown files as structured guides |
+| **GitHub Copilot**       | Manual: Read skill markdown files for guidance            |
+| **Cursor**               | Manual: Use as reference documentation                    |
+| **Other AI agents**      | Manual: Read markdown files as structured guides          |
 
 ### Automatic Discovery (Claude Code)
 
