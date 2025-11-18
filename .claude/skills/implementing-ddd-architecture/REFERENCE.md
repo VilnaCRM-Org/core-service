@@ -104,7 +104,7 @@ class Customer extends AggregateRoot
 
 - **Command Handlers**: Execute write operations (implement `CommandHandlerInterface`)
 - **Event Subscribers**: React to domain events (implement `DomainEventSubscriberInterface`)
-- **DTOs**: Data transfer between layers (can use Symfony validation)
+- **DTOs**: Data transfer between layers (validation via YAML config at `config/validator/`)
 - **Transformers**: Convert between representations
 - **API Platform Processors**: Handle API operations
 - **GraphQL Resolvers**: Handle GraphQL queries/mutations

@@ -1,6 +1,10 @@
 ---
 name: quality-standards
 description: Overview of protected quality thresholds and quick reference for all quality tools. Use when you need to understand quality metrics, run comprehensive quality checks, or learn which specialized skill to use. For specific issues, use dedicated skills (deptrac-fixer for Deptrac, complexity-management for PHPInsights, testing-workflow for coverage).
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this file to understand protected quality thresholds, then use specific skills for fixes.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # Quality Standards Skill

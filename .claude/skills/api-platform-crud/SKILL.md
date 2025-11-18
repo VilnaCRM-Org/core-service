@@ -1,6 +1,10 @@
 ---
 name: api-platform-crud
 description: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns. Use when adding new API resources, implementing CRUD endpoints, creating DTOs, configuring operations, or setting up state processors. Follows the repository's hexagonal architecture with YAML resource configuration and command bus pattern.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this file and examples/complete-customer-crud.md for the full CRUD implementation pattern.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # API Platform CRUD Skill

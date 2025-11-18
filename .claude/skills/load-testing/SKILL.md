@@ -1,6 +1,10 @@
 ---
 name: load-testing
 description: Create and manage K6 load tests for REST and GraphQL APIs. Use when creating load tests, writing K6 scripts, testing API performance, debugging load test failures, or setting up performance monitoring. Covers REST endpoints, GraphQL operations, data generation, IRI handling, configuration patterns, and performance troubleshooting.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this file, then rest-api-patterns.md or graphql-patterns.md. Check examples/ for complete tests.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # Load Testing Skill

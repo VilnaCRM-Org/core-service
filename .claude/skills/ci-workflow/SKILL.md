@@ -1,6 +1,10 @@
 ---
 name: ci-workflow
 description: Run comprehensive CI checks before committing changes. Use when the user asks to run CI, run quality checks, validate code quality, or before finishing any task that involves code changes.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this entire file and follow the "Execution Steps" section below.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # CI Workflow Skill

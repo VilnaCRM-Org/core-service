@@ -330,22 +330,31 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
 
 namespace App\Customer\Application\DTO;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
 /**
- * This is fine - Application layer CAN use Symfony
- * Used for API input validation before creating domain objects
+ * Application layer DTOs - validation configured via YAML
+ * See config/validator/Customer.yaml for validation rules
  */
 final class CreateCustomerInput
 {
-    #[Assert\NotBlank]
-    #[Assert\Email]
     public string $email;
-
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 100)]
     public string $name;
-
-    #[Assert\PositiveOrZero]
     public int $loyaltyPoints = 0;
 }
+
+/**
+ * Validation configuration (PREFERRED APPROACH)
+ * File: config/validator/Customer.yaml
+ *
+ * App\Customer\Application\DTO\CreateCustomerInput:
+ *   properties:
+ *     email:
+ *       - NotBlank: { message: 'not.blank' }
+ *       - Email: { message: 'email.invalid' }
+ *     name:
+ *       - NotBlank: { message: 'not.blank' }
+ *       - Length:
+ *           min: 2
+ *           max: 100
+ *     loyaltyPoints:
+ *       - PositiveOrZero: { message: 'positive.or.zero' }
+ */
