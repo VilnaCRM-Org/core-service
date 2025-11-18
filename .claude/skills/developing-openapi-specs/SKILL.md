@@ -1,6 +1,10 @@
 ---
 name: developing-openapi-specs
 description: Guide for contributing to the OpenAPI layer using processor pattern, complexity management, and functional programming. Use when adding endpoint factories, processors, parameter descriptions, reducing cyclomatic complexity, or fixing OpenAPI validation errors. Covers architecture patterns from user-service repository.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this file and follow the processor pattern guidelines for OpenAPI documentation.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # Developing OpenAPI Specs

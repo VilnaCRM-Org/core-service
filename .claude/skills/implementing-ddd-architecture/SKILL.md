@@ -1,6 +1,10 @@
 ---
 name: implementing-ddd-architecture
 description: Design and implement DDD patterns (entities, value objects, aggregates, CQRS). Use when creating new domain objects, implementing bounded contexts, designing repository interfaces, or learning proper layer separation. For fixing existing Deptrac violations, use the deptrac-fixer skill instead.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this entire file and the supporting files (REFERENCE.md, DIRECTORY-STRUCTURE.md, examples/).
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # Implementing DDD Architecture
@@ -92,29 +96,49 @@ class Customer extends AggregateRoot {
 
 ### 4. Value Objects for Validation
 
+**Domain Layer** uses Value Objects in `Domain/ValueObject` for validation (NO Symfony validation).
+**Application Layer** uses YAML validation config at `config/validator/{Entity}.yaml` for DTOs.
+
 ❌ **Wrong**:
 
 ```php
+// Domain/Entity/Customer.php - NEVER use framework attributes in Domain!
 class Customer {
-    #[Assert\Email] // Framework in domain!
+    #[Assert\Email] // ❌ Framework dependency in domain!
     private string $email;
 }
 ```
 
-✅ **Correct**:
+✅ **Correct (Domain Layer)**:
 
 ```php
+// Domain/Entity/Customer.php
 class Customer {
     private Email $email; // Value Object validates itself
 }
 
+// Domain/ValueObject/Email.php - Pure PHP validation
 final readonly class Email {
     public function __construct(private string $value) {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException();
+            throw new InvalidEmailException("Invalid email: {$value}");
         }
     }
+
+    public function value(): string { return $this->value; }
 }
+```
+
+✅ **Correct (Application Layer DTOs)**:
+
+```yaml
+# config/validator/Customer.yaml - YAML validation for DTOs
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
 ```
 
 ## CQRS Pattern Quick Start

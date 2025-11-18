@@ -1,6 +1,20 @@
-# Claude Code Skills
+# AI Agent Skills (Claude Code, OpenAI, GitHub Copilot, Cursor)
 
-This directory contains modular Skills that extend Claude Code's capabilities for this project. Skills are automatically discovered by Claude and activated when relevant to the task at hand.
+This directory contains modular **AI-agnostic Skills** that work with any AI coding assistant. While originally designed for Claude Code, these skills are pure markdown files that any AI agent can read and follow.
+
+## For Different AI Agents
+
+### Claude Code Users
+Skills are automatically discovered and invoked when relevant. You don't need to do anything special.
+
+### OpenAI, GitHub Copilot, Cursor, and Other AI Agents
+**Start here**: Read [AI-AGENT-GUIDE.md](AI-AGENT-GUIDE.md) for complete cross-platform usage instructions.
+
+**Quick start**:
+1. Read [SKILL-DECISION-GUIDE.md](SKILL-DECISION-GUIDE.md) to choose the right skill
+2. Open the skill's `SKILL.md` file
+3. Follow the execution steps
+4. Check supporting files (`reference/`, `examples/`) as needed
 
 ## Available Skills
 
@@ -364,17 +378,31 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 
 ## How Skills Work
 
-### Automatic Discovery
+### Cross-Platform Compatibility
+
+These skills work across different AI agents:
+
+| AI Agent | How It Works |
+|----------|-------------|
+| **Claude Code** | Automatic discovery and invocation via `Skill` tool |
+| **OpenAI (GPT-4/CODEX)** | Manual: Read skill markdown files and follow instructions |
+| **GitHub Copilot** | Manual: Read skill markdown files for guidance |
+| **Cursor** | Manual: Use as reference documentation |
+| **Other AI agents** | Manual: Read markdown files as structured guides |
+
+### Automatic Discovery (Claude Code)
 
 Claude Code automatically discovers and loads Skills from this directory. No manual activation is required.
 
 ### Invocation
 
-Skills are **model-invoked** — Claude autonomously decides when to use them based on:
+**For Claude Code**: Skills are **model-invoked** — Claude autonomously decides when to use them based on:
 
 - Task context and user request
 - Skill descriptions (the `description` field in YAML frontmatter)
 - Relevance to current work
+
+**For OpenAI and Other Agents**: You manually read the appropriate skill file based on your task (see [AI-AGENT-GUIDE.md](AI-AGENT-GUIDE.md))
 
 ### Skill Structure
 

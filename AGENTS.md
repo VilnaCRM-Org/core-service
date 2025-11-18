@@ -147,9 +147,9 @@ Never run PHP commands directly on the host system.
 3. Update OpenAPI examples and serializer groups so the documented payloads exactly match the seeded data (no placeholder values that Schemathesis cannot reach).
 4. Re-run `make generate-openapi-spec` if invoked in isolation, or just rerun `make schemathesis-validate`. Repeat until both **Examples** and **Coverage** phases report zero failures and zero warnings.
 
-## Claude Code Skills
+## AI Agent Skills (Claude Code, OpenAI, GitHub Copilot, Cursor)
 
-This repository includes comprehensive Claude Code Skills in the `.claude/skills/` directory to assist with development tasks.
+This repository includes comprehensive **AI-agnostic Skills** in the `.claude/skills/` directory to assist with development tasks. While originally designed for Claude Code, these skills work with any AI coding assistant.
 
 ### Available Skills
 
@@ -203,13 +203,34 @@ Skills follow Claude Code best practices with multi-file structure:
 
 ### Using Skills
 
+#### For Claude Code Users
+
 Skills are **model-invoked** - Claude automatically activates them based on context. You don't need to manually invoke skills; Claude recognizes when a skill is relevant based on:
 
 - Keywords in your request (e.g., "run tests", "create migration", "update docs")
 - Current task context
 - Skill descriptions
 
-See [.claude/skills/README.md](.claude/skills/README.md) for complete skill documentation and usage patterns.
+#### For OpenAI, GitHub Copilot, Cursor, and Other AI Agents
+
+**START HERE**: Read [.claude/skills/AI-AGENT-GUIDE.md](.claude/skills/AI-AGENT-GUIDE.md) for complete instructions.
+
+**Quick workflow for non-Claude agents:**
+
+1. **Identify task type** → Read [.claude/skills/SKILL-DECISION-GUIDE.md](.claude/skills/SKILL-DECISION-GUIDE.md)
+2. **Choose appropriate skill** → Use the decision tree to find the right skill
+3. **Read the skill file** → Open `.claude/skills/{skill-name}/SKILL.md`
+4. **Follow execution steps** → Execute the step-by-step instructions in the skill
+5. **Check supporting files** → Refer to `reference/` and `examples/` subdirectories as needed
+
+**Key difference**: While Claude Code invokes skills automatically via its `Skill` tool, OpenAI and other agents need to manually read and follow skill markdown files.
+
+**Example**: To run CI checks:
+- Read `.claude/skills/ci-workflow/SKILL.md`
+- Execute `make ci` as instructed
+- Follow fix patterns if checks fail
+
+See [.claude/skills/README.md](.claude/skills/README.md) and [.claude/skills/AI-AGENT-GUIDE.md](.claude/skills/AI-AGENT-GUIDE.md) for complete skill documentation and cross-platform usage patterns.
 
 ## Architecture Deep Dive
 
@@ -252,12 +273,12 @@ Comprehensive customer management functionality:
   - Command Handlers: Process business operations (implementing `CommandHandlerInterface`)
   - HTTP Request Processors & GraphQL Resolvers
   - Event Subscribers (implementing `DomainEventSubscriberInterface`)
-  - DTOs with Symfony validation attributes (`#[Assert\...]` allowed here)
+  - DTOs with YAML validation config (`config/validator/Customer.yaml`)
 - **Domain Layer** (**NO framework imports**):
   - Entities: Customer, CustomerType, CustomerStatus (pure PHP, no Doctrine annotations)
-  - Value Objects: Self-validating using pure PHP (filter_var, preg_match, etc.)
+  - Value Objects: Self-validating using pure PHP in `Domain/ValueObject` (e.g., Email, Phone - use filter_var, preg_match, etc.)
   - Domain Events: Customer-related events extending `DomainEvent`
-  - Domain Exceptions: CustomerNotFoundException, etc.
+  - Domain Exceptions: CustomerNotFoundException, InvalidEmailException, etc.
   - Repository Interfaces: Contracts only, not implementations
 - **Infrastructure Layer** (Implements Domain interfaces):
   - Repository implementations (MongoDB using Doctrine ODM)
@@ -621,7 +642,7 @@ config/
 - `Command/` → CreateCustomerCommand.php
 - `CommandHandler/` → CreateCustomerHandler.php
 - `EventSubscriber/` → SendEmailOnCustomerCreated.php
-- `DTO/` → CustomerInput.php (with #[Assert] allowed)
+- `DTO/` → CustomerInput.php (validation via `config/validator/Customer.yaml`)
 - `Processor/` → CreateCustomerProcessor.php
 
 **Infrastructure Layer** - Implements Domain interfaces:

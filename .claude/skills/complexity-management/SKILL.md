@@ -1,6 +1,10 @@
 ---
 name: complexity-management
 description: Maintain and improve code quality using PHPInsights without decreasing quality thresholds. Use when PHPInsights fails, cyclomatic complexity is too high, code quality drops, or when refactoring for better maintainability. Always maintains 94% complexity and 100% quality/architecture/style scores.
+#
+# FOR OPENAI/GPT/CODEX AGENTS: Read this file and refactoring-strategies.md for complexity reduction patterns.
+# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
+#
 ---
 
 # Code Complexity Management
