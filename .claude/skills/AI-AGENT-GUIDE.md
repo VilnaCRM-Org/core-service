@@ -9,9 +9,11 @@ This repository uses a modular **Skills system** originally designed for Claude 
 ## How This Works
 
 ### For Claude Code
+
 Claude Code automatically discovers and invokes skills using its `Skill` tool when tasks match skill descriptions.
 
 ### For OpenAI Agents & Others
+
 You need to manually discover and read skill files, then follow their step-by-step instructions.
 
 ## Quick Start for OpenAI Agents
@@ -52,6 +54,7 @@ Quick Decision Tree:
 Each skill has a main `SKILL.md` file at `.claude/skills/{skill-name}/SKILL.md`
 
 **Example**: For CI workflow issues, read:
+
 ```
 .claude/skills/ci-workflow/SKILL.md
 ```
@@ -61,17 +64,21 @@ Each skill has a main `SKILL.md` file at `.claude/skills/{skill-name}/SKILL.md`
 Each skill provides structured execution steps. Follow them sequentially:
 
 **Example from ci-workflow:**
+
 ```markdown
 ## Execution Steps
 
 ### Step 1: Run CI
+
 make ci
 
 ### Step 2: Check Result
+
 - ✅ Success: "✅ CI checks successfully passed!" → Task complete
 - ❌ Failure: "❌ CI checks failed:" → Go to Step 3
 
 ### Step 3: Fix Failures
+
 [Specific fix instructions...]
 ```
 
@@ -91,6 +98,7 @@ Complex skills have multi-file structure:
 ```
 
 **When to read supporting files:**
+
 - Encountering errors → `reference/troubleshooting.md`
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
@@ -99,35 +107,35 @@ Complex skills have multi-file structure:
 
 ### 🔧 Workflow Skills
 
-| Skill | File | When to Use |
-|-------|------|-------------|
-| **CI Workflow** | `ci-workflow/SKILL.md` | Run all quality checks before committing |
-| **Code Review** | `code-review/SKILL.md` | Address PR review comments systematically |
+| Skill                | File                        | When to Use                                      |
+| -------------------- | --------------------------- | ------------------------------------------------ |
+| **CI Workflow**      | `ci-workflow/SKILL.md`      | Run all quality checks before committing         |
+| **Code Review**      | `code-review/SKILL.md`      | Address PR review comments systematically        |
 | **Testing Workflow** | `testing-workflow/SKILL.md` | Run/debug unit, integration, E2E, mutation tests |
 
 ### 🏗️ Architecture & Quality Skills
 
-| Skill | File | When to Use |
-|-------|------|-------------|
-| **Implementing DDD** | `implementing-ddd-architecture/SKILL.md` | Create entities, value objects, aggregates, CQRS |
-| **Deptrac Fixer** | `deptrac-fixer/SKILL.md` | Fix architectural boundary violations |
-| **Quality Standards** | `quality-standards/SKILL.md` | Overview of protected quality thresholds |
-| **Complexity Management** | `complexity-management/SKILL.md` | Reduce cyclomatic complexity in code |
-| **OpenAPI Specs** | `developing-openapi-specs/SKILL.md` | Add OpenAPI documentation with processor pattern |
+| Skill                     | File                                     | When to Use                                      |
+| ------------------------- | ---------------------------------------- | ------------------------------------------------ |
+| **Implementing DDD**      | `implementing-ddd-architecture/SKILL.md` | Create entities, value objects, aggregates, CQRS |
+| **Deptrac Fixer**         | `deptrac-fixer/SKILL.md`                 | Fix architectural boundary violations            |
+| **Quality Standards**     | `quality-standards/SKILL.md`             | Overview of protected quality thresholds         |
+| **Complexity Management** | `complexity-management/SKILL.md`         | Reduce cyclomatic complexity in code             |
+| **OpenAPI Specs**         | `developing-openapi-specs/SKILL.md`      | Add OpenAPI documentation with processor pattern |
 
 ### 💾 Database & Documentation Skills
 
-| Skill | File | When to Use |
-|-------|------|-------------|
+| Skill                   | File                           | When to Use                                      |
+| ----------------------- | ------------------------------ | ------------------------------------------------ |
 | **Database Migrations** | `database-migrations/SKILL.md` | Create/modify MongoDB entities with Doctrine ODM |
-| **Documentation Sync** | `documentation-sync/SKILL.md` | Keep docs synchronized with code changes |
+| **Documentation Sync**  | `documentation-sync/SKILL.md`  | Keep docs synchronized with code changes         |
 
 ### 🚀 API & Performance Skills
 
-| Skill | File | When to Use |
-|-------|------|-------------|
-| **API Platform CRUD** | `api-platform-crud/SKILL.md` | Create complete REST API CRUD with DDD/CQRS |
-| **Load Testing** | `load-testing/SKILL.md` | Create K6 performance tests for REST/GraphQL |
+| Skill                 | File                         | When to Use                                  |
+| --------------------- | ---------------------------- | -------------------------------------------- |
+| **API Platform CRUD** | `api-platform-crud/SKILL.md` | Create complete REST API CRUD with DDD/CQRS  |
+| **Load Testing**      | `load-testing/SKILL.md`      | Create K6 performance tests for REST/GraphQL |
 
 ## Practical Examples
 
@@ -145,6 +153,7 @@ Complex skills have multi-file structure:
 **Your workflow:**
 
 1. **Identify skills**: Need multiple skills:
+
    - `implementing-ddd-architecture` - Design the entity
    - `database-migrations` - Configure persistence
    - `api-platform-crud` - Add REST endpoints
@@ -166,26 +175,26 @@ Complex skills have multi-file structure:
 
 ## Key Differences from Claude Code
 
-| Aspect | Claude Code | OpenAI/Other Agents |
-|--------|-------------|---------------------|
-| **Discovery** | Automatic | Manual (read SKILL-DECISION-GUIDE.md) |
-| **Invocation** | Automatic via Skill tool | Manual (read SKILL.md file) |
-| **Execution** | Guided by tool | Self-guided (follow steps) |
-| **Multi-file skills** | Automatically loaded | Read supporting files as needed |
+| Aspect                | Claude Code              | OpenAI/Other Agents                   |
+| --------------------- | ------------------------ | ------------------------------------- |
+| **Discovery**         | Automatic                | Manual (read SKILL-DECISION-GUIDE.md) |
+| **Invocation**        | Automatic via Skill tool | Manual (read SKILL.md file)           |
+| **Execution**         | Guided by tool           | Self-guided (follow steps)            |
+| **Multi-file skills** | Automatically loaded     | Read supporting files as needed       |
 
 ## Quality Standards & Protected Thresholds
 
 **CRITICAL**: This project has **protected quality thresholds** that MUST NOT be lowered:
 
-| Tool | Metric | Required | Skill for Issues |
-|------|--------|----------|------------------|
-| PHPInsights | Complexity | 94% min | `complexity-management` |
-| PHPInsights | Quality | 100% | `complexity-management` |
-| PHPInsights | Architecture | 100% | `deptrac-fixer` |
-| PHPInsights | Style | 100% | Run `make phpcsfixer` |
-| Deptrac | Violations | 0 | `deptrac-fixer` |
-| Psalm | Errors | 0 | Fix reported issues |
-| Infection | MSI | High % | `testing-workflow` |
+| Tool        | Metric       | Required | Skill for Issues        |
+| ----------- | ------------ | -------- | ----------------------- |
+| PHPInsights | Complexity   | 94% min  | `complexity-management` |
+| PHPInsights | Quality      | 100%     | `complexity-management` |
+| PHPInsights | Architecture | 100%     | `deptrac-fixer`         |
+| PHPInsights | Style        | 100%     | Run `make phpcsfixer`   |
+| Deptrac     | Violations   | 0        | `deptrac-fixer`         |
+| Psalm       | Errors       | 0        | Fix reported issues     |
+| Infection   | MSI          | High %   | `testing-workflow`      |
 
 **Always improve code quality to meet standards. Never lower thresholds.**
 
@@ -318,6 +327,7 @@ This skills system integrates with:
 The skills system provides **modular, reusable workflows** that work across different AI agents. While Claude Code invokes them automatically, OpenAI agents and others can achieve the same results by reading and following the skill files manually.
 
 **Start here:**
+
 1. Read this guide (you're done! ✓)
 2. Read `.claude/skills/SKILL-DECISION-GUIDE.md`
 3. Pick a skill based on your task

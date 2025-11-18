@@ -12,20 +12,20 @@ This project uses **modular skills** for specialized tasks. Skills are automatic
 
 ### Quick Skill Guide
 
-| Task Type | Skill | When to Use |
-|-----------|-------|-------------|
-| **Fix Deptrac violations** | `deptrac-fixer` | Architecture boundary violations detected |
-| **Fix complexity issues** | `complexity-management` | PHPInsights complexity score drops |
-| **Run CI checks** | `ci-workflow` | Before committing, validating changes |
-| **Debug test failures** | `testing-workflow` | PHPUnit, Behat, or Infection issues |
-| **Handle PR feedback** | `code-review` | Processing code review comments |
-| **Create DDD patterns** | `implementing-ddd-architecture` | New entities, value objects, aggregates |
-| **Add CRUD endpoints** | `api-platform-crud` | New API resources with full CRUD |
-| **Create load tests** | `load-testing` | K6 performance tests (REST/GraphQL) |
-| **Update entity schema** | `database-migrations` | Modifying entities, adding fields |
-| **Document APIs** | `developing-openapi-specs` | OpenAPI endpoint factories |
-| **Sync documentation** | `documentation-sync` | After any code changes |
-| **Quality overview** | `quality-standards` | Understanding protected thresholds |
+| Task Type                  | Skill                           | When to Use                               |
+| -------------------------- | ------------------------------- | ----------------------------------------- |
+| **Fix Deptrac violations** | `deptrac-fixer`                 | Architecture boundary violations detected |
+| **Fix complexity issues**  | `complexity-management`         | PHPInsights complexity score drops        |
+| **Run CI checks**          | `ci-workflow`                   | Before committing, validating changes     |
+| **Debug test failures**    | `testing-workflow`              | PHPUnit, Behat, or Infection issues       |
+| **Handle PR feedback**     | `code-review`                   | Processing code review comments           |
+| **Create DDD patterns**    | `implementing-ddd-architecture` | New entities, value objects, aggregates   |
+| **Add CRUD endpoints**     | `api-platform-crud`             | New API resources with full CRUD          |
+| **Create load tests**      | `load-testing`                  | K6 performance tests (REST/GraphQL)       |
+| **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields         |
+| **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                |
+| **Sync documentation**     | `documentation-sync`            | After any code changes                    |
+| **Quality overview**       | `quality-standards`             | Understanding protected thresholds        |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
 
@@ -33,16 +33,16 @@ This project uses **modular skills** for specialized tasks. Skills are automatic
 
 This project enforces **strict quality thresholds** that MUST NOT be lowered:
 
-| Tool | Metric | Required | Skill for Issues |
-|------|--------|----------|------------------|
-| **PHPInsights** | Complexity | 94% min | `complexity-management` |
-| **PHPInsights** | Quality | 100% | `complexity-management` |
-| **PHPInsights** | Architecture | 100% | `deptrac-fixer` |
-| **PHPInsights** | Style | 100% | Run `make phpcsfixer` |
-| **Deptrac** | Violations | 0 | `deptrac-fixer` |
-| **Psalm** | Errors | 0 | Fix reported issues |
-| **Test Coverage** | Lines | High % | `testing-workflow` |
-| **Infection MSI** | Score | High % | `testing-workflow` |
+| Tool              | Metric       | Required | Skill for Issues        |
+| ----------------- | ------------ | -------- | ----------------------- |
+| **PHPInsights**   | Complexity   | 94% min  | `complexity-management` |
+| **PHPInsights**   | Quality      | 100%     | `complexity-management` |
+| **PHPInsights**   | Architecture | 100%     | `deptrac-fixer`         |
+| **PHPInsights**   | Style        | 100%     | Run `make phpcsfixer`   |
+| **Deptrac**       | Violations   | 0        | `deptrac-fixer`         |
+| **Psalm**         | Errors       | 0        | Fix reported issues     |
+| **Test Coverage** | Lines        | High %   | `testing-workflow`      |
+| **Infection MSI** | Score        | High %   | `testing-workflow`      |
 
 > **⚠️ NEVER lower thresholds**. Always fix code to meet standards. See `quality-standards` skill for details.
 
@@ -50,24 +50,24 @@ This project enforces **strict quality thresholds** that MUST NOT be lowered:
 
 ### Quick Reference Table
 
-| Category | Command | Description | Related Skill |
-|----------|---------|-------------|---------------|
-| **Docker** | `make start` | Start containers | - |
-| | `make sh` | Access PHP container | - |
-| **Quality** | `make phpcsfixer` | Fix code style | - |
-| | `make psalm` | Static analysis | - |
-| | `make phpinsights` | Quality checks | `complexity-management` |
-| | `make deptrac` | Architecture validation | `deptrac-fixer` |
-| **Testing** | `make unit-tests` | Unit tests only | `testing-workflow` |
-| | `make integration-tests` | Integration tests | `testing-workflow` |
-| | `make e2e-tests` | Behat E2E tests | `testing-workflow` |
-| | `make all-tests` | All functional tests | `testing-workflow` |
-| | `make infection` | Mutation testing | `testing-workflow` |
-| **Load Testing** | `make smoke-load-tests` | Minimal load test | `load-testing` |
-| | `make load-tests` | All load tests | `load-testing` |
-| **CI** | `make ci` (if exists) | Run all CI checks | `ci-workflow` |
-| **Database** | `make setup-test-db` | Reset test MongoDB | `database-migrations` |
-| **API Docs** | `make generate-openapi-spec` | Export OpenAPI | `developing-openapi-specs` |
+| Category         | Command                      | Description             | Related Skill              |
+| ---------------- | ---------------------------- | ----------------------- | -------------------------- |
+| **Docker**       | `make start`                 | Start containers        | -                          |
+|                  | `make sh`                    | Access PHP container    | -                          |
+| **Quality**      | `make phpcsfixer`            | Fix code style          | -                          |
+|                  | `make psalm`                 | Static analysis         | -                          |
+|                  | `make phpinsights`           | Quality checks          | `complexity-management`    |
+|                  | `make deptrac`               | Architecture validation | `deptrac-fixer`            |
+| **Testing**      | `make unit-tests`            | Unit tests only         | `testing-workflow`         |
+|                  | `make integration-tests`     | Integration tests       | `testing-workflow`         |
+|                  | `make e2e-tests`             | Behat E2E tests         | `testing-workflow`         |
+|                  | `make all-tests`             | All functional tests    | `testing-workflow`         |
+|                  | `make infection`             | Mutation testing        | `testing-workflow`         |
+| **Load Testing** | `make smoke-load-tests`      | Minimal load test       | `load-testing`             |
+|                  | `make load-tests`            | All load tests          | `load-testing`             |
+| **CI**           | `make ci` (if exists)        | Run all CI checks       | `ci-workflow`              |
+| **Database**     | `make setup-test-db`         | Reset test MongoDB      | `database-migrations`      |
+| **API Docs**     | `make generate-openapi-spec` | Export OpenAPI          | `developing-openapi-specs` |
 
 ### Detailed Commands
 
@@ -83,6 +83,7 @@ make sh             # Access PHP container shell
 make logs           # Show all logs
 make new-logs       # Show live logs
 ```
+
 </details>
 
 <details>
@@ -92,6 +93,7 @@ make new-logs       # Show live logs
 make install        # Install dependencies from composer.lock
 make update         # Update dependencies per composer.json
 ```
+
 </details>
 
 <details>
@@ -105,6 +107,7 @@ make phpinsights    # Run PHP quality checks
 make deptrac        # Validate architectural boundaries
 make composer-validate  # Validate composer files
 ```
+
 </details>
 
 <details>
@@ -121,6 +124,7 @@ make infection          # Run mutation testing
 # Setup test database
 make setup-test-db      # Drop and recreate test MongoDB schema
 ```
+
 </details>
 
 <details>
@@ -137,6 +141,7 @@ make load-tests         # Run all load tests
 make aws-load-tests         # Execute load tests on AWS
 make aws-load-tests-cleanup # Clean up AWS resources
 ```
+
 </details>
 
 <details>
@@ -147,6 +152,7 @@ make cache-clear    # Clear Symfony cache
 make cache-warmup   # Warmup cache
 make commands       # List all Symfony console commands
 ```
+
 </details>
 
 <details>
@@ -156,6 +162,7 @@ make commands       # List all Symfony console commands
 make generate-openapi-spec   # Export OpenAPI spec to .github/openapi-spec/spec.yaml
 make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
 ```
+
 </details>
 
 ## Architecture
@@ -410,3 +417,4 @@ Key environment variables are defined in `.env` and `.env.test`:
 ---
 
 **For detailed workflows, patterns, and troubleshooting** → See modular skills in `.claude/skills/` directory.
+````
