@@ -57,117 +57,61 @@ class Customer
 **Complete Fix**:
 
 ```php
-// Step 1: Create Value Objects
-// src/Customer/Domain/ValueObject/CustomerName.php
-namespace App\Customer\Domain\ValueObject;
-
-use App\Customer\Domain\Exception\InvalidCustomerNameException;
-
-final readonly class CustomerName
-{
-    private const MIN_LENGTH = 2;
-    private const MAX_LENGTH = 100;
-
-    public function __construct(private string $value)
-    {
-        $this->ensureIsValid($value);
-    }
-
-    private function ensureIsValid(string $value): void
-    {
-        $trimmed = trim($value);
-
-        if ($trimmed === '') {
-            throw new InvalidCustomerNameException('Customer name cannot be empty');
-        }
-
-        $length = mb_strlen($trimmed);
-
-        if ($length < self::MIN_LENGTH) {
-            throw new InvalidCustomerNameException(
-                sprintf('Customer name must be at least %d characters', self::MIN_LENGTH)
-            );
-        }
-
-        if ($length > self::MAX_LENGTH) {
-            throw new InvalidCustomerNameException(
-                sprintf('Customer name cannot exceed %d characters', self::MAX_LENGTH)
-            );
-        }
-    }
-
-    public function value(): string
-    {
-        return $this->value;
-    }
-
-    public function equals(self $other): bool
-    {
-        return $this->value === $other->value;
-    }
-}
-
-// src/Customer/Domain/ValueObject/Email.php
-namespace App\Customer\Domain\ValueObject;
-
-use App\Customer\Domain\Exception\InvalidEmailException;
-
-final readonly class Email
-{
-    public function __construct(private string $value)
-    {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException("Invalid email format: {$value}");
-        }
-    }
-
-    public function value(): string
-    {
-        return $this->value;
-    }
-
-    public function domain(): string
-    {
-        return explode('@', $this->value)[1];
-    }
-
-    public function equals(self $other): bool
-    {
-        return $this->value === $other->value;
-    }
-}
-
-// Step 2: Update Entity
+// Step 1: Remove Symfony from Domain - Pure entity
 // src/Customer/Domain/Entity/Customer.php
 namespace App\Customer\Domain\Entity;
 
-use App\Customer\Domain\ValueObject\CustomerName;
-use App\Customer\Domain\ValueObject\Email;
-
 class Customer
 {
-    private CustomerName $name;
-    private Email $email;
+    private string $name;
+    private string $email;
 
-    public function __construct(CustomerName $name, Email $email)
+    public function __construct(string $name, string $email)
     {
         $this->name = $name;
         $this->email = $email;
     }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function email(): string
+    {
+        return $this->email;
+    }
 }
 
-// Step 3: Create Domain Exceptions
-// src/Customer/Domain/Exception/InvalidCustomerNameException.php
-namespace App\Customer\Domain\Exception;
+// Step 2: Add YAML validation in Application layer
+// config/validator/Customer.yaml
+```
 
-use App\Shared\Domain\Exception\DomainException;
+```yaml
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    name:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          min: 2
+          max: 100
+          minMessage: 'Customer name must be at least 2 characters'
+          maxMessage: 'Customer name cannot exceed 100 characters'
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
+```
 
-final class InvalidCustomerNameException extends DomainException
+```php
+// Step 3: Application DTO (clean, no attributes)
+// src/Core/Customer/Application/DTO/CustomerCreate.php
+namespace App\Core\Customer\Application\DTO;
+
+final class CustomerCreate
 {
-    public function __construct(string $message)
-    {
-        parent::__construct($message);
-    }
+    public string $name;
+    public string $email;
 }
 ```
 

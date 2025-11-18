@@ -184,18 +184,22 @@ When you see a Deptrac violation, use this map to know where to move or refactor
 
 | FROM (Wrong)                                                     | TO (Correct)                                                            |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `src/Customer/Domain/Entity/Customer.php` with `#[Assert\Email]` | Create `src/Customer/Domain/ValueObject/Email.php` with self-validation |
+| `src/Customer/Domain/Entity/Customer.php` with `#[Assert\Email]` | Pure Domain entity + YAML validation in `config/validator/Customer.yaml` |
 
-**Move validation from**:
+**Move validation from Domain to Application**:
 
 ```
-Customer.php                    →   Email.php (new Value Object)
-├─ #[Assert\Email] email        →   ├─ filter_var() validation
-├─ #[Assert\NotBlank] name      →   └─ throw InvalidEmailException
+Customer.php (Domain)           →   Customer.php (Domain) - Pure entity
+├─ #[Assert\Email] email        →   ├─ private string $email (no validation)
+├─ #[Assert\NotBlank] name      →   └─ private string $name (no validation)
 └─ #[Assert\Length] name        →
-                                    CustomerName.php (new Value Object)
-                                    ├─ strlen() check
-                                    └─ throw InvalidCustomerNameException
+                                    Application/DTO/CustomerCreate.php
+                                    └─ public properties
+
+                                    config/validator/Customer.yaml
+                                    ├─ email: Email, NotBlank
+                                    ├─ name: NotBlank, Length
+                                    └─ UniqueEmail custom validator
 ```
 
 ---
