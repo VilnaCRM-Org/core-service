@@ -52,8 +52,8 @@ Infrastructure → Application → Domain
 
 - ❌ **NO** external dependencies (Symfony, Doctrine, API Platform)
 - ❌ **NO** framework imports or attributes
+- ❌ **NO** validation in Domain (handle in Application DTOs with YAML config)
 - ✅ Pure PHP business logic only
-- ✅ Use Value Objects for validation
 - ✅ Define repository interfaces (not implementations)
 
 ### 2. Deptrac Violations
@@ -67,7 +67,7 @@ Infrastructure → Application → Domain
 
 **Common fixes:**
 
-- Domain → Symfony: Extract validation to Value Objects
+- Domain → Symfony: Remove validation from Domain, use YAML config in Application
 - Domain → Doctrine: Use XML mappings in `config/doctrine/`
 - Domain → API Platform: Move to Application layer or YAML config
 - Infrastructure → Handler: Use Command/Event Bus instead
@@ -94,10 +94,10 @@ class Customer extends AggregateRoot {
 }
 ```
 
-### 4. Value Objects for Validation
+### 4. Validation Pattern
 
-**Domain Layer** uses Value Objects in `Domain/ValueObject` for validation (NO Symfony validation).
-**Application Layer** uses YAML validation config at `config/validator/{Entity}.yaml` for DTOs.
+**Domain Layer** - Pure entities with NO validation (no Symfony dependencies)
+**Application Layer** - YAML validation config at `config/validator/{Entity}.yaml` for DTOs
 
 ❌ **Wrong**:
 
@@ -112,33 +112,43 @@ class Customer {
 ✅ **Correct (Domain Layer)**:
 
 ```php
-// Domain/Entity/Customer.php
+// Domain/Entity/Customer.php - Pure PHP, no validation
+namespace App\Customer\Domain\Entity;
+
 class Customer {
-    private Email $email; // Value Object validates itself
-}
+    private string $email; // Pure property, no framework dependencies
 
-// Domain/ValueObject/Email.php - Pure PHP validation
-final readonly class Email {
-    public function __construct(private string $value) {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException("Invalid email: {$value}");
-        }
+    public function __construct(string $email)
+    {
+        $this->email = $email;
     }
-
-    public function value(): string { return $this->value; }
 }
 ```
 
-✅ **Correct (Application Layer DTOs)**:
+✅ **Correct (Application Layer)**:
+
+```php
+// Application/DTO/CustomerCreate.php - Clean DTO
+namespace App\Core\Customer\Application\DTO;
+
+final class CustomerCreate
+{
+    public string $email;
+    public string $initials;
+}
+```
 
 ```yaml
-# config/validator/Customer.yaml - YAML validation for DTOs
+# config/validator/Customer.yaml - Validation configuration
 App\Core\Customer\Application\DTO\CustomerCreate:
   properties:
     email:
       - NotBlank: { message: 'not.blank' }
       - Email: { message: 'email.invalid' }
       - App\Shared\Application\Validator\UniqueEmail: ~
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - App\Shared\Application\Validator\Initials: ~
 ```
 
 ## CQRS Pattern Quick Start

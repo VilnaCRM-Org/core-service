@@ -93,40 +93,48 @@ Domain must not depend on Symfony
 
 **Cause**: Using Symfony validation attributes in domain entity.
 
-**Fix Strategy**: Extract validation to Value Objects
+**Fix Strategy**: Remove validation from Domain, use YAML config in Application layer
 
 ```php
-// BEFORE (WRONG)
+// BEFORE (WRONG) - Domain with Symfony validation
 namespace App\Customer\Domain\Entity;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Customer
 {
-    #[Assert\Email]
+    #[Assert\Email]  // ❌ Symfony in Domain!
     private string $email;
 }
 
-// AFTER (CORRECT)
+// AFTER (CORRECT) - Pure Domain entity
 namespace App\Customer\Domain\Entity;
-
-use App\Customer\Domain\ValueObject\Email;
 
 class Customer
 {
-    private Email $email;
-}
+    private string $email;  // ✅ Pure PHP, no framework
 
-// Value Object validates itself
-final readonly class Email
-{
-    public function __construct(private string $value)
+    public function __construct(string $email)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException("Invalid email: {$value}");
-        }
+        $this->email = $email;
     }
 }
+
+// Application DTO with YAML validation
+// Application/DTO/CustomerCreate.php
+namespace App\Core\Customer\Application\DTO;
+
+final class CustomerCreate
+{
+    public string $email;
+}
+
+// config/validator/Customer.yaml
+// App\Core\Customer\Application\DTO\CustomerCreate:
+//   properties:
+//     email:
+//       - NotBlank: { message: 'not.blank' }
+//       - Email: { message: 'email.invalid' }
 ```
 
 ### Pattern 2: Domain → Doctrine (Annotations)
@@ -471,7 +479,7 @@ Infrastructure Layer (Implements Domain interfaces)
 - All domain classes have no framework imports
 - Business logic remains in domain layer
 - Handlers orchestrate without business logic
-- Value Objects encapsulate validation
+- Validation handled in Application layer via YAML config
 - XML mappings for Doctrine configuration
 
 ## Quick Commands

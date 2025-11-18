@@ -314,26 +314,61 @@ Domain must not depend on Symfony
     uses Symfony\Component\Validator\Constraints as Assert
 ```
 
-**Fix**: Extract validation to Value Objects
+**Fix**: Remove framework validation from Domain, use YAML config for Application DTOs
+
+**Domain Layer (Pure Entity):**
 
 ```php
-// BEFORE (WRONG) - Symfony in Domain
-#[Assert\Email]
-private string $email;
+// BEFORE (WRONG) - Symfony validation in Domain Entity
+namespace App\Customer\Domain\Entity;
 
-// AFTER (CORRECT) - Value Object validates itself
-private Email $email;
+use Symfony\Component\Validator\Constraints as Assert;
 
-// Email.php in Domain/ValueObject/
-final readonly class Email
+class Customer
 {
-    public function __construct(private string $value)
+    #[Assert\Email]  // ❌ VIOLATION: Symfony in Domain!
+    private string $email;
+}
+
+// AFTER (CORRECT) - Pure PHP entity, no validation
+namespace App\Customer\Domain\Entity;
+
+class Customer
+{
+    private string $email;  // ✅ Pure PHP, no framework dependencies
+
+    public function __construct(string $email)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException($value);
-        }
+        $this->email = $email;
     }
 }
+```
+
+**Application Layer (DTOs with YAML validation):**
+
+```php
+// Application/DTO/CustomerCreate.php - No attributes, clean DTO
+namespace App\Core\Customer\Application\DTO;
+
+final class CustomerCreate
+{
+    public string $email;
+    public string $initials;
+    public string $phone;
+}
+```
+
+```yaml
+# config/validator/Customer.yaml - Validation configuration
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - App\Shared\Application\Validator\Initials: ~
 ```
 
 #### Pattern 2: Domain → Doctrine Annotations

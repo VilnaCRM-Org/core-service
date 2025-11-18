@@ -581,38 +581,34 @@ class Customer
     }
 }
 
-// Value Object
-namespace App\Customer\Domain\ValueObject;
-
-final readonly class Email
-{
-    public function __construct(private string $value)
-    {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException("Invalid email: {$value}");
-        }
-    }
-
-    public function value(): string { return $this->value; }
-}
 ```
 
-**Optional**: If Symfony validation needed for API input, use DTOs in Application layer:
+**For API input validation**, use YAML config in Application layer:
 
 ```php
 // Application/DTO/CreateCustomerDTO.php
-namespace App\Customer\Application\DTO;
-
-use Symfony\Component\Validator\Constraints as Assert;
+namespace App\Core\Customer\Application\DTO;
 
 final class CreateCustomerDTO
 {
-    #[Assert\Email]
     public string $email;
-
-    #[Assert\NotBlank]
     public string $name;
 }
+```
+
+```yaml
+# config/validator/Customer.yaml
+App\Core\Customer\Application\DTO\CreateCustomerDTO:
+  properties:
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    name:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          min: 2
+          max: 100
 ```
 
 #### Violation Type 2: Domain → Doctrine (Annotations)
@@ -1119,20 +1115,15 @@ class Customer
 
     public function __construct(string $email)
     {
-        // Validation scattered
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException();
-        }
+        // ❌ NO validation in Domain!
         $this->email = $email;
     }
 
     public function changeEmail(string $newEmail): void
     {
-        // Duplicate validation
-        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException();
-        }
+        // ❌ NO validation in Domain!
         $this->email = $newEmail;
+        $this->record(new CustomerEmailChanged($this->id, $newEmail));
     }
 }
 ```
@@ -1140,36 +1131,37 @@ class Customer
 **Correct Approach**:
 
 ```php
-// Value Object encapsulates validation
-final readonly class Email
-{
-    public function __construct(private string $value)
-    {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException("Invalid email: {$value}");
-        }
-    }
-
-    public function value(): string { return $this->value; }
-    public function domain(): string { return explode('@', $this->value)[1]; }
-}
-
-// Entity uses Value Object
+// Domain Entity - Pure PHP, no validation
 class Customer
 {
-    private Email $email;
+    private string $email;
 
-    public function __construct(Email $email)
+    public function __construct(string $email)
     {
-        $this->email = $email; // Already validated!
+        $this->email = $email; // ✅ No validation - handled in Application layer
     }
 
-    public function changeEmail(Email $newEmail): void
+    public function changeEmail(string $newEmail): void
     {
-        $this->email = $newEmail; // Already validated!
+        $this->email = $newEmail; // ✅ Validation already done by Application layer
         $this->record(new CustomerEmailChanged($this->id, $newEmail));
     }
+
+    public function email(): string
+    {
+        return $this->email;
+    }
 }
+```
+
+```yaml
+# config/validator/Customer.yaml - Validation in Application layer
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - App\Shared\Application\Validator\UniqueEmail: ~
 ```
 
 ---
