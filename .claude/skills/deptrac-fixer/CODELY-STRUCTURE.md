@@ -182,8 +182,8 @@ When you see a Deptrac violation, use this map to know where to move or refactor
 
 **Violation**: `uses Symfony\Component\Validator\Constraints`
 
-| FROM (Wrong)                                                     | TO (Correct)                                                            |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| FROM (Wrong)                                                     | TO (Correct)                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | `src/Customer/Domain/Entity/Customer.php` with `#[Assert\Email]` | Pure Domain entity + YAML validation in `config/validator/Customer.yaml` |
 
 **Move validation from Domain to Application**:
