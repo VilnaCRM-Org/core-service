@@ -21,6 +21,7 @@ description: Maintain and improve code quality using PHPInsights without decreas
 Maintain exceptional code quality standards using PHPInsights while preserving hexagonal architecture, DDD patterns, and CQRS design.
 
 **Success Criteria**:
+
 - `make phpinsights` passes without errors
 - Code quality: 100%
 - Complexity: ≥ 94%
@@ -76,6 +77,7 @@ make analyze-complexity-json N=20 > complexity-report.json
 ```
 
 **Output shows**:
+
 - **CCN (Cyclomatic Complexity)**: > 15 is critical
 - **WMC (Weighted Method Count)**: Sum of all method complexities
 - **Avg Complexity**: CCN ÷ Methods (target: < 5)
@@ -100,6 +102,7 @@ make phpinsights
 ### Step 4: Apply Refactoring Strategy
 
 **See**: [refactoring-strategies.md](refactoring-strategies.md) for proven patterns:
+
 - Extract Methods
 - Strategy Pattern
 - Early Returns
@@ -122,11 +125,13 @@ Repeat until all scores meet thresholds.
 **Problem**: Method has too many decision points (if/else/switch/loops)
 
 **Identify hotspots**:
+
 ```bash
 make analyze-complexity N=10
 ```
 
 **Solutions**:
+
 1. **Extract methods**: Break complex method into smaller private methods
 2. **Strategy pattern**: Replace conditionals with polymorphism
 3. **Early returns**: Reduce nesting with guard clauses
@@ -141,6 +146,7 @@ make analyze-complexity N=10
 **Problem**: Layer dependencies violated (e.g., Domain depending on Infrastructure)
 
 **Solutions**:
+
 1. **Review layer boundaries**: Domain → Application → Infrastructure
 2. **Use interfaces**: Define contracts in Domain, implement in Infrastructure
 3. **Dependency injection**: Inject dependencies through constructors
@@ -155,6 +161,7 @@ make analyze-complexity N=10
 **Problem**: Code doesn't meet PSR-12 or Symfony coding standards
 
 **Solution**:
+
 ```bash
 # Auto-fix most style issues
 make phpcsfixer
@@ -170,6 +177,7 @@ make phpinsights
 **Problem**: Lines exceed configured limit
 
 **Solutions**:
+
 1. Break long method calls into multiple lines
 2. Extract complex expressions into variables
 3. Use named parameters (PHP 8+)

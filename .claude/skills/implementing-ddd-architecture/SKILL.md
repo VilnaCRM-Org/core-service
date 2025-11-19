@@ -19,6 +19,7 @@ description: Design and implement DDD patterns (entities, value objects, aggrega
 Design and implement rich domain models following DDD, hexagonal architecture, and CQRS patterns.
 
 **Success Criteria**:
+
 - Domain entities remain framework-agnostic (no framework imports)
 - Business logic in Domain layer, not in Application handlers
 - `make deptrac` shows zero violations
@@ -48,11 +49,11 @@ Infrastructure ───────> Domain + Application
 
 **Allowed Dependencies**:
 
-| Layer | Can Import |
-|-------|-----------|
-| **Domain** | ❌ Nothing (pure PHP, SPL, domain-specific libraries only) |
-| **Application** | ✅ Domain, Infrastructure, Symfony, API Platform |
-| **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, MongoDB |
+| Layer              | Can Import                                                 |
+| ------------------ | ---------------------------------------------------------- |
+| **Domain**         | ❌ Nothing (pure PHP, SPL, domain-specific libraries only) |
+| **Application**    | ✅ Domain, Infrastructure, Symfony, API Platform           |
+| **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, MongoDB         |
 
 **See**: [DIRECTORY-STRUCTURE.md](DIRECTORY-STRUCTURE.md) for complete file placement guide.
 
@@ -63,12 +64,14 @@ Infrastructure ───────> Domain + Application
 ### 1. Domain Layer Purity
 
 ❌ **FORBIDDEN in Domain**:
+
 - Symfony components (`use Symfony\...`)
 - Doctrine annotations/attributes
 - API Platform attributes
 - Any framework-specific code
 
 ✅ **ALLOWED in Domain**:
+
 - Pure PHP
 - SPL (Standard PHP Library)
 - Domain-specific value objects
@@ -77,6 +80,7 @@ Infrastructure ───────> Domain + Application
 ### 2. Rich Domain Models
 
 ❌ **BAD (Anemic)**:
+
 ```php
 class Customer {
     public function setName(string $name): void {
@@ -86,6 +90,7 @@ class Customer {
 ```
 
 ✅ **GOOD (Rich)**:
+
 ```php
 class Customer {
     public function changeName(CustomerName $name): void {
@@ -99,6 +104,7 @@ class Customer {
 ### 3. Validation Pattern
 
 ❌ **BAD**: Validation in Domain with Symfony
+
 ```php
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -109,6 +115,7 @@ class Customer {
 ```
 
 ✅ **GOOD**: Validation in YAML config (Preferred)
+
 ```yaml
 # config/validator/Customer.yaml
 App\Application\DTO\CustomerCreate:
@@ -121,6 +128,7 @@ App\Application\DTO\CustomerCreate:
 ```
 
 **Framework validators should always be used when possible.** They provide:
+
 - Centralized configuration
 - Easy maintenance
 - Standard error messages
@@ -128,6 +136,7 @@ App\Application\DTO\CustomerCreate:
 - Custom validators for business rules
 
 **Value Objects** should only be used when:
+
 - Framework validators cannot express the business rule
 - Complex domain logic requires encapsulation
 - The validation is part of domain invariants
@@ -211,6 +220,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 ```
 
 **Register in `config/services.yaml`**:
+
 ```yaml
 App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
   alias: App\Core\Customer\Infrastructure\Repository\CustomerRepository
