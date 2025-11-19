@@ -1,10 +1,6 @@
 ---
 name: documentation-sync
 description: Keep documentation in sync with code changes. Use when implementing features, modifying APIs, changing architecture, adding configuration, updating security, or making any changes that affect user-facing or developer-facing documentation.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this file and follow the "Documentation Update Workflow" section.
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Documentation Synchronization Skill

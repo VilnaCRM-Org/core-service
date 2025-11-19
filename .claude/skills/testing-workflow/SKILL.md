@@ -1,10 +1,6 @@
 ---
 name: testing-workflow
 description: Run and manage functional tests (unit, integration, E2E, mutation). Use when running tests, debugging test failures, ensuring test coverage, or fixing mutation testing issues. Covers PHPUnit, Behat, and Infection. For K6 load/performance tests, use the load-testing skill instead.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this entire file and follow the workflow sections below.
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Testing Workflow Skill

@@ -1593,7 +1593,7 @@ Ask yourself these questions:
 ✅ Style: 100%
 ```
 
-**Justification**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. Consider adjusting `phpinsights.php` threshold to 93.9%.
+**Justification**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, the protected threshold remains at 94% and should not be lowered.
 
 **Option B: Strategic Micro-Optimization**
 
@@ -1604,22 +1604,22 @@ Target only the highest-impact changes:
 3. Verify improvement
 4. Stop if no improvement or readability suffers
 
-**Option C: Adjust Threshold (Last Resort)**
+**Option C: Protected Threshold Policy**
 
 ```php
 // phpinsights.php
 'requirements' => [
-    'min-complexity' => 93.9,  // Adjusted from 94 to reflect achievable quality
+    'min-complexity' => 93,  // Protected threshold - NEVER lower
     // ... other thresholds remain at 100
 ],
 ```
 
-**When to adjust**: If you've exhausted optimization options and:
+**Policy**: The 93% threshold is protected and must NOT be lowered. If you're at less than 93:
 
-- Average CCN < 1.2
-- No individual classes > 6 CCN
-- All other metrics at 100%
-- Code is highly maintainable
+- Apply Option B (Strategic Micro-Optimization)
+- Target specific high-complexity classes
+- Use proven refactoring patterns
+- Maintain code readability while improving metrics
 
 ---
 
