@@ -18,12 +18,14 @@ Never run PHP commands directly outside the container.
 4. **FOLLOW** → Execute the step-by-step instructions in the skill file exactly as written
 
 ### ❌ DO NOT:
+
 - Fix issues directly from AGENTS.md without reading the skills
 - Skip the skill decision guide
 - Guess the fix based on general DDD knowledge
 - Use only partial information from this file
 
 ### ✅ DO:
+
 - Always start with `.claude/skills/AI-AGENT-GUIDE.md`
 - Use the decision tree in `SKILL-DECISION-GUIDE.md`
 - Read the complete skill file for your specific task
@@ -32,6 +34,7 @@ Never run PHP commands directly outside the container.
 ### Example: Fixing Deptrac Violations
 
 **WRONG APPROACH:**
+
 ```
 1. See Deptrac violation in output
 2. Remove framework imports from Domain
@@ -39,6 +42,7 @@ Never run PHP commands directly outside the container.
 ```
 
 **CORRECT APPROACH:**
+
 ```
 1. Read .claude/skills/AI-AGENT-GUIDE.md
 2. Read .claude/skills/SKILL-DECISION-GUIDE.md → Points to "deptrac-fixer"
@@ -50,6 +54,7 @@ Never run PHP commands directly outside the container.
 ```
 
 **Why This Matters:**
+
 - The skills contain the **ACTUAL architecture patterns** used in this codebase
 - AGENTS.md is a **reference**, not a complete fix guide
 - Skills are **regularly updated** with correct patterns
@@ -58,12 +63,14 @@ Never run PHP commands directly outside the container.
 ### Validation Architecture (CRITICAL)
 
 **Domain Layer:**
+
 - ❌ NO validation logic (no `filter_var`, no `strlen`, no assertions)
 - ❌ NO Symfony validation (`#[Assert\...]`)
 - ✅ Pure PHP entities with primitive types
 - ✅ Accept parameters directly in constructor
 
 **Application Layer:**
+
 - ✅ YAML validation config at `config/validator/{Entity}.yaml`
 - ✅ Clean DTOs with public properties
 - ✅ Custom validators in `Application/Validator/`
