@@ -5,478 +5,279 @@ description: Diagnose and fix Deptrac architectural violations automatically. Us
 
 # Deptrac Fixer Skill
 
-**Automatically diagnose and fix architectural boundary violations without modifying Deptrac configuration.**
-
-This skill provides a systematic approach to resolving Deptrac violations by refactoring code to respect layer boundaries.
-
-## When to Use This Skill
-
-Activate automatically when:
+## Context (Input)
 
 - `make deptrac` reports violations
-- Code review shows architectural concerns
-- Adding dependencies that might violate layer rules
-- Refactoring code between layers
-- Creating new classes that interact across layers
-- Any error message containing "must not depend on"
+- Error message contains "must not depend on"
+- Domain layer has framework imports (Symfony, Doctrine, API Platform)
+- Infrastructure directly calls Application handlers
+- Any architectural boundary violation detected
 
-**To understand DDD architecture patterns** (why layers exist, how to design new entities), see [implementing-ddd-architecture skill](../implementing-ddd-architecture/SKILL.md).
+## Task (Function)
+
+Diagnose and fix Deptrac violations by refactoring code to respect hexagonal architecture boundaries.
+
+**Success Criteria**: `make deptrac` outputs "✅ No violations found"
+
+---
 
 ## Core Principle
 
-**The architecture is sacred. NEVER modify `deptrac.yaml` to bypass violations - always fix the code.**
+**Fix the code, NEVER modify `deptrac.yaml`**
+
+The architecture is correct. The code must conform to it, not vice versa.
+
+---
 
 ## Quick Start: Fix a Violation
 
-### 1. Run Deptrac
+### Step 1: Run Deptrac
 
 ```bash
 make deptrac
 ```
 
-### 2. Parse the Violation Message
+### Step 2: Parse Violation Message
 
 ```
 Domain must not depend on Symfony
-  src/Customer/Domain/Entity/Customer.php:15
+  src/Customer/Domain/Entity/Customer.php:8
     uses Symfony\Component\Validator\Constraints as Assert
 ```
 
-**Extract**:
-
+**Extract:**
 - **Violating Layer**: Domain
 - **Forbidden Dependency**: Symfony
-- **File**: `src/Customer/Domain/Entity/Customer.php:15`
-- **Import**: `Symfony\Component\Validator\Constraints`
+- **File & Line**: `src/Customer/Domain/Entity/Customer.php:8`
+- **Violation Type**: `uses` (import statement)
 
-### 3. Apply the Fix Pattern
+### Step 3: Identify Fix Pattern
 
-See [Violation Patterns](#common-violation-patterns) below.
+| Domain Depends On | Fix Pattern | Example File |
+|-------------------|-------------|--------------|
+| Symfony Validator | Move to YAML config | [01-domain-symfony-validation.php](examples/01-domain-symfony-validation.php) |
+| Doctrine (ODM/ORM) | Use XML mapping | [02-domain-doctrine-annotations.php](examples/02-domain-doctrine-annotations.php) |
+| API Platform | Move to YAML config | [03-domain-api-platform.php](examples/03-domain-api-platform.php) |
+| Infrastructure → Handler | Use Command Bus | [04-infrastructure-handler.php](examples/04-infrastructure-handler.php) |
 
-### 4. Verify
+**See**: [REFERENCE.md](REFERENCE.md) for complete fix patterns and advanced scenarios.
+
+### Step 4: Apply Fix
+
+Follow the pattern from examples, then verify:
 
 ```bash
 make deptrac
 ```
 
-Expected: Zero violations.
+Repeat until: "✅ No violations found"
+
+---
 
 ## Layer Dependency Rules
 
 ```
-Infrastructure → Application → Domain
-      ↓              ↓           ↓
-  External       Use Cases    Pure Business
+Domain ─────────────────> (NO dependencies)
+           │
+           │
+Application ──────────> Domain + Infrastructure + Symfony + API Platform
+           │
+           │
+Infrastructure ───────> Domain + Application + Symfony + Doctrine
 ```
 
-| From Layer         | Can Depend On                                       | CANNOT Depend On |
-| ------------------ | --------------------------------------------------- | ---------------- |
-| **Domain**         | NOTHING                                             | Everything       |
-| **Application**    | Domain, Infrastructure, Symfony, API Platform, etc. | N/A              |
-| **Infrastructure** | Domain, Application, Symfony, Doctrine, etc.        | N/A              |
+**Allowed Dependencies:**
 
-## Common Violation Patterns
+| Layer | Can Depend On |
+|-------|---------------|
+| **Domain** | ❌ Nothing (pure PHP only) |
+| **Application** | ✅ Domain, Infrastructure, Symfony, API Platform |
+| **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, MongoDB |
 
-### Pattern 1: Domain → Symfony (Validation)
+**See**: [CODELY-STRUCTURE.md](CODELY-STRUCTURE.md) for complete directory hierarchy.
 
-**Violation**:
+---
 
-```
-Domain must not depend on Symfony
-  src/Customer/Domain/Entity/Customer.php
-    uses Symfony\Component\Validator\Constraints as Assert
-```
+## Common Fix Patterns (Quick Reference)
 
-**Cause**: Using Symfony validation attributes in domain entity.
+### Pattern 1: Domain → Symfony Validator
 
-**Fix Strategy**: Remove validation from Domain, use YAML config in Application layer
+❌ **Problem**: Validation annotations in Domain entity
 
 ```php
-// BEFORE (WRONG) - Domain with Symfony validation
-namespace App\Customer\Domain\Entity;
-
 use Symfony\Component\Validator\Constraints as Assert;
 
-class Customer
-{
-    #[Assert\Email]  // ❌ Symfony in Domain!
-    private string $email;
+class Customer {
+    #[Assert\NotBlank]
+    private string $name;
 }
-
-// AFTER (CORRECT) - Pure Domain entity
-namespace App\Customer\Domain\Entity;
-
-class Customer
-{
-    private string $email;  // ✅ Pure PHP, no framework
-
-    public function __construct(string $email)
-    {
-        $this->email = $email;
-    }
-}
-
-// Application DTO with YAML validation
-// Application/DTO/CustomerCreate.php
-namespace App\Core\Customer\Application\DTO;
-
-final class CustomerCreate
-{
-    public string $email;
-}
-
-// config/validator/Customer.yaml
-// App\Core\Customer\Application\DTO\CustomerCreate:
-//   properties:
-//     email:
-//       - NotBlank: { message: 'not.blank' }
-//       - Email: { message: 'email.invalid' }
 ```
 
-### Pattern 2: Domain → Doctrine (Annotations)
+✅ **Solution**: Move validation to `config/validator/{Entity}.yaml`
 
-**Violation**:
+---
 
-```
-Domain must not depend on Doctrine
-  src/Product/Domain/Entity/Product.php
-    uses Doctrine\ODM\MongoDB\Mapping\Annotations as ODM
-```
+### Pattern 2: Domain → Doctrine Annotations
 
-**Cause**: Using Doctrine mapping attributes in domain entity.
-
-**Fix Strategy**: Use XML mappings instead
+❌ **Problem**: Doctrine attributes in Domain entity
 
 ```php
-// BEFORE (WRONG)
-namespace App\Product\Domain\Entity;
-
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
-#[ODM\Document(collection: 'products')]
-class Product
-{
-    #[ODM\Id(type: 'ulid', strategy: 'NONE')]
-    private Ulid $id;
-}
-
-// AFTER (CORRECT)
-namespace App\Product\Domain\Entity;
-
-class Product
-{
-    private Ulid $id;
-    // Pure PHP, no Doctrine imports
-}
+#[ODM\Document]
+class Customer { }
 ```
 
-**XML Mapping** (`config/doctrine/Product.mongodb.xml`):
+✅ **Solution**: Create XML mapping in `config/doctrine/{Entity}.mongodb.xml`
 
-```xml
-<doctrine-mongo-mapping>
-    <document name="App\Product\Domain\Entity\Product" collection="products">
-        <field name="id" type="ulid" id="true" strategy="NONE"/>
-    </document>
-</doctrine-mongo-mapping>
-```
+---
 
 ### Pattern 3: Domain → API Platform
 
-**Violation**:
-
-```
-Domain must not depend on ApiPlatform
-  src/Customer/Domain/Entity/Customer.php
-    uses ApiPlatform\Metadata\ApiResource
-```
-
-**Cause**: API Platform attributes in domain.
-
-**Fix Strategy A**: Configure API in YAML
-
-```yaml
-# config/packages/api_platform.yaml
-resources:
-  App\Customer\Domain\Entity\Customer:
-    operations:
-      get:
-        method: GET
-```
-
-**Fix Strategy B**: Use DTOs in Application layer
+❌ **Problem**: API Platform attributes in Domain entity
 
 ```php
-// Application/DTO/CustomerResource.php
-namespace App\Customer\Application\DTO;
-
 use ApiPlatform\Metadata\ApiResource;
 
-#[ApiResource(operations: [...])]
-final class CustomerResource
-{
-    public string $id;
-    public string $email;
-}
+#[ApiResource]
+class Customer { }
 ```
 
-### Pattern 4: Domain → External Library
+✅ **Solution**: Create YAML config in `config/api_platform/resources/{entity}.yaml`
 
-**Violation**:
+---
 
-```
-Domain must not depend on MongoDB\BSON
-  src/Customer/Domain/Entity/Customer.php
-    uses MongoDB\BSON\ObjectId
-```
+### Pattern 4: Infrastructure → Application Handler
 
-**Cause**: Using MongoDB-specific types in domain.
-
-**Fix Strategy**: Use domain Value Objects
+❌ **Problem**: Direct handler call from Infrastructure
 
 ```php
-// BEFORE (WRONG)
-use MongoDB\BSON\ObjectId;
-
-class Customer
-{
-    private ObjectId $id;
-}
-
-// AFTER (CORRECT)
-use App\Shared\Domain\ValueObject\Ulid;
-
-class Customer
-{
-    private Ulid $id; // Framework-agnostic
+class Repository {
+    public function __construct(
+        private SomeHandler $handler  // ❌ Circular dependency
+    ) {}
 }
 ```
 
-### Pattern 5: Infrastructure → Application Handler
-
-**Violation**:
-
-```
-Infrastructure must not depend on Application (direct handler call)
-  src/Customer/Infrastructure/EventListener/CustomerListener.php
-    uses App\Customer\Application\CommandHandler\SendEmailHandler
-```
-
-**Cause**: Direct handler dependency instead of using bus.
-
-**Fix Strategy**: Use Command/Event Bus
+✅ **Solution**: Use Command Bus pattern
 
 ```php
-// BEFORE (WRONG)
-namespace App\Customer\Infrastructure\EventListener;
-
-use App\Customer\Application\CommandHandler\SendEmailHandler;
-
-class CustomerListener
-{
+class Repository {
     public function __construct(
-        private SendEmailHandler $handler
-    ) {}
-}
-
-// AFTER (CORRECT)
-use App\Shared\Domain\Bus\Command\CommandBusInterface;
-
-class CustomerListener
-{
-    public function __construct(
-        private CommandBusInterface $commandBus
+        private CommandBusInterface $commandBus  // ✅ Interface
     ) {}
 
-    public function handle(): void
-    {
-        $this->commandBus->dispatch(new SendEmailCommand(...));
+    public function someMethod() {
+        $this->commandBus->dispatch(new SomeCommand());
     }
 }
 ```
 
+**See**: [examples/](examples/) directory for complete, runnable examples.
+
+---
+
 ## Diagnostic Workflow
 
-### Step 1: Identify All Violations
+When facing multiple violations:
+
+### Step 1: Get All Violations
 
 ```bash
-make deptrac 2>&1 | grep "must not depend on"
+make deptrac > violations.txt
 ```
 
 ### Step 2: Categorize by Type
 
-Group violations by pattern:
-
-- Domain → Framework (most critical)
+Group violations by layer pair:
+- Domain → Symfony
+- Domain → Doctrine
+- Domain → API Platform
 - Infrastructure → Application
-- Application → Infrastructure (rare but possible)
+- etc.
 
-### Step 3: Fix in Order
+### Step 3: Fix in Priority Order
 
-**Priority**:
-
-1. Domain → external dependencies
-2. Infrastructure → Application
-3. Other layer violations
+1. **Domain violations first** (most critical)
+2. **Infrastructure violations** (circular dependencies)
+3. **Application violations** (least common)
 
 ### Step 4: Verify Incrementally
 
-After each fix:
-
 ```bash
+# After each fix
 make deptrac
 ```
 
-## Refactoring Checklist
+Track progress: 15 violations → 10 → 5 → 0 ✅
 
-Before refactoring to fix violation:
+---
 
-- [ ] Identify exact import causing violation
-- [ ] Determine correct layer for the dependency
-- [ ] Choose appropriate fix pattern
-- [ ] Check if Value Object needed
-- [ ] Check if XML mapping needed
-- [ ] Check if Bus pattern needed
-- [ ] Run `make deptrac` after fix
-- [ ] Run `make unit-tests` to ensure no breaks
+## Constraints (Parameters)
 
-## Anti-Patterns
+### NEVER
 
-### DON'T: Modify deptrac.yaml
+- Modify `deptrac.yaml` to allow violations
+- Disable Deptrac checks
+- Add suppression comments
+- Create "wrapper" classes to hide dependencies
+- Move entire class to wrong layer just to satisfy Deptrac
+- Use reflection or dynamic loading to bypass checks
 
-```yaml
-# NEVER DO THIS
-ruleset:
-  Domain:
-    - Symfony # Adding exception to silence violation
-```
+### ALWAYS
 
-### DON'T: Wrap Framework Code
+- Fix the code to match the architecture
+- Keep Domain layer pure (no framework imports)
+- Use interfaces for cross-layer dependencies
+- Move configuration to YAML/XML files
+- Verify fixes with `make deptrac` after each change
+- Check that tests still pass after refactoring
 
-```php
-// WRONG: Still depends on Symfony
-namespace App\Customer\Domain\Service;
+---
 
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+## Format (Output)
 
-class DomainValidator
-{
-    public function __construct(private ValidatorInterface $validator) {}
-}
-```
-
-### DON'T: Move Entire Class to Wrong Layer
-
-```php
-// WRONG: Moving domain entity to application layer
-namespace App\Customer\Application\Entity;
-
-class Customer {} // Loses domain purity
-```
-
-## Advanced Patterns
-
-### Creating Framework-Agnostic Interfaces
-
-When domain needs external services:
-
-```php
-// Domain layer - interface only
-namespace App\Customer\Domain\Service;
-
-interface EmailValidatorInterface
-{
-    public function isValid(string $email): bool;
-}
-
-// Infrastructure layer - implementation
-namespace App\Customer\Infrastructure\Service;
-
-use App\Customer\Domain\Service\EmailValidatorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
-final class SymfonyEmailValidator implements EmailValidatorInterface
-{
-    public function __construct(private ValidatorInterface $validator) {}
-
-    public function isValid(string $email): bool
-    {
-        // Use Symfony validator here
-    }
-}
-```
-
-### Value Object Factory Pattern
-
-```php
-// Application layer can use framework validation
-namespace App\Customer\Application\Factory;
-
-use App\Customer\Domain\ValueObject\Email;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
-final readonly class EmailFactory
-{
-    public function __construct(private ValidatorInterface $validator) {}
-
-    public function createFromInput(string $input): Email
-    {
-        // Additional Symfony validation if needed
-        $violations = $this->validator->validate($input, [...]);
-
-        if (count($violations) > 0) {
-            throw new InvalidInputException(...);
-        }
-
-        return new Email($input); // Domain VO validates itself too
-    }
-}
-```
-
-## Directory Structure Reference
-
-When fixing violations, you need to know WHERE files should go. See [CODELY-STRUCTURE.md](CODELY-STRUCTURE.md) for:
-
-- Complete CodelyTV directory hierarchy (`ls -la` style)
-- Our project structure (adapted from CodelyTV)
-- **Violation Fix Map** - exact file movements for each violation type
-- Real-world examples from CodelyTV's php-ddd-example
-
-**Quick reference**:
+### Expected Deptrac Output
 
 ```
-Domain Layer (NO framework imports!)
-├── Entity/      → Aggregate roots and entities
-├── ValueObject/ → Self-validating value objects (Email.php, Money.php)
-├── Event/       → Domain events (CustomerCreated.php)
-├── Repository/  → Interfaces ONLY (CustomerRepositoryInterface.php)
-└── Exception/   → Domain exceptions (InvalidEmailException.php)
+Deptrac
 
-Application Layer (CAN use Symfony, API Platform)
-├── Command/        → CreateCustomerCommand.php
-├── CommandHandler/ → CreateCustomerHandler.php
-├── EventSubscriber/→ SendEmailOnCustomerCreated.php
-├── DTO/            → CustomerInput.php (validation via config/validator/)
-└── Processor/      → CreateCustomerProcessor.php
+Checking dependencies...
 
-Infrastructure Layer (Implements Domain interfaces)
-├── Repository/     → MongoDBCustomerRepository.php
-└── config/doctrine/→ Customer.mongodb.xml (XML mappings)
+✅ No violations found
 ```
+
+### Expected CI Output
+
+```
+✅ CI checks successfully passed!
+```
+
+---
+
+## Verification Checklist
+
+After fixing violations:
+
+- [ ] `make deptrac` shows 0 violations
+- [ ] Domain entities have no framework imports
+- [ ] Validation moved to `config/validator/`
+- [ ] Doctrine mapping moved to `config/doctrine/`
+- [ ] API Platform config moved to `config/api_platform/`
+- [ ] Infrastructure uses Command Bus, not direct handler calls
+- [ ] All tests still pass (`make all-tests`)
+- [ ] `make ci` passes completely
+
+---
 
 ## Related Skills
 
-- **[implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md)** - Full DDD patterns and layer responsibilities
-- **[quality-standards](../quality-standards/SKILL.md)** - Overall code quality management
-- **[complexity-management](../complexity-management/SKILL.md)** - Reducing complexity while fixing violations
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Understanding DDD patterns and layer responsibilities
+- [api-platform-crud](../api-platform-crud/SKILL.md) - YAML-based API Platform configuration
+- [database-migrations](../database-migrations/SKILL.md) - XML-based Doctrine mappings
+- [complexity-management](../complexity-management/SKILL.md) - Refactoring without breaking architecture
 
-## Success Criteria
-
-- `make deptrac` reports zero violations
-- All domain classes have no framework imports
-- Business logic remains in domain layer
-- Handlers orchestrate without business logic
-- Validation handled in Application layer via YAML config
-- XML mappings for Doctrine configuration
+---
 
 ## Quick Commands
 
@@ -484,13 +285,69 @@ Infrastructure Layer (Implements Domain interfaces)
 # Run Deptrac analysis
 make deptrac
 
-# Check specific layer violations
-make deptrac 2>&1 | grep "Domain must not"
+# Check specific layer violations (if supported)
+vendor/bin/deptrac analyze --report-uncovered
 
-# Verify after fixes
-make deptrac && make unit-tests
+# Verify architecture after fixes
+make deptrac && make ci
 ```
 
 ---
 
-**Remember**: The architecture serves the domain. Fix the code, never the rules.
+## Reference Documentation
+
+For detailed patterns, examples, and troubleshooting:
+
+- **[REFERENCE.md](REFERENCE.md)** - Complete fix patterns for all violation types
+- **[CODELY-STRUCTURE.md](CODELY-STRUCTURE.md)** - Directory hierarchy and file placement rules
+- **[examples/](examples/)** - Complete, runnable code examples:
+  - `01-domain-symfony-validation.php` - Fixing Symfony validation violations
+  - `02-domain-doctrine-annotations.php` - Removing Doctrine imports
+  - `03-domain-api-platform.php` - Moving API Platform config
+  - `04-infrastructure-handler.php` - Using Command Bus pattern
+
+---
+
+## Anti-Patterns to Avoid
+
+### ❌ DON'T Modify deptrac.yaml
+
+```yaml
+# ❌ NEVER DO THIS
+paths:
+  - { collector: layer_domain, exclude: '.*Annotation.*' }  # Hiding violations
+```
+
+### ❌ DON'T Create Wrapper Classes
+
+```php
+// ❌ BAD: Hiding framework dependency
+class MyValidator {
+    private SymfonyValidator $validator;  // Still violates!
+}
+```
+
+### ❌ DON'T Move Classes to Wrong Layer
+
+```php
+// ❌ BAD: Moving Domain entity to Application to "fix" violation
+// src/Application/Entity/Customer.php  // WRONG LAYER!
+```
+
+### ✅ DO Fix the Root Cause
+
+- Extract validation to YAML
+- Move configuration to XML
+- Use interfaces and dependency inversion
+- Respect layer responsibilities
+
+---
+
+## Success Criteria Summary
+
+- ✅ Zero Deptrac violations
+- ✅ Domain layer pure (no framework imports)
+- ✅ All configuration externalized (YAML/XML)
+- ✅ Proper use of Command Bus for cross-layer communication
+- ✅ All tests passing
+- ✅ CI pipeline green

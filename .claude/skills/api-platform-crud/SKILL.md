@@ -5,521 +5,273 @@ description: Create complete REST API CRUD operations using API Platform 4 with 
 
 # API Platform CRUD Skill
 
-**Create production-ready REST API CRUD operations following DDD, CQRS, and hexagonal architecture patterns.**
+## Context (Input)
 
-This skill guides you through implementing complete CRUD (Create, Read, Update, Delete) operations using API Platform 4 with the repository's established patterns.
+- Need to create new API resource with REST endpoints
+- Implementing CRUD operations (Create, Read, Update, Delete)
+- Adding DTOs for input/output transformation
+- Configuring API Platform operations, filters, or pagination
+- Working with state processors following CQRS pattern
 
-## When to Use This Skill
+## Task (Function)
 
-Activate automatically when:
+Implement production-ready REST API CRUD operations following DDD, CQRS, and hexagonal architecture patterns.
 
-- Creating new API resources (entities with REST endpoints)
-- Implementing CRUD operations for existing entities
-- Adding custom operations (beyond standard CRUD)
-- Creating DTOs for input/output transformation
-- Configuring filters, pagination, or serialization
-- Working with state processors or providers
-- Setting up GraphQL alongside REST
+**Success Criteria**:
+- All CRUD operations functional (POST, GET, PUT, PATCH, DELETE)
+- DTOs properly validated
+- Domain entities remain framework-agnostic
+- Command bus pattern used for write operations
+- `make ci` outputs "✅ CI checks successfully passed!"
+
+---
 
 ## Quick Start: Complete CRUD in 10 Steps
 
-> **Template Syntax Note**: Throughout this guide, placeholders like `{Entity}`, `{Context}`, and `{entity}` should be replaced with your actual values. For example:
->
-> - `{Entity}` → `Customer` (PascalCase class name)
-> - `{Context}` → `Customer` (bounded context/module name)
-> - `{entity}` → `customer` (lowercase for configs/filters)
-> - `{entities}` → `customers` (plural for collection names)
->
-> See `examples/complete-customer-crud.md` for a fully realized implementation using `Customer` entity.
+> **Full Implementation Example**: See [examples/complete-customer-crud.md](examples/complete-customer-crud.md) for detailed code.
 
 ### Step 1: Create Domain Entity
 
-```php
-// src/Core/{Context}/Domain/Entity/{Entity}.php
-namespace App\Core\{Context}\Domain\Entity;
+Create pure PHP entity in `src/Core/{Context}/Domain/Entity/{Entity}.php`
 
-final class {Entity}
-{
-    private Ulid $ulid;
-    private string $name;
-    private \DateTimeImmutable $createdAt;
-    private \DateTimeImmutable $updatedAt;
-
-    public function __construct(
-        Ulid $ulid,
-        string $name
-    ) {
-        $this->ulid = $ulid;
-        $this->name = $name;
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function update({Entity}Update $update): void
-    {
-        $this->name = $update->getName();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    // Getters only, no setters (immutability)
-    public function getUlid(): Ulid { return $this->ulid; }
-    public function getName(): string { return $this->name; }
-    // ...
-}
-```
-
-**NO Doctrine annotations, NO Symfony imports, NO API Platform attributes.**
+- ❌ NO Doctrine annotations/attributes
+- ❌ NO Symfony imports
+- ❌ NO API Platform attributes
+- ✅ Pure business logic only
 
 ### Step 2: Create Doctrine XML Mapping
 
-```xml
-<!-- config/doctrine/{Entity}.mongodb.xml -->
-<?xml version="1.0" encoding="UTF-8"?>
-<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
-                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
-                         http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
-    <document name="App\Core\{Context}\Domain\Entity\{Entity}" collection="{entities}">
-        <field name="ulid" id="true" type="ulid" strategy="NONE"/>
-        <field name="name" type="string"/>
-        <field name="createdAt" type="date_immutable"/>
-        <field name="updatedAt" type="date_immutable"/>
-    </document>
-</doctrine-mongo-mapping>
-```
+Create `config/doctrine/{Entity}.mongodb.xml` with field mappings and indexes.
+
+**See**: [database-migrations](../database-migrations/SKILL.md) skill for XML mapping patterns.
 
 ### Step 3: Create Input DTOs
 
-```php
-// src/Core/{Context}/Application/DTO/{Entity}Create.php
-namespace App\Core\{Context}\Application\DTO;
+Create three DTOs in `src/Core/{Context}/Application/DTO/`:
+- `{Entity}Create` - For POST requests
+- `{Entity}Put` - For PUT requests (full update)
+- `{Entity}Patch` - For PATCH requests (partial update)
 
-final readonly class {Entity}Create
-{
-    public function __construct(
-        public ?string $name = null,
-    ) {
-    }
-}
-
-// {Entity}Put.php - Same as Create (full replacement)
-// {Entity}Patch.php - All nullable (partial update)
-```
+**See**: [reference/dto-validation-patterns.md](reference/dto-validation-patterns.md)
 
 ### Step 4: Configure Validation
 
-```yaml
-# config/validator/{Entity}.yaml
-App\Core\{Context}\Application\DTO\{Entity}Create:
-  properties:
-    name:
-      - NotBlank: ~
-      - Length:
-          max: 255
-```
+Create `config/validator/{Entity}.yaml` with validation rules for each DTO.
 
 ### Step 5: Create API Platform Resource Configuration
 
+Create `config/api_platform/resources/{entity}.yaml`:
+
 ```yaml
-# config/api_platform/resources/{entity}.yaml
 App\Core\{Context}\Domain\Entity\{Entity}:
-  shortName: '{Entity}'
-  normalizationContext:
-    groups: ['output']
-  paginationPartial: true
-  paginationViaCursor:
-    - { field: 'ulid', direction: 'desc' }
-  order: { 'ulid': 'desc' }
-
-  exceptionToStatus:
-    'App\Core\{Context}\Domain\Exception\{Entity}NotFoundException': 404
-
+  shortName: {Entity}
   operations:
-    # READ Operations
-    ApiPlatform\Metadata\GetCollection:
-      description: 'Retrieves the collection of {Entity} resources'
-      filters:
-        - {entity}.mongodb.search
-        - {entity}.mongodb.order
-
-    ApiPlatform\Metadata\Get:
-      description: 'Retrieves a {Entity} resource by its unique identifier'
-
-    # CREATE Operation
+    ApiPlatform\Metadata\GetCollection: ~
+    ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\Post:
-      description: 'Creates a {Entity} resource'
       input: App\Core\{Context}\Application\DTO\{Entity}Create
       processor: App\Core\{Context}\Application\Processor\Create{Entity}Processor
-      denormalizationContext:
-        allow_extra_attributes: false
-
-    # UPDATE Operations
     ApiPlatform\Metadata\Put:
-      description: 'Replaces the {Entity} resource'
       input: App\Core\{Context}\Application\DTO\{Entity}Put
-      processor: App\Core\{Context}\Application\Processor\{Entity}PutProcessor
-
+      processor: App\Core\{Context}\Application\Processor\Update{Entity}Processor
     ApiPlatform\Metadata\Patch:
-      description: 'Updates the {Entity} resource partially'
       input: App\Core\{Context}\Application\DTO\{Entity}Patch
-      processor: App\Core\{Context}\Application\Processor\{Entity}PatchProcessor
-
-    # DELETE Operation
-    ApiPlatform\Metadata\Delete:
-      description: 'Removes the {Entity} resource'
+      processor: App\Core\{Context}\Application\Processor\Patch{Entity}Processor
+    ApiPlatform\Metadata\Delete: ~
 ```
+
+**See**: [reference/configuration-patterns.md](reference/configuration-patterns.md) for detailed patterns.
 
 ### Step 6: Configure Serialization Groups
 
-```yaml
-# config/serialization/{Entity}.yaml
-App\Core\{Context}\Domain\Entity\{Entity}:
-  attributes:
-    ulid:
-      groups: ['output']
-    name:
-      groups: ['output', 'write:{entity}']
-    createdAt:
-      groups: ['output']
-    updatedAt:
-      groups: ['output']
-```
+Create `config/serialization/{Entity}.yaml` to control which fields are exposed.
 
 ### Step 7: Create State Processors
 
-```php
-// src/Core/{Context}/Application/Processor/Create{Entity}Processor.php
-namespace App\Core\{Context}\Application\Processor;
+Create processors in `src/Core/{Context}/Application/Processor/`:
+- `Create{Entity}Processor` - Handles POST
+- `Update{Entity}Processor` - Handles PUT
+- `Patch{Entity}Processor` - Handles PATCH
 
-use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\ProcessorInterface;
-use App\Core\{Context}\Application\Command\Create{Entity}Command;
-use App\Core\{Context}\Application\DTO\{Entity}Create;
-use App\Core\{Context}\Application\Transformer\{Entity}Transformer;
-use App\Core\{Context}\Domain\Entity\{Entity};
-use App\Shared\Domain\Bus\Command\CommandBusInterface;
-
-/**
- * @implements ProcessorInterface<{Entity}Create, {Entity}>
- */
-final readonly class Create{Entity}Processor implements ProcessorInterface
-{
-    public function __construct(
-        private CommandBusInterface $commandBus,
-        private {Entity}Transformer $transformer,
-    ) {
-    }
-
-    /**
-     * @param {Entity}Create $data
-     */
-    public function process(
-        mixed $data,
-        Operation $operation,
-        array $uriVariables = [],
-        array $context = []
-    ): {Entity} {
-        $entity = $this->transformer->transformFromCreate($data);
-        $this->commandBus->dispatch(new Create{Entity}Command($entity));
-        return $entity;
-    }
-}
-```
+Each processor:
+1. Receives DTO
+2. Transforms to Command
+3. Dispatches via Command Bus
+4. Returns resulting Entity
 
 ### Step 8: Create Command and Handler
 
-```php
-// src/Core/{Context}/Application/Command/Create{Entity}Command.php
-namespace App\Core\{Context}\Application\Command;
+Create:
+- Command in `Application/Command/{Action}{Entity}Command.php`
+- Handler in `Application/CommandHandler/{Action}{Entity}CommandHandler.php`
 
-use App\Core\{Context}\Domain\Entity\{Entity};
-use App\Shared\Domain\Bus\Command\CommandInterface;
+Handler contains business logic and calls repository.
 
-final readonly class Create{Entity}Command implements CommandInterface
-{
-    public function __construct(
-        private {Entity} $entity,
-    ) {
-    }
-
-    public function getEntity(): {Entity}
-    {
-        return $this->entity;
-    }
-}
-
-// src/Core/{Context}/Application/CommandHandler/Create{Entity}CommandHandler.php
-namespace App\Core\{Context}\Application\CommandHandler;
-
-use App\Core\{Context}\Application\Command\Create{Entity}Command;
-use App\Core\{Context}\Domain\Repository\{Entity}RepositoryInterface;
-use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
-
-final readonly class Create{Entity}CommandHandler implements CommandHandlerInterface
-{
-    public function __construct(
-        private {Entity}RepositoryInterface $repository,
-    ) {
-    }
-
-    public function __invoke(Create{Entity}Command $command): void
-    {
-        $this->repository->save($command->getEntity());
-    }
-}
-```
+**See**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) for CQRS patterns.
 
 ### Step 9: Create Repository
 
-```php
-// src/Core/{Context}/Domain/Repository/{Entity}RepositoryInterface.php
-namespace App\Core\{Context}\Domain\Repository;
+Create:
+- Interface in `Domain/Repository/{Entity}RepositoryInterface.php`
+- Implementation in `Infrastructure/Repository/{Entity}Repository.php`
+- Register in `config/services.yaml`
 
-use App\Core\{Context}\Domain\Entity\{Entity};
-
-interface {Entity}RepositoryInterface
-{
-    public function save({Entity} $entity): void;
-    public function delete({Entity} $entity): void;
-    public function find(string $ulid): ?{Entity};
-}
-
-// src/Core/{Context}/Infrastructure/Repository/Mongo{Entity}Repository.php
-namespace App\Core\{Context}\Infrastructure\Repository;
-
-use App\Core\{Context}\Domain\Entity\{Entity};
-use App\Core\{Context}\Domain\Repository\{Entity}RepositoryInterface;
-
-final class Mongo{Entity}Repository extends BaseRepository implements {Entity}RepositoryInterface
-{
-    // Inherits save(), delete(), find() from BaseRepository
-}
-```
+**See**: [database-migrations](../database-migrations/SKILL.md) skill for repository patterns.
 
 ### Step 10: Configure Filters (Optional)
 
-```yaml
-# config/services.yaml
-services:
-  app.{entity}.mongodb.order_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments:
-      - ulid: 'desc'
-        name: 'asc'
-        createdAt: 'desc'
-    tags:
-      - { name: 'api_platform.filter', id: '{entity}.mongodb.order' }
+Add filters in `config/services.yaml` for search, ordering, etc.
 
-  app.{entity}.mongodb.search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments:
-      - name: 'exact'
-    tags:
-      - { name: 'api_platform.filter', id: '{entity}.mongodb.search' }
-```
+**See**: [reference/filters-and-pagination.md](reference/filters-and-pagination.md)
 
-## Core Architecture Pattern
+---
+
+## Architecture Flow
 
 ```
-REST Request → API Platform → Processor → DTO → Transformer → Entity → Command → Handler → Repository → MongoDB
+REST Request → API Platform
+            ↓
+        Processor (Application)
+            ↓
+        DTO → Transformer → Command
+            ↓
+        Command Bus
+            ↓
+        Handler (Application)
+            ↓
+        Entity (Domain) ← Repository (Infrastructure)
+            ↓
+        MongoDB
 ```
 
-**Layer Responsibilities:**
+**See**: [reference/configuration-patterns.md](reference/configuration-patterns.md) for detailed architecture.
 
-- **API Platform Config** (YAML): Defines operations, input/output, routing
-- **Processors** (Application): Orchestrate request handling, dispatch commands
-- **DTOs** (Application): Decouple API input from domain model
-- **Transformers** (Application): Convert DTOs to domain entities
-- **Commands** (Application): Encapsulate write operation intent
-- **Handlers** (Application): Execute business logic, call repositories
-- **Entities** (Domain): Pure business logic, no framework dependencies
-- **Repositories** (Infrastructure): Persist to database
+---
 
-## Resource Configuration Patterns
+## Constraints (Parameters)
 
-### YAML vs PHP Attributes
+### NEVER
 
-This repository uses **YAML-based configuration** (not PHP attributes) to maintain clean separation:
+- Add framework annotations/attributes to Domain entities
+- Put business logic in Processors (use Handlers)
+- Skip validation configuration
+- Use PHP attributes for API Platform config (use YAML)
+- Violate layer boundaries (check with `make deptrac`)
+- Skip DTO transformation (direct Entity manipulation)
 
-```yaml
-# config/api_platform/resources/{entity}.yaml
-App\Entity\{Entity}:
-  operations:
-    ApiPlatform\Metadata\Get: ~
+### ALWAYS
+
+- Keep Domain entities framework-agnostic
+- Use YAML for all configuration (validation, serialization, resources)
+- Dispatch Commands via Command Bus for write operations
+- Create separate DTOs for Create, Put, and Patch
+- Follow IRI pattern for entity references
+- Run `make ci` before committing
+
+---
+
+## Format (Output)
+
+### Expected API Endpoints
+
+```
+GET    /api/{entities}           # List all
+GET    /api/{entities}/{id}      # Get one
+POST   /api/{entities}           # Create
+PUT    /api/{entities}/{id}      # Full update
+PATCH  /api/{entities}/{id}      # Partial update
+DELETE /api/{entities}/{id}      # Delete
 ```
 
-**Benefits:**
+### Expected OpenAPI Spec
 
-- Domain entities remain framework-agnostic
-- API configuration is centralized and versionable
-- Supports DDD/hexagonal architecture
-
-### Operation Types
-
-| Operation     | HTTP Method | Purpose          | Input DTO      | Processor Required    |
-| ------------- | ----------- | ---------------- | -------------- | --------------------- |
-| GetCollection | GET         | List resources   | None           | No (default provider) |
-| Get           | GET         | Single resource  | None           | No (default provider) |
-| Post          | POST        | Create resource  | {Entity}Create | Yes                   |
-| Put           | PUT         | Full replacement | {Entity}Put    | Yes                   |
-| Patch         | PATCH       | Partial update   | {Entity}Patch  | Yes                   |
-| Delete        | DELETE      | Remove resource  | None           | No (default)          |
-
-### Pagination Configuration
-
-```yaml
-paginationPartial: true
-paginationViaCursor:
-  - { field: 'ulid', direction: 'desc' }
-order: { 'ulid': 'desc' }
+```bash
+make generate-openapi-spec
+# Generates .github/openapi-spec/spec.yaml
 ```
 
-### IRI Resolution in Processors
+### Expected CI Result
 
-When DTOs contain references to other entities (e.g., type, status):
-
-```php
-use ApiPlatform\Metadata\IriConverterInterface;
-
-final readonly class CreateCustomerProcessor implements ProcessorInterface
-{
-    public function __construct(
-        private IriConverterInterface $iriConverter,
-    ) {}
-
-    public function process(mixed $data, ...): Customer
-    {
-        // Convert IRI string to entity
-        $type = $this->iriConverter->getResourceFromIri($data->type);
-        // ...
-    }
-}
+```
+✅ CI checks successfully passed!
 ```
 
-## DTO Patterns
+---
 
-### Create DTO (POST)
+## Verification Checklist
 
-```php
-final readonly class CustomerCreate
-{
-    public function __construct(
-        public ?string $initials = null,
-        public ?string $email = null,
-        public ?string $type = null,  // IRI string: "/api/customer_types/{ulid}"
-    ) {}
-}
-```
+After implementation:
 
-### Put DTO (Full Update)
+- [ ] Domain entity created (no framework imports)
+- [ ] Doctrine XML mapping configured
+- [ ] Three DTOs created (Create, Put, Patch)
+- [ ] Validation rules configured in YAML
+- [ ] API Platform resource YAML created
+- [ ] Serialization groups configured
+- [ ] State Processors created for write operations
+- [ ] Commands and Handlers implemented
+- [ ] Repository interface and implementation created
+- [ ] Filters configured (if needed)
+- [ ] Resource directory registered in `api_platform.yaml`
+- [ ] All endpoints respond correctly (test with Postman/Behat)
+- [ ] Validation works (test invalid inputs)
+- [ ] `make deptrac` passes (no violations)
+- [ ] `make ci` passes (all checks green)
+- [ ] OpenAPI spec generated successfully
 
-Same structure as Create - all required fields for full replacement.
-
-### Patch DTO (Partial Update)
-
-```php
-final readonly class CustomerPatch
-{
-    public function __construct(
-        public ?string $initials = null,  // All nullable
-        public ?string $email = null,
-        public ?string $type = null,
-    ) {}
-}
-```
-
-**Key difference**: In Patch processor, use conditional logic to preserve existing values:
-
-```php
-$newName = $data->name ?? $existingEntity->getName();
-```
-
-## Validation Strategy
-
-### External YAML Configuration
-
-```yaml
-# config/validator/{Entity}.yaml
-App\Core\{Context}\Application\DTO\{Entity}Create:
-  properties:
-    name:
-      - NotBlank: ~
-      - Length: { max: 255 }
-    email:
-      - Email: ~
-      - App\Shared\Application\Validator\UniqueEmail: ~
-```
-
-### Custom Validators
-
-```php
-// src/Shared/Application/Validator/UniqueEmail.php
-// src/Shared/Application/Validator/UniqueEmailValidator.php
-```
-
-## Exception Handling
-
-```yaml
-# In resource configuration
-exceptionToStatus:
-  'App\Core\Customer\Domain\Exception\CustomerNotFoundException': 404
-  'App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException': 400
-```
-
-Domain exceptions automatically map to HTTP status codes.
-
-## Checklist: New CRUD Resource
-
-- [ ] Create Domain Entity (pure PHP, no framework imports)
-- [ ] Create Doctrine XML mapping in `config/doctrine/`
-- [ ] Create Repository Interface in Domain layer
-- [ ] Create Repository Implementation in Infrastructure layer
-- [ ] Create Input DTOs (Create, Put, Patch) in Application layer
-- [ ] Configure validation in `config/validator/`
-- [ ] Create API Platform resource YAML in `config/api_platform/resources/`
-- [ ] Configure serialization groups in `config/serialization/`
-- [ ] Create State Processors for POST, PUT, PATCH
-- [ ] Create Transformer for DTO → Entity conversion
-- [ ] Create Commands for write operations
-- [ ] Create Command Handlers
-- [ ] Create Domain Exceptions
-- [ ] Configure Filters in `config/services.yaml`
-- [ ] Add resource directory to `api_platform.yaml` if new context
-- [ ] Run `make ci` to verify all quality checks pass
+---
 
 ## Related Skills
 
-- **[implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md)** - DDD patterns and layer responsibilities
-- **[deptrac-fixer](../deptrac-fixer/SKILL.md)** - Fix architectural violations
-- **[database-migrations](../database-migrations/SKILL.md)** - MongoDB entity management
-- **[developing-openapi-specs](../developing-openapi-specs/SKILL.md)** - OpenAPI specification patterns
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - DDD patterns and CQRS
+- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Fix architectural violations
+- [database-migrations](../database-migrations/SKILL.md) - MongoDB entity management
+- [developing-openapi-specs](../developing-openapi-specs/SKILL.md) - OpenAPI documentation
+- [testing-workflow](../testing-workflow/SKILL.md) - Write E2E tests for endpoints
+
+---
 
 ## Quick Commands
 
 ```bash
-# Verify API configuration
+# Clear cache after config changes
 make cache-clear
 
 # Generate OpenAPI spec
 make generate-openapi-spec
 
-# Test endpoints
-make behat
-
 # Validate architecture
 make deptrac
+
+# Run E2E tests
+make e2e-tests
 
 # Full CI check
 make ci
 ```
 
-## Success Criteria
+---
 
-- API Platform resource configuration valid (no syntax errors)
-- All CRUD operations functional (POST, GET, PUT, PATCH, DELETE)
-- DTOs properly validated
-- Serialization groups correctly applied
-- Domain entities remain framework-agnostic
-- Command bus pattern used for write operations
-- All tests pass with 100% coverage
-- `make ci` outputs "✅ CI checks successfully passed!"
+## Reference Documentation
+
+For detailed patterns and examples:
+
+- **[Configuration Patterns](reference/configuration-patterns.md)** - YAML config, operations, pagination, IRI resolution
+- **[DTO & Validation Patterns](reference/dto-validation-patterns.md)** - DTO design, validation rules, exception handling
+- **[Filters & Pagination](reference/filters-and-pagination.md)** - Search filters, sorting, pagination config
+- **[Troubleshooting](reference/troubleshooting.md)** - Common issues and solutions
+- **[Complete Example](examples/complete-customer-crud.md)** - Full Customer CRUD implementation
+
+---
+
+## Template Syntax
+
+Throughout documentation, placeholders follow these conventions:
+
+| Placeholder | Example | Usage |
+|-------------|---------|-------|
+| `{Entity}` | `Customer` | PascalCase class name |
+| `{Context}` | `Customer` | Bounded context/module name |
+| `{entity}` | `customer` | Lowercase for configs/filters |
+| `{entities}` | `customers` | Plural for collection names |
+| `{Action}` | `Create`, `Update` | Command action verb |
