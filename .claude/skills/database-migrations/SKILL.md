@@ -160,10 +160,10 @@ App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
 
 ### Custom Types
 
-| Type | Usage | Purpose |
-|------|-------|---------|
-| `ulid` | MongoDB `_id` field | Sortable, time-ordered identifiers |
-| `domain_uuid` | Domain identifiers | Standard UUID format (RFC 4122) |
+| Type          | Usage               | Purpose                            |
+| ------------- | ------------------- | ---------------------------------- |
+| `ulid`        | MongoDB `_id` field | Sortable, time-ordered identifiers |
+| `domain_uuid` | Domain identifiers  | Standard UUID format (RFC 4122)    |
 
 ```xml
 <field name="ulid" id="true" type="ulid"/>
@@ -383,18 +383,21 @@ final class CustomerRepositoryTest extends IntegrationTestCase
 ### Common Issues
 
 **Database Connection Errors**:
+
 ```bash
 docker compose ps mongodb
 docker compose logs mongodb
 ```
 
 **Schema Sync Issues**:
+
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:validate
 docker compose exec php bin/console doctrine:mongodb:schema:update --force
 ```
 
 **Migration Conflicts**:
+
 ```bash
 docker compose exec php bin/console doctrine:migrations:status
 docker compose exec php bin/console doctrine:migrations:migrate prev  # Rollback

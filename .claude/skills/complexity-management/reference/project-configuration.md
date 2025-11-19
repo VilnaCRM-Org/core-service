@@ -117,6 +117,7 @@ class Customer extends AggregateRoot
 ### Application Layer
 
 **Keep complexity low**:
+
 - Processors: Orchestration only (complexity 1-3)
 - Transformers: Simple DTO → Entity conversion (complexity 1-2)
 - Command Handlers: Minimal logic, delegate to Domain (complexity 2-4)
@@ -124,6 +125,7 @@ class Customer extends AggregateRoot
 ### Domain Layer
 
 **Complexity is acceptable for business rules**:
+
 - Entities: Complex business validation (complexity up to 8-10 acceptable)
 - Value Objects: Validation and invariants (complexity 3-5)
 - Domain Services: Complex business operations (complexity 5-8)
@@ -131,6 +133,7 @@ class Customer extends AggregateRoot
 ### Infrastructure Layer
 
 **Keep simple**:
+
 - Repositories: CRUD operations only (complexity 1-3)
 - Event handlers: Simple side effects (complexity 1-2)
 
