@@ -24,31 +24,31 @@ Understand quality metrics and route to appropriate specialized skill for fixes.
 
 ### PHPInsights (Source Code)
 
-| Metric | Required | Fix With |
-|--------|----------|----------|
-| Quality | 100% | [complexity-management](../complexity-management/SKILL.md) |
-| Complexity | 94% | [complexity-management](../complexity-management/SKILL.md) |
-| Architecture | 100% | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
-| Style | 100% | Run `make phpcsfixer` |
+| Metric       | Required | Fix With                                                   |
+| ------------ | -------- | ---------------------------------------------------------- |
+| Quality      | 100%     | [complexity-management](../complexity-management/SKILL.md) |
+| Complexity   | 94%      | [complexity-management](../complexity-management/SKILL.md) |
+| Architecture | 100%     | [deptrac-fixer](../deptrac-fixer/SKILL.md)                 |
+| Style        | 100%     | Run `make phpcsfixer`                                      |
 
 ### PHPInsights (Tests)
 
-| Metric | Required | Fix With |
-|--------|----------|----------|
-| Quality | 95% | [complexity-management](../complexity-management/SKILL.md) |
-| Complexity | 95% | [complexity-management](../complexity-management/SKILL.md) |
-| Architecture | 90% | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
-| Style | 95% | Run `make phpcsfixer` |
+| Metric       | Required | Fix With                                                   |
+| ------------ | -------- | ---------------------------------------------------------- |
+| Quality      | 95%      | [complexity-management](../complexity-management/SKILL.md) |
+| Complexity   | 95%      | [complexity-management](../complexity-management/SKILL.md) |
+| Architecture | 90%      | [deptrac-fixer](../deptrac-fixer/SKILL.md)                 |
+| Style        | 95%      | Run `make phpcsfixer`                                      |
 
 ### Other Tools
 
-| Tool | Metric | Required | Fix With |
-|------|--------|----------|----------|
-| Deptrac | Violations | 0 | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
-| Psalm | Errors | 0 | Fix reported issues |
-| Psalm | Security Issues | 0 | Fix tainted flows |
-| Infection | MSI | 100% | [testing-workflow](../testing-workflow/SKILL.md) |
-| PHPUnit | Coverage | 100% | [testing-workflow](../testing-workflow/SKILL.md) |
+| Tool      | Metric          | Required | Fix With                                         |
+| --------- | --------------- | -------- | ------------------------------------------------ |
+| Deptrac   | Violations      | 0        | [deptrac-fixer](../deptrac-fixer/SKILL.md)       |
+| Psalm     | Errors          | 0        | Fix reported issues                              |
+| Psalm     | Security Issues | 0        | Fix tainted flows                                |
+| Infection | MSI             | 100%     | [testing-workflow](../testing-workflow/SKILL.md) |
+| PHPUnit   | Coverage        | 100%     | [testing-workflow](../testing-workflow/SKILL.md) |
 
 ## Quick Reference Commands
 
@@ -63,26 +63,26 @@ make ci
 
 ### Individual Quality Checks
 
-| Check | Command | Purpose |
-|-------|---------|---------|
-| Code quality | `make phpinsights` | All PHPInsights metrics |
-| Complexity analysis | `make phpmd` | Find high-complexity methods |
-| Static analysis | `make psalm` | Type checking and errors |
-| Security taint | `make psalm-security` | Security vulnerability scan |
-| Architecture | `make deptrac` | Layer boundary validation |
-| Code style | `make phpcsfixer` | Auto-fix PSR-12 style |
-| Composer validation | `make composer-validate` | Validate composer.json |
+| Check               | Command                  | Purpose                      |
+| ------------------- | ------------------------ | ---------------------------- |
+| Code quality        | `make phpinsights`       | All PHPInsights metrics      |
+| Complexity analysis | `make phpmd`             | Find high-complexity methods |
+| Static analysis     | `make psalm`             | Type checking and errors     |
+| Security taint      | `make psalm-security`    | Security vulnerability scan  |
+| Architecture        | `make deptrac`           | Layer boundary validation    |
+| Code style          | `make phpcsfixer`        | Auto-fix PSR-12 style        |
+| Composer validation | `make composer-validate` | Validate composer.json       |
 
 ### Testing Commands
 
-| Check | Command | Purpose |
-|-------|---------|---------|
-| Unit tests | `make unit-tests` | Domain/Application logic |
-| Integration tests | `make integration-tests` | Component interactions |
-| E2E tests | `make e2e-tests` | Full user scenarios (Behat) |
-| All tests | `make all-tests` | Unit + Integration + E2E |
-| Test coverage | `make tests-with-coverage` | Generate coverage report |
-| Mutation tests | `make infection` | Test quality validation |
+| Check             | Command                    | Purpose                     |
+| ----------------- | -------------------------- | --------------------------- |
+| Unit tests        | `make unit-tests`          | Domain/Application logic    |
+| Integration tests | `make integration-tests`   | Component interactions      |
+| E2E tests         | `make e2e-tests`           | Full user scenarios (Behat) |
+| All tests         | `make all-tests`           | Unit + Integration + E2E    |
+| Test coverage     | `make tests-with-coverage` | Generate coverage report    |
+| Mutation tests    | `make infection`           | Test quality validation     |
 
 ## Routing to Specialized Skills
 
@@ -91,6 +91,7 @@ When quality checks fail, use the appropriate specialized skill:
 ### Architecture Issues
 
 - **Deptrac violations** → [deptrac-fixer](../deptrac-fixer/SKILL.md)
+
   - Domain depends on Infrastructure
   - Layer boundary violations
   - "must not depend on" errors
@@ -103,6 +104,7 @@ When quality checks fail, use the appropriate specialized skill:
 ### Code Quality Issues
 
 - **High cyclomatic complexity** → [complexity-management](../complexity-management/SKILL.md)
+
   - PHPInsights complexity < 94%
   - PHPMD reports high CCN
   - Methods too complex
@@ -122,6 +124,7 @@ When quality checks fail, use the appropriate specialized skill:
 ### Workflow Integration
 
 - **Before committing** → [ci-workflow](../ci-workflow/SKILL.md)
+
   - Run all checks systematically
   - Fix failures in priority order
   - Ensure all checks pass
@@ -151,14 +154,14 @@ Check output for specific failure:
 
 Based on failure type, use appropriate skill:
 
-| Failure Pattern | Skill to Use |
-|----------------|--------------|
-| "Complexity score too low" | complexity-management |
-| "Deptrac violations" | deptrac-fixer |
-| "must not depend on" | deptrac-fixer |
-| "tests failed" | testing-workflow |
-| "Psalm found errors" | Fix type errors directly |
-| "escaped mutants" | testing-workflow |
+| Failure Pattern            | Skill to Use             |
+| -------------------------- | ------------------------ |
+| "Complexity score too low" | complexity-management    |
+| "Deptrac violations"       | deptrac-fixer            |
+| "must not depend on"       | deptrac-fixer            |
+| "tests failed"             | testing-workflow         |
+| "Psalm found errors"       | Fix type errors directly |
+| "escaped mutants"          | testing-workflow         |
 
 ### Step 4: Re-run CI
 

@@ -18,6 +18,7 @@ description: Create complete REST API CRUD operations using API Platform 4 with 
 Implement production-ready REST API CRUD operations following DDD, CQRS, and hexagonal architecture patterns.
 
 **Success Criteria**:
+
 - All CRUD operations functional (POST, GET, PUT, PATCH, DELETE)
 - DTOs properly validated
 - Domain entities remain framework-agnostic
@@ -48,6 +49,7 @@ Create `config/doctrine/{Entity}.mongodb.xml` with field mappings and indexes.
 ### Step 3: Create Input DTOs
 
 Create three DTOs in `src/Core/{Context}/Application/DTO/`:
+
 - `{Entity}Create` - For POST requests
 - `{Entity}Put` - For PUT requests (full update)
 - `{Entity}Patch` - For PATCH requests (partial update)
@@ -64,7 +66,7 @@ Create `config/api_platform/resources/{entity}.yaml`:
 
 ```yaml
 App\Core\{Context}\Domain\Entity\{Entity}:
-  shortName: {Entity}
+  shortName: { Entity }
   operations:
     ApiPlatform\Metadata\GetCollection: ~
     ApiPlatform\Metadata\Get: ~
@@ -89,11 +91,13 @@ Create `config/serialization/{Entity}.yaml` to control which fields are exposed.
 ### Step 7: Create State Processors
 
 Create processors in `src/Core/{Context}/Application/Processor/`:
+
 - `Create{Entity}Processor` - Handles POST
 - `Update{Entity}Processor` - Handles PUT
 - `Patch{Entity}Processor` - Handles PATCH
 
 Each processor:
+
 1. Receives DTO
 2. Transforms to Command
 3. Dispatches via Command Bus
@@ -102,6 +106,7 @@ Each processor:
 ### Step 8: Create Command and Handler
 
 Create:
+
 - Command in `Application/Command/{Action}{Entity}Command.php`
 - Handler in `Application/CommandHandler/{Action}{Entity}CommandHandler.php`
 
@@ -112,6 +117,7 @@ Handler contains business logic and calls repository.
 ### Step 9: Create Repository
 
 Create:
+
 - Interface in `Domain/Repository/{Entity}RepositoryInterface.php`
 - Implementation in `Infrastructure/Repository/{Entity}Repository.php`
 - Register in `config/services.yaml`
@@ -268,10 +274,10 @@ For detailed patterns and examples:
 
 Throughout documentation, placeholders follow these conventions:
 
-| Placeholder | Example | Usage |
-|-------------|---------|-------|
-| `{Entity}` | `Customer` | PascalCase class name |
-| `{Context}` | `Customer` | Bounded context/module name |
-| `{entity}` | `customer` | Lowercase for configs/filters |
-| `{entities}` | `customers` | Plural for collection names |
-| `{Action}` | `Create`, `Update` | Command action verb |
+| Placeholder  | Example            | Usage                         |
+| ------------ | ------------------ | ----------------------------- |
+| `{Entity}`   | `Customer`         | PascalCase class name         |
+| `{Context}`  | `Customer`         | Bounded context/module name   |
+| `{entity}`   | `customer`         | Lowercase for configs/filters |
+| `{entities}` | `customers`        | Plural for collection names   |
+| `{Action}`   | `Create`, `Update` | Command action verb           |

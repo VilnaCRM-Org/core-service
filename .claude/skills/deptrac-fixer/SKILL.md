@@ -46,6 +46,7 @@ Domain must not depend on Symfony
 ```
 
 **Extract:**
+
 - **Violating Layer**: Domain
 - **Forbidden Dependency**: Symfony
 - **File & Line**: `src/Customer/Domain/Entity/Customer.php:8`
@@ -53,12 +54,12 @@ Domain must not depend on Symfony
 
 ### Step 3: Identify Fix Pattern
 
-| Domain Depends On | Fix Pattern | Example File |
-|-------------------|-------------|--------------|
-| Symfony Validator | Move to YAML config | [01-domain-symfony-validation.php](examples/01-domain-symfony-validation.php) |
-| Doctrine (ODM/ORM) | Use XML mapping | [02-domain-doctrine-annotations.php](examples/02-domain-doctrine-annotations.php) |
-| API Platform | Move to YAML config | [03-domain-api-platform.php](examples/03-domain-api-platform.php) |
-| Infrastructure → Handler | Use Command Bus | [04-infrastructure-handler.php](examples/04-infrastructure-handler.php) |
+| Domain Depends On        | Fix Pattern         | Example File                                                                      |
+| ------------------------ | ------------------- | --------------------------------------------------------------------------------- |
+| Symfony Validator        | Move to YAML config | [01-domain-symfony-validation.php](examples/01-domain-symfony-validation.php)     |
+| Doctrine (ODM/ORM)       | Use XML mapping     | [02-domain-doctrine-annotations.php](examples/02-domain-doctrine-annotations.php) |
+| API Platform             | Move to YAML config | [03-domain-api-platform.php](examples/03-domain-api-platform.php)                 |
+| Infrastructure → Handler | Use Command Bus     | [04-infrastructure-handler.php](examples/04-infrastructure-handler.php)           |
 
 **See**: [REFERENCE.md](REFERENCE.md) for complete fix patterns and advanced scenarios.
 
@@ -88,10 +89,10 @@ Infrastructure ───────> Domain + Application + Symfony + Doctrine
 
 **Allowed Dependencies:**
 
-| Layer | Can Depend On |
-|-------|---------------|
-| **Domain** | ❌ Nothing (pure PHP only) |
-| **Application** | ✅ Domain, Infrastructure, Symfony, API Platform |
+| Layer              | Can Depend On                                      |
+| ------------------ | -------------------------------------------------- |
+| **Domain**         | ❌ Nothing (pure PHP only)                         |
+| **Application**    | ✅ Domain, Infrastructure, Symfony, API Platform   |
 | **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, MongoDB |
 
 **See**: [CODELY-STRUCTURE.md](CODELY-STRUCTURE.md) for complete directory hierarchy.
@@ -190,6 +191,7 @@ make deptrac > violations.txt
 ### Step 2: Categorize by Type
 
 Group violations by layer pair:
+
 - Domain → Symfony
 - Domain → Doctrine
 - Domain → API Platform
@@ -315,7 +317,7 @@ For detailed patterns, examples, and troubleshooting:
 ```yaml
 # ❌ NEVER DO THIS
 paths:
-  - { collector: layer_domain, exclude: '.*Annotation.*' }  # Hiding violations
+  - { collector: layer_domain, exclude: '.*Annotation.*' } # Hiding violations
 ```
 
 ### ❌ DON'T Create Wrapper Classes

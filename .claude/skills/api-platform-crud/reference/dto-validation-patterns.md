@@ -26,6 +26,7 @@ final readonly class CustomerCreate
 ```
 
 **Characteristics:**
+
 - All properties nullable for flexibility
 - Validation enforced via YAML config
 - IRIs used for entity references
@@ -55,6 +56,7 @@ final readonly class CustomerPut
 ```
 
 **Usage Pattern:**
+
 - Client must provide all fields
 - Missing fields will be set to null (unless validation prevents it)
 - Replaces entire resource state
@@ -144,6 +146,7 @@ App\Core\{Context}\Application\DTO\{Entity}Create:
 ```
 
 **Benefits:**
+
 - DTOs remain simple POPOs (Plain Old PHP Objects)
 - Validation rules centralized and versionable
 - Easy to test and maintain
@@ -211,9 +214,9 @@ final class UniqueEmailValidator extends ConstraintValidator
 ```yaml
 # config/services.yaml
 services:
-    App\Shared\Application\Validator\UniqueEmailValidator:
-        tags:
-            - { name: validator.constraint_validator }
+  App\Shared\Application\Validator\UniqueEmailValidator:
+    tags:
+      - { name: validator.constraint_validator }
 ```
 
 ---
@@ -231,7 +234,7 @@ App\Core\Customer\Application\DTO\CustomerCreate:
       - Email:
           groups: ['create', 'update']
       - App\Shared\Application\Validator\UniqueEmail:
-          groups: ['create']  # Only check uniqueness on creation
+          groups: ['create'] # Only check uniqueness on creation
 ```
 
 **In Resource Config:**
