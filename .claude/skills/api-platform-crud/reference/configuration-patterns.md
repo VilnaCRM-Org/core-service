@@ -28,7 +28,7 @@ This repository uses **YAML-based configuration** (not PHP attributes) to mainta
 ```yaml
 # config/api_platform/resources/{entity}.yaml
 App\Core\{Context}\Domain\Entity\{Entity}:
-  shortName: {Entity}
+  shortName: { Entity }
   operations:
     ApiPlatform\Metadata\Get: ~
     ApiPlatform\Metadata\GetCollection: ~
@@ -55,14 +55,14 @@ class Customer {  }
 
 ## Operation Types
 
-| Operation | HTTP Method | Purpose | Input DTO | Processor Required |
-|-----------|-------------|---------|-----------|-------------------|
-| GetCollection | GET | List resources | None | No (default provider) |
-| Get | GET | Single resource | None | No (default provider) |
-| Post | POST | Create resource | {Entity}Create | Yes |
-| Put | PUT | Full replacement | {Entity}Put | Yes |
-| Patch | PATCH | Partial update | {Entity}Patch | Yes |
-| Delete | DELETE | Remove resource | None | No (default) |
+| Operation     | HTTP Method | Purpose          | Input DTO      | Processor Required    |
+| ------------- | ----------- | ---------------- | -------------- | --------------------- |
+| GetCollection | GET         | List resources   | None           | No (default provider) |
+| Get           | GET         | Single resource  | None           | No (default provider) |
+| Post          | POST        | Create resource  | {Entity}Create | Yes                   |
+| Put           | PUT         | Full replacement | {Entity}Put    | Yes                   |
+| Patch         | PATCH       | Partial update   | {Entity}Patch  | Yes                   |
+| Delete        | DELETE      | Remove resource  | None           | No (default)          |
 
 **Example: Full CRUD Configuration**
 
@@ -104,6 +104,7 @@ order: { 'ulid': 'desc' }
 ```
 
 **Benefits:**
+
 - Consistent results even with concurrent inserts
 - Better performance for large datasets
 - Handles deep pagination efficiently
@@ -117,6 +118,7 @@ paginationMaximumItemsPerPage: 100
 ```
 
 **Use when:**
+
 - Need page numbers for UI
 - Smaller datasets
 - Random access to pages required
@@ -200,7 +202,7 @@ App\Core\Customer\Domain\Entity\Customer:
     activate:
       class: ApiPlatform\Metadata\Put
       uriTemplate: '/customers/{id}/activate'
-      input: false  # No input DTO
+      input: false # No input DTO
       processor: App\Core\Customer\Application\Processor\ActivateCustomerProcessor
 ```
 
