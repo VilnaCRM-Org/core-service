@@ -111,9 +111,9 @@ final readonly class PatchCustomerProcessor implements ProcessorInterface
 
 ## Validation Strategy
 
-### External YAML Configuration (Recommended)
+### External YAML Configuration (Primary Approach)
 
-Validation rules are defined in YAML files, keeping DTOs clean:
+**This is the preferred validation method.** Validation rules are defined in YAML files, keeping DTOs clean:
 
 ```yaml
 # config/validator/{Entity}.yaml
@@ -151,6 +151,10 @@ App\Core\{Context}\Application\DTO\{Entity}Create:
 - Validation rules centralized and versionable
 - Easy to test and maintain
 - Can be generated from OpenAPI specs
+- Framework-provided validators cover most use cases
+- Custom validators available for business rules
+
+**Policy**: Always use framework validators (Symfony Validator component) when possible. Value Objects should only be used for validation when framework validators cannot express the business rule or when the validation is intrinsically part of domain invariants.
 
 ---
 
@@ -325,17 +329,19 @@ API Platform automatically formats errors following RFC 7807 (Problem Details):
 
 ### ✅ DO
 
-- Use external YAML configuration for standard constraints
+- **Prefer framework validators** - Use external YAML configuration for all validation
 - Create custom validators for business rules
 - Keep DTOs simple (no logic)
 - Use validation groups for context-specific rules
 - Map domain exceptions to appropriate HTTP status codes
 - Return descriptive error messages
+- Use Symfony's built-in constraints (NotBlank, Email, Length, etc.)
 
 ### ❌ DON'T
 
 - Put validation logic in DTOs
 - Use PHP attributes for validation (use YAML)
+- Use Value Objects for validation when framework validators can do the job
 - Throw HTTP exceptions from domain layer
 - Expose internal error details to API clients
 - Duplicate validation logic across DTOs

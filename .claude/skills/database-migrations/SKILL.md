@@ -5,55 +5,51 @@ description: Create, manage, and apply database migrations using Doctrine ODM fo
 
 # Database Migrations Skill
 
-## Overview
+## Context (Input)
 
-This skill guides you through creating and managing database migrations for MongoDB using Doctrine ODM in a Hexagonal Architecture context.
+- New entity needs database persistence
+- Existing entity requires schema changes (add/modify/remove fields)
+- MongoDB repository needs implementation
+- Database schema validation fails
+- Need to set up indexes for performance
+
+## Task (Function)
+
+Create entities with XML mapping and repositories following hexagonal architecture and MongoDB best practices.
+
+**Success Criteria**: `make setup-test-db` runs without errors, schema validates, all tests pass.
+
+---
 
 ## Core Principles
 
-### 1. Domain-Driven Design
+### Domain-Driven Design
 
-- Entities belong in **Domain layer** (`{Context}/Domain/Entity/`)
-- Repository interfaces in **Domain layer** (`{Context}/Domain/Repository/`)
-- Repository implementations in **Infrastructure layer** (`{Context}/Infrastructure/Repository/`)
-- XML mappings are infrastructure concern (`config/doctrine/`)
+- **Entities**: Domain layer (`{Context}/Domain/Entity/`)
+- **Repository Interfaces**: Domain layer (`{Context}/Domain/Repository/`)
+- **Repository Implementations**: Infrastructure layer (`{Context}/Infrastructure/Repository/`)
+- **XML Mappings**: Infrastructure concern (`config/doctrine/`)
 
-**Related Skill**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - For comprehensive DDD patterns, layer responsibilities, and Deptrac compliance
+**See**: [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) for DDD patterns.
 
-### 2. MongoDB Schema Management
+### MongoDB with Doctrine ODM
 
-- Use XML mappings for all entity metadata (not annotations)
+- Use **XML mappings** for all entity metadata (not annotations/attributes)
 - Define indexes in XML for performance
 - Use custom types (ULID, DomainUuid) for identifiers
-- Schema updates are applied via Doctrine commands
+- Schema updates applied via Doctrine commands
 
-### 3. API Platform Integration
-
-- Configure resources via YAML (`config/api_platform/resources/`)
-- Register resource directories in `api_platform.yaml`
-- Use DTOs and Processors for API operations
-
-## Available Commands
-
-```bash
-# Schema Management
-make doctrine-migrations-migrate        # Apply pending migrations
-make doctrine-migrations-generate       # Create empty migration file
-make setup-test-db                      # Drop and recreate test database
-
-# Schema Operations
-docker compose exec php bin/console doctrine:mongodb:schema:update       # Update schema
-docker compose exec php bin/console doctrine:mongodb:schema:validate     # Validate schema
-```
+---
 
 ## Quick Start
 
 ### Creating a New Entity
 
-**1. Define Entity** (Domain Layer):
+**Step 1: Create Entity (Domain Layer)**
 
 ```php
-namespace App\Core\Customer\Domain\Entity;
+// src/Core/{Context}/Domain/Entity/{Entity}.php
+namespace App\Core\{Context}\Domain\Entity;
 
 final class Customer
 {
@@ -64,13 +60,14 @@ final class Customer
         private \DateTimeImmutable $createdAt
     ) {}
 
-    // Getters...
+    // Getters only - no setters (immutability)
 }
 ```
 
-**2. Create XML Mapping** (`config/doctrine/Customer.mongodb.xml`):
+**Step 2: Create XML Mapping**
 
 ```xml
+<!-- config/doctrine/Customer.mongodb.xml -->
 <document name="App\Core\Customer\Domain\Entity\Customer" collection="customers">
     <field name="id" fieldName="id" id="true" type="ulid"/>
     <field name="name" type="string"/>
@@ -83,9 +80,10 @@ final class Customer
 </document>
 ```
 
-**3. Configure API Platform** (`config/api_platform/resources/customer.yaml`):
+**Step 3: Configure API Platform**
 
 ```yaml
+# config/api_platform/resources/customer.yaml
 App\Core\Customer\Domain\Entity\Customer:
   shortName: Customer
   operations:
@@ -94,29 +92,34 @@ App\Core\Customer\Domain\Entity\Customer:
     post: ~
 ```
 
-**4. Update Schema**:
+**Step 4: Update Schema**
 
 ```bash
 make cache-clear
 docker compose exec php bin/console doctrine:mongodb:schema:update
 ```
 
-**See detailed guides**: [entity-creation-guide.md](entity-creation-guide.md)
+**See**: [entity-creation-guide.md](entity-creation-guide.md) for complete workflow.
+
+---
 
 ### Modifying Existing Entities
 
-**1. Update Entity Class** (add/modify fields)
-**2. Update XML Mapping** (add field definitions)
-**3. Clear Cache**: `make cache-clear`
-**4. Update Schema**: `docker compose exec php bin/console doctrine:mongodb:schema:update`
+1. **Update Entity Class** (add/modify fields)
+2. **Update XML Mapping** (add field definitions)
+3. **Clear Cache**: `make cache-clear`
+4. **Update Schema**: `docker compose exec php bin/console doctrine:mongodb:schema:update`
 
-**See detailed guides**: [entity-modification-guide.md](entity-modification-guide.md)
+**See**: [entity-modification-guide.md](entity-modification-guide.md)
+
+---
 
 ### Creating Repositories
 
-**1. Define Interface** (Domain):
+**Step 1: Define Interface (Domain)**
 
 ```php
+// Domain/Repository/CustomerRepositoryInterface.php
 interface CustomerRepositoryInterface
 {
     public function save(Customer $customer): void;
@@ -124,9 +127,10 @@ interface CustomerRepositoryInterface
 }
 ```
 
-**2. Implement** (Infrastructure):
+**Step 2: Implement (Infrastructure)**
 
 ```php
+// Infrastructure/Repository/CustomerRepository.php
 final class CustomerRepository implements CustomerRepositoryInterface
 {
     public function __construct(
@@ -141,53 +145,171 @@ final class CustomerRepository implements CustomerRepositoryInterface
 }
 ```
 
-**3. Register in `services.yaml`**:
+**Step 3: Register in `services.yaml`**
 
 ```yaml
 App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
   alias: App\Core\Customer\Infrastructure\Repository\CustomerRepository
 ```
 
-**See detailed patterns**: [repository-patterns.md](repository-patterns.md)
+**See**: [repository-patterns.md](repository-patterns.md)
+
+---
 
 ## MongoDB-Specific Features
 
 ### Custom Types
 
-**ULID** (`type="ulid"`):
+| Type | Usage | Purpose |
+|------|-------|---------|
+| `ulid` | MongoDB `_id` field | Sortable, time-ordered identifiers |
+| `domain_uuid` | Domain identifiers | Standard UUID format (RFC 4122) |
 
-- Sortable, time-ordered identifiers
-- Used for MongoDB \_id fields
-- Auto-generated, globally unique
-
-**DomainUuid** (`type="domain_uuid"`):
-
-- Standard UUID format
-- Used for domain identifiers
-- RFC 4122 compliant
+```xml
+<field name="ulid" id="true" type="ulid"/>
+<field name="customerId" type="domain_uuid"/>
+```
 
 ### Indexes
 
-Define for performance and constraints:
-
 ```xml
 <indexes>
+    <!-- Unique index -->
     <index><key name="email" order="asc"/><option name="unique" value="true"/></index>
+
+    <!-- Performance index -->
     <index><key name="createdAt" order="desc"/></index>
-    <index><key name="status"/><key name="type"/></index>  <!-- Compound -->
+
+    <!-- Compound index -->
+    <index><key name="status"/><key name="type"/></index>
 </indexes>
 ```
 
 ### Embedded Documents
 
-For value objects:
+For Value Objects:
 
 ```xml
 <embed-one field="address" target-document="App\Core\Customer\Domain\ValueObject\Address"/>
 <embed-many field="tags" target-document="App\Core\Customer\Domain\ValueObject\Tag"/>
 ```
 
-**See detailed guide**: [mongodb-specifics.md](mongodb-specifics.md)
+**See**: [mongodb-specifics.md](mongodb-specifics.md)
+
+---
+
+## Available Commands
+
+```bash
+# Schema Management
+make doctrine-migrations-migrate        # Apply pending migrations
+make doctrine-migrations-generate       # Create empty migration file
+make setup-test-db                      # Drop and recreate test database
+
+# Schema Operations
+docker compose exec php bin/console doctrine:mongodb:schema:update       # Update schema
+docker compose exec php bin/console doctrine:mongodb:schema:validate     # Validate schema
+```
+
+---
+
+## Constraints (Parameters)
+
+### NEVER
+
+- Use Doctrine annotations/attributes in Domain entities
+- Modify existing migrations after they're applied
+- Skip XML mapping validation
+- Leave empty migration files in codebase
+- Commit without testing schema changes
+- Skip `make setup-test-db` before integration tests
+
+### ALWAYS
+
+- Create XML mappings for all entity metadata
+- Keep Domain entities framework-agnostic
+- Define indexes for frequently queried fields
+- Test migrations on dev database before committing
+- Run `make setup-test-db` to verify schema
+- Use Faker for unique test data (emails, names, etc.)
+- Register resource directories in `api_platform.yaml`
+
+---
+
+## Format (Output)
+
+### Expected Schema Validation Output
+
+```bash
+$ docker compose exec php bin/console doctrine:mongodb:schema:validate
+The MongoDB schema is valid.
+```
+
+### Expected Test DB Setup Output
+
+```bash
+$ make setup-test-db
+Database dropped and recreated successfully
+```
+
+---
+
+## Verification Checklist
+
+After entity/migration changes:
+
+- [ ] Entity defined in Domain layer (no framework imports)
+- [ ] XML mapping created in `config/doctrine/`
+- [ ] API Platform resource configured (if needed)
+- [ ] Repository interface in Domain layer
+- [ ] Repository implementation in Infrastructure layer
+- [ ] Repository registered in `services.yaml`
+- [ ] Schema validates: `doctrine:mongodb:schema:validate`
+- [ ] Test database setup works: `make setup-test-db`
+- [ ] All integration tests pass
+- [ ] `make deptrac` passes (no violations)
+- [ ] `make ci` passes
+
+---
+
+## Related Skills
+
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - DDD patterns and repository interfaces
+- [api-platform-crud](../api-platform-crud/SKILL.md) - Configuring API Platform resources
+- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Fixing architectural violations
+
+---
+
+## Quick Commands
+
+```bash
+# Validate schema
+docker compose exec php bin/console doctrine:mongodb:schema:validate
+
+# Update schema
+docker compose exec php bin/console doctrine:mongodb:schema:update
+
+# Setup test database
+make setup-test-db
+
+# Clear cache after config changes
+make cache-clear
+```
+
+---
+
+## Reference Documentation
+
+Detailed guides and examples:
+
+- **[entity-creation-guide.md](entity-creation-guide.md)** - Complete entity creation workflow
+- **[entity-modification-guide.md](entity-modification-guide.md)** - Modifying existing entities
+- **[repository-patterns.md](repository-patterns.md)** - Repository implementation patterns
+- **[mongodb-specifics.md](mongodb-specifics.md)** - MongoDB features and patterns
+- **[reference/troubleshooting.md](reference/troubleshooting.md)** - Common issues and solutions
+- **[examples/](examples/)** - Complete working examples
+
+---
 
 ## Migration Best Practices
 
@@ -204,7 +326,7 @@ public function down(Schema $schema): void { }
 ### 2. Test Before Committing
 
 1. Apply migration on dev database
-2. Verify schema with `doctrine:mongodb:schema:validate`
+2. Verify schema: `doctrine:mongodb:schema:validate`
 3. Run all tests
 4. Test rollback if applicable
 
@@ -217,6 +339,8 @@ make doctrine-migrations-migrate
 # Verify application works
 # Keep backup for potential rollback
 ```
+
+---
 
 ## Testing with Database
 
@@ -241,7 +365,7 @@ final class CustomerRepositoryTest extends IntegrationTestCase
 
     public function testSaveAndRetrieveCustomer(): void
     {
-        $customer = new Customer(/* unique test data */);
+        $customer = new Customer(/* unique test data with Faker */);
         $this->repository->save($customer);
 
         $retrieved = $this->repository->findById($customer->getId());
@@ -250,52 +374,30 @@ final class CustomerRepositoryTest extends IntegrationTestCase
 }
 ```
 
-**Important**: Always use Faker for unique test data (emails, names, etc.)
+**Important**: Always use Faker for unique test data.
+
+---
 
 ## Troubleshooting
 
 ### Common Issues
 
 **Database Connection Errors**:
-
 ```bash
 docker compose ps mongodb
 docker compose logs mongodb
 ```
 
 **Schema Sync Issues**:
-
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:validate
 docker compose exec php bin/console doctrine:mongodb:schema:update --force
 ```
 
 **Migration Conflicts**:
-
 ```bash
 docker compose exec php bin/console doctrine:migrations:status
 docker compose exec php bin/console doctrine:migrations:migrate prev  # Rollback
 ```
 
-**See comprehensive guide**: [reference/troubleshooting.md](reference/troubleshooting.md)
-
-## Supporting Files
-
-For detailed patterns, examples, and reference documentation:
-
-- **[entity-creation-guide.md](entity-creation-guide.md)** - Complete entity creation workflow
-- **[entity-modification-guide.md](entity-modification-guide.md)** - Modifying existing entities
-- **[repository-patterns.md](repository-patterns.md)** - Repository implementation patterns
-- **[mongodb-specifics.md](mongodb-specifics.md)** - MongoDB features and patterns
-- **[reference/troubleshooting.md](reference/troubleshooting.md)** - Common issues and solutions
-- **[examples/](examples/)** - Complete working examples
-
-## Success Criteria
-
-- Entity defined in Domain layer
-- XML mapping created and valid
-- API Platform resource configured
-- Repository implemented following hexagonal architecture
-- Schema validated successfully
-- All tests pass
-- Documentation updated in `docs/design-and-architecture.md`
+**See**: [reference/troubleshooting.md](reference/troubleshooting.md) for comprehensive guide.
