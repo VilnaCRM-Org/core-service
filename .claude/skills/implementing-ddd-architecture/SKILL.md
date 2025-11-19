@@ -1,10 +1,6 @@
 ---
 name: implementing-ddd-architecture
 description: Design and implement DDD patterns (entities, value objects, aggregates, CQRS). Use when creating new domain objects, implementing bounded contexts, designing repository interfaces, or learning proper layer separation. For fixing existing Deptrac violations, use the deptrac-fixer skill instead.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this entire file and the supporting files (REFERENCE.md, DIRECTORY-STRUCTURE.md, examples/).
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Implementing DDD Architecture

@@ -1,10 +1,6 @@
 ---
 name: code-review
 description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this entire file and follow the "Workflow" section below.
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Code Review Workflow Skill

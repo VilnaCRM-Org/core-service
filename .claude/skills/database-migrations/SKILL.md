@@ -1,10 +1,6 @@
 ---
 name: database-migrations
 description: Create, manage, and apply database migrations using Doctrine ODM for MongoDB. Use when modifying entities, adding fields, managing database schema changes, creating repositories, or troubleshooting database issues.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this file and supporting guides (entity-creation-guide.md, repository-patterns.md).
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Database Migrations Skill

@@ -1,10 +1,6 @@
 ---
 name: deptrac-fixer
 description: Diagnose and fix Deptrac architectural violations automatically. Use when Deptrac reports dependency violations, layers are incorrectly coupled, or when refactoring code to respect hexagonal architecture boundaries. Never modifies deptrac.yaml - always fixes the code to match the architecture.
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this file and follow the "Diagnostic Workflow" section. Check examples/ for fix patterns.
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Deptrac Fixer Skill

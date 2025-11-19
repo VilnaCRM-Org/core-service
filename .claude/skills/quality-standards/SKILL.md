@@ -1,433 +1,244 @@
 ---
 name: quality-standards
 description: Overview of protected quality thresholds and quick reference for all quality tools. Use when you need to understand quality metrics, run comprehensive quality checks, or learn which specialized skill to use. For specific issues, use dedicated skills (deptrac-fixer for Deptrac, complexity-management for PHPInsights, testing-workflow for coverage).
-#
-# FOR OPENAI/GPT/CODEX AGENTS: Read this file to understand protected quality thresholds, then use specific skills for fixes.
-# FOR CLAUDE CODE: This skill is automatically invoked when relevant.
-#
 ---
 
 # Quality Standards Skill
 
-This skill provides an overview of protected quality thresholds and guides you to the appropriate specialized skill for specific issues.
+## Context (Input)
 
-## When to Use This Skill
+- Need to understand protected quality thresholds
+- Running comprehensive quality checks before commit
+- Determining which specialized skill to use for specific issues
+- Quick reference for quality tool commands
 
-Activate this skill when:
+## Task (Function)
 
-- You need to understand what quality metrics are protected
-- Running comprehensive quality checks (`make ci`)
-- Learning which specialized skill to use for specific issues
-- Quick reference for all quality tool commands
+Understand quality metrics and route to appropriate specialized skill for fixes.
 
-**For specific issues, use these specialized skills:**
+**Success Criteria**: Know which skill to use for your specific quality issue.
 
-- **Deptrac violations** → Use [deptrac-fixer](../deptrac-fixer/SKILL.md) skill
-- **High cyclomatic complexity** → Use [complexity-management](../complexity-management/SKILL.md) skill
-- **Test coverage issues** → Use [testing-workflow](../testing-workflow/SKILL.md) skill
-- **Architecture violations** → Use [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) skill
+## Protected Quality Thresholds
 
-## Protected Quality Metrics
-
-**NEVER decrease these thresholds**:
+**CRITICAL**: These thresholds are protected and must NEVER be lowered.
 
 ### PHPInsights (Source Code)
 
-- **min-quality**: 100%
-- **min-complexity**: 95%
-- **min-architecture**: 100%
-- **min-style**: 100%
+| Metric | Required | Fix With |
+|--------|----------|----------|
+| Quality | 100% | [complexity-management](../complexity-management/SKILL.md) |
+| Complexity | 94% | [complexity-management](../complexity-management/SKILL.md) |
+| Architecture | 100% | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
+| Style | 100% | Run `make phpcsfixer` |
 
 ### PHPInsights (Tests)
 
-- **min-quality**: 95%
-- **min-complexity**: 95%
-- **min-architecture**: 90%
-- **min-style**: 95%
+| Metric | Required | Fix With |
+|--------|----------|----------|
+| Quality | 95% | [complexity-management](../complexity-management/SKILL.md) |
+| Complexity | 95% | [complexity-management](../complexity-management/SKILL.md) |
+| Architecture | 90% | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
+| Style | 95% | Run `make phpcsfixer` |
 
-### Test Coverage
+### Other Tools
 
-- **Unit test coverage**: 100%
-- **Mutation testing (Infection) MSI**: 100%
+| Tool | Metric | Required | Fix With |
+|------|--------|----------|----------|
+| Deptrac | Violations | 0 | [deptrac-fixer](../deptrac-fixer/SKILL.md) |
+| Psalm | Errors | 0 | Fix reported issues |
+| Psalm | Security Issues | 0 | Fix tainted flows |
+| Infection | MSI | 100% | [testing-workflow](../testing-workflow/SKILL.md) |
+| PHPUnit | Coverage | 100% | [testing-workflow](../testing-workflow/SKILL.md) |
 
-## Quality Check Commands
+## Quick Reference Commands
 
-### Run PHPInsights
-
-```bash
-make phpinsights
-```
-
-### Run PHP Mess Detector (for complexity issues)
-
-```bash
-make phpmd
-```
-
-### Run Psalm Static Analysis
+### Comprehensive Checks
 
 ```bash
-make psalm
-make psalm-security  # Security taint analysis
+# Run all CI checks (recommended before commit)
+make ci
 ```
 
-### Run Deptrac Architecture Validation
+**Success**: Must output "✅ CI checks successfully passed!"
 
-```bash
-make deptrac
-```
+### Individual Quality Checks
 
-**Specialized Skills for Deptrac Issues**:
+| Check | Command | Purpose |
+|-------|---------|---------|
+| Code quality | `make phpinsights` | All PHPInsights metrics |
+| Complexity analysis | `make phpmd` | Find high-complexity methods |
+| Static analysis | `make psalm` | Type checking and errors |
+| Security taint | `make psalm-security` | Security vulnerability scan |
+| Architecture | `make deptrac` | Layer boundary validation |
+| Code style | `make phpcsfixer` | Auto-fix PSR-12 style |
+| Composer validation | `make composer-validate` | Validate composer.json |
 
-- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Diagnose and fix violations automatically (recommended)
-- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Understand proper layer architecture
+### Testing Commands
 
-### Run PHP CS Fixer
+| Check | Command | Purpose |
+|-------|---------|---------|
+| Unit tests | `make unit-tests` | Domain/Application logic |
+| Integration tests | `make integration-tests` | Component interactions |
+| E2E tests | `make e2e-tests` | Full user scenarios (Behat) |
+| All tests | `make all-tests` | Unit + Integration + E2E |
+| Test coverage | `make tests-with-coverage` | Generate coverage report |
+| Mutation tests | `make infection` | Test quality validation |
 
-```bash
-make phpcsfixer
-```
+## Routing to Specialized Skills
 
-## Resolving PHPInsights Complexity Failures
+When quality checks fail, use the appropriate specialized skill:
 
-### When PHPInsights Reports Low Complexity Score
+### Architecture Issues
 
-**Problem**: `[ERROR] The complexity score is too low` without specific files
+- **Deptrac violations** → [deptrac-fixer](../deptrac-fixer/SKILL.md)
+  - Domain depends on Infrastructure
+  - Layer boundary violations
+  - "must not depend on" errors
 
-**Solution**:
+- **DDD architecture patterns** → [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md)
+  - Creating new entities/value objects
+  - Implementing CQRS patterns
+  - Understanding layer responsibilities
 
-1. **Run PHP Mess Detector first** to find hotspots:
+### Code Quality Issues
 
-   ```bash
-   make phpmd
-   ```
+- **High cyclomatic complexity** → [complexity-management](../complexity-management/SKILL.md)
+  - PHPInsights complexity < 94%
+  - PHPMD reports high CCN
+  - Methods too complex
 
-2. **Review PHPMD output** for cyclomatic complexity warnings
+- **Code style issues** → Run `make phpcsfixer`
+  - PSR-12 violations
+  - Line length > 100 chars
+  - Formatting issues
 
-3. **Address each high-complexity finding**
+### Testing Issues
 
-4. **Re-run PHPInsights**:
+- **Test failures** → [testing-workflow](../testing-workflow/SKILL.md)
+  - Unit/Integration/E2E failures
+  - Mutation testing (Infection)
+  - Test coverage < 100%
 
-   ```bash
-   make phpinsights
-   ```
+### Workflow Integration
 
-## Reducing Cyclomatic Complexity
+- **Before committing** → [ci-workflow](../ci-workflow/SKILL.md)
+  - Run all checks systematically
+  - Fix failures in priority order
+  - Ensure all checks pass
 
-**Target**: Keep complexity below 5 per method
-
-### Strategy 1: Extract Methods
-
-**Before** (complexity: 8):
-
-```php
-public function validate($value, Constraint $constraint): void
-{
-    if ($value === null || ($constraint->isOptional() && $value === '')) {
-        return;
-    }
-    if (!(strlen($value) >= 8 && strlen($value) <= 64)) {
-        $this->addViolation('password.invalid.length');
-    }
-    if (!preg_match('/[A-Z]/', $value)) {
-        $this->addViolation('password.missing.uppercase');
-    }
-    if (!preg_match('/[0-9]/', $value)) {
-        $this->addViolation('password.missing.digit');
-    }
-}
-```
-
-**After** (complexity: 2):
-
-```php
-public function validate($value, Constraint $constraint): void
-{
-    if ($this->shouldSkipValidation($value, $constraint)) {
-        return;
-    }
-
-    $this->performValidations($value);
-}
-
-private function shouldSkipValidation($value, Constraint $constraint): bool
-{
-    return $value === null || ($constraint->isOptional() && $value === '');
-}
-
-private function performValidations($value): void
-{
-    $this->validateLength($value);
-    $this->validateUppercase($value);
-    $this->validateDigit($value);
-}
-```
-
-### Strategy 2: Use Strategy Pattern
-
-**Before** (complexity: 10):
-
-```php
-public function process($data, $type): array
-{
-    if ($type === 'json') {
-        // JSON processing logic (3 conditions)
-    } elseif ($type === 'xml') {
-        // XML processing logic (3 conditions)
-    } elseif ($type === 'csv') {
-        // CSV processing logic (3 conditions)
-    }
-    return $result;
-}
-```
-
-**After** (complexity: 2):
-
-```php
-public function process($data, $type): array
-{
-    $strategy = $this->strategyFactory->create($type);
-    return $strategy->process($data);
-}
-```
-
-### Strategy 3: Early Returns
-
-**Before** (complexity: 6):
-
-```php
-public function calculate($value): int
-{
-    if ($value !== null) {
-        if ($value > 0) {
-            if ($value < 100) {
-                return $value * 2;
-            }
-        }
-    }
-    return 0;
-}
-```
-
-**After** (complexity: 3):
-
-```php
-public function calculate($value): int
-{
-    if ($value === null) {
-        return 0;
-    }
-
-    if ($value <= 0 || $value >= 100) {
-        return 0;
-    }
-
-    return $value * 2;
-}
-```
-
-## Fixing Architecture Violations
-
-### Understanding Deptrac Layers
-
-**Dependency Rules**:
-
-- **Domain** layer: NO dependencies on other layers
-- **Application** layer: Can depend on Domain and Infrastructure
-- **Infrastructure** layer: Can depend on Domain and Application
-
-### Common Violations
-
-**Problem**: Domain depends on Infrastructure
-
-```php
-// ❌ BAD: Domain using Doctrine annotation
-namespace App\User\Domain\Entity;
-
-use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
-
-#[ODM\Document]
-class User { }
-```
-
-**Solution**: Move annotations to XML mapping
-
-```xml
-<!-- config/doctrine/User.mongodb.xml -->
-<doctrine-mongo-mapping>
-    <document name="App\User\Domain\Entity\User">
-        <!-- mappings here -->
-    </document>
-</doctrine-mongo-mapping>
-```
-
-**Problem**: Using wrong layer's interfaces
-**Solution**: Move interface to correct layer or create proper abstraction
-
-## Improving Code Quality Score
-
-### Remove Code Duplication
-
-Use PHP CS Fixer to identify and extract common patterns:
-
-```php
-// ❌ BAD: Duplicated logic
-public function validateEmail($email) {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new InvalidEmailException();
-    }
-}
-
-public function checkEmail($email) {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new InvalidEmailException();
-    }
-}
-
-// ✅ GOOD: Extracted common logic
-private function isValidEmail($email): bool {
-    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-}
-```
-
-### Improve Method Naming
-
-```php
-// ❌ BAD: Unclear method name
-public function process($data): void { }
-
-// ✅ GOOD: Self-explanatory method name
-public function hashPasswordUsingBcrypt(string $plainPassword): string { }
-```
-
-### Remove Inline Comments
-
-**MANDATORY**: Write self-explanatory code instead of comments
-
-```php
-// ❌ BAD: Inline comment explaining code
-if ($value === '') {
-    return false; // empty is not "only spaces"
-}
-
-// ✅ GOOD: Self-explanatory method name
-if ($this->isEmptyButNotOnlySpaces($value)) {
-    return false;
-}
-```
+- **PR review feedback** → [code-review](../code-review/SKILL.md)
+  - Fetch and address PR comments
+  - Systematic comment resolution
 
 ## Quality Improvement Workflow
 
-### 1. Identify Issues
-
-Run all quality checks:
-
-```bash
-make phpinsights
-make phpmd
-make psalm
-make deptrac
-```
-
-### 2. Prioritize Fixes
-
-**Priority Order**:
-
-1. Architecture violations (Deptrac)
-2. Security issues (Psalm security)
-3. High complexity methods (PHPMD)
-4. Type safety issues (Psalm)
-5. Code style (PHP CS Fixer)
-
-### 3. Apply Fixes
-
-For each issue:
-
-1. Understand the root cause
-2. Apply appropriate refactoring strategy
-3. Run specific quality check
-4. Verify improvement
-
-### 4. Verify Overall Quality
-
-Run comprehensive checks:
+### Step 1: Run Comprehensive Checks
 
 ```bash
 make ci
 ```
 
-Must output: "✅ CI checks successfully passed!"
+### Step 2: Identify Failing Check
 
-## Best Practices
+Check output for specific failure:
 
-### Single Responsibility Principle
-
-Each class/method should have one clear purpose:
-
-```php
-// ❌ BAD: Multiple responsibilities
-class UserService {
-    public function createUser() { }
-    public function sendEmail() { }
-    public function logActivity() { }
-}
-
-// ✅ GOOD: Single responsibility
-class UserRegistrationService {
-    public function register(User $user): void { }
-}
-
-class EmailService {
-    public function send(Email $email): void { }
-}
+```
+❌ CI checks failed:
+  - phpinsights: Complexity score too low (93.5% < 94%)
 ```
 
-### Dependency Inversion
+### Step 3: Use Specialized Skill
 
-Depend on abstractions, not concretions:
+Based on failure type, use appropriate skill:
 
-```php
-// ❌ BAD: Depends on concrete class
-class UserService {
-    private MySQLUserRepository $repository;
-}
+| Failure Pattern | Skill to Use |
+|----------------|--------------|
+| "Complexity score too low" | complexity-management |
+| "Deptrac violations" | deptrac-fixer |
+| "must not depend on" | deptrac-fixer |
+| "tests failed" | testing-workflow |
+| "Psalm found errors" | Fix type errors directly |
+| "escaped mutants" | testing-workflow |
 
-// ✅ GOOD: Depends on interface
-class UserService {
-    private UserRepositoryInterface $repository;
-}
+### Step 4: Re-run CI
+
+```bash
+make ci
 ```
 
-### Keep Methods Small
+Repeat until: "✅ CI checks successfully passed!"
 
-Target: Under 20 lines per method
+## Constraints (Parameters)
 
-### Use Type Hints
+### NEVER
 
-```php
-// ✅ GOOD: Explicit types
-public function processUser(User $user): ProcessedUser
-{
-    // ...
-}
+- Lower quality thresholds in config files (`phpinsights.php`, `infection.json5`, etc.)
+- Skip failing checks to "save time"
+- Commit code without all CI checks passing
+- Modify `deptrac.yaml` to allow violations (fix code, not config)
+- Disable security checks
+
+### ALWAYS
+
+- Fix code to meet standards (not config to meet code)
+- Run `make ci` before creating commits
+- Use specialized skills for specific quality issues
+- Maintain 100% test coverage
+- Keep cyclomatic complexity low (target: < 5 per method)
+- Respect hexagonal architecture boundaries
+
+## Format (Output)
+
+### Expected CI Output
+
+```
+✅ CI checks successfully passed!
 ```
 
-## Success Criteria
+### Expected PHPInsights Output
 
-- PHPInsights: All scores meet or exceed thresholds
-- PHPMD: No high complexity warnings
-- Psalm: Zero errors
-- Deptrac: Zero architecture violations
-- PHP CS Fixer: Clean code style
-- CI: "✅ CI checks successfully passed!"
+```
+[CODE] 100.0 pts       ✅ Target: 100%
+[COMPLEXITY] 94.0 pts  ✅ Target: 94%
+[ARCHITECTURE] 100 pts ✅ Target: 100%
+[STYLE] 100.0 pts      ✅ Target: 100%
+```
 
-## Remember
+### Expected Deptrac Output
 
-**NEVER** modify quality thresholds downward in:
+```
+✅ No violations found
+```
 
-- `phpinsights.php`
-- `phpinsights-tests.php`
-- `infection.json5`
-- `phpunit.xml.dist`
+### Expected Infection Output
 
-**ALWAYS** fix the code, never lower the standards.
+```
+Mutation Score Indicator (MSI): 100%
+```
+
+## Verification Checklist
+
+After using this skill:
+
+- [ ] Identified which quality check is failing
+- [ ] Selected appropriate specialized skill for the issue
+- [ ] Ready to execute specialized skill workflow
+- [ ] Understand which threshold applies to the failure
+- [ ] Know the command to re-run the check after fixes
+
+## Related Skills
+
+- [ci-workflow](../ci-workflow/SKILL.md) - Run comprehensive CI validation
+- [complexity-management](../complexity-management/SKILL.md) - Reduce complexity, improve quality
+- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Fix architectural violations
+- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Understand DDD patterns
+- [testing-workflow](../testing-workflow/SKILL.md) - Fix test failures, improve coverage
+
+## Reference Documentation
+
+For detailed examples and patterns, see:
+
+- **Refactoring patterns** → complexity-management skill
+- **Architecture rules** → implementing-ddd-architecture skill
+- **Layer boundaries** → deptrac-fixer skill
+- **Testing strategies** → testing-workflow skill
