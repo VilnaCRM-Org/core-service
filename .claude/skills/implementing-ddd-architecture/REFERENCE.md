@@ -1113,15 +1113,15 @@ Factories are automatically registered in `config/services.yaml`:
 
 ```yaml
 services:
-    _defaults:
-        autowire: true
-        autoconfigure: true
+  _defaults:
+    autowire: true
+    autoconfigure: true
 
-    # All factories in src/ are auto-registered
-    App\:
-        resource: '../src/'
-        exclude:
-            - '../src/*/Domain/Entity/'
+  # All factories in src/ are auto-registered
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/*/Domain/Entity/'
 ```
 
 ### Testing with Factories
@@ -1210,20 +1210,24 @@ final readonly class OrderFactory implements OrderFactoryInterface
 #### ✅ CREATE Value Objects When:
 
 1. **Complex Validation Rules**
+
    - Example: `Email` with format validation
    - Example: `Money` with currency and amount validation
    - Example: `PhoneNumber` with international format handling
 
 2. **Domain-Specific Behavior**
+
    - Example: `Money::add()`, `Money::multiply()`
    - Example: `Address::isSameCountry()`
    - Example: `DateRange::overlaps()`
 
 3. **Shared Across Multiple Entities**
+
    - Example: `Money` used in Order, Invoice, Payment
    - Example: `Address` used in Customer, Warehouse, Supplier
 
 4. **Immutability is Critical**
+
    - Example: `OrderId`, `CustomerId` (identity values)
    - Example: `EmailAddress` (shouldn't change after validation)
 
@@ -1235,16 +1239,19 @@ final readonly class OrderFactory implements OrderFactoryInterface
 #### ❌ DON'T Create Value Objects When:
 
 1. **Simple String Fields Without Validation**
+
    - Example: `string $leadSource` (just a label)
    - Example: `string $notes` (free text)
    - Example: `string $reference` (no validation needed)
 
 2. **Boolean Flags**
+
    - Example: `bool $confirmed`
    - Example: `bool $isActive`
    - **Exception**: Use Value Object if you need more than 2 states (use enum/Value Object pattern)
 
 3. **Simple Numeric Fields**
+
    - Example: `int $quantity` (if no special rules)
    - Example: `float $discount` (if just a percentage)
    - **Exception**: Use Value Object if there's validation or behavior
@@ -1282,6 +1289,7 @@ class Customer
 ```
 
 **Why this is pragmatic**:
+
 - Uses primitives for simple fields
 - Only uses Value Object for `Ulid` (special domain concept)
 - Validation happens in Application layer (DTOs) or via type hints
@@ -1309,6 +1317,7 @@ class Customer
 ```
 
 **Why this is bad**:
+
 - Too many classes to maintain
 - No actual business value added
 - Harder to understand and test
@@ -1390,6 +1399,7 @@ App\Core\Customer\Application\DTO\CustomerCreate:
 ```
 
 **DTO Class** (simple properties, no annotations):
+
 ```php
 // src/Core/Customer/Application/DTO/CustomerCreate.php
 namespace App\Core\Customer\Application\DTO;
@@ -1407,6 +1417,7 @@ final class CustomerCreate
 ```
 
 **Custom Validators** (when needed):
+
 ```php
 // src/Shared/Application/Validator/UniqueEmail.php
 namespace App\Shared\Application\Validator;
@@ -1461,11 +1472,13 @@ public function changeStatus(CustomerStatus $newStatus): void
 ### Key Differences from "Pure" DDD
 
 **This codebase does NOT:**
+
 - ❌ Use Value Objects with validation in constructors
 - ❌ Use annotation-based validation on DTOs
 - ❌ Validate format/structure in domain entities
 
 **This codebase DOES:**
+
 - ✅ Use YAML configuration for all validation rules
 - ✅ Keep domain entities simple with primitives
 - ✅ Validate at the Application boundary (DTOs)
@@ -1475,12 +1488,14 @@ public function changeStatus(CustomerStatus $newStatus): void
 ### Summary: Be Pragmatic!
 
 ✅ **DO**:
+
 - Use primitives by default
 - Add Value Objects when you need validation + behavior
 - Follow the actual codebase patterns (primitives for Customer fields)
 - Keep it simple (YAGNI principle)
 
 ❌ **DON'T**:
+
 - Wrap every field in a Value Object "because DDD says so"
 - Create Value Objects without clear benefit
 - Add complexity for theoretical future needs

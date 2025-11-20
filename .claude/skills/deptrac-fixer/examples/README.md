@@ -15,27 +15,33 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 ## Examples Overview
 
 ### 1. [01-domain-symfony-validation.php](01-domain-symfony-validation.php)
+
 **Fixing Domain → Symfony validator constraint violations**
 
 **Key Patterns:**
+
 - ❌ BEFORE: Symfony validation attributes in domain entity
 - ✅ AFTER: Primitives in entity + YAML validation in Application layer
 - Shows: Custom validators (UniqueEmail, Initials), DTO validation config
 - Demonstrates: Where validation belongs (config/validator/Customer.yaml)
 
 ### 2. [02-domain-doctrine-annotations.php](02-domain-doctrine-annotations.php)
+
 **Removing Doctrine ODM annotations from domain entities**
 
 **Key Patterns:**
+
 - ❌ BEFORE: Doctrine annotations on entity properties
 - ✅ AFTER: Pure PHP entity with primitives, XML mappings in config/doctrine/
 - Shows: Factory pattern (ProductFactoryInterface), domain collections (TagCollection)
 - Demonstrates: When to use Value Objects (Money with operations vs primitives)
 
 ### 3. [03-domain-api-platform.php](03-domain-api-platform.php)
+
 **Moving API Platform configuration out of domain**
 
 **Key Patterns:**
+
 - ❌ BEFORE: API Platform attributes on domain entity
 - ✅ AFTER Option 1: YAML configuration (recommended for simple CRUD)
 - ✅ AFTER Option 2: Application DTOs (for complex transformations)
@@ -43,18 +49,22 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 - Demonstrates: Actual Customer entity pattern from codebase
 
 ### 4. [04-infrastructure-handler.php](04-infrastructure-handler.php)
+
 **Using bus pattern instead of direct handler calls**
 
 **Key Patterns:**
+
 - ❌ BEFORE: Infrastructure directly instantiating domain entities
 - ✅ AFTER: Command bus + Factory pattern
 - Shows: CommandBusInterface injection, CustomerFactoryInterface usage
 - Demonstrates: Proper layer separation with command/handler pattern
 
 ### 5. [05-complete-entity-refactoring.php](05-complete-entity-refactoring.php)
+
 **Full entity refactoring with all patterns combined**
 
 **Key Patterns:**
+
 - Complete example combining all fixes
 - Shows real-world refactoring workflow
 - Demonstrates all pragmatic patterns together
@@ -69,24 +79,26 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 
 ## Quick Reference
 
-| Violation Pattern          | Example | Key Solution                                   |
-| -------------------------- | ------- | ---------------------------------------------- |
+| Violation Pattern          | Example | Key Solution                                  |
+| -------------------------- | ------- | --------------------------------------------- |
 | Domain → Symfony Validator | 01      | Primitives + YAML validation (no annotations) |
-| Domain → Doctrine          | 02      | XML mappings + Factory pattern + Primitives    |
-| Domain → API Platform      | 03      | YAML config + Primitives + No DTO annotations  |
-| Infrastructure → Handler   | 04      | CommandBus + Factory injection                 |
-| All Combined               | 05      | Complete pragmatic workflow                    |
+| Domain → Doctrine          | 02      | XML mappings + Factory pattern + Primitives   |
+| Domain → API Platform      | 03      | YAML config + Primitives + No DTO annotations |
+| Infrastructure → Handler   | 04      | CommandBus + Factory injection                |
+| All Combined               | 05      | Complete pragmatic workflow                   |
 
 ## Validation Strategy (CRITICAL)
 
 **✅ CORRECT - Three-Layer Validation:**
 
 1. **Application Layer (DTOs)** - Format/structure validation
+
    - Location: `config/validator/Customer.yaml`
    - Rules: NotBlank, Email, Length, custom validators
    - NO annotations on DTO classes!
 
 2. **Domain Layer (Entities)** - Business invariants only
+
    - Location: Entity business methods
    - Rules: State transitions, business rules
    - NO validation in constructors (trust DTO layer)!
@@ -96,6 +108,7 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
    - Examples: UniqueEmail, Initials, business-specific rules
 
 **❌ WRONG:**
+
 ```php
 // Don't do this in DTOs
 final class CustomerCreate {
@@ -114,6 +127,7 @@ final readonly class Email {
 ```
 
 **✅ CORRECT:**
+
 ```php
 // Simple DTO with no annotations
 final class CustomerCreate {
@@ -160,6 +174,7 @@ final readonly class CreateCustomerHandler {
 ```
 
 **❌ WRONG:**
+
 ```php
 // Don't use 'new' in production code
 $customer = new Customer($initials, $email, $phone);  // ❌
@@ -187,6 +202,7 @@ $customer = Customer::create($initials, $email);  // ❌
 4. **Validation-only fields** - Use YAML config instead
 
 **Decision Tree:**
+
 ```
 Does the field need domain behavior (methods/operations)?
 ├─ YES → Consider Value Object (e.g., Money::add())
@@ -232,6 +248,7 @@ make phpinsights
 ## Real Codebase Reference
 
 All examples match patterns from:
+
 - **Entity**: `src/Core/Customer/Domain/Entity/Customer.php`
 - **Validation**: `config/validator/Customer.yaml`
 - **Factory**: `src/Core/Customer/Domain/Factory/CustomerFactoryInterface.php`
