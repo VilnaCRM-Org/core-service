@@ -25,6 +25,7 @@ This project uses **modular skills** for specialized tasks. Skills are automatic
 | **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields         |
 | **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                |
 | **Sync documentation**     | `documentation-sync`            | After any code changes                    |
+| **Update C4 diagrams**     | `structurizr-architecture-sync` | After architectural changes               |
 | **Quality overview**       | `quality-standards`             | Understanding protected thresholds        |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
@@ -284,8 +285,9 @@ graph LR
 2. **Create API Endpoint** → Use `api-platform-crud` skill
 3. **Configure Database** → Use `database-migrations` skill
 4. **Write Tests** → Use `testing-workflow` skill
-5. **Update Documentation** → Use `documentation-sync` skill
-6. **Run CI Validation** → Use `ci-workflow` skill
+5. **Update C4 Diagrams** → Use `structurizr-architecture-sync` skill
+6. **Update Documentation** → Use `documentation-sync` skill
+7. **Run CI Validation** → Use `ci-workflow` skill
 
 ### Fixing Quality Issues
 
@@ -301,7 +303,8 @@ graph LR
 1. Fetch PR comments → Use `code-review` skill
 2. Address feedback → Use relevant implementation skills
 3. Run quality checks → Use `ci-workflow` skill
-4. Update documentation → Use `documentation-sync` skill
+4. Update C4 diagrams (if architecture changed) → Use `structurizr-architecture-sync` skill
+5. Update documentation → Use `documentation-sync` skill
 
 ## 📐 Important Patterns
 
@@ -334,6 +337,18 @@ graph LR
 2. Record events: `$this->record(new CustomerCreatedEvent(...))`
 3. Pull events in handler: `$events = $aggregate->pullDomainEvents()`
 4. Dispatch events via event bus
+
+### Updating Architecture Documentation (C4 Model)
+
+**Skills**: `structurizr-architecture-sync`
+
+1. After adding components (handlers, entities, repositories), update `workspace.dsl`
+2. Add component definition in appropriate group (Application/Domain/Infrastructure)
+3. Add relationships showing component dependencies
+4. Validate DSL syntax: `structurizr-cli validate workspace.dsl`
+5. Generate diagrams: `docker run -p 8080:8080 -v $(pwd):/usr/local/structurizr structurizr/lite`
+
+**See**: `.claude/skills/structurizr-architecture-sync/SKILL.md` for complete workflow
 
 ### Custom API Filters
 
@@ -396,6 +411,7 @@ Key environment variables are defined in `.env` and `.env.test`:
 - **Kernel**: `src/Shared/Kernel.php`
 - **Preload**: `config/preload.php`
 - **API Docs**: `https://localhost/api/docs` (after `make start`)
+- **Architecture Diagrams**: `workspace.dsl` (Structurizr C4 model)
 - **Git Hooks**: Configured in `captainhook.json`
 - **Commits**: Conventional commits enforced
 
