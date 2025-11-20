@@ -45,9 +45,14 @@ final class Product extends AggregateRoot
     private ?\DateTimeImmutable $publishedAt = null;
 
     /**
-     * Constructor is private - use named constructor for clarity
+     * Constructor - public to allow Factory classes to instantiate
+     *
+     * NOTE: In production code, this should be called via ProductFactory,
+     * not directly. Direct instantiation with 'new' is only acceptable in tests.
+     *
+     * @see ProductFactoryInterface
      */
-    private function __construct(
+    public function __construct(
         Ulid $id,
         ProductName $name,
         Money $price,
@@ -59,32 +64,13 @@ final class Product extends AggregateRoot
         $this->price = $price;
         $this->status = $status;
         $this->createdAt = $createdAt;
-    }
 
-    /**
-     * Named constructor - expresses business intent
-     */
-    public static function create(
-        Ulid $id,
-        ProductName $name,
-        Money $price
-    ): self {
-        $product = new self(
-            $id,
-            $name,
-            $price,
-            ProductStatus::draft(),
-            new \DateTimeImmutable()
-        );
-
-        // Record domain event
-        $product->record(new ProductCreated(
-            $product->id,
-            $product->name,
-            $product->price
+        // Record domain event when product is created
+        $this->record(new ProductCreated(
+            $this->id,
+            $this->name,
+            $this->price
         ));
-
-        return $product;
     }
 
     /**

@@ -74,6 +74,7 @@ use App\Catalog\Application\Command\CreateProductCommand;
 use App\Catalog\Application\Command\UpdateProductPriceCommand;
 use App\Catalog\Application\Command\PublishProductCommand;
 use App\Catalog\Domain\Entity\Product;
+use App\Catalog\Domain\Factory\ProductFactoryInterface;
 use App\Catalog\Domain\Repository\ProductRepositoryInterface;
 use App\Catalog\Domain\ValueObject\Money;
 use App\Catalog\Domain\ValueObject\ProductName;
@@ -89,7 +90,7 @@ use App\Catalog\Domain\Exception\ProductNotFoundException;
  * Responsibilities:
  * - Orchestrate the use case
  * - Transform command data to domain objects
- * - Call domain methods
+ * - Call domain factory
  * - Persist via repository
  *
  * NOT responsible for:
@@ -99,7 +100,8 @@ use App\Catalog\Domain\Exception\ProductNotFoundException;
 final readonly class CreateProductHandler implements CommandHandlerInterface
 {
     public function __construct(
-        private ProductRepositoryInterface $productRepository
+        private ProductRepositoryInterface $productRepository,
+        private ProductFactoryInterface $productFactory  // ✅ Inject factory
     ) {}
 
     public function __invoke(CreateProductCommand $command): void
@@ -108,8 +110,9 @@ final readonly class CreateProductHandler implements CommandHandlerInterface
         $name = new ProductName($command->name);
         $price = new Money($command->priceInCents, $command->currency);
 
-        // Call domain factory method - business logic is in the domain
-        $product = Product::create(
+        // ✅ Use factory instead of static method or 'new'
+        // Factory encapsulates creation logic and improves testability
+        $product = $this->productFactory->create(
             $command->id,
             $name,
             $price

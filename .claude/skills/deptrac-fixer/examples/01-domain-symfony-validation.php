@@ -289,13 +289,48 @@ final class InvalidLoyaltyPointsException extends DomainException
 }
 
 // ============================================================================
-// USAGE IN COMMAND HANDLER
+// DOMAIN FACTORY - Encapsulates entity creation (RECOMMENDED)
+// ============================================================================
+
+namespace App\Customer\Domain\Factory;
+
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\ValueObject\CustomerId;
+use App\Customer\Domain\ValueObject\Email;
+use App\Customer\Domain\ValueObject\CustomerName;
+use App\Customer\Domain\ValueObject\LoyaltyPoints;
+
+interface CustomerFactoryInterface
+{
+    public function create(
+        CustomerId $id,
+        Email $email,
+        CustomerName $name,
+        LoyaltyPoints $loyaltyPoints
+    ): Customer;
+}
+
+final readonly class CustomerFactory implements CustomerFactoryInterface
+{
+    public function create(
+        CustomerId $id,
+        Email $email,
+        CustomerName $name,
+        LoyaltyPoints $loyaltyPoints
+    ): Customer {
+        // Encapsulates the 'new' keyword - single point of change
+        return new Customer($id, $email, $name, $loyaltyPoints);
+    }
+}
+
+// ============================================================================
+// USAGE IN COMMAND HANDLER (WITH FACTORY PATTERN)
 // ============================================================================
 
 namespace App\Customer\Application\CommandHandler;
 
 use App\Customer\Application\Command\CreateCustomerCommand;
-use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Customer\Domain\ValueObject\CustomerId;
 use App\Customer\Domain\ValueObject\Email;
@@ -306,14 +341,15 @@ use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 final readonly class CreateCustomerHandler implements CommandHandlerInterface
 {
     public function __construct(
-        private CustomerRepositoryInterface $repository
+        private CustomerRepositoryInterface $repository,
+        private CustomerFactoryInterface $customerFactory  // ✅ Inject factory
     ) {
     }
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        // Transform primitives to Value Objects (validation happens here)
-        $customer = new Customer(
+        // ✅ Use factory instead of 'new' - better encapsulation and testability
+        $customer = $this->customerFactory->create(
             new CustomerId($command->id),
             new Email($command->email),             // Validates email format
             new CustomerName($command->name),       // Validates length
@@ -323,6 +359,18 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
         $this->repository->save($customer);
     }
 }
+
+/**
+ * WHY USE FACTORIES?
+ *
+ * ✅ Single Responsibility: Factory encapsulates object creation logic
+ * ✅ Testability: Easy to mock factories in tests
+ * ✅ Flexibility: Can change construction logic without changing handlers
+ * ✅ DDD Pattern: Separates creation concerns from business logic
+ *
+ * NOTE: Using 'new' directly in tests is acceptable for simplicity.
+ * In production code, prefer factories for complex domain objects.
+ */
 
 // ============================================================================
 // OPTIONAL: Application Layer DTO with Symfony Validation (for API input)
