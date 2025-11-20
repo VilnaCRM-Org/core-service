@@ -13,6 +13,7 @@ This document provides comprehensive explanations and step-by-step workflows ref
 - [Doctrine Configuration](#doctrine-configuration)
 - [Event-Driven Architecture Details](#event-driven-architecture-details)
 - [Repository Pattern Details](#repository-pattern-details)
+- [Factory Pattern for Entity Creation](#factory-pattern-for-entity-creation)
 - [Anti-Patterns Deep Dive](#anti-patterns-deep-dive)
 
 ---
@@ -134,7 +135,8 @@ use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 final readonly class CreateCustomerHandler implements CommandHandlerInterface
 {
     public function __construct(
-        private CustomerRepositoryInterface $repository
+        private CustomerRepositoryInterface $repository,
+        private CustomerFactoryInterface $customerFactory  // ✅ Inject factory
     ) {}
 
     public function __invoke(CreateCustomerCommand $command): void
@@ -142,8 +144,9 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
         // Transform primitive data to domain value objects
         $email = new Email($command->email);
 
-        // Call domain factory/constructor - business logic is in the domain
-        $customer = new Customer(
+        // ✅ Use factory instead of 'new' for entity creation
+        // Factory encapsulates construction logic and improves testability
+        $customer = $this->customerFactory->create(
             $command->id,
             $email,
             $command->name
@@ -967,6 +970,232 @@ $criteria = new Criteria(
 );
 
 $products = $repository->findByCriteria($criteria);
+```
+
+---
+
+## Factory Pattern for Entity Creation
+
+### Why Use Factories?
+
+**Key Principle**: In production code, prefer **Factory classes with interfaces** over direct `new` keyword or static factory methods for creating domain entities and complex value objects.
+
+**Benefits**:
+
+- ✅ **Single Responsibility**: Factory encapsulates object creation logic
+- ✅ **Testability**: Easy to mock factories in unit tests
+- ✅ **Flexibility**: Can change construction logic without modifying handlers
+- ✅ **DDD Pattern**: Separates creation concerns from business logic
+- ✅ **Dependency Injection**: Follows SOLID principles with interfaces
+
+**When to Use Factories**:
+
+- Creating domain entities (aggregates)
+- Complex value objects with dependencies
+- Objects requiring multi-step construction
+- When you need to test creation logic separately
+
+**When NOT to Use Factories**:
+
+- ✅ In **tests**: Use `new` directly for simplicity
+- ✅ Simple value objects without dependencies (e.g., `new Email($value)`)
+- ✅ Inside factory classes themselves (the factory encapsulates `new`)
+
+### Factory Interface
+
+**Location**: `src/{Context}/Domain/Factory/{Entity}FactoryInterface.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Customer\Domain\Factory;
+
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\ValueObject\Email;
+use App\Customer\Domain\ValueObject\CustomerName;
+use App\Shared\Domain\ValueObject\Ulid;
+
+interface CustomerFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        Email $email,
+        CustomerName $name
+    ): Customer;
+}
+```
+
+### Factory Implementation
+
+**Location**: `src/{Context}/Domain/Factory/{Entity}Factory.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Customer\Domain\Factory;
+
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\ValueObject\Email;
+use App\Customer\Domain\ValueObject\CustomerName;
+use App\Shared\Domain\ValueObject\Ulid;
+
+final readonly class CustomerFactory implements CustomerFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        Email $email,
+        CustomerName $name
+    ): Customer {
+        // Factory encapsulates the 'new' keyword
+        // This is the ONLY place where we use 'new Customer()'
+        return new Customer($id, $email, $name);
+    }
+}
+```
+
+### Using Factories in Command Handlers
+
+**❌ BAD - Direct instantiation**:
+
+```php
+final readonly class CreateCustomerHandler implements CommandHandlerInterface
+{
+    public function __construct(
+        private CustomerRepositoryInterface $repository
+    ) {}
+
+    public function __invoke(CreateCustomerCommand $command): void
+    {
+        // ❌ Direct use of 'new' - tightly coupled, harder to test
+        $customer = new Customer(
+            new Ulid($command->id),
+            new Email($command->email),
+            new CustomerName($command->name)
+        );
+
+        $this->repository->save($customer);
+    }
+}
+```
+
+**✅ GOOD - Factory injection**:
+
+```php
+final readonly class CreateCustomerHandler implements CommandHandlerInterface
+{
+    public function __construct(
+        private CustomerRepositoryInterface $repository,
+        private CustomerFactoryInterface $customerFactory  // ✅ Inject factory
+    ) {}
+
+    public function __invoke(CreateCustomerCommand $command): void
+    {
+        // ✅ Use factory - decoupled, easy to test and modify
+        $customer = $this->customerFactory->create(
+            new Ulid($command->id),
+            new Email($command->email),
+            new CustomerName($command->name)
+        );
+
+        $this->repository->save($customer);
+    }
+}
+```
+
+### Auto-Registration
+
+Factories are automatically registered in `config/services.yaml`:
+
+```yaml
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # All factories in src/ are auto-registered
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/*/Domain/Entity/'
+```
+
+### Testing with Factories
+
+**Production code**: Use factories
+
+```php
+final readonly class CreateCustomerHandler implements CommandHandlerInterface
+{
+    public function __construct(
+        private CustomerFactoryInterface $customerFactory
+    ) {}
+
+    public function __invoke(CreateCustomerCommand $command): void
+    {
+        $customer = $this->customerFactory->create(...);
+        // ...
+    }
+}
+```
+
+**Test code**: Use `new` directly for simplicity
+
+```php
+final class CustomerRepositoryTest extends TestCase
+{
+    public function testSaveAndRetrieveCustomer(): void
+    {
+        // ✅ In tests, using 'new' is acceptable for simplicity
+        $customer = new Customer(
+            new Ulid('01234567-89ab-cdef-0123-456789abcdef'),
+            new Email('test@example.com'),
+            new CustomerName('John Doe')
+        );
+
+        $this->repository->save($customer);
+        $retrieved = $this->repository->findById($customer->id());
+
+        self::assertEquals($customer->id(), $retrieved->id());
+    }
+}
+```
+
+### Complex Factory Example
+
+For entities with dependencies or complex setup:
+
+```php
+final readonly class OrderFactory implements OrderFactoryInterface
+{
+    public function __construct(
+        private UlidFactoryInterface $ulidFactory,
+        private ClockInterface $clock
+    ) {}
+
+    public function create(
+        CustomerId $customerId,
+        array $items,
+        ShippingAddress $shippingAddress
+    ): Order {
+        $orderId = $this->ulidFactory->create();
+        $createdAt = $this->clock->now();
+
+        // Complex initialization logic encapsulated in factory
+        $order = new Order($orderId, $customerId, $createdAt);
+
+        foreach ($items as $item) {
+            $order->addItem($item);
+        }
+
+        $order->setShippingAddress($shippingAddress);
+
+        return $order;
+    }
+}
 ```
 
 ---

@@ -127,21 +127,14 @@ final class Customer extends AggregateRoot
     private Email $email;
     private CustomerName $name;
 
-    private function __construct(Ulid $id, Email $email, CustomerName $name)
+    public function __construct(Ulid $id, Email $email, CustomerName $name)
     {
         $this->id = $id;
         $this->email = $email;
         $this->name = $name;
-    }
-
-    public static function create(Ulid $id, Email $email, CustomerName $name): self
-    {
-        $customer = new self($id, $email, $name);
 
         // Record domain event - will be dispatched after persistence
-        $customer->record(new CustomerCreated($id, $email, $name));
-
-        return $customer;
+        $this->record(new CustomerCreated($id, $email, $name));
     }
 
     public function changeEmail(Email $newEmail): void
@@ -405,13 +398,46 @@ final class DomainEventPublisher
 // ============================================================================
 
 // ============================================================================
-// COMMAND HANDLER - Uses repository (no direct Doctrine)
+// DOMAIN FACTORY - Encapsulates entity creation
+// ============================================================================
+
+namespace App\Customer\Domain\Factory;
+
+use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\ValueObject\Email;
+use App\Customer\Domain\ValueObject\CustomerName;
+use App\Shared\Domain\ValueObject\Ulid;
+
+interface CustomerFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        Email $email,
+        CustomerName $name
+    ): Customer;
+}
+
+final readonly class CustomerFactory implements CustomerFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        Email $email,
+        CustomerName $name
+    ): Customer {
+        // Factory encapsulates the 'new' keyword
+        // Entity constructor records the domain event
+        return new Customer($id, $email, $name);
+    }
+}
+
+// ============================================================================
+// COMMAND HANDLER - Uses factory and repository (no direct Doctrine)
 // ============================================================================
 
 namespace App\Customer\Application\CommandHandler;
 
 use App\Customer\Application\Command\CreateCustomerCommand;
-use App\Customer\Domain\Entity\Customer;
+use App\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Customer\Domain\ValueObject\Email;
 use App\Customer\Domain\ValueObject\CustomerName;
@@ -420,14 +446,16 @@ use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 final readonly class CreateCustomerHandler implements CommandHandlerInterface
 {
     public function __construct(
-        private CustomerRepositoryInterface $repository
+        private CustomerRepositoryInterface $repository,
+        private CustomerFactoryInterface $customerFactory  // ✅ Inject factory
     ) {
     }
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        // Create domain entity (events are recorded internally)
-        $customer = Customer::create(
+        // ✅ Use factory instead of 'new' or static methods
+        // Events are recorded in entity constructor
+        $customer = $this->customerFactory->create(
             $command->id,
             new Email($command->email),
             new CustomerName($command->name)

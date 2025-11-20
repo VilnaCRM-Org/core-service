@@ -1178,11 +1178,18 @@ final readonly class CustomerProcessor implements ProcessorInterface
 // Command Handler handles everything
 final readonly class CreateCustomerCommandHandler implements CommandHandlerInterface
 {
+    public function __construct(
+        private CustomerRepositoryInterface $repository,
+        private CustomerFactoryInterface $customerFactory,
+        private EventPublisherInterface $eventPublisher
+    ) {}
+
     public function __invoke(CreateCustomerCommand $command): void
     {
         $email = Email::fromString($command->email); // Validates
 
-        $customer = Customer::create(
+        // ✅ Use factory instead of static method
+        $customer = $this->customerFactory->create(
             CustomerId::fromString($command->id),
             $email,
             $this->emailUniquenessChecker

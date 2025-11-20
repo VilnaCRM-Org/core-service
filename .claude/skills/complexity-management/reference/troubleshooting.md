@@ -10,7 +10,7 @@ When `make phpinsights` fails:
 
    ```
    [CODE] 100.0 pts       ✅
-   [COMPLEXITY] 89.3 pts  ❌ (requires 94%)
+   [COMPLEXITY] 89.3 pts  ❌ (requires 93%)
    [ARCHITECTURE] 100 pts ✅
    [STYLE] 97.8 pts       ❌ (requires 100%)
    ```

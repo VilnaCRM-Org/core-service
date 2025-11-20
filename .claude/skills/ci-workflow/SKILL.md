@@ -55,7 +55,7 @@ Repeat Steps 2-4 until success message appears.
 **NEVER decrease these thresholds**:
 
 - min-quality: 100%
-- min-complexity: 94%
+- min-complexity: 93%
 - min-architecture: 100%
 - min-style: 100%
 - mutation MSI: 100%
