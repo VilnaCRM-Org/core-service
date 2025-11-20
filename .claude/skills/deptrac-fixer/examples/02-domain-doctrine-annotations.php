@@ -53,15 +53,20 @@ class ProductBefore
 }
 
 // ============================================================================
-// AFTER (CORRECT) - Pure domain entity without Doctrine imports
+// AFTER (CORRECT) - Pure domain entity without Doctrine imports (PRAGMATIC)
 // ============================================================================
 
+/**
+ * PRAGMATIC APPROACH:
+ * - Use primitives for simple fields (string $name, string $description)
+ * - Use Value Objects ONLY when needed (Money has operations, TagCollection)
+ * - No static factory methods - use injectable Factory instead
+ * - Entity constructor is public to allow Factory to instantiate
+ */
 namespace App\Product\Domain\Entity;
 
-use App\Product\Domain\ValueObject\Money;
-use App\Product\Domain\ValueObject\ProductName;
-use App\Product\Domain\ValueObject\ProductDescription;
-use App\Product\Domain\Collection\TagCollection;
+use App\Product\Domain\ValueObject\Money;  // ✅ VO - has operations (add, subtract)
+use App\Product\Domain\Collection\TagCollection;  // ✅ Domain collection
 use App\Product\Domain\Event\ProductCreated;
 use App\Shared\Domain\Aggregate\AggregateRoot;
 use App\Shared\Domain\ValueObject\Ulid;
@@ -69,17 +74,25 @@ use App\Shared\Domain\ValueObject\Ulid;
 final class Product extends AggregateRoot
 {
     private Ulid $id;
-    private ProductName $name;
-    private ?ProductDescription $description;
-    private Money $price;
-    private bool $active;
+    private string $name;                      // ✅ Primitive - validated in YAML
+    private ?string $description;              // ✅ Primitive - just text
+    private Money $price;                      // ✅ VO - has operations (add, subtract)
+    private bool $active;                      // ✅ Primitive - simple boolean
     private \DateTimeImmutable $createdAt;
     private TagCollection $tags;
 
-    private function __construct(
+    /**
+     * Constructor is public to allow Factory classes to instantiate
+     *
+     * NOTE: In production code, this should be called via ProductFactory,
+     * not directly. Direct instantiation with 'new' is only acceptable in tests.
+     *
+     * @see ProductFactoryInterface
+     */
+    public function __construct(
         Ulid $id,
-        ProductName $name,
-        ?ProductDescription $description,
+        string $name,
+        ?string $description,
         Money $price,
         bool $active,
         \DateTimeImmutable $createdAt
@@ -91,27 +104,9 @@ final class Product extends AggregateRoot
         $this->active = $active;
         $this->createdAt = $createdAt;
         $this->tags = new TagCollection();
-    }
 
-    // Named constructor - clear intent
-    public static function create(
-        Ulid $id,
-        ProductName $name,
-        ?ProductDescription $description,
-        Money $price
-    ): self {
-        $product = new self(
-            $id,
-            $name,
-            $description,
-            $price,
-            true, // Active by default
-            new \DateTimeImmutable()
-        );
-
-        $product->record(new ProductCreated($id, $name, $price));
-
-        return $product;
+        // Record domain event
+        $this->record(new ProductCreated($id, $name, $price));
     }
 
     // Business methods
@@ -141,12 +136,17 @@ final class Product extends AggregateRoot
         return $this->id;
     }
 
-    public function name(): ProductName
+    public function name(): string  // ✅ Returns primitive
     {
         return $this->name;
     }
 
-    public function price(): Money
+    public function description(): ?string  // ✅ Returns primitive
+    {
+        return $this->description;
+    }
+
+    public function price(): Money  // ✅ Returns VO (has operations)
     {
         return $this->price;
     }
@@ -154,6 +154,77 @@ final class Product extends AggregateRoot
     public function tags(): TagCollection
     {
         return $this->tags;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+}
+
+// ============================================================================
+// FACTORY PATTERN (RECOMMENDED)
+// ============================================================================
+
+namespace App\Product\Domain\Factory;
+
+use App\Product\Domain\Entity\Product;
+use App\Product\Domain\ValueObject\Money;
+use App\Shared\Domain\ValueObject\Ulid;
+
+interface ProductFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        string $name,
+        ?string $description,
+        Money $price
+    ): Product;
+}
+
+final readonly class ProductFactory implements ProductFactoryInterface
+{
+    public function create(
+        Ulid $id,
+        string $name,
+        ?string $description,
+        Money $price
+    ): Product {
+        // Factory encapsulates the 'new' keyword
+        return new Product(
+            $id,
+            $name,
+            $description,
+            $price,
+            true, // Active by default
+            new \DateTimeImmutable()
+        );
+    }
+}
+
+// Usage in Command Handler
+namespace App\Product\Application\CommandHandler;
+
+use App\Product\Domain\Factory\ProductFactoryInterface;
+
+final readonly class CreateProductHandler implements CommandHandlerInterface
+{
+    public function __construct(
+        private ProductRepositoryInterface $repository,
+        private ProductFactoryInterface $productFactory  // ✅ Inject factory
+    ) {}
+
+    public function __invoke(CreateProductCommand $command): void
+    {
+        // ✅ Use factory instead of static method or 'new'
+        $product = $this->productFactory->create(
+            $command->id,
+            $command->name,
+            $command->description,
+            Money::fromCents($command->priceInCents, $command->currency)
+        );
+
+        $this->repository->save($product);
     }
 }
 
@@ -393,10 +464,15 @@ final class MongoDBProductRepository implements ProductRepositoryInterface
 }
 
 // ============================================================================
-// KEY POINTS:
-// 1. Domain entity has NO Doctrine imports
+// KEY POINTS (PRAGMATIC APPROACH):
+// 1. Domain entity has NO Doctrine imports (pure PHP)
 // 2. All persistence concerns are in XML mappings (config/doctrine/)
-// 3. Custom domain collections replace Doctrine Collections
-// 4. Value Objects are mapped as embedded documents
-// 5. Repository implementation (Infrastructure) uses Doctrine internally
+// 3. Use PRIMITIVES for simple fields (string $name, string $description)
+// 4. Use VALUE OBJECTS only when needed (Money has operations, TagCollection)
+// 5. Use FACTORY PATTERN (ProductFactoryInterface) not static methods
+// 6. Constructor is PUBLIC to allow factory instantiation
+// 7. Custom domain collections replace Doctrine Collections
+// 8. Value Objects with operations are mapped as embedded documents
+// 9. Repository implementation (Infrastructure) uses Doctrine internally
+// 10. Follow actual codebase patterns (see src/Core/Customer/Domain/Entity/)
 // ============================================================================

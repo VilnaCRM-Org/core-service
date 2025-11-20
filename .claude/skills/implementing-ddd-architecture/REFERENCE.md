@@ -14,6 +14,7 @@ This document provides comprehensive explanations and step-by-step workflows ref
 - [Event-Driven Architecture Details](#event-driven-architecture-details)
 - [Repository Pattern Details](#repository-pattern-details)
 - [Factory Pattern for Entity Creation](#factory-pattern-for-entity-creation)
+- [When to Use Value Objects (Pragmatic Approach)](#when-to-use-value-objects-pragmatic-approach)
 - [Anti-Patterns Deep Dive](#anti-patterns-deep-dive)
 
 ---
@@ -1197,6 +1198,295 @@ final readonly class OrderFactory implements OrderFactoryInterface
     }
 }
 ```
+
+---
+
+## When to Use Value Objects (Pragmatic Approach)
+
+### Decision Criteria
+
+**IMPORTANT**: Not every field needs to be a Value Object! Be pragmatic and consider the trade-offs.
+
+#### ✅ CREATE Value Objects When:
+
+1. **Complex Validation Rules**
+   - Example: `Email` with format validation
+   - Example: `Money` with currency and amount validation
+   - Example: `PhoneNumber` with international format handling
+
+2. **Domain-Specific Behavior**
+   - Example: `Money::add()`, `Money::multiply()`
+   - Example: `Address::isSameCountry()`
+   - Example: `DateRange::overlaps()`
+
+3. **Shared Across Multiple Entities**
+   - Example: `Money` used in Order, Invoice, Payment
+   - Example: `Address` used in Customer, Warehouse, Supplier
+
+4. **Immutability is Critical**
+   - Example: `OrderId`, `CustomerId` (identity values)
+   - Example: `EmailAddress` (shouldn't change after validation)
+
+5. **Special Domain Concept**
+   - Example: `ULID` (custom ID strategy)
+   - Example: `Percentage` (0-100 with business rules)
+   - Example: `Temperature` (with unit conversions)
+
+#### ❌ DON'T Create Value Objects When:
+
+1. **Simple String Fields Without Validation**
+   - Example: `string $leadSource` (just a label)
+   - Example: `string $notes` (free text)
+   - Example: `string $reference` (no validation needed)
+
+2. **Boolean Flags**
+   - Example: `bool $confirmed`
+   - Example: `bool $isActive`
+   - **Exception**: Use Value Object if you need more than 2 states (use enum/Value Object pattern)
+
+3. **Simple Numeric Fields**
+   - Example: `int $quantity` (if no special rules)
+   - Example: `float $discount` (if just a percentage)
+   - **Exception**: Use Value Object if there's validation or behavior
+
+4. **Fields That Will Never Have Business Logic**
+   - Example: `string $externalApiId` (just storage)
+   - Example: `string $rawData` (pass-through data)
+
+### Real Codebase Examples
+
+#### ✅ Actual Customer Entity (Pragmatic)
+
+```php
+// src/Core/Customer/Domain/Entity/Customer.php
+namespace App\Core\Customer\Domain\Entity;
+
+use App\Shared\Domain\ValueObject\UlidInterface;
+use DateTimeImmutable;
+
+class Customer
+{
+    public function __construct(
+        private string $initials,           // ✅ Simple string - no VO needed
+        private string $email,              // ✅ Simple string - validated elsewhere
+        private string $phone,              // ✅ Simple string - no complex logic
+        private string $leadSource,         // ✅ Simple label - no VO needed
+        private CustomerType $type,         // ✅ Entity reference - not a VO
+        private CustomerStatus $status,     // ✅ Entity reference - not a VO
+        private ?bool $confirmed,           // ✅ Simple boolean - no VO needed
+        private UlidInterface $ulid,        // ✅ Domain concept - VO is justified
+        private DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private DateTimeImmutable $updatedAt = new DateTimeImmutable(),
+    ) {}
+}
+```
+
+**Why this is pragmatic**:
+- Uses primitives for simple fields
+- Only uses Value Object for `Ulid` (special domain concept)
+- Validation happens in Application layer (DTOs) or via type hints
+- No unnecessary complexity
+
+#### ❌ Over-Engineered Customer (Too Many VOs)
+
+```php
+// DON'T DO THIS - Over-engineered!
+class Customer
+{
+    public function __construct(
+        private CustomerInitials $initials,     // ❌ Overkill - just a string
+        private EmailAddress $email,            // ⚠️ Only if you need validation
+        private PhoneNumber $phone,             // ⚠️ Only if you need formatting
+        private LeadSource $leadSource,         // ❌ Overkill - just a label
+        private CustomerType $type,
+        private CustomerStatus $status,
+        private ConfirmationStatus $confirmed,  // ❌ Overkill - just a bool
+        private CustomerId $id,
+        private CreatedAt $createdAt,           // ❌ Overkill - DateTimeImmutable is fine
+        private UpdatedAt $updatedAt,           // ❌ Overkill - DateTimeImmutable is fine
+    ) {}
+}
+```
+
+**Why this is bad**:
+- Too many classes to maintain
+- No actual business value added
+- Harder to understand and test
+- Violates YAGNI (You Aren't Gonna Need It)
+
+### Decision Tree
+
+```
+Does the field need complex validation?
+├─ YES → Consider Value Object
+└─ NO → Is there domain behavior (methods)?
+    ├─ YES → Consider Value Object
+    └─ NO → Is it shared across entities?
+        ├─ YES → Consider Value Object
+        └─ NO → Use primitive type
+```
+
+### Examples from the Codebase
+
+#### ✅ Good Use of Value Object: `UlidInterface`
+
+```php
+// Justified because:
+// - Special ID strategy (not UUID, not auto-increment)
+// - Needs conversion logic
+// - Used across all entities
+private UlidInterface $ulid;
+```
+
+#### ✅ Good Use of Primitive: `email`
+
+```php
+// Justified because:
+// - Validation happens in DTO layer (Symfony Validator)
+// - No special domain behavior needed
+// - Keep it simple
+private string $email;
+```
+
+#### ✅ Good Use of Entity Reference: `CustomerType`
+
+```php
+// Justified because:
+// - Has its own identity (it's an entity, not a value)
+// - Stored in separate collection
+// - Shared across customers
+private CustomerType $type;
+```
+
+### Validation Strategy
+
+**In this codebase, validation happens at the Application layer using YAML configuration**:
+
+#### 1. **Application Layer (DTOs)** - YAML-based Symfony Validator
+
+**Location**: `config/validator/Customer.yaml`
+
+```yaml
+# config/validator/Customer.yaml
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials: ~
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+    confirmed:
+      - Type: { type: 'bool', message: 'This value should be a boolean.' }
+```
+
+**DTO Class** (simple properties, no annotations):
+```php
+// src/Core/Customer/Application/DTO/CustomerCreate.php
+namespace App\Core\Customer\Application\DTO;
+
+final class CustomerCreate
+{
+    public string $initials;
+    public string $email;
+    public string $phone;
+    public string $leadSource;
+    public string $type;
+    public string $status;
+    public bool $confirmed;
+}
+```
+
+**Custom Validators** (when needed):
+```php
+// src/Shared/Application/Validator/UniqueEmail.php
+namespace App\Shared\Application\Validator;
+
+use Symfony\Component\Validator\Constraint;
+
+#[\Attribute]
+final class UniqueEmail extends Constraint
+{
+    public string $message = 'email.already.exists';
+}
+```
+
+#### 2. **Domain Layer (Entities)** - Simple primitives, no validation
+
+```php
+// src/Core/Customer/Domain/Entity/Customer.php
+class Customer
+{
+    public function __construct(
+        private string $email,  // No validation here!
+        private string $phone,  // Validation already done in DTO
+        // ...
+    ) {}
+
+    public function update(CustomerUpdate $updateData): void
+    {
+        // No validation - trust the input has been validated
+        $this->email = $updateData->newEmail;
+        $this->phone = $updateData->newPhone;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+}
+```
+
+#### 3. **Domain Layer (Entity Methods)** - Business invariants only
+
+```php
+// Only validate business rules, not input format
+public function changeStatus(CustomerStatus $newStatus): void
+{
+    // Business rule: can't change status if customer is deleted
+    if ($this->isDeleted()) {
+        throw new CannotChangeStatusOfDeletedCustomerException();
+    }
+
+    $this->status = $newStatus;
+    $this->updatedAt = new DateTimeImmutable();
+}
+```
+
+### Key Differences from "Pure" DDD
+
+**This codebase does NOT:**
+- ❌ Use Value Objects with validation in constructors
+- ❌ Use annotation-based validation on DTOs
+- ❌ Validate format/structure in domain entities
+
+**This codebase DOES:**
+- ✅ Use YAML configuration for all validation rules
+- ✅ Keep domain entities simple with primitives
+- ✅ Validate at the Application boundary (DTOs)
+- ✅ Use custom validators for business validation (`UniqueEmail`)
+- ✅ Only enforce business invariants in domain methods
+
+### Summary: Be Pragmatic!
+
+✅ **DO**:
+- Use primitives by default
+- Add Value Objects when you need validation + behavior
+- Follow the actual codebase patterns (primitives for Customer fields)
+- Keep it simple (YAGNI principle)
+
+❌ **DON'T**:
+- Wrap every field in a Value Object "because DDD says so"
+- Create Value Objects without clear benefit
+- Add complexity for theoretical future needs
+- Ignore the existing codebase patterns
+
+**Remember**: The goal is **maintainable, understandable code**, not "pure" DDD at all costs.
 
 ---
 

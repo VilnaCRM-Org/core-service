@@ -39,6 +39,20 @@ class CustomerBefore
 
 // ============================================================================
 // AFTER (CORRECT) - Pure domain entity with Value Objects
+//
+// NOTE: This example uses Value Objects for educational purposes to show
+// how to move validation from Symfony to the domain layer.
+//
+// In REAL CODE, be pragmatic! Not every field needs a Value Object.
+// See: .claude/skills/implementing-ddd-architecture/REFERENCE.md
+//      Section: "When to Use Value Objects (Pragmatic Approach)"
+//
+// The actual Customer entity in src/Core/Customer/Domain/Entity/Customer.php
+// uses primitives (string $email, string $phone) because they don't need
+// complex domain logic. Use Value Objects only when you have:
+// - Complex validation rules
+// - Domain-specific behavior (methods)
+// - Shared concepts across entities
 // ============================================================================
 
 namespace App\Customer\Domain\Entity;
@@ -373,36 +387,159 @@ final readonly class CreateCustomerHandler implements CommandHandlerInterface
  */
 
 // ============================================================================
-// OPTIONAL: Application Layer DTO with Symfony Validation (for API input)
+// ACTUAL CODEBASE PATTERN: YAML Validation on Application DTOs
 // ============================================================================
 
 namespace App\Customer\Application\DTO;
 
 /**
- * Application layer DTOs - validation configured via YAML
- * See config/validator/Customer.yaml for validation rules
+ * Application layer DTO - simple properties, NO validation annotations
+ * Validation is configured in YAML: config/validator/Customer.yaml
+ *
+ * This is the REAL pattern used in this codebase!
  */
-final class CreateCustomerInput
+final class CustomerCreate
 {
+    public string $initials;
     public string $email;
-    public string $name;
-    public int $loyaltyPoints = 0;
+    public string $phone;
+    public string $leadSource;
+    public string $type;      // IRI reference
+    public string $status;    // IRI reference
+    public bool $confirmed;
 }
 
 /**
- * Validation configuration (PREFERRED APPROACH)
+ * Validation configuration (ACTUAL CODEBASE PATTERN)
  * File: config/validator/Customer.yaml
  *
- * App\Customer\Application\DTO\CreateCustomerInput:
+ * App\Core\Customer\Application\DTO\CustomerCreate:
  *   properties:
+ *     initials:
+ *       - NotBlank: { message: 'not.blank' }
+ *       - Length:
+ *           max: 255
+ *       - App\Shared\Application\Validator\Initials: ~
  *     email:
  *       - NotBlank: { message: 'not.blank' }
  *       - Email: { message: 'email.invalid' }
- *     name:
+ *       - Length:
+ *           max: 255
+ *       - App\Shared\Application\Validator\UniqueEmail: ~
+ *     phone:
  *       - NotBlank: { message: 'not.blank' }
  *       - Length:
- *           min: 2
- *           max: 100
- *     loyaltyPoints:
- *       - PositiveOrZero: { message: 'positive.or.zero' }
+ *           max: 255
+ *     leadSource:
+ *       - NotBlank: { message: 'not.blank' }
+ *       - Length:
+ *           max: 255
+ *     type:
+ *       - NotBlank: { message: 'not.blank' }
+ *     status:
+ *       - NotBlank: { message: 'not.blank' }
+ *     confirmed:
+ *       - Type: { type: 'bool', message: 'This value should be a boolean.' }
+ */
+
+/**
+ * Custom Validator (when you need business logic validation)
+ */
+namespace App\Shared\Application\Validator;
+
+use Symfony\Component\Validator\Constraint;
+
+#[\Attribute]
+final class UniqueEmail extends Constraint
+{
+    public string $message = 'email.already.exists';
+}
+
+/**
+ * Custom Validator Implementation
+ */
+namespace App\Shared\Application\Validator;
+
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+
+final class UniqueEmailValidator extends ConstraintValidator
+{
+    public function __construct(
+        private CustomerRepositoryInterface $customerRepository
+    ) {}
+
+    public function validate($value, Constraint $constraint): void
+    {
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if ($this->customerRepository->emailExists($value)) {
+            $this->context->buildViolation($constraint->message)
+                ->addViolation();
+        }
+    }
+}
+
+// ============================================================================
+// PRAGMATIC VALUE OBJECT DECISION GUIDE
+// ============================================================================
+
+/**
+ * VALIDATION STRATEGY IN THIS CODEBASE
+ *
+ * ✅ WHAT WE DO:
+ * 1. Use YAML configuration for ALL validation (config/validator/)
+ * 2. Validate at Application boundary (DTOs)
+ * 3. Use custom validators for business rules (UniqueEmail, Initials)
+ * 4. Keep domain entities simple with primitives
+ * 5. Only enforce business invariants in domain methods
+ *
+ * ❌ WHAT WE DON'T DO:
+ * 1. Use annotations on DTOs (#[Assert\Email])
+ * 2. Validate in Value Object constructors
+ * 3. Validate format/structure in domain entities
+ * 4. Create Value Objects for every field
+ *
+ * WHEN TO USE VALUE OBJECTS:
+ *
+ * ✅ USE VALUE OBJECTS WHEN:
+ * 1. Special domain concept (ULID, Money with operations)
+ * 2. Domain-specific behavior needed (Money::add(), Address::isSameCountry())
+ * 3. Complex immutable concept shared across entities
+ * 4. Need operations/methods on the value
+ *
+ * ✅ USE PRIMITIVES WHEN:
+ * 1. Simple string fields (string $leadSource, string $email)
+ * 2. Boolean flags (bool $confirmed)
+ * 3. Numeric fields without operations (int $quantity)
+ * 4. Validation happens in DTO layer (YAML config)
+ * 5. No domain behavior needed
+ *
+ * REAL CODEBASE EXAMPLE:
+ * src/Core/Customer/Domain/Entity/Customer.php uses:
+ * - string $email (primitive - validated via YAML in DTO)
+ * - string $phone (primitive - validated via YAML in DTO)
+ * - string $leadSource (primitive - just a label)
+ * - string $initials (primitive - custom validator in YAML)
+ * - UlidInterface $ulid (Value Object - special domain concept)
+ *
+ * VALIDATION FLOW:
+ * 1. API receives request → DTO (CustomerCreate)
+ * 2. Symfony Validator validates using YAML config
+ * 3. Custom validators run (UniqueEmail, Initials)
+ * 4. If valid → Transform to domain entity (primitives)
+ * 5. Domain entity only enforces business invariants
+ *
+ * REMEMBER: Be pragmatic!
+ * - Default to primitives + YAML validation
+ * - Add Value Objects only when you need behavior/operations
+ * - Don't wrap every field in a Value Object
+ * - Follow the actual codebase patterns
+ *
+ * See: .claude/skills/implementing-ddd-architecture/REFERENCE.md
+ *      Section: "When to Use Value Objects (Pragmatic Approach)"
+ *      Section: "Validation Strategy"
  */

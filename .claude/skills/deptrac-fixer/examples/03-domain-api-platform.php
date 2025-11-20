@@ -59,56 +59,70 @@ class CustomerBefore
 }
 
 // ============================================================================
-// AFTER - OPTION 1: YAML Configuration (Recommended)
+// AFTER - OPTION 1: YAML Configuration (Recommended - ACTUAL CODEBASE PATTERN)
 // ============================================================================
 
-namespace App\Customer\Domain\Entity;
+/**
+ * PRAGMATIC APPROACH:
+ * - Use primitives for simple fields (string $email, string $initials)
+ * - Use Value Objects ONLY when needed (UlidInterface - special domain concept)
+ * - Validation happens in YAML (config/validator/), NOT in domain
+ * - This matches src/Core/Customer/Domain/Entity/Customer.php
+ */
+namespace App\Core\Customer\Domain\Entity;
 
-use App\Customer\Domain\ValueObject\Email;
-use App\Customer\Domain\ValueObject\CustomerName;
-use App\Shared\Domain\Aggregate\AggregateRoot;
-use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Domain\ValueObject\UlidInterface;
+use DateTimeImmutable;
 
 /**
  * Pure domain entity - NO API Platform imports!
  */
-final class Customer extends AggregateRoot
+final class Customer
 {
-    private Ulid $id;
-    private Email $email;
-    private CustomerName $name;
-    private \DateTimeImmutable $createdAt;
-
     public function __construct(
-        Ulid $id,
-        Email $email,
-        CustomerName $name,
-        \DateTimeImmutable $createdAt
+        private string $initials,           // ✅ Primitive - validated in YAML
+        private string $email,              // ✅ Primitive - validated in YAML
+        private string $phone,              // ✅ Primitive - validated in YAML
+        private string $leadSource,         // ✅ Primitive - just a label
+        private CustomerType $type,         // Entity reference
+        private CustomerStatus $status,     // Entity reference
+        private ?bool $confirmed,           // ✅ Primitive - simple boolean
+        private UlidInterface $ulid,        // ✅ VO - special domain concept
+        private DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private DateTimeImmutable $updatedAt = new DateTimeImmutable(),
     ) {
-        $this->id = $id;
-        $this->email = $email;
-        $this->name = $name;
-        $this->createdAt = $createdAt;
+        // NO validation here - trust input was validated in DTO layer
     }
 
-    // Pure business methods...
-
-    public function id(): Ulid
+    // Pure business methods - business invariants only
+    public function update(CustomerUpdate $updateData): void
     {
-        return $this->id;
+        $this->email = $updateData->newEmail;
+        $this->phone = $updateData->newPhone;
+        $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function email(): Email
+    public function getUlid(): string
+    {
+        return (string) $this->ulid;
+    }
+
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    public function name(): CustomerName
+    public function getInitials(): string
     {
-        return $this->name;
+        return $this->initials;
     }
 
-    public function createdAt(): \DateTimeImmutable
+    public function getPhone(): string
+    {
+        return $this->phone;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -239,46 +253,80 @@ final class CustomerResource
 
     /**
      * Factory method to create DTO from domain entity
+     * Works with primitives - no Value Object unwrapping needed
      */
     public static function fromEntity(\App\Customer\Domain\Entity\Customer $customer): self
     {
         $dto = new self();
-        $dto->id = $customer->id()->value();
-        $dto->email = $customer->email()->value();
-        $dto->name = $customer->name()->value();
-        $dto->createdAt = $customer->createdAt();
+        $dto->id = $customer->getUlid();           // Returns string directly
+        $dto->email = $customer->getEmail();        // Returns string directly
+        $dto->name = $customer->getInitials();      // Returns string directly
+        $dto->createdAt = $customer->getCreatedAt();
 
         return $dto;
     }
 }
 
 // ============================================================================
-// INPUT DTO - For write operations
+// INPUT DTO - For write operations (NO ANNOTATIONS - use YAML validation)
 // ============================================================================
 
 namespace App\Customer\Application\DTO;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
+/**
+ * ✅ PRAGMATIC APPROACH: No annotations on DTOs
+ * Validation is configured in config/validator/Customer.yaml
+ */
 final class CreateCustomerInput
 {
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    public string $email;
-
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 100)]
-    public string $name;
+    public string $initials;  // Validated in YAML
+    public string $email;     // Validated in YAML
+    public string $phone;     // Validated in YAML
 }
 
 final class UpdateCustomerInput
 {
-    #[Assert\Email]
-    public ?string $email = null;
-
-    #[Assert\Length(min: 2, max: 100)]
-    public ?string $name = null;
+    public ?string $initials = null;  // Validated in YAML
+    public ?string $email = null;     // Validated in YAML
+    public ?string $phone = null;     // Validated in YAML
 }
+
+/*
+# config/validator/Customer.yaml
+
+App\Customer\Application\DTO\CreateCustomerInput:
+  properties:
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials: ~
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Customer\Application\DTO\UpdateCustomerInput:
+  properties:
+    initials:
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials: ~
+    email:
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - Length:
+          max: 255
+*/
 
 // ============================================================================
 // STATE PROVIDER - Application Layer
@@ -342,8 +390,9 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
 
         $command = new CreateCustomerCommand(
             $id,
+            $data->initials,
             $data->email,
-            $data->name
+            $data->phone
         );
 
         $this->commandBus->dispatch($command);

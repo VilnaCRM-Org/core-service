@@ -3,93 +3,187 @@
 declare(strict_types=1);
 
 /**
- * Example: Value Objects following DDD principles
+ * Example: Pragmatic Value Object Usage
  *
- * Location: src/Catalog/Domain/ValueObject/
- * Layer: Domain
- * Characteristics:
- * - Immutable
- * - Self-validating
- * - Equality based on value, not identity
- * - NO external dependencies
+ * IMPORTANT: This file shows when to use Value Objects and when NOT to.
+ * Not every field needs to be a Value Object!
+ *
+ * See: ../REFERENCE.md - "When to Use Value Objects (Pragmatic Approach)"
  */
 
-namespace App\Catalog\Domain\ValueObject;
+// ============================================================================
+// ❌ DON'T DO THIS - Over-Engineering with Value Objects
+// ============================================================================
 
-use App\Catalog\Domain\Exception\InvalidProductNameException;
-use App\Catalog\Domain\Exception\InvalidMoneyException;
-use App\Catalog\Domain\Exception\InvalidProductStatusException;
+namespace App\Customer\Domain\ValueObject;
+
+use App\Customer\Domain\Exception\InvalidEmailException;
+use App\Customer\Domain\Exception\InvalidCustomerNameException;
 
 /**
- * Example 1: ProductName Value Object
+ * ❌ BAD: Email Value Object with validation
  *
- * Encapsulates validation and business rules for product names
+ * Why this is wrong:
+ * - Email validation should be in Application layer (YAML config)
+ * - No domain behavior needed (just a string)
+ * - Creates unnecessary complexity
+ * - Not used in actual codebase (src/Core/Customer uses string $email)
  */
-final readonly class ProductName
+final readonly class EmailBad
 {
-    private const MIN_LENGTH = 3;
-    private const MAX_LENGTH = 255;
-
     private string $value;
 
     public function __construct(string $value)
     {
-        $this->ensureIsValid($value);
-        $this->value = trim($value);
-    }
-
-    private function ensureIsValid(string $value): void
-    {
-        $trimmed = trim($value);
-
-        if (empty($trimmed)) {
-            throw new InvalidProductNameException(
-                "Product name cannot be empty"
-            );
+        // ❌ Don't validate here - use YAML validation in DTOs
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidEmailException("Invalid email: {$value}");
         }
-
-        if (strlen($trimmed) < self::MIN_LENGTH) {
-            throw new InvalidProductNameException(
-                sprintf(
-                    "Product name must be at least %d characters, got %d",
-                    self::MIN_LENGTH,
-                    strlen($trimmed)
-                )
-            );
-        }
-
-        if (strlen($trimmed) > self::MAX_LENGTH) {
-            throw new InvalidProductNameException(
-                sprintf(
-                    "Product name cannot exceed %d characters, got %d",
-                    self::MAX_LENGTH,
-                    strlen($trimmed)
-                )
-            );
-        }
+        $this->value = strtolower(trim($value));
     }
 
     public function value(): string
     {
         return $this->value;
     }
+}
 
-    public function equals(ProductName $other): bool
+/**
+ * ❌ BAD: CustomerName Value Object
+ *
+ * Why this is wrong:
+ * - Just a string with length validation
+ * - Validation should be in YAML
+ * - No domain behavior
+ * - Adds maintenance burden
+ */
+final readonly class CustomerNameBad
+{
+    private const MIN_LENGTH = 2;
+    private const MAX_LENGTH = 255;
+
+    private string $value;
+
+    public function __construct(string $value)
     {
-        return $this->value === $other->value;
+        // ❌ Don't validate here - use YAML validation in DTOs
+        $trimmed = trim($value);
+        if (strlen($trimmed) < self::MIN_LENGTH || strlen($trimmed) > self::MAX_LENGTH) {
+            throw new InvalidCustomerNameException("Invalid name length");
+        }
+        $this->value = $trimmed;
     }
 
-    public function __toString(): string
+    public function value(): string
     {
         return $this->value;
     }
 }
 
+// ============================================================================
+// ✅ DO THIS - Pragmatic Approach (ACTUAL CODEBASE PATTERN)
+// ============================================================================
+
 /**
- * Example 2: Money Value Object
+ * ✅ GOOD: Use primitives + YAML validation
  *
- * Encapsulates monetary values with currency
+ * Location: src/Core/Customer/Domain/Entity/Customer.php
  */
+namespace App\Core\Customer\Domain\Entity;
+
+use App\Shared\Domain\ValueObject\UlidInterface;
+use DateTimeImmutable;
+
+final class Customer
+{
+    public function __construct(
+        private string $initials,           // ✅ Primitive - validated via YAML
+        private string $email,              // ✅ Primitive - validated via YAML
+        private string $phone,              // ✅ Primitive - validated via YAML
+        private string $leadSource,         // ✅ Primitive - just a label
+        private CustomerType $type,         // Entity reference
+        private CustomerStatus $status,     // Entity reference
+        private ?bool $confirmed,           // ✅ Primitive - simple boolean
+        private UlidInterface $ulid,        // ✅ Value Object - special domain concept
+        private DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private DateTimeImmutable $updatedAt = new DateTimeImmutable(),
+    ) {
+        // NO validation here - trust the input has been validated in DTO layer
+    }
+
+    public function update(CustomerUpdate $updateData): void
+    {
+        // Simple assignment - no validation needed
+        $this->email = $updateData->newEmail;
+        $this->phone = $updateData->newPhone;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+}
+
+/**
+ * ✅ GOOD: YAML validation in Application layer
+ *
+ * Location: config/validator/Customer.yaml
+ */
+/*
+App\Core\Customer\Application\DTO\CustomerCreate:
+  properties:
+    initials:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\Initials: ~
+    email:
+      - NotBlank: { message: 'not.blank' }
+      - Email: { message: 'email.invalid' }
+      - Length:
+          max: 255
+      - App\Shared\Application\Validator\UniqueEmail: ~
+    phone:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+*/
+
+// ============================================================================
+// ✅ WHEN TO USE VALUE OBJECTS - Good Examples
+// ============================================================================
+
+/**
+ * ✅ GOOD: ULID Value Object
+ *
+ * Justified because:
+ * - Special ID strategy (not UUID, not auto-increment)
+ * - Needs conversion logic between Symfony ULID and domain ULID
+ * - Used across ALL entities
+ * - Domain concept with specific behavior
+ *
+ * Location: src/Shared/Domain/ValueObject/UlidInterface.php
+ */
+namespace App\Shared\Domain\ValueObject;
+
+interface UlidInterface extends \Stringable
+{
+    public function toString(): string;
+    public function toRfc4122(): string;
+    public function equals(self $other): bool;
+}
+
+/**
+ * ✅ GOOD: Money Value Object
+ *
+ * Justified because:
+ * - Has domain behavior (add, subtract, multiply)
+ * - Complex type (amount + currency)
+ * - Needs to ensure currency matches for operations
+ * - Shared across multiple entities (Order, Invoice, Payment)
+ *
+ * Use this when you need operations on values!
+ */
+namespace App\Catalog\Domain\ValueObject;
+
+use App\Catalog\Domain\Exception\InvalidMoneyException;
+
 final readonly class Money
 {
     private int $amountInCents;
@@ -97,25 +191,13 @@ final readonly class Money
 
     public function __construct(int $amountInCents, string $currency = 'USD')
     {
-        $this->ensureIsValid($amountInCents, $currency);
+        // ✅ Validation here is OK - it's a business rule about money
+        if ($amountInCents < 0) {
+            throw new InvalidMoneyException("Money amount cannot be negative");
+        }
+
         $this->amountInCents = $amountInCents;
         $this->currency = strtoupper($currency);
-    }
-
-    private function ensureIsValid(int $amountInCents, string $currency): void
-    {
-        if ($amountInCents < 0) {
-            throw new InvalidMoneyException(
-                "Money amount cannot be negative: {$amountInCents}"
-            );
-        }
-
-        $validCurrencies = ['USD', 'EUR', 'GBP'];
-        if (!in_array(strtoupper($currency), $validCurrencies, true)) {
-            throw new InvalidMoneyException(
-                "Invalid currency: {$currency}. Must be one of: " . implode(', ', $validCurrencies)
-            );
-        }
     }
 
     public function amountInCents(): int
@@ -133,11 +215,6 @@ final readonly class Money
         return $this->amountInCents / 100;
     }
 
-    public function isNegative(): bool
-    {
-        return $this->amountInCents < 0;
-    }
-
     public function isZero(): bool
     {
         return $this->amountInCents === 0;
@@ -150,7 +227,7 @@ final readonly class Money
     }
 
     /**
-     * Value objects can have business logic!
+     * ✅ Value objects with BEHAVIOR - this is the key!
      */
     public function add(Money $other): self
     {
@@ -191,19 +268,23 @@ final readonly class Money
 
     public function __toString(): string
     {
-        return sprintf(
-            "%s %.2f",
-            $this->currency,
-            $this->amountInDollars()
-        );
+        return sprintf("%s %.2f", $this->currency, $this->amountInDollars());
     }
 }
 
 /**
- * Example 3: ProductStatus Enum-like Value Object
+ * ✅ GOOD: Status/Enum Value Object
  *
- * Represents product status as a type-safe value object
+ * Justified because:
+ * - Type-safe alternative to string constants
+ * - Prevents invalid states
+ * - Expressive query methods (isDraft(), isPublished())
+ * - Can use PHP 8.1+ enums or this pattern
  */
+namespace App\Catalog\Domain\ValueObject;
+
+use App\Catalog\Domain\Exception\InvalidProductStatusException;
+
 final readonly class ProductStatus
 {
     private const DRAFT = 'draft';
@@ -220,21 +301,14 @@ final readonly class ProductStatus
 
     private function __construct(string $value)
     {
-        $this->ensureIsValid($value);
+        if (!in_array($value, self::VALID_STATUSES, true)) {
+            throw new InvalidProductStatusException("Invalid status: {$value}");
+        }
         $this->value = $value;
     }
 
-    private function ensureIsValid(string $value): void
-    {
-        if (!in_array($value, self::VALID_STATUSES, true)) {
-            throw new InvalidProductStatusException(
-                "Invalid product status: {$value}. Must be one of: " . implode(', ', self::VALID_STATUSES)
-            );
-        }
-    }
-
     /**
-     * Named constructors for each status - type safe!
+     * Named constructors for type safety
      */
     public static function draft(): self
     {
@@ -257,7 +331,7 @@ final readonly class ProductStatus
     }
 
     /**
-     * Query methods - expressive and type-safe
+     * ✅ Expressive query methods
      */
     public function isDraft(): bool
     {
@@ -290,64 +364,101 @@ final readonly class ProductStatus
     }
 }
 
-/**
- * Example 4: Email Value Object
- *
- * Simple but crucial - validates email format
- */
-final readonly class Email
-{
-    private string $value;
-
-    public function __construct(string $value)
-    {
-        $this->ensureIsValidEmail($value);
-        $this->value = strtolower(trim($value));
-    }
-
-    private function ensureIsValidEmail(string $value): void
-    {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException(
-                "Invalid email address: {$value}"
-            );
-        }
-    }
-
-    public function value(): string
-    {
-        return $this->value;
-    }
-
-    public function domain(): string
-    {
-        return substr($this->value, strpos($this->value, '@') + 1);
-    }
-
-    public function localPart(): string
-    {
-        return substr($this->value, 0, strpos($this->value, '@'));
-    }
-
-    public function equals(Email $other): bool
-    {
-        return $this->value === $other->value;
-    }
-
-    public function __toString(): string
-    {
-        return $this->value;
-    }
-}
+// ============================================================================
+// DECISION GUIDE: When to Use Value Objects
+// ============================================================================
 
 /**
- * KEY TAKEAWAYS:
+ * ✅ CREATE VALUE OBJECTS WHEN:
  *
- * 1. Value Objects are IMMUTABLE (readonly class or private setters)
- * 2. Validation happens in constructor - once created, always valid
- * 3. Equality based on VALUE, not identity (equals() method)
- * 4. Can contain business logic related to the value
- * 5. NO external dependencies (pure PHP)
- * 6. Use named constructors for clarity (Money::zero(), Status::draft())
- * 7. Self-documenting through type system
+ * 1. DOMAIN BEHAVIOR EXISTS
+ *    - Money::add(), Money::subtract(), Money::multiply()
+ *    - Address::isSameCountry(), Address::formatForShipping()
+ *    - DateRange::overlaps(), DateRange::duration()
+ *
+ * 2. SPECIAL DOMAIN CONCEPT
+ *    - ULID (custom ID strategy with conversion logic)
+ *    - Percentage (0-100 with business rules)
+ *    - Temperature (with unit conversions)
+ *
+ * 3. COMPLEX IMMUTABLE TYPE
+ *    - Money (amount + currency, must match for operations)
+ *    - Coordinates (latitude + longitude)
+ *    - Dimensions (width + height + depth)
+ *
+ * 4. TYPE-SAFE ENUMERATIONS
+ *    - ProductStatus (draft, published, archived)
+ *    - OrderStatus (pending, confirmed, shipped)
+ *    - PaymentMethod (credit_card, paypal, bank_transfer)
+ *
+ * 5. SHARED ACROSS ENTITIES
+ *    - Money used in Order, Invoice, Payment, Refund
+ *    - Address used in Customer, Warehouse, Supplier
+ *    - Phone used in Customer, Employee, Supplier
+ *
+ * ❌ DON'T CREATE VALUE OBJECTS WHEN:
+ *
+ * 1. SIMPLE STRINGS WITHOUT BEHAVIOR
+ *    - string $email (validated in YAML)
+ *    - string $phone (validated in YAML)
+ *    - string $leadSource (just a label)
+ *    - string $notes (free text)
+ *
+ * 2. SIMPLE BOOLEANS
+ *    - bool $confirmed
+ *    - bool $isActive
+ *    - bool $deleted
+ *
+ * 3. SIMPLE NUMBERS WITHOUT OPERATIONS
+ *    - int $quantity (no special behavior)
+ *    - float $discount (just a percentage)
+ *    - int $stockLevel (just a number)
+ *
+ * 4. VALIDATION-ONLY FIELDS
+ *    - Use YAML validation in Application layer instead
+ *    - Don't create Value Objects just for validation
+ *
+ * VALIDATION FLOW IN THIS CODEBASE:
+ *
+ * 1. API Request → DTO (Application Layer)
+ * 2. Symfony Validator validates using YAML config
+ * 3. Custom validators run (UniqueEmail, Initials)
+ * 4. If valid → Transform to domain entity (primitives)
+ * 5. Domain entity only enforces business invariants
+ *
+ * REAL CODEBASE COMPARISON:
+ *
+ * ❌ WRONG (Over-engineered):
+ * class Customer {
+ *     private EmailAddress $email;        // Unnecessary VO
+ *     private PhoneNumber $phone;         // Unnecessary VO
+ *     private CustomerInitials $initials; // Unnecessary VO
+ *     private CreatedAt $createdAt;       // Unnecessary VO
+ * }
+ *
+ * ✅ CORRECT (Pragmatic - actual src/Core/Customer/Domain/Entity/Customer.php):
+ * class Customer {
+ *     private string $email;              // Primitive - validated in YAML
+ *     private string $phone;              // Primitive - validated in YAML
+ *     private string $initials;           // Primitive - validated in YAML
+ *     private DateTimeImmutable $createdAt; // Built-in immutable type
+ *     private UlidInterface $ulid;        // VO - special domain concept
+ * }
+ *
+ * KEY PRINCIPLES:
+ *
+ * ✅ Default to primitives
+ * ✅ Add Value Objects only when you need behavior/operations
+ * ✅ Use YAML validation for format/length checks
+ * ✅ Follow the actual codebase patterns
+ * ✅ Keep it simple (YAGNI - You Aren't Gonna Need It)
+ *
+ * ❌ Don't wrap every field in a Value Object
+ * ❌ Don't create Value Objects just for validation
+ * ❌ Don't add complexity without clear benefit
+ * ❌ Don't ignore existing codebase patterns
+ *
+ * REMEMBER: The goal is maintainable, understandable code, not "pure" DDD.
+ *
+ * See: ../REFERENCE.md - "When to Use Value Objects (Pragmatic Approach)"
  */

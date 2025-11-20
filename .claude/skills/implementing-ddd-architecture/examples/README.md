@@ -27,29 +27,23 @@ Key Concepts:
 
 ### 02-value-object-examples.php
 
-**Value Object Patterns**
+**Pragmatic Value Object Usage (When and When NOT to use them)**
+
+**IMPORTANT**: This example shows when to use Value Objects and when to use primitives.
 
 Demonstrates:
 
-- Immutable value objects (readonly classes)
-- Self-validating in constructor
-- Equality based on value, not identity
-- Business logic within value objects
-- Named constructors for type safety
-
-Examples:
-
-- `ProductName`: String validation with min/max length
-- `Money`: Currency handling with arithmetic operations
-- `ProductStatus`: Enum-like status with type-safe constructors
-- `Email`: Email validation and domain extraction
+- ❌ ANTI-PATTERNS: Email/CustomerName VOs with validation (use YAML instead)
+- ✅ CORRECT: Actual Customer entity with primitives + YAML validation
+- ✅ WHEN TO USE: Money (with operations), ProductStatus (type-safe enum), ULID (special concept)
+- ✅ DECISION CRITERIA: Only use VOs when you need behavior/operations
 
 Key Principles:
 
-- Once created, always valid
-- NO setters (immutable)
-- `equals()` method for value comparison
-- Rich behavior (not just data containers)
+- **Default to primitives** (string $email, string $phone)
+- **Validate in YAML** (config/validator/), NOT in Value Objects
+- **Add VOs only when needed** (Money::add(), ULID conversion logic)
+- **Follow actual codebase patterns** (src/Core/Customer uses primitives)
 
 ### 03-cqrs-pattern-example.php
 
@@ -74,21 +68,24 @@ Key Concepts:
 
 ### 04-fixing-deptrac-violations.php
 
-**Common Deptrac Violations and Fixes**
+**Common Deptrac Violations and Fixes (PRAGMATIC APPROACH)**
+
+**IMPORTANT**: Uses ACTUAL codebase patterns (YAML validation, primitives, factories).
 
 Demonstrates:
 
 - **BEFORE/AFTER** code for common violations
-- How to identify and fix architectural issues
+- How to identify and fix architectural issues using actual patterns
 - Why you should NEVER modify `deptrac.yaml`
 
 Violations Covered:
 
-1. Domain → Symfony (validators): Fix with Value Objects
-2. Domain → Doctrine (annotations): Fix with XML mappings
-3. Domain → API Platform (attributes): Fix with config/YAML or DTOs
-4. Infrastructure → Application (handlers): Fix with Command/Event Bus
-5. Anemic domain models: Fix by moving logic to entities
+1. **Domain → Symfony (validators)**: Fix with YAML validation + primitives
+2. **Domain → Doctrine (annotations)**: Fix with XML mappings
+3. **Domain → API Platform (attributes)**: Fix with YAML config
+4. **Infrastructure → Application (handlers)**: Fix with Command/Event Bus
+5. **Using 'new' instead of factories**: Fix with Factory pattern
+6. **Anemic domain models**: Fix by moving logic to entities
 
 Step-by-Step Workflow:
 
@@ -116,10 +113,10 @@ When working on a task:
 2. **Need Validation?**
    → Reference `02-value-object-examples.php`
 
-   - Create Value Object
-   - Validate in constructor
-   - Make it immutable (readonly)
-   - Add business logic if needed
+   - **Default**: Use YAML validation (config/validator/)
+   - **Primitives**: string $email, string $phone (NOT Value Objects)
+   - **Value Objects**: Only when you need behavior (Money::add(), ULID)
+   - **See decision criteria** in example file
 
 3. **Implementing a Use Case?**
    → Reference `03-cqrs-pattern-example.php`
@@ -173,13 +170,16 @@ Before committing code, ensure:
 
 - [ ] `make deptrac` passes with zero violations
 - [ ] Domain layer has NO framework imports
-- [ ] Business logic is in Domain entities/VOs
+- [ ] Business logic is in Domain entities, NOT in handlers
 - [ ] Handlers only orchestrate, don't contain logic
-- [ ] Value Objects validate themselves
+- [ ] **Validation uses YAML** (config/validator/), NOT annotations or VOs
+- [ ] **Primitives by default** (string $email), VOs only when needed (Money, ULID)
+- [ ] **Factories used in production code**, NOT direct 'new' keyword
 - [ ] Commands implement `CommandInterface`
 - [ ] Handlers implement `CommandHandlerInterface`
 - [ ] Repository interfaces in Domain, implementations in Infrastructure
 - [ ] Doctrine mappings use XML, not annotations
+- [ ] API Platform config in YAML, not attributes
 - [ ] Aggregates extend `AggregateRoot` and use `record()` for events
 
 ## Additional Resources
