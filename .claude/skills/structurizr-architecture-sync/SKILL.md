@@ -61,11 +61,11 @@ Keep the Structurizr workspace (`workspace.dsl`) synchronized with codebase chan
 
 Components must be grouped by their architectural layer:
 
-| Layer                | Contains                                                        | DSL Group         |
-| -------------------- | --------------------------------------------------------------- | ----------------- |
-| **Application**      | Controllers, Command Handlers, Event Subscribers, API handlers  | `group "Application"` |
-| **Domain**           | Entities, Value Objects, Aggregates, Domain Events, Interfaces  | `group "Domain"`      |
-| **Infrastructure**   | Repositories, Buses, Transformers, Doctrine Types, External adapters | `group "Infrastructure"` |
+| Layer              | Contains                                                             | DSL Group                |
+| ------------------ | -------------------------------------------------------------------- | ------------------------ |
+| **Application**    | Controllers, Command Handlers, Event Subscribers, API handlers       | `group "Application"`    |
+| **Domain**         | Entities, Value Objects, Aggregates, Domain Events, Interfaces       | `group "Domain"`         |
+| **Infrastructure** | Repositories, Buses, Transformers, Doctrine Types, External adapters | `group "Infrastructure"` |
 
 **Alignment with Deptrac**: Layer groupings must match Deptrac configuration to maintain architectural integrity.
 
@@ -104,22 +104,22 @@ customerCommandHandler -> customerCreatedEvent "creates"
 
 ### Common Component Types
 
-| Type                | Purpose                    | Layer            |
-| ------------------- | -------------------------- | ---------------- |
-| `Controller`        | API endpoint handlers      | Application      |
-| `CommandHandler`    | CQRS command handlers      | Application      |
-| `EventSubscriber`   | Domain event subscribers   | Infrastructure   |
-| `Entity`            | Domain entities            | Domain           |
-| `ValueObject`       | Domain value objects       | Domain           |
-| `Aggregate`         | Domain aggregates          | Domain           |
-| `DomainEvent`       | Domain events              | Domain           |
-| `Factory`           | Object factories           | Domain/Infrastructure |
-| `Repository`        | Data access                | Infrastructure   |
-| `Transformer`       | Data transformers          | Infrastructure   |
-| `EventBus`          | Event publishing           | Infrastructure   |
-| `MongoDB`           | Database                   | Infrastructure   |
-| `Redis`             | Cache                      | Infrastructure   |
-| `AWS SQS`           | Message broker             | Infrastructure   |
+| Type              | Purpose                  | Layer                 |
+| ----------------- | ------------------------ | --------------------- |
+| `Controller`      | API endpoint handlers    | Application           |
+| `CommandHandler`  | CQRS command handlers    | Application           |
+| `EventSubscriber` | Domain event subscribers | Infrastructure        |
+| `Entity`          | Domain entities          | Domain                |
+| `ValueObject`     | Domain value objects     | Domain                |
+| `Aggregate`       | Domain aggregates        | Domain                |
+| `DomainEvent`     | Domain events            | Domain                |
+| `Factory`         | Object factories         | Domain/Infrastructure |
+| `Repository`      | Data access              | Infrastructure        |
+| `Transformer`     | Data transformers        | Infrastructure        |
+| `EventBus`        | Event publishing         | Infrastructure        |
+| `MongoDB`         | Database                 | Infrastructure        |
+| `Redis`           | Cache                    | Infrastructure        |
+| `AWS SQS`         | Message broker           | Infrastructure        |
 
 ### Tags
 
@@ -150,13 +150,13 @@ After implementing code changes, determine if they are architecturally significa
 
 For each new/modified component, identify:
 
-| Detail         | How to Identify                                  |
-| -------------- | ------------------------------------------------ |
-| **Name**       | Class name (e.g., `CustomerCommandHandler`)      |
-| **Layer**      | File location (`Application/Domain/Infrastructure`) |
-| **Type**       | Class purpose (Controller, Handler, Entity, etc.)   |
-| **Description**| Class docblock or primary responsibility         |
-| **Dependencies**| Constructor parameters, method calls            |
+| Detail           | How to Identify                                     |
+| ---------------- | --------------------------------------------------- |
+| **Name**         | Class name (e.g., `CustomerCommandHandler`)         |
+| **Layer**        | File location (`Application/Domain/Infrastructure`) |
+| **Type**         | Class purpose (Controller, Handler, Entity, etc.)   |
+| **Description**  | Class docblock or primary responsibility            |
+| **Dependencies** | Constructor parameters, method calls                |
 
 ### Step 3: Update workspace.dsl
 

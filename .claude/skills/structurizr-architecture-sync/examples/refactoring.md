@@ -426,11 +426,13 @@ git diff workspace.dsl
 After refactoring components:
 
 1. **Validate DSL syntax**:
+
    ```bash
    structurizr-cli validate workspace.dsl
    ```
 
 2. **Generate diagram**:
+
    ```bash
    docker run -it --rm -p 8080:8080 \
      -v $(pwd):/usr/local/structurizr \
@@ -440,6 +442,7 @@ After refactoring components:
 3. **Review refactoring visually**: Ensure new structure is clearer
 
 4. **Run Deptrac**: Verify layer boundaries respected
+
    ```bash
    make deptrac
    ```

@@ -219,11 +219,13 @@ orderConfirmedSubscriber -> messageBroker "sends confirmation via"
 The generated diagram will show:
 
 1. **Domain Layer**:
+
    - Order (aggregate) with value objects (OrderId, OrderStatus, Money)
    - Events (OrderCreatedEvent, OrderConfirmedEvent)
    - Repository interface (port)
 
 2. **Infrastructure Layer**:
+
    - OrderRepository implementing the interface
    - OrderConfirmedSubscriber
 
@@ -372,11 +374,13 @@ order -> orderCreatedEvent "creates"
 After documenting the domain entity:
 
 1. **Validate DSL syntax**:
+
    ```bash
    structurizr-cli validate workspace.dsl
    ```
 
 2. **Generate diagram**:
+
    ```bash
    docker run -it --rm -p 8080:8080 \
      -v $(pwd):/usr/local/structurizr \

@@ -187,13 +187,13 @@ database = component "Database" "Stores application data" "MongoDB" {
 
 Our C4 component diagram reflects hexagonal architecture principles:
 
-| Hexagon Layer | C4 Group | Contains |
-|---------------|----------|----------|
-| **Driving Adapters** | Application | Controllers, API handlers |
-| **Application Core** | Application | Command handlers, use cases |
-| **Domain** | Domain | Entities, value objects, domain logic |
-| **Driven Adapters** | Infrastructure | Repositories, external service clients |
-| **Ports** | Domain | Interfaces (repository interfaces, factory interfaces) |
+| Hexagon Layer        | C4 Group       | Contains                                               |
+| -------------------- | -------------- | ------------------------------------------------------ |
+| **Driving Adapters** | Application    | Controllers, API handlers                              |
+| **Application Core** | Application    | Command handlers, use cases                            |
+| **Domain**           | Domain         | Entities, value objects, domain logic                  |
+| **Driven Adapters**  | Infrastructure | Repositories, external service clients                 |
+| **Ports**            | Domain         | Interfaces (repository interfaces, factory interfaces) |
 
 **Visual representation**: The C4 diagram shows how hexagonal layers interact while maintaining clean boundaries.
 
