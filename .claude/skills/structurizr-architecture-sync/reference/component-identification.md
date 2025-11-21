@@ -33,54 +33,54 @@ A component is architecturally significant if:
 
 ### ✅ INCLUDE: Application Layer
 
-| Component Type       | Reasoning                                              | Example                    |
-| -------------------- | ------------------------------------------------------ | -------------------------- |
-| **Controllers**      | Entry points for requests                              | `HealthCheckController`    |
-| **Command Handlers** | CQRS pattern, orchestrate use cases                    | `CreateCustomerHandler`    |
-| **Query Handlers**   | CQRS read side                                         | `GetCustomerQueryHandler`  |
-| **API Processors**   | API Platform state processors                          | `CustomerStateProcessor`   |
-| **API Resolvers**    | GraphQL resolvers                                      | `CustomerResolver`         |
+| Component Type       | Reasoning                           | Example                   |
+| -------------------- | ----------------------------------- | ------------------------- |
+| **Controllers**      | Entry points for requests           | `HealthCheckController`   |
+| **Command Handlers** | CQRS pattern, orchestrate use cases | `CreateCustomerHandler`   |
+| **Query Handlers**   | CQRS read side                      | `GetCustomerQueryHandler` |
+| **API Processors**   | API Platform state processors       | `CustomerStateProcessor`  |
+| **API Resolvers**    | GraphQL resolvers                   | `CustomerResolver`        |
 
 **Why**: These represent the application's entry points and use case orchestration.
 
 ### ✅ INCLUDE: Domain Layer
 
-| Component Type          | Reasoning                                           | Example                 |
-| ----------------------- | --------------------------------------------------- | ----------------------- |
-| **Entities**            | Core business objects                               | `Customer`, `Order`     |
-| **Aggregates**          | Consistency boundaries                              | `Customer` (aggregate)  |
-| **Value Objects**       | Important domain concepts with validation           | `Email`, `CustomerId`   |
-| **Domain Events**       | State change notifications                          | `CustomerCreatedEvent`  |
-| **Factory Interfaces**  | Contracts for object creation                       | `UuidFactoryInterface`  |
-| **Repository Interfaces**| Contracts for persistence (hexagonal ports)         | `CustomerRepositoryInterface` |
-| **Domain Services**     | Stateless business logic                            | `PricingService`        |
+| Component Type            | Reasoning                                   | Example                       |
+| ------------------------- | ------------------------------------------- | ----------------------------- |
+| **Entities**              | Core business objects                       | `Customer`, `Order`           |
+| **Aggregates**            | Consistency boundaries                      | `Customer` (aggregate)        |
+| **Value Objects**         | Important domain concepts with validation   | `Email`, `CustomerId`         |
+| **Domain Events**         | State change notifications                  | `CustomerCreatedEvent`        |
+| **Factory Interfaces**    | Contracts for object creation               | `UuidFactoryInterface`        |
+| **Repository Interfaces** | Contracts for persistence (hexagonal ports) | `CustomerRepositoryInterface` |
+| **Domain Services**       | Stateless business logic                    | `PricingService`              |
 
 **Why**: These represent core business logic and domain model.
 
 ### ✅ INCLUDE: Infrastructure Layer
 
-| Component Type         | Reasoning                                           | Example                      |
-| ---------------------- | --------------------------------------------------- | ---------------------------- |
-| **Repositories**       | Data access implementations                         | `CustomerRepository`         |
-| **Event Subscribers**  | React to domain events                              | `SendWelcomeEmailSubscriber` |
-| **Event Buses**        | Event publishing mechanism                          | `InMemorySymfonyEventBus`    |
-| **Command Buses**      | Command dispatching mechanism                       | `SymfonyCommandBus`          |
-| **Factories**          | Factory implementations                             | `UuidFactory`                |
-| **Transformers**       | Data transformation (API Platform)                  | `UuidTransformer`            |
-| **External Adapters**  | Integrations with external services                 | `StripePaymentAdapter`       |
-| **Doctrine Types**     | Custom field types (if architecturally significant) | `UuidType`                   |
+| Component Type        | Reasoning                                           | Example                      |
+| --------------------- | --------------------------------------------------- | ---------------------------- |
+| **Repositories**      | Data access implementations                         | `CustomerRepository`         |
+| **Event Subscribers** | React to domain events                              | `SendWelcomeEmailSubscriber` |
+| **Event Buses**       | Event publishing mechanism                          | `InMemorySymfonyEventBus`    |
+| **Command Buses**     | Command dispatching mechanism                       | `SymfonyCommandBus`          |
+| **Factories**         | Factory implementations                             | `UuidFactory`                |
+| **Transformers**      | Data transformation (API Platform)                  | `UuidTransformer`            |
+| **External Adapters** | Integrations with external services                 | `StripePaymentAdapter`       |
+| **Doctrine Types**    | Custom field types (if architecturally significant) | `UuidType`                   |
 
 **Why**: These implement infrastructure concerns and adapt external services.
 
 ### ✅ INCLUDE: External Dependencies
 
-| Component Type          | Reasoning                      | Example            |
-| ----------------------- | ------------------------------ | ------------------ |
-| **Databases**           | Persistence layer              | MongoDB, PostgreSQL |
-| **Caches**              | Caching layer                  | Redis              |
-| **Message Brokers**     | Asynchronous messaging         | AWS SQS, RabbitMQ  |
-| **External APIs**       | Third-party integrations       | Stripe API         |
-| **Search Engines**      | Search capabilities            | Elasticsearch      |
+| Component Type      | Reasoning                | Example             |
+| ------------------- | ------------------------ | ------------------- |
+| **Databases**       | Persistence layer        | MongoDB, PostgreSQL |
+| **Caches**          | Caching layer            | Redis               |
+| **Message Brokers** | Asynchronous messaging   | AWS SQS, RabbitMQ   |
+| **External APIs**   | Third-party integrations | Stripe API          |
+| **Search Engines**  | Search capabilities      | Elasticsearch       |
 
 **Why**: These are critical infrastructure dependencies.
 
@@ -176,24 +176,24 @@ A component is architecturally significant if:
 
 Use this matrix to decide if a class should be a component:
 
-| Question                                           | Weight | Yes = Points |
-| -------------------------------------------------- | ------ | ------------ |
-| Does it participate in a use case?                 | High   | +3           |
-| Does it have business logic?                       | High   | +3           |
-| Does it cross architectural boundaries?            | High   | +3           |
-| Is it an entry point (controller, handler)?        | High   | +3           |
-| Is it a domain entity or aggregate?                | High   | +3           |
-| Does it implement a hexagonal port?                | Medium | +2           |
-| Is it an infrastructure adapter?                   | Medium | +2           |
-| Does it handle domain events?                      | Medium | +2           |
-| Is it a repository or factory?                     | Medium | +2           |
-| Would a new developer need to know about it?       | Medium | +2           |
-| Is it reused across multiple components?           | Low    | +1           |
-| Does it have significant dependencies?             | Low    | +1           |
-| Is it just data transfer?                          | High   | -3           |
-| Is it a test class?                                | High   | -3           |
-| Is it framework boilerplate?                       | Medium | -2           |
-| Is it a private helper?                            | Medium | -2           |
+| Question                                     | Weight | Yes = Points |
+| -------------------------------------------- | ------ | ------------ |
+| Does it participate in a use case?           | High   | +3           |
+| Does it have business logic?                 | High   | +3           |
+| Does it cross architectural boundaries?      | High   | +3           |
+| Is it an entry point (controller, handler)?  | High   | +3           |
+| Is it a domain entity or aggregate?          | High   | +3           |
+| Does it implement a hexagonal port?          | Medium | +2           |
+| Is it an infrastructure adapter?             | Medium | +2           |
+| Does it handle domain events?                | Medium | +2           |
+| Is it a repository or factory?               | Medium | +2           |
+| Would a new developer need to know about it? | Medium | +2           |
+| Is it reused across multiple components?     | Low    | +1           |
+| Does it have significant dependencies?       | Low    | +1           |
+| Is it just data transfer?                    | High   | -3           |
+| Is it a test class?                          | High   | -3           |
+| Is it framework boilerplate?                 | Medium | -2           |
+| Is it a private helper?                      | Medium | -2           |
 
 **Scoring**:
 
@@ -384,14 +384,17 @@ group "Infrastructure" {
 **Ask yourself**:
 
 1. **Would removing this from the diagram make the architecture less clear?**
+
    - Yes → Include it
    - No → Omit it
 
 2. **Would a new team member ask about this component during onboarding?**
+
    - Yes → Include it
    - No → Omit it
 
 3. **Does this represent an architectural pattern (CQRS, DDD, Hexagonal)?**
+
    - Yes → Include it
    - No → Omit it
 

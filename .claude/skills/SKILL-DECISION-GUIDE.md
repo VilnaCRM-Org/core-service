@@ -178,12 +178,12 @@ This skill covers processor patterns for OpenAPI.
 
 ## Common Confusions
 
-| Confusion                                      | Clarification                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| deptrac-fixer vs implementing-ddd-architecture | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                 |
-| testing-workflow vs load-testing               | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing |
-| quality-standards vs complexity-management     | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management    |
-| ci-workflow vs testing-workflow                | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                      |
+| Confusion                                           | Clarification                                                                                                                          |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| deptrac-fixer vs implementing-ddd-architecture      | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                                          |
+| testing-workflow vs load-testing                    | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing                          |
+| quality-standards vs complexity-management          | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management                             |
+| ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
 | documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
 
 ## Multiple Skills for One Task

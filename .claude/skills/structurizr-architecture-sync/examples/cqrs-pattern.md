@@ -262,19 +262,23 @@ workspace {
 The generated diagram will show:
 
 1. **Application Layer** (top):
+
    - CreateCustomerCommandHandler
 
 2. **Domain Layer** (middle):
+
    - Customer aggregate with value objects
    - CustomerCreatedEvent
    - CustomerRepositoryInterface (port)
 
 3. **Infrastructure Layer** (bottom):
+
    - CustomerRepository implementing the interface
    - SendWelcomeEmailSubscriber
    - InMemorySymfonyEventBus
 
 4. **External Systems**:
+
    - Database (MongoDB)
    - Message Broker (AWS SQS)
 
@@ -341,11 +345,13 @@ customerCreatedEvent -> logAuditSubscriber "triggers"
 After documenting the CQRS pattern:
 
 1. **Validate DSL syntax**:
+
    ```bash
    structurizr-cli validate workspace.dsl
    ```
 
 2. **Generate diagram**:
+
    ```bash
    docker run -it --rm -p 8080:8080 \
      -v $(pwd):/usr/local/structurizr \

@@ -190,14 +190,17 @@ customerRepository -> database "retrieves from"
 The generated diagram will show:
 
 1. **Request Entry**:
+
    - CustomerController (entry point)
 
 2. **Request Processing**:
+
    - Controller → UUID Transformer (transform ID)
    - Controller → Item Provider (retrieve data)
    - Item Provider → Repository (data access)
 
 3. **UUID Transformation**:
+
    - Transformer → Factory Interface
    - Factory → Implements Interface
    - Factory → Creates UUID
@@ -343,11 +346,13 @@ customerRepository -> database "queries with filters"
 After documenting the API endpoint:
 
 1. **Validate DSL syntax**:
+
    ```bash
    structurizr-cli validate workspace.dsl
    ```
 
 2. **Generate diagram**:
+
    ```bash
    docker run -it --rm -p 8080:8080 \
      -v $(pwd):/usr/local/structurizr \

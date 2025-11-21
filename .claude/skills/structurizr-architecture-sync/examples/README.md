@@ -9,6 +9,7 @@ Practical examples for common Structurizr workspace.dsl update scenarios.
 **When to use**: Implementing command handlers with CQRS pattern
 
 **Covers**:
+
 - Adding command handlers
 - Domain entities and value objects
 - Domain events
@@ -25,6 +26,7 @@ Practical examples for common Structurizr workspace.dsl update scenarios.
 **When to use**: Adding REST or GraphQL API endpoints
 
 **Covers**:
+
 - Controllers and API Platform providers
 - Item providers and state processors
 - GraphQL resolvers
@@ -41,6 +43,7 @@ Practical examples for common Structurizr workspace.dsl update scenarios.
 **When to use**: Creating new domain entities and aggregates
 
 **Covers**:
+
 - Aggregate roots
 - Value objects (when to include/exclude)
 - Domain events
@@ -57,6 +60,7 @@ Practical examples for common Structurizr workspace.dsl update scenarios.
 **When to use**: Updating workspace.dsl during code refactoring
 
 **Covers**:
+
 - Splitting handlers (Single Responsibility Principle)
 - Extracting domain services
 - Moving components between layers
@@ -118,16 +122,16 @@ docker run -it --rm -p 8080:8080 \
 
 ## Quick Reference
 
-| You're Adding...                     | Use Example      | Key Concepts                  |
-| ------------------------------------ | ---------------- | ----------------------------- |
-| Command handler with events          | CQRS Pattern     | Handlers, events, subscribers |
-| REST API endpoint                    | API Endpoint     | Controllers, providers        |
-| GraphQL operation                    | API Endpoint     | Resolvers, queries            |
-| New entity/aggregate                 | Domain Entity    | Aggregates, value objects     |
-| Event subscriber                     | CQRS Pattern     | Event flow, messaging         |
-| Splitting existing component         | Refactoring      | Component removal/addition    |
-| Moving component between layers      | Refactoring      | Layer boundaries              |
-| Repository implementation            | Domain Entity    | Hexagonal ports/adapters      |
+| You're Adding...                | Use Example   | Key Concepts                  |
+| ------------------------------- | ------------- | ----------------------------- |
+| Command handler with events     | CQRS Pattern  | Handlers, events, subscribers |
+| REST API endpoint               | API Endpoint  | Controllers, providers        |
+| GraphQL operation               | API Endpoint  | Resolvers, queries            |
+| New entity/aggregate            | Domain Entity | Aggregates, value objects     |
+| Event subscriber                | CQRS Pattern  | Event flow, messaging         |
+| Splitting existing component    | Refactoring   | Component removal/addition    |
+| Moving component between layers | Refactoring   | Layer boundaries              |
+| Repository implementation       | Domain Entity | Hexagonal ports/adapters      |
 
 ## Combining Examples
 
