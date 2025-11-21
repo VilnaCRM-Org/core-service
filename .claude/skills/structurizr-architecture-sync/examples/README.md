@@ -211,7 +211,15 @@ Have a useful scenario not covered here? Consider:
 ## Need More Help?
 
 - **Main skill documentation**: [SKILL.md](../SKILL.md)
-- **Reference documentation**: [reference/](../reference/)
+- **Reference documentation**:
+  - [Workspace Template](../reference/workspace-template.md) - Complete workspace.dsl structure
+  - [Common Mistakes](../reference/common-mistakes.md) - Pitfalls and solutions
+  - [Component Identification](../reference/component-identification.md) - What to document
+  - [Relationship Patterns](../reference/relationship-patterns.md) - Common patterns
+  - [DSL Syntax](../reference/dsl-syntax.md) - Complete syntax reference
+  - [C4 Model Guide](../reference/c4-model-guide.md) - Understanding C4
 - **Decision guide**: `.claude/skills/SKILL-DECISION-GUIDE.md`
-- **C4 Model documentation**: https://c4model.com/
-- **Structurizr DSL docs**: https://docs.structurizr.com/dsl
+- **External resources**:
+  - C4 Model documentation: https://c4model.com/
+  - Structurizr DSL docs: https://docs.structurizr.com/dsl
+  - User Service example: https://github.com/VilnaCRM-Org/user-service
