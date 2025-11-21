@@ -18,6 +18,7 @@ views {
 ```
 
 **Error Message**:
+
 ```
 workspace.dsl: The element "customer" does not exist at line 242
 ```
@@ -132,6 +133,7 @@ views {
 ```
 
 Then **position manually in the UI**:
+
 1. Open http://localhost:8080
 2. Drag components to arrange them
 3. Click "Save workspace" button
@@ -212,6 +214,7 @@ group "Domain" {
 **Only document architecturally significant components**:
 
 ✅ **DO document**:
+
 - Processors (API handlers)
 - Command Handlers
 - Event Subscribers
@@ -221,6 +224,7 @@ group "Domain" {
 - Event Bus
 
 ❌ **DON'T document**:
+
 - Value objects
 - Factories
 - Interfaces
@@ -329,6 +333,7 @@ group "Infrastructure" {
 ### Solution
 
 **Use consistent naming**:
+
 - Variable name = camelCase version of class name
 - Display name = exact class name
 - Include component type (third parameter)
@@ -439,6 +444,7 @@ customerHandler -> repository "persists via"
 ### Solution
 
 **Model one-way dependencies**:
+
 - Processors call handlers (not vice versa)
 - Handlers use repositories (not vice versa)
 - Events trigger subscribers (not vice versa)

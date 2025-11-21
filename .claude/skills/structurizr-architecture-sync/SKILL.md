@@ -43,6 +43,7 @@ Keep the Structurizr workspace (`workspace.dsl`) synchronized with codebase chan
 Determine if your code changes are architecturally significant:
 
 **✅ DO update workspace.dsl when adding**:
+
 - Processors (HTTP/GraphQL handlers)
 - Command Handlers (CQRS pattern)
 - Event Subscribers (event-driven patterns)
@@ -53,6 +54,7 @@ Determine if your code changes are architecturally significant:
 - External dependencies (DB, Cache, Message Broker)
 
 **❌ DON'T update for**:
+
 - Factory classes
 - Transformer classes (unless critical)
 - Value objects
@@ -76,6 +78,7 @@ group "Application" {
 ```
 
 **Layers**:
+
 - `group "Application"` - Controllers, Processors, Handlers, Subscribers
 - `group "Domain"` - Entities, Domain Events
 - `group "Infrastructure"` - Repositories, Event Bus, Infrastructure services
@@ -108,6 +111,7 @@ open http://localhost:8080
 ```
 
 **Check for**:
+
 - No syntax errors displayed
 - New component appears
 - Relationships are visible
@@ -163,6 +167,7 @@ structurizr:
 6. Commit `workspace.json` with `workspace.dsl`
 
 **Layout best practices**:
+
 - Processors/Controllers on the left (entry points)
 - Command Handlers in the middle (business logic)
 - Repositories to the right of handlers
@@ -175,6 +180,7 @@ structurizr:
 ### 1. Filtered Views Causing Errors
 
 ❌ **WRONG**:
+
 ```dsl
 views {
     component softwareSystem.serviceName "Components_Customer" {
@@ -184,6 +190,7 @@ views {
 ```
 
 ✅ **CORRECT**:
+
 ```dsl
 views {
     component softwareSystem.serviceName "Components_All" {
@@ -195,6 +202,7 @@ views {
 ### 2. External Dependencies in Groups
 
 ❌ **WRONG**:
+
 ```dsl
 group "Infrastructure" {
     database = component "Database" ... { tags "Database" }
@@ -202,6 +210,7 @@ group "Infrastructure" {
 ```
 
 ✅ **CORRECT**:
+
 ```dsl
 group "Infrastructure" {
     repository = component "Repository" ... { tags "Item" }
@@ -214,6 +223,7 @@ database = component "Database" ... { tags "Database" }
 ### 3. Using autolayout
 
 ❌ **WRONG**:
+
 ```dsl
 views {
     component ... {
@@ -224,6 +234,7 @@ views {
 ```
 
 ✅ **CORRECT**:
+
 ```dsl
 views {
     component ... {
@@ -235,6 +246,7 @@ views {
 ### 4. Over-Documenting Internal Details
 
 ❌ **WRONG** (too many components):
+
 ```dsl
 customer = component "Customer" ...
 customerId = component "CustomerId" ...
@@ -243,6 +255,7 @@ customerFactory = component "CustomerFactory" ...
 ```
 
 ✅ **CORRECT** (focus on significance):
+
 ```dsl
 customer = component "Customer" "Represents a customer aggregate" "Entity" {
     tags "Item"
@@ -256,6 +269,7 @@ customer = component "Customer" "Represents a customer aggregate" "Entity" {
 ## Reference Documentation
 
 ### Detailed Guides
+
 - [C4 Model Fundamentals](reference/c4-model-guide.md) - Understanding C4 modeling
 - [DSL Syntax Reference](reference/dsl-syntax.md) - Complete Structurizr DSL syntax
 - [Component Identification](reference/component-identification.md) - What to document
@@ -264,6 +278,7 @@ customer = component "Customer" "Represents a customer aggregate" "Entity" {
 - [Common Mistakes](reference/common-mistakes.md) - Pitfalls and solutions
 
 ### Examples
+
 - [Adding CQRS Pattern](examples/cqrs-pattern.md) - Command handlers, events, subscribers
 - [Adding API Endpoint](examples/api-endpoint.md) - Controllers, processors, transformers
 - [Adding Domain Entity](examples/domain-entity.md) - Entities, value objects, factories
@@ -276,17 +291,20 @@ customer = component "Customer" "Represents a customer aggregate" "Entity" {
 ### What Makes a Good Architecture Diagram
 
 **Clarity over Completeness**:
+
 - 15-25 components (optimal readability)
 - Focus on architectural significance
 - Clear left-to-right or top-to-bottom flow
 - External dependencies clearly visible
 
 **Layer Separation**:
+
 - Application: Entry points and orchestration
 - Domain: Business logic and entities
 - Infrastructure: Technical implementation
 
 **Meaningful Relationships**:
+
 - Show actual code dependencies
 - Use descriptive labels
 - Avoid circular dependencies
@@ -308,11 +326,13 @@ This ensures architecture documentation matches enforced boundaries.
 ## Integration with Other Skills
 
 Use this skill **after**:
+
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - After creating domain model
 - [api-platform-crud](../api-platform-crud/SKILL.md) - After adding API endpoints
 - [deptrac-fixer](../deptrac-fixer/SKILL.md) - After fixing layer violations
 
 Use this skill **before**:
+
 - [documentation-sync](../documentation-sync/SKILL.md) - Update docs with architecture
 - [ci-workflow](../ci-workflow/SKILL.md) - Validate all changes
 

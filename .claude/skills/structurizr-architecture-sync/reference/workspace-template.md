@@ -193,6 +193,7 @@ group "Infrastructure" { ... }
 ```
 
 **Component placement**:
+
 - **Application**: Processors, Handlers, Subscribers, Controllers
 - **Domain**: Entities, Domain Events
 - **Infrastructure**: Repositories, Event Bus, Infrastructure services
@@ -258,6 +259,7 @@ views {
 ```
 
 **DO NOT add**:
+
 - Multiple views (use single `Components_All`)
 - `autolayout` directive (position manually in UI)
 
@@ -266,11 +268,13 @@ views {
 ### For Your Service
 
 1. **Replace service name**:
+
    ```dsl
    serviceName = container "Core Service" {  // Your service name
    ```
 
 2. **Add your components** in appropriate groups:
+
    - List all processors
    - List all command handlers
    - List all event subscribers
@@ -278,6 +282,7 @@ views {
    - List your repositories
 
 3. **Define relationships**:
+
    - Start with processor → handler flows
    - Add handler → entity → repository chains
    - Add event flows if using events
@@ -294,11 +299,11 @@ views {
 
 ## Component Counts by Service
 
-| Service | Components | Notes |
-|---------|-----------|-------|
-| User Service | 23 | Good balance |
-| Core Service | 21 | Clean and focused |
-| Target Range | 15-25 | Optimal for clarity |
+| Service      | Components | Notes               |
+| ------------ | ---------- | ------------------- |
+| User Service | 23         | Good balance        |
+| Core Service | 21         | Clean and focused   |
+| Target Range | 15-25      | Optimal for clarity |
 
 ## Next Steps
 
