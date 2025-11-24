@@ -3537,6 +3537,10 @@ components:
       additionalProperties: false
       deprecated: false
       properties:
+        id:
+          type:
+            - string
+            - 'null'
         initials:
           maxLength: 255
           type:
@@ -3694,6 +3698,10 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerStatus.StatusPut.jsonld:
       type: object
       description: ''
@@ -3758,6 +3766,10 @@ components:
       properties:
         value:
           maxLength: 255
+          type:
+            - string
+            - 'null'
+        id:
           type:
             - string
             - 'null'
