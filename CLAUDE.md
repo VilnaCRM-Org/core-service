@@ -20,17 +20,20 @@ VilnaCRM Core Service - A modern PHP microservice built with Symfony 7, API Plat
 **IMPORTANT**: Always use make commands or docker exec into the PHP container. Never run PHP commands directly on the host.
 
 ### Quick Start
+
 - `make start` - Start all services (includes MongoDB)
 - `make install` - Install PHP dependencies
 - `make sh` - Access PHP container shell
 
 ### Development Essentials
+
 - `make phpcsfixer` - Auto-fix code style (PSR-12)
 - `make psalm` - Static analysis
 - `make all-tests` - Run complete test suite
 - `make ci` - Run all CI checks (must pass before commit)
 
 ### Testing
+
 - `make unit-tests` - Unit tests (100% coverage required)
 - `make integration-tests` - Integration tests
 - `make behat` - E2E BDD tests
@@ -41,6 +44,7 @@ For complete command reference and detailed workflows, see [AGENTS.md](./AGENTS.
 ## Architecture Quick Reference
 
 ### Directory Structure
+
 ```
 src/
 ├── {Context}/              # Bounded contexts (e.g., Customer)
@@ -56,6 +60,7 @@ src/
 ### Key Patterns
 
 **CQRS & Event-Driven**:
+
 - Commands: Implement `CommandInterface`
 - Command Handlers: Implement `CommandHandlerInterface` (auto-tagged)
 - Domain Events: Extend `DomainEvent`
@@ -63,6 +68,7 @@ src/
 - Aggregates: Extend `AggregateRoot` to record domain events
 
 **Dependency Rules**:
+
 - Domain layer: No external dependencies
 - Application layer: Depends on Domain
 - Infrastructure layer: Depends on Domain and Application
@@ -72,6 +78,7 @@ For detailed architecture guidelines, see [AGENTS.md](./AGENTS.md).
 ## Quality Standards
 
 The project enforces strict quality standards:
+
 - 100% unit test coverage
 - 100% mutation testing score (MSI)
 - PHPInsights score of 100
