@@ -7,7 +7,7 @@ namespace App\Tests\Integration;
 /**
  * Integration tests for CustomerStatus GraphQL operations.
  */
-final class CustomerStatusGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
+final class CustomerStatusGraphQLTest extends BaseGraphQLTest
 {
     public function testQuerySingleCustomerStatusSuccess(): void
     {
@@ -117,7 +117,7 @@ final class CustomerStatusGraphQLIntegrationTest extends BaseGraphQLIntegrationT
         $statusIri = $this->createEntity('/api/customer_statuses', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($statusIri),
+            'id' => $statusIri,
             'value' => 'Updated Status',
         ];
 
@@ -177,7 +177,7 @@ final class CustomerStatusGraphQLIntegrationTest extends BaseGraphQLIntegrationT
         $nonExistentId = $this->faker->ulid();
 
         $updateData = [
-            'id' => $nonExistentId,
+            'id' => '/api/customer_statuses/' . $nonExistentId,
             'value' => 'Updated Status',
         ];
 

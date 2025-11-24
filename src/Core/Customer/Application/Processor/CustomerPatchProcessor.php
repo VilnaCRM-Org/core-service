@@ -43,7 +43,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customer = $this->retrieveCustomer($uriVariables);
+        $customer = $this->retrieveCustomer($data, $uriVariables);
         $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
         return $customer;
@@ -52,9 +52,14 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     /**
      * @param array<string,string> $uriVariables
      */
-    private function retrieveCustomer(array $uriVariables): Customer
+    private function retrieveCustomer(CustomerPatch $data, array $uriVariables): Customer
     {
-        $ulid = $uriVariables['ulid'];
+        $ulid = $uriVariables['ulid'] ?? ($data->id !== null ? basename($data->id) : null);
+
+        if (!$ulid) {
+            throw new CustomerNotFoundException();
+        }
+
         return $this->repository->find(
             $this->ulidTransformer->create($ulid)
         ) ?? throw new CustomerNotFoundException();

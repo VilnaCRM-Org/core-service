@@ -100,16 +100,47 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
+    {
+        $ulid = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customer_statuses/%s', $ulid);
+        $dto = new StatusPatch($this->faker->word(), $iri);
+        $operation = $this->createMock(Operation::class);
+        $customerStatus = $this->createMock(CustomerStatus::class);
+        $command = $this->createMock(UpdateCustomerStatusCommand::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerStatus, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->setupDependencies($customerStatus, $dto->value, $command);
+        $this->setupCustomerStatus($customerStatus, $dto->value);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerStatus, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new StatusPatch($this->faker->word(), null);
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerStatusNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
     private function createDto(): StatusPatch
     {
         return new StatusPatch(
-            $this->faker->word()
+            $this->faker->word(),
+            null
         );
     }
 
     private function createDtoWithEmptyValue(): StatusPatch
     {
-        return new StatusPatch('');
+        return new StatusPatch('', null);
     }
 
     private function setupRepository(

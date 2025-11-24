@@ -102,7 +102,7 @@ final class CustomerTest extends UnitTestCase
 
     public function testGetAndSetUpdatedAt(): void
     {
-        $updatedAt = new DateTimeImmutable($this->faker->date('Y-m-d H:i:s'));
+        $updatedAt = new \DateTime($this->faker->date('Y-m-d H:i:s'));
         $this->customer->setUpdatedAt($updatedAt);
         $this->assertEquals($updatedAt, $this->customer->getUpdatedAt());
     }

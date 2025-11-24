@@ -101,16 +101,47 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
+    {
+        $ulid = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customer_types/%s', $ulid);
+        $dto = new TypePatch($this->faker->word(), $iri);
+        $operation = $this->createMock(Operation::class);
+        $customerType = $this->createMock(CustomerType::class);
+        $command = $this->createMock(UpdateCustomerTypeCommand::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->setupDependencies($customerType, $dto->value, $command);
+        $this->setupCustomerType($customerType, $dto->value);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerType, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new TypePatch($this->faker->word(), null);
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerTypeNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
     private function createDto(): TypePatch
     {
         return new TypePatch(
-            $this->faker->word()
+            $this->faker->word(),
+            null
         );
     }
 
     private function createDtoWithEmptyValue(): TypePatch
     {
-        return new TypePatch('');
+        return new TypePatch('', null);
     }
 
     private function setupRepository(

@@ -124,5 +124,5 @@ export default function prepareCustomers() {
 
 export function teardown(data) {
   console.log('\nTest data preparation completed.');
-  console.log('Note: Data persists for load testing. Use CleanupCustomers.js to remove test data.');
+  console.log('Note: Data persists for load testing. Use cleanupCustomers.js to remove test data.');
 }

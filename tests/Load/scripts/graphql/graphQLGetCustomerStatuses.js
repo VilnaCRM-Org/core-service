@@ -10,7 +10,7 @@ const scenarioUtils = new ScenarioUtils(utils, scenarioName);
 export const options = scenarioUtils.getOptions();
 
 export function setup() {
-  // Fetch existing customer statuses created by PrepareCustomers script
+  // Fetch existing customer statuses created by prepareCustomers script
   const response = http.get(`${utils.getBaseUrl()}/customer_statuses?itemsPerPage=100`);
 
   if (response.status !== 200) {
@@ -23,7 +23,7 @@ export function setup() {
   const statuses = data.member || [];
 
   if (statuses.length === 0) {
-    throw new Error('No customer statuses found. Please run PrepareCustomers script first.');
+    throw new Error('No customer statuses found. Please run prepareCustomers script first.');
   }
 
   return {

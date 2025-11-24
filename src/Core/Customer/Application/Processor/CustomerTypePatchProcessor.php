@@ -39,8 +39,9 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerType {
-        $ulid = $uriVariables['ulid'];
+        $ulid = $this->extractUlid($data, $uriVariables);
         $iri = sprintf('/api/customer_types/%s', $ulid);
+
         $customerType = $this->repository->find(
             $this->ulidFactory->create($ulid)
         ) ?? throw CustomerTypeNotFoundException::withIri($iri);
@@ -50,6 +51,20 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         $this->dispatchCommand($customerType, $newValue);
 
         return $customerType;
+    }
+
+    /**
+     * @param array<string,string> $uriVariables
+     */
+    private function extractUlid(TypePatch $data, array $uriVariables): string
+    {
+        $ulid = $uriVariables['ulid'] ?? ($data->id !== null ? basename($data->id) : null);
+
+        if ($ulid) {
+            return $ulid;
+        }
+
+        throw CustomerTypeNotFoundException::withIri('/api/customer_types/unknown');
     }
 
     private function getNewValue(

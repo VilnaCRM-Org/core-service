@@ -7,7 +7,7 @@ namespace App\Tests\Integration;
 /**
  * Integration tests for CustomerType GraphQL operations.
  */
-final class CustomerTypeGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
+final class CustomerTypeGraphQLTest extends BaseGraphQLTest
 {
     public function testQuerySingleCustomerTypeSuccess(): void
     {
@@ -67,7 +67,7 @@ final class CustomerTypeGraphQLIntegrationTest extends BaseGraphQLIntegrationTes
         $typeIri = $this->createEntity('/api/customer_types', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($typeIri),
+            'id' => $typeIri,
             'value' => 'Updated Type',
         ];
 
@@ -120,7 +120,7 @@ final class CustomerTypeGraphQLIntegrationTest extends BaseGraphQLIntegrationTes
         $nonExistentId = $this->faker->ulid();
 
         $updateData = [
-            'id' => $nonExistentId,
+            'id' => '/api/customer_types/' . $nonExistentId,
             'value' => 'Updated Type',
         ];
 

@@ -10,7 +10,7 @@ const scenarioUtils = new ScenarioUtils(utils, scenarioName);
 export const options = scenarioUtils.getOptions();
 
 export function setup() {
-  // Fetch existing customer types created by PrepareCustomers script
+  // Fetch existing customer types created by prepareCustomers script
   const response = http.get(`${utils.getBaseUrl()}/customer_types?itemsPerPage=100`);
 
   if (response.status !== 200) {
@@ -21,7 +21,7 @@ export function setup() {
   const types = data.member || [];
 
   if (types.length === 0) {
-    throw new Error('No customer types found. Please run PrepareCustomers script first.');
+    throw new Error('No customer types found. Please run prepareCustomers script first.');
   }
 
   return {

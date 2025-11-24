@@ -120,6 +120,66 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, $uriVars);
     }
 
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
+    {
+        $ulidStr = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customers/%s', $ulidStr);
+        $dto = new CustomerPatch(
+            $iri,
+            $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            null,
+            null,
+            $this->faker->boolean()
+        );
+        $operation = $this->createMock(Operation::class);
+        $customer = $this->createMock(Customer::class);
+        $ulid = new Ulid($ulidStr);
+        $command = $this->createMock(UpdateCustomerCommand::class);
+
+        $this->setupRepository($ulid, $customer);
+        $this->setupCustomer(
+            $customer,
+            $dto->initials,
+            $dto->email,
+            $dto->phone,
+            $dto->leadSource,
+            $dto->confirmed
+        );
+
+        $this->factory->expects($this->once())
+            ->method('create')
+            ->willReturn($command);
+        $this->commandBus->expects($this->once())
+            ->method('dispatch')
+            ->with($command);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customer, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new CustomerPatch(
+            null,
+            $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            null,
+            null,
+            $this->faker->boolean()
+        );
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
     private function setupRepository(Ulid $ulid, Customer $customer): void
     {
         $this->repository->expects($this->once())

@@ -7,6 +7,7 @@ namespace App\Core\Customer\Application\DTO;
 final readonly class CustomerPatch
 {
     public function __construct(
+        public ?string $id = null,
         public ?string $initials = null,
         public ?string $email = null,
         public ?string $phone = null,

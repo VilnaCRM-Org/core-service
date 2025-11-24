@@ -14,7 +14,7 @@ namespace App\Tests\Integration;
  * - Update customer mutation
  * - Delete customer mutation
  */
-final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
+final class CustomerGraphQLTest extends BaseGraphQLTest
 {
     public function testQuerySingleCustomerSuccess(): void
     {
@@ -113,7 +113,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
         $customerIri = $this->createEntity('/api/customers', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'initials' => 'Updated Customer',
             'email' => $this->faker->unique()->safeEmail(),
             'confirmed' => ! $initialData['confirmed'],
@@ -132,7 +132,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
         $nonExistentUlid = $this->faker->ulid();
 
         $updateData = [
-            'id' => $nonExistentUlid,
+            'id' => '/api/customers/' . $nonExistentUlid,
             'initials' => 'Updated Customer',
         ];
 
@@ -158,7 +158,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
         $customerIri = $this->createEntity('/api/customers', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'initials' => 'Only Initials Changed',
         ];
 
@@ -224,7 +224,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
         $newStatus = $this->createCustomerStatus('New Status');
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'type' => $newType,
             'status' => $newStatus,
         ];
@@ -245,7 +245,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
 
         // Update with non-existent type
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'type' => '/api/customer_types/' . $this->faker->ulid(),
         ];
 
@@ -275,7 +275,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
 
         // Update with non-existent status
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'status' => '/api/customer_statuses/' . $this->faker->ulid(),
         ];
 
@@ -368,7 +368,7 @@ final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
 
         // Update with invalid email
         $updateData = [
-            'id' => $this->extractUlidFromIri($customerIri),
+            'id' => $customerIri,
             'email' => 'invalid-email-format',
         ];
 

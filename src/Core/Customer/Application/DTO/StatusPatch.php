@@ -8,6 +8,7 @@ final readonly class StatusPatch
 {
     public function __construct(
         public ?string $value,
+        public ?string $id = null,
     ) {
     }
 }

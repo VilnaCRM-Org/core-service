@@ -56,6 +56,6 @@ final readonly class CustomerUpdateFactory implements
      */
     private function getStringValue(?string $newValue, string $defaultValue): string
     {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
+        return $newValue !== null && trim($newValue) !== '' ? $newValue : $defaultValue;
     }
 }

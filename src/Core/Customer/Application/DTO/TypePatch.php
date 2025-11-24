@@ -7,7 +7,8 @@ namespace App\Core\Customer\Application\DTO;
 final readonly class TypePatch
 {
     public function __construct(
-        public ?string $value = null,
+        public ?string $value,
+        public ?string $id = null,
     ) {
     }
 }

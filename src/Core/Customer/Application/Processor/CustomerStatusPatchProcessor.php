@@ -39,7 +39,8 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerStatus {
-        $ulid = $uriVariables['ulid'];
+        $ulid = $this->extractUlid($data, $uriVariables);
+
         $customerStatus = $this->repository->find(
             $this->ulidFactory->create($ulid)
         ) ?? throw new CustomerStatusNotFoundException();
@@ -50,6 +51,20 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
         $this->dispatchCommand($customerStatus, $newValue);
 
         return $customerStatus;
+    }
+
+    /**
+     * @param array<string,string> $uriVariables
+     */
+    private function extractUlid(StatusPatch $data, array $uriVariables): string
+    {
+        $ulid = $uriVariables['ulid'] ?? ($data->id !== null ? basename($data->id) : null);
+
+        if ($ulid) {
+            return $ulid;
+        }
+
+        throw new CustomerStatusNotFoundException();
     }
 
     private function getNewValue(

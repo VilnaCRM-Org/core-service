@@ -6,6 +6,7 @@ namespace App\Core\Customer\Domain\Entity;
 
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
+use DateTime;
 use DateTimeImmutable;
 
 class Customer implements CustomerInterface
@@ -20,7 +21,7 @@ class Customer implements CustomerInterface
         private ?bool $confirmed,
         private UlidInterface $ulid,
         private DateTimeImmutable $createdAt = new DateTimeImmutable(),
-        private DateTimeImmutable $updatedAt = new DateTimeImmutable(),
+        private DateTime $updatedAt = new DateTime(),
     ) {
     }
 
@@ -104,12 +105,12 @@ class Customer implements CustomerInterface
         $this->createdAt = $createdAt;
     }
 
-    public function getUpdatedAt(): DateTimeImmutable
+    public function getUpdatedAt(): DateTime
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
@@ -133,6 +134,6 @@ class Customer implements CustomerInterface
         $this->type = $updateData->newType;
         $this->status = $updateData->newStatus;
         $this->confirmed = $updateData->newConfirmed;
-        $this->updatedAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTime();
     }
 }
