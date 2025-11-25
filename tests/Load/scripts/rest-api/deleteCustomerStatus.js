@@ -1,8 +1,8 @@
 import http from 'k6/http';
 import counter from 'k6/x/counter';
-import InsertCustomerStatusesUtils from '../utils/insertCustomerStatusesUtils.js';
-import ScenarioUtils from '../utils/scenarioUtils.js';
-import Utils from '../utils/utils.js';
+import InsertCustomerStatusesUtils from '../../utils/insertCustomerStatusesUtils.js';
+import ScenarioUtils from '../../utils/scenarioUtils.js';
+import Utils from '../../utils/utils.js';
 
 const scenarioName = 'deleteCustomerStatus';
 

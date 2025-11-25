@@ -1,6 +1,6 @@
 import http from 'k6/http';
-import ScenarioUtils from '../utils/scenarioUtils.js';
-import Utils from '../utils/utils.js';
+import ScenarioUtils from '../../utils/scenarioUtils.js';
+import Utils from '../../utils/utils.js';
 import counter from 'k6/x/counter';
 
 const scenarioName = 'graphQLUpdateCustomerType';
