@@ -34,9 +34,7 @@ function buildCandidatePaths(fileLocation, fileName) {
   const candidateSet = new Set();
 
   if (fileLocation) {
-    const normalizedLocation = fileLocation.endsWith('/')
-      ? fileLocation
-      : `${fileLocation}/`;
+    const normalizedLocation = fileLocation.endsWith('/') ? fileLocation : `${fileLocation}/`;
     candidateSet.add(`${normalizedLocation}${fileName}`);
   }
 
