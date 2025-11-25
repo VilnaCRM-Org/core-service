@@ -286,32 +286,37 @@ stop-prod-loadtest: ## Stop production load testing environment
 validate-configuration: ## Validate configuration structure and detect locked file modifications
 	@./scripts/validate-configuration.sh
 
+validate-load-test-naming: ## Ensure load test scripts follow naming conventions
+	@./scripts/validate-load-test-naming.sh
+
 ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	@echo "🚀 Running comprehensive CI checks..."
 	@failed_checks=""; \
-	echo "1️⃣  Validating composer.json and composer.lock..."; \
+	echo "1️⃣  Validating load test script naming..."; \
+	if ! make validate-load-test-naming; then failed_checks="$$failed_checks\n❌ load test script naming"; fi; \
+	echo "2️⃣  Validating composer.json and composer.lock..."; \
 	if ! make composer-validate; then failed_checks="$$failed_checks\n❌ composer validation"; fi; \
-	echo "2️⃣  Checking Symfony requirements..."; \
+	echo "3️⃣  Checking Symfony requirements..."; \
 	if ! make check-requirements; then failed_checks="$$failed_checks\n❌ Symfony requirements check"; fi; \
-	echo "3️⃣  Running security analysis..."; \
+	echo "4️⃣  Running security analysis..."; \
 	if ! make check-security; then failed_checks="$$failed_checks\n❌ security analysis"; fi; \
-	echo "4️⃣  Fixing code style with PHP CS Fixer..."; \
+	echo "5️⃣  Fixing code style with PHP CS Fixer..."; \
 	if ! make phpcsfixer; then failed_checks="$$failed_checks\n❌ PHP CS Fixer"; fi; \
-	echo "5️⃣  Running static analysis with Psalm..."; \
+	echo "6️⃣  Running static analysis with Psalm..."; \
 	if ! make psalm; then failed_checks="$$failed_checks\n❌ Psalm static analysis"; fi; \
-	echo "6️⃣  Running security taint analysis..."; \
+	echo "7️⃣  Running security taint analysis..."; \
 	if ! make psalm-security; then failed_checks="$$failed_checks\n❌ Psalm security analysis"; fi; \
-	echo "7️⃣  Running code quality analysis with PHPMD..."; \
+	echo "8️⃣  Running code quality analysis with PHPMD..."; \
 	if ! make phpmd; then failed_checks="$$failed_checks\n❌ PHPMD quality analysis"; fi; \
-	echo "8️⃣  Running code quality analysis with PHPInsights..."; \
+	echo "9️⃣  Running code quality analysis with PHPInsights..."; \
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
-	echo "9️⃣  Validating architecture with Deptrac..."; \
+	echo "🔟  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "🔟 Running complete test suite (unit, integration, e2e)..."; \
+	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
-	echo "1️⃣1️⃣ Running mutation testing with Infection..."; \
+	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
@@ -330,12 +335,19 @@ pr-comments: ## Retrieve unresolved comments for a GitHub Pull Request
 		echo "Visit: https://cli.github.com/ for installation instructions"; \
 		exit 1; \
 	fi
+	@if ! command -v jq >/dev/null 2>&1; then \
+		echo "Error: jq is required but not installed."; \
+		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
+		exit 1; \
+	fi
 ifdef PR
 	@echo "Retrieving unresolved comments for PR #$(PR)..."
-	@GITHUB_HOST="$(GITHUB_HOST)" ./scripts/get-pr-comments.sh "$(PR)" "$(FORMAT)"
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
+		./scripts/get-pr-comments.sh "$(PR)" "$(FORMAT)"
 else
 	@echo "Auto-detecting PR from current git branch..."
-	@GITHUB_HOST="$(GITHUB_HOST)" ./scripts/get-pr-comments.sh "$(FORMAT)"
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
+		./scripts/get-pr-comments.sh "$(FORMAT)"
 endif
 
 pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a GitHub Pull Request
@@ -351,10 +363,10 @@ pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a Git
 	fi
 ifdef PR
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments-improved.sh "$(PR)" "$${FORMAT:-text}"
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-text}"
 else
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments-improved.sh "$${FORMAT:-text}"
+		./scripts/get-pr-comments.sh "$${FORMAT:-text}"
 endif
 
 pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments-errors.txt
@@ -383,10 +395,10 @@ pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments
 	} > "$$output_file"; \
 	if [ -n "$(PR)" ]; then \
 		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments-improved.sh "$(PR)" "text" >> "$$output_file" 2>&1 || true; \
+			./scripts/get-pr-comments.sh "$(PR)" "text" >> "$$output_file" 2>&1 || true; \
 	else \
 		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments-improved.sh "text" >> "$$output_file" 2>&1 || true; \
+			./scripts/get-pr-comments.sh "text" >> "$$output_file" 2>&1 || true; \
 	fi; \
 	comment_count=$$(grep -c "^Comment ID:" "$$output_file" || echo "0"); \
 	echo "" >> "$$output_file"; \
@@ -403,4 +415,3 @@ pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments
 		echo "⚠️  No unresolved comments found in this PR"; \
 		echo "📄 Report saved to: $$output_file"; \
 	fi
-

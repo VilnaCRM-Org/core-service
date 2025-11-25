@@ -8,12 +8,11 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\StatusPatch;
 use App\Core\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
+use App\Core\Customer\Application\Resolver\CustomerStatusResolver;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
-use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Infrastructure\Factory\UlidFactory;
+use InvalidArgumentException;
 
 /**
  * @implements ProcessorInterface<StatusPatch, CustomerStatus>
@@ -21,17 +20,17 @@ use App\Shared\Infrastructure\Factory\UlidFactory;
 final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
 {
     public function __construct(
-        private StatusRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
         private UpdateStatusCommandFactoryInterface $commandFactory,
-        private UlidFactory $ulidFactory,
+        private CustomerStatusResolver $customerStatusResolver,
     ) {
     }
 
     /**
-     * @param StatusPatch $data
-     * @param array<string,string> $context
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.DisallowMixedTypeHint
+     *
      * @param array<string,string> $uriVariables
+     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
     public function process(
         mixed $data,
@@ -39,39 +38,26 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerStatus {
-        $ulid = $this->extractUlid($data, $uriVariables);
-
-        $customerStatus = $this->repository->find(
-            $this->ulidFactory->create($ulid)
-        ) ?? throw new CustomerStatusNotFoundException();
-
-        $newValue = $this
-            ->getNewValue($data->value, $customerStatus->getValue());
-
-        $this->dispatchCommand($customerStatus, $newValue);
-
-        return $customerStatus;
-    }
-
-    /**
-     * @param array<string,string> $uriVariables
-     */
-    private function extractUlid(StatusPatch $data, array $uriVariables): string
-    {
-        $ulid = $uriVariables['ulid'] ?? ($data->id !== null ? basename($data->id) : null);
-
-        if ($ulid) {
-            return $ulid;
+        if (!$data instanceof StatusPatch) {
+            throw new InvalidArgumentException(sprintf(
+                'Expected %s, got %s',
+                StatusPatch::class,
+                get_debug_type($data)
+            ));
         }
 
-        throw new CustomerStatusNotFoundException();
-    }
+        $customerStatus = $this->customerStatusResolver->resolve(
+            $data,
+            $context,
+            $operation
+        );
 
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
+        // Only update if value is explicitly provided and not empty
+        if ($data->value !== null && trim($data->value) !== '') {
+            $this->dispatchCommand($customerStatus, $data->value);
+        }
+
+        return $customerStatus;
     }
 
     private function dispatchCommand(

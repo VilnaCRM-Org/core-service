@@ -71,14 +71,16 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $operation = $this->createMock(Operation::class);
         $ulid = (string) $this->faker->ulid();
         $customerType = $this->createMock(CustomerType::class);
-        $command = $this
-            ->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerType, $existingValue, $command);
         $this->setupCustomerType($customerType, $existingValue);
+
+        // When value is empty string, no command should be dispatched (proper PATCH semantics)
+        $this->commandBus
+            ->expects($this->never())
+            ->method('dispatch');
 
         $result = $this->processor
             ->process($dto, $operation, ['ulid' => $ulid]);

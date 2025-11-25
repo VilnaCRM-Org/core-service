@@ -46,9 +46,10 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
             $this->ulidFactory->create($ulid)
         ) ?? throw CustomerTypeNotFoundException::withIri($iri);
 
-        $newValue = $this->getNewValue($data->value, $customerType->getValue());
-
-        $this->dispatchCommand($customerType, $newValue);
+        // Only update if value is explicitly provided and not empty
+        if ($data->value !== null && trim($data->value) !== '') {
+            $this->dispatchCommand($customerType, $data->value);
+        }
 
         return $customerType;
     }
@@ -65,13 +66,6 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         }
 
         throw CustomerTypeNotFoundException::withIri('/api/customer_types/unknown');
-    }
-
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return strlen(trim($newValue ?? '')) > 0 ? $newValue : $defaultValue;
     }
 
     private function dispatchCommand(
