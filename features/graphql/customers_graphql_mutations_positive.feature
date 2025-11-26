@@ -29,6 +29,8 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
           phone
           leadSource
           confirmed
+          createdAt
+          updatedAt
           type {
             id
           }
@@ -47,6 +49,10 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response "data.createCustomer.customer.leadSource" should be "Website"
     And the GraphQL response "data.createCustomer.customer.confirmed" should be "true"
     And the GraphQL response should contain "data.createCustomer.customer.id"
+    And the GraphQL response should contain "data.createCustomer.customer.createdAt"
+    And the GraphQL response should contain "data.createCustomer.customer.updatedAt"
+    And the GraphQL response should contain "data.createCustomer.customer.type.id"
+    And the GraphQL response should contain "data.createCustomer.customer.status.id"
     Then delete customer with email "john.doe@example.com"
 
   Scenario: Create a customer with confirmed set to false
@@ -205,6 +211,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.phone" should be "+9999999999"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERA"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERA") {
+        phone
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.phone" should be "+9999999999"
 
   Scenario: Update customer initials
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERB"
@@ -226,6 +242,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.initials" should be "XY"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERB"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERB") {
+        initials
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.initials" should be "XY"
 
   Scenario: Update customer leadSource
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERC"
@@ -247,6 +273,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.leadSource" should be "NewCampaign"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERC"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERC") {
+        leadSource
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.leadSource" should be "NewCampaign"
 
   Scenario: Update customer confirmed status from true to false
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERD"
@@ -268,6 +304,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "false"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERD"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERD") {
+        confirmed
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.confirmed" should be "false"
 
   Scenario: Update customer type
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERE"
@@ -293,6 +339,18 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should contain "data.updateCustomer.customer.type.id"
     And the GraphQL response "data.updateCustomer.customer.type.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERE"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERE") {
+        type {
+          id
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.type.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
 
   Scenario: Update customer status
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERF"
@@ -318,6 +376,18 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should contain "data.updateCustomer.customer.status.id"
     And the GraphQL response "data.updateCustomer.customer.status.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YERF"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERF") {
+        status {
+          id
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.status.id" should contain "01JKX8XGHVDZ46MWYMZT94YER6"
 
   Scenario: Update multiple customer fields at once
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERG"

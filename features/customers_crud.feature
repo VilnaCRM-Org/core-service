@@ -47,6 +47,13 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "status.@id" should exist
     And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
     And the JSON node "confirmed" should be true
+    And the JSON node "ulid" should exist
+    And the JSON node "createdAt" should exist
+    And the JSON node "updatedAt" should exist
+    And the JSON node "@id" should exist
+    And the JSON node "@type" should be equal to "Customer"
+    And the JSON node "type.value" should exist
+    And the JSON node "status.value" should exist
     Then delete customer with email "postcustomer@example.com"
 
   Scenario: Create a customer resource with additional unrecognized property should be rejected
@@ -75,6 +82,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "createdAt" should exist
+    And I add "Content-Type" header equal to "application/ld+json"
     When I send a PUT request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     {
@@ -98,6 +109,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "type" should exist
     And the JSON node "status" should exist
     And the JSON node "confirmed" should be false
+    And the JSON node "createdAt" should exist
+    And the JSON node "updatedAt" should exist
     When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
     And the JSON node "email" should be equal to "updated@example.com"
@@ -135,6 +148,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "status.@id" should exist
     And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
     And the JSON node "confirmed" should be true
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "updated@example.com"
+    And the JSON node "initials" should be equal to "AB"
+    And the JSON node "leadSource" should be equal to "LinkedIn"
 
   Scenario: Replace a customer resource with updated email
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -165,6 +183,16 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "status.@id" should exist
     And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
     And the JSON node "confirmed" should be true
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "NEW.EMAIL@EXAMPLE.COM"
+    And the JSON node "phone" should be equal to "0123456789"
+    And the JSON node "initials" should be equal to "CA"
+
+    And the JSON node "type.@id" should match "/^\/api\/customer_types\/.+$/"
+    And the JSON node "status.@id" should exist
+    And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
+    And the JSON node "confirmed" should be true
 
   Scenario: Replace a customer resource with all updated fields (verify complete replacement)
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -184,6 +212,22 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     """
     Then the response status code should be equal to 200
     And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_ulid_put"
+    And the JSON node "email" should be equal to "completelynew@example.com"
+    And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "initials" should be equal to "CN"
+    And the JSON node "leadSource" should be equal to "Twitter"
+    And the JSON node "type.@id" should match "/^\/api\/customer_types\/.+$/"
+    And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
+    And the JSON node "confirmed" should be false
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "completelynew@example.com"
+    And the JSON node "phone" should be equal to "0987654321"
+    And the JSON node "initials" should be equal to "CN"
+    And the JSON node "leadSource" should be equal to "Twitter"
+    And the JSON node "confirmed" should be false
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
     And the JSON node "email" should be equal to "completelynew@example.com"
@@ -256,9 +300,20 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "type.@id" should match "/^\/api\/customer_types\/.+$/"
     And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "type.@id" should contain "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "status.@id" should contain "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "type.@id" should match "/^\/api\/customer_types\/.+$/"
+    And the JSON node "status.@id" should match "/^\/api\/customer_statuses\/.+$/"
 
   Scenario: Partially update a customer resource and verify unchanged fields remain intact
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "confirmed" should be true
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
@@ -273,6 +328,17 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "confirmed" should be false
     And the JSON node "email" should exist
     And the JSON node "phone" should exist
+    And the JSON node "initials" should exist
+    And the JSON node "leadSource" should exist
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "confirmed" should be false
+    And the JSON node "email" should exist
+    And the JSON node "phone" should exist
+    And the JSON node "initials" should exist
+    And the JSON node "leadSource" should exist
+    And the JSON node "type" should exist
+    And the JSON node "status" should exist
 
   Scenario: Partially update a customer resource's email and phone simultaneously
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -307,6 +373,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_ulid_patch"
+    And the JSON node "email" should contain "patched@example.com"
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "patched@example.com"
     And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "email" should contain "patched@example.com"
 

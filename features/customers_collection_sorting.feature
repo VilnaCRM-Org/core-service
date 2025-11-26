@@ -17,6 +17,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].leadSource" should contain "Google"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BleadSource%5D=asc"
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
 
   Scenario: Retrieve customers collection sorted by leadSource in descending order
     Given create customer with leadSource "Bing"
@@ -28,6 +31,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].leadSource" should contain "Bing"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BleadSource%5D=desc"
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
 
   Scenario: Retrieve customers collection sorted by ulid in ascending order
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
@@ -38,6 +44,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
     And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER2"
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
 
   Scenario: Retrieve customers collection sorted by ulid in descending order
