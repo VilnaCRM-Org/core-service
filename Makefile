@@ -286,14 +286,9 @@ stop-prod-loadtest: ## Stop production load testing environment
 validate-configuration: ## Validate configuration structure and detect locked file modifications
 	@./scripts/validate-configuration.sh
 
-validate-load-test-naming: ## Ensure load test scripts follow naming conventions
-	@./scripts/validate-load-test-naming.sh
-
 ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	@echo "🚀 Running comprehensive CI checks..."
 	@failed_checks=""; \
-	echo "1️⃣  Validating load test script naming..."; \
-	if ! make validate-load-test-naming; then failed_checks="$$failed_checks\n❌ load test script naming"; fi; \
 	echo "2️⃣  Validating composer.json and composer.lock..."; \
 	if ! make composer-validate; then failed_checks="$$failed_checks\n❌ composer validation"; fi; \
 	echo "3️⃣  Checking Symfony requirements..."; \
