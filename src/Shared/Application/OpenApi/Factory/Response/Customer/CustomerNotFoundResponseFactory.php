@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Factory\Response\Customer;
 
 use ApiPlatform\OpenApi\Model\Response;
-use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
 use App\Shared\Application\OpenApi\Factory\Response\ResponseFactoryInterface;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerNotFoundResponseFactory implements ResponseFactoryInterface

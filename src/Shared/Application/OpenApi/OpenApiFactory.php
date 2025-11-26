@@ -6,15 +6,15 @@ namespace App\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
+use App\Shared\Application\OpenApi\Augmenter\TagDescriptionAugmenter;
+use App\Shared\Application\OpenApi\Extension\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
+use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
 use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\IriReferenceTypeFixer;
 use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\OpenApiExtensionsApplier;
-use App\Shared\Application\OpenApi\Processor\ParameterDescriptionAugmenter;
-use App\Shared\Application\OpenApi\Processor\PathParametersSanitizer;
-use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Processor\TagDescriptionAugmenter;
+use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
 use ArrayObject;
 use Traversable;
 

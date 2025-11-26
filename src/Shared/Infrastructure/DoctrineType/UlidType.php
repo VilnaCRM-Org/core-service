@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValidator;
 use Doctrine\ODM\MongoDB\Types\Type;
@@ -58,7 +58,7 @@ $return = $value ? (function($value) {
     $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
         $ulidFactory,
         new \App\Shared\Infrastructure\Transformer\UlidValidator(),
-        new \App\Shared\Infrastructure\Transformer\UlidConverter($ulidFactory)
+        new \App\Shared\Infrastructure\Converter\UlidConverter($ulidFactory)
     );
     $binary = $value instanceof \MongoDB\BSON\Binary ? $value
     ->getData() : $value;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
 use ArrayObject;
 
 /**

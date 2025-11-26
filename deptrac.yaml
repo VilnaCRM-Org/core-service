@@ -14,7 +14,7 @@ parameters:
         - type: className
           regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer).*'
+          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Extension|Sanitizer).*'
 
     - name: Domain
       collectors:
@@ -30,7 +30,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
         - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory).*'
+          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory|Converter).*'
 
     - name: Symfony
       collectors:
