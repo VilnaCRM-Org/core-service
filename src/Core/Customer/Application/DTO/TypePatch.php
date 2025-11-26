@@ -6,13 +6,11 @@ namespace App\Core\Customer\Application\DTO;
 
 use ApiPlatform\Metadata\ApiProperty;
 
-final readonly class TypePatch
+final class TypePatch
 {
-    public function __construct(
-        #[ApiProperty]
-        public ?string $value,
-        #[ApiProperty]
-        public ?string $id = null,
-    ) {
-    }
+    #[ApiProperty]
+    public ?string $value = null;
+
+    #[ApiProperty]
+    public ?string $id = null;
 }

@@ -302,6 +302,13 @@ type Mutation {
 
 "Creates a Customer."
 input createCustomerInput {
+  initials: String
+  email: String
+  phone: String
+  leadSource: String
+  type: String
+  status: String
+  confirmed: Boolean
   clientMutationId: String
 }
 
@@ -314,6 +321,14 @@ type createCustomerPayload {
 "Updates a Customer."
 input updateCustomerInput {
   id: ID!
+  _id: String
+  initials: String
+  email: String
+  phone: String
+  leadSource: String
+  type: String
+  status: String
+  confirmed: Boolean
   clientMutationId: String
 }
 
@@ -342,6 +357,7 @@ type deleteCustomerPayloadData implements Node {
 
 "Creates a CustomerStatus."
 input createCustomerStatusInput {
+  value: String
   clientMutationId: String
 }
 
@@ -354,6 +370,8 @@ type createCustomerStatusPayload {
 "Updates a CustomerStatus."
 input updateCustomerStatusInput {
   id: ID!
+  value: String
+  _id: String
   clientMutationId: String
 }
 
@@ -382,6 +400,7 @@ type deleteCustomerStatusPayloadData implements Node {
 
 "Creates a CustomerType."
 input createCustomerTypeInput {
+  value: String
   clientMutationId: String
 }
 
@@ -394,6 +413,8 @@ type createCustomerTypePayload {
 "Updates a CustomerType."
 input updateCustomerTypeInput {
   id: ID!
+  value: String
+  _id: String
   clientMutationId: String
 }
 
