@@ -173,6 +173,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_put"
     And the JSON node "value" should be equal to "Qualified"
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "value" should be equal to "Qualified"
 
   Scenario: Replace a customer type resource while including an extra field should be rejected
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
