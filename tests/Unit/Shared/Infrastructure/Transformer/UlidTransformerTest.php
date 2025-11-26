@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValidator;
 use App\Tests\Unit\UnitTestCase;

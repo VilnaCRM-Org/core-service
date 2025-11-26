@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Serializer;
 
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
 use stdClass;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 

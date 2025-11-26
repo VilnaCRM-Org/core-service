@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 
-use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 
 final class UpdateCustomerRequestFactory extends CustomerRequestFactory
 {
