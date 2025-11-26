@@ -9,4 +9,10 @@ final class TypePatch
     public ?string $value = null;
 
     public ?string $id = null;
+
+    public function __construct(?string $value = null, ?string $id = null)
+    {
+        $this->value = $value;
+        $this->id = $id;
+    }
 }

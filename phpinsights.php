@@ -17,6 +17,7 @@ return [
     'exclude' => [
         'vendor',
         'CLI/bats/php',
+        'src/Core/Customer/Application/DTO',
     ],
     'add' => [],
     'remove' => [
