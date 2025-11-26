@@ -41,7 +41,9 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
     public function testProcessDispatchesCommandWithResolvedStatus(): void
     {
-        $dto = new StatusPatch($this->faker->word(), null);
+        $dto = new StatusPatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
         $operation = $this->createMock(Operation::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
         $command = $this->createMock(UpdateCustomerStatusCommand::class);
@@ -76,7 +78,9 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
     public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
     {
-        $dto = new StatusPatch('', null);
+        $dto = new StatusPatch();
+        $dto->value = '';
+        $dto->id = null;
         $operation = $this->createMock(Operation::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
         $existingValue = $this->faker->word();
@@ -102,7 +106,9 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
 
     public function testProcessThrowsExceptionWhenResolverFails(): void
     {
-        $dto = new StatusPatch($this->faker->word(), null);
+        $dto = new StatusPatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
         $operation = $this->createMock(Operation::class);
 
         $this->resolver

@@ -107,7 +107,9 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     {
         $ulid = (string) $this->faker->ulid();
         $iri = sprintf('/api/customer_types/%s', $ulid);
-        $dto = new TypePatch($this->faker->word(), $iri);
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = $iri;
         $operation = $this->createMock(Operation::class);
         $customerType = $this->createMock(CustomerType::class);
         $command = $this->createMock(UpdateCustomerTypeCommand::class);
@@ -125,7 +127,9 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
     public function testProcessThrowsExceptionWhenNoUlidProvided(): void
     {
-        $dto = new TypePatch($this->faker->word(), null);
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
         $operation = $this->createMock(Operation::class);
 
         $this->expectException(CustomerTypeNotFoundException::class);
@@ -135,15 +139,18 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
     private function createDto(): TypePatch
     {
-        return new TypePatch(
-            $this->faker->word(),
-            null
-        );
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        return $dto;
     }
 
     private function createDtoWithEmptyValue(): TypePatch
     {
-        return new TypePatch('', null);
+        $dto = new TypePatch();
+        $dto->value = '';
+        $dto->id = null;
+        return $dto;
     }
 
     private function setupRepository(
