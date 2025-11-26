@@ -37,20 +37,16 @@ export default function getCustomers() {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    '50 customers returned',
-    res => {
-      const body = JSON.parse(res.body);
-      if (body.errors) {
-        console.error('GraphQL errors:', JSON.stringify(body.errors));
-        return false;
-      }
-      if (!body.data || !body.data.customers || !body.data.customers.edges) {
-        console.error('Missing data in response:', JSON.stringify(body));
-        return false;
-      }
-      return body.data.customers.edges.length === 50;
+  utils.checkResponse(response, '50 customers returned', res => {
+    const body = JSON.parse(res.body);
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
     }
-  );
+    if (!body.data || !body.data.customers || !body.data.customers.edges) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    return body.data.customers.edges.length === 50;
+  });
 }

@@ -43,11 +43,7 @@ export default function createCustomerType(data) {
       console.error('GraphQL errors:', JSON.stringify(body.errors));
       return false;
     }
-    if (
-      !body.data ||
-      !body.data.createCustomerType ||
-      !body.data.createCustomerType.customerType
-    ) {
+    if (!body.data || !body.data.createCustomerType || !body.data.createCustomerType.customerType) {
       console.error('Missing data in response:', JSON.stringify(body));
       return false;
     }

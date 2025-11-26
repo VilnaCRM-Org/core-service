@@ -46,22 +46,18 @@ export default function createCustomer(data) {
     utils.getGraphQLHeader()
   );
 
-  utils.checkResponse(
-    response,
-    'created customer returned',
-    res => {
-      const body = JSON.parse(res.body);
-      // Check for GraphQL errors first
-      if (body.errors) {
-        console.error('GraphQL errors:', JSON.stringify(body.errors));
-        return false;
-      }
-      // Check if data exists
-      if (!body.data || !body.data[mutationName]) {
-        console.error('Missing data in response:', JSON.stringify(body));
-        return false;
-      }
-      return body.data[mutationName].customer.email === customer.email;
+  utils.checkResponse(response, 'created customer returned', res => {
+    const body = JSON.parse(res.body);
+    // Check for GraphQL errors first
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
     }
-  );
+    // Check if data exists
+    if (!body.data || !body.data[mutationName]) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    return body.data[mutationName].customer.email === customer.email;
+  });
 }

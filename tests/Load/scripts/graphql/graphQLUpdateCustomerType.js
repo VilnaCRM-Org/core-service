@@ -66,11 +66,7 @@ export default function updateCustomerType(data) {
       console.error('GraphQL errors:', JSON.stringify(body.errors));
       return false;
     }
-    if (
-      !body.data ||
-      !body.data.updateCustomerType ||
-      !body.data.updateCustomerType.customerType
-    ) {
+    if (!body.data || !body.data.updateCustomerType || !body.data.updateCustomerType.customerType) {
       console.error('Missing data in response:', JSON.stringify(body));
       return false;
     }
