@@ -174,6 +174,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.email" should be "updated.email@example.com"
     And the GraphQL response "data.updateCustomer.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5") {
+        email
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.email" should be "updated.email@example.com"
 
   Scenario: Update customer phone
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YERA"
@@ -342,6 +352,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
 
   Scenario: Delete a customer successfully
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER7"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER7") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should contain "data.customer.id"
     When I send the following GraphQL mutation:
     """
     mutation {
@@ -357,6 +377,16 @@ Feature: GraphQL Customer Mutation Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomer.customer.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER7") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer" should be "null"
 
   Scenario: Delete a customer and verify it no longer exists
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER8"
