@@ -53,7 +53,8 @@ final class TestDataCleaner
     public function cleanupCustomers(): void
     {
         foreach ($this->customerIds as $id) {
-            $customer = $this->customerRepository->find($id);
+            $ulid = $this->ulidFactory->create($id);
+            $customer = $this->customerRepository->find($ulid);
             if ($customer !== null) {
                 $this->customerRepository->delete($customer);
             }

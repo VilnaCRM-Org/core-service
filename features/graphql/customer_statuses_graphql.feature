@@ -57,12 +57,14 @@ Feature: GraphQL CustomerStatus CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.createCustomerStatus.customerStatus.value" should be equal to "Pending"
+    And the GraphQL response should contain "data.createCustomerStatus.customerStatus.id"
     When I send the following GraphQL query:
     """
     {
       customerStatuses(first: 1, value: "Pending") {
         edges {
           node {
+            id
             value
           }
         }
@@ -72,6 +74,7 @@ Feature: GraphQL CustomerStatus CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.customerStatuses.edges.0.node.value" should be equal to "Pending"
+    And the GraphQL response "data.customerStatuses.edges" should have 1 items
     Then delete status with value "Pending"
 
   Scenario: Update a customer status via GraphQL mutation
@@ -107,6 +110,19 @@ Feature: GraphQL CustomerStatus CRUD Operations
 
   Scenario: Delete a customer status via GraphQL mutation
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerStatus.id"
+    And the GraphQL response should contain "data.customerStatus.value"
     When I send the following GraphQL mutation:
     """
     mutation {
