@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 
 use App\Shared\Application\OpenApi\Builder\ContextBuilder;
-use App\Shared\Application\OpenApi\Builder\Parameter;
-use App\Shared\Application\OpenApi\Builder\ParameterSchemaFactory;
+use App\Shared\Application\OpenApi\Factory\ParameterSchemaFactory;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 

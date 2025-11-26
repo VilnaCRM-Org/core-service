@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
+use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
 use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\PropertyTypeFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
