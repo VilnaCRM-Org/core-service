@@ -26,6 +26,7 @@ return [
         SpaceAfterNotSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
+        NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenPublicPropertySniff::class,
     ],
 
     'config' => [
@@ -46,6 +47,11 @@ return [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
                 'src/Core/Customer/Domain/Entity/Customer',
+            ],
+        ],
+        NunoMaduro\PhpInsights\Domain\Metrics\Complexity\Complexity::class => [
+            'exclude' => [
+                'src/Core/Customer/Application/DTO',
             ],
         ],
     ],
