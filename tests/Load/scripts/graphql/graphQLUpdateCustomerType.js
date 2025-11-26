@@ -62,12 +62,19 @@ export default function updateCustomerType(data) {
 
   utils.checkResponse(response, 'customer type updated', res => {
     const body = JSON.parse(res.body);
-    return (
-      body.data &&
-      body.data.updateCustomerType &&
-      body.data.updateCustomerType.customerType &&
-      body.data.updateCustomerType.customerType.value === newValue
-    );
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
+    }
+    if (
+      !body.data ||
+      !body.data.updateCustomerType ||
+      !body.data.updateCustomerType.customerType
+    ) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    return body.data.updateCustomerType.customerType.value === newValue;
   });
 }
 

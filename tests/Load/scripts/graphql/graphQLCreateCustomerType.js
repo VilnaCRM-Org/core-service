@@ -39,12 +39,21 @@ export default function createCustomerType(data) {
 
   utils.checkResponse(response, 'customer type created', res => {
     const body = JSON.parse(res.body);
-    if (body.data && body.data.createCustomerType && body.data.createCustomerType.customerType) {
-      // Track created type for cleanup
-      data.createdTypes.push(body.data.createCustomerType.customerType.id);
-      return body.data.createCustomerType.customerType.value === value;
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
     }
-    return false;
+    if (
+      !body.data ||
+      !body.data.createCustomerType ||
+      !body.data.createCustomerType.customerType
+    ) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    // Track created type for cleanup
+    data.createdTypes.push(body.data.createCustomerType.customerType.id);
+    return body.data.createCustomerType.customerType.value === value;
   });
 }
 

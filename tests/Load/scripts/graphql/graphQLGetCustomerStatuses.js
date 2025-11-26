@@ -61,7 +61,15 @@ export default function getCustomerStatuses(data) {
 
   utils.checkResponse(response, 'customerStatuses query returned', res => {
     const body = JSON.parse(res.body);
-    return body.data && body.data.customerStatuses && body.data.customerStatuses.edges.length > 0;
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
+    }
+    if (!body.data || !body.data.customerStatuses || !body.data.customerStatuses.edges) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    return body.data.customerStatuses.edges.length > 0;
   });
 }
 

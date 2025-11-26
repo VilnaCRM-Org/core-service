@@ -42,6 +42,17 @@ export default function getCustomer(data) {
   utils.checkResponse(
     response,
     'customer returned',
-    res => JSON.parse(res.body).data.customer.id === `${id}`
+    res => {
+      const body = JSON.parse(res.body);
+      if (body.errors) {
+        console.error('GraphQL errors:', JSON.stringify(body.errors));
+        return false;
+      }
+      if (!body.data || !body.data.customer) {
+        console.error('Missing data in response:', JSON.stringify(body));
+        return false;
+      }
+      return body.data.customer.id === id;
+    }
   );
 }

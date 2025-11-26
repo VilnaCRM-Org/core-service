@@ -48,11 +48,15 @@ App\Core\Customer\Domain\Entity\CustomerType:
       name: create
       input: App\Core\Customer\Application\DTO\TypeCreate
       processor: App\Core\Customer\Application\Processor\CreateTypeProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     update_mutation:
       class: ApiPlatform\Metadata\GraphQl\Mutation
       name: update
       input: App\Core\Customer\Application\DTO\TypePatch
       processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
       normalizationContext:

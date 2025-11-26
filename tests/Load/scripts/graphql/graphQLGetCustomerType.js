@@ -52,7 +52,15 @@ export default function getCustomerType(data) {
 
   utils.checkResponse(response, 'customerType query returned', res => {
     const body = JSON.parse(res.body);
-    return body.data && body.data.customerType && body.data.customerType.id;
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
+    }
+    if (!body.data || !body.data.customerType) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    return body.data.customerType.id !== undefined;
   });
 }
 

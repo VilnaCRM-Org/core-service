@@ -49,6 +49,17 @@ export default function deleteCustomer(data) {
   utils.checkResponse(
     response,
     'deleted customer id returned',
-    res => JSON.parse(res.body).data[mutationName].customer.id !== undefined
+    res => {
+      const body = JSON.parse(res.body);
+      if (body.errors) {
+        console.error('GraphQL errors:', JSON.stringify(body.errors));
+        return false;
+      }
+      if (!body.data || !body.data[mutationName]) {
+        console.error('Missing data in response:', JSON.stringify(body));
+        return false;
+      }
+      return body.data[mutationName].customer.id !== undefined;
+    }
   );
 }

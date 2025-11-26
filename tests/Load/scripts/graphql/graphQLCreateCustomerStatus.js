@@ -40,16 +40,21 @@ export default function createCustomerStatus(data) {
 
   utils.checkResponse(response, 'customer status created', res => {
     const body = JSON.parse(res.body);
-    if (
-      body.data &&
-      body.data.createCustomerStatus &&
-      body.data.createCustomerStatus.customerStatus
-    ) {
-      // Track created status for cleanup
-      data.createdStatuses.push(body.data.createCustomerStatus.customerStatus.id);
-      return body.data.createCustomerStatus.customerStatus.value === value;
+    if (body.errors) {
+      console.error('GraphQL errors:', JSON.stringify(body.errors));
+      return false;
     }
-    return false;
+    if (
+      !body.data ||
+      !body.data.createCustomerStatus ||
+      !body.data.createCustomerStatus.customerStatus
+    ) {
+      console.error('Missing data in response:', JSON.stringify(body));
+      return false;
+    }
+    // Track created status for cleanup
+    data.createdStatuses.push(body.data.createCustomerStatus.customerStatus.id);
+    return body.data.createCustomerStatus.customerStatus.value === value;
   });
 }
 
