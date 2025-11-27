@@ -39,6 +39,7 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 ### Essential Execution Rules
 
 1. **MANDATORY: Use Make Commands or Docker Container Access Only**
+
    - `make command-name` (preferred)
    - `docker compose exec php command` (direct container access)
    - `make sh` then run commands inside
@@ -153,6 +154,7 @@ src/
 ### Development Workflow
 
 1. **Start Environment**
+
    ```bash
    make build          # First time only (15-30 min, NEVER CANCEL)
    make start          # Start containers (5-10 min)
@@ -160,11 +162,13 @@ src/
    ```
 
 2. **Make Changes**
+
    - Follow architecture patterns from skills
    - Respect layer boundaries (Domain → NO frameworks)
    - Use skills for guidance
 
 3. **Quality Checks**
+
    ```bash
    make phpcsfixer     # Fix code style
    make psalm          # Static analysis
