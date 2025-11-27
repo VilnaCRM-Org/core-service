@@ -17,18 +17,19 @@ use Webmozart\Assert\Assert;
 
 final class GraphQLContext implements Context, SnippetAcceptingContext
 {
-    private ?Response $response = null;
-
-    /** @var array<string, string|int|bool|float|array|null>|null */
-    private ?array $responseData = null;
-
     private readonly GraphQLRequestSender $requestSender;
     private readonly ResponseDataAccessor $dataAccessor;
     private readonly ErrorValidator $errorValidator;
     private readonly ValueAssertionChain $valueAssertion;
 
-    public function __construct(KernelInterface $kernel)
-    {
+    /**
+     * @param array<string, string|int|bool|float|array|null>|null $responseData
+     */
+    public function __construct(
+        KernelInterface $kernel,
+        private ?Response $response = null,
+        private ?array $responseData = null,
+    ) {
         $this->requestSender = new GraphQLRequestSender($kernel);
         $this->dataAccessor = new ResponseDataAccessor();
         $this->errorValidator = new ErrorValidator();

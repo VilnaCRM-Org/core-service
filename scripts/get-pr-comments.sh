@@ -1,18 +1,27 @@
 #!/bin/bash
 
 # ==============================================================================
-# GitHub PR ALL Comments Retrieval Script (Improved)
+# GitHub PR ALL Comments Retrieval Script (Enhanced)
 # ==============================================================================
 #
 # This script retrieves ALL unresolved inline comments for a GitHub PR
-# with pagination support and fetches ALL comments (not just first per thread)
+# with automatic categorization and prioritization for systematic code review
 #
-# IMPROVEMENTS:
+# KEY FEATURES:
 # - Fetches ALL comments in each thread (not just first)
 # - Supports pagination (handles >100 threads)
+# - Automatic categorization (committable, llm-prompt, question, feedback)
+# - Priority sorting (HIGHEST, HIGH, MEDIUM, LOW)
+# - Multiple output formats (text, json, markdown)
 # - Includes outdated comments option
 # - Better error handling
 # - Shows fetching progress
+#
+# COMMENT CATEGORIES (aligned with AGENTS.md):
+# - Committable Suggestions (HIGHEST) - Direct code suggestions to apply
+# - LLM Prompts (HIGH) - Refactoring instructions and architectural guidance
+# - Questions (MEDIUM) - Clarifications needed
+# - Feedback (LOW) - General observations
 #
 # ==============================================================================
 
@@ -23,7 +32,7 @@ PR_NUMBER=""
 FORMAT="text"
 REPO=""
 GITHUB_HOST="${GITHUB_HOST:-github.com}"
-INCLUDE_OUTDATED="${INCLUDE_OUTDATED:-false}"
+INCLUDE_OUTDATED="${INCLUDE_OUTDATED:-true}"
 VERBOSE="${VERBOSE:-false}"
 
 # Help functions
@@ -250,7 +259,19 @@ process_threads() {
             ($outdated_filter)
         ))
         | map(
-            .comments.nodes[] as \$comment | {
+            .comments.nodes[] as \$comment |
+            (\$comment.body | ascii_downcase) as \$body_lower |
+            (if (\$comment.body | test(\"suggestion\")) then \"committable\"
+             elif (\$body_lower | test(\"refactor|implement|should|must|need to|extract|create new|add new|update|change|modify|fix\")) then \"llm-prompt\"
+             elif (\$body_lower | test(\"why|how|what|\\\\?\")) then \"question\"
+             else \"feedback\"
+             end) as \$category |
+            (if \$category == \"committable\" then 1
+             elif \$category == \"llm-prompt\" then 2
+             elif \$category == \"question\" then 3
+             else 4
+             end) as \$priority |
+            {
                 id: \$comment.id,
                 path: .path,
                 line: .line,
@@ -264,10 +285,18 @@ process_threads() {
                 html_url: \$comment.url,
                 thread_id: .id,
                 is_outdated: .isOutdated,
-                in_reply_to_id: null
+                in_reply_to_id: null,
+                category: \$category,
+                priority: \$priority,
+                priority_label: (if \$priority == 1 then \"HIGHEST\"
+                                 elif \$priority == 2 then \"HIGH\"
+                                 elif \$priority == 3 then \"MEDIUM\"
+                                 else \"LOW\"
+                                 end)
             }
         )
         | flatten
+        | sort_by(.priority, .created_at)
     ")
 
     local comment_count
@@ -328,6 +357,7 @@ output_text() {
 
     echo "$comments" | jq -r '.[] |
         "Comment ID: " + (.id | tostring) + "\n" +
+        "Priority: " + .priority_label + " (" + .category + ")\n" +
         "File: " + .path + " (Line " + (.line // .original_line | tostring) + ")\n" +
         "Author: @" + .user.login + "\n" +
         "Created: " + .created_at + "\n" +
@@ -340,6 +370,24 @@ output_text() {
     echo "==============================================="
     echo "Total unresolved comments found: $comment_count"
     echo "==============================================="
+    echo ""
+
+    local committable_count=$(echo "$comments" | jq '[.[] | select(.category == "committable")] | length')
+    local llm_prompt_count=$(echo "$comments" | jq '[.[] | select(.category == "llm-prompt")] | length')
+    local question_count=$(echo "$comments" | jq '[.[] | select(.category == "question")] | length')
+    local feedback_count=$(echo "$comments" | jq '[.[] | select(.category == "feedback")] | length')
+
+    echo "By Category:"
+    echo "  - Committable Suggestions (HIGHEST): $committable_count"
+    echo "  - LLM Prompts (HIGH): $llm_prompt_count"
+    echo "  - Questions (MEDIUM): $question_count"
+    echo "  - Feedback (LOW): $feedback_count"
+    echo ""
+    echo "Recommended Workflow:"
+    echo "  1. Address Committable Suggestions first - apply them directly"
+    echo "  2. Process LLM Prompts - use as detailed refactoring instructions"
+    echo "  3. Answer Questions - provide explanations and improve code clarity"
+    echo "  4. Consider Feedback - for future improvements"
 }
 
 output_json() {
@@ -350,7 +398,7 @@ output_json() {
     echo "$comments" | jq --arg pr_number "$pr_number" --arg count "$comment_count" '{
         "pr_number": ($pr_number | tonumber),
         "total_comments": ($count | tonumber),
-        "include_outdated": env.INCLUDE_OUTDATED == "true",
+        "include_outdated": (env.INCLUDE_OUTDATED == "true"),
         "fetched_at": (now | todate),
         "comments": .
     }'
@@ -370,7 +418,10 @@ output_markdown() {
     fi
 
     echo "$comments" | jq -r '.[] |
-        "## Comment by @" + .user.login + " in `" + .path + "`\n" +
+        "## " + (if .priority == 1 then ":fire: " elif .priority == 2 then ":warning: " elif .priority == 3 then ":question: " else ":bulb: " end) +
+        .priority_label + " - " + .category + "\n" +
+        "\n" +
+        "**Comment by** @" + .user.login + " in `" + .path + "`\n" +
         "\n" +
         "**Line:** " + (.line // .original_line | tostring) + "  \n" +
         "**Created:** " + .created_at + "  \n" +
@@ -387,6 +438,26 @@ output_markdown() {
     echo "## Summary"
     echo ""
     echo "**Total unresolved comments found:** $comment_count"
+    echo ""
+
+    local committable_count=$(echo "$comments" | jq '[.[] | select(.category == "committable")] | length')
+    local llm_prompt_count=$(echo "$comments" | jq '[.[] | select(.category == "llm-prompt")] | length')
+    local question_count=$(echo "$comments" | jq '[.[] | select(.category == "question")] | length')
+    local feedback_count=$(echo "$comments" | jq '[.[] | select(.category == "feedback")] | length')
+
+    echo "### By Category"
+    echo ""
+    echo "- :fire: **Committable Suggestions (HIGHEST):** $committable_count"
+    echo "- :warning: **LLM Prompts (HIGH):** $llm_prompt_count"
+    echo "- :question: **Questions (MEDIUM):** $question_count"
+    echo "- :bulb: **Feedback (LOW):** $feedback_count"
+    echo ""
+    echo "### Recommended Workflow"
+    echo ""
+    echo "1. Address **Committable Suggestions** first - apply them directly"
+    echo "2. Process **LLM Prompts** - use as detailed refactoring instructions"
+    echo "3. Answer **Questions** - provide explanations and improve code clarity"
+    echo "4. Consider **Feedback** - for future improvements"
 }
 
 # Main function

@@ -141,4 +141,52 @@ final class CustomerTest extends UnitTestCase
         $this->assertEquals($newStatus, $this->customer->getStatus());
         $this->assertTrue($this->customer->isConfirmed());
     }
+
+    public function testConstructorWithExplicitCreatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt
+        );
+
+        $this->assertEquals($createdAt, $customer->getCreatedAt());
+    }
+
+    public function testConstructorWithExplicitUpdatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+        $updatedAt = new \DateTime('2023-01-02 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt,
+            $updatedAt
+        );
+
+        $this->assertEquals($updatedAt, $customer->getUpdatedAt());
+    }
 }

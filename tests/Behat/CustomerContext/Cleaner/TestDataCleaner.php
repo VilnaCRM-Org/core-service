@@ -11,20 +11,19 @@ use App\Shared\Infrastructure\Factory\UlidFactory;
 
 final class TestDataCleaner
 {
-    /** @var array<string> */
-    private array $customerIds = [];
-
-    /** @var array<string> */
-    private array $statusIds = [];
-
-    /** @var array<string> */
-    private array $typeIds = [];
-
+    /**
+     * @param array<string> $customerIds
+     * @param array<string> $statusIds
+     * @param array<string> $typeIds
+     */
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly StatusRepositoryInterface $statusRepository,
         private readonly TypeRepositoryInterface $typeRepository,
-        private readonly UlidFactory $ulidFactory
+        private readonly UlidFactory $ulidFactory,
+        private array $customerIds = [],
+        private array $statusIds = [],
+        private array $typeIds = [],
     ) {
     }
 

@@ -20,9 +20,11 @@ class Customer implements CustomerInterface
         private CustomerStatus $status,
         private ?bool $confirmed,
         private UlidInterface $ulid,
-        private DateTimeImmutable $createdAt = new DateTimeImmutable(),
-        private DateTime $updatedAt = new DateTime(),
+        private ?DateTimeImmutable $createdAt = null,
+        private ?DateTime $updatedAt = null,
     ) {
+        $this->createdAt ??= new DateTimeImmutable();
+        $this->updatedAt ??= new DateTime();
     }
 
     public function getUlid(): string

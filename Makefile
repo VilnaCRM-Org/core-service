@@ -324,7 +324,7 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 		echo "✅ CI checks successfully passed!"; \
 	fi
 
-pr-comments: ## Retrieve unresolved comments for a GitHub Pull Request
+pr-comments: ## Retrieve ALL unresolved comments (including outdated) for current PR (markdown format)
 	@if ! command -v gh >/dev/null 2>&1; then \
 		echo "Error: GitHub CLI (gh) is required but not installed."; \
 		echo "Visit: https://cli.github.com/ for installation instructions"; \
@@ -336,13 +336,34 @@ pr-comments: ## Retrieve unresolved comments for a GitHub Pull Request
 		exit 1; \
 	fi
 ifdef PR
-	@echo "Retrieving unresolved comments for PR #$(PR)..."
+	@echo "Retrieving ALL unresolved comments (including outdated) for PR #$(PR)..."
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
+else
+	@echo "Auto-detecting PR from current git branch..."
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
+		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
+endif
+
+pr-comments-current: ## Retrieve only NON-OUTDATED unresolved comments (markdown format)
+	@if ! command -v gh >/dev/null 2>&1; then \
+		echo "Error: GitHub CLI (gh) is required but not installed."; \
+		echo "Visit: https://cli.github.com/ for installation instructions"; \
+		exit 1; \
+	fi
+	@if ! command -v jq >/dev/null 2>&1; then \
+		echo "Error: jq is required but not installed."; \
+		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
+		exit 1; \
+	fi
+ifdef PR
+	@echo "Retrieving non-outdated comments for PR #$(PR)..."
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
-		./scripts/get-pr-comments.sh "$(PR)" "$(FORMAT)"
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
 else
 	@echo "Auto-detecting PR from current git branch..."
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
-		./scripts/get-pr-comments.sh "$(FORMAT)"
+		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
 endif
 
 pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a GitHub Pull Request
