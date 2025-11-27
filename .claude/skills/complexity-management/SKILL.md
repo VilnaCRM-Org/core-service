@@ -12,7 +12,7 @@ description: Maintain and improve code quality using PHPInsights without decreas
 - Code quality score drops below 100%
 - Architecture score falls below 100%
 - Style score drops below 100%
-- Complexity score falls below 93%
+- Complexity score falls below 94%
 - Adding new features that increase complexity
 - Refactoring existing code for better maintainability
 

@@ -1621,7 +1621,7 @@ Target only the highest-impact changes:
 ],
 ```
 
-**Policy**: The 93% threshold is protected and must NOT be lowered. If you're at less than 93:
+**Policy**: The 94% threshold is protected and must NOT be lowered. If you're at less than 94:
 
 - Apply Option B (Strategic Micro-Optimization)
 - Target specific high-complexity classes

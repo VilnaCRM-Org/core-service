@@ -3,16 +3,20 @@
 declare(strict_types=1);
 
 /**
- * Example: Pragmatic Value Object Usage
+ * ⚠️ WARNING: This file demonstrates ANTI-PATTERNS first, then CORRECT patterns!
  *
- * IMPORTANT: This file shows when to use Value Objects and when NOT to.
- * Not every field needs to be a Value Object!
+ * FILE STRUCTURE:
+ * - Lines 18-81:  ❌ ANTI-PATTERNS (what NOT to do)
+ * - Lines 84+:    ✅ CORRECT PATTERNS (what to do instead)
+ *
+ * This is a decision guide showing when to use Value Objects vs primitives.
+ * NOT every field needs to be a Value Object!
  *
  * See: ../REFERENCE.md - "When to Use Value Objects (Pragmatic Approach)"
  */
 
 // ============================================================================
-// ❌ DON'T DO THIS - Over-Engineering with Value Objects
+// ❌ ANTI-PATTERNS - DON'T DO THIS (Over-Engineering with Value Objects)
 // ============================================================================
 
 namespace App\Customer\Domain\ValueObject;

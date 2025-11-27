@@ -1473,30 +1473,33 @@ public function changeStatus(CustomerStatus $newStatus): void
 
 **This codebase does NOT:**
 
-- ❌ Use Value Objects with validation in constructors
+- ❌ Use Value Objects for simple fields (email, name, phone in entities)
 - ❌ Use annotation-based validation on DTOs
 - ❌ Validate format/structure in domain entities
 
 **This codebase DOES:**
 
-- ✅ Use YAML configuration for all validation rules
+- ✅ Use YAML configuration for DTO validation rules
 - ✅ Keep domain entities simple with primitives
 - ✅ Validate at the Application boundary (DTOs)
 - ✅ Use custom validators for business validation (`UniqueEmail`)
-- ✅ Only enforce business invariants in domain methods
+- ✅ Use Value Objects when justified (ULID, Money, complex types with behavior)
+- ✅ Allow self-validation in Value Objects (using filter_var, preg_match, etc.)
 
 ### Summary: Be Pragmatic!
 
 ✅ **DO**:
 
-- Use primitives by default
-- Add Value Objects when you need validation + behavior
+- Use primitives by default in entities
+- Add Value Objects when you need complex types + behavior
+- Allow Value Objects to self-validate (filter_var is OK in VOs)
 - Follow the actual codebase patterns (primitives for Customer fields)
 - Keep it simple (YAGNI principle)
 
 ❌ **DON'T**:
 
 - Wrap every field in a Value Object "because DDD says so"
+- Add validation to entity constructors (use YAML for DTOs instead)
 - Create Value Objects without clear benefit
 - Add complexity for theoretical future needs
 - Ignore the existing codebase patterns
