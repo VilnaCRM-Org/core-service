@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
+description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments. Includes DDD architecture verification (class naming, directory placement, layer compliance).
 ---
 
 # Code Review Workflow Skill
@@ -10,10 +10,11 @@ description: Systematically retrieve and address PR code review comments using m
 - PR has unresolved code review comments
 - Need systematic approach to address feedback
 - Ready to implement reviewer suggestions
+- Need to verify DDD architecture compliance
 
 ## Task (Function)
 
-Retrieve PR comments, categorize by type, and implement all changes systematically.
+Retrieve PR comments, categorize by type, verify architecture compliance, and implement all changes systematically.
 
 ## Execution Steps
 
@@ -33,8 +34,70 @@ make pr-comments FORMAT=json  # JSON output
 | ---------------------- | --------------------------- | -------- | ------------------------------------ |
 | Committable Suggestion | Code block, "```suggestion" | Highest  | Apply immediately, commit separately |
 | LLM Prompt             | "🤖 Prompt for AI Agents"   | High     | Execute prompt, implement changes    |
+| Architecture Concern   | Class naming, file location | High     | Verify DDD compliance (see Step 2.1) |
 | Question               | Ends with "?"               | Medium   | Answer inline or via code change     |
 | General Feedback       | Discussion, recommendation  | Low      | Consider and improve                 |
+
+#### Step 2.1: Architecture & DDD Verification
+
+For any code changes (suggestions, prompts, or new files), verify:
+
+**Class Naming Compliance** (see `implementing-ddd-architecture` skill):
+
+| Layer          | Class Type        | Naming Pattern                    | Example                           |
+| -------------- | ----------------- | --------------------------------- | --------------------------------- |
+| **Domain**     | Entity            | `{EntityName}.php`                | `Customer.php`                    |
+|                | Value Object      | `{ConceptName}.php`               | `Email.php`, `Money.php`          |
+|                | Domain Event      | `{Entity}{PastTenseAction}.php`   | `CustomerCreated.php`             |
+|                | Repository Iface  | `{Entity}RepositoryInterface.php` | `CustomerRepositoryInterface.php` |
+|                | Exception         | `{SpecificError}Exception.php`    | `InvalidEmailException.php`       |
+| **Application** | Command           | `{Action}{Entity}Command.php`     | `CreateCustomerCommand.php`       |
+|                | Command Handler   | `{Action}{Entity}Handler.php`     | `CreateCustomerHandler.php`       |
+|                | Event Subscriber  | `{Action}On{Event}.php`           | `SendEmailOnCustomerCreated.php`  |
+|                | DTO               | `{Entity}{Type}.php`              | `CustomerInput.php`               |
+|                | Processor         | `{Action}{Entity}Processor.php`   | `CreateCustomerProcessor.php`     |
+|                | Transformer       | `{From}To{To}Transformer.php`     | `CustomerToArrayTransformer.php`  |
+| **Infrastructure** | Repository    | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php` |
+|                | Doctrine Type     | `{ConceptName}Type.php`           | `UlidType.php`                    |
+|                | Bus Implementation| `{Framework}{Type}Bus.php`        | `SymfonyCommandBus.php`           |
+
+**Directory Location Compliance**:
+
+```
+src/{Context}/
+├── Application/
+│   ├── Command/          ← Commands
+│   ├── CommandHandler/   ← Command Handlers
+│   ├── EventSubscriber/  ← Event Subscribers
+│   ├── DTO/              ← Data Transfer Objects
+│   ├── Processor/        ← API Platform Processors
+│   ├── Transformer/      ← Data Transformers
+│   └── MutationInput/    ← GraphQL Mutation Inputs
+├── Domain/
+│   ├── Entity/           ← Entities & Aggregates
+│   ├── ValueObject/      ← Value Objects
+│   ├── Event/            ← Domain Events
+│   ├── Repository/       ← Repository Interfaces
+│   └── Exception/        ← Domain Exceptions
+└── Infrastructure/
+    ├── Repository/       ← Repository Implementations
+    ├── DoctrineType/     ← Custom Doctrine Types
+    └── Bus/              ← Message Bus Implementations
+```
+
+**Verification Questions**:
+
+1. ✅ Is the class name following the DDD naming pattern for its type?
+2. ✅ Is the class in the correct directory according to its responsibility?
+3. ✅ Does the class name reflect what it actually does?
+4. ✅ Is the class in the correct layer (Domain/Application/Infrastructure)?
+5. ✅ Does Domain layer have NO framework imports (Symfony/Doctrine/API Platform)?
+
+**Action on Violations**:
+- Rename class to follow naming conventions
+- Move file to correct directory
+- Run `make deptrac` to verify no layer violations
+- Update all references to renamed/moved classes
 
 ### Step 3: Apply Changes Systematically
 
@@ -95,11 +158,18 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Ignore LLM prompts from reviewers
 - Commit without running `make ci`
 - Leave questions unanswered
+- Accept class names that don't follow DDD naming patterns
+- Place files in wrong directories (violates layer architecture)
+- Allow Domain layer to import framework code (Symfony/Doctrine/API Platform)
 
 **ALWAYS**:
 
 - Apply suggestions exactly as provided
 - Commit each suggestion separately with URL reference
+- Verify architecture compliance for any new/modified classes
+- Check class naming follows DDD patterns (see Step 2.1)
+- Verify files are in correct directories according to layer
+- Run `make deptrac` to ensure no layer violations
 - Run `make ci` after implementing changes
 - Mark conversations resolved after addressing
 
@@ -126,6 +196,12 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
 
 - [ ] All PR comments retrieved via `make pr-comments`
 - [ ] Comments categorized by type
+- [ ] Architecture & DDD compliance verified for all changes:
+  - [ ] Class names follow DDD naming patterns
+  - [ ] Files in correct directories according to layer
+  - [ ] Class names reflect what they actually do
+  - [ ] Domain layer has NO framework imports
+  - [ ] `make deptrac` passes (0 violations)
 - [ ] Committable suggestions applied and committed separately
 - [ ] LLM prompts executed and implemented
 - [ ] Questions answered (code or reply)
