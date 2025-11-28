@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
@@ -15,7 +14,7 @@ final readonly class UlidTransformer
     public function __construct(
         private UlidFactory $ulidFactory,
         private UlidValidator $validator,
-        private UlidConverter $converter
+        private UlidValueTransformer $converter
     ) {
     }
 

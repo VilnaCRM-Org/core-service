@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
 use App\Shared\Application\OpenApi\Cleaner\ArrayValueProcessor;
 use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
+use App\Shared\Application\OpenApi\Cleaner\EmptyValueChecker;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
-use App\Shared\Application\OpenApi\Serializer\EmptyValueChecker;
 use App\Tests\Unit\UnitTestCase;
 
 final class DataCleanerTest extends UnitTestCase

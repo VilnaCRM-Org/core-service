@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Infrastructure\Converter;
+namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
-final class UlidConverterTest extends UnitTestCase
+final class UlidValueTransformerTest extends UnitTestCase
 {
-    private UlidConverter $converter;
+    private UlidValueTransformer $converter;
     private UlidFactory $ulidFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->ulidFactory = $this->createMock(UlidFactory::class);
-        $this->converter = new UlidConverter($this->ulidFactory);
+        $this->converter = new UlidValueTransformer($this->ulidFactory);
     }
 
     public function testToUlidWithUlidInstance(): void

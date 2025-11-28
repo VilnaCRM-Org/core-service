@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Serializer;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
-use App\Shared\Application\OpenApi\Serializer\EmptyValueChecker;
+use App\Shared\Application\OpenApi\Cleaner\EmptyValueChecker;
 use App\Tests\Unit\UnitTestCase;
 
 final class EmptyValueCheckerTest extends UnitTestCase
