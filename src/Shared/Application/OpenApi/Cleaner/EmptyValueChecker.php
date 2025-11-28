@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Serializer;
+namespace App\Shared\Application\OpenApi\Cleaner;
 
 /**
  * Determines which empty arrays should be removed from OpenAPI spec.

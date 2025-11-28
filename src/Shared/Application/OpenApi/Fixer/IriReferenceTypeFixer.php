@@ -6,7 +6,6 @@ namespace App\Shared\Application\OpenApi\Fixer;
 
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
 use ArrayObject;
 
 final class IriReferenceTypeFixer
@@ -14,7 +13,7 @@ final class IriReferenceTypeFixer
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
     public function __construct(
-        private readonly ContentPropertyProcessor $contentProcessor
+        private readonly ContentPropertyFixer $contentPropertyFixer
     ) {
     }
 
@@ -42,7 +41,7 @@ final class IriReferenceTypeFixer
 
         if (
             !$content instanceof ArrayObject
-            || !$this->contentProcessor->process($content)
+            || !$this->contentPropertyFixer->process($content)
         ) {
             return $pathItem;
         }

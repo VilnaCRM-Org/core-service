@@ -10,10 +10,10 @@ use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Augmenter\TagDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Extension\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
+use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
 use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
 use ArrayObject;
 use Traversable;
@@ -93,8 +93,8 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
     {
         return new IriReferenceTypeFixer(
-            new ContentPropertyProcessor(
-                new MediaTypePropertyProcessor(new PropertyTypeFixer())
+            new ContentPropertyFixer(
+                new MediaTypePropertyFixer(new PropertyTypeFixer())
             )
         );
     }

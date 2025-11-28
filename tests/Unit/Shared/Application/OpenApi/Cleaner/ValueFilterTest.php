@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
+use App\Shared\Application\OpenApi\Cleaner\EmptyValueChecker;
 use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
-use App\Shared\Application\OpenApi\Serializer\EmptyValueChecker;
 use App\Tests\Unit\UnitTestCase;
 
 final class ValueFilterTest extends UnitTestCase
