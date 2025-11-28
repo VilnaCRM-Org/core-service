@@ -161,7 +161,7 @@ This project follows **Hexagonal Architecture** with **DDD** and **CQRS** patter
 
 ## Technology Stack
 
-PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See CLAUDE.md for complete technical details.
+PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation for complete technical details.
 
 ---
 
