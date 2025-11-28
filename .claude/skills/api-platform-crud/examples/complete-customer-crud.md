@@ -13,9 +13,6 @@ use App\Shared\Domain\ValueObject\Ulid;
 
 final class Customer
 {
-    private \DateTimeImmutable $createdAt;
-    private \DateTimeImmutable $updatedAt;
-
     public function __construct(
         private Ulid $ulid,
         private string $email,
@@ -24,10 +21,10 @@ final class Customer
         private bool $confirmed,
         private string $leadSource,
         private CustomerType $type,
-        private CustomerStatus $status
+        private CustomerStatus $status,
+        private \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
+        private \DateTimeImmutable $updatedAt = new \DateTimeImmutable()
     ) {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function update(CustomerUpdate $update): void

@@ -39,7 +39,6 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 ### Essential Execution Rules
 
 1. **MANDATORY: Use Make Commands or Docker Container Access Only**
-
    - `make command-name` (preferred)
    - `docker compose exec php command` (direct container access)
    - `make sh` then run commands inside
@@ -112,75 +111,20 @@ This project enforces **strict quality thresholds** that MUST NOT be lowered:
 
 ## Architecture Overview
 
-### Layer Dependency Rules (CRITICAL)
+This project follows **Hexagonal Architecture** with **DDD** and **CQRS** patterns. Architecture boundaries are enforced via Deptrac.
 
-The architecture enforces strict layer boundaries via Deptrac:
+**CRITICAL RULE**: Domain layer must have NO framework dependencies.
 
-```text
-Infrastructure → Application → Domain
-      ↓              ↓           ↓
-  External       Use Cases    Pure Business
-```
-
-| From Layer         | Can Depend On                                       | CANNOT Depend On |
-| ------------------ | --------------------------------------------------- | ---------------- |
-| **Domain**         | NOTHING (pure PHP only)                             | Everything       |
-| **Application**    | Domain, Infrastructure, Symfony, API Platform, etc. | N/A              |
-| **Infrastructure** | Domain, Application, Symfony, Doctrine, etc.        | N/A              |
-
-**CRITICAL**: Domain layer must have NO framework imports (Symfony, Doctrine, API Platform, MongoDB).
-
-> **For detailed architectural patterns, see `.claude/skills/implementing-ddd-architecture/SKILL.md`**
-
-### Directory Structure
-
-```text
-src/
-├── Core/Customer/              # Customer bounded context
-│   ├── Application/            # Use Cases (Commands, Handlers, DTOs, Processors)
-│   ├── Domain/                 # Pure Business Logic (NO framework imports!)
-│   └── Infrastructure/         # Technical Implementation (Repositories)
-├── Internal/                   # Internal services (HealthCheck)
-└── Shared/                     # Shared Kernel
-    ├── Application/            # Cross-cutting concerns
-    ├── Domain/                 # Interfaces, abstract classes, common entities
-    └── Infrastructure/         # Message Buses, Doctrine types, retry strategies
-```
-
-> **For complete structure and patterns, see `.claude/skills/implementing-ddd-architecture/SKILL.md`**
+> **For complete architectural patterns, layer rules, and directory structure, see `.claude/skills/implementing-ddd-architecture/SKILL.md`**
 
 ## Common Workflows
 
 ### Development Workflow
 
-1. **Start Environment**
-
-   ```bash
-   make build          # First time only (15-30 min, NEVER CANCEL)
-   make start          # Start containers (5-10 min)
-   make install        # Install dependencies (3-5 min)
-   ```
-
-2. **Make Changes**
-
-   - Follow architecture patterns from skills
-   - Respect layer boundaries (Domain → NO frameworks)
-   - Use skills for guidance
-
-3. **Quality Checks**
-
-   ```bash
-   make phpcsfixer     # Fix code style
-   make psalm          # Static analysis
-   make deptrac        # Architecture validation
-   make all-tests      # Run all tests
-   make phpinsights    # Quality checks
-   ```
-
-4. **Complete Task**
-   ```bash
-   make ci             # MUST see "✅ CI checks successfully passed!"
-   ```
+1. **Start Environment** → `make build` (first time), `make start`, `make install`
+2. **Make Changes** → Follow architecture patterns from skills, respect layer boundaries
+3. **Quality Checks** → Run relevant quality commands (see Essential Commands table)
+4. **Complete Task** → Run `make ci` (MUST see "✅ CI checks successfully passed!")
 
 ### Fixing Issues Workflow
 
@@ -214,13 +158,9 @@ src/
 - **Examples**: `.claude/skills/{skill-name}/examples/`
 - **Troubleshooting**: `.claude/skills/{skill-name}/reference/`
 
-## Environment Information
+## Technology Stack
 
-- **PHP Version**: 8.3.12 (minimum 8.2)
-- **Database**: MongoDB with Doctrine ODM
-- **Frameworks**: Symfony 7, API Platform 4
-- **Testing**: PHPUnit, Behat, Infection, K6
-- **Quality Tools**: Psalm, PHPInsights, Deptrac, PHP CS Fixer
+PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See CLAUDE.md for complete technical details.
 
 ---
 
