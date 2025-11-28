@@ -44,22 +44,22 @@ For any code changes (suggestions, prompts, or new files), verify:
 
 **Class Naming Compliance** (see `implementing-ddd-architecture` skill):
 
-| Layer          | Class Type        | Naming Pattern                    | Example                           |
-| -------------- | ----------------- | --------------------------------- | --------------------------------- |
-| **Domain**     | Entity            | `{EntityName}.php`                | `Customer.php`                    |
-|                | Value Object      | `{ConceptName}.php`               | `Email.php`, `Money.php`          |
-|                | Domain Event      | `{Entity}{PastTenseAction}.php`   | `CustomerCreated.php`             |
-|                | Repository Iface  | `{Entity}RepositoryInterface.php` | `CustomerRepositoryInterface.php` |
-|                | Exception         | `{SpecificError}Exception.php`    | `InvalidEmailException.php`       |
-| **Application** | Command           | `{Action}{Entity}Command.php`     | `CreateCustomerCommand.php`       |
-|                | Command Handler   | `{Action}{Entity}Handler.php`     | `CreateCustomerHandler.php`       |
-|                | Event Subscriber  | `{Action}On{Event}.php`           | `SendEmailOnCustomerCreated.php`  |
-|                | DTO               | `{Entity}{Type}.php`              | `CustomerInput.php`               |
-|                | Processor         | `{Action}{Entity}Processor.php`   | `CreateCustomerProcessor.php`     |
-|                | Transformer       | `{From}To{To}Transformer.php`     | `CustomerToArrayTransformer.php`  |
-| **Infrastructure** | Repository    | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php` |
-|                | Doctrine Type     | `{ConceptName}Type.php`           | `UlidType.php`                    |
-|                | Bus Implementation| `{Framework}{Type}Bus.php`        | `SymfonyCommandBus.php`           |
+| Layer              | Class Type         | Naming Pattern                       | Example                           |
+| ------------------ | ------------------ | ------------------------------------ | --------------------------------- |
+| **Domain**         | Entity             | `{EntityName}.php`                   | `Customer.php`                    |
+|                    | Value Object       | `{ConceptName}.php`                  | `Email.php`, `Money.php`          |
+|                    | Domain Event       | `{Entity}{PastTenseAction}.php`      | `CustomerCreated.php`             |
+|                    | Repository Iface   | `{Entity}RepositoryInterface.php`    | `CustomerRepositoryInterface.php` |
+|                    | Exception          | `{SpecificError}Exception.php`       | `InvalidEmailException.php`       |
+| **Application**    | Command            | `{Action}{Entity}Command.php`        | `CreateCustomerCommand.php`       |
+|                    | Command Handler    | `{Action}{Entity}Handler.php`        | `CreateCustomerHandler.php`       |
+|                    | Event Subscriber   | `{Action}On{Event}.php`              | `SendEmailOnCustomerCreated.php`  |
+|                    | DTO                | `{Entity}{Type}.php`                 | `CustomerInput.php`               |
+|                    | Processor          | `{Action}{Entity}Processor.php`      | `CreateCustomerProcessor.php`     |
+|                    | Transformer        | `{From}To{To}Transformer.php`        | `CustomerToArrayTransformer.php`  |
+| **Infrastructure** | Repository         | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php`   |
+|                    | Doctrine Type      | `{ConceptName}Type.php`              | `UlidType.php`                    |
+|                    | Bus Implementation | `{Framework}{Type}Bus.php`           | `SymfonyCommandBus.php`           |
 
 **Directory Location Compliance**:
 
@@ -94,6 +94,7 @@ src/{Context}/
 5. ✅ Does Domain layer have NO framework imports (Symfony/Doctrine/API Platform)?
 
 **Action on Violations**:
+
 - Rename class to follow naming conventions
 - Move file to correct directory
 - Run `make deptrac` to verify no layer violations
