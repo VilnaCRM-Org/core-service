@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Fixer;
 
-use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
 use ArrayObject;
 
 /**
- * Updates schema properties for a specific media type definition.
+ * Fixes schema properties for a specific media type definition.
  */
-final class MediaTypePropertyProcessor
+final class MediaTypePropertyFixer
 {
     public function __construct(
         private readonly PropertyTypeFixer $propertyTypeFixer

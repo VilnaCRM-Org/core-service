@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Fixer;
 
 use ArrayObject;
 
 /**
- * Processes content properties to fix IRI reference types using functional approach.
+ * Fixes content properties to correct IRI reference types using functional approach.
  */
-final class ContentPropertyProcessor
+final class ContentPropertyFixer
 {
     public function __construct(
-        private readonly MediaTypePropertyProcessor $mediaTypeProcessor
+        private readonly MediaTypePropertyFixer $mediaTypePropertyFixer
     ) {
     }
 
@@ -26,7 +26,7 @@ final class ContentPropertyProcessor
         $wasModified = false;
 
         foreach ($mediaTypes as $mediaType => $mediaTypeObject) {
-            $wasModified = $this->mediaTypeProcessor->process(
+            $wasModified = $this->mediaTypePropertyFixer->process(
                 $content,
                 (string) $mediaType,
                 $mediaTypeObject
