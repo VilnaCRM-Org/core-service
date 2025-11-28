@@ -9,10 +9,10 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;
+use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -24,9 +24,9 @@ final class IriReferenceTypeFixerTest extends UnitTestCase
     {
         parent::setUp();
         $propertyTypeFixer = new PropertyTypeFixer();
-        $mediaTypeProcessor = new MediaTypePropertyProcessor($propertyTypeFixer);
-        $contentProcessor = new ContentPropertyProcessor($mediaTypeProcessor);
-        $this->fixer = new IriReferenceTypeFixer($contentProcessor);
+        $mediaTypePropertyFixer = new MediaTypePropertyFixer($propertyTypeFixer);
+        $contentPropertyFixer = new ContentPropertyFixer($mediaTypePropertyFixer);
+        $this->fixer = new IriReferenceTypeFixer($contentPropertyFixer);
     }
 
     public function testFixWithEmptyPaths(): void

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Cleaner;
 
-use App\Shared\Application\OpenApi\Serializer\EmptyValueChecker;
-
 /**
  * Determines if a value should be filtered out during data cleaning.
  */

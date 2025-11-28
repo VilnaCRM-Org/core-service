@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Fixer;
 
+use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
+use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Processor\ContentPropertyProcessor;
-use App\Shared\Application\OpenApi\Processor\MediaTypePropertyProcessor;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
-final class ContentPropertyProcessorTest extends UnitTestCase
+final class ContentPropertyFixerTest extends UnitTestCase
 {
-    private ContentPropertyProcessor $processor;
+    private ContentPropertyFixer $fixer;
 
     protected function setUp(): void
     {
         parent::setUp();
         $propertyTypeFixer = new PropertyTypeFixer();
-        $mediaTypeProcessor = new MediaTypePropertyProcessor($propertyTypeFixer);
-        $this->processor = new ContentPropertyProcessor($mediaTypeProcessor);
+        $mediaTypePropertyFixer = new MediaTypePropertyFixer($propertyTypeFixer);
+        $this->fixer = new ContentPropertyFixer($mediaTypePropertyFixer);
     }
 
     public function testProcessReturnsTrueWhenIriReferenceFixed(): void
@@ -34,7 +34,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['relation']['type']);
@@ -53,7 +53,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertFalse($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['name']['type']);
@@ -73,7 +73,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertTrue($result);
         $props = $content['application/json']['schema']['properties'];
@@ -104,7 +104,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['relation']['type']);
@@ -125,7 +125,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             'text/plain' => null,
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertTrue($result);
         $this->assertEquals(
@@ -149,7 +149,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertFalse($result);
         $this->assertArrayNotHasKey('properties', $content['application/json']['schema']);
@@ -159,7 +159,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
     {
         $content = new ArrayObject([]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertFalse($result);
     }
@@ -176,7 +176,7 @@ final class ContentPropertyProcessorTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->processor->process($content);
+        $result = $this->fixer->process($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content[0]['schema']['properties']['relation']['type']);
