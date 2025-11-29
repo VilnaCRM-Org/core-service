@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidTypeConverter;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use MongoDB\BSON\Binary;
@@ -23,7 +23,7 @@ final class UlidTransformerTest extends UnitTestCase
         parent::setUp();
         $this->ulidFactory = $this->createMock(UlidFactory::class);
         $validator = new UlidValidator();
-        $converter = new UlidConverter($this->ulidFactory);
+        $converter = new UlidTypeConverter($this->ulidFactory);
         $this->ulidTransformer = new UlidTransformer($this->ulidFactory, $validator, $converter);
     }
 

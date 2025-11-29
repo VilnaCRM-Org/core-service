@@ -9,9 +9,9 @@ use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Infrastructure\Converter\UlidConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidTypeConverter;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use DateTimeImmutable;
@@ -26,7 +26,7 @@ final class CustomerTest extends UnitTestCase
         parent::setUp();
 
         $ulidFactory = new UlidFactory();
-        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
+        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidTypeConverter($ulidFactory));
         $ulid = $this->ulidTransformer
             ->transformFromSymfonyUlid($this->faker->ulid());
 
