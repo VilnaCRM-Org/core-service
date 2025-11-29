@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Customer\Domain\Entity;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Converter\UlidTypeConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidTypeConverter;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 
