@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Transformer;
+namespace App\Shared\Infrastructure\Validator;
 
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
