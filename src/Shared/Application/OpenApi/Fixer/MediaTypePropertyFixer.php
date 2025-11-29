@@ -23,7 +23,7 @@ final class MediaTypePropertyFixer
      *     }
      * } $mediaTypeObject
      */
-    public function process(ArrayObject $content, string $mediaType, array $mediaTypeObject): bool
+    public function fix(ArrayObject $content, string $mediaType, array $mediaTypeObject): bool
     {
         $properties = $mediaTypeObject['schema']['properties'] ?? [];
 
