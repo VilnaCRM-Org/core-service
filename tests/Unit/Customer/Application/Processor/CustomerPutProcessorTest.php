@@ -16,9 +16,9 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Infrastructure\Converter\UlidTypeConverter;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -46,7 +46,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $ulidFactory = new UlidFactory();
-        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidTypeConverter($ulidFactory));
+        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
         $this->processor = new CustomerPutProcessor(
             $this->repository,
             $this->commandBus,

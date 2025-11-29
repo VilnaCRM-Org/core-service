@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Converter;
+namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 /**
- * Converts between different Ulid type representations.
+ * Transforms between different Ulid type representations.
  */
-final class UlidTypeConverter
+final class UlidValueTransformer
 {
     public function __construct(
         private readonly UlidFactory $ulidFactory
