@@ -16,7 +16,7 @@ final class ContentPropertyFixer
     ) {
     }
 
-    public function process(ArrayObject $content): bool
+    public function fix(ArrayObject $content): bool
     {
         $mediaTypes = array_filter(
             iterator_to_array($content),
@@ -26,7 +26,7 @@ final class ContentPropertyFixer
         $wasModified = false;
 
         foreach ($mediaTypes as $mediaType => $mediaTypeObject) {
-            $wasModified = $this->mediaTypePropertyFixer->process(
+            $wasModified = $this->mediaTypePropertyFixer->fix(
                 $content,
                 (string) $mediaType,
                 $mediaTypeObject

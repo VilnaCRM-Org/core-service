@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Validator;
+namespace App\Shared\Application\Validator\Guard;
 
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Determines whether validation should be skipped for initials.
+ * Guards against validating null and empty values.
  */
-final class ValidationSkipChecker
+final class EmptyValueGuard
 {
     public function shouldSkip(
         array|string|int|float|bool|null $value,

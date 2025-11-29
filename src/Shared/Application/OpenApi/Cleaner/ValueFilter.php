@@ -10,7 +10,7 @@ namespace App\Shared\Application\OpenApi\Cleaner;
 final class ValueFilter
 {
     public function __construct(
-        private readonly EmptyValueChecker $emptyValueChecker
+        private readonly EmptyArrayFilter $emptyValueChecker
     ) {
     }
 
