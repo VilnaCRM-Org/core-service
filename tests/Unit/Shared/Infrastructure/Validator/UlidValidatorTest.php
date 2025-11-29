@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
+namespace App\Tests\Unit\Shared\Infrastructure\Validator;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
