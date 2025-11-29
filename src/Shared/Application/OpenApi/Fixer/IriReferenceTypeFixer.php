@@ -41,7 +41,7 @@ final class IriReferenceTypeFixer
 
         if (
             !$content instanceof ArrayObject
-            || !$this->contentPropertyFixer->process($content)
+            || !$this->contentPropertyFixer->fix($content)
         ) {
             return $pathItem;
         }

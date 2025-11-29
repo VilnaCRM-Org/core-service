@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Validator;
 
+use App\Shared\Application\Validator\Guard\EmptyValueGuard;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -12,7 +13,7 @@ final class InitialsValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
-        private readonly ValidationSkipChecker $skipChecker
+        private readonly EmptyValueGuard $skipChecker
     ) {
     }
 

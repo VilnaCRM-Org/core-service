@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\Validator;
+namespace App\Tests\Unit\Shared\Application\Validator\Guard;
 
+use App\Shared\Application\Validator\Guard\EmptyValueGuard;
 use App\Shared\Application\Validator\Initials;
-use App\Shared\Application\Validator\ValidationSkipChecker;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Constraint;
 
-final class ValidationSkipCheckerTest extends UnitTestCase
+final class EmptyValueGuardTest extends UnitTestCase
 {
-    private ValidationSkipChecker $checker;
+    private EmptyValueGuard $checker;
     private Constraint $constraint;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->checker = new ValidationSkipChecker();
+        $this->checker = new EmptyValueGuard();
         $this->constraint = $this->createMock(Initials::class);
     }
 

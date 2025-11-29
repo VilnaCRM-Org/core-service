@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Cleaner;
 
 /**
- * Processes array values during data cleaning.
+ * Cleans array values during data cleaning.
  */
-final class ArrayValueProcessor
+final class ArrayValueCleaner
 {
     public function __construct(
         private readonly ParameterCleaner $parameterCleaner,
@@ -16,13 +16,13 @@ final class ArrayValueProcessor
     }
 
     /**
-     * Process an array value by cleaning parameters and recursively cleaning nested data.
+     * Clean an array value by cleaning parameters and recursively cleaning nested data.
      *
      * @param array<array-key, string|int|float|bool|array|null> $value
      *
      * @return array<array-key, string|int|float|bool|array|null>|null
      */
-    public function process(string|int $key, array $value, callable $recursiveCleaner): ?array
+    public function clean(string|int $key, array $value, callable $recursiveCleaner): ?array
     {
         if ($this->valueFilter->shouldRemove($key, $value)) {
             return null;

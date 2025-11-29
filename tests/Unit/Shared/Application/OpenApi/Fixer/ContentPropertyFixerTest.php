@@ -34,7 +34,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['relation']['type']);
@@ -53,7 +53,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertFalse($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['name']['type']);
@@ -73,7 +73,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertTrue($result);
         $props = $content['application/json']['schema']['properties'];
@@ -104,7 +104,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content['application/json']['schema']['properties']['relation']['type']);
@@ -125,7 +125,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             'text/plain' => null,
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertTrue($result);
         $this->assertEquals(
@@ -149,7 +149,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertFalse($result);
         $this->assertArrayNotHasKey('properties', $content['application/json']['schema']);
@@ -159,7 +159,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
     {
         $content = new ArrayObject([]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertFalse($result);
     }
@@ -176,7 +176,7 @@ final class ContentPropertyFixerTest extends UnitTestCase
             ],
         ]);
 
-        $result = $this->fixer->process($content);
+        $result = $this->fixer->fix($content);
 
         $this->assertTrue($result);
         $this->assertEquals('string', $content[0]['schema']['properties']['relation']['type']);
