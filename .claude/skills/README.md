@@ -156,7 +156,34 @@ This directory contains modular Skills that extend Claude Code's capabilities fo
 
 ---
 
-### 7. Load Testing (`load-testing/`)
+### 7. Code Organization (`code-organization/`)
+
+**Purpose**: Ensure proper code organization following "Directory X contains ONLY class type X"
+
+**When activated**:
+
+- Creating new classes
+- Refactoring existing code
+- Code review feedback about organization
+- Moving classes between directories
+- Renaming classes or methods
+
+**What it does**:
+
+- Enforces "Directory X contains ONLY class type X" principle
+- Validates class names match functionality
+- Ensures namespaces match directory structure
+- Checks variable and parameter naming consistency
+- Verifies comment accuracy
+- Provides refactoring workflow for reorganization
+
+**Key principle**: Each directory contains ONLY the type of class it's named for (Converter/, Transformer/, Validator/, Builder/, Fixer/, Cleaner/, etc.)
+
+**Examples**: UlidTypeConverter in Converter/ (not Transformer/), UlidValidator in Validator/ (not Transformer/)
+
+---
+
+### 8. Load Testing (`load-testing/`)
 
 **Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
 
