@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Serializer;
 
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Cleaner\ArrayValueProcessor;
+use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
 use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
-use App\Shared\Application\OpenApi\Cleaner\EmptyValueChecker;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
 use App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer;
@@ -24,9 +24,9 @@ final class OpenApiNormalizerTest extends UnitTestCase
         parent::setUp();
         $this->decorated = $this->createMock(NormalizerInterface::class);
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyValueChecker();
+        $emptyValueChecker = new EmptyArrayFilter();
         $valueFilter = new ValueFilter($emptyValueChecker);
-        $arrayProcessor = new ArrayValueProcessor($parameterCleaner, $valueFilter);
+        $arrayProcessor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
         $dataCleaner = new DataCleaner($arrayProcessor, $valueFilter);
         $this->normalizer = new OpenApiNormalizer($this->decorated, $dataCleaner);
     }

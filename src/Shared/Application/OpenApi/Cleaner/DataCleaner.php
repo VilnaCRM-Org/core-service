@@ -10,7 +10,7 @@ namespace App\Shared\Application\OpenApi\Cleaner;
 final class DataCleaner
 {
     public function __construct(
-        private readonly ArrayValueProcessor $arrayProcessor,
+        private readonly ArrayValueCleaner $arrayProcessor,
         private readonly ValueFilter $valueFilter
     ) {
     }
@@ -45,7 +45,7 @@ final class DataCleaner
 
         return match (true) {
             $this->valueFilter->shouldRemove($key, $value) => null,
-            is_array($value) => $this->arrayProcessor->process(
+            is_array($value) => $this->arrayProcessor->clean(
                 $key,
                 $value,
                 fn (array $data): array => $this->clean($data)

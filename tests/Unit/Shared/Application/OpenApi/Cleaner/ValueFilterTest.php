@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
-use App\Shared\Application\OpenApi\Cleaner\EmptyValueChecker;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
 use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
 use App\Tests\Unit\UnitTestCase;
 
@@ -15,7 +15,7 @@ final class ValueFilterTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $emptyValueChecker = new EmptyValueChecker();
+        $emptyValueChecker = new EmptyArrayFilter();
         $this->filter = new ValueFilter($emptyValueChecker);
     }
 
