@@ -7,7 +7,7 @@ namespace App\Shared\Infrastructure\Validator;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 /**
- * Validates ULID values before transformation.
+ * Validates ULID values.
  */
 final class UlidValidator
 {
