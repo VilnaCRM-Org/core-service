@@ -8,6 +8,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Tests\Unit\UnitTestCase;
@@ -101,7 +102,7 @@ final class CustomerTest extends UnitTestCase
 
     public function testGetAndSetUpdatedAt(): void
     {
-        $updatedAt = new DateTimeImmutable($this->faker->date('Y-m-d H:i:s'));
+        $updatedAt = new \DateTime($this->faker->date('Y-m-d H:i:s'));
         $this->customer->setUpdatedAt($updatedAt);
         $this->assertEquals($updatedAt, $this->customer->getUpdatedAt());
     }
@@ -113,5 +114,79 @@ final class CustomerTest extends UnitTestCase
 
         $this->customer->setConfirmed(false);
         $this->assertFalse($this->customer->isConfirmed());
+    }
+
+    public function testUpdate(): void
+    {
+        $newType = $this->createMock(CustomerType::class);
+        $newStatus = $this->createMock(CustomerStatus::class);
+
+        $updateData = new CustomerUpdate(
+            newInitials: 'New Name',
+            newEmail: 'new@email.com',
+            newPhone: '+1234567890',
+            newLeadSource: 'newsletter',
+            newType: $newType,
+            newStatus: $newStatus,
+            newConfirmed: true,
+        );
+
+        $this->customer->update($updateData);
+
+        $this->assertEquals('New Name', $this->customer->getInitials());
+        $this->assertEquals('new@email.com', $this->customer->getEmail());
+        $this->assertEquals('+1234567890', $this->customer->getPhone());
+        $this->assertEquals('newsletter', $this->customer->getLeadSource());
+        $this->assertEquals($newType, $this->customer->getType());
+        $this->assertEquals($newStatus, $this->customer->getStatus());
+        $this->assertTrue($this->customer->isConfirmed());
+    }
+
+    public function testConstructorWithExplicitCreatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt
+        );
+
+        $this->assertEquals($createdAt, $customer->getCreatedAt());
+    }
+
+    public function testConstructorWithExplicitUpdatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+        $updatedAt = new \DateTime('2023-01-02 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt,
+            $updatedAt
+        );
+
+        $this->assertEquals($updatedAt, $customer->getUpdatedAt());
     }
 }

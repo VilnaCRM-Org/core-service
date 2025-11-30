@@ -15,4 +15,24 @@ final readonly class Parameter
         public bool $required = true
     ) {
     }
+
+    public static function required(
+        string $name,
+        string $type,
+        string|int|array|bool $example,
+        ?int $maxLength = null,
+        ?string $format = null
+    ): self {
+        return new self($name, $type, $example, $maxLength, $format, true);
+    }
+
+    public static function optional(
+        string $name,
+        string $type,
+        string|int|array|bool $example,
+        ?int $maxLength = null,
+        ?string $format = null
+    ): self {
+        return new self($name, $type, $example, $maxLength, $format, false);
+    }
 }

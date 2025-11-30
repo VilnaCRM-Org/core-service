@@ -77,7 +77,12 @@ final class CustomerUpdateTest extends UnitTestCase
     }
 
     /**
-     * @param array{initials: string, email: string, phone: string, leadSource: string} $customerData
+     * @param array{
+     *     initials: string,
+     *     email: string,
+     *     phone: string,
+     *     leadSource: string
+     * } $customerData
      *
      * @return array{
      *     update: CustomerUpdate,

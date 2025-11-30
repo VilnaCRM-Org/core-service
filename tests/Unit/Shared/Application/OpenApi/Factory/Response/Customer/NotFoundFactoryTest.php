@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Response\Customer;
 
 use ApiPlatform\OpenApi\Model\Response;
-use App\Core\Customer\Application\OpenApi\Response\Customer\NotFoundFactory;
 use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\ResponseBuilder;
+use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerNotFoundResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
@@ -33,7 +33,7 @@ final class NotFoundFactoryTest extends UnitTestCase
             )
             ->willReturn($this->createStub(Response::class));
 
-        $factory = new NotFoundFactory($responseBuilderMock);
+        $factory = new CustomerNotFoundResponseFactory($responseBuilderMock);
         $response = $factory->getResponse();
 
         $this->assertInstanceOf(Response::class, $response);

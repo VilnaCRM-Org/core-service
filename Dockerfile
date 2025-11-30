@@ -13,7 +13,10 @@ RUN xcaddy build \
     --with github.com/dunglas/vulcain/caddy
 
 # Prod image
-FROM php:8.3-fpm-alpine3.20 AS app_php
+# Using Alpine 3.19 instead of 3.20 due to compatibility issues with PHP extensions
+# and the mlocati/php-extension-installer. Alpine 3.20 introduced changes that cause
+# build failures with mongodb and other extensions.
+FROM php:8.3-fpm-alpine3.19 AS app_php
 
 # Allow to use development versions of Symfony
 ARG STABILITY="stable"
@@ -101,10 +104,12 @@ RUN set -eux; \
 # Dev image
 FROM app_php AS app_php_dev
 
-RUN apk add --no-cache bash
-RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash
-RUN apk add symfony-cli
-RUN apk add --no-cache make
+RUN apk add --no-cache \
+    bash \
+    make
+
+RUN set -o pipefail && curl -sS https://get.symfony.com/cli/installer | bash \
+ && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 ENV APP_ENV=dev XDEBUG_MODE=off
 VOLUME /srv/app/var/

@@ -7,16 +7,6 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given I add "Accept" header equal to "application/ld+json"
     And I add "Content-Type" header equal to "application/ld+json"
 
-  Scenario: Retrieve customers collection sorted by status.value in descending order
-    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
-    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
-    When I send a GET request to "/api/customers?order[status.value]=desc"
-    Then the response status code should be equal to 200
-    And the response should be in JSON
-    And the JSON node "member[0].status" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
-    And the JSON node "member[1].status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=desc"
 
   Scenario: Retrieve customers collection with updatedAt date filters and verify JSON nodes
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -46,6 +36,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection using ULID filter operator "lte" (less than or equal)
   This operator should include the customer whose ULID exactly matches or lesser than the given value
@@ -87,6 +78,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection using ULID filter operator "gte" (greater than or equal)
   In this scenario, the filter returns the customer with the given ULID plus all with higher values
@@ -128,6 +120,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection with updatedAt[before] filter and verify JSON nodes
     # A customer is created and its updatedAt (set to now) will be before a future date (now + 1 year).

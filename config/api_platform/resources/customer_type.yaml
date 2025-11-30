@@ -1,8 +1,12 @@
 App\Core\Customer\Domain\Entity\CustomerType:
+  exceptionToStatus:
+    'App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException': 404
   normalizationContext:
     groups: ['output']
   paginationViaCursor:
     - { field: 'ulid', direction: 'DESC' }
+
+  # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
       filters:
@@ -13,10 +17,47 @@ App\Core\Customer\Domain\Entity\CustomerType:
     ApiPlatform\Metadata\Put:
       input: App\Core\Customer\Application\DTO\TypePut
       processor: App\Core\Customer\Application\Processor\CustomerTypePutProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
     ApiPlatform\Metadata\Patch:
       input: App\Core\Customer\Application\DTO\TypePatch
       processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: true
     ApiPlatform\Metadata\Delete: ~
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\TypeCreate
       processor: App\Core\Customer\Application\Processor\CreateTypeProcessor
+      denormalizationContext:
+        allow_extra_attributes: true
+
+  # GraphQL Operations
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query:
+      filters:
+        - customer.mongodb.type.order
+        - customer.mongodb.type.partial_search
+        - mongodb.range
+    ApiPlatform\Metadata\GraphQl\QueryCollection:
+      filters:
+        - customer.mongodb.type.order
+        - customer.mongodb.type.partial_search
+        - mongodb.range
+      paginationType: cursor
+    ApiPlatform\Metadata\GraphQl\Mutation:
+      name: create
+      input: App\Core\Customer\Application\DTO\TypeCreate
+      processor: App\Core\Customer\Application\Processor\CreateTypeProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+    update_mutation:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: update
+      input: App\Core\Customer\Application\DTO\TypePatch
+      processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+    ApiPlatform\Metadata\GraphQl\DeleteMutation:
+      name: delete
+      normalizationContext:
+        groups: ['deleteMutationOutput']

@@ -19,8 +19,8 @@ services:
           'ulid': 'desc',
           'createdAt': 'desc',
           'updatedAt': 'desc',
-          'initials': 'asc',
           'email': 'asc',
+          'initials': 'asc',
           'phone': 'asc',
           'leadSource': 'asc',
           'type.value': 'asc',
@@ -43,6 +43,12 @@ services:
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
 
+  app.customer.mongodb.boolean_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
+    arguments: [{ 'confirmed': ~ }]
+    tags:
+      - { name: 'api_platform.filter', id: 'customer.mongodb.boolean' }
+
   app.customer.mongodb.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments:
@@ -54,7 +60,6 @@ services:
           leadSource: 'exact',
           'type.value': 'exact',
           'status.value': 'exact',
-          confirmed: 'exact',
         },
       ]
     tags:
@@ -124,3 +129,27 @@ services:
     arguments:
       ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
     autoconfigure: false
+
+  App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeCreateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeUpdateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'

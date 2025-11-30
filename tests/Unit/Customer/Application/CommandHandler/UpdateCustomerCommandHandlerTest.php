@@ -73,22 +73,7 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         CustomerUpdate $updateData
     ): void {
         $customer->expects($this->once())
-            ->method('setInitials')->with($updateData->newInitials);
-        $customer->expects($this->once())
-            ->method('setEmail')->with($updateData->newEmail);
-        $customer->expects($this->once())
-            ->method('setPhone')->with($updateData->newPhone);
-
-        $customer->expects($this->once())
-            ->method('setLeadSource')->with($updateData->newLeadSource);
-
-        $customer->expects($this->once())
-            ->method('setType')->with($updateData->newType);
-
-        $customer->expects($this->once())
-            ->method('setStatus')->with($updateData->newStatus);
-        $customer->expects($this->once())
-            ->method('setConfirmed')->with($updateData->newConfirmed);
+            ->method('update')->with($updateData);
     }
 
     private function executeCommand(

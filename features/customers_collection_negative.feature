@@ -487,7 +487,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "detail" should contain "phone: This value is too long. It should have 255 characters or less."
 
   Scenario: Fail to update customer resource with invalid email format via PATCH and check error message
-    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4" and email "original@example.com"
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "original@example.com"
+    And the JSON node "updatedAt" should exist
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4" with body:
 """
@@ -500,6 +504,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "detail" should contain "email: This value is not a valid email address."
+    When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "email" should be equal to "original@example.com"
+    Then delete customer with email "original@example.com"
 
   Scenario: Fail to update customer resource with non-boolean confirmed via PATCH and check error message
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
