@@ -21,7 +21,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -302,32 +302,6 @@ paths:
           explode: true
           allowReserved: false
         -
-          name: confirmed
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: boolean
-          style: form
-          explode: false
-          allowReserved: false
-        -
-          name: 'confirmed[]'
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: array
-            items:
-              type: boolean
-          style: form
-          explode: true
-          allowReserved: false
-        -
           name: 'order[ulid]'
           in: query
           description: ''
@@ -376,7 +350,7 @@ paths:
           explode: false
           allowReserved: false
         -
-          name: 'order[initials]'
+          name: 'order[email]'
           in: query
           description: ''
           required: false
@@ -392,7 +366,7 @@ paths:
           explode: false
           allowReserved: false
         -
-          name: 'order[email]'
+          name: 'order[initials]'
           in: query
           description: ''
           required: false
@@ -568,6 +542,18 @@ paths:
           explode: false
           allowReserved: false
         -
+          name: confirmed
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: boolean
+          style: form
+          explode: false
+          allowReserved: false
+        -
           name: 'ulid[lt]'
           in: query
           description: 'Filter on the ulid property using the lt operator'
@@ -638,7 +624,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
+                $ref: '#/components/schemas/Customer.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -822,7 +808,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
+                $ref: '#/components/schemas/Customer.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -938,7 +924,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
+                $ref: '#/components/schemas/Customer.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -1272,7 +1258,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
+                $ref: '#/components/schemas/Customer.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -1486,7 +1472,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -1725,7 +1711,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -1873,7 +1859,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -1989,7 +1975,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -2287,7 +2273,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
           links: {  }
         '400':
           description: 'Bad request'
@@ -3500,6 +3486,7 @@ components:
     Customer.CustomerCreate.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - initials
@@ -3547,8 +3534,13 @@ components:
     Customer.CustomerPatch:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       properties:
+        id:
+          type:
+            - string
+            - 'null'
         initials:
           maxLength: 255
           type:
@@ -3587,6 +3579,7 @@ components:
     Customer.CustomerPut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - initials
@@ -3631,7 +3624,7 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.jsonld:
+    Customer.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3668,17 +3661,13 @@ components:
         leadSource:
           type: string
         type:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
+          $ref: '#/components/schemas/CustomerType.jsonld-output'
         status:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
+          $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         confirmed:
           type: boolean
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld'
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
         createdAt:
           type: string
           format: date-time
@@ -3688,6 +3677,7 @@ components:
     CustomerStatus.StatusCreate.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3700,6 +3690,7 @@ components:
     CustomerStatus.StatusPatch:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       properties:
         value:
@@ -3707,9 +3698,14 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerStatus.StatusPut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3719,7 +3715,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.jsonld:
+    CustomerStatus.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3773,9 +3769,14 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerType.TypePut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3850,34 +3851,6 @@ components:
           description: 'A URI reference that identifies the problem type'
           type: string
     HealthCheck.jsonld:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
-              type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
-    UlidInterface.jsonld:
       type: object
       description: ''
       deprecated: false

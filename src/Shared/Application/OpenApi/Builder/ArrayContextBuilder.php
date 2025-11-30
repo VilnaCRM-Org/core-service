@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Builder;
 
+use ArrayObject;
+
 final class ArrayContextBuilder
 {
     /**
      * @param array<Parameter> $params
      */
-    public function build(array $params): \ArrayObject
+    public function build(array $params): ArrayObject
     {
-        $content = new \ArrayObject([
+        $content = new ArrayObject([
             'application/ld+json' => [
                 'example' => [''],
             ],
@@ -57,8 +59,8 @@ final class ArrayContextBuilder
         array $items,
         array $example,
         array $required
-    ): \ArrayObject {
-        return new \ArrayObject([
+    ): ArrayObject {
+        return new ArrayObject([
             'application/ld+json' => [
                 'schema' => [
                     'type' => 'array',

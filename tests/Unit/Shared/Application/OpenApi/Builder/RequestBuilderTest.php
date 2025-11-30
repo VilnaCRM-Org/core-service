@@ -61,6 +61,38 @@ final class RequestBuilderTest extends UnitTestCase
         $this->assertEquals($expectedContent, $requestBody->getContent());
     }
 
+    public function testBuildRequiredCreatesRequiredRequestBody(): void
+    {
+        $params = [
+            new Parameter('name', 'string', 'test'),
+        ];
+
+        $this->contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new ArrayObject([]));
+
+        $requestBody = $this->builder->buildRequired($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
+    }
+
+    public function testBuildOptionalCreatesOptionalRequestBody(): void
+    {
+        $params = [
+            new Parameter('name', 'string', 'test'),
+        ];
+
+        $this->contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new ArrayObject([]));
+
+        $requestBody = $this->builder->buildOptional($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
+    }
+
     private function getExpectedContent(
         string $name,
         int $age

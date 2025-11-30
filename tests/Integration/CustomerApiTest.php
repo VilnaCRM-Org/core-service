@@ -8,7 +8,7 @@ use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 
-final class CustomerApiTest extends BaseIntegrationTest
+final class CustomerApiTest extends BaseTest
 {
     public function testCreateCustomerSuccess(): void
     {

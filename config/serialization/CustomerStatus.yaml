@@ -1,6 +1,20 @@
 App\Core\Customer\Domain\Entity\CustomerStatus:
   attributes:
+    # Serialization groups configuration for CustomerStatus entity
+    #
+    # Group usage:
+    # - 'output': Read-only in all REST and GraphQL output operations
+    # - 'write:customerStatus': Writable in create/update operations
+    #
+    # GraphQL Operations:
+    # - Query operations (e.g., customerStatus, customerStatuses) use 'output' group
+    # - Create/Update mutations use 'write:customerStatus' group for input validation
+    # - The 'ulid' field is intentionally read-only (auto-generated server-side)
+    #   and not included in write operations to prevent modification
     ulid:
-      groups: ['read:customerStatus']
+      groups: ['output']
+      description: Read-only unique identifier (ULID format), auto-generated on creation
+
     value:
-      groups: ['read:customerStatus', 'write:customerStatus']
+      groups: ['output', 'write:customerStatus']
+      description: The display value of the customer status (e.g., 'Active', 'Inactive')

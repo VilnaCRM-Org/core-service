@@ -39,20 +39,17 @@ final class InitialsValidatorTest extends UnitTestCase
         );
     }
 
-    public function testOptional(): void
+    public function testNullValue(): void
     {
-        $this->constraint->expects($this->once())
-            ->method('isOptional')
-            ->willReturn(true);
         $this->context->expects($this->never())
             ->method('buildViolation');
         $this->validator->validate(
-            '',
+            null,
             $this->constraint
         );
     }
 
-    public function testOptionalDefaultValue(): void
+    public function testEmptyStringValue(): void
     {
         $this->context->expects($this->never())
             ->method('buildViolation');

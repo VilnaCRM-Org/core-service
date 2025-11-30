@@ -21,4 +21,32 @@ final class ParameterTest extends UnitTestCase
         $this->assertEquals($type, $parameter->type);
         $this->assertEquals($example, $parameter->example);
     }
+
+    public function testRequiredCreatesParameterWithRequiredTrue(): void
+    {
+        $name = $this->faker->name();
+        $type = $this->faker->word();
+        $example = $this->faker->word();
+
+        $parameter = Parameter::required($name, $type, $example);
+
+        $this->assertEquals($name, $parameter->name);
+        $this->assertEquals($type, $parameter->type);
+        $this->assertEquals($example, $parameter->example);
+        $this->assertTrue($parameter->required);
+    }
+
+    public function testOptionalCreatesParameterWithRequiredFalse(): void
+    {
+        $name = $this->faker->name();
+        $type = $this->faker->word();
+        $example = $this->faker->word();
+
+        $parameter = Parameter::optional($name, $type, $example);
+
+        $this->assertEquals($name, $parameter->name);
+        $this->assertEquals($type, $parameter->type);
+        $this->assertEquals($example, $parameter->example);
+        $this->assertFalse($parameter->required);
+    }
 }

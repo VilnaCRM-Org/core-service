@@ -10,8 +10,8 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Core\Customer\Application\OpenApi\Endpoint\Status\StatusFactory;
-use App\Core\Customer\Application\OpenApi\Request\Status\StatusCreateFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\CustomerStatus\CustomerStatusEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerStatusEndpointFactoryTest extends UnitTestCase
 {
-    private StatusCreateFactory $createFactory;
+    private StatusCreateRequestFactory $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
     private InternalErrorFactory $internalErrorFactory;
@@ -61,7 +61,7 @@ final class CustomerStatusEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this
-            ->createMock(StatusCreateFactory::class);
+            ->createMock(StatusCreateRequestFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
@@ -125,9 +125,9 @@ final class CustomerStatusEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->unauthorizedResponse);
     }
 
-    private function createFactory(): StatusFactory
+    private function createFactory(): CustomerStatusEndpointFactory
     {
-        return new StatusFactory(
+        return new CustomerStatusEndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,

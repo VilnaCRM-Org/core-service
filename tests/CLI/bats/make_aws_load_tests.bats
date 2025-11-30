@@ -9,3 +9,4 @@ load 'bats-assert/load'
   assert_output --partial "You can access the S3 bucket here"
   assert_success
 }
+

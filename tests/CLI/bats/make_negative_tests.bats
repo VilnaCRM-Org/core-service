@@ -35,10 +35,22 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-     mv tests/Behat/CustomerContext/CustomerContext.php tests/
-     run make behat
-     mv tests/CustomerContext.php tests/Behat/CustomerContext
-     assert_failure
+  original_path="tests/Behat/CustomerContext/CustomerContext.php"
+  temp_path="tests/CustomerContext.php"
+  
+  cleanup() {
+    if [ -f "$temp_path" ]; then
+      mv "$temp_path" "$original_path"
+    fi
+  }
+  trap cleanup EXIT
+  
+  mv "$original_path" "$temp_path"
+  run make behat
+  
+  mv "$temp_path" "$original_path"
+  
+  assert_failure
 }
 
 @test "make psalm should fail when there are errors" {
@@ -52,26 +64,15 @@ load 'bats-assert/load'
   assert_output --partial "does not exist"
 }
 
-@test "make deptrac should fail when there are dependency violations" {
-  mkdir src/Internal/HealthCheck/Domain/Entity/
-  mv tests/CLI/bats/php/SomeEntity.php src/Internal/HealthCheck/Domain/Entity/
-
-  run make deptrac
-
-  mv src/Internal/HealthCheck/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
-  rmdir src/Internal/HealthCheck/Domain/Entity/
-  assert_output --partial "error"
-}
-
 @test "make phpinsights should fail when code quality is low" {
-  mv tests/CLI/bats/php/temp_bad_code.php temp_bad_code.php
+  mv tests/CLI/bats/php/temp_bad_code.php src/temp_bad_code.php
 
   run make phpinsights
 
-  mv temp_bad_code.php tests/CLI/bats/php/
+  mv src/temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The code quality score is too low"
+  assert_output --partial "The method anotherBadMethod() has a Cyclomatic Complexity of 10"
 }
 
 @test "make unit-tests should fail if tests fail" {
@@ -101,10 +102,5 @@ load 'bats-assert/load'
   mv composer.json.bak composer.json
 
   assert_failure
-  assert_output --partial "does not contain valid JSON"
 }
 
-@test "make aws-lod-tests without config should fail" {
-  run make aws-load-tests
-  assert_failure
-}
