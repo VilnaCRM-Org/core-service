@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Augmenter;
+namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 
-final class TagDescriptionAugmenter
+final class TagDescriptionProcessor
 {
-    public function augment(OpenApi $openApi): OpenApi
+    public function process(OpenApi $openApi): OpenApi
     {
         $tagDescriptions = $this->getTagDescriptions();
 
         $tags = array_map(
-            static fn (Tag $tag) => self::augmentTag($tag, $tagDescriptions),
+            static fn (Tag $tag) => self::processTag($tag, $tagDescriptions),
             $openApi->getTags()
         );
 
@@ -37,7 +37,7 @@ final class TagDescriptionAugmenter
     /**
      * @param array<string, string> $descriptions
      */
-    private static function augmentTag(Tag $tag, array $descriptions): Tag
+    private static function processTag(Tag $tag, array $descriptions): Tag
     {
         $tagName = $tag->getName();
 

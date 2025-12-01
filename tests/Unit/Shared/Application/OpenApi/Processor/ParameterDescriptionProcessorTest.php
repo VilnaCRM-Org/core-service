@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Augmenter;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
+use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
 use App\Tests\Unit\UnitTestCase;
 
-final class ParameterDescriptionAugmenterTest extends UnitTestCase
+final class ParameterDescriptionProcessorTest extends UnitTestCase
 {
-    private ParameterDescriptionAugmenter $augmenter;
+    private ParameterDescriptionProcessor $processor;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->augmenter = new ParameterDescriptionAugmenter();
+        $this->processor = new ParameterDescriptionProcessor();
     }
 
-    public function testAugmentWithEmptyPaths(): void
+    public function testProcessWithEmptyPaths(): void
     {
         $paths = new Paths();
         $openApi = new OpenApi(
@@ -31,12 +31,12 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $this->assertCount(0, $openApi->getPaths()->getPaths());
+        $this->assertCount(0, $result->getPaths()->getPaths());
     }
 
-    public function testAugmentWithPathItemWithoutOperations(): void
+    public function testProcessWithPathItemWithoutOperations(): void
     {
         $pathItem = new PathItem();
         $paths = new Paths();
@@ -48,13 +48,13 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test');
-        $this->assertNull($result->getGet());
+        $resultPath = $result->getPaths()->getPath('/test');
+        $this->assertNull($resultPath->getGet());
     }
 
-    public function testAugmentAddsDescriptionToKnownParameter(): void
+    public function testProcessAddsDescriptionToKnownParameter(): void
     {
         $parameter = new Parameter('page', 'query');
 
@@ -75,43 +75,42 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
-        $parameters = $result->getParameters();
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
+        $parameters = $resultPath->getParameters();
 
         $this->assertCount(1, $parameters);
         $this->assertEquals('Page number for pagination', $parameters[0]->getDescription());
     }
 
-    public function testAugmentDoesNotOverrideExistingDescription(): void
+    public function testProcessDoesNotOverrideExistingDescription(): void
     {
         $existingDescription = 'My custom page description';
         $parameter = (new Parameter('page', 'query'))->withDescription($existingDescription);
         $openApi = $this->createOpenApiWithParameters([$parameter]);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $parameters = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $parameters = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $this->assertCount(1, $parameters);
         $this->assertEquals($existingDescription, $parameters[0]->getDescription());
     }
 
-    public function testAugmentWithUnknownParameter(): void
+    public function testProcessWithUnknownParameter(): void
     {
         $parameter = new Parameter('unknown_param', 'query');
         $openApi = $this->createOpenApiWithParameters([$parameter]);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $parameters = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $parameters = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $this->assertCount(1, $parameters);
-        // Unknown parameters are left unchanged (empty string or null)
         $description = $parameters[0]->getDescription();
         $this->assertTrue($description === null || $description === '');
     }
 
-    public function testAugmentWithMultipleParameters(): void
+    public function testProcessWithMultipleParameters(): void
     {
         $parameters = [
             new Parameter('page', 'query'),
@@ -121,9 +120,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         ];
         $openApi = $this->createOpenApiWithParameters($parameters);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultParams = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $resultParams = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $this->assertCount(4, $resultParams);
         $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
         $this->assertEquals('Number of items per page', $resultParams[1]->getDescription());
@@ -132,19 +131,19 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $this->assertTrue($description === null || $description === '');
     }
 
-    public function testAugmentWithAllOperationTypes(): void
+    public function testProcessWithAllOperationTypes(): void
     {
         $parameter = new Parameter('page', 'query');
         $pathItem = $this->createPathItemWithAllOperations($parameter);
         $openApi = $this->createOpenApiWithPathItem('/test', $pathItem);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultPath = $openApi->getPaths()->getPath('/test');
+        $resultPath = $result->getPaths()->getPath('/test');
         $this->assertAllOperationDescriptions($resultPath, 'Page number for pagination');
     }
 
-    public function testAugmentWithOrderParameters(): void
+    public function testProcessWithOrderParameters(): void
     {
         $parameters = [
             new Parameter('order[ulid]', 'query'),
@@ -153,9 +152,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         ];
         $openApi = $this->createOpenApiWithParameters($parameters);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultParams = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $resultParams = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $expected = [
             'Sort by customer unique identifier',
             'Sort by creation date',
@@ -164,7 +163,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $this->assertParameterDescriptions($expected, $resultParams);
     }
 
-    public function testAugmentWithFilterParameters(): void
+    public function testProcessWithFilterParameters(): void
     {
         $parameters = [
             new Parameter('email', 'query'),
@@ -174,9 +173,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         ];
         $openApi = $this->createOpenApiWithParameters($parameters);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultParams = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $resultParams = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $expected = [
             'Filter by customer email address (exact match)',
             'Filter by multiple customer email addresses (exact match)',
@@ -186,7 +185,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         $this->assertParameterDescriptions($expected, $resultParams);
     }
 
-    public function testAugmentWithDateFilterParameters(): void
+    public function testProcessWithDateFilterParameters(): void
     {
         $parameters = [
             new Parameter('createdAt[before]', 'query'),
@@ -195,9 +194,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         ];
         $openApi = $this->createOpenApiWithParameters($parameters);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultParams = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $resultParams = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $this->assertEquals(
             'Filter customers created before this date',
             $resultParams[0]->getDescription()
@@ -212,7 +211,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         );
     }
 
-    public function testAugmentWithUlidFilterParameters(): void
+    public function testProcessWithUlidFilterParameters(): void
     {
         $parameters = [
             new Parameter('ulid[between]', 'query'),
@@ -221,9 +220,9 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         ];
         $openApi = $this->createOpenApiWithParameters($parameters);
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $resultParams = $openApi->getPaths()->getPath('/test')->getGet()->getParameters();
+        $resultParams = $result->getPaths()->getPath('/test')->getGet()->getParameters();
         $this->assertEquals(
             'Filter by ULID range (comma-separated start and end)',
             $resultParams[0]->getDescription()
@@ -238,7 +237,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
         );
     }
 
-    public function testAugmentWithMultiplePaths(): void
+    public function testProcessWithMultiplePaths(): void
     {
         $parameter = new Parameter('page', 'query');
         $operation = (new Operation('test', [], [], 'Test'))->withParameters([$parameter]);
@@ -256,17 +255,17 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $path1Result = $openApi->getPaths()->getPath('/path1')->getGet();
-        $path2Result = $openApi->getPaths()->getPath('/path2')->getPost();
+        $path1Result = $result->getPaths()->getPath('/path1')->getGet();
+        $path2Result = $result->getPaths()->getPath('/path2')->getPost();
         $expected = 'Page number for pagination';
 
         $this->assertEquals($expected, $path1Result->getParameters()[0]->getDescription());
         $this->assertEquals($expected, $path2Result->getParameters()[0]->getDescription());
     }
 
-    public function testAugmentWithEmptyStringDescription(): void
+    public function testProcessWithEmptyStringDescription(): void
     {
         $parameter = (new Parameter('page', 'query'))->withDescription('');
 
@@ -281,15 +280,15 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
-        $resultParams = $result->getParameters();
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
+        $resultParams = $resultPath->getParameters();
 
         $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
     }
 
-    public function testAugmentWithNullDescription(): void
+    public function testProcessWithNullDescription(): void
     {
         $parameter = new Parameter('page', 'query');
 
@@ -304,15 +303,15 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
-        $resultParams = $result->getParameters();
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
+        $resultParams = $resultPath->getParameters();
 
         $this->assertEquals('Page number for pagination', $resultParams[0]->getDescription());
     }
 
-    public function testAugmentPreservesEmptyDescriptionForUnknownParameter(): void
+    public function testProcessPreservesEmptyDescriptionForUnknownParameter(): void
     {
         $parameter = new Parameter('unknown_parameter', 'query');
 
@@ -327,10 +326,10 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
-        $resultParams = $result->getParameters();
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
+        $resultParams = $resultPath->getParameters();
 
         $description = $resultParams[0]->getDescription();
         $this->assertTrue($description === null || $description === '');
@@ -338,7 +337,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
 
     public function testIsDescriptionEmptyWithNull(): void
     {
-        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $reflection = new \ReflectionClass(ParameterDescriptionProcessor::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
 
@@ -349,7 +348,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
 
     public function testIsDescriptionEmptyWithEmptyString(): void
     {
-        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $reflection = new \ReflectionClass(ParameterDescriptionProcessor::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
 
@@ -360,7 +359,7 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
 
     public function testIsDescriptionEmptyWithNonEmptyString(): void
     {
-        $reflection = new \ReflectionClass(ParameterDescriptionAugmenter::class);
+        $reflection = new \ReflectionClass(ParameterDescriptionProcessor::class);
         $method = $reflection->getMethod('isDescriptionEmpty');
         $method->setAccessible(true);
 
@@ -384,17 +383,16 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
-        $firstParam = $result->getParameters()[0];
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
+        $firstParam = $resultPath->getParameters()[0];
 
         $this->assertEquals('Test description', $firstParam->getDescription());
     }
 
-    public function testAugmentWithOperationWithEmptyParametersArray(): void
+    public function testProcessWithOperationWithEmptyParametersArray(): void
     {
-        // Create an operation with an explicitly empty parameters array
         $originalOperation = (new Operation('test', [], [], 'Test operation'))->withParameters([]);
         $pathItem = (new PathItem())->withGet($originalOperation);
         $paths = new Paths();
@@ -406,13 +404,11 @@ final class ParameterDescriptionAugmenterTest extends UnitTestCase
             $paths
         );
 
-        $this->augmenter->augment($openApi);
+        $result = $this->processor->process($openApi);
 
-        $result = $openApi->getPaths()->getPath('/test')->getGet();
+        $resultPath = $result->getPaths()->getPath('/test')->getGet();
 
-        // The operation should be returned unchanged (same instance)
-        $this->assertSame($originalOperation, $result);
-        $this->assertEmpty($result->getParameters());
+        $this->assertEmpty($resultPath->getParameters());
     }
 
     /**

@@ -64,10 +64,21 @@ final class InitialsValidatorTest extends UnitTestCase
         );
     }
 
-    public function testOptionalDefaultValue(): void
+    public function testRequiredDefaultValue(): void
     {
-        $this->context->expects($this->never())
-            ->method('buildViolation');
+        $constraintViolationBuilder = $this->createMock(
+            ConstraintViolationBuilderInterface::class
+        );
+        $this->translator->expects($this->once())
+            ->method('trans')
+            ->with('initials.spaces')
+            ->willReturn('Initials cannot be only whitespace');
+        $this->context->expects($this->once())
+            ->method('buildViolation')
+            ->with('Initials cannot be only whitespace')
+            ->willReturn($constraintViolationBuilder);
+        $constraintViolationBuilder->expects($this->once())
+            ->method('addViolation');
         $this->validator->validate(
             '',
             new Initials()
