@@ -47,11 +47,9 @@ final class PathParametersProcessor
         $processedPathItem = $processedPathItem->withPatch(
             $this->processOperation($pathItem->getPatch())
         );
-        $processedPathItem = $processedPathItem->withDelete(
+        return $processedPathItem->withDelete(
             $this->processOperation($pathItem->getDelete())
         );
-
-        return $processedPathItem;
     }
 
     private function processOperation(?Operation $operation): ?Operation
