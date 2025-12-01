@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
 
 final class IriReferenceTypeProcessor
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
+    private IriReferenceContentTransformer $contentTransformer;
+
+    public function __construct(?IriReferenceContentTransformer $contentTransformer = null)
+    {
+        $this->contentTransformer = $contentTransformer ?? new IriReferenceContentTransformer();
+    }
 
     public function process(OpenApi $openApi): OpenApi
     {
@@ -19,152 +27,46 @@ final class IriReferenceTypeProcessor
         foreach (array_keys($paths->getPaths()) as $path) {
             $pathItem = $paths->getPath($path);
 
-            $processedPathItem = array_reduce(
-                self::OPERATIONS,
-                fn (PathItem $item, string $operation): PathItem => $this->processOperation($item, $operation),
-                $pathItem
-            );
+            foreach (self::OPERATIONS as $operation) {
+                $pathItem = $this->updateOperation($pathItem, $operation);
+            }
 
-            $paths->addPath($path, $processedPathItem);
+            $paths->addPath($path, $pathItem);
         }
 
         return $openApi;
     }
 
-    private function processOperation(PathItem $pathItem, string $operation): PathItem
+    private function updateOperation(PathItem $pathItem, string $operation): PathItem
     {
         $currentOperation = $pathItem->{'get' . $operation}();
-        $content = $currentOperation?->getRequestBody()?->getContent();
+
+        if (!$currentOperation instanceof Operation) {
+            return $pathItem;
+        }
+
+        $requestBody = $currentOperation->getRequestBody();
+
+        if (!$requestBody instanceof RequestBody) {
+            return $pathItem;
+        }
+
+        $content = $requestBody->getContent();
 
         if (!$content instanceof ArrayObject) {
             return $pathItem;
         }
 
-        $processedContent = $this->processContent($content);
+        $processedContent = $this->contentTransformer->transform($content);
 
-        if ($processedContent === $content->getArrayCopy()) {
+        if ($processedContent === null) {
             return $pathItem;
         }
 
         $updatedOperation = $currentOperation->withRequestBody(
-            $currentOperation->getRequestBody()->withContent(
-                new ArrayObject($processedContent)
-            )
+            $requestBody->withContent(new ArrayObject($processedContent))
         );
 
         return $pathItem->{'with' . $operation}($updatedOperation);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function processContent(ArrayObject $content): array
-    {
-        $result = $content->getArrayCopy();
-
-        foreach ($result as $mediaType => $mediaTypeObject) {
-            if (!is_array($mediaTypeObject)) {
-                continue;
-            }
-
-            $result[$mediaType] = $this->processMediaType($mediaTypeObject);
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array<string, mixed> $mediaTypeObject
-     *
-     * @return array<string, mixed>
-     */
-    private function processMediaType(array $mediaTypeObject): array
-    {
-        $properties = $this->extractProperties($mediaTypeObject);
-
-        if ($properties === null) {
-            return $mediaTypeObject;
-        }
-
-        $result = $this->transformIriReferences($properties);
-
-        if (!$result['modified']) {
-            return $mediaTypeObject;
-        }
-
-        return $this->buildUpdatedMediaType($mediaTypeObject, $result['properties']);
-    }
-
-    /**
-     * @param array<string, mixed> $mediaTypeObject
-     *
-     * @return array<string, mixed>|null
-     */
-    private function extractProperties(array $mediaTypeObject): ?array
-    {
-        $properties = $mediaTypeObject['schema']['properties'] ?? [];
-
-        return is_array($properties) ? $properties : null;
-    }
-
-    /**
-     * @param array<string, mixed> $properties
-     *
-     * @return array{properties: array<string, mixed>, modified: bool}
-     */
-    private function transformIriReferences(array $properties): array
-    {
-        $processedProperties = $properties;
-        $wasModified = false;
-
-        foreach ($properties as $propName => $propSchema) {
-            if ($this->shouldTransformProperty($propSchema)) {
-                $processedProperties[$propName] = $this->createIriReferenceSchema(
-                    $propSchema
-                );
-                $wasModified = true;
-            }
-        }
-
-        return ['properties' => $processedProperties, 'modified' => $wasModified];
-    }
-
-    private function shouldTransformProperty(mixed $propSchema): bool
-    {
-        return is_array($propSchema) && ($propSchema['type'] ?? null) === 'iri-reference';
-    }
-
-    /**
-     * @param array<string, mixed> $propSchema
-     *
-     * @return array<string, mixed>
-     */
-    private function createIriReferenceSchema(array $propSchema): array
-    {
-        return array_merge(
-            $propSchema,
-            ['type' => 'string', 'format' => 'iri-reference']
-        );
-    }
-
-    /**
-     * @param array<string, mixed> $mediaTypeObject
-     * @param array<string, mixed> $processedProperties
-     *
-     * @return array<string, mixed>
-     */
-    private function buildUpdatedMediaType(
-        array $mediaTypeObject,
-        array $processedProperties
-    ): array {
-        return array_merge(
-            $mediaTypeObject,
-            [
-                'schema' => array_merge(
-                    $mediaTypeObject['schema'],
-                    ['properties' => $processedProperties]
-                ),
-            ]
-        );
     }
 }

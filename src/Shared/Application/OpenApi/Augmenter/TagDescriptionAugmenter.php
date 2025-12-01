@@ -2,29 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Augmenter;
 
 use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 
-final class TagDescriptionProcessor
+final class TagDescriptionAugmenter
 {
-    public function process(OpenApi $openApi): OpenApi
+    public function augment(OpenApi $openApi): OpenApi
     {
         $tagDescriptions = $this->getTagDescriptions();
-        $tags = $this->indexTags($openApi);
 
-        foreach ($tagDescriptions as $tagName => $description) {
-            $tag = $tags[$tagName] ?? new Tag($tagName);
+        $tags = array_map(
+            static fn (Tag $tag) => self::augmentTag($tag, $tagDescriptions),
+            $openApi->getTags()
+        );
 
-            if ($this->isDescriptionEmpty($tag->getDescription())) {
-                $tag = $tag->withDescription($description);
-            }
-
-            $tags[$tagName] = $tag;
-        }
-
-        return $openApi->withTags(array_values($tags));
+        return $openApi->withTags($tags);
     }
 
     /**
@@ -41,17 +35,21 @@ final class TagDescriptionProcessor
     }
 
     /**
-     * @return array<string, Tag>
+     * @param array<string, string> $descriptions
      */
-    private function indexTags(OpenApi $openApi): array
+    private static function augmentTag(Tag $tag, array $descriptions): Tag
     {
-        $indexedTags = [];
+        $tagName = $tag->getName();
 
-        foreach ($openApi->getTags() as $tag) {
-            $indexedTags[$tag->getName()] = $tag;
+        if (!isset($descriptions[$tagName])) {
+            return $tag;
         }
 
-        return $indexedTags;
+        if (!self::isDescriptionEmpty($tag->getDescription())) {
+            return $tag;
+        }
+
+        return $tag->withDescription($descriptions[$tagName]);
     }
 
     private static function isDescriptionEmpty(?string $description): bool

@@ -130,4 +130,9 @@ final class UlidTransformerTest extends UnitTestCase
 
         $this->assertNull($result);
     }
+
+    public function testToPhpValueReturnsNullForNullInput(): void
+    {
+        $this->assertNull($this->ulidTransformer->toPhpValue(null));
+    }
 }

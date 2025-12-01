@@ -41,7 +41,7 @@ final class CustomerStatusFactoryTest extends TestCase
             false,
             false,
             [
-                'default' => '01JKX8XNHQPR7BJZXM9W2K5T3Y',
+                'default' => '01JKX8XGHVDZ46MWYMZT94YER4',
                 'type' => 'string',
             ]
         );
@@ -55,7 +55,7 @@ final class CustomerStatusFactoryTest extends TestCase
                 'ulid',
                 'CustomerStatus identifier',
                 true,
-                '01JKX8XNHQPR7BJZXM9W2K5T3Y',
+                '01JKX8XGHVDZ46MWYMZT94YER4',
                 'string'
             )
             ->willReturn($this->expectedParameter);
