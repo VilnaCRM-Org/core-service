@@ -10,12 +10,9 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Validator\StringFieldValidator;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -30,7 +27,6 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private UpdateCustomerCommandFactoryInterface $commandFactory,
         private IriConverterInterface $iriConverter,
         private UlidFactory $ulidTransformer,
-        private StringFieldValidator $fieldResolver,
     ) {
     }
 
@@ -45,60 +41,58 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customer = $this->retrieveCustomer($uriVariables);
-        $customerUpdate = $this->buildCustomerUpdate($data, $customer);
+        $customer = $this->retrieveCustomer($data, $uriVariables);
+        $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
+
         return $customer;
     }
 
     /**
      * @param array<string,string> $uriVariables
      */
-    private function retrieveCustomer(array $uriVariables): Customer
+    private function retrieveCustomer(CustomerPatch $data, array $uriVariables): Customer
     {
-        $ulid = $uriVariables['ulid'];
-        return $this->repository->find(
-            $this->ulidTransformer->create($ulid)
-        ) ?? throw new CustomerNotFoundException();
+        $ulidString = $this->extractUlid($data, $uriVariables);
+        $ulid = $this->ulidTransformer->create($ulidString);
+
+        return $this->repository->find($ulid)
+            ?? throw new CustomerNotFoundException();
     }
 
-    private function buildCustomerUpdate(
+    /**
+     * @param array<string,string> $uriVariables
+     */
+    private function extractUlid(CustomerPatch $data, array $uriVariables): string
+    {
+        if (isset($uriVariables['ulid'])) {
+            return $uriVariables['ulid'];
+        }
+
+        if ($data->id !== null) {
+            return basename($data->id);
+        }
+
+        throw new CustomerNotFoundException();
+    }
+
+    private function prepareCustomerUpdate(
         CustomerPatch $data,
         Customer $customer
     ): CustomerUpdate {
         return new CustomerUpdate(
-            newInitials: $this->fieldResolver->resolve(
-                $data->initials,
-                $customer->getInitials()
-            ),
-            newEmail: $this->fieldResolver->resolve($data->email, $customer->getEmail()),
-            newPhone: $this->fieldResolver->resolve($data->phone, $customer->getPhone()),
-            newLeadSource: $this->fieldResolver->resolve(
-                $data->leadSource,
-                $customer->getLeadSource()
-            ),
-            newType: $this->resolveType($data->type, $customer),
-            newStatus: $this->resolveStatus($data->status, $customer),
+            newInitials: $data->initials ?? $customer->getInitials(),
+            newEmail: $data->email ?? $customer->getEmail(),
+            newPhone: $data->phone ?? $customer->getPhone(),
+            newLeadSource: $data->leadSource ?? $customer->getLeadSource(),
+            newType: $data->type
+                ? $this->iriConverter->getResourceFromIri($data->type)
+                : $customer->getType(),
+            newStatus: $data->status
+                ? $this->iriConverter->getResourceFromIri($data->status)
+                : $customer->getStatus(),
             newConfirmed: $data->confirmed ?? $customer->isConfirmed()
         );
-    }
-
-    private function resolveType(?string $typeIri, Customer $customer): CustomerType
-    {
-        if ($typeIri === null) {
-            return $customer->getType();
-        }
-
-        return $this->iriConverter->getResourceFromIri($typeIri);
-    }
-
-    private function resolveStatus(?string $statusIri, Customer $customer): CustomerStatus
-    {
-        if ($statusIri === null) {
-            return $customer->getStatus();
-        }
-
-        return $this->iriConverter->getResourceFromIri($statusIri);
     }
 
     private function dispatchUpdateCommand(

@@ -16,12 +16,14 @@
         <exclude name="TooManyMethods"/>
         <exclude name="TooManyFields"/>
         <exclude name="ExcessivePublicCount"/>
+        <exclude name="ExcessiveParameterList"/>
     </rule>
 
     <rule ref="rulesets/cleancode.xml">
         <exclude name="StaticAccess"/>
         <exclude name="ElseExpression"/>
         <exclude name="MissingImport"/>
+        <exclude name="BooleanArgumentFlag"/>
     </rule>
 
     <rule ref="rulesets/design.xml">

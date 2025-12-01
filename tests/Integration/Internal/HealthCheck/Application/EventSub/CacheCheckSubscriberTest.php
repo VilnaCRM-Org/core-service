@@ -6,11 +6,11 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Application\EventSub\CacheCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use App\Tests\Integration\BaseIntegrationTest;
+use App\Tests\Integration\BaseTest;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Contracts\Cache\CacheInterface;
 
-final class CacheCheckSubscriberTest extends BaseIntegrationTest
+final class CacheCheckSubscriberTest extends BaseTest
 {
     private CacheCheckSubscriber $subscriber;
     private CacheInterface $cache;

@@ -5,156 +5,267 @@ description: Run and manage different types of tests (unit, integration, E2E, mu
 
 # Testing Workflow Skill
 
-## Context (Input)
+This skill provides comprehensive guidance for running and managing tests in the project.
 
-- Code changes require test validation
-- Test failures need debugging
-- Coverage/mutation targets must be met
+## When to Use This Skill
 
-## Task (Function)
+Activate this skill when:
 
-Execute appropriate test suite and ensure 100% pass rate with required coverage.
+- User asks to run tests
+- Debugging test failures
+- Checking test coverage
+- Running specific test suites
+- After implementing new features
+- Validating bug fixes
 
-## Test Commands Quick Reference
+## Test Types and Commands
 
-| Test Type    | Command                  | Runtime  | Coverage | Location           |
-| ------------ | ------------------------ | -------- | -------- | ------------------ |
-| Unit         | `make unit-tests`        | 2-3 min  | 100%     | tests/Unit/        |
-| Integration  | `make integration-tests` | 3-5 min  | Full     | tests/Integration/ |
-| E2E (Behat)  | `make behat`             | 5-10 min | BDD      | features/          |
-| All Tests    | `make all-tests`         | 8-15 min | 100%     | All                |
-| Mutation     | `make infection`         | Variable | 100% MSI | Unit tests         |
-| Load (smoke) | `make smoke-load-tests`  | 5-10 min | -        | tests/Load/        |
-| Load (all)   | `make load-tests`        | 30+ min  | -        | tests/Load/        |
+### Unit Tests
 
-## Execution Workflow
-
-### Step 1: Run Tests
+**Purpose**: Test individual classes/methods in isolation with mocked dependencies
 
 ```bash
-make unit-tests           # For quick validation
-make all-tests            # For comprehensive check
+make unit-tests
 ```
 
-### Step 2: Check Results
+**Runtime**: 2-3 minutes
+**Location**: `tests/Unit/`
+**Coverage Required**: 100%
 
-- ✅ **All Pass + 100% coverage** → Complete
-- ❌ **Failures detected** → Go to Step 3
+### Integration Tests
 
-### Step 3: Debug Failures
-
-Identify failure type and apply fix:
-
-| Failure Type      | Debug Command           | Common Fixes                              |
-| ----------------- | ----------------------- | ----------------------------------------- |
-| Assertion failure | PHPUnit output          | Fix logic, update test expectations       |
-| Coverage < 100%   | Coverage report         | Add missing test cases                    |
-| Escaped mutants   | `make infection` output | Test edge cases, strengthen assertions    |
-| Behat scenario    | Feature output          | Fix application logic or step definitions |
-| Type error        | Stack trace             | Fix type hints, mock returns              |
-
-### Step 4: Fix and Re-test
+**Purpose**: Test interactions between components with real database and services
 
 ```bash
-# Fix the code/tests
-make unit-tests           # Re-run to verify fix
+make integration-tests
 ```
 
-Repeat Steps 2-4 until all tests pass with 100% coverage.
+**Runtime**: 3-5 minutes
+**Location**: `tests/Integration/`
+**Coverage Required**: Comprehensive
 
-## Mutation Testing (Infection)
+### End-to-End Tests (Behat)
 
-**Goal**: 100% Mutation Score Indicator (MSI) - Zero escaped mutants
+**Purpose**: BDD scenarios testing complete user journeys
 
-### Run Mutation Tests
+```bash
+make behat
+# or
+make e2e-tests
+```
+
+**Runtime**: 5-10 minutes
+**Location**: `features/`
+**Contexts**: Defined in `behat.yml.dist`
+
+### All Tests
+
+**Purpose**: Run complete test suite
+
+```bash
+make all-tests
+```
+
+**Runtime**: 8-15 minutes
+**CRITICAL**: NEVER CANCEL - Wait for completion
+
+### Mutation Testing (Infection)
+
+**Purpose**: Validate test quality by making code mutations
 
 ```bash
 make infection
 ```
 
-### Fix Escaped Mutants
+**Runtime**: Variable (can be long)
+**Target**: 100% MSI (0 escaped mutants)
 
-1. Review mutation diff in output
-2. Add test case for uncaught mutation
-3. Strengthen assertion specificity
-4. Consider refactoring for testability
+### Load Testing
 
-**Example**: If mutant changes `>` to `>=`, add boundary test case.
-
-## Faker Usage in Tests
-
-**Setup**: Tests extend `UnitTestCase` which provides `$this->faker`
-
-```php
-// Good - Dynamic test data
-$this->faker->email();
-$this->faker->lexify('??');  // 2 random letters
-$this->faker->unique()->ulid();
-
-// Bad - Hardcoded values
-'test@example.com'
-'AB'
-```
-
-**Available**:
-
-- `$this->faker->ulid()` - Domain ULID via custom provider
-- All standard Faker methods (email, name, word, etc.)
-
-## Load Testing
-
-**Commands**:
+**Purpose**: Validate performance under various load conditions
 
 ```bash
-make smoke-load-tests      # Minimal load, 5-10 min
-make average-load-tests    # Normal traffic, 15-25 min
-make stress-load-tests     # High load, 20-30 min
-make spike-load-tests      # Extreme spikes, 25-35 min
+make smoke-load-tests    # 5-10 min, minimal load
+make average-load-tests  # 15-25 min, normal patterns
+make stress-load-tests   # 20-30 min, high load
+make spike-load-tests    # 25-35 min, extreme spikes
+make load-tests          # All load tests
 ```
 
-**Prerequisites**:
+**Requirements**: Test database setup, 30-min timeouts
 
-- Test database seeded (`make setup-test-db`)
-- Docker containers running (`make start`)
-- K6 Docker image built
+## Test Coverage Workflow
 
-## Constraints (Parameters)
+### Check Coverage
 
-**NEVER**:
+```bash
+make tests-with-coverage
+```
 
-- Cancel long-running tests mid-execution
-- Commit with failing tests
-- Accept coverage < 100%
-- Allow escaped mutants
-- Run tests outside Docker (use `make` commands)
+**Runtime**: 10-15 minutes
+**Output**: Coverage report
 
-**ALWAYS**:
+### Generate HTML Coverage Report
 
-- Use Faker for dynamic test data
+```bash
+make coverage-html
+```
+
+Opens detailed coverage report in browser.
+
+## Debugging Test Failures
+
+### Step 1: Identify Failure Type
+
+**Unit Test Failure**:
+
+- Check test output for assertion failures
+- Review mocked dependencies
+- Verify test data setup
+
+**Integration Test Failure**:
+
+- Check database state
+- Verify service connections
+- Review environment variables
+
+**Behat Test Failure**:
+
+- Check feature file scenarios
+- Review context implementations
+- Verify API responses match expectations
+
+### Step 2: Run Specific Test
+
+**Run single test file**:
+
+```bash
+docker compose exec -e APP_ENV=test php vendor/bin/phpunit tests/Unit/Specific/TestFile.php
+```
+
+**Run specific test method**:
+
+```bash
+docker compose exec -e APP_ENV=test php vendor/bin/phpunit --filter testMethodName
+```
+
+**Run specific Behat scenario**:
+
+```bash
+docker compose exec -e APP_ENV=test php vendor/bin/behat features/specific.feature:10
+```
+
+### Step 3: Fix and Verify
+
+1. Fix the failing test or code
+2. Re-run the specific test
+3. Run full suite to ensure no regressions
+4. Check coverage maintained at 100%
+
+## Mutation Testing Strategy
+
+### Understanding Escaped Mutants
+
+Infection makes small code changes (mutations) and checks if tests catch them.
+
+**Common mutation types**:
+
+- Boundary conditions (`>` → `>=`, `<` → `<=`)
+- Return values (`true` → `false`)
+- Operators (`+` → `-`, `&&` → `||`)
+- Default parameter values
+
+### Fixing Escaped Mutants
+
+1. **Run Infection**:
+
+   ```bash
+   make infection
+   ```
+
+2. **Review mutation diff** in output
+
+3. **Add targeted tests** for edge cases:
+
+   ```php
+   public function testBoundaryCondition(): void
+   {
+       // Test exact boundary
+       $this->assertTrue($validator->validate(8));  // Min length
+       $this->assertTrue($validator->validate(64)); // Max length
+       $this->assertFalse($validator->validate(7)); // Below min
+       $this->assertFalse($validator->validate(65)); // Above max
+   }
+   ```
+
+4. **If tests can't catch mutants**, refactor for testability:
+   - Extract complex conditions into methods
+   - Make default parameters injectable
+   - Use dependency injection for DateTime
+   - Avoid static method calls
+
+### Target: 100% MSI
+
+- All mutants must be killed
+- Zero escaped mutants
+- Zero uncovered mutants
+
+## Test Database Management
+
+### Setup Test Database
+
+```bash
+make setup-test-db
+```
+
+**Purpose**: Drop and recreate test MongoDB schema
+**When to use**:
+
+- Before running integration/E2E tests
+- After schema changes
+- When tests fail due to database state
+
+## Best Practices
+
+### Use Faker for Test Data
+
+**MANDATORY**: Never hardcode test values
+
+```php
+// ❌ BAD
+$email = 'test@example.com';
+
+// ✅ GOOD
+$email = $this->faker->unique()->email();
+```
+
+### Maintain 100% Coverage
+
+- Write tests for all new code
+- Cover all branches and edge cases
+- Test error conditions
+- Test boundary values
+
+### Keep Tests Fast
+
 - Mock external dependencies in unit tests
-- Use real DB in integration tests
-- Ensure deterministic test results
+- Use test database for integration tests
+- Avoid unnecessary setup/teardown
+- Run specific tests during development
 
-## Format (Output)
+### Write Clear Test Names
 
-**Unit Tests Success**:
-
-```
-OK (X tests, Y assertions)
-✅ COVERAGE SUCCESS: Line coverage is 100%
-```
-
-**Mutation Testing Success**:
-
-```
-100% MSI
-0 escaped mutants
+```php
+// ✅ GOOD: Descriptive test names
+public function testUserRegistrationFailsWhenEmailAlreadyExists(): void
+public function testPasswordValidationRequiresMinimumLength(): void
+public function testTokenExpiresAfterOneHour(): void
 ```
 
-## Verification Checklist
+## Success Criteria
 
-- [ ] All tests pass
-- [ ] Coverage is 100%
-- [ ] Zero escaped mutants (if running mutation tests)
-- [ ] No hardcoded test values (use Faker)
-- [ ] Tests run in Docker container via `make`
+- All test suites pass
+- 100% code coverage maintained
+- 100% mutation score (0 escaped mutants)
+- No test database errors
+- Load tests meet performance thresholds

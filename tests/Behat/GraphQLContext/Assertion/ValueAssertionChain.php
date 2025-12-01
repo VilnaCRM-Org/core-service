@@ -6,11 +6,12 @@ namespace App\Tests\Behat\GraphQLContext\Assertion;
 
 final class ValueAssertionChain
 {
-    /** @var array<ValueAssertionInterface> */
-    private array $assertions;
-
-    public function __construct()
-    {
+    /**
+     * @param array<ValueAssertionInterface> $assertions
+     */
+    public function __construct(
+        private array $assertions = [],
+    ) {
         $this->assertions = [
             new BooleanValueAssertion(),
             new NullValueAssertion(),
