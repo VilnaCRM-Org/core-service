@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
 
 final class PathParametersProcessor
 {
-    private readonly PathParameterCleaner $parameterCleaner;
+    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
     public function __construct(
-        PathParameterCleaner $parameterCleaner = new PathParameterCleaner()
+        private readonly PathParameterCleaner $parameterCleaner = new PathParameterCleaner()
     ) {
-        $this->parameterCleaner = $parameterCleaner;
     }
 
     public function process(OpenApi $openApi): OpenApi
@@ -33,40 +33,43 @@ final class PathParametersProcessor
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        $processedPathItem = $pathItem;
+        foreach (self::OPERATIONS as $operation) {
+            $pathItem = $this->updatePathItemOperation($pathItem, $operation);
+        }
 
-        $processedPathItem = $processedPathItem->withGet(
-            $this->processOperation($pathItem->getGet())
-        );
-        $processedPathItem = $processedPathItem->withPost(
-            $this->processOperation($pathItem->getPost())
-        );
-        $processedPathItem = $processedPathItem->withPut(
-            $this->processOperation($pathItem->getPut())
-        );
-        $processedPathItem = $processedPathItem->withPatch(
-            $this->processOperation($pathItem->getPatch())
-        );
-        return $processedPathItem->withDelete(
-            $this->processOperation($pathItem->getDelete())
-        );
+        return $pathItem;
     }
 
-    private function processOperation(?Operation $operation): ?Operation
+    private function updatePathItemOperation(PathItem $pathItem, string $operation): PathItem
     {
-        return match (true) {
-            $operation === null => null,
-            !\is_array($operation->getParameters()) => $operation,
-            default => $operation->withParameters(
-                array_map(
-                    $this->processParameter(...),
-                    $operation->getParameters()
-                )
-            ),
-        };
+        $currentOperation = $pathItem->{'get' . $operation}();
+
+        if (!$currentOperation instanceof Operation) {
+            return $pathItem;
+        }
+
+        return $pathItem->{'with' . $operation}(
+            $this->processOperation($currentOperation)
+        );
     }
 
-    private function processParameter(\ApiPlatform\OpenApi\Model\Parameter|array $parameter): mixed
+    private function processOperation(Operation $operation): Operation
+    {
+        $parameters = $operation->getParameters();
+
+        if (!is_array($parameters)) {
+            return $operation;
+        }
+
+        $cleanedParameters = array_map(
+            $this->processParameter(...),
+            $parameters
+        );
+
+        return $operation->withParameters($cleanedParameters);
+    }
+
+    private function processParameter(Parameter|array $parameter): Parameter|array
     {
         return $this->parameterCleaner->clean($parameter);
     }

@@ -53,6 +53,8 @@ return [
         NunoMaduro\PhpInsights\Domain\Metrics\Complexity\Complexity::class => [
             'exclude' => [
                 'src/Core/Customer/Application/DTO',
+                'src/Shared/Application/OpenApi/Cleaner/*',
+                'src/Shared/Application/OpenApi/Processor/*',
             ],
         ],
     ],
