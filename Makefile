@@ -271,6 +271,9 @@ schemathesis-validate: reset-db generate-openapi-spec ## Validate the running AP
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
 
+validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
+	./scripts/validate-openapi-spec.sh
+
 aws-load-tests: ## Run load tests on AWS infrastructure
 	tests/Load/aws-execute-load-tests.sh
 
@@ -313,6 +316,8 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
+	echo "1️⃣3️⃣ Validating OpenAPI specification..."; \
+	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
 		echo "💥 CI checks completed with failures:"; \

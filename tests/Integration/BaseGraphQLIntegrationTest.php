@@ -10,7 +10,7 @@ namespace App\Tests\Integration;
  * Provides common functionality for testing GraphQL queries and mutations
  * including request helpers, response validation, and assertion methods.
  */
-abstract class BaseGraphQLIntegrationTest extends BaseIntegrationTest
+abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
 {
     protected const GRAPHQL_ENDPOINT = '/api/graphql';
 
@@ -229,13 +229,4 @@ abstract class BaseGraphQLIntegrationTest extends BaseIntegrationTest
         ];
     }
 
-    /**
-     * Extract ULID from IRI path.
-     *
-     * GraphQL mutations expect just the ULID, not the full IRI path.
-     */
-    protected function extractUlidFromIri(string $iri): string
-    {
-        return basename($iri);
-    }
 }
