@@ -13,10 +13,15 @@ final class TagCollectorProcessor
 {
     public function process(OpenApi $openApi): OpenApi
     {
-        $existingTags = $this->extractExistingTagNames($openApi->getTags());
+        $existingTags = $this->uniqueTagNames(
+            $this->extractExistingTagNames($openApi->getTags())
+        );
         $operationTags = $this->collectTagsFromOperations($openApi);
 
-        $allTagNames = array_unique(array_merge($existingTags, $operationTags));
+        $allTagNames = array_merge(
+            $existingTags,
+            array_diff($operationTags, $existingTags)
+        );
         sort($allTagNames);
 
         $tags = array_map(
@@ -38,6 +43,16 @@ final class TagCollectorProcessor
             static fn (Tag $tag): string => $tag->getName(),
             $tags
         );
+    }
+
+    /**
+     * @param array<string> $tags
+     *
+     * @return array<string>
+     */
+    private function uniqueTagNames(array $tags): array
+    {
+        return array_keys(array_flip($tags));
     }
 
     /**

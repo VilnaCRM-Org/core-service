@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
-final class IriReferencePropertyTransformer
+final class IriReferencePropertyTransformer implements IriReferencePropertyTransformerInterface
 {
     /**
      * @param array<string, scalar|array<string, scalar|null>> $schema

@@ -25,9 +25,7 @@ final readonly class UlidTransformer
             return null;
         }
 
-        $ulid = $value instanceof Ulid
-            ? $value
-            : $this->valueTransformer->toUlid($value);
+        $ulid = $this->valueTransformer->toUlid($value);
 
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
@@ -38,9 +36,7 @@ final readonly class UlidTransformer
             return null;
         }
 
-        $symfonyUlid = $value instanceof SymfonyUlid
-            ? $value
-            : $this->valueTransformer->fromBinary($value);
+        $symfonyUlid = $this->valueTransformer->fromBinary($value);
 
         return $this->transformFromSymfonyUlid($symfonyUlid);
     }
