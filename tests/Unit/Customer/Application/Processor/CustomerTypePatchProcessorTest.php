@@ -71,14 +71,16 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $operation = $this->createMock(Operation::class);
         $ulid = (string) $this->faker->ulid();
         $customerType = $this->createMock(CustomerType::class);
-        $command = $this
-            ->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerType, $existingValue, $command);
         $this->setupCustomerType($customerType, $existingValue);
+
+        // When value is empty string, no command should be dispatched (proper PATCH semantics)
+        $this->commandBus
+            ->expects($this->never())
+            ->method('dispatch');
 
         $result = $this->processor
             ->process($dto, $operation, ['ulid' => $ulid]);
@@ -101,38 +103,54 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
-    public function testProcessPreservesExistingValueWhenNewValueIsNull(): void
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
     {
-        $existingValue = $this->faker->word();
-        $dto = new TypePatch(null);
-        $operation = $this->createMock(Operation::class);
         $ulid = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customer_types/%s', $ulid);
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = $iri;
+        $operation = $this->createMock(Operation::class);
         $customerType = $this->createMock(CustomerType::class);
-        $command = $this
-            ->createMock(UpdateCustomerTypeCommand::class);
+        $command = $this->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerType, $existingValue, $command);
-        $this->setupCustomerType($customerType, $existingValue);
+        $this->setupDependencies($customerType, $dto->value, $command);
+        $this->setupCustomerType($customerType, $dto->value);
 
-        $result = $this->processor
-            ->process($dto, $operation, ['ulid' => $ulid]);
+        $result = $this->processor->process($dto, $operation);
 
         $this->assertSame($customerType, $result);
     }
 
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerTypeNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
     private function createDto(): TypePatch
     {
-        return new TypePatch(
-            $this->faker->word()
-        );
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        return $dto;
     }
 
     private function createDtoWithEmptyValue(): TypePatch
     {
-        return new TypePatch('');
+        $dto = new TypePatch();
+        $dto->value = '';
+        $dto->id = null;
+        return $dto;
     }
 
     private function setupRepository(

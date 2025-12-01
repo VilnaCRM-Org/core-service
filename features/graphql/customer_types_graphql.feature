@@ -60,6 +60,24 @@ Feature: GraphQL CustomerType CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.createCustomerType.customerType.value" should be "Enterprise"
+    And the GraphQL response should contain "data.createCustomerType.customerType.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customerTypes(first: 1, value: "Enterprise") {
+        edges {
+          node {
+            id
+            value
+          }
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerTypes.edges" should have 1 items
+    And the GraphQL response "data.customerTypes.edges.0.node.value" should be "Enterprise"
     Then delete type with value "Enterprise"
 
   Scenario: Update a customer type via GraphQL mutation
@@ -81,9 +99,31 @@ Feature: GraphQL CustomerType CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomerType.customerType.value" should be "Updated Type"
+    And the GraphQL response should contain "data.updateCustomerType.customerType.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customerType(id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4") {
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerType.value" should be "Updated Type"
+    And the GraphQL response should not have errors
 
   Scenario: Delete a customer type via GraphQL mutation
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send the following GraphQL query:
+    """
+    {
+      customerType(id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should contain "data.customerType.id"
     When I send the following GraphQL mutation:
     """
     mutation {
@@ -99,6 +139,16 @@ Feature: GraphQL CustomerType CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomerType.customerType"
+    When I send the following GraphQL query:
+    """
+    {
+      customerType(id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerType" should be "null"
 
   Scenario: Query customer types with filtering by value
     Given create customer type with value "VIP"
@@ -138,6 +188,7 @@ Feature: GraphQL CustomerType CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customerTypes.edges"
+    And the GraphQL response "data.customerTypes.edges" should have at least 2 items
 
   Scenario: Attempt to create a customer type with missing value
     When I send the following GraphQL mutation:

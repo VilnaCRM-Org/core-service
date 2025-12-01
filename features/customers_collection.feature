@@ -71,6 +71,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should contain "JD"
     And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].initials" should be equal to "JD"
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[0].createdAt" should exist
 
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
     Given create customer with initials "AB"
@@ -84,6 +88,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
     And the JSON node "member[1].initials" should match "/(AB|CD)/"
     And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
+    And the JSON node "member[0].createdAt" should exist
+    And the JSON node "member[1].createdAt" should exist
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
     Given create customer with email "john.doe@example.com"

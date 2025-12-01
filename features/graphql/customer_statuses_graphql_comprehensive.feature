@@ -267,6 +267,16 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomerStatus.customerStatus.value" should be "UpdatedValue"
     And the GraphQL response "data.updateCustomerStatus.customerStatus.id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4") {
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerStatus.value" should be "UpdatedValue"
     Then delete status with id "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Delete a customer status
@@ -286,6 +296,16 @@ Feature: GraphQL CustomerStatus Operations - Comprehensive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomerStatus.customerStatus.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER5") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerStatus" should be "null"
 
   Scenario: Create multiple customer statuses sequentially
     When I send the following GraphQL mutation:

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Validator;
 
-use App\Shared\Application\Validator\Guard\EmptyValueGuard;
 use App\Shared\Application\Validator\Initials;
 use App\Shared\Application\Validator\InitialsValidator;
 use App\Tests\Unit\UnitTestCase;
@@ -25,8 +24,7 @@ final class InitialsValidatorTest extends UnitTestCase
         parent::setUp();
         $this->context = $this->createMock(ExecutionContextInterface::class);
         $this->translator = $this->createMock(TranslatorInterface::class);
-        $skipChecker = new EmptyValueGuard();
-        $this->validator = new InitialsValidator($this->translator, $skipChecker);
+        $this->validator = new InitialsValidator($this->translator);
         $this->validator->initialize($this->context);
         $this->constraint = $this->createMock(Initials::class);
     }
@@ -51,34 +49,10 @@ final class InitialsValidatorTest extends UnitTestCase
         );
     }
 
-    public function testOptional(): void
+    public function testEmptyStringValue(): void
     {
-        $this->constraint->expects($this->once())
-            ->method('isOptional')
-            ->willReturn(true);
         $this->context->expects($this->never())
             ->method('buildViolation');
-        $this->validator->validate(
-            '',
-            $this->constraint
-        );
-    }
-
-    public function testRequiredDefaultValue(): void
-    {
-        $constraintViolationBuilder = $this->createMock(
-            ConstraintViolationBuilderInterface::class
-        );
-        $this->translator->expects($this->once())
-            ->method('trans')
-            ->with('initials.spaces')
-            ->willReturn('Initials cannot be only whitespace');
-        $this->context->expects($this->once())
-            ->method('buildViolation')
-            ->with('Initials cannot be only whitespace')
-            ->willReturn($constraintViolationBuilder);
-        $constraintViolationBuilder->expects($this->once())
-            ->method('addViolation');
         $this->validator->validate(
             '',
             new Initials()
@@ -102,17 +76,6 @@ final class InitialsValidatorTest extends UnitTestCase
 
         $this->validator->validate(
             ' ',
-            $this->constraint
-        );
-    }
-
-    public function testNonStringValueDoesNotValidate(): void
-    {
-        $this->context->expects($this->never())
-            ->method('buildViolation');
-
-        $this->validator->validate(
-            123,
             $this->constraint
         );
     }
