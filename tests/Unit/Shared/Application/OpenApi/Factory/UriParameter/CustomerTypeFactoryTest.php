@@ -41,7 +41,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
             false,
             false,
             [
-                'default' => '01JKX8XVJS4F9CHTQR6N8D2PW7',
+                'default' => '01JKX8XGHVDZ46MWYMZT94YER4',
                 'type' => 'string',
             ]
         );
@@ -55,7 +55,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
                 'ulid',
                 'CustomerType identifier',
                 true,
-                '01JKX8XVJS4F9CHTQR6N8D2PW7',
+                '01JKX8XGHVDZ46MWYMZT94YER4',
                 'string'
             )
             ->willReturn($this->expectedParameter);

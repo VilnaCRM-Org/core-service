@@ -19,12 +19,10 @@ abstract class UlidUriParameterFactory implements UriParameterFactoryInterface
             'ulid',
             $this->getDescription(),
             true,
-            $this->getExampleUlid(),
+            '01JKX8XGHVDZ46MWYMZT94YER4',
             'string'
         );
     }
 
     abstract protected function getDescription(): string;
-
-    abstract protected function getExampleUlid(): string;
 }

@@ -10,9 +10,4 @@ final class UlidUriCustomerType extends UlidUriParameterFactory
     {
         return 'CustomerType identifier';
     }
-
-    protected function getExampleUlid(): string
-    {
-        return '01JKX8XVJS4F9CHTQR6N8D2PW7';
-    }
 }
