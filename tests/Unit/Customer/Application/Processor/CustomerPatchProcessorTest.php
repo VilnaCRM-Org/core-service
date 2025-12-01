@@ -10,12 +10,13 @@ use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPatchProcessor;
+use App\Core\Customer\Application\Processor\CustomerPatchUpdateResolver;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Shared\Application\Validator\StringFieldValidator;
+use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
@@ -28,6 +29,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerRepositoryInterface|MockObject $repository;
+    private CustomerPatchUpdateResolver $patchUpdateResolver;
+    private PatchUlidExtractor $patchUlidExtractor;
     private CustomerPatchProcessor $processor;
     private UlidFactory $ulidFactory;
 
@@ -41,14 +44,17 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $this->ulidFactory = new UlidFactory();
-        $fieldResolver = new StringFieldValidator();
+        $this->patchUpdateResolver = new CustomerPatchUpdateResolver(
+            $this->iriConverter
+        );
+        $this->patchUlidExtractor = new PatchUlidExtractor();
         $this->processor = new CustomerPatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
-            $this->iriConverter,
-            $this->ulidFactory,
-            $fieldResolver
+            $this->patchUpdateResolver,
+            $this->patchUlidExtractor,
+            $this->ulidFactory
         );
     }
 

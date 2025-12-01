@@ -9,7 +9,7 @@ use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
+use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
 use App\Tests\Unit\UnitTestCase;
 
@@ -110,7 +110,7 @@ final class PathParametersSanitizerTest extends UnitTestCase
 
     public function testSanitizeWithCustomPathParameterCleaner(): void
     {
-        $mockCleaner = $this->createMock(PathParameterCleaner::class);
+        $mockCleaner = $this->createMock(PathParameterCleanerInterface::class);
         $mockCleaner->expects($this->once())
             ->method('clean')
             ->willReturnCallback(static fn ($param) => $param);
@@ -132,6 +132,21 @@ final class PathParametersSanitizerTest extends UnitTestCase
         $result = $sanitizer->sanitize($openApi);
 
         $this->assertInstanceOf(OpenApi::class, $result);
+    }
+
+    public function testSanitizeSkipsOperationsWithoutParameterArray(): void
+    {
+        $mockCleaner = $this->createMock(PathParameterCleanerInterface::class);
+        $mockCleaner->expects($this->never())->method('clean');
+
+        $sanitizer = new PathParametersSanitizer($mockCleaner);
+        $operation = new Operation('test');
+        $pathItem = (new PathItem())->withGet($operation);
+        $openApi = $this->createOpenApiWithPath('/test', $pathItem);
+
+        $result = $sanitizer->sanitize($openApi);
+
+        self::assertSame($operation, $result->getPaths()->getPath('/test')->getGet());
     }
 
     public function testSanitizeReturnsOpenApiInstance(): void

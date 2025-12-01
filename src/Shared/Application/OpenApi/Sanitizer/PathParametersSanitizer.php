@@ -8,15 +8,16 @@ use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
+use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 
 final class PathParametersSanitizer
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
-    private readonly PathParameterCleaner $parameterCleaner;
+    private readonly PathParameterCleanerInterface $parameterCleaner;
 
     public function __construct(
-        PathParameterCleaner $parameterCleaner = new PathParameterCleaner()
+        PathParameterCleanerInterface $parameterCleaner = new PathParameterCleaner()
     ) {
         $this->parameterCleaner = $parameterCleaner;
     }

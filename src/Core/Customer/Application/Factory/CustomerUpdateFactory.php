@@ -13,6 +13,7 @@ final readonly class CustomerUpdateFactory implements
 {
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
+        private ?CustomerUpdateScalarResolver $scalarResolver = null,
     ) {
     }
 
@@ -29,33 +30,17 @@ final readonly class CustomerUpdateFactory implements
      */
     public function create(Customer $customer, array $input): CustomerUpdate
     {
-        $customerType = $this->relationResolver->resolveType(
-            $input['type'] ?? null,
-            $customer
-        );
-
-        $customerStatus = $this->relationResolver->resolveStatus(
-            $input['status'] ?? null,
-            $customer
-        );
+        $scalarResolver = $this->scalarResolver ?? new CustomerUpdateScalarResolver();
+        $stringFields = $scalarResolver->resolveStrings($customer, $input);
 
         return new CustomerUpdate(
-            $this->getStringValue($input['initials'] ?? null, $customer->getInitials()),
-            $this->getStringValue($input['email'] ?? null, $customer->getEmail()),
-            $this->getStringValue($input['phone'] ?? null, $customer->getPhone()),
-            $this->getStringValue($input['leadSource'] ?? null, $customer->getLeadSource()),
-            $customerType,
-            $customerStatus,
-            $input['confirmed'] ?? $customer->isConfirmed()
+            $stringFields['initials'],
+            $stringFields['email'],
+            $stringFields['phone'],
+            $stringFields['leadSource'],
+            $this->relationResolver->resolveType($input['type'] ?? null, $customer),
+            $this->relationResolver->resolveStatus($input['status'] ?? null, $customer),
+            $scalarResolver->resolveConfirmed($customer, $input)
         );
-    }
-
-    /**
-     * Returns the new value if it's not empty/whitespace-only, otherwise returns the default value.
-     * This prevents GraphQL mutations from overwriting existing values with blank strings.
-     */
-    private function getStringValue(?string $newValue, string $defaultValue): string
-    {
-        return $newValue !== null && trim($newValue) !== '' ? $newValue : $defaultValue;
     }
 }
