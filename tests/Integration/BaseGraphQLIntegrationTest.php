@@ -228,5 +228,4 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
             'value' => $value ?? $this->faker->word(),
         ];
     }
-
 }
