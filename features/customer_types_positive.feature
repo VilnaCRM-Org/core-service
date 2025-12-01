@@ -152,6 +152,10 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_post"
     And the JSON node "value" should contain "Prospect"
+    And the JSON node "ulid" should exist
+    And the JSON node "@id" should exist
+    And the JSON node "@type" should be equal to "CustomerType"
+    And the JSON node "value" should be equal to "Prospect"
     Then delete type with value "Prospect"
 
 # ----- PUT /api/customer_types/{ulid} – Replace Resource (Positive Tests) -----
@@ -168,6 +172,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_put"
+    And the JSON node "value" should be equal to "Qualified"
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
     And the JSON node "value" should be equal to "Qualified"
 
   Scenario: Replace a customer type resource while including an extra field should be rejected
@@ -201,6 +208,9 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_patch"
     And the JSON node "value" should contain "Nurtured"
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "value" should be equal to "Nurtured"
 
   Scenario: Update customer type resource with an empty patch payload (resource remains unchanged)
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -217,6 +227,10 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the JSON node "@type" should contain "CustomerType"
     And the JSON node "ulid" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
     And the JSON node "value" should exist
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "value" should exist
 
 # ----- DELETE /api/customer_types/{ulid} – Delete Resource (Positive Test) -----
 
@@ -227,3 +241,5 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be empty
     And the header "Content-Type" should not exist
     And the response should be valid according to the operation id "api_customer_types_ulid_delete"
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 404

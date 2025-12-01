@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "============================================"
 echo "Preparing test data for load tests"
@@ -10,7 +10,7 @@ docker run --rm \
   --network=host \
   -v "$(pwd)/tests/Load:/app" \
   -w /app \
-  k6 run scripts/PrepareCustomers.js
+  k6 run scripts/prepareCustomers.js
 
 echo ""
 echo "============================================"

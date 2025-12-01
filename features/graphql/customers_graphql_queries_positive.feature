@@ -47,6 +47,9 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     And the GraphQL response should contain "data.customer.type.id"
     And the GraphQL response should contain "data.customer.type.value"
     And the GraphQL response should contain "data.customer.status.id"
+    And the GraphQL response "data.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the GraphQL response "data.customer.type.value" should not be empty
+    And the GraphQL response "data.customer.status.value" should not be empty
 
   Scenario: Query a single customer with minimal field selection
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -113,8 +116,12 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     And the GraphQL response should contain "data.customers.edges"
     And the GraphQL response should contain "data.customers.pageInfo.hasNextPage"
     And the GraphQL response should contain "data.customers.pageInfo.endCursor"
+    And the GraphQL response "data.customers.edges" should have 2 items
+    And the GraphQL response "data.customers.pageInfo.hasNextPage" should be "true"
+    And the GraphQL response should contain "data.customers.edges.0.cursor"
+    And the GraphQL response should contain "data.customers.edges.1.cursor"
 
-  Scenario: Query customers collection with filtering by email
+  Scenario: Query customers collection filtering by email
     Given create customer with email "user1@example.com"
     And create customer with email "user2@example.com"
     When I send the following GraphQL query:
@@ -136,6 +143,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have 1 items
+    And the GraphQL response "data.customers.edges.0.node.email" should be equal to "user1@example.com"
 
   Scenario: Query customers collection filtering by initials
     Given create customer with initials "AB"
@@ -156,6 +165,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have 1 items
+    And the GraphQL response "data.customers.edges.0.node.initials" should be equal to "AB"
 
   Scenario: Query customers collection filtering by phone
     Given create customer with phone "+1234567890"
@@ -175,6 +186,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have 1 items
+    And the GraphQL response "data.customers.edges.0.node.phone" should be equal to "+1234567890"
 
   Scenario: Query customers collection filtering by leadSource
     Given create customer with leadSource "GoogleAds"
@@ -195,6 +208,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have 1 items
+    And the GraphQL response "data.customers.edges.0.node.leadSource" should be equal to "GoogleAds"
 
   Scenario: Query customers collection filtering by confirmed status true
     Given create customer with confirmed "true"
@@ -214,6 +229,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have at least 1 items
+    And the GraphQL response "data.customers.edges.0.node.confirmed" should be "true"
 
   Scenario: Query customers collection filtering by confirmed status false
     Given create customer with confirmed "false"
@@ -233,6 +250,8 @@ Feature: GraphQL Customer Query Operations - Positive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.customers.edges"
+    And the GraphQL response "data.customers.edges" should have at least 1 items
+    And the GraphQL response "data.customers.edges.0.node.confirmed" should be "false"
 
   Scenario: Query customers collection filtering by type value
     Given create customer with type value "Premium" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER5"

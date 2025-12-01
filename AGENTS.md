@@ -115,6 +115,13 @@ Never run PHP commands directly on the host system.
 - `make stress-load-tests` -- High load testing
 - `make spike-load-tests` -- Extreme spike testing
 - `make execute-load-tests-script scenario=<name>` -- Run specific scenario
+- `make validate-load-test-naming` -- Validate naming/location of load-test scripts (run automatically in `make ci`)
+
+#### Load Test Script Naming Rules
+
+- Every script in `tests/Load/scripts/` must start with a lowercase character (e.g., `cleanupCustomers.js`)
+- REST scenarios belong in `tests/Load/scripts/rest-api/`; GraphQL scenarios belong in `tests/Load/scripts/graphql/`
+- The `validate-load-test-naming` target fails CI if any script violates these rules—update AI prompts and manual workflows accordingly
 
 ### Database Commands
 
