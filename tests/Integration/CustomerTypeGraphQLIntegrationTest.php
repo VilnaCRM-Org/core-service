@@ -67,7 +67,7 @@ final class CustomerTypeGraphQLIntegrationTest extends BaseGraphQLIntegrationTes
         $typeIri = $this->createEntity('/api/customer_types', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($typeIri),
+            'id' => $typeIri,
             'value' => 'Updated Type',
         ];
 

@@ -150,13 +150,13 @@ final class ParameterDescriptionProcessor
      */
     private function processOperation(?Operation $operation, array $descriptions): ?Operation
     {
-        return match (true) {
-            $operation === null => null,
-            $operation->getParameters() === [] => $operation,
-            default => $operation->withParameters(
-                $this->processParameters($operation->getParameters(), $descriptions)
-            ),
-        };
+        if ($operation === null) {
+            return null;
+        }
+
+        return $operation->withParameters(
+            $this->processParameters($operation->getParameters(), $descriptions)
+        );
     }
 
     /**

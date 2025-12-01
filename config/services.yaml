@@ -153,3 +153,16 @@ services:
   App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory:
     arguments:
       $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
+
+  App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer:
+    decorates: 'api_platform.openapi.normalizer'
+    arguments:
+      - '@App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer.inner'
+      - '@App\Shared\Application\OpenApi\Cleaner\DataCleaner'
+    autoconfigure: false
+
+  App\Shared\Application\OpenApi\Serializer\ParameterNormalizer:
+    decorates: 'api_platform.openapi.normalizer.api_gateway'
+    arguments:
+      - '@App\Shared\Application\OpenApi\Serializer\ParameterNormalizer.inner'
+    autoconfigure: false

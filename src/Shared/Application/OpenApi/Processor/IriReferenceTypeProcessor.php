@@ -80,36 +80,91 @@ final class IriReferenceTypeProcessor
      */
     private function processMediaType(array $mediaTypeObject): array
     {
-        $properties = $mediaTypeObject['schema']['properties'] ?? [];
+        $properties = $this->extractProperties($mediaTypeObject);
 
-        if (!is_array($properties)) {
+        if ($properties === null) {
             return $mediaTypeObject;
         }
 
+        $result = $this->transformIriReferences($properties);
+
+        if (!$result['modified']) {
+            return $mediaTypeObject;
+        }
+
+        return $this->buildUpdatedMediaType($mediaTypeObject, $result['properties']);
+    }
+
+    /**
+     * @param array<string, mixed> $mediaTypeObject
+     *
+     * @return array<string, mixed>|null
+     */
+    private function extractProperties(array $mediaTypeObject): ?array
+    {
+        $properties = $mediaTypeObject['schema']['properties'] ?? [];
+
+        return is_array($properties) ? $properties : null;
+    }
+
+    /**
+     * @param array<string, mixed> $properties
+     *
+     * @return array{properties: array<string, mixed>, modified: bool}
+     */
+    private function transformIriReferences(array $properties): array
+    {
         $processedProperties = $properties;
         $wasModified = false;
 
         foreach ($properties as $propName => $propSchema) {
-            if (!is_array($propSchema)) {
-                continue;
-            }
-
-            if (($propSchema['type'] ?? null) === 'iri-reference') {
-                $processedProperties[$propName] = array_merge(
-                    $propSchema,
-                    ['type' => 'string', 'format' => 'iri-reference']
+            if ($this->shouldTransformProperty($propSchema)) {
+                $processedProperties[$propName] = $this->createIriReferenceSchema(
+                    $propSchema
                 );
                 $wasModified = true;
             }
         }
 
-        if (!$wasModified) {
-            return $mediaTypeObject;
-        }
+        return ['properties' => $processedProperties, 'modified' => $wasModified];
+    }
 
+    private function shouldTransformProperty(mixed $propSchema): bool
+    {
+        return is_array($propSchema) && ($propSchema['type'] ?? null) === 'iri-reference';
+    }
+
+    /**
+     * @param array<string, mixed> $propSchema
+     *
+     * @return array<string, mixed>
+     */
+    private function createIriReferenceSchema(array $propSchema): array
+    {
+        return array_merge(
+            $propSchema,
+            ['type' => 'string', 'format' => 'iri-reference']
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $mediaTypeObject
+     * @param array<string, mixed> $processedProperties
+     *
+     * @return array<string, mixed>
+     */
+    private function buildUpdatedMediaType(
+        array $mediaTypeObject,
+        array $processedProperties
+    ): array {
         return array_merge(
             $mediaTypeObject,
-            ['schema' => array_merge($mediaTypeObject['schema'], ['properties' => $processedProperties])]
+            [
+                'schema' => array_merge(
+                    $mediaTypeObject['schema'],
+                    ['properties' => $processedProperties]
+                ),
+            ]
         );
     }
 }

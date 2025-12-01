@@ -38,6 +38,6 @@ final class EmptyValueGuard
 
     private function shouldSkipEmptyString(Constraint $constraint): bool
     {
-        return $constraint->isOptional();
+        return true;
     }
 }
