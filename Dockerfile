@@ -13,6 +13,9 @@ RUN xcaddy build \
     --with github.com/dunglas/vulcain/caddy
 
 # Prod image
+# Using Alpine 3.19 instead of 3.20 due to compatibility issues with PHP extensions
+# and the mlocati/php-extension-installer. Alpine 3.20 introduced changes that cause
+# build failures with mongodb and other extensions.
 FROM php:8.3-fpm-alpine3.19 AS app_php
 
 # Allow to use development versions of Symfony

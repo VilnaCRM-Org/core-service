@@ -39,33 +39,33 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerType {
-        $ulid = $uriVariables['ulid'];
+        $ulid = $this->extractUlid($data, $uriVariables);
         $iri = sprintf('/api/customer_types/%s', $ulid);
+
         $customerType = $this->repository->find(
             $this->ulidFactory->create($ulid)
         ) ?? throw CustomerTypeNotFoundException::withIri($iri);
 
-        $newValue = $this->getNewValue($data->value, $customerType->getValue());
-
-        $this->dispatchCommand($customerType, $newValue);
+        // Only update if value is explicitly provided and not empty
+        if ($data->value !== null && trim($data->value) !== '') {
+            $this->dispatchCommand($customerType, $data->value);
+        }
 
         return $customerType;
     }
 
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return $this->hasValidContent($newValue) ? $newValue : $defaultValue;
-    }
-
-    private function hasValidContent(?string $value): bool
+    /**
+     * @param array<string,string> $uriVariables
+     */
+    private function extractUlid(TypePatch $data, array $uriVariables): string
     {
-        if ($value === null) {
-            return false;
+        $ulid = $uriVariables['ulid'] ?? ($data->id !== null ? basename($data->id) : null);
+
+        if ($ulid) {
+            return $ulid;
         }
 
-        return strlen(trim($value)) > 0;
+        throw CustomerTypeNotFoundException::withIri('/api/customer_types/unknown');
     }
 
     private function dispatchCommand(

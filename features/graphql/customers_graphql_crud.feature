@@ -167,6 +167,20 @@ Feature: GraphQL Customer CRUD Operations
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.email" should be "updated@example.com"
     And the GraphQL response "data.updateCustomer.customer.phone" should be "9876543210"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+        email
+        phone
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customer.email" should be "updated@example.com"
+    And the GraphQL response "data.customer.phone" should be "9876543210"
 
   Scenario: Delete a customer via GraphQL mutation
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -185,6 +199,16 @@ Feature: GraphQL Customer CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomer.customer"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer" should be "null"
 
   Scenario: Query customers with filtering
     Given create customer with type value "Premium" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"

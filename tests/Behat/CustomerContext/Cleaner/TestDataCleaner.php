@@ -11,20 +11,19 @@ use App\Shared\Infrastructure\Factory\UlidFactory;
 
 final class TestDataCleaner
 {
-    /** @var array<string> */
-    private array $customerIds = [];
-
-    /** @var array<string> */
-    private array $statusIds = [];
-
-    /** @var array<string> */
-    private array $typeIds = [];
-
+    /**
+     * @param array<string> $customerIds
+     * @param array<string> $statusIds
+     * @param array<string> $typeIds
+     */
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly StatusRepositoryInterface $statusRepository,
         private readonly TypeRepositoryInterface $typeRepository,
-        private readonly UlidFactory $ulidFactory
+        private readonly UlidFactory $ulidFactory,
+        private array $customerIds = [],
+        private array $statusIds = [],
+        private array $typeIds = [],
     ) {
     }
 
@@ -53,7 +52,8 @@ final class TestDataCleaner
     public function cleanupCustomers(): void
     {
         foreach ($this->customerIds as $id) {
-            $customer = $this->customerRepository->find($id);
+            $ulid = $this->ulidFactory->create($id);
+            $customer = $this->customerRepository->find($ulid);
             if ($customer !== null) {
                 $this->customerRepository->delete($customer);
             }

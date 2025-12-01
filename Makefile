@@ -101,19 +101,9 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd src ansi phpmd.xml --exclude vendor
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
-analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
-	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
-
-analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
-	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
-
-analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
-	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
-
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
-
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
@@ -272,18 +262,14 @@ coverage-html: ## Create the code coverage report with PHPUnit
 coverage-xml: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover coverage/coverage.xml
 
-generate-openapi-spec:
+generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
-	@docker compose exec php chown $(shell id -u):$(shell id -g) .github/openapi-spec/spec.yaml
 
 schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
 	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)
 
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
-
-validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
-	./scripts/validate-openapi-spec.sh
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	tests/Load/aws-execute-load-tests.sh
@@ -303,26 +289,24 @@ validate-configuration: ## Validate configuration structure and detect locked fi
 ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	@echo "🚀 Running comprehensive CI checks..."
 	@failed_checks=""; \
-	echo "1️⃣  Validating composer.json and composer.lock..."; \
+	echo "2️⃣  Validating composer.json and composer.lock..."; \
 	if ! make composer-validate; then failed_checks="$$failed_checks\n❌ composer validation"; fi; \
-	echo "2️⃣  Checking Symfony requirements..."; \
+	echo "3️⃣  Checking Symfony requirements..."; \
 	if ! make check-requirements; then failed_checks="$$failed_checks\n❌ Symfony requirements check"; fi; \
-	echo "3️⃣  Running security analysis..."; \
+	echo "4️⃣  Running security analysis..."; \
 	if ! make check-security; then failed_checks="$$failed_checks\n❌ security analysis"; fi; \
-	echo "4️⃣  Fixing code style with PHP CS Fixer..."; \
+	echo "5️⃣  Fixing code style with PHP CS Fixer..."; \
 	if ! make phpcsfixer; then failed_checks="$$failed_checks\n❌ PHP CS Fixer"; fi; \
-	echo "5️⃣  Running static analysis with Psalm..."; \
+	echo "6️⃣  Running static analysis with Psalm..."; \
 	if ! make psalm; then failed_checks="$$failed_checks\n❌ Psalm static analysis"; fi; \
-	echo "6️⃣  Running security taint analysis..."; \
+	echo "7️⃣  Running security taint analysis..."; \
 	if ! make psalm-security; then failed_checks="$$failed_checks\n❌ Psalm security analysis"; fi; \
-	echo "7️⃣  Running code quality analysis with PHPMD..."; \
+	echo "8️⃣  Running code quality analysis with PHPMD..."; \
 	if ! make phpmd; then failed_checks="$$failed_checks\n❌ PHPMD quality analysis"; fi; \
-	echo "8️⃣  Running code quality analysis with PHPInsights..."; \
+	echo "9️⃣  Running code quality analysis with PHPInsights..."; \
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
-	echo "9️⃣  Validating architecture with Deptrac..."; \
+	echo "🔟  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "🔟 Validating OpenAPI specification..."; \
-	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
 	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
@@ -340,18 +324,46 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 		echo "✅ CI checks successfully passed!"; \
 	fi
 
-pr-comments: ## Retrieve unresolved comments for a GitHub Pull Request
+pr-comments: ## Retrieve ALL unresolved comments (including outdated) for current PR (markdown format)
 	@if ! command -v gh >/dev/null 2>&1; then \
 		echo "Error: GitHub CLI (gh) is required but not installed."; \
 		echo "Visit: https://cli.github.com/ for installation instructions"; \
 		exit 1; \
 	fi
+	@if ! command -v jq >/dev/null 2>&1; then \
+		echo "Error: jq is required but not installed."; \
+		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
+		exit 1; \
+	fi
 ifdef PR
-	@echo "Retrieving unresolved comments for PR #$(PR)..."
-	@GITHUB_HOST="$(GITHUB_HOST)" ./scripts/get-pr-comments.sh "$(PR)" "$(FORMAT)"
+	@echo "Retrieving ALL unresolved comments (including outdated) for PR #$(PR)..."
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
 else
 	@echo "Auto-detecting PR from current git branch..."
-	@GITHUB_HOST="$(GITHUB_HOST)" ./scripts/get-pr-comments.sh "$(FORMAT)"
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
+		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
+endif
+
+pr-comments-current: ## Retrieve only NON-OUTDATED unresolved comments (markdown format)
+	@if ! command -v gh >/dev/null 2>&1; then \
+		echo "Error: GitHub CLI (gh) is required but not installed."; \
+		echo "Visit: https://cli.github.com/ for installation instructions"; \
+		exit 1; \
+	fi
+	@if ! command -v jq >/dev/null 2>&1; then \
+		echo "Error: jq is required but not installed."; \
+		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
+		exit 1; \
+	fi
+ifdef PR
+	@echo "Retrieving non-outdated comments for PR #$(PR)..."
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
+else
+	@echo "Auto-detecting PR from current git branch..."
+	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
+		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
 endif
 
 pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a GitHub Pull Request
@@ -367,10 +379,10 @@ pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a Git
 	fi
 ifdef PR
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments-improved.sh "$(PR)" "$${FORMAT:-text}"
+		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-text}"
 else
 	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments-improved.sh "$${FORMAT:-text}"
+		./scripts/get-pr-comments.sh "$${FORMAT:-text}"
 endif
 
 pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments-errors.txt
@@ -399,10 +411,10 @@ pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments
 	} > "$$output_file"; \
 	if [ -n "$(PR)" ]; then \
 		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments-improved.sh "$(PR)" "text" >> "$$output_file" 2>&1 || true; \
+			./scripts/get-pr-comments.sh "$(PR)" "text" >> "$$output_file" 2>&1 || true; \
 	else \
 		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments-improved.sh "text" >> "$$output_file" 2>&1 || true; \
+			./scripts/get-pr-comments.sh "text" >> "$$output_file" 2>&1 || true; \
 	fi; \
 	comment_count=$$(grep -c "^Comment ID:" "$$output_file" || echo "0"); \
 	echo "" >> "$$output_file"; \

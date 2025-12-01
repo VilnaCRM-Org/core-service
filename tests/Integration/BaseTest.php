@@ -11,7 +11,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class BaseIntegrationTest extends ApiTestCase
+abstract class BaseTest extends ApiTestCase
 {
     protected Generator $faker;
 
