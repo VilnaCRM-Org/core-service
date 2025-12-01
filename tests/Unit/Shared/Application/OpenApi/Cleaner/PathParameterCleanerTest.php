@@ -45,7 +45,6 @@ final class PathParameterCleanerTest extends UnitTestCase
 
         $result = $this->cleaner->clean($parameter);
 
-        // Path parameters are returned as-is (ParameterNormalizer handles cleanup during serialization)
         $this->assertSame($parameter, $result);
         $this->assertEquals('id', $result->getName());
         $this->assertEquals('path', $result->getIn());
@@ -60,8 +59,10 @@ final class PathParameterCleanerTest extends UnitTestCase
 
         $result = $this->cleaner->clean($parameter);
 
+        $this->assertNotSame($parameter, $result);
         $this->assertEquals('id', $result->getName());
         $this->assertEquals('path', $result->getIn());
+        $this->assertTrue($result->getRequired());
     }
 
     public function testCleanWithHeaderParameter(): void

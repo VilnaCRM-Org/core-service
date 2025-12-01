@@ -21,7 +21,7 @@ docker compose exec php bash -c "
 " > /dev/null 2>&1
 
 # Check if report exists
-if ! docker compose exec php test -f "${METRICS_FILE}"; then
+if ! docker compose exec php sh -c "[ -f '${METRICS_FILE}' ]"; then
     echo "Error: PHPMetrics report not found: ${METRICS_FILE}" >&2
     echo "Run PHPMetrics first to generate the report." >&2
     exit 1

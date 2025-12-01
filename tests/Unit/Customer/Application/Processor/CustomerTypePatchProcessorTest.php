@@ -12,6 +12,7 @@ use App\Core\Customer\Application\Processor\CustomerTypePatchProcessor;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
@@ -24,6 +25,7 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     private CommandBusInterface|MockObject $commandBus;
     private UpdateTypeCommandFactoryInterface|MockObject $factory;
     private UlidFactory|MockObject $ulidFactory;
+    private PatchUlidExtractor $patchUlidExtractor;
     private CustomerTypePatchProcessor $processor;
 
     protected function setUp(): void
@@ -35,11 +37,13 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->factory = $this
             ->createMock(UpdateTypeCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
+        $this->patchUlidExtractor = new PatchUlidExtractor();
 
         $this->processor = new CustomerTypePatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
+            $this->patchUlidExtractor,
             $this->ulidFactory,
         );
     }

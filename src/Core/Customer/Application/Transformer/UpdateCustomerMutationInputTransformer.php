@@ -6,6 +6,8 @@ namespace App\Core\Customer\Application\Transformer;
 
 use App\Core\Customer\Application\MutationInput\UpdateCustomerMutationInput;
 
+use function array_key_exists;
+
 final class UpdateCustomerMutationInputTransformer
 {
     /**
@@ -22,13 +24,21 @@ final class UpdateCustomerMutationInputTransformer
     public function transform(array $args): UpdateCustomerMutationInput
     {
         return new UpdateCustomerMutationInput(
-            $args['initials'] ?? null,
-            $args['email'] ?? null,
-            $args['phone'] ?? null,
-            $args['leadSource'] ?? null,
-            $args['type'] ?? null,
-            $args['status'] ?? null,
-            $args['confirmed'] ?? null
+            $this->valueFor($args, 'initials'),
+            $this->valueFor($args, 'email'),
+            $this->valueFor($args, 'phone'),
+            $this->valueFor($args, 'leadSource'),
+            $this->valueFor($args, 'type'),
+            $this->valueFor($args, 'status'),
+            $this->valueFor($args, 'confirmed')
         );
+    }
+
+    /**
+     * @param array<string, string|bool|null> $args
+     */
+    private function valueFor(array $args, string $key): string|bool|null
+    {
+        return array_key_exists($key, $args) ? $args[$key] : null;
     }
 }
