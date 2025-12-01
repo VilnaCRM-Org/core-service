@@ -6,13 +6,18 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use function is_array;
 
-final class IriReferenceMediaTypeTransformer
+final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTransformerInterface
 {
-    private IriReferencePropertyTransformer $propertyTransformer;
+    private IriReferencePropertyTransformerInterface $propertyTransformer;
 
-    public function __construct(?IriReferencePropertyTransformer $propertyTransformer = null)
-    {
-        $this->propertyTransformer = $propertyTransformer ?? new IriReferencePropertyTransformer();
+    public function __construct(
+        ?IriReferencePropertyTransformerInterface $propertyTransformer = null
+    ) {
+        if ($propertyTransformer === null) {
+            $propertyTransformer = new IriReferencePropertyTransformer();
+        }
+
+        $this->propertyTransformer = $propertyTransformer;
     }
 
     /**
@@ -22,29 +27,24 @@ final class IriReferenceMediaTypeTransformer
      */
     public function transform(array $mediaType): array
     {
-        $schema = $mediaType['schema'] ?? null;
-        $properties = $schema['properties'] ?? null;
+        $definition = IriReferenceMediaTypeDefinition::from($mediaType);
 
-        if (!is_array($schema) || !is_array($properties)) {
+        if ($definition === null) {
             return $mediaType;
         }
 
-        $transformedProperties = array_map(
-            fn ($candidate) => $this->transformProperty($candidate),
-            $properties
-        );
+        $properties = $definition->transformWith($this->transformProperty(...));
 
-        if ($transformedProperties === $properties) {
+        if ($properties === null) {
             return $mediaType;
         }
 
-        $mediaType['schema']['properties'] = $transformedProperties;
-
-        return $mediaType;
+        return $definition->withProperties($properties);
     }
 
-    private function transformProperty(mixed $schema): mixed
-    {
+    private function transformProperty(
+        array|string|int|float|bool|null $schema
+    ): array|string|int|float|bool|null {
         return is_array($schema)
             ? $this->propertyTransformer->transform($schema)
             : $schema;

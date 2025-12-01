@@ -9,14 +9,18 @@ use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
+use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 
 final class PathParametersProcessor
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
+    private readonly PathParameterCleanerInterface $parameterCleaner;
+
     public function __construct(
-        private readonly PathParameterCleaner $parameterCleaner = new PathParameterCleaner()
+        ?PathParameterCleanerInterface $parameterCleaner = null
     ) {
+        $this->parameterCleaner = $parameterCleaner ?? new PathParameterCleaner();
     }
 
     public function process(OpenApi $openApi): OpenApi

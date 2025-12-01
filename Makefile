@@ -199,6 +199,15 @@ infection: ## Run mutation testing with 100% MSI requirement
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
 
+analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
+	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
+
+analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
+	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
+
+analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
+	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
+
 reset-db: ## Recreate the database schema for ephemeral test runs
 	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
 	-@$(SYMFONY) doctrine:mongodb:schema:drop

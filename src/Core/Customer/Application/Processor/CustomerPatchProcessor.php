@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
@@ -13,6 +12,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -25,7 +25,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private CustomerRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
         private UpdateCustomerCommandFactoryInterface $commandFactory,
-        private IriConverterInterface $iriConverter,
+        private CustomerPatchUpdateResolver $patchUpdateResolver,
+        private PatchUlidExtractor $patchUlidExtractor,
         private UlidFactory $ulidTransformer,
     ) {
     }
@@ -41,58 +42,25 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customer = $this->retrieveCustomer($data, $uriVariables);
-        $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
+        $ulid = $this->patchUlidExtractor->extract(
+            $uriVariables,
+            $data->id,
+            static fn () => new CustomerNotFoundException()
+        );
+
+        $customer = $this->retrieveCustomer($ulid);
+        $customerUpdate = $this->patchUpdateResolver->build($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
 
         return $customer;
     }
 
-    /**
-     * @param array<string,string> $uriVariables
-     */
-    private function retrieveCustomer(CustomerPatch $data, array $uriVariables): Customer
+    private function retrieveCustomer(string $ulid): Customer
     {
-        $ulidString = $this->extractUlid($data, $uriVariables);
-        $ulid = $this->ulidTransformer->create($ulidString);
+        $ulidObject = $this->ulidTransformer->create($ulid);
 
-        return $this->repository->find($ulid)
+        return $this->repository->find($ulidObject)
             ?? throw new CustomerNotFoundException();
-    }
-
-    /**
-     * @param array<string,string> $uriVariables
-     */
-    private function extractUlid(CustomerPatch $data, array $uriVariables): string
-    {
-        if (isset($uriVariables['ulid'])) {
-            return $uriVariables['ulid'];
-        }
-
-        if ($data->id !== null) {
-            return basename($data->id);
-        }
-
-        throw new CustomerNotFoundException();
-    }
-
-    private function prepareCustomerUpdate(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerUpdate {
-        return new CustomerUpdate(
-            newInitials: $data->initials ?? $customer->getInitials(),
-            newEmail: $data->email ?? $customer->getEmail(),
-            newPhone: $data->phone ?? $customer->getPhone(),
-            newLeadSource: $data->leadSource ?? $customer->getLeadSource(),
-            newType: $data->type
-                ? $this->iriConverter->getResourceFromIri($data->type)
-                : $customer->getType(),
-            newStatus: $data->status
-                ? $this->iriConverter->getResourceFromIri($data->status)
-                : $customer->getStatus(),
-            newConfirmed: $data->confirmed ?? $customer->isConfirmed()
-        );
     }
 
     private function dispatchUpdateCommand(

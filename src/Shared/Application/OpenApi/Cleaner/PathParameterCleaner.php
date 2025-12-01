@@ -6,7 +6,7 @@ namespace App\Shared\Application\OpenApi\Cleaner;
 
 use ApiPlatform\OpenApi\Model;
 
-final class PathParameterCleaner
+final class PathParameterCleaner implements PathParameterCleanerInterface
 {
     public function clean(mixed $parameter): mixed
     {
@@ -18,8 +18,11 @@ final class PathParameterCleaner
             return $parameter;
         }
 
-        // The ParameterNormalizer removes allowEmptyValue and allowReserved during serialization
-        // This method just validates it's a path parameter - no additional cleaning needed
-        return $parameter;
+        // Ensure OpenAPI path parameters are always marked as required
+        if ($parameter->getRequired() === true) {
+            return $parameter;
+        }
+
+        return $parameter->withRequired(true);
     }
 }
