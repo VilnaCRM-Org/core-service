@@ -17,7 +17,6 @@ return [
     'exclude' => [
         'vendor',
         'CLI/bats/php',
-        'src/Core/Customer/Application/DTO',
     ],
     'add' => [],
     'remove' => [
@@ -27,7 +26,6 @@ return [
         SpaceAfterNotSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
-        NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenPublicPropertySniff::class,
     ],
 
     'config' => [
@@ -41,24 +39,17 @@ return [
                 'phpinsights',
             ],
             'ignoreComments' => true,
-            'lineLimit' => 100,
         ],
         ForbiddenNormalClasses::class => [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
-                'src/Core/Customer/Domain/Entity/Customer',
-            ],
-        ],
-        NunoMaduro\PhpInsights\Domain\Metrics\Complexity\Complexity::class => [
-            'exclude' => [
-                'src/Core/Customer/Application/DTO',
             ],
         ],
     ],
     'requirements' => [
         'min-quality' => 100,
-        'min-complexity' => 94,
+        'min-complexity' => 95,
         'min-architecture' => 100,
         'min-style' => 100,
     ],

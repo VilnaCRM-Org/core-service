@@ -1,45 +1,45 @@
-# [0.5.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.4.1...v0.5.0) (2025-11-30)
+# [1.10.0](https://github.com/VilnaCRM-Org/php-service-template/compare/v1.9.0...v1.10.0) (2025-07-10)
 
 
 ### Features
 
-* **#4:** implement the customer graphql spec ([#25](https://github.com/VilnaCRM-Org/core-service/issues/25)) ([2f0711c](https://github.com/VilnaCRM-Org/core-service/commit/2f0711cf4c9c3345d4101aaa64955caf925f45ba)), closes [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#5917](https://github.com/VilnaCRM-Org/core-service/issues/5917) [#3422](https://github.com/VilnaCRM-Org/core-service/issues/3422) [#2566342313](https://github.com/VilnaCRM-Org/core-service/issues/2566342313) [/github.com/VilnaCRM-Org/core-service/pull/25#discussion_r2566342313](https://github.com//github.com/VilnaCRM-Org/core-service/pull/25/issues/discussion_r2566342313)
+* **deps:** bump the all-deps group across 1 directory with 15 updates ([#149](https://github.com/VilnaCRM-Org/php-service-template/issues/149)) ([3cb2b30](https://github.com/VilnaCRM-Org/php-service-template/commit/3cb2b306cf307fb80dbb1557aa337949d5629212))
 
 
 
-## [0.4.1](https://github.com/VilnaCRM-Org/core-service/compare/v0.4.0...v0.4.1) (2025-07-04)
+# [1.9.0](https://github.com/VilnaCRM-Org/php-service-template/compare/v1.8.1...v1.9.0) (2025-07-08)
+
+
+### Features
+
+* **deps:** bump brace-expansion from 1.1.11 to 1.1.12 in /tests/Load in the npm_and_yarn group ([#143](https://github.com/VilnaCRM-Org/php-service-template/issues/143)) ([39338b8](https://github.com/VilnaCRM-Org/php-service-template/commit/39338b889b5a638eecb0df7dac6abf42e8b2cfd2))
+
+
+
+## [1.8.1](https://github.com/VilnaCRM-Org/php-service-template/compare/v1.8.0...v1.8.1) (2025-07-07)
 
 
 ### Bug Fixes
 
-* **#42:** update dependabot.yml ([#42](https://github.com/VilnaCRM-Org/core-service/issues/42)) ([bfa7245](https://github.com/VilnaCRM-Org/core-service/commit/bfa72457f087b60646968472fdbd1a7f7e7ec39c))
+* **#146:** Update dependabot.yml ([#146](https://github.com/VilnaCRM-Org/php-service-template/issues/146)) ([4eaf3e7](https://github.com/VilnaCRM-Org/php-service-template/commit/4eaf3e7a4d56758db04368703095660733893ab9))
 
 
 
-# [0.4.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.3.0...v0.4.0) (2025-07-01)
-
-
-### Features
-
-* **deps:** bump brace-expansion from 1.1.11 to 1.1.12 in /tests/Load in the npm_and_yarn group ([#40](https://github.com/VilnaCRM-Org/core-service/issues/40)) ([af77b17](https://github.com/VilnaCRM-Org/core-service/commit/af77b17f528de81f5de50179f983302610a86b94))
-
-
-
-# [0.3.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.2.0...v0.3.0) (2025-06-30)
+# [1.8.0](https://github.com/VilnaCRM-Org/php-service-template/compare/v1.7.0...v1.8.0) (2025-07-02)
 
 
 ### Features
 
-* **deps:** bump the npm_and_yarn group in /tests/Load with 2 updates ([#36](https://github.com/VilnaCRM-Org/core-service/issues/36)) ([878b8c1](https://github.com/VilnaCRM-Org/core-service/commit/878b8c104b9bd44c4a8bd2ab1ed75b6834f81950))
+* **#135:** add rector php ([#135](https://github.com/VilnaCRM-Org/php-service-template/issues/135)) ([10c34b4](https://github.com/VilnaCRM-Org/php-service-template/commit/10c34b4be0c8cda8cf3c4eadf84c172bfa5abc21)), closes [#126](https://github.com/VilnaCRM-Org/php-service-template/issues/126)
 
 
 
-# [0.2.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.1.0...v0.2.0) (2025-05-12)
+# [1.7.0](https://github.com/VilnaCRM-Org/php-service-template/compare/v1.6.1...v1.7.0) (2025-05-26)
 
 
 ### Features
 
-* **#4:** implement the customer functionality ([#26](https://github.com/VilnaCRM-Org/core-service/issues/26)) ([49c7766](https://github.com/VilnaCRM-Org/core-service/commit/49c776695aa20b23c6c960b97a418eb086b4994b)), closes [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#15](https://github.com/VilnaCRM-Org/core-service/issues/15) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#4](https://github.com/VilnaCRM-Org/core-service/issues/4) [#42](https://github.com/VilnaCRM-Org/core-service/issues/42)
+* **deps:** bump the all-deps group across 1 directory with 11 updates ([#136](https://github.com/VilnaCRM-Org/php-service-template/issues/136)) ([9e631ee](https://github.com/VilnaCRM-Org/php-service-template/commit/9e631ee0732cfd6cfe9cccc5d546fe3d929b10aa))
 
 
 
