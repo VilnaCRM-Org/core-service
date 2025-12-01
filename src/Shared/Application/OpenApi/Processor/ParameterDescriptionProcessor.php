@@ -2,28 +2,31 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Augmenter;
+namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 
-final class ParameterDescriptionAugmenter
+final class ParameterDescriptionProcessor
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
-    public function augment(OpenApi $openApi): void
+    public function process(OpenApi $openApi): OpenApi
     {
         $parameterDescriptions = $this->getParameterDescriptions();
+        $paths = $openApi->getPaths();
 
-        foreach (array_keys($openApi->getPaths()->getPaths()) as $path) {
-            $pathItem = $openApi->getPaths()->getPath($path);
-            $openApi->getPaths()->addPath(
+        foreach (array_keys($paths->getPaths()) as $path) {
+            $pathItem = $paths->getPath($path);
+            $paths->addPath(
                 $path,
-                $this->augmentPathItem($pathItem, $parameterDescriptions)
+                $this->processPathItem($pathItem, $parameterDescriptions)
             );
         }
+
+        return $openApi;
     }
 
     /**
@@ -128,11 +131,11 @@ final class ParameterDescriptionAugmenter
     /**
      * @param array<string, string> $descriptions
      */
-    private function augmentPathItem(PathItem $pathItem, array $descriptions): PathItem
+    private function processPathItem(PathItem $pathItem, array $descriptions): PathItem
     {
         foreach (self::OPERATIONS as $operation) {
             $pathItem = $pathItem->{'with' . $operation}(
-                $this->augmentOperation(
+                $this->processOperation(
                     $pathItem->{'get' . $operation}(),
                     $descriptions
                 )
@@ -145,13 +148,13 @@ final class ParameterDescriptionAugmenter
     /**
      * @param array<string, string> $descriptions
      */
-    private function augmentOperation(?Operation $operation, array $descriptions): ?Operation
+    private function processOperation(?Operation $operation, array $descriptions): ?Operation
     {
         return match (true) {
             $operation === null => null,
             $operation->getParameters() === [] => $operation,
             default => $operation->withParameters(
-                $this->augmentParameters($operation->getParameters(), $descriptions)
+                $this->processParameters($operation->getParameters(), $descriptions)
             ),
         };
     }
@@ -162,10 +165,10 @@ final class ParameterDescriptionAugmenter
      *
      * @return array<int, Parameter>
      */
-    private function augmentParameters(array $parameters, array $descriptions): array
+    private function processParameters(array $parameters, array $descriptions): array
     {
         return array_map(
-            static fn (Parameter $parameter): Parameter => self::augmentParameter(
+            static fn (Parameter $parameter): Parameter => self::processParameter(
                 $parameter,
                 $descriptions
             ),
@@ -176,7 +179,7 @@ final class ParameterDescriptionAugmenter
     /**
      * @param array<string, string> $descriptions
      */
-    private static function augmentParameter(Parameter $parameter, array $descriptions): Parameter
+    private static function processParameter(Parameter $parameter, array $descriptions): Parameter
     {
         $paramName = $parameter->getName();
 
