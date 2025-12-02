@@ -41,8 +41,8 @@ This project enforces **strict quality thresholds** that MUST NOT be lowered:
 | **PHPInsights**   | Style        | 100%     | Run `make phpcsfixer`   |
 | **Deptrac**       | Violations   | 0        | `deptrac-fixer`         |
 | **Psalm**         | Errors       | 0        | Fix reported issues     |
-| **Test Coverage** | Lines        | High %   | `testing-workflow`      |
-| **Infection MSI** | Score        | High %   | `testing-workflow`      |
+| **Test Coverage** | Lines        | 100%     | `testing-workflow`      |
+| **Infection MSI** | Score        | 100%     | `testing-workflow`      |
 
 > **⚠️ NEVER lower thresholds**. Always fix code to meet standards. See `quality-standards` skill for details.
 
@@ -169,7 +169,7 @@ make generate-graphql-spec   # Export GraphQL spec to .github/graphql-spec/spec
 
 ### Directory Structure
 
-````text
+```text
 src/
 ├── Customer/              # Customer bounded context
 │   └── Domain/
@@ -417,4 +417,4 @@ Key environment variables are defined in `.env` and `.env.test`:
 ---
 
 **For detailed workflows, patterns, and troubleshooting** → See modular skills in `.claude/skills/` directory.
-````
+```
