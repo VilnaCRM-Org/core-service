@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "============================================"
 echo "Cleaning up test data from load tests"
@@ -10,7 +10,7 @@ docker run --rm \
   --network=host \
   -v "$(pwd)/tests/Load:/app" \
   -w /app \
-  k6 run scripts/CleanupCustomers.js
+  k6 run scripts/cleanupCustomers.js
 
 echo ""
 echo "============================================"

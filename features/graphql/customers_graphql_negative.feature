@@ -216,6 +216,22 @@ Feature: GraphQL Customer Operations - Negative Test Cases
 
   Scenario: Attempt to create a customer with duplicate email
     Given create customer with email "duplicate@example.com"
+    When I send the following GraphQL query:
+    """
+    {
+      customers(first: 10, email: "duplicate@example.com") {
+        edges {
+          node {
+            id
+            email
+          }
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customers.edges" should have 1 items
     When I send the following GraphQL mutation:
     """
     mutation {
@@ -236,6 +252,22 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should have errors
+    When I send the following GraphQL query:
+    """
+    {
+      customers(first: 10, email: "duplicate@example.com") {
+        edges {
+          node {
+            id
+            email
+          }
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customers.edges" should have 1 items
     Then delete customer with email "duplicate@example.com"
 
   # ----- Update Mutation Error Cases -----
@@ -274,6 +306,21 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should have errors
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5") {
+        id
+        type {
+          id
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customer.id"
+    And the GraphQL response "data.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Attempt to update customer with non-existent status
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
@@ -292,6 +339,21 @@ Feature: GraphQL Customer Operations - Negative Test Cases
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should have errors
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YER5") {
+        id
+        status {
+          id
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customer.id"
+    And the GraphQL response "data.customer.id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Attempt to update customer email to duplicate email
     Given create customer with email "original@example.com"

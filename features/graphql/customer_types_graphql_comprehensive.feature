@@ -322,6 +322,16 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomerType.customerType.value" should be "UpdatedValue"
     And the GraphQL response "data.updateCustomerType.customerType.id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send the following GraphQL query:
+    """
+    {
+      customerType(id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4") {
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerType.value" should be "UpdatedValue"
 
   Scenario: Delete a customer type
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER5"
@@ -340,6 +350,16 @@ Feature: GraphQL CustomerType Operations - Comprehensive Test Cases
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomerType.customerType.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customerType(id: "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER5") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customerType" should be "null"
 
   Scenario: Delete a customer type and verify it no longer exists
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER6"

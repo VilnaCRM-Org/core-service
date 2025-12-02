@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import { loadSharedJsonFile } from './sharedDataLoader.js';
 
 export default class InsertCustomersUtils {
   constructor(utils, scenarioName) {
@@ -13,7 +14,11 @@ export default class InsertCustomersUtils {
   }
 
   loadInsertedCustomers() {
-    return JSON.parse(open(`../${this.utils.getConfig()['customersFileName']}`));
+    return loadSharedJsonFile(
+      this.config.customersFileLocation,
+      this.config.customersFileName,
+      'inserted customers'
+    );
   }
 
   *customersGenerator(numberOfCustomers, types, statuses) {

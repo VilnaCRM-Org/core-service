@@ -10,9 +10,9 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use DateTimeImmutable;
 
@@ -26,7 +26,7 @@ final class CustomerTest extends UnitTestCase
         parent::setUp();
 
         $ulidFactory = new UlidFactory();
-        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
+        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
         $ulid = $this->ulidTransformer
             ->transformFromSymfonyUlid($this->faker->ulid());
 
@@ -105,7 +105,7 @@ final class CustomerTest extends UnitTestCase
 
     public function testGetAndSetUpdatedAt(): void
     {
-        $updatedAt = new DateTimeImmutable($this->faker->date('Y-m-d H:i:s'));
+        $updatedAt = new \DateTime($this->faker->date('Y-m-d H:i:s'));
         $this->customer->setUpdatedAt($updatedAt);
         $this->assertEquals($updatedAt, $this->customer->getUpdatedAt());
     }
@@ -143,5 +143,53 @@ final class CustomerTest extends UnitTestCase
         $this->assertEquals($newType, $this->customer->getType());
         $this->assertEquals($newStatus, $this->customer->getStatus());
         $this->assertTrue($this->customer->isConfirmed());
+    }
+
+    public function testConstructorWithExplicitCreatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt
+        );
+
+        $this->assertEquals($createdAt, $customer->getCreatedAt());
+    }
+
+    public function testConstructorWithExplicitUpdatedAt(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+        $createdAt = new DateTimeImmutable('2023-01-01 12:00:00');
+        $updatedAt = new \DateTime('2023-01-02 12:00:00');
+
+        $customer = new Customer(
+            $this->faker->name(),
+            $this->faker->email(),
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid,
+            $createdAt,
+            $updatedAt
+        );
+
+        $this->assertEquals($updatedAt, $customer->getUpdatedAt());
     }
 }

@@ -83,6 +83,10 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_put"
     And the JSON node "detail" should contain "value: This value should not be blank"
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "value" should exist
+    And the JSON node "ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Fail to replace a customer type resource for a non-existent ulid
     When I send a PUT request to "/api/customer_types/01JKX8XGXVDZ46MWYMZT94YER4" with body:
@@ -127,6 +131,10 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_patch"
     And the JSON node "detail" should contain "value: This value is too long. It should have 255 characters or less."
+    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
+    Then the response status code should be equal to 200
+    And the JSON node "value" should not contain "AAAAAAAAAA"
+    And the JSON node "ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER4"
 
   Scenario: Fail to update customer type resource with invalid ulid format via PATCH
     And I add "Content-Type" header equal to "application/merge-patch+json"

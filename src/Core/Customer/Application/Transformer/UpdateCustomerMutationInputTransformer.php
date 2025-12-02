@@ -6,6 +6,8 @@ namespace App\Core\Customer\Application\Transformer;
 
 use App\Core\Customer\Application\MutationInput\UpdateCustomerMutationInput;
 
+use function array_key_exists;
+
 final class UpdateCustomerMutationInputTransformer
 {
     /**
@@ -22,29 +24,21 @@ final class UpdateCustomerMutationInputTransformer
     public function transform(array $args): UpdateCustomerMutationInput
     {
         return new UpdateCustomerMutationInput(
-            $this->extractString($args, 'initials'),
-            $this->extractString($args, 'email'),
-            $this->extractString($args, 'phone'),
-            $this->extractString($args, 'leadSource'),
-            $this->extractString($args, 'type'),
-            $this->extractString($args, 'status'),
-            $this->extractBool($args, 'confirmed')
+            $this->valueFor($args, 'initials'),
+            $this->valueFor($args, 'email'),
+            $this->valueFor($args, 'phone'),
+            $this->valueFor($args, 'leadSource'),
+            $this->valueFor($args, 'type'),
+            $this->valueFor($args, 'status'),
+            $this->valueFor($args, 'confirmed')
         );
     }
 
     /**
      * @param array<string, string|bool|null> $args
      */
-    private function extractString(array $args, string $key): ?string
+    private function valueFor(array $args, string $key): string|bool|null
     {
-        return $args[$key] ?? null;
-    }
-
-    /**
-     * @param array<string, string|bool|null> $args
-     */
-    private function extractBool(array $args, string $key): ?bool
-    {
-        return $args[$key] ?? null;
+        return array_key_exists($key, $args) ? $args[$key] : null;
     }
 }

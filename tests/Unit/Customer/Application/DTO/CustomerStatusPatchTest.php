@@ -13,14 +13,15 @@ final class CustomerStatusPatchTest extends UnitTestCase
     {
         $value = $this->faker->word();
 
-        $dto = new StatusPatch($value);
+        $dto = new StatusPatch();
+        $dto->value = $value;
 
         $this->assertDto($dto, $value);
     }
 
     public function testConstructWithNullValue(): void
     {
-        $dto = new StatusPatch(null);
+        $dto = new StatusPatch();
 
         $this->assertDto($dto, null);
     }
