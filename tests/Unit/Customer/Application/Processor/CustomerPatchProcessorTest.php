@@ -10,12 +10,13 @@ use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPatchProcessor;
+use App\Core\Customer\Application\Processor\CustomerPatchUpdateResolver;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Shared\Application\Validator\StringFieldValidator;
+use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
@@ -28,6 +29,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerRepositoryInterface|MockObject $repository;
+    private CustomerPatchUpdateResolver $patchUpdateResolver;
+    private PatchUlidExtractor $patchUlidExtractor;
     private CustomerPatchProcessor $processor;
     private UlidFactory $ulidFactory;
 
@@ -41,14 +44,17 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $this->ulidFactory = new UlidFactory();
-        $fieldResolver = new StringFieldValidator();
+        $this->patchUpdateResolver = new CustomerPatchUpdateResolver(
+            $this->iriConverter
+        );
+        $this->patchUlidExtractor = new PatchUlidExtractor();
         $this->processor = new CustomerPatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
-            $this->iriConverter,
-            $this->ulidFactory,
-            $fieldResolver
+            $this->patchUpdateResolver,
+            $this->patchUlidExtractor,
+            $this->ulidFactory
         );
     }
 
@@ -84,15 +90,15 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessWithPartialData(): void
     {
-        $partial = new CustomerPatch(
-            initials: 'New Name',
-            email: null,
-            phone: null,
-            leadSource: 'New Source',
-            type: null,
-            status: null,
-            confirmed: null,
-        );
+        $partial = new CustomerPatch();
+        $partial->initials = 'New Name';
+        $partial->email = null;
+        $partial->phone = null;
+        $partial->leadSource = 'New Source';
+        $partial->type = null;
+        $partial->status = null;
+        $partial->confirmed = null;
+
         $exData = [
             'initials' => 'Original Name',
             'email' => 'original@example.com',
@@ -121,6 +127,66 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
         $this->expectException(CustomerNotFoundException::class);
         $this->processor->process($dto, $operation, $uriVars);
+    }
+
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
+    {
+        $ulidStr = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customers/%s', $ulidStr);
+        $dto = new CustomerPatch();
+        $dto->id = $iri;
+        $dto->initials = $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']);
+        $dto->email = $this->faker->email();
+        $dto->phone = $this->faker->phoneNumber();
+        $dto->leadSource = $this->faker->word();
+        $dto->type = null;
+        $dto->status = null;
+        $dto->confirmed = $this->faker->boolean();
+
+        $operation = $this->createMock(Operation::class);
+        $customer = $this->createMock(Customer::class);
+        $ulid = new Ulid($ulidStr);
+        $command = $this->createMock(UpdateCustomerCommand::class);
+
+        $this->setupRepository($ulid, $customer);
+        $this->setupCustomer(
+            $customer,
+            $dto->initials,
+            $dto->email,
+            $dto->phone,
+            $dto->leadSource,
+            $dto->confirmed
+        );
+
+        $this->factory->expects($this->once())
+            ->method('create')
+            ->willReturn($command);
+        $this->commandBus->expects($this->once())
+            ->method('dispatch')
+            ->with($command);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customer, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new CustomerPatch();
+        $dto->id = null;
+        $dto->initials = $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']);
+        $dto->email = $this->faker->email();
+        $dto->phone = $this->faker->phoneNumber();
+        $dto->leadSource = $this->faker->word();
+        $dto->type = null;
+        $dto->status = null;
+        $dto->confirmed = $this->faker->boolean();
+
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
     }
 
     private function setupRepository(Ulid $ulid, Customer $customer): void
@@ -229,28 +295,28 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     private function createDto(): CustomerPatch
     {
-        return new CustomerPatch(
-            initials: $this->faker->name(),
-            email: $this->faker->email(),
-            phone: $this->faker->phoneNumber(),
-            leadSource: $this->faker->word(),
-            type: '/api/customer_types/' . $this->faker->ulid(),
-            status: '/api/customer_statuses/' . $this->faker->ulid(),
-            confirmed: $this->faker->boolean()
-        );
+        $dto = new CustomerPatch();
+        $dto->initials = $this->faker->name();
+        $dto->email = $this->faker->email();
+        $dto->phone = $this->faker->phoneNumber();
+        $dto->leadSource = $this->faker->word();
+        $dto->type = '/api/customer_types/' . $this->faker->ulid();
+        $dto->status = '/api/customer_statuses/' . $this->faker->ulid();
+        $dto->confirmed = $this->faker->boolean();
+        return $dto;
     }
 
     private function createEmptyDto(): CustomerPatch
     {
-        return new CustomerPatch(
-            initials: null,
-            email: null,
-            phone: null,
-            leadSource: null,
-            type: null,
-            status: null,
-            confirmed: null
-        );
+        $dto = new CustomerPatch();
+        $dto->initials = null;
+        $dto->email = null;
+        $dto->phone = null;
+        $dto->leadSource = null;
+        $dto->type = null;
+        $dto->status = null;
+        $dto->confirmed = null;
+        return $dto;
     }
 
     /**

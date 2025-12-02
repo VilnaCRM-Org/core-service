@@ -36,6 +36,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection using ULID filter operator "lte" (less than or equal)
   This operator should include the customer whose ULID exactly matches or lesser than the given value
@@ -77,6 +78,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection using ULID filter operator "gte" (greater than or equal)
   In this scenario, the filter returns the customer with the given ULID plus all with higher values
@@ -118,6 +120,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "@id" should be equal to "/api/customers"
     And the JSON node "@type" should be equal to "Collection"
     And the JSON node "view.@id" should contain "/api/customers?ulid%5Bbetween%5D=01JKX8XGHVDZ46MWYMZT94YER2..01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member" should have 3 elements
 
   Scenario: Retrieve customers collection with updatedAt[before] filter and verify JSON nodes
     # A customer is created and its updatedAt (set to now) will be before a future date (now + 1 year).

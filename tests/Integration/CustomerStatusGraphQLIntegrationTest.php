@@ -117,7 +117,7 @@ final class CustomerStatusGraphQLIntegrationTest extends BaseGraphQLIntegrationT
         $statusIri = $this->createEntity('/api/customer_statuses', $initialData);
 
         $updateData = [
-            'id' => $this->extractUlidFromIri($statusIri),
+            'id' => $statusIri,
             'value' => 'Updated Status',
         ];
 

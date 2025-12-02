@@ -526,6 +526,7 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
         customer {
           id
           updatedAt
+          email
         }
       }
     }
@@ -533,6 +534,17 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.updateCustomer.customer.updatedAt"
+    And the GraphQL response "data.updateCustomer.customer.email" should be "updated@example.com"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERE") {
+        email
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.email" should be "updated@example.com"
     Then delete customer with email "updated@example.com"
 
   # ----- Confirmed Field Tests -----
@@ -606,6 +618,16 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "false"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERF") {
+        confirmed
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.confirmed" should be "false"
     Then delete customer with id "01JKX8XGHVDZ46MWYMZT94YERF"
 
   Scenario: Update customer confirmed from false to true
@@ -627,4 +649,15 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response "data.updateCustomer.customer.confirmed" should be "true"
+    When I send the following GraphQL query:
+    """
+    {
+      customer(id: "/api/customers/01JKX8XGHVDZ46MWYMZT94YERG") {
+        confirmed
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response "data.customer.confirmed" should be "true"
+    Then delete customer with id "01JKX8XGHVDZ46MWYMZT94YERG"
 

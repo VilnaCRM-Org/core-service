@@ -6,9 +6,9 @@ namespace App\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use Doctrine\ODM\MongoDB\Types\Type;
 use MongoDB\BSON\Binary;
 
@@ -57,8 +57,8 @@ $return = $value ? (function($value) {
     $ulidFactory = new \App\Shared\Infrastructure\Factory\UlidFactory();
     $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
         $ulidFactory,
-        new \App\Shared\Infrastructure\Transformer\UlidValidator(),
-        new \App\Shared\Infrastructure\Transformer\UlidConverter($ulidFactory)
+        new \App\Shared\Infrastructure\Validator\UlidValidator(),
+        new \App\Shared\Infrastructure\Transformer\UlidValueTransformer($ulidFactory)
     );
     $binary = $value instanceof \MongoDB\BSON\Binary ? $value
     ->getData() : $value;
@@ -76,7 +76,7 @@ PHP;
         return new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
-            new UlidConverter($ulidFactory)
+            new UlidValueTransformer($ulidFactory)
         );
     }
 

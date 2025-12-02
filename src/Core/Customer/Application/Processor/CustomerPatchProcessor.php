@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Validator\StringFieldValidator;
+use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -28,9 +25,9 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private CustomerRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
         private UpdateCustomerCommandFactoryInterface $commandFactory,
-        private IriConverterInterface $iriConverter,
+        private CustomerPatchUpdateResolver $patchUpdateResolver,
+        private PatchUlidExtractor $patchUlidExtractor,
         private UlidFactory $ulidTransformer,
-        private StringFieldValidator $fieldResolver,
     ) {
     }
 
@@ -45,60 +42,25 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customer = $this->retrieveCustomer($uriVariables);
-        $customerUpdate = $this->buildCustomerUpdate($data, $customer);
+        $ulid = $this->patchUlidExtractor->extract(
+            $uriVariables,
+            $data->id,
+            static fn () => new CustomerNotFoundException()
+        );
+
+        $customer = $this->retrieveCustomer($ulid);
+        $customerUpdate = $this->patchUpdateResolver->build($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
+
         return $customer;
     }
 
-    /**
-     * @param array<string,string> $uriVariables
-     */
-    private function retrieveCustomer(array $uriVariables): Customer
+    private function retrieveCustomer(string $ulid): Customer
     {
-        $ulid = $uriVariables['ulid'];
-        return $this->repository->find(
-            $this->ulidTransformer->create($ulid)
-        ) ?? throw new CustomerNotFoundException();
-    }
+        $ulidObject = $this->ulidTransformer->create($ulid);
 
-    private function buildCustomerUpdate(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerUpdate {
-        return new CustomerUpdate(
-            newInitials: $this->fieldResolver->resolve(
-                $data->initials,
-                $customer->getInitials()
-            ),
-            newEmail: $this->fieldResolver->resolve($data->email, $customer->getEmail()),
-            newPhone: $this->fieldResolver->resolve($data->phone, $customer->getPhone()),
-            newLeadSource: $this->fieldResolver->resolve(
-                $data->leadSource,
-                $customer->getLeadSource()
-            ),
-            newType: $this->resolveType($data->type, $customer),
-            newStatus: $this->resolveStatus($data->status, $customer),
-            newConfirmed: $data->confirmed ?? $customer->isConfirmed()
-        );
-    }
-
-    private function resolveType(?string $typeIri, Customer $customer): CustomerType
-    {
-        if ($typeIri === null) {
-            return $customer->getType();
-        }
-
-        return $this->iriConverter->getResourceFromIri($typeIri);
-    }
-
-    private function resolveStatus(?string $statusIri, Customer $customer): CustomerStatus
-    {
-        if ($statusIri === null) {
-            return $customer->getStatus();
-        }
-
-        return $this->iriConverter->getResourceFromIri($statusIri);
+        return $this->repository->find($ulidObject)
+            ?? throw new CustomerNotFoundException();
     }
 
     private function dispatchUpdateCommand(

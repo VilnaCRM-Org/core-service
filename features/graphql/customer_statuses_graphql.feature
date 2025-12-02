@@ -49,13 +49,32 @@ Feature: GraphQL CustomerStatus CRUD Operations
       }) {
         customerStatus {
           id
+          value
         }
       }
     }
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
-    And the GraphQL response should contain "data.createCustomerStatus.customerStatus"
+    And the GraphQL response "data.createCustomerStatus.customerStatus.value" should be equal to "Pending"
+    And the GraphQL response should contain "data.createCustomerStatus.customerStatus.id"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatuses(first: 1, value: "Pending") {
+        edges {
+          node {
+            id
+            value
+          }
+        }
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerStatuses.edges.0.node.value" should be equal to "Pending"
+    And the GraphQL response "data.customerStatuses.edges" should have 1 items
     Then delete status with value "Pending"
 
   Scenario: Update a customer status via GraphQL mutation
@@ -69,16 +88,41 @@ Feature: GraphQL CustomerStatus CRUD Operations
       }) {
         customerStatus {
           id
+          value
         }
       }
     }
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
-    And the GraphQL response should contain "data.updateCustomerStatus.customerStatus"
+    And the GraphQL response "data.updateCustomerStatus.customerStatus.value" should be equal to "Updated"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4") {
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerStatus.value" should be equal to "Updated"
 
   Scenario: Delete a customer status via GraphQL mutation
     Given create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+        value
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response should contain "data.customerStatus.id"
+    And the GraphQL response should contain "data.customerStatus.value"
     When I send the following GraphQL mutation:
     """
     mutation {
@@ -94,6 +138,17 @@ Feature: GraphQL CustomerStatus CRUD Operations
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
     And the GraphQL response should contain "data.deleteCustomerStatus.customerStatus"
+    When I send the following GraphQL query:
+    """
+    {
+      customerStatus(id: "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4") {
+        id
+      }
+    }
+    """
+    Then the GraphQL response status code should be 200
+    And the GraphQL response should not have errors
+    And the GraphQL response "data.customerStatus" should be equal to null
 
   Scenario: Query customer statuses with filtering by value
     Given create customer status with value "VIP"

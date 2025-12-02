@@ -8,9 +8,9 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerStatusTest extends UnitTestCase
@@ -21,7 +21,7 @@ final class CustomerStatusTest extends UnitTestCase
         $expectedUlid = $this->faker->ulid();
 
         $ulidFactory = new UlidFactory();
-        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
+        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
         $ulid = $ulidTransformer->transformFromSymfonyUlid($expectedUlid);
 
         $customerStatus = new CustomerStatus($expectedValue, $ulid);

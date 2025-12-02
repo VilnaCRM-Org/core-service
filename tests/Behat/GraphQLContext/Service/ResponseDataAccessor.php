@@ -9,7 +9,7 @@ use Webmozart\Assert\Assert;
 final class ResponseDataAccessor
 {
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
     public function hasField(array $data, string $path): bool
     {
@@ -22,9 +22,9 @@ final class ResponseDataAccessor
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
-    public function getFieldValue(array $data, string $path): string|int|bool|array|null
+    public function getFieldValue(array $data, string $path): mixed
     {
         $parts = explode('.', $path);
         $current = $data;
@@ -39,7 +39,7 @@ final class ResponseDataAccessor
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
     public function assertFieldContains(array $data, string $path, string $value): void
     {
@@ -53,7 +53,7 @@ final class ResponseDataAccessor
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
     public function assertFieldMatchesRegex(array $data, string $path, string $pattern): void
     {
@@ -67,7 +67,7 @@ final class ResponseDataAccessor
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
     public function assertArrayHasCount(array $data, string $path, int $expectedCount): void
     {
@@ -85,7 +85,7 @@ final class ResponseDataAccessor
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $data
+     * @param array<string, mixed> $data
      */
     public function assertObjectHasProperties(
         array $data,

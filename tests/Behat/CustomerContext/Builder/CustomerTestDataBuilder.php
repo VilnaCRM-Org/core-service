@@ -13,18 +13,17 @@ use Faker\Generator;
 
 final class CustomerTestDataBuilder
 {
-    private string $initials;
-    private string $email;
-    private string $phone;
-    private string $leadSource;
-    private bool $confirmed = true;
-    private ?CustomerType $type = null;
-    private ?CustomerStatus $status = null;
-    private ?Ulid $ulid = null;
-
     public function __construct(
         private readonly CustomerFactoryInterface $customerFactory,
-        private readonly Generator $faker
+        private readonly Generator $faker,
+        private string $initials = '',
+        private string $email = '',
+        private string $phone = '',
+        private string $leadSource = '',
+        private bool $confirmed = true,
+        private ?CustomerType $type = null,
+        private ?CustomerStatus $status = null,
+        private ?Ulid $ulid = null,
     ) {
         $this->initials = $this->faker->lexify('??');
         $this->email = $this->faker->email();
