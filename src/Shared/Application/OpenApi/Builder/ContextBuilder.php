@@ -154,10 +154,6 @@ final class ContextBuilder
      */
     private function emptyArrayToNull(array $values): ?array
     {
-        if ($values === []) {
-            return null;
-        }
-
-        return $values;
+        return $values === [] ? null : $values;
     }
 }

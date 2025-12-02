@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use function array_map;
-
 use ArrayObject;
 use function is_array;
 

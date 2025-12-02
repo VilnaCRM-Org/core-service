@@ -27,21 +27,22 @@ final class IriReferenceTypeProcessor
     {
         $paths = $openApi->getPaths();
 
-        foreach (array_keys($paths->getPaths()) as $path) {
-            $current = $paths->getPath($path);
-            $paths->addPath($path, $this->processPathItem($current));
-        }
+        // Pattern: Replace foreach with array_walk (functional composition)
+        array_walk(
+            array_keys($paths->getPaths()),
+            fn (string $path) => $paths->addPath($path, $this->processPathItem($paths->getPath($path)))
+        );
 
         return $openApi;
     }
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        foreach (self::OPERATIONS as $operation) {
-            $pathItem = $this->transformOperation($pathItem, $operation);
-        }
-
-        return $pathItem;
+        return array_reduce(
+            self::OPERATIONS,
+            fn (PathItem $item, string $op): PathItem => $this->transformOperation($item, $op),
+            $pathItem
+        );
     }
 
     private function transformOperation(PathItem $pathItem, string $operation): PathItem
@@ -58,18 +59,7 @@ final class IriReferenceTypeProcessor
             return $pathItem;
         }
 
-        return $this->withTransformedOperation($pathItem, $operation, $context, $processedContent);
-    }
-
-    /**
-     * @param array<string, scalar|array<string, scalar|null>> $processedContent
-     */
-    private function withTransformedOperation(
-        PathItem $pathItem,
-        string $operation,
-        IriReferenceOperationContext $context,
-        array $processedContent
-    ): PathItem {
+        // Pattern: Inline trivial method (reduces method count)
         $updatedOperation = $context->operation->withRequestBody(
             $context->requestBody->withContent(new ArrayObject($processedContent))
         );

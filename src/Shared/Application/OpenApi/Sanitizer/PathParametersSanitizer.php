@@ -37,13 +37,13 @@ final class PathParametersSanitizer
 
     private function sanitizePathItem(PathItem $pathItem): PathItem
     {
-        foreach (self::OPERATIONS as $operation) {
-            $pathItem = $pathItem->{'with' . $operation}(
-                $this->sanitizeOperation($pathItem->{'get' . $operation}())
-            );
-        }
-
-        return $pathItem;
+        return array_reduce(
+            self::OPERATIONS,
+            fn (PathItem $item, string $operation): PathItem => $item->{'with' . $operation}(
+                $this->sanitizeOperation($item->{'get' . $operation}())
+            ),
+            $pathItem
+        );
     }
 
     private function sanitizeOperation(?Operation $operation): ?Operation

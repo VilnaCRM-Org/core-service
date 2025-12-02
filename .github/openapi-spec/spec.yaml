@@ -21,7 +21,7 @@ paths:
       tags:
         - Customer
       responses:
-        '200':
+        -
           description: 'Customer collection'
           content:
             application/ld+json:
@@ -34,7 +34,7 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -55,7 +55,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -76,7 +76,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -97,7 +97,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -622,13 +622,13 @@ paths:
       tags:
         - Customer
       responses:
-        '201':
+        -
           description: 'Customer resource created'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/Customer.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -649,7 +649,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -674,7 +674,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -695,7 +695,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -716,7 +716,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -792,13 +792,13 @@ paths:
       tags:
         - Customer
       responses:
-        '200':
+        -
           description: 'Customer resource'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/Customer.jsonld-output'
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -819,7 +819,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -840,7 +840,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'Customer not found'
           content:
             application/problem+json:
@@ -861,7 +861,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -903,13 +903,13 @@ paths:
       tags:
         - Customer
       responses:
-        '200':
+        -
           description: 'Customer resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/Customer.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -930,7 +930,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -955,7 +955,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -976,7 +976,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -997,7 +997,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'Customer not found'
           content:
             application/problem+json:
@@ -1018,7 +1018,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1106,12 +1106,12 @@ paths:
       tags:
         - Customer
       responses:
-        '204':
+        -
           description: 'Customer resource deleted'
           content:
             application/problem+json:
               example: []
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1132,7 +1132,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1153,7 +1153,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'Customer not found'
           content:
             application/problem+json:
@@ -1174,7 +1174,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1216,13 +1216,13 @@ paths:
       tags:
         - Customer
       responses:
-        '200':
+        -
           description: 'Customer resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/Customer.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -1243,7 +1243,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -1268,7 +1268,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1289,7 +1289,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1310,7 +1310,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'Customer not found'
           content:
             application/problem+json:
@@ -1331,7 +1331,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1412,7 +1412,7 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '200':
+        -
           description: 'CustomerStatus collection'
           content:
             application/ld+json:
@@ -1425,7 +1425,7 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -1446,7 +1446,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1467,7 +1467,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1488,7 +1488,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1649,13 +1649,13 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '201':
+        -
           description: 'CustomerStatus resource created'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerStatus.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -1676,7 +1676,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -1701,7 +1701,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1722,7 +1722,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1743,7 +1743,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1787,13 +1787,13 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '200':
+        -
           description: 'CustomerStatus resource'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerStatus.jsonld-output'
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1814,7 +1814,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1835,7 +1835,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerStatus not found'
           content:
             application/problem+json:
@@ -1856,7 +1856,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -1898,13 +1898,13 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '200':
+        -
           description: 'CustomerStatus resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerStatus.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -1925,7 +1925,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -1950,7 +1950,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -1971,7 +1971,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -1992,7 +1992,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerStatus not found'
           content:
             application/problem+json:
@@ -2013,7 +2013,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2069,12 +2069,12 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '204':
+        -
           description: 'CustomerStatus resource deleted'
           content:
             application/problem+json:
               example: []
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2095,7 +2095,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2116,7 +2116,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerStatus not found'
           content:
             application/problem+json:
@@ -2137,7 +2137,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2179,13 +2179,13 @@ paths:
       tags:
         - CustomerStatus
       responses:
-        '200':
+        -
           description: 'CustomerStatus resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerStatus.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -2206,7 +2206,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -2231,7 +2231,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2252,7 +2252,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2273,7 +2273,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerStatus not found'
           content:
             application/problem+json:
@@ -2294,7 +2294,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2351,7 +2351,7 @@ paths:
       tags:
         - CustomerType
       responses:
-        '200':
+        -
           description: 'CustomerType collection'
           content:
             application/ld+json:
@@ -2364,7 +2364,7 @@ paths:
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -2385,7 +2385,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2406,7 +2406,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2427,7 +2427,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2588,13 +2588,13 @@ paths:
       tags:
         - CustomerType
       responses:
-        '201':
+        -
           description: 'CustomerType resource created'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -2615,7 +2615,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -2640,7 +2640,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2661,7 +2661,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2682,7 +2682,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2726,13 +2726,13 @@ paths:
       tags:
         - CustomerType
       responses:
-        '200':
+        -
           description: 'CustomerType resource'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2753,7 +2753,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2774,7 +2774,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerType not found'
           content:
             application/problem+json:
@@ -2795,7 +2795,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -2837,13 +2837,13 @@ paths:
       tags:
         - CustomerType
       responses:
-        '200':
+        -
           description: 'CustomerType resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -2864,7 +2864,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -2889,7 +2889,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -2910,7 +2910,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -2931,7 +2931,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerType not found'
           content:
             application/problem+json:
@@ -2952,7 +2952,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -3008,12 +3008,12 @@ paths:
       tags:
         - CustomerType
       responses:
-        '204':
+        -
           description: 'CustomerType resource deleted'
           content:
             application/problem+json:
               example: []
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -3034,7 +3034,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -3055,7 +3055,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerType not found'
           content:
             application/problem+json:
@@ -3076,7 +3076,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -3118,13 +3118,13 @@ paths:
       tags:
         - CustomerType
       responses:
-        '200':
+        -
           description: 'CustomerType resource updated'
           content:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-        '400':
+        -
           description: 'Bad request'
           content:
             application/problem+json:
@@ -3145,7 +3145,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-        '422':
+        -
           description: 'Validation error'
           content:
             application/problem+json:
@@ -3170,7 +3170,7 @@ paths:
                 violations:
                   - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-        '401':
+        -
           description: Unauthorized
           content:
             application/problem+json:
@@ -3191,7 +3191,7 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-        '403':
+        -
           description: Forbidden
           content:
             application/problem+json:
@@ -3212,7 +3212,7 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-        '404':
+        -
           description: 'CustomerType not found'
           content:
             application/problem+json:
@@ -3233,7 +3233,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-        '500':
+        -
           description: 'Internal server error'
           content:
             application/problem+json:
@@ -3290,9 +3290,9 @@ paths:
       tags:
         - HealthCheck
       responses:
-        '204':
+        -
           description: 'Health check passed with no content to return.'
-        '500':
+        -
           description: 'Health check failed.'
       summary: 'Retrieves a HealthCheck resource.'
       description: 'Retrieves a HealthCheck resource.'

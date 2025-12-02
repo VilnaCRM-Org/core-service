@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\IriReferenceContentTransformer;
-use App\Shared\Application\OpenApi\Processor\IriReferenceMediaTypeTransformer;
 use App\Shared\Application\OpenApi\Processor\IriReferenceMediaTypeTransformerInterface;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;

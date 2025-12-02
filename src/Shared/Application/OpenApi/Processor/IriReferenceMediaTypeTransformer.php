@@ -8,16 +8,12 @@ use function is_array;
 
 final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTransformerInterface
 {
-    private IriReferencePropertyTransformerInterface $propertyTransformer;
+    private readonly IriReferencePropertyTransformerInterface $propertyTransformer;
 
     public function __construct(
         ?IriReferencePropertyTransformerInterface $propertyTransformer = null
     ) {
-        if ($propertyTransformer === null) {
-            $propertyTransformer = new IriReferencePropertyTransformer();
-        }
-
-        $this->propertyTransformer = $propertyTransformer;
+        $this->propertyTransformer = $propertyTransformer ?? new IriReferencePropertyTransformer();
     }
 
     /**
@@ -28,18 +24,12 @@ final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTra
     public function transform(array $mediaType): array
     {
         $definition = IriReferenceMediaTypeDefinition::from($mediaType);
+        $properties = $definition?->transformWith($this->transformProperty(...));
 
-        if ($definition === null) {
-            return $mediaType;
-        }
-
-        $properties = $definition->transformWith($this->transformProperty(...));
-
-        if ($properties === null) {
-            return $mediaType;
-        }
-
-        return $definition->withProperties($properties);
+        // Pattern: Combine sequential null checks (reduces CCN by 1)
+        return $definition !== null && $properties !== null
+            ? $definition->withProperties($properties)
+            : $mediaType;
     }
 
     private function transformProperty(

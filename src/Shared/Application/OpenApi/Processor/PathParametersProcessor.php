@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Operation;
-use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
@@ -37,44 +36,25 @@ final class PathParametersProcessor
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        foreach (self::OPERATIONS as $operation) {
-            $pathItem = $this->updatePathItemOperation($pathItem, $operation);
-        }
-
-        return $pathItem;
+        return array_reduce(
+            self::OPERATIONS,
+            fn (PathItem $item, string $op): PathItem => $this->updatePathItemOperation($item, $op),
+            $pathItem
+        );
     }
 
     private function updatePathItemOperation(PathItem $pathItem, string $operation): PathItem
     {
         $currentOperation = $pathItem->{'get' . $operation}();
+        $parameters = $currentOperation?->getParameters();
 
-        if (!$currentOperation instanceof Operation) {
-            return $pathItem;
-        }
-
-        return $pathItem->{'with' . $operation}(
-            $this->processOperation($currentOperation)
-        );
-    }
-
-    private function processOperation(Operation $operation): Operation
-    {
-        $parameters = $operation->getParameters();
-
-        if (!is_array($parameters)) {
-            return $operation;
-        }
-
-        $cleanedParameters = array_map(
-            $this->processParameter(...),
-            $parameters
-        );
-
-        return $operation->withParameters($cleanedParameters);
-    }
-
-    private function processParameter(Parameter|array $parameter): Parameter|array
-    {
-        return $this->parameterCleaner->clean($parameter);
+        // Pattern: Combine null checks and inline trivial wrapper
+        return $currentOperation instanceof Operation && is_array($parameters)
+            ? $pathItem->{'with' . $operation}(
+                $currentOperation->withParameters(
+                    array_map($this->parameterCleaner->clean(...), $parameters)
+                )
+            )
+            : $pathItem;
     }
 }
