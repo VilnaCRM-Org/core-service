@@ -24,14 +24,14 @@ final class DataCleaner
      */
     public function clean(array $data): array
     {
-        $result = [];
-        foreach ($data as $key => $value) {
-            $processed = $this->processValue($key, $value);
-            if ($processed !== null) {
-                $result[$key] = $processed;
-            }
-        }
-        return $result;
+        return array_reduce(
+            array_keys($data),
+            function (array $result, string|int $key) use ($data): array {
+                $processed = $this->processValue($key, $data[$key]);
+                return $processed !== null ? array_merge($result, [$key => $processed]) : $result;
+            },
+            []
+        );
     }
 
     private function processValue(

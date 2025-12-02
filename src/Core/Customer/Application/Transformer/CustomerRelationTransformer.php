@@ -23,43 +23,47 @@ final readonly class CustomerRelationTransformer implements
         ?string $typeIri,
         Customer $customer
     ): CustomerType {
-        $iri = $typeIri ?? $this->getDefaultTypeIri($customer);
-
-        $resource = $this->iriConverter->getResourceFromIri($iri);
-
-        if (!$resource instanceof CustomerType) {
-            throw CustomerTypeNotFoundException::withIri($iri);
-        }
-
-        return $resource;
+        return $this->resolveRelation(
+            $typeIri,
+            $customer->getType(),
+            CustomerType::class,
+            static fn (string $iri): CustomerTypeNotFoundException => CustomerTypeNotFoundException::withIri($iri)
+        );
     }
 
     public function resolveStatus(
         ?string $statusIri,
         Customer $customer
     ): CustomerStatus {
-        $iri = $statusIri ?? $this->getDefaultStatusIri($customer);
+        return $this->resolveRelation(
+            $statusIri,
+            $customer->getStatus(),
+            CustomerStatus::class,
+            static fn (string $iri): CustomerStatusNotFoundException => CustomerStatusNotFoundException::withIri($iri)
+        );
+    }
 
-        $resource = $this->iriConverter->getResourceFromIri($iri);
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $expectedClass
+     * @param callable(string): \Exception $exceptionFactory
+     *
+     * @return T
+     */
+    private function resolveRelation(
+        ?string $iri,
+        object $default,
+        string $expectedClass,
+        callable $exceptionFactory
+    ): object {
+        $resolvedIri = $iri ?? $this->iriConverter->getIriFromResource($default);
+        $resource = $this->iriConverter->getResourceFromIri($resolvedIri);
 
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($iri);
+        if (!$resource instanceof $expectedClass) {
+            throw $exceptionFactory($resolvedIri);
         }
 
         return $resource;
-    }
-
-    private function getDefaultTypeIri(Customer $customer): string
-    {
-        return $this->iriConverter->getIriFromResource(
-            $customer->getType()
-        );
-    }
-
-    private function getDefaultStatusIri(Customer $customer): string
-    {
-        return $this->iriConverter->getIriFromResource(
-            $customer->getStatus()
-        );
     }
 }

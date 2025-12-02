@@ -50,17 +50,10 @@ return [
                 'src/Core/Customer/Domain/Entity/Customer',
             ],
         ],
-        NunoMaduro\PhpInsights\Domain\Metrics\Complexity\Complexity::class => [
-            'exclude' => [
-                'src/Core/Customer/Application/DTO',
-                'src/Shared/Application/OpenApi/Cleaner/*',
-                'src/Shared/Application/OpenApi/Processor/*',
-            ],
-        ],
     ],
     'requirements' => [
         'min-quality' => 100,
-        'min-complexity' => 93,
+        'min-complexity' => 94,
         'min-architecture' => 100,
         'min-style' => 100,
     ],

@@ -15,6 +15,7 @@ use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Application\Request\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+
 use function trim;
 
 /**

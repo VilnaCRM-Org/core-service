@@ -16,7 +16,6 @@ use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
 use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
 use ArrayObject;
-use Traversable;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
@@ -48,9 +47,9 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-        $factories = $this->endpointFactories instanceof Traversable
-            ? iterator_to_array($this->endpointFactories)
-            : $this->endpointFactories;
+        $factories = is_array($this->endpointFactories)
+            ? $this->endpointFactories
+            : iterator_to_array($this->endpointFactories);
 
         array_walk(
             $factories,
@@ -70,22 +69,22 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     private function normalizeOpenApi(OpenApi $openApi): OpenApi
     {
         $webhooks = $openApi->getWebhooks();
-        $normalizedOpenApi = new OpenApi(
-            $openApi->getInfo(),
-            $openApi->getServers(),
-            $openApi->getPaths(),
-            $openApi->getComponents(),
-            $openApi->getSecurity(),
-            $openApi->getTags(),
-            $openApi->getExternalDocs(),
-            $openApi->getJsonSchemaDialect(),
-            $webhooks instanceof ArrayObject && $webhooks->count() > 0
-                ? $webhooks
-                : new ArrayObject()
-        );
 
+        // Pattern: Direct parameter inline (reduces temporary variables)
         return $this->extensionsApplier->apply(
-            $normalizedOpenApi,
+            new OpenApi(
+                $openApi->getInfo(),
+                $openApi->getServers(),
+                $openApi->getPaths(),
+                $openApi->getComponents(),
+                $openApi->getSecurity(),
+                $openApi->getTags(),
+                $openApi->getExternalDocs(),
+                $openApi->getJsonSchemaDialect(),
+                $webhooks instanceof ArrayObject && $webhooks->count() > 0
+                    ? $webhooks
+                    : new ArrayObject()
+            ),
             $openApi->getExtensionProperties()
         );
     }

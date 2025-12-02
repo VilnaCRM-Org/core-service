@@ -31,12 +31,9 @@ final class SpecMetadataCleaner
 
     public function cleanComponents(?Components $components): ?Components
     {
-        if ($components === null) {
-            return null;
-        }
-
-        return new Components(
-            $components->getSchemas()
+        return $this->normalizeNullable(
+            $components,
+            static fn (Components $c): Components => new Components($c->getSchemas())
         );
     }
 
@@ -70,26 +67,37 @@ final class SpecMetadataCleaner
 
     private function normalizeContact(?Contact $contact): ?Contact
     {
-        if ($contact === null) {
-            return null;
-        }
-
-        return new Contact(
-            $contact->getName(),
-            $contact->getUrl(),
-            $contact->getEmail()
+        return $this->normalizeNullable(
+            $contact,
+            static fn (Contact $c): Contact => new Contact(
+                $c->getName(),
+                $c->getUrl(),
+                $c->getEmail()
+            )
         );
     }
 
     private function normalizeLicense(?License $license): ?License
     {
-        if ($license === null) {
-            return null;
-        }
-
-        return new License(
-            $license->getName(),
-            $license->getUrl()
+        return $this->normalizeNullable(
+            $license,
+            static fn (License $l): License => new License(
+                $l->getName(),
+                $l->getUrl()
+            )
         );
+    }
+
+    /**
+     * @template T
+     *
+     * @param T|null $value
+     * @param callable(T): T $transformer
+     *
+     * @return T|null
+     */
+    private function normalizeNullable(?object $value, callable $transformer): ?object
+    {
+        return $value === null ? null : $transformer($value);
     }
 }

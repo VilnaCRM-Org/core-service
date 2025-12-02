@@ -52,10 +52,13 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
 
         $this->iriConverter
             ->method('getResourceFromIri')
-            ->willReturnMap([
-                [$dto->type, [], $this->createMock(\ApiPlatform\Metadata\Operation::class), $type],
-                [$dto->status, [], $this->createMock(\ApiPlatform\Metadata\Operation::class), $status],
-            ]);
+            ->willReturnCallback(function (string $iri) use ($dto, $type, $status): object {
+                return match ($iri) {
+                    $dto->type => $type,
+                    $dto->status => $status,
+                    default => throw new \RuntimeException('Unexpected IRI: ' . $iri),
+                };
+            });
 
         $update = $this->resolver->build($dto, $customer);
 

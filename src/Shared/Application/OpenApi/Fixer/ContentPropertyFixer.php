@@ -23,16 +23,11 @@ final class ContentPropertyFixer
             static fn ($mediaTypeObject): bool => is_array($mediaTypeObject)
         );
 
-        $wasModified = false;
-
-        foreach ($mediaTypes as $mediaType => $mediaTypeObject) {
-            $wasModified = $this->mediaTypePropertyFixer->fix(
-                $content,
-                (string) $mediaType,
-                $mediaTypeObject
-            ) || $wasModified;
-        }
-
-        return $wasModified;
+        return array_reduce(
+            array_keys($mediaTypes),
+            fn (bool $modified, string $mediaType): bool => $this->mediaTypePropertyFixer->fix($content, $mediaType, $mediaTypes[$mediaType])
+                || $modified,
+            false
+        );
     }
 }

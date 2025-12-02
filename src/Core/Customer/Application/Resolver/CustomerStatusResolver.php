@@ -28,49 +28,22 @@ final readonly class CustomerStatusResolver
     ): CustomerStatus {
         $previous = $context['previous_data'] ?? null;
 
-        return $previous instanceof CustomerStatus
-            ? $previous
-            : $this->resolveFromIri($this->requireIri($data), $context, $operation);
-    }
-
-    /**
-     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
-     */
-    private function resolveFromIri(
-        string $iri,
-        array $context,
-        Operation $operation
-    ): CustomerStatus {
-        $resource = $this->getResource($iri, $context, $operation);
-
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($iri);
+        // Pattern: Early return for cached value
+        if ($previous instanceof CustomerStatus) {
+            return $previous;
         }
 
-        return $resource;
-    }
+        // Pattern: Null coalescing with throw expression (PHP 8.0+)
+        $iri = $data->id ?? throw new CustomerStatusNotFoundException();
 
-    /**
-     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
-     */
-    private function getResource(
-        string $iri,
-        array $context,
-        Operation $operation
-    ): object {
         try {
-            return $this->iriConverter->getResourceFromIri($iri, $context, $operation);
+            $resource = $this->iriConverter->getResourceFromIri($iri, $context, $operation);
         } catch (ItemNotFoundException) {
             throw CustomerStatusNotFoundException::withIri($iri);
         }
-    }
 
-    private function requireIri(StatusPatch $data): string
-    {
-        if ($data->id === null) {
-            throw new CustomerStatusNotFoundException();
-        }
-
-        return $data->id;
+        return $resource instanceof CustomerStatus
+            ? $resource
+            : throw CustomerStatusNotFoundException::withIri($iri);
     }
 }

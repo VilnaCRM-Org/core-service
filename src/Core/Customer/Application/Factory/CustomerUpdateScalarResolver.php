@@ -34,14 +34,16 @@ final class CustomerUpdateScalarResolver
      */
     public function resolveStrings(Customer $customer, array $input): array
     {
-        $resolved = [];
-
-        foreach (self::STRING_FIELDS as $field => $getter) {
-            $current = $customer->{$getter}();
-            $resolved[$field] = $this->stringValue($input[$field] ?? null, $current);
-        }
-
-        return $resolved;
+        return array_reduce(
+            array_keys(self::STRING_FIELDS),
+            fn (array $result, string $field): array => array_merge($result, [
+                $field => $this->stringValue(
+                    $input[$field] ?? null,
+                    $customer->{self::STRING_FIELDS[$field]}()
+                ),
+            ]),
+            []
+        );
     }
 
     /**
@@ -53,17 +55,17 @@ final class CustomerUpdateScalarResolver
     {
         $candidate = $input['confirmed'] ?? null;
 
-        if ($candidate === null) {
-            return $customer->isConfirmed();
-        }
-
-        return (bool) $candidate;
+        return $candidate === null ? $customer->isConfirmed() : (bool) $candidate;
     }
 
     private function stringValue(?string $candidate, string $fallback): string
     {
         $trimmed = trim($candidate ?? '');
 
-        return $trimmed !== '' ? $trimmed : $fallback;
+        // Pattern: Match expression for cleaner logic
+        return match (true) {
+            $trimmed !== '' => $trimmed,
+            default => $fallback,
+        };
     }
 }

@@ -28,13 +28,14 @@ final class IriReferenceMediaTypeDefinition
     public static function from(array $mediaType): ?self
     {
         $schema = $mediaType['schema'] ?? null;
-        $properties = $schema['properties'] ?? null;
 
-        if (!is_array($schema) || !is_array($properties)) {
+        if (!is_array($schema)) {
             return null;
         }
 
-        return new self($mediaType, $properties);
+        $properties = $schema['properties'] ?? null;
+
+        return is_array($properties) ? new self($mediaType, $properties) : null;
     }
 
     /**

@@ -11,20 +11,29 @@ final class TagDescriptionProcessor
 {
     public function process(OpenApi $openApi): OpenApi
     {
-        $tagDescriptions = $this->getTagDescriptions();
-        $tags = $this->indexTags($openApi);
-
-        foreach ($tagDescriptions as $tagName => $description) {
-            $tag = $tags[$tagName] ?? new Tag($tagName);
-
-            if ($this->isDescriptionEmpty($tag->getDescription())) {
-                $tag = $tag->withDescription($description);
-            }
-
-            $tags[$tagName] = $tag;
-        }
+        $tags = array_reduce(
+            array_keys($this->getTagDescriptions()),
+            fn (array $tags, string $name): array => [
+                ...$tags,
+                $name => $this->createOrUpdateTag($tags, $name),
+            ],
+            $this->indexTags($openApi)
+        );
 
         return $openApi->withTags(array_values($tags));
+    }
+
+    /**
+     * @param array<string, Tag> $tags
+     */
+    private function createOrUpdateTag(array $tags, string $tagName): Tag
+    {
+        $tag = $tags[$tagName] ?? new Tag($tagName);
+        $description = $this->getTagDescriptions()[$tagName];
+
+        return ($tag->getDescription() ?? '') === ''
+            ? $tag->withDescription($description)
+            : $tag;
     }
 
     /**
@@ -45,17 +54,10 @@ final class TagDescriptionProcessor
      */
     private function indexTags(OpenApi $openApi): array
     {
-        $indexedTags = [];
-
-        foreach ($openApi->getTags() as $tag) {
-            $indexedTags[$tag->getName()] = $tag;
-        }
-
-        return $indexedTags;
-    }
-
-    private static function isDescriptionEmpty(?string $description): bool
-    {
-        return ($description ?? '') === '';
+        return array_reduce(
+            $openApi->getTags(),
+            static fn (array $indexed, Tag $tag): array => [...$indexed, $tag->getName() => $tag],
+            []
+        );
     }
 }

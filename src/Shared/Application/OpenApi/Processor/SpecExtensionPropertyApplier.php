@@ -22,10 +22,13 @@ final class SpecExtensionPropertyApplier
             return $openApi;
         }
 
-        foreach ($extensionProperties as $key => $value) {
-            $openApi = $openApi->withExtensionProperty($key, $value);
-        }
-
-        return $openApi;
+        return array_reduce(
+            array_keys($extensionProperties),
+            static fn (OpenApi $api, string $key): OpenApi => $api->withExtensionProperty(
+                $key,
+                $extensionProperties[$key]
+            ),
+            $openApi
+        );
     }
 }

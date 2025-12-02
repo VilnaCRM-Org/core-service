@@ -64,16 +64,24 @@ final class TagCollectorProcessor
 
         foreach ($openApi->getPaths()->getPaths() as $pathItem) {
             assert($pathItem instanceof PathItem);
-
-            foreach ($this->getOperations($pathItem) as $operation) {
-                $operationTags = $operation->getTags() ?? [];
-                foreach ($operationTags as $tag) {
-                    $tags[] = $tag;
-                }
-            }
+            $tags = array_merge($tags, $this->collectTagsFromPathItem($pathItem));
         }
 
         return array_unique($tags);
+    }
+
+    /**
+     * @return array<string>
+     */
+    private function collectTagsFromPathItem(PathItem $pathItem): array
+    {
+        $tags = [];
+
+        foreach ($this->getOperations($pathItem) as $operation) {
+            $tags = array_merge($tags, $operation->getTags() ?? []);
+        }
+
+        return $tags;
     }
 
     /**
