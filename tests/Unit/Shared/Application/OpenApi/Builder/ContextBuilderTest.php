@@ -17,7 +17,7 @@ final class ContextBuilderTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->contextBuilder = new ContextBuilder();
+        $this->contextBuilder = new ContextBuilder(new ParameterSchemaFactory());
     }
 
     public function testConstructorWithCustomParameterSchemaFactory(): void

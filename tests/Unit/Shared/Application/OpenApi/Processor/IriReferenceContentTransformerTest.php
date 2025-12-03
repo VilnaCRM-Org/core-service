@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
 use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingMediaTypeTransformer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
@@ -16,7 +18,11 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->transformer = new IriReferenceContentTransformer();
+        $this->transformer = new IriReferenceContentTransformer(
+            new IriReferenceMediaTypeTransformer(
+                new IriReferencePropertyTransformer()
+            )
+        );
     }
 
     public function testTransformReturnsNullWhenNothingChanges(): void

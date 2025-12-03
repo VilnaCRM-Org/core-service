@@ -9,24 +9,17 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
-use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolver;
 use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolverInterface;
-use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformerInterface;
 use App\Shared\Application\OpenApi\ValueObject\IriReferenceOperationContext;
 use ArrayObject;
 
 final class IriReferenceTypeProcessor
 {
-    private IriReferenceContentTransformerInterface $contentTransformer;
-    private IriReferenceOperationContextResolverInterface $contextResolver;
-
     public function __construct(
-        ?IriReferenceContentTransformerInterface $contentTransformer = null,
-        ?IriReferenceOperationContextResolverInterface $contextResolver = null
+        private readonly IriReferenceContentTransformerInterface $contentTransformer,
+        private readonly IriReferenceOperationContextResolverInterface $contextResolver
     ) {
-        $this->contentTransformer = $contentTransformer ?? new IriReferenceContentTransformer();
-        $this->contextResolver = $contextResolver ?? new IriReferenceOperationContextResolver();
     }
 
     public function process(OpenApi $openApi): OpenApi

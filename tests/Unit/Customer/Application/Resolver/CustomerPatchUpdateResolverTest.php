@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Customer\Application\Processor;
+namespace App\Tests\Unit\Customer\Application\Resolver;
 
 use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
-use App\Core\Customer\Application\Factory\CustomerUpdateScalarResolver;
-use App\Core\Customer\Application\Processor\CustomerPatchUpdateResolver;
+use App\Core\Customer\Application\Resolver\CustomerPatchUpdateResolver;
+use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;

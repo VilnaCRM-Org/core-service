@@ -12,15 +12,10 @@ use ArrayObject;
 
 final class SpecCleanupProcessor
 {
-    private readonly SpecMetadataCleaner $metadataCleaner;
-    private readonly SpecExtensionPropertyApplier $extensionApplier;
-
     public function __construct(
-        ?SpecMetadataCleaner $metadataCleaner = null,
-        ?SpecExtensionPropertyApplier $extensionApplier = null,
+        private readonly SpecMetadataCleaner $metadataCleaner,
+        private readonly SpecExtensionPropertyApplier $extensionApplier,
     ) {
-        $this->metadataCleaner = $metadataCleaner ?? new SpecMetadataCleaner();
-        $this->extensionApplier = $extensionApplier ?? new SpecExtensionPropertyApplier();
     }
 
     public function process(OpenApi $openApi): OpenApi
