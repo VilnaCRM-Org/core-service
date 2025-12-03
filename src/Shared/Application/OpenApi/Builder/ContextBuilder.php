@@ -10,13 +10,9 @@ use ArrayObject;
 
 final class ContextBuilder
 {
-    private ParameterSchemaFactory $parameterSchemaFactory;
-
     public function __construct(
-        ?ParameterSchemaFactory $parameterSchemaFactory = null
+        private ParameterSchemaFactory $parameterSchemaFactory
     ) {
-        $this->parameterSchemaFactory = $parameterSchemaFactory
-            ?? new ParameterSchemaFactory();
     }
 
     /**

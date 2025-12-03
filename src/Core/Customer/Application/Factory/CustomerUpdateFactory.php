@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Factory;
 
+use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
@@ -11,14 +12,10 @@ use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 final readonly class CustomerUpdateFactory implements
     CustomerUpdateFactoryInterface
 {
-    private CustomerUpdateScalarResolver $scalarResolver;
-
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
-        ?CustomerUpdateScalarResolver $scalarResolver = null,
+        private CustomerUpdateScalarResolver $scalarResolver,
     ) {
-        $this->scalarResolver = $scalarResolver
-            ?? new CustomerUpdateScalarResolver();
     }
 
     /**

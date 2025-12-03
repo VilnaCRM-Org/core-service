@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Core\Customer\Application\Factory;
+namespace App\Core\Customer\Application\Resolver;
 
 use App\Core\Customer\Domain\Entity\Customer;
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
 use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingPropertyTransformer;
 use App\Tests\Unit\UnitTestCase;
 
@@ -15,7 +16,7 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->transformer = new IriReferenceMediaTypeTransformer();
+        $this->transformer = new IriReferenceMediaTypeTransformer(new IriReferencePropertyTransformer());
     }
 
     public function testTransformReturnsOriginalWhenSchemaIsMissing(): void

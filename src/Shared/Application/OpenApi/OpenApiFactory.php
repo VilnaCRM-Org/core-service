@@ -25,16 +25,11 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __construct(
         private OpenApiFactoryInterface $decorated,
         iterable $endpointFactories,
-        private PathParametersProcessor $pathParametersProcessor
-            = new PathParametersProcessor(),
-        private ParameterDescriptionProcessor $parameterDescriptionProcessor
-            = new ParameterDescriptionProcessor(),
-        private IriReferenceTypeProcessor $iriReferenceTypeProcessor
-            = new IriReferenceTypeProcessor(),
-        private TagDescriptionProcessor $tagDescriptionProcessor
-            = new TagDescriptionProcessor(),
+        private PathParametersProcessor $pathParametersProcessor,
+        private ParameterDescriptionProcessor $parameterDescriptionProcessor,
+        private IriReferenceTypeProcessor $iriReferenceTypeProcessor,
+        private TagDescriptionProcessor $tagDescriptionProcessor,
         private OpenApiExtensionsApplier $extensionsApplier
-            = new OpenApiExtensionsApplier()
     ) {
         $this->endpointFactories = is_array($endpointFactories)
             ? $endpointFactories

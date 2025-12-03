@@ -10,13 +10,9 @@ use function is_array;
 
 final class IriReferenceContentTransformer implements IriReferenceContentTransformerInterface
 {
-    private readonly IriReferenceMediaTypeTransformerInterface $mediaTypeTransformer;
-
     public function __construct(
-        ?IriReferenceMediaTypeTransformerInterface $mediaTypeTransformer = null
+        private readonly IriReferenceMediaTypeTransformerInterface $mediaTypeTransformer
     ) {
-        $this->mediaTypeTransformer = $mediaTypeTransformer
-            ?? new IriReferenceMediaTypeTransformer();
     }
 
     /**
