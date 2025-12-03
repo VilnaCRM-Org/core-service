@@ -27,13 +27,7 @@ final class IriReferenceMediaTypeDefinition
      */
     public static function from(array $mediaType): ?self
     {
-        $schema = $mediaType['schema'] ?? null;
-
-        if (!is_array($schema)) {
-            return null;
-        }
-
-        $properties = $schema['properties'] ?? null;
+        $properties = $mediaType['schema']['properties'] ?? null;
 
         return is_array($properties) ? new self($mediaType, $properties) : null;
     }
@@ -59,5 +53,19 @@ final class IriReferenceMediaTypeDefinition
         $mediaType['schema']['properties'] = $properties;
 
         return $mediaType;
+    }
+
+    /**
+     * @param callable(array<string, scalar|array<string, scalar|null>>): array<string, scalar|array<string, scalar|null>>|null $transformer
+     *
+     * @return array<string, scalar|array<string, scalar|null>>
+     */
+    public function transformMediaType(callable $transformer): array
+    {
+        $properties = $this->transformWith($transformer);
+
+        return $properties === null
+            ? $this->mediaType
+            : $this->withProperties($properties);
     }
 }

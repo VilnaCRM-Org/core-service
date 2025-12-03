@@ -14,21 +14,13 @@ final class ArrayContextBuilder
      */
     public function build(array $params): ArrayObject
     {
-        if (count($params) === 0) {
-            return new ArrayObject([
+        return $params === []
+            ? new ArrayObject([
                 'application/ld+json' => [
                     'example' => [''],
                 ],
-            ]);
-        }
-
-        $collection = $this->buildParamsCollection($params);
-
-        return $this->buildContent(
-            $collection['items'],
-            $collection['example'],
-            $collection['required']
-        );
+            ])
+            : $this->buildForCollection($params);
     }
 
     /**
@@ -47,6 +39,20 @@ final class ArrayContextBuilder
             'example' => $this->buildExample($params),
             'required' => $this->collectRequired($params),
         ];
+    }
+
+    /**
+     * @param array<Parameter> $params
+     */
+    private function buildForCollection(array $params): ArrayObject
+    {
+        $collection = $this->buildParamsCollection($params);
+
+        return $this->buildContent(
+            $collection['items'],
+            $collection['example'],
+            $collection['required']
+        );
     }
 
     /**

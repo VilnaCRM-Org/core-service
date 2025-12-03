@@ -13,13 +13,11 @@ final class IriReferencePropertyTransformer implements IriReferencePropertyTrans
      */
     public function transform(array $schema): array
     {
-        if (($schema['type'] ?? null) !== 'iri-reference') {
-            return $schema;
-        }
-
-        return array_merge(
-            $schema,
-            ['type' => 'string', 'format' => 'iri-reference']
-        );
+        return ($schema['type'] ?? null) === 'iri-reference'
+            ? array_merge(
+                $schema,
+                ['type' => 'string', 'format' => 'iri-reference']
+            )
+            : $schema;
     }
 }

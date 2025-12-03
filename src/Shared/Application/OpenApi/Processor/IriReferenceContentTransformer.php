@@ -15,11 +15,8 @@ final class IriReferenceContentTransformer implements IriReferenceContentTransfo
     public function __construct(
         ?IriReferenceMediaTypeTransformerInterface $mediaTypeTransformer = null
     ) {
-        if ($mediaTypeTransformer === null) {
-            $mediaTypeTransformer = new IriReferenceMediaTypeTransformer();
-        }
-
-        $this->mediaTypeTransformer = $mediaTypeTransformer;
+        $this->mediaTypeTransformer = $mediaTypeTransformer
+            ?? new IriReferenceMediaTypeTransformer();
     }
 
     /**

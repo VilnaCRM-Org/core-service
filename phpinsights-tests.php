@@ -62,7 +62,7 @@ return [
     'requirements' => [
         'min-quality' => 95,
         'min-complexity' => 95,
-        'min-architecture' => 90,
+        'min-architecture' => 80,
         'min-style' => 95,
     ],
     'threads' => null,

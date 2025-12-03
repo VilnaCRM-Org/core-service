@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
 use App\Tests\Unit\UnitTestCase;
+use ReflectionMethod;
 
 final class TagDescriptionProcessorTest extends UnitTestCase
 {
@@ -66,5 +67,26 @@ final class TagDescriptionProcessorTest extends UnitTestCase
         self::assertNotFalse($customerIndex);
         self::assertSame('Custom doc', $descriptions[$customerIndex]);
         self::assertSame(range(0, count($processedTags) - 1), array_keys($processedTags));
+    }
+
+    public function testIndexTagsKeepsAllPreviouslyProcessedTags(): void
+    {
+        $openApi = new OpenApi(
+            new Info('title', '1.0', 'desc'),
+            [new Server('https://localhost')],
+            new Paths(),
+            tags: [
+                new Tag('Customer'),
+                new Tag('CustomerStatus'),
+            ]
+        );
+
+        $method = new ReflectionMethod(TagDescriptionProcessor::class, 'indexTags');
+        $method->setAccessible(true);
+
+        $indexed = $method->invoke(new TagDescriptionProcessor(), $openApi);
+
+        self::assertArrayHasKey('Customer', $indexed);
+        self::assertArrayHasKey('CustomerStatus', $indexed);
     }
 }

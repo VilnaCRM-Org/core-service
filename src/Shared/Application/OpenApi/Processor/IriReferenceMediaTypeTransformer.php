@@ -24,12 +24,9 @@ final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTra
     public function transform(array $mediaType): array
     {
         $definition = IriReferenceMediaTypeDefinition::from($mediaType);
-        $properties = $definition?->transformWith($this->transformProperty(...));
 
-        // Pattern: Combine sequential null checks (reduces CCN by 1)
-        return $definition !== null && $properties !== null
-            ? $definition->withProperties($properties)
-            : $mediaType;
+        return $definition?->transformMediaType($this->transformProperty(...))
+            ?? $mediaType;
     }
 
     private function transformProperty(

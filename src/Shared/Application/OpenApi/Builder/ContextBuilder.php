@@ -26,15 +26,13 @@ final class ContextBuilder
         array $params,
         string $contentType = 'application/problem+json'
     ): ArrayObject {
-        if (count($params) === 0) {
-            return new ArrayObject([
+        return $params === []
+            ? new ArrayObject([
                 $contentType => [
                     'example' => new ArrayObject(),
                 ],
-            ]);
-        }
-
-        return $this->processParams($params, $contentType);
+            ])
+            : $this->processParams($params, $contentType);
     }
 
     /**

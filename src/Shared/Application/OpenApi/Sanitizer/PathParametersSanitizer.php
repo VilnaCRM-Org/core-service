@@ -9,6 +9,7 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
+use App\Shared\Application\OpenApi\Support\PathsManipulator;
 
 final class PathParametersSanitizer
 {
@@ -24,13 +25,10 @@ final class PathParametersSanitizer
 
     public function sanitize(OpenApi $openApi): OpenApi
     {
-        foreach (array_keys($openApi->getPaths()->getPaths()) as $path) {
-            $pathItem = $openApi->getPaths()->getPath($path);
-            $openApi->getPaths()->addPath(
-                $path,
-                $this->sanitizePathItem($pathItem)
-            );
-        }
+        PathsManipulator::map(
+            $openApi,
+            fn (PathItem $pathItem): PathItem => $this->sanitizePathItem($pathItem)
+        );
 
         return $openApi;
     }

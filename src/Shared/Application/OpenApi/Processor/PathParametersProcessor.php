@@ -9,11 +9,11 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
 use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
+use App\Shared\Application\OpenApi\Support\PathItemOperations;
+use App\Shared\Application\OpenApi\Support\PathsManipulator;
 
 final class PathParametersProcessor
 {
-    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
-
     private readonly PathParameterCleanerInterface $parameterCleaner;
 
     public function __construct(
@@ -24,37 +24,31 @@ final class PathParametersProcessor
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $paths = $openApi->getPaths();
-
-        foreach (array_keys($paths->getPaths()) as $path) {
-            $pathItem = $paths->getPath($path);
-            $paths->addPath($path, $this->processPathItem($pathItem));
-        }
+        PathsManipulator::map(
+            $openApi,
+            fn (PathItem $pathItem): PathItem => $this->processPathItem($pathItem)
+        );
 
         return $openApi;
     }
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        return array_reduce(
-            self::OPERATIONS,
-            fn (PathItem $item, string $op): PathItem => $this->updatePathItemOperation($item, $op),
-            $pathItem
+        return PathItemOperations::map(
+            $pathItem,
+            fn (Operation $operation): Operation => $this
+                ->updateOperation($operation)
         );
     }
 
-    private function updatePathItemOperation(PathItem $pathItem, string $operation): PathItem
+    private function updateOperation(Operation $operation): Operation
     {
-        $currentOperation = $pathItem->{'get' . $operation}();
-        $parameters = $currentOperation?->getParameters();
+        $parameters = $operation->getParameters();
 
-        // Pattern: Combine null checks and inline trivial wrapper
-        return $currentOperation instanceof Operation && is_array($parameters)
-            ? $pathItem->{'with' . $operation}(
-                $currentOperation->withParameters(
-                    array_map($this->parameterCleaner->clean(...), $parameters)
-                )
+        return is_array($parameters)
+            ? $operation->withParameters(
+                array_map($this->parameterCleaner->clean(...), $parameters)
             )
-            : $pathItem;
+            : $operation;
     }
 }

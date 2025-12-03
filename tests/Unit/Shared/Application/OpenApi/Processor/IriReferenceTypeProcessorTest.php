@@ -31,12 +31,12 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
             ->withGet($this->createOperationWithoutIriReference());
         $paths->addPath('/customers', $pathItem);
 
-        $openApi = (new OpenApi(
+        $openApi = new OpenApi(
             new Info('VilnaCRM', '1.0', 'Spec under test'),
             [new Server('https://localhost')],
             $paths,
             new Components()
-        ));
+        );
 
         $processed = (new IriReferenceTypeProcessor())->process($openApi);
         $updatedPath = $processed->getPaths()->getPath('/customers');

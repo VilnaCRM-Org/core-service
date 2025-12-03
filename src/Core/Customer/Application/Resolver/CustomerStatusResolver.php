@@ -26,24 +26,51 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        $previous = $context['previous_data'] ?? null;
+        $existing = $context['previous_data'] ?? null;
 
-        // Pattern: Early return for cached value
-        if ($previous instanceof CustomerStatus) {
-            return $previous;
-        }
+        return $existing instanceof CustomerStatus
+            ? $existing
+            : $this->resolveFromIri($data->id, $context, $operation);
+    }
 
-        // Pattern: Null coalescing with throw expression (PHP 8.0+)
-        $iri = $data->id ?? throw new CustomerStatusNotFoundException();
-
+    /**
+     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
+     */
+    private function fetchResource(
+        string $iri,
+        array $context,
+        Operation $operation
+    ): object {
         try {
-            $resource = $this->iriConverter->getResourceFromIri($iri, $context, $operation);
+            return $this->iriConverter->getResourceFromIri($iri, $context, $operation);
         } catch (ItemNotFoundException) {
             throw CustomerStatusNotFoundException::withIri($iri);
         }
+    }
 
+    private function requireIri(?string $iri): string
+    {
+        return $iri ?? throw new CustomerStatusNotFoundException();
+    }
+
+    private function assertStatus(string $iri, object $resource): CustomerStatus
+    {
         return $resource instanceof CustomerStatus
             ? $resource
             : throw CustomerStatusNotFoundException::withIri($iri);
+    }
+
+    /**
+     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
+     */
+    private function resolveFromIri(
+        ?string $iri,
+        array $context,
+        Operation $operation
+    ): CustomerStatus {
+        $resolvedIri = $this->requireIri($iri);
+        $resource = $this->fetchResource($resolvedIri, $context, $operation);
+
+        return $this->assertStatus($resolvedIri, $resource);
     }
 }

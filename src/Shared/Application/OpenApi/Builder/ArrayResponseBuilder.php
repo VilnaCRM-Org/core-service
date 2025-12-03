@@ -37,13 +37,14 @@ final class ArrayResponseBuilder implements ResponseBuilderInterface
      */
     private function buildHeadersArray(array $headers): ArrayObject
     {
-        $headersArray = new ArrayObject();
+        $headersArray = array_reduce(
+            $headers,
+            fn (array $collection, Header $header): array => $this
+                ->appendHeader($collection, $header),
+            []
+        );
 
-        foreach ($headers as $header) {
-            $headersArray[$header->name] = $this->createHeaderModel($header);
-        }
-
-        return $headersArray;
+        return new ArrayObject($headersArray);
     }
 
     private function createHeaderModel(Header $header): Model\Header
@@ -56,5 +57,17 @@ final class ArrayResponseBuilder implements ResponseBuilderInterface
                 'example' => $header->example,
             ]
         );
+    }
+
+    /**
+     * @param array<string, Model\Header> $collection
+     *
+     * @return array<string, Model\Header>
+     */
+    private function appendHeader(array $collection, Header $header): array
+    {
+        $collection[$header->name] = $this->createHeaderModel($header);
+
+        return $collection;
     }
 }
