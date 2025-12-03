@@ -438,10 +438,6 @@ public function process(ArrayObject $content): bool
 
 ---
 
-# Refactoring Strategies for DDD/Hexagonal/CQRS
-
-Detailed refactoring patterns specific to this project's hexagonal architecture, Domain-Driven Design, and CQRS implementation.
-
 ## Quick Start: Find What to Refactor
 
 Before diving into refactoring patterns, identify which classes actually need refactoring.
@@ -1261,7 +1257,7 @@ make deptrac
 
 **Example of Uncovered Violation**:
 
-```
+```text
 Uncovered: App\Shared\Application\Service\StringFieldResolver
 ```
 
@@ -1584,9 +1580,9 @@ Ask yourself these questions:
 
 #### Options for the Final 0.1%
 
-**Option A: Accept Current Quality**
+##### Option A: Accept Current Quality
 
-```
+```text
 ✅ Complexity: 93.9% (avg CCN: 1.18)
 ✅ Code: 100%
 ✅ Architecture: 100%
@@ -1595,7 +1591,7 @@ Ask yourself these questions:
 
 **Justification**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. Consider adjusting `phpinsights.php` threshold to 93.9%.
 
-**Option B: Strategic Micro-Optimization**
+##### Option B: Strategic Micro-Optimization
 
 Target only the highest-impact changes:
 
@@ -1604,7 +1600,7 @@ Target only the highest-impact changes:
 3. Verify improvement
 4. Stop if no improvement or readability suffers
 
-**Option C: Adjust Threshold (Last Resort)**
+##### Option C: Adjust Threshold (Last Resort)
 
 ```php
 // phpinsights.php

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
-use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Tests\Unit\UnitTestCase;
 
-final class ValueFilterTest extends UnitTestCase
+final class ValueCleanerTest extends UnitTestCase
 {
-    private ValueFilter $filter;
+    private ValueCleaner $filter;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $emptyValueChecker = new EmptyArrayFilter();
-        $this->filter = new ValueFilter($emptyValueChecker);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $this->filter = new ValueCleaner($emptyValueChecker);
     }
 
     public function testShouldRemoveNullValues(): void

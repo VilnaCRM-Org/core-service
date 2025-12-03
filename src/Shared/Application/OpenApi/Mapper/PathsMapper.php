@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Support;
+namespace App\Shared\Application\OpenApi\Mapper;
 
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 
-final class PathsManipulator
+final class PathsMapper
 {
     /**
      * @param callable(PathItem, string): PathItem $callback

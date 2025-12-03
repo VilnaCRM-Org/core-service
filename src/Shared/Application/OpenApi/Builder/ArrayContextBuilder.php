@@ -105,13 +105,13 @@ final class ArrayContextBuilder
      */
     private function collectRequired(array $params): array
     {
-        return array_map(
+        return array_values(array_map(
             static fn (Parameter $param): string => $param->name,
             array_filter(
                 $params,
                 static fn (Parameter $param): bool => $param->isRequired()
             )
-        );
+        ));
     }
 
     /**

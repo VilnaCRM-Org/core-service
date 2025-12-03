@@ -87,6 +87,20 @@ final class ArrayContextBuilderTest extends UnitTestCase
         $schema = $content['application/ld+json']['schema'];
 
         $this->assertSame(['id'], $schema['required']);
+        $this->assertSame([0], array_keys($schema['required']));
+    }
+
+    public function testBuildRequiredArrayHasSequentialKeys(): void
+    {
+        $requiredName = Parameter::required('name', 'string', 'John');
+        $optionalEmail = Parameter::optional('email', 'string', 'john@example.com');
+        $requiredAge = Parameter::required('age', 'integer', '30');
+
+        $content = $this->contextBuilder->build([$requiredName, $optionalEmail, $requiredAge]);
+        $schema = $content['application/ld+json']['schema'];
+
+        $this->assertSame(['name', 'age'], $schema['required']);
+        $this->assertSame([0, 1], array_keys($schema['required']));
     }
 
     /**

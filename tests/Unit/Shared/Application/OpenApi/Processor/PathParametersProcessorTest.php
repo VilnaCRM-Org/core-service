@@ -11,9 +11,8 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Cleaner\PathParameterCleaner;
-use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
+use App\Tests\Unit\Shared\Application\OpenApi\Stub\PathParameterCleanerSpy;
 use App\Tests\Unit\UnitTestCase;
 
 final class PathParametersProcessorTest extends UnitTestCase
@@ -49,7 +48,7 @@ final class PathParametersProcessorTest extends UnitTestCase
             ->getGet()
             ->getParameters();
 
-        self::assertSame(1, $this->cleaner->callCount);
+        self::assertSame(1, $this->cleaner->getCallCount());
         self::assertCount(2, $updatedParameters);
         self::assertInstanceOf(Parameter::class, $updatedParameters[0]);
         self::assertSame($pathParameter, $updatedParameters[0]);
@@ -72,26 +71,6 @@ final class PathParametersProcessorTest extends UnitTestCase
         self::assertNull(
             $result->getPaths()->getPath('/customers')->getPost()?->getParameters()
         );
-        self::assertSame(0, $this->cleaner->callCount);
-    }
-}
-
-final class PathParameterCleanerSpy implements PathParameterCleanerInterface
-{
-    public int $callCount = 0;
-    private PathParameterCleaner $decorated;
-
-    public function __construct()
-    {
-        $this->decorated = new PathParameterCleaner();
-    }
-
-    public function clean(mixed $parameter): mixed
-    {
-        if ($parameter instanceof Parameter) {
-            $this->callCount++;
-        }
-
-        return $this->decorated->clean($parameter);
+        self::assertSame(0, $this->cleaner->getCallCount());
     }
 }

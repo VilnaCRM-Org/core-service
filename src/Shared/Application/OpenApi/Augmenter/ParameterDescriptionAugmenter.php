@@ -8,9 +8,9 @@ use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
+use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use App\Shared\Application\OpenApi\ParameterDescriptionDictionary;
-use App\Shared\Application\OpenApi\Support\PathItemOperations;
-use App\Shared\Application\OpenApi\Support\PathsManipulator;
 
 final class ParameterDescriptionAugmenter
 {
@@ -18,7 +18,7 @@ final class ParameterDescriptionAugmenter
     {
         $parameterDescriptions = ParameterDescriptionDictionary::descriptions();
 
-        PathsManipulator::map(
+        PathsMapper::map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this
                 ->augmentPathItem($pathItem, $parameterDescriptions)
@@ -30,7 +30,7 @@ final class ParameterDescriptionAugmenter
      */
     private function augmentPathItem(PathItem $pathItem, array $descriptions): PathItem
     {
-        return PathItemOperations::map(
+        return PathItemOperationMapper::map(
             $pathItem,
             fn (Operation $operation): Operation => $this
                 ->augmentOperation($operation, $descriptions)

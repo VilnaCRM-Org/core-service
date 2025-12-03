@@ -11,7 +11,7 @@ final class DataCleaner
 {
     public function __construct(
         private readonly ArrayValueCleaner $arrayProcessor,
-        private readonly ValueFilter $valueFilter
+        private readonly ValueCleaner $valueFilter
     ) {
     }
 

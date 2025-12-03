@@ -31,7 +31,6 @@ final class ParameterNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param object $data
      * @param array<string, bool|int|string> $context
      */
     public function supportsNormalization(

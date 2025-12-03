@@ -6,6 +6,8 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Applier\SpecExtensionPropertyApplier;
+use App\Shared\Application\OpenApi\Cleaner\SpecMetadataCleaner;
 use ArrayObject;
 
 final class SpecCleanupProcessor

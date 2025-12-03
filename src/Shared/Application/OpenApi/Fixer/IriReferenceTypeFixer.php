@@ -7,8 +7,8 @@ namespace App\Shared\Application\OpenApi\Fixer;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Support\PathItemOperations;
-use App\Shared\Application\OpenApi\Support\PathsManipulator;
+use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
+use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use ArrayObject;
 
 final class IriReferenceTypeFixer
@@ -20,7 +20,7 @@ final class IriReferenceTypeFixer
 
     public function fix(OpenApi $openApi): void
     {
-        PathsManipulator::map(
+        PathsMapper::map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this->applyOperations($pathItem)
         );
@@ -28,7 +28,7 @@ final class IriReferenceTypeFixer
 
     private function applyOperations(PathItem $pathItem): PathItem
     {
-        return PathItemOperations::map(
+        return PathItemOperationMapper::map(
             $pathItem,
             fn (Operation $operation): Operation => $this
                 ->fixOperation($operation)

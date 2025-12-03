@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Shared\Application\OpenApi\Processor\IriReferenceOperationContextResolver;
+use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolver;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
