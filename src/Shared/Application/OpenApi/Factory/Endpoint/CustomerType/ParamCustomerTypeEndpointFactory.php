@@ -18,7 +18,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustomerType;
+use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerTypeUlidParameterFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerTypeEndpointFactory extends EndpointFactory
@@ -38,7 +38,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
     private RequestBody $replaceCustomerTypeRequest;
 
     public function __construct(
-        private UlidUriCustomerType $parameterFactory,
+        private CustomerTypeUlidParameterFactory $parameterFactory,
         private TypeUpdateRequestFactory $updateCustomerTypeRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,

@@ -17,13 +17,11 @@ final class ParameterDescriptionProcessor
     {
         $parameterDescriptions = ParameterDescriptionDictionary::descriptions();
 
-        PathsMapper::map(
+        return PathsMapper::map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this
                 ->processPathItem($pathItem, $parameterDescriptions)
         );
-
-        return $openApi;
     }
 
     /**
