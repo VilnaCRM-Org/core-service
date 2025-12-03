@@ -8,6 +8,7 @@ description: Ensure proper code organization with class names, directories, name
 ## Purpose
 
 Maintain proper code organization where:
+
 - **Directory X contains ONLY class type X**
 - Class names match their functionality
 - Namespaces match directory structure
@@ -19,6 +20,7 @@ Maintain proper code organization where:
 **"Directory X should contain ONLY class type X"**
 
 Examples:
+
 - `Converter/` → Contains ONLY converters
 - `Transformer/` → Contains ONLY transformers
 - `Validator/` → Contains ONLY validators
@@ -40,6 +42,7 @@ Examples:
 ### 1. Class Location
 
 ✅ **CORRECT:**
+
 ```php
 // File: src/Shared/Infrastructure/Converter/UlidTypeConverter.php
 namespace App\Shared\Infrastructure\Converter;
@@ -52,6 +55,7 @@ final class UlidTypeConverter  // IS a Converter
 ```
 
 ❌ **WRONG:**
+
 ```php
 // File: src/Shared/Infrastructure/Transformer/UlidTypeConverter.php
 namespace App\Shared\Infrastructure\Transformer;
@@ -67,6 +71,7 @@ final class UlidTypeConverter  // IS a Converter, NOT a Transformer!
 Class name MUST match what it does:
 
 ✅ **CORRECT:**
+
 - `UlidValidator` → validates ULIDs
 - `UlidTransformer` → transforms for Doctrine
 - `UlidTypeConverter` → converts between types
@@ -74,6 +79,7 @@ Class name MUST match what it does:
 - `ContentPropertyFixer` → fixes content properties
 
 ❌ **WRONG:**
+
 - `UlidHelper` → Too vague, what does it help with?
 - `UlidConverter` → What does it convert? Be specific: `UlidTypeConverter`
 - `UlidUtils` → What utilities? Extract to specific classes
@@ -83,12 +89,14 @@ Class name MUST match what it does:
 Namespace MUST match directory structure:
 
 ✅ **CORRECT:**
+
 ```php
 // File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Validator;
 ```
 
 ❌ **WRONG:**
+
 ```php
 // File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Transformer;  // Wrong namespace!
@@ -99,12 +107,14 @@ namespace App\Shared\Infrastructure\Transformer;  // Wrong namespace!
 Variables should be specific and descriptive:
 
 ✅ **CORRECT:**
+
 ```php
 private UlidTypeConverter $typeConverter;  // Specific
 public function fromBinary(...$value)      // Accepts any type
 ```
 
 ❌ **WRONG:**
+
 ```php
 private UlidTypeConverter $converter;      // Vague - converter of what?
 public function fromBinary(...$binary)     // Misleading - accepts ANY type
@@ -115,12 +125,14 @@ public function fromBinary(...$binary)     // Misleading - accepts ANY type
 Parameter names MUST match their actual type/purpose:
 
 ✅ **CORRECT:**
+
 ```php
 public function toPhpValue(mixed $value): Ulid  // Accepts mixed, name is generic
 public function fromBinary(mixed $value): Ulid  // Accepts mixed despite method name
 ```
 
 ❌ **WRONG:**
+
 ```php
 public function fromBinary(mixed $binary): Ulid  // Name suggests only binary accepted
 ```
@@ -130,6 +142,7 @@ public function fromBinary(mixed $binary): Ulid  // Name suggests only binary ac
 Comments MUST accurately describe functionality:
 
 ✅ **CORRECT:**
+
 ```php
 /**
  * Validates ULID values.
@@ -138,6 +151,7 @@ final class UlidValidator
 ```
 
 ❌ **WRONG:**
+
 ```php
 /**
  * Validates ULID values before transformation.  // Misleading - it's used BY transformer
@@ -194,6 +208,7 @@ When refactoring code organization:
 ### Step 1: Identify What the Class Does
 
 Ask yourself:
+
 - What is the PRIMARY responsibility of this class?
 - Does it convert? → `Converter/`
 - Does it transform? → `Transformer/`
@@ -205,26 +220,30 @@ Ask yourself:
 ### Step 2: Check the Directory
 
 Current location matches responsibility?
+
 - ✅ YES → Class is correctly placed
 - ❌ NO → Move to appropriate directory
 
 ### Step 3: Update All References
 
 1. Move the file:
+
    ```bash
    mv src/Path/OldDir/Class.php src/Path/NewDir/Class.php
    ```
 
 2. Update namespace in the file:
+
    ```php
    namespace App\Path\NewDir;
    ```
 
 3. Update all imports:
+
    ```bash
    # Find all files using this class
    grep -r "use.*OldDir\\ClassName" src/ tests/
-   
+
    # Update them
    sed -i 's|OldDir\\ClassName|NewDir\\ClassName|g' affected_files
    ```
@@ -239,6 +258,7 @@ Current location matches responsibility?
 ### Step 4: Verify Consistency
 
 Check that:
+
 - [ ] Class is in correct directory
 - [ ] Namespace matches directory
 - [ ] Class name matches functionality
@@ -252,6 +272,7 @@ Check that:
 ### Example 1: UlidValidator
 
 **Before:**
+
 ```php
 // src/Shared/Infrastructure/Transformer/UlidValidator.php
 namespace App\Shared\Infrastructure\Transformer;
@@ -263,10 +284,12 @@ final class UlidValidator { }
 ```
 
 **Issues:**
+
 - ❌ In Transformer/ directory but it's a VALIDATOR
 - ❌ Comment says "before transformation" (misleading)
 
 **After:**
+
 ```php
 // src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Validator;
@@ -278,12 +301,14 @@ final class UlidValidator { }
 ```
 
 **Fixed:**
+
 - ✅ In Validator/ directory (correct)
 - ✅ Comment is accurate
 
 ### Example 2: UlidTypeConverter
 
 **Before:**
+
 ```php
 // src/Shared/Infrastructure/Transformer/UlidConverter.php
 namespace App\Shared\Infrastructure\Transformer;
@@ -295,11 +320,13 @@ final class UlidConverter
 ```
 
 **Issues:**
+
 - ❌ In Transformer/ directory but it's a CONVERTER
 - ❌ Name "UlidConverter" too generic
 - ❌ Parameter "$binary" misleading (accepts any type)
 
 **After:**
+
 ```php
 // src/Shared/Infrastructure/Converter/UlidTypeConverter.php
 namespace App\Shared\Infrastructure\Converter;
@@ -311,6 +338,7 @@ final class UlidTypeConverter
 ```
 
 **Fixed:**
+
 - ✅ In Converter/ directory (correct)
 - ✅ Name "UlidTypeConverter" is specific
 - ✅ Parameter "$value" is accurate (accepts any type)
@@ -318,13 +346,14 @@ final class UlidTypeConverter
 ### Example 3: UlidTransformer
 
 **Before:**
+
 ```php
 final readonly class UlidTransformer
 {
     public function __construct(
         private UlidTypeConverter $converter  // Vague
     ) { }
-    
+
     public function toPhpValue(mixed $binary): Ulid  // Misleading name
     {
         $this->converter->fromBinary($binary);
@@ -333,17 +362,19 @@ final readonly class UlidTransformer
 ```
 
 **Issues:**
+
 - ❌ Variable "$converter" too vague
 - ❌ Parameter "$binary" misleading (accepts any type)
 
 **After:**
+
 ```php
 final readonly class UlidTransformer
 {
     public function __construct(
         private UlidTypeConverter $typeConverter  // Specific
     ) { }
-    
+
     public function toPhpValue(mixed $value): Ulid  // Accurate
     {
         $this->typeConverter->fromBinary($value);
@@ -352,22 +383,23 @@ final readonly class UlidTransformer
 ```
 
 **Fixed:**
+
 - ✅ Variable "$typeConverter" is specific
 - ✅ Parameter "$value" is accurate
 
 ## Quick Reference: Is It in the Right Place?
 
-| Class Does | Belongs In | Examples |
-|-----------|-----------|----------|
-| Converts types | `Converter/` | UlidTypeConverter |
-| Transforms data (DB↔PHP) | `Transformer/` | UlidTransformer |
-| Validates values | `Validator/` | UlidValidator |
-| Builds/constructs | `Builder/` | ArrayResponseBuilder |
-| Fixes/modifies | `Fixer/` | ContentPropertyFixer |
-| Cleans/filters | `Cleaner/` | ArrayValueCleaner |
-| Creates objects | `Factory/` | UlidFactory |
-| Serializes/normalizes | `Serializer/` | OpenApiNormalizer |
-| Domain logic | `Entity/`, `ValueObject/` | Customer, Ulid |
+| Class Does                | Belongs In                | Examples             |
+| ------------------------- | ------------------------- | -------------------- |
+| Converts types            | `Converter/`              | UlidTypeConverter    |
+| Transforms data (DB↔PHP) | `Transformer/`            | UlidTransformer      |
+| Validates values          | `Validator/`              | UlidValidator        |
+| Builds/constructs         | `Builder/`                | ArrayResponseBuilder |
+| Fixes/modifies            | `Fixer/`                  | ContentPropertyFixer |
+| Cleans/filters            | `Cleaner/`                | ArrayValueCleaner    |
+| Creates objects           | `Factory/`                | UlidFactory          |
+| Serializes/normalizes     | `Serializer/`             | OpenApiNormalizer    |
+| Domain logic              | `Entity/`, `ValueObject/` | Customer, Ulid       |
 
 ## Pre-Commit Checklist
 
@@ -405,20 +437,24 @@ grep -r "^namespace" src/ --include="*.php" | head -10
 ## Common Mistakes to Avoid
 
 1. **Don't create "Helper" or "Util" classes**
+
    - These are code smells
    - Extract specific responsibilities into properly named classes
 
 2. **Don't put multiple class types in one directory**
+
    - Converters don't belong in Transformer/
    - Validators don't belong in Converter/
    - Each directory has ONE purpose
 
 3. **Don't use vague variable names**
+
    - "$converter" → "$typeConverter" (be specific)
    - "$data" → "$customerData" (be descriptive)
    - "$value" is OK for parameters accepting ANY type
 
 4. **Don't mismatch parameter names with types**
+
    - If parameter accepts `mixed`, don't name it after one type
    - `fromBinary(mixed $binary)` → `fromBinary(mixed $value)`
 
