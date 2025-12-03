@@ -22,7 +22,9 @@ final class IriReferenceOperationContextResolverTest extends UnitTestCase
 
     public function testResolveReturnsContextWhenOperationHasRequestBody(): void
     {
-        $requestBody = (new RequestBody())->withContent(new ArrayObject(['application/json' => []]));
+        $requestBody = (new RequestBody())->withContent(
+            new ArrayObject(['application/json' => []])
+        );
         $pathItem = (new PathItem())->withPost(
             (new Operation('op'))->withRequestBody($requestBody)
         );

@@ -59,7 +59,10 @@ final class ArrayValueCleanerTest extends UnitTestCase
         ];
 
         $recursiveCleaner = static function (array $data): array {
-            return array_map(static fn ($value) => is_array($value) ? ['cleaned' => true] : $value, $data);
+            return array_map(
+                static fn ($value) => is_array($value) ? ['cleaned' => true] : $value,
+                $data
+            );
         };
 
         $result = $this->processor->clean('customKey', $data, $recursiveCleaner);

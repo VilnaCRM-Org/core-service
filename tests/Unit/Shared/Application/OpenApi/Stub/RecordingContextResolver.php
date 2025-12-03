@@ -14,7 +14,8 @@ final class RecordingContextResolver implements IriReferenceOperationContextReso
     private bool $invoked = false;
 
     public function __construct(
-        private readonly IriReferenceOperationContextResolver $inner = new IriReferenceOperationContextResolver()
+        private readonly IriReferenceOperationContextResolver $inner =
+            new IriReferenceOperationContextResolver()
     ) {
     }
 
