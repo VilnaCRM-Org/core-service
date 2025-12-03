@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Cleaner;
 
 /**
- * Determines if a value should be filtered out during data cleaning.
+ * Cleans values by determining which should be removed during data cleaning.
  */
-final class ValueFilter
+final class ValueCleaner
 {
     public function __construct(
-        private readonly EmptyArrayFilter $emptyValueChecker
+        private readonly EmptyArrayCleaner $emptyValueChecker
     ) {
     }
 

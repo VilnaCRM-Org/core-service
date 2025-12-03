@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Request;
+namespace App\Shared\Application\Extractor;
 
 final class PatchUlidExtractor
 {

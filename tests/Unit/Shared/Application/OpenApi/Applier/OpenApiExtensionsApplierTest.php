@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Application\OpenApi\Extension;
+namespace App\Tests\Unit\Shared\Application\OpenApi\Applier;
 
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Extension\OpenApiExtensionsApplier;
+use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Tests\Unit\UnitTestCase;
 
 final class OpenApiExtensionsApplierTest extends UnitTestCase

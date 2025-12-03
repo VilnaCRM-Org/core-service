@@ -7,9 +7,9 @@ namespace App\Shared\Application\OpenApi\Processor;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
+use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use App\Shared\Application\OpenApi\ParameterDescriptionDictionary;
-use App\Shared\Application\OpenApi\Support\PathItemOperations;
-use App\Shared\Application\OpenApi\Support\PathsManipulator;
 
 final class ParameterDescriptionProcessor
 {
@@ -17,7 +17,7 @@ final class ParameterDescriptionProcessor
     {
         $parameterDescriptions = ParameterDescriptionDictionary::descriptions();
 
-        PathsManipulator::map(
+        PathsMapper::map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this
                 ->processPathItem($pathItem, $parameterDescriptions)
@@ -31,7 +31,7 @@ final class ParameterDescriptionProcessor
      */
     private function processPathItem(PathItem $pathItem, array $descriptions): PathItem
     {
-        return PathItemOperations::map(
+        return PathItemOperationMapper::map(
             $pathItem,
             fn ($operation) => $operation->withParameters(
                 $this->processParameters($operation->getParameters(), $descriptions)
@@ -39,9 +39,6 @@ final class ParameterDescriptionProcessor
         );
     }
 
-    /**
-     * @param array<string, string> $descriptions
-     */
     /**
      * @param array<int, Parameter> $parameters
      * @param array<string, string> $descriptions

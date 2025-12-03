@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Cleaner;
 
 /**
- * Filters which empty arrays should be removed from OpenAPI spec.
+ * Cleans empty arrays from OpenAPI spec based on key names.
  */
-final class EmptyArrayFilter
+final class EmptyArrayCleaner
 {
     private const REMOVABLE_EMPTY_KEYS = [
         'extensionProperties',

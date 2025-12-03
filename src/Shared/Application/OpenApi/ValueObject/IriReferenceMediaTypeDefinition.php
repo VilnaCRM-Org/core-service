@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\ValueObject;
 
 use function array_map;
 use function is_array;
@@ -29,6 +29,7 @@ final class IriReferenceMediaTypeDefinition
     {
         $properties = $mediaType['schema']['properties'] ?? null;
 
+        /** @psalm-suppress NoValue */
         return is_array($properties) ? new self($mediaType, $properties) : null;
     }
 

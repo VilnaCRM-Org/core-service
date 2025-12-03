@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Support;
+namespace App\Shared\Application\OpenApi\Mapper;
 
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 
-final class PathItemOperations
+final class PathItemOperationMapper
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 

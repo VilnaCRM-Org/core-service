@@ -12,7 +12,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
-use App\Shared\Application\Request\PatchUlidExtractor;
+use App\Shared\Application\Extractor\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 

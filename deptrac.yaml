@@ -12,11 +12,11 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*'
         - type: className
-          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Request).*'
+          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Extension|Sanitizer|Support).*'
+          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Sanitizer|Transformer|Resolver|Applier|Mapper).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary)'
+          regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)'
 
     - name: Domain
       collectors:

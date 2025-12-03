@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Transformer;
 
 use ArrayObject;
 

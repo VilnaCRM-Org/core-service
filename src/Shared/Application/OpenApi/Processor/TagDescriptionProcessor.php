@@ -6,13 +6,14 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\TagDescriptionDictionary;
 
 final class TagDescriptionProcessor
 {
     public function process(OpenApi $openApi): OpenApi
     {
         $tags = array_reduce(
-            array_keys($this->getTagDescriptions()),
+            array_keys(TagDescriptionDictionary::descriptions()),
             fn (array $tags, string $name): array => [
                 ...$tags,
                 $name => $this->createOrUpdateTag($tags, $name),
@@ -29,24 +30,11 @@ final class TagDescriptionProcessor
     private function createOrUpdateTag(array $tags, string $tagName): Tag
     {
         $tag = $tags[$tagName] ?? new Tag($tagName);
-        $description = $this->getTagDescriptions()[$tagName];
+        $description = TagDescriptionDictionary::descriptions()[$tagName];
 
         return ($tag->getDescription() ?? '') === ''
             ? $tag->withDescription($description)
             : $tag;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function getTagDescriptions(): array
-    {
-        return [
-            'Customer' => 'Operations related to customer management',
-            'CustomerStatus' => 'Operations related to customer status management',
-            'CustomerType' => 'Operations related to customer type management',
-            'HealthCheck' => 'Health check endpoints for monitoring',
-        ];
     }
 
     /**

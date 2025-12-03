@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Transformer;
+
+use App\Shared\Application\OpenApi\ValueObject\IriReferenceMediaTypeDefinition;
 
 use function is_array;
 

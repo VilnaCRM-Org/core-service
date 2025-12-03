@@ -6,12 +6,13 @@ namespace App\Shared\Application\OpenApi\Augmenter;
 
 use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\TagDescriptionDictionary;
 
 final class TagDescriptionAugmenter
 {
     public function augment(OpenApi $openApi): OpenApi
     {
-        $tagDescriptions = $this->getTagDescriptions();
+        $tagDescriptions = TagDescriptionDictionary::descriptions();
 
         $tags = array_map(
             static fn (Tag $tag) => self::augmentTag($tag, $tagDescriptions),
@@ -19,19 +20,6 @@ final class TagDescriptionAugmenter
         );
 
         return $openApi->withTags($tags);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function getTagDescriptions(): array
-    {
-        return [
-            'Customer' => 'Operations related to customer management',
-            'CustomerStatus' => 'Operations related to customer status management',
-            'CustomerType' => 'Operations related to customer type management',
-            'HealthCheck' => 'Health check endpoints for monitoring',
-        ];
     }
 
     /**
@@ -49,6 +37,6 @@ final class TagDescriptionAugmenter
 
     private static function isDescriptionEmpty(?string $description): bool
     {
-        return $description === null || $description === '';
+        return ($description ?? '') === '';
     }
 }

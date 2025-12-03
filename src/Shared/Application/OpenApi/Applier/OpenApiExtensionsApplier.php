@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Extension;
+namespace App\Shared\Application\OpenApi\Applier;
 
 use ApiPlatform\OpenApi\OpenApi;
 

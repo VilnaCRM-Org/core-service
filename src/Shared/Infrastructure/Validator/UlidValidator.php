@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Validator;
 
+use App\Shared\Domain\ValueObject\Ulid;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 /**
@@ -13,19 +14,8 @@ final class UlidValidator
 {
     public function isValid(array|string|int|float|bool|object|null $value): bool
     {
-        if ($value === null) {
-            return false;
-        }
-
-        return $this->isValidStringUlid($value);
-    }
-
-    private function isValidStringUlid(array|string|int|float|bool|object|null $value): bool
-    {
-        if (!is_string($value)) {
-            return true;
-        }
-
-        return SymfonyUlid::isValid($value);
+        // Domain Ulid objects and SymfonyUlid objects are already valid
+        return ($value instanceof Ulid || $value instanceof SymfonyUlid)
+            || (is_string($value) && SymfonyUlid::isValid($value));
     }
 }

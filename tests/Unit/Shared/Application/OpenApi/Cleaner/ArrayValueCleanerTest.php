@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
 use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
-use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Tests\Unit\UnitTestCase;
 
 final class ArrayValueCleanerTest extends UnitTestCase
@@ -18,8 +18,8 @@ final class ArrayValueCleanerTest extends UnitTestCase
     {
         parent::setUp();
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyArrayFilter();
-        $valueFilter = new ValueFilter($emptyValueChecker);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $valueFilter = new ValueCleaner($emptyValueChecker);
         $this->processor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
     }
 

@@ -6,9 +6,9 @@ namespace App\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Augmenter\TagDescriptionAugmenter;
-use App\Shared\Application\OpenApi\Extension\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
 use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;

@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
 use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
 use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
-use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Tests\Unit\UnitTestCase;
 
 final class DataCleanerTest extends UnitTestCase
@@ -19,8 +19,8 @@ final class DataCleanerTest extends UnitTestCase
     {
         parent::setUp();
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyArrayFilter();
-        $valueFilter = new ValueFilter($emptyValueChecker);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $valueFilter = new ValueCleaner($emptyValueChecker);
         $arrayProcessor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
         $this->cleaner = new DataCleaner($arrayProcessor, $valueFilter);
     }

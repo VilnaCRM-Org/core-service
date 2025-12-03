@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
 use App\Tests\Unit\UnitTestCase;
 
-final class EmptyArrayFilterTest extends UnitTestCase
+final class EmptyArrayCleanerTest extends UnitTestCase
 {
-    private EmptyArrayFilter $checker;
+    private EmptyArrayCleaner $checker;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->checker = new EmptyArrayFilter();
+        $this->checker = new EmptyArrayCleaner();
     }
 
     public function testShouldRemoveExtensionProperties(): void

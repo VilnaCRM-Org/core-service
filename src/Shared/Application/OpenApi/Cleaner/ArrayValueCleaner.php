@@ -11,7 +11,7 @@ final class ArrayValueCleaner
 {
     public function __construct(
         private readonly ParameterCleaner $parameterCleaner,
-        private readonly ValueFilter $valueFilter
+        private readonly ValueCleaner $valueFilter
     ) {
     }
 
