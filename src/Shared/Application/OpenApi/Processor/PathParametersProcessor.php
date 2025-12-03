@@ -24,12 +24,10 @@ final class PathParametersProcessor
 
     public function process(OpenApi $openApi): OpenApi
     {
-        PathsMapper::map(
+        return PathsMapper::map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this->processPathItem($pathItem)
         );
-
-        return $openApi;
     }
 
     private function processPathItem(PathItem $pathItem): PathItem

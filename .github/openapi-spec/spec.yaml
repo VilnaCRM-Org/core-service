@@ -1888,10 +1888,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
@@ -2045,10 +2045,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/ld+json:
@@ -2169,10 +2169,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
@@ -2326,10 +2326,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/merge-patch+json:
@@ -2827,10 +2827,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     put:
       operationId: api_customer_types_ulid_put
@@ -2984,10 +2984,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/ld+json:
@@ -3108,10 +3108,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
@@ -3265,10 +3265,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/merge-patch+json:

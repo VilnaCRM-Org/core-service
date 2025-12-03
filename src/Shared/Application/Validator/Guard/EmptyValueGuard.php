@@ -15,6 +15,6 @@ final class EmptyValueGuard
         array|string|int|float|bool|null $value,
         Constraint $constraint
     ): bool {
-        return $value === null || $value === '';
+        return $value === null;
     }
 }

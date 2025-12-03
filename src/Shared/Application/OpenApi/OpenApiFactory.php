@@ -7,19 +7,15 @@ namespace App\Shared\Application\OpenApi;
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
-use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
-use App\Shared\Application\OpenApi\Augmenter\TagDescriptionAugmenter;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
-use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
-use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;
-use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
-use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
+use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
+use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
+use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
 use ArrayObject;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
-    private IriReferenceTypeFixer $iriReferenceTypeFixer;
     /** @var list<EndpointFactoryInterface> */
     private array $endpointFactories;
 
@@ -29,21 +25,20 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __construct(
         private OpenApiFactoryInterface $decorated,
         iterable $endpointFactories,
-        private PathParametersSanitizer $pathParametersSanitizer
-            = new PathParametersSanitizer(),
-        private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
-            = new ParameterDescriptionAugmenter(),
-        ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
-        private TagDescriptionAugmenter $tagDescriptionAugmenter
-            = new TagDescriptionAugmenter(),
+        private PathParametersProcessor $pathParametersProcessor
+            = new PathParametersProcessor(),
+        private ParameterDescriptionProcessor $parameterDescriptionProcessor
+            = new ParameterDescriptionProcessor(),
+        private IriReferenceTypeProcessor $iriReferenceTypeProcessor
+            = new IriReferenceTypeProcessor(),
+        private TagDescriptionProcessor $tagDescriptionProcessor
+            = new TagDescriptionProcessor(),
         private OpenApiExtensionsApplier $extensionsApplier
             = new OpenApiExtensionsApplier()
     ) {
         $this->endpointFactories = is_array($endpointFactories)
             ? $endpointFactories
             : iterator_to_array($endpointFactories);
-        $this->iriReferenceTypeFixer = $iriReferenceTypeFixer
-            ?? $this->createDefaultIriReferenceTypeFixer();
     }
 
     /**
@@ -73,11 +68,11 @@ final class OpenApiFactory implements OpenApiFactoryInterface
 
     private function applyAugmenters(OpenApi $openApi): OpenApi
     {
-        $this->parameterDescriptionAugmenter->augment($openApi);
-        $openApi = $this->tagDescriptionAugmenter->augment($openApi);
-        $this->iriReferenceTypeFixer->fix($openApi);
+        $openApi = $this->parameterDescriptionProcessor->process($openApi);
+        $openApi = $this->tagDescriptionProcessor->process($openApi);
+        $openApi = $this->iriReferenceTypeProcessor->process($openApi);
 
-        return $this->pathParametersSanitizer->sanitize($openApi);
+        return $this->pathParametersProcessor->process($openApi);
     }
 
     private function normalizeOpenApi(OpenApi $openApi): OpenApi
@@ -103,14 +98,5 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         return $webhooks instanceof ArrayObject && $webhooks->count() > 0
             ? $webhooks
             : new ArrayObject();
-    }
-
-    private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
-    {
-        return new IriReferenceTypeFixer(
-            new ContentPropertyFixer(
-                new MediaTypePropertyFixer(new PropertyTypeFixer())
-            )
-        );
     }
 }
