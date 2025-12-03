@@ -14,9 +14,12 @@ use ApiPlatform\OpenApi\Model\Schema;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\SpecCleanupProcessor;
+use App\Shared\Application\OpenApi\Processor\SpecExtensionPropertyApplier;
+use App\Shared\Application\OpenApi\Processor\SpecMetadataCleaner;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 use ReflectionMethod;
+use ReflectionProperty;
 
 final class SpecCleanupProcessorTest extends UnitTestCase
 {
@@ -132,5 +135,22 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         $result = $method->invoke($processor, null, $openApi);
 
         self::assertSame($openApi, $result);
+    }
+
+    public function testConstructorUsesProvidedCollaborators(): void
+    {
+        $metadataCleaner = new SpecMetadataCleaner();
+        $extensionApplier = new SpecExtensionPropertyApplier();
+
+        $processor = new SpecCleanupProcessor($metadataCleaner, $extensionApplier);
+
+        $metadataProperty = new ReflectionProperty(SpecCleanupProcessor::class, 'metadataCleaner');
+        $metadataProperty->setAccessible(true);
+
+        $extensionProperty = new ReflectionProperty(SpecCleanupProcessor::class, 'extensionApplier');
+        $extensionProperty->setAccessible(true);
+
+        self::assertSame($metadataCleaner, $metadataProperty->getValue($processor));
+        self::assertSame($extensionApplier, $extensionProperty->getValue($processor));
     }
 }

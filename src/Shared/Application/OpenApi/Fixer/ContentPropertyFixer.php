@@ -25,7 +25,9 @@ final class ContentPropertyFixer
 
         return array_reduce(
             array_keys($mediaTypes),
-            fn (bool $modified, string $mediaType): bool => $this->mediaTypePropertyFixer->fix($content, $mediaType, $mediaTypes[$mediaType])
+            fn (bool $modified, string $mediaType): bool => $this
+                ->mediaTypePropertyFixer
+                ->fix($content, $mediaType, $mediaTypes[$mediaType])
                 || $modified,
             false
         );

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Fixer;
 
+use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Support\PathItemOperations;
+use App\Shared\Application\OpenApi\Support\PathsManipulator;
 use ArrayObject;
 
 final class IriReferenceTypeFixer
 {
-    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
-
     public function __construct(
         private readonly ContentPropertyFixer $contentPropertyFixer
     ) {
@@ -19,39 +20,34 @@ final class IriReferenceTypeFixer
 
     public function fix(OpenApi $openApi): void
     {
-        foreach (array_keys($openApi->getPaths()->getPaths()) as $path) {
-            $pathItem = $openApi->getPaths()->getPath($path);
-
-            $pathItem = array_reduce(
-                self::OPERATIONS,
-                function (PathItem $item, string $operation): PathItem {
-                    return $this->fixOperation($item, $operation);
-                },
-                $pathItem
-            );
-
-            $openApi->getPaths()->addPath($path, $pathItem);
-        }
+        PathsManipulator::map(
+            $openApi,
+            fn (PathItem $pathItem): PathItem => $this->applyOperations($pathItem)
+        );
     }
 
-    private function fixOperation(PathItem $pathItem, string $operation): PathItem
+    private function applyOperations(PathItem $pathItem): PathItem
     {
-        $currentOperation = $pathItem->{'get' . $operation}();
-        $content = $currentOperation?->getRequestBody()?->getContent();
-
-        if (
-            !$content instanceof ArrayObject
-            || !$this->contentPropertyFixer->fix($content)
-        ) {
-            return $pathItem;
-        }
-
-        $updatedOperation = $currentOperation->withRequestBody(
-            $currentOperation->getRequestBody()->withContent(
-                new ArrayObject($content->getArrayCopy())
-            )
+        return PathItemOperations::map(
+            $pathItem,
+            fn (Operation $operation): Operation => $this
+                ->fixOperation($operation)
         );
+    }
 
-        return $pathItem->{'with' . $operation}($updatedOperation);
+    private function fixOperation(Operation $operation): Operation
+    {
+        $content = $operation->getRequestBody()?->getContent();
+
+        $canFixContent = $content instanceof ArrayObject
+            && $this->contentPropertyFixer->fix($content);
+
+        return $canFixContent
+            ? $operation->withRequestBody(
+                $operation->getRequestBody()->withContent(
+                    new ArrayObject($content->getArrayCopy())
+                )
+            )
+            : $operation;
     }
 }

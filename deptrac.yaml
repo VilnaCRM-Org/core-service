@@ -14,7 +14,9 @@ parameters:
         - type: className
           regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Request).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Extension|Sanitizer).*'
+          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Extension|Sanitizer|Support).*'
+        - type: className
+          regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary)'
 
     - name: Domain
       collectors:

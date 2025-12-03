@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Factory\CustomerUpdateFactory;
+use App\Core\Customer\Application\Factory\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Tests\Unit\UnitTestCase;
+use ReflectionProperty;
 
 final class CustomerUpdateFactoryTest extends UnitTestCase
 {
@@ -148,6 +150,19 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         self::assertSame('default@test.com', $result->newEmail);
         self::assertSame('+999', $result->newPhone);
         self::assertSame('default-source', $result->newLeadSource);
+    }
+
+    public function testConstructorUsesProvidedScalarResolverInstance(): void
+    {
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $scalarResolver = new CustomerUpdateScalarResolver();
+
+        $factory = new CustomerUpdateFactory($relationResolver, $scalarResolver);
+
+        $resolverProperty = new ReflectionProperty(CustomerUpdateFactory::class, 'scalarResolver');
+        $resolverProperty->setAccessible(true);
+
+        self::assertSame($scalarResolver, $resolverProperty->getValue($factory));
     }
 
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */

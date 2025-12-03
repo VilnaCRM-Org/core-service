@@ -29,19 +29,19 @@ final class MediaTypePropertyFixer
 
         $propertiesToFix = array_filter(
             $properties,
-            fn ($propSchema): bool => is_array($propSchema) && $this->propertyTypeFixer->needsFix($propSchema)
+            fn ($propSchema): bool => is_array($propSchema)
+                && $this->propertyTypeFixer->needsFix($propSchema)
         );
-
-        if ($propertiesToFix === []) {
-            return false;
-        }
 
         array_walk(
             $propertiesToFix,
-            fn (array $propSchema, string $propName): mixed => $content[$mediaType]['schema']['properties'][$propName] =
-                    $this->propertyTypeFixer->fix($propSchema)
+            function (array $propSchema, string $propName) use ($content, $mediaType): void {
+                $content[$mediaType]['schema']['properties'][$propName] = $this
+                    ->propertyTypeFixer
+                    ->fix($propSchema);
+            }
         );
 
-        return true;
+        return $propertiesToFix !== [];
     }
 }

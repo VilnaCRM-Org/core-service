@@ -19,11 +19,8 @@ final class ValueFilter
      */
     public function shouldRemove(string|int $key, array|string|int|float|bool|null $value): bool
     {
-        if ($value === null) {
-            return true;
-        }
-
-        return $this->isRemovableEmptyArray($key, $value);
+        return $value === null
+            || $this->isRemovableEmptyArray($key, $value);
     }
 
     private function isRemovableEmptyArray(

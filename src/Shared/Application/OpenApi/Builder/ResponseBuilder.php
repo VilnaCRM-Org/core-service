@@ -37,19 +37,23 @@ final class ResponseBuilder implements ResponseBuilderInterface
      */
     private function buildHeadersArray(array $headers): ArrayObject
     {
-        $headersArray = new ArrayObject();
+        $headersArray = array_reduce(
+            $headers,
+            static function (array $collection, Header $header): array {
+                $collection[$header->name] = new Model\Header(
+                    description: $header->description,
+                    schema: [
+                        'type' => $header->type,
+                        'format' => $header->format,
+                        'example' => $header->example,
+                    ]
+                );
 
-        foreach ($headers as $header) {
-            $headersArray[$header->name] = new Model\Header(
-                description: $header->description,
-                schema: [
-                    'type' => $header->type,
-                    'format' => $header->format,
-                    'example' => $header->example,
-                ]
-            );
-        }
+                return $collection;
+            },
+            []
+        );
 
-        return $headersArray;
+        return new ArrayObject($headersArray);
     }
 }

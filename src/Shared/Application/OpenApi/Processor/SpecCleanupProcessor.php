@@ -23,7 +23,7 @@ final class SpecCleanupProcessor
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $normalizedOpenApi = $this->createNormalizedOpenApi($openApi);
+        $normalizedOpenApi = $this->metadataCleaner->createNormalizedOpenApi($openApi);
 
         return $this->applyExtensionProperties(
             $openApi->getExtensionProperties(),
@@ -31,9 +31,9 @@ final class SpecCleanupProcessor
         );
     }
 
-    private function createNormalizedOpenApi(OpenApi $openApi): OpenApi
+    private function cleanComponents(?Components $components): ?Components
     {
-        return $this->metadataCleaner->createNormalizedOpenApi($openApi);
+        return $this->metadataCleaner->cleanComponents($components);
     }
 
     private function applyExtensionProperties(
@@ -41,10 +41,5 @@ final class SpecCleanupProcessor
         OpenApi $openApi
     ): OpenApi {
         return $this->extensionApplier->apply($extensionProperties, $openApi);
-    }
-
-    private function cleanComponents(?Components $components): ?Components
-    {
-        return $this->metadataCleaner->cleanComponents($components);
     }
 }

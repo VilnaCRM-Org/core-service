@@ -27,7 +27,9 @@ final readonly class CustomerRelationTransformer implements
             $typeIri,
             $customer->getType(),
             CustomerType::class,
-            static fn (string $iri): CustomerTypeNotFoundException => CustomerTypeNotFoundException::withIri($iri)
+            static function (string $iri): CustomerTypeNotFoundException {
+                return CustomerTypeNotFoundException::withIri($iri);
+            }
         );
     }
 
@@ -39,7 +41,9 @@ final readonly class CustomerRelationTransformer implements
             $statusIri,
             $customer->getStatus(),
             CustomerStatus::class,
-            static fn (string $iri): CustomerStatusNotFoundException => CustomerStatusNotFoundException::withIri($iri)
+            static function (string $iri): CustomerStatusNotFoundException {
+                return CustomerStatusNotFoundException::withIri($iri);
+            }
         );
     }
 

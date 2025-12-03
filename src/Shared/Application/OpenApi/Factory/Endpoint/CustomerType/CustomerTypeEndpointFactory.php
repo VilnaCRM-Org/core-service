@@ -56,26 +56,22 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
 
     public function createEndpoint(OpenApi $openApi): void
     {
-        $pathItem = $openApi->getPaths()->getPath(self::ENDPOINT_URI);
-        $operationPost = $pathItem->getPost();
-        $operationGet = $pathItem->getGet();
-        $mergedGet = $this->mergeResponses(
-            $operationGet->getResponses(),
+        $this->applyOperation(
+            $openApi,
+            self::ENDPOINT_URI,
+            'Post',
+            [],
+            $this->getPostResponses(),
+            $this->createCustomerTypeRequest
+        );
+
+        $this->applyOperation(
+            $openApi,
+            self::ENDPOINT_URI,
+            'Get',
+            [],
             $this->getGetResponses()
         );
-        $mergedPost = $this->mergeResponses(
-            $operationPost->getResponses(),
-            $this->getPostResponses()
-        );
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withPost(
-                $operationPost
-                    ->withResponses($mergedPost)
-                    ->withRequestBody($this->createCustomerTypeRequest)
-            )
-            ->withGet($operationGet->withResponses(
-                $mergedGet
-            )));
     }
 
     /**

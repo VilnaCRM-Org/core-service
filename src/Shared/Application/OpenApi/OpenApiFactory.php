@@ -20,13 +20,15 @@ use ArrayObject;
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
     private IriReferenceTypeFixer $iriReferenceTypeFixer;
+    /** @var list<EndpointFactoryInterface> */
+    private array $endpointFactories;
 
     /**
      * @param iterable<EndpointFactoryInterface> $endpointFactories
      */
     public function __construct(
         private OpenApiFactoryInterface $decorated,
-        private iterable $endpointFactories,
+        iterable $endpointFactories,
         private PathParametersSanitizer $pathParametersSanitizer
             = new PathParametersSanitizer(),
         private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
@@ -37,6 +39,9 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         private OpenApiExtensionsApplier $extensionsApplier
             = new OpenApiExtensionsApplier()
     ) {
+        $this->endpointFactories = is_array($endpointFactories)
+            ? $endpointFactories
+            : iterator_to_array($endpointFactories);
         $this->iriReferenceTypeFixer = $iriReferenceTypeFixer
             ?? $this->createDefaultIriReferenceTypeFixer();
     }
@@ -47,30 +52,36 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-        $factories = is_array($this->endpointFactories)
-            ? $this->endpointFactories
-            : iterator_to_array($this->endpointFactories);
+        $this->applyEndpointFactories($openApi);
 
+        return $this->normalizeOpenApi(
+            $this->applyAugmenters($openApi)
+        );
+    }
+
+    private function applyEndpointFactories(OpenApi $openApi): void
+    {
         array_walk(
-            $factories,
-            static function (EndpointFactoryInterface $endpointFactory) use ($openApi): void {
-                $endpointFactory->createEndpoint($openApi);
+            $this->endpointFactories,
+            static function (
+                EndpointFactoryInterface $factory
+            ) use ($openApi): void {
+                $factory->createEndpoint($openApi);
             }
         );
+    }
 
+    private function applyAugmenters(OpenApi $openApi): OpenApi
+    {
         $this->parameterDescriptionAugmenter->augment($openApi);
         $openApi = $this->tagDescriptionAugmenter->augment($openApi);
         $this->iriReferenceTypeFixer->fix($openApi);
-        $openApi = $this->pathParametersSanitizer->sanitize($openApi);
 
-        return $this->normalizeOpenApi($openApi);
+        return $this->pathParametersSanitizer->sanitize($openApi);
     }
 
     private function normalizeOpenApi(OpenApi $openApi): OpenApi
     {
-        $webhooks = $openApi->getWebhooks();
-
-        // Pattern: Direct parameter inline (reduces temporary variables)
         return $this->extensionsApplier->apply(
             new OpenApi(
                 $openApi->getInfo(),
@@ -81,12 +92,17 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                 $openApi->getTags(),
                 $openApi->getExternalDocs(),
                 $openApi->getJsonSchemaDialect(),
-                $webhooks instanceof ArrayObject && $webhooks->count() > 0
-                    ? $webhooks
-                    : new ArrayObject()
+                $this->normalizeWebhooks($openApi->getWebhooks())
             ),
             $openApi->getExtensionProperties()
         );
+    }
+
+    private function normalizeWebhooks(?ArrayObject $webhooks): ArrayObject
+    {
+        return $webhooks instanceof ArrayObject && $webhooks->count() > 0
+            ? $webhooks
+            : new ArrayObject();
     }
 
     private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer

@@ -53,9 +53,7 @@ final class CustomerUpdateScalarResolver
      */
     public function resolveConfirmed(Customer $customer, array $input): bool
     {
-        $candidate = $input['confirmed'] ?? null;
-
-        return $candidate === null ? $customer->isConfirmed() : (bool) $candidate;
+        return (bool) ($input['confirmed'] ?? $customer->isConfirmed());
     }
 
     private function stringValue(?string $candidate, string $fallback): string

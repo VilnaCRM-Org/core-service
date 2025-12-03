@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Support\PathItemOperations;
+use App\Shared\Application\OpenApi\Support\PathsManipulator;
 use ArrayObject;
 
 final class IriReferenceTypeProcessor
 {
-    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
-
     private IriReferenceContentTransformerInterface $contentTransformer;
     private IriReferenceOperationContextResolverInterface $contextResolver;
 
@@ -25,12 +26,9 @@ final class IriReferenceTypeProcessor
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $paths = $openApi->getPaths();
-
-        // Pattern: Replace foreach with array_walk (functional composition)
-        array_walk(
-            array_keys($paths->getPaths()),
-            fn (string $path) => $paths->addPath($path, $this->processPathItem($paths->getPath($path)))
+        PathsManipulator::map(
+            $openApi,
+            fn (PathItem $pathItem): PathItem => $this->processPathItem($pathItem)
         );
 
         return $openApi;
@@ -38,32 +36,35 @@ final class IriReferenceTypeProcessor
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        return array_reduce(
-            self::OPERATIONS,
-            fn (PathItem $item, string $op): PathItem => $this->transformOperation($item, $op),
-            $pathItem
+        return PathItemOperations::map(
+            $pathItem,
+            fn (Operation $operation, string $operationName): Operation => $this
+                ->transformOperation($pathItem, $operation, $operationName)
         );
     }
 
-    private function transformOperation(PathItem $pathItem, string $operation): PathItem
-    {
-        $context = $this->contextResolver->resolve($pathItem, $operation);
+    private function transformOperation(
+        PathItem $pathItem,
+        Operation $operation,
+        string $operationName
+    ): Operation {
+        $context = $this->contextResolver->resolve($pathItem, $operationName);
 
-        if ($context === null) {
-            return $pathItem;
-        }
+        return $context === null
+            ? $operation
+            : $this->updateOperationFromContext($context, $operation);
+    }
 
+    private function updateOperationFromContext(
+        IriReferenceOperationContext $context,
+        Operation $defaultOperation
+    ): Operation {
         $processedContent = $this->contentTransformer->transform($context->content);
 
-        if ($processedContent === null) {
-            return $pathItem;
-        }
-
-        // Pattern: Inline trivial method (reduces method count)
-        $updatedOperation = $context->operation->withRequestBody(
-            $context->requestBody->withContent(new ArrayObject($processedContent))
-        );
-
-        return $pathItem->{'with' . $operation}($updatedOperation);
+        return $processedContent === null
+            ? $defaultOperation
+            : $context->operation->withRequestBody(
+                $context->requestBody->withContent(new ArrayObject($processedContent))
+            );
     }
 }

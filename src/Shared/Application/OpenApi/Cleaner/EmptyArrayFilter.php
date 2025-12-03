@@ -27,10 +27,6 @@ final class EmptyArrayFilter
      */
     public function shouldRemoveEmptyArray(string|int $key): bool
     {
-        if (!is_string($key)) {
-            return false;
-        }
-
-        return in_array($key, self::REMOVABLE_EMPTY_KEYS, true);
+        return is_string($key) && in_array($key, self::REMOVABLE_EMPTY_KEYS, true);
     }
 }

@@ -6,13 +6,15 @@ namespace App\Tests\Unit\Customer\Application\Processor;
 
 use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
+use App\Core\Customer\Application\Factory\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Processor\CustomerPatchUpdateResolver;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use PHPUnit\Framework\MockObject\MockObject;
-use UnexpectedValueException;
+use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final class CustomerPatchUpdateResolverTest extends UnitTestCase
 {
@@ -23,7 +25,10 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
     {
         parent::setUp();
         $this->iriConverter = $this->createMock(IriConverterInterface::class);
-        $this->resolver = new CustomerPatchUpdateResolver($this->iriConverter);
+        $this->resolver = new CustomerPatchUpdateResolver(
+            new CustomerUpdateScalarResolver(),
+            new CustomerRelationTransformer($this->iriConverter)
+        );
     }
 
     public function testBuildUsesTransformedValues(): void
@@ -52,7 +57,7 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
 
         $this->iriConverter
             ->method('getResourceFromIri')
-            ->willReturnCallback(function (string $iri) use ($dto, $type, $status): object {
+            ->willReturnCallback(static function (string $iri) use ($dto, $type, $status): object {
                 return match ($iri) {
                     $dto->type => $type,
                     $dto->status => $status,
@@ -90,7 +95,7 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
             ->method('getResourceFromIri')
             ->willReturn($this->createMock(CustomerStatus::class));
 
-        $this->expectException(UnexpectedValueException::class);
+        $this->expectException(CustomerTypeNotFoundException::class);
 
         $this->resolver->build($dto, $customer);
     }

@@ -11,10 +11,14 @@ use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 final readonly class CustomerUpdateFactory implements
     CustomerUpdateFactoryInterface
 {
+    private CustomerUpdateScalarResolver $scalarResolver;
+
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
-        private ?CustomerUpdateScalarResolver $scalarResolver = null,
+        ?CustomerUpdateScalarResolver $scalarResolver = null,
     ) {
+        $this->scalarResolver = $scalarResolver
+            ?? new CustomerUpdateScalarResolver();
     }
 
     /**
@@ -30,8 +34,7 @@ final readonly class CustomerUpdateFactory implements
      */
     public function create(Customer $customer, array $input): CustomerUpdate
     {
-        $scalarResolver = $this->scalarResolver ?? new CustomerUpdateScalarResolver();
-        $stringFields = $scalarResolver->resolveStrings($customer, $input);
+        $stringFields = $this->scalarResolver->resolveStrings($customer, $input);
 
         return new CustomerUpdate(
             $stringFields['initials'],
@@ -40,7 +43,7 @@ final readonly class CustomerUpdateFactory implements
             $stringFields['leadSource'],
             $this->relationResolver->resolveType($input['type'] ?? null, $customer),
             $this->relationResolver->resolveStatus($input['status'] ?? null, $customer),
-            $scalarResolver->resolveConfirmed($customer, $input)
+            $this->scalarResolver->resolveConfirmed($customer, $input)
         );
     }
 }
