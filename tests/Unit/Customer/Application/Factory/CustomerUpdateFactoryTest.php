@@ -175,7 +175,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $customerStatus = $this->createMock(CustomerStatus::class);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver()),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'customerType' => $customerType,
@@ -236,7 +239,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver()),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -292,7 +298,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $customer->method('isConfirmed')->willReturn($existingData['confirmed']);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver()),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -341,7 +350,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver()),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -378,7 +390,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver()),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),

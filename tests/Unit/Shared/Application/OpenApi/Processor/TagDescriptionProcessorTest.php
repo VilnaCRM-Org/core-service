@@ -61,7 +61,10 @@ final class TagDescriptionProcessorTest extends UnitTestCase
         $processedTags = $processed->getTags();
 
         $names = array_map(static fn (Tag $tag): string => $tag->getName(), $processedTags);
-        $descriptions = array_map(static fn (Tag $tag): ?string => $tag->getDescription(), $processedTags);
+        $descriptions = array_map(
+            static fn (Tag $tag): ?string => $tag->getDescription(),
+            $processedTags
+        );
 
         $customerIndex = array_search('Customer', $names, true);
         self::assertNotFalse($customerIndex);

@@ -36,7 +36,10 @@ final class TagCollectorProcessorTest extends UnitTestCase
 
         $processed = (new TagCollectorProcessor())->process($openApi);
 
-        $tagNames = array_map(static fn (Tag $tag): string => $tag->getName(), $processed->getTags());
+        $tagNames = array_map(
+            static fn (Tag $tag): string => $tag->getName(),
+            $processed->getTags()
+        );
 
         self::assertSame(['Customer', 'CustomerStatus', 'Existing'], $tagNames);
     }
@@ -58,7 +61,10 @@ final class TagCollectorProcessorTest extends UnitTestCase
         );
 
         $processed = (new TagCollectorProcessor())->process($openApi);
-        $tagNames = array_map(static fn (Tag $tag): string => $tag->getName(), $processed->getTags());
+        $tagNames = array_map(
+            static fn (Tag $tag): string => $tag->getName(),
+            $processed->getTags()
+        );
 
         self::assertSame($tagNames, array_values(array_unique($tagNames)));
     }
@@ -78,7 +84,10 @@ final class TagCollectorProcessorTest extends UnitTestCase
         );
 
         $processed = (new TagCollectorProcessor())->process($openApi);
-        $tagNames = array_map(static fn (Tag $tag): string => $tag->getName(), $processed->getTags());
+        $tagNames = array_map(
+            static fn (Tag $tag): string => $tag->getName(),
+            $processed->getTags()
+        );
 
         self::assertContains('Customer', $tagNames);
     }
@@ -99,7 +108,10 @@ final class TagCollectorProcessorTest extends UnitTestCase
         );
 
         $processed = (new TagCollectorProcessor())->process($openApi);
-        $tagNames = array_map(static fn (Tag $tag): string => $tag->getName(), $processed->getTags());
+        $tagNames = array_map(
+            static fn (Tag $tag): string => $tag->getName(),
+            $processed->getTags()
+        );
 
         self::assertSame(['Customer'], $tagNames);
     }
@@ -120,7 +132,10 @@ final class TagCollectorProcessorTest extends UnitTestCase
         );
 
         $processed = (new TagCollectorProcessor())->process($openApi);
-        $tagNames = array_map(static fn (Tag $tag): string => $tag->getName(), $processed->getTags());
+        $tagNames = array_map(
+            static fn (Tag $tag): string => $tag->getName(),
+            $processed->getTags()
+        );
 
         self::assertSame(['Customer'], $tagNames);
     }

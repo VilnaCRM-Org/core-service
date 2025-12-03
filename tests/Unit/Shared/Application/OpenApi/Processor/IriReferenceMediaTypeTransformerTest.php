@@ -16,7 +16,9 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->transformer = new IriReferenceMediaTypeTransformer(new IriReferencePropertyTransformer());
+        $this->transformer = new IriReferenceMediaTypeTransformer(
+            new IriReferencePropertyTransformer()
+        );
     }
 
     public function testTransformReturnsOriginalWhenSchemaIsMissing(): void

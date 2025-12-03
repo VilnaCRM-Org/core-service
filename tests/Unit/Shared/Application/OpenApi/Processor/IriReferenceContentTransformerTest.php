@@ -75,7 +75,10 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
         $result = $this->transformer->transform($content);
 
         self::assertNotNull($result);
-        self::assertArrayHasKey('format', $result['application/json']['schema']['properties']['relation']);
+        self::assertArrayHasKey(
+            'format',
+            $result['application/json']['schema']['properties']['relation']
+        );
     }
 
     public function testTransformIgnoresNonArrayDefinitions(): void

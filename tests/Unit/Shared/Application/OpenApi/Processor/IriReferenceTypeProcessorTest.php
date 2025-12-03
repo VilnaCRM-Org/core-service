@@ -82,7 +82,10 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
             new Components()
         );
 
-        $processed = (new IriReferenceTypeProcessor(new RecordingContentTransformer(), new RecordingContextResolver()))->process($openApi);
+        $processed = (new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            new RecordingContextResolver()
+        ))->process($openApi);
         $processedPath = $processed->getPaths()->getPath('/customers');
 
         self::assertSame(
@@ -98,10 +101,16 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
     public function testProcessUsesInjectedContentTransformer(): void
     {
         $contentTransformer = new RecordingContentTransformer();
-        $processor = new IriReferenceTypeProcessor($contentTransformer, new RecordingContextResolver());
+        $processor = new IriReferenceTypeProcessor(
+            $contentTransformer,
+            new RecordingContextResolver()
+        );
 
         $paths = new Paths();
-        $paths->addPath('/customers', (new PathItem())->withPost($this->createOperationWithIriReference()));
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
@@ -118,10 +127,16 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
     public function testProcessUsesInjectedContextResolver(): void
     {
         $resolver = new RecordingContextResolver();
-        $processor = new IriReferenceTypeProcessor(new RecordingContentTransformer(), $resolver);
+        $processor = new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            $resolver
+        );
 
         $paths = new Paths();
-        $paths->addPath('/customers', (new PathItem())->withPost($this->createOperationWithIriReference()));
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
@@ -138,7 +153,10 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
     public function testProcessPreservesExtensionProperties(): void
     {
         $paths = new Paths();
-        $paths->addPath('/customers', (new PathItem())->withPost($this->createOperationWithIriReference()));
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
 
         $openApi = (new OpenApi(
             new Info('title', '1.0', ''),
@@ -147,7 +165,10 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
             new Components()
         ))->withExtensionProperty('x-custom', 'value');
 
-        $processor = new IriReferenceTypeProcessor(new RecordingContentTransformer(), new RecordingContextResolver());
+        $processor = new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            new RecordingContextResolver()
+        );
         $result = $processor->process($openApi);
 
         self::assertSame(['x-custom' => 'value'], $result->getExtensionProperties());

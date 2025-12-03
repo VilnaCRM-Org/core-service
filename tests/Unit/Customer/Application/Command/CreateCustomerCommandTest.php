@@ -27,7 +27,11 @@ final class CreateCustomerCommandTest extends UnitTestCase
         parent::setUp();
         $this->customerFactory = new CustomerFactory();
         $ulidFactory = new UlidFactory();
-        $this->transformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
+        $this->transformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
     }
 
     public function testConstructorAcceptsCustomer(): void

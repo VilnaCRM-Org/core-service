@@ -46,7 +46,11 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $ulidFactory = new UlidFactory();
-        $this->ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
+        $this->ulidTransformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
         $this->processor = new CustomerPutProcessor(
             $this->repository,
             $this->commandBus,
