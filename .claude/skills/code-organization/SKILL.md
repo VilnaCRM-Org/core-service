@@ -501,6 +501,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 **Benefits:**
+
 - Less boilerplate code
 - Clearer dependency declaration
 - Easier to maintain
@@ -539,6 +540,7 @@ final class IriReferenceContentTransformer
 ```
 
 **Why is this wrong?**
+
 - Hard to test (can't mock dependencies)
 - Tight coupling
 - Hidden dependencies
@@ -599,18 +601,21 @@ final class CustomerCreator
 **When `new` is acceptable in src/:**
 
 1. **Value Objects:**
+
    ```php
    return new CustomerUpdate($data);  // ✅ OK
    return new Ulid($value);           // ✅ OK
    ```
 
 2. **Exceptions:**
+
    ```php
    throw new CustomerNotFoundException($id);  // ✅ OK
    throw new ValidationException($message);   // ✅ OK
    ```
 
 3. **Framework Objects:**
+
    ```php
    return new Response($content);     // ✅ OK
    return new ArrayObject($data);     // ✅ OK
@@ -685,6 +690,7 @@ public function __construct(
 ```
 
 **Why interfaces?**
+
 - Easy to mock in tests
 - Supports multiple implementations
 - Follows SOLID principles
@@ -744,6 +750,7 @@ final class CustomerUpdateScalarResolver  // Now in correct directory!
 ```
 
 **What changed:**
+
 - ✅ Moved from `Factory/` to `Resolver/`
 - ✅ Updated namespace
 - ✅ Updated all imports in dependent files
@@ -782,6 +789,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 **What changed:**
+
 - ✅ Removed default instantiation
 - ✅ Made dependency required
 - ✅ Used constructor property promotion
@@ -828,6 +836,7 @@ final class OpenApiFactory
 ```
 
 **What changed:**
+
 - ✅ Removed all 5 default instantiations
 - ✅ All dependencies now required
 - ✅ Configured in `services.yaml` instead
@@ -837,15 +846,15 @@ final class OpenApiFactory
 
 ```yaml
 services:
-    App\Shared\Application\OpenApi\OpenApiFactory:
-        arguments:
-            $decorated: '@api_platform.openapi.factory'
-            $endpointFactories: !tagged_iterator 'app.openapi.endpoint_factory'
-            $pathParametersProcessor: '@App\Shared\Application\OpenApi\Processor\PathParametersProcessor'
-            $parameterDescriptionProcessor: '@App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor'
-            $iriReferenceTypeProcessor: '@App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor'
-            $tagDescriptionProcessor: '@App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor'
-            $extensionsApplier: '@App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier'
+  App\Shared\Application\OpenApi\OpenApiFactory:
+    arguments:
+      $decorated: '@api_platform.openapi.factory'
+      $endpointFactories: !tagged_iterator 'app.openapi.endpoint_factory'
+      $pathParametersProcessor: '@App\Shared\Application\OpenApi\Processor\PathParametersProcessor'
+      $parameterDescriptionProcessor: '@App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor'
+      $iriReferenceTypeProcessor: '@App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor'
+      $tagDescriptionProcessor: '@App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor'
+      $extensionsApplier: '@App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier'
 ```
 
 ### Example 4: Test Coverage for Extension Properties
@@ -876,6 +885,7 @@ public function testProcessPreservesExtensionProperties(): void
 ```
 
 **Why this matters:**
+
 - ✅ Achieves 100% code coverage
 - ✅ Catches mutation testing escapes
 - ✅ Verifies important functionality (extension properties preserved)
@@ -922,6 +932,7 @@ final class PathsMapper
 ```
 
 **Why avoid static?**
+
 - Hard to mock in tests
 - Creates tight coupling
 - Cannot be polymorphic
@@ -929,6 +940,7 @@ final class PathsMapper
 - Makes code less flexible
 
 **When static is acceptable:**
+
 - Named constructors (e.g., `Parameter::required()`)
 - Factory methods on value objects
 - Framework requirements (e.g., `EventSubscriber::getSubscribedEvents()`)
