@@ -14,7 +14,7 @@ parameters:
         - type: className
           regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer|ValueObject|Cleaner|Augmenter|Fixer|Sanitizer|Transformer|Resolver|Applier|Mapper).*'
+          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject).*'
         - type: className
           regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)'
 
@@ -23,7 +23,7 @@ parameters:
         - type: className
           regex: '.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
         - type: className
-          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
+          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|Event|Exception|Factory|Repository|Collection).*'
         - type: className
           regex: '.*\\Shared\\Domain\\Bus\\(Command|Event).*'
 
