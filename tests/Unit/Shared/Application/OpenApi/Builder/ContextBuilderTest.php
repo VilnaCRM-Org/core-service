@@ -36,22 +36,6 @@ final class ContextBuilderTest extends UnitTestCase
         $this->assertEquals(['type' => 'custom'], $properties['test']);
     }
 
-    public function testConstructorWithCustomParameterSchemaFactory(): void
-    {
-        $customFactory = $this->createMock(ParameterSchemaFactory::class);
-        $customFactory->expects($this->once())
-            ->method('create')
-            ->willReturn(['type' => 'custom']);
-
-        $builder = new ContextBuilder($customFactory);
-
-        $params = [Parameter::required('test', 'string', 'value')];
-        $result = $builder->build($params);
-
-        $properties = $result['application/problem+json']['schema']['properties'];
-        $this->assertEquals(['type' => 'custom'], $properties['test']);
-    }
-
     public function testBuildWithEmptyParams(): void
     {
         $content = $this->contextBuilder->build([]);
