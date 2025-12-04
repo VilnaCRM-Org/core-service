@@ -6,9 +6,6 @@ namespace App\Shared\Application\Validator\Guard;
 
 use Symfony\Component\Validator\Constraint;
 
-/**
- * Guards against validating null and empty values.
- */
 final class EmptyValueGuard
 {
     public function shouldSkip(

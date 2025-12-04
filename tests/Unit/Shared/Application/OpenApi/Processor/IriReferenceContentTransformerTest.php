@@ -104,6 +104,10 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
 
         self::assertNotNull($result);
         self::assertSame(
+            'string',
+            $result['application/json']['schema']['properties']['status']['type']
+        );
+        self::assertSame(
             'iri-reference',
             $result['application/json']['schema']['properties']['status']['format']
         );

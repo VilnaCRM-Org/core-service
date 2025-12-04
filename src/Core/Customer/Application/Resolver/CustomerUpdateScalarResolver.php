@@ -60,7 +60,6 @@ final class CustomerUpdateScalarResolver
     {
         $trimmed = trim($candidate ?? '');
 
-        // Pattern: Match expression for cleaner logic
         return match (true) {
             $trimmed !== '' => $trimmed,
             default => $fallback,
