@@ -65,6 +65,8 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 | **Create load tests**      | `load-testing`                  | K6 performance tests (REST/GraphQL)       |
 | **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields         |
 | **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                |
+| **Develop OpenAPI layer**  | `openapi-development`           | OpenAPI processors, complexity patterns   |
+| **Organize code**          | `code-organization`             | Proper class placement, naming consistency |
 | **Sync documentation**     | `documentation-sync`            | After any code changes                    |
 | **Quality overview**       | `quality-standards`             | Understanding protected thresholds        |
 
