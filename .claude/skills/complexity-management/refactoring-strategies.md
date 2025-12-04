@@ -1580,7 +1580,7 @@ Ask yourself these questions:
 
 #### Options for the Final 0.1%
 
-##### Option A: Accept Current Quality
+##### Option A: Accept Current Quality (with further refactoring)
 
 ```text
 ✅ Complexity: 93.9% (avg CCN: 1.18)
@@ -1589,7 +1589,7 @@ Ask yourself these questions:
 ✅ Style: 100%
 ```
 
-**Justification**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. Consider adjusting `phpinsights.php` threshold to 93.9%.
+**Approach**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, **project policy requires maintaining the 95% threshold**. Continue with micro-optimizations using Option B to reach 95%.
 
 ##### Option B: Strategic Micro-Optimization
 
@@ -1600,22 +1600,20 @@ Target only the highest-impact changes:
 3. Verify improvement
 4. Stop if no improvement or readability suffers
 
-##### Option C: Adjust Threshold (Last Resort)
+##### Option C: Adjust Threshold (❌ FORBIDDEN IN THIS PROJECT)
 
 ```php
 // phpinsights.php
+// ❌ NEVER DO THIS IN THIS PROJECT
 'requirements' => [
-    'min-complexity' => 93.9,  // Adjusted from 94 to reflect achievable quality
+    'min-complexity' => 93.9,  // ❌ Lowering thresholds is FORBIDDEN
     // ... other thresholds remain at 100
 ],
 ```
 
-**When to adjust**: If you've exhausted optimization options and:
+**Why this is forbidden**: This project has a strict policy that **phpinsights thresholds must NEVER be lowered**. The minimum complexity threshold is 95%, and this must be maintained or exceeded. If you cannot reach 95%, continue refactoring using Option B or seek additional guidance.
 
-- Average CCN < 1.2
-- No individual classes > 6 CCN
-- All other metrics at 100%
-- Code is highly maintainable
+**This example is shown only to illustrate what NOT to do**. In other codebases without this policy, threshold adjustment might be acceptable, but not here.
 
 ---
 

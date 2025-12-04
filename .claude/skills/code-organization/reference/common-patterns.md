@@ -295,7 +295,7 @@ public function serialize(mixed $data): string
 
 ## Identification Flowchart
 
-```
+```text
 Does it create objects?
   └─ YES → Factory/
   └─ NO ↓
