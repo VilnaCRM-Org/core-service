@@ -764,7 +764,7 @@ Key configuration:
 ```php
 'requirements' => [
     'min-quality' => 100,
-    'min-complexity' => 94,  // Matches user-service
+    'min-complexity' => 95,  // Project standard (NEVER decrease below 95%)
     'min-architecture' => 100,
     'min-style' => 100,
 ],
