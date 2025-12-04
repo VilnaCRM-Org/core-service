@@ -147,6 +147,36 @@ final class UlidRangeFilterTest extends UnitTestCase
         );
     }
 
+    public function testNormalizeValuesWithNonArrayValue(): void
+    {
+        $filter = $this->createFilter(['ulid' => null]);
+        $ulidString = (string) $this->faker->ulid();
+
+        $reflection = new \ReflectionClass($filter);
+        $method = $reflection->getMethod('normalizeValues');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($filter, $ulidString);
+
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+        $this->assertEquals($ulidString, $result[0]);
+    }
+
+    public function testNormalizeValuesWithArrayValue(): void
+    {
+        $filter = $this->createFilter(['ulid' => null]);
+        $arrayValue = ['lt' => (string) $this->faker->ulid()];
+
+        $reflection = new \ReflectionClass($filter);
+        $method = $reflection->getMethod('normalizeValues');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($filter, $arrayValue);
+
+        $this->assertSame($arrayValue, $result);
+    }
+
     public function testApplyWithEmptyContext(): void
     {
         $filter = $this->createFilter(['ulid' => null]);

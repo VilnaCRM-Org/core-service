@@ -6,6 +6,8 @@ namespace App\Shared\Application\OpenApi\Builder;
 
 use ApiPlatform\OpenApi\Model;
 use ApiPlatform\OpenApi\Model\Response;
+use App\Shared\Application\OpenApi\ValueObject\Header;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use ArrayObject;
 
 final class ResponseBuilder implements ResponseBuilderInterface
@@ -23,12 +25,22 @@ final class ResponseBuilder implements ResponseBuilderInterface
         array $params,
         array $headers
     ): Response {
-        $content = $this->contextBuilder->build($params);
-        $headersArray = new ArrayObject();
+        return new Response(
+            description: $description,
+            content: $this->contextBuilder->build($params),
+            headers: $this->buildHeadersArray($headers)
+        );
+    }
 
-        if (count($headers) > 0) {
-            foreach ($headers as $header) {
-                $headersArray[$header->name] = new Model\Header(
+    /**
+     * @param array<Header> $headers
+     */
+    private function buildHeadersArray(array $headers): ArrayObject
+    {
+        $headersArray = array_reduce(
+            $headers,
+            static function (array $collection, Header $header): array {
+                $collection[$header->name] = new Model\Header(
                     description: $header->description,
                     schema: [
                         'type' => $header->type,
@@ -36,13 +48,12 @@ final class ResponseBuilder implements ResponseBuilderInterface
                         'example' => $header->example,
                     ]
                 );
-            }
-        }
 
-        return new Response(
-            description: $description,
-            content: $content,
-            headers: $headersArray
+                return $collection;
+            },
+            []
         );
+
+        return new ArrayObject($headersArray);
     }
 }

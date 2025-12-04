@@ -15,6 +15,9 @@ final class CustomerNotFoundExceptionTest extends UnitTestCase
         $exception = CustomerNotFoundException::withId($id);
 
         $this->assertInstanceOf(CustomerNotFoundException::class, $exception);
-        $this->assertSame(sprintf('Customer with id "%s" not found', $id), $exception->getMessage());
+        $this->assertSame(
+            sprintf('Customer with id "%s" not found', $id),
+            $exception->getMessage()
+        );
     }
 }

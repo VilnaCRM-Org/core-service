@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Factory\Endpoint\Customer;
 
 use ApiPlatform\OpenApi\Model\Parameter;
-use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
@@ -19,7 +18,7 @@ use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
 use App\Shared\Application\OpenApi\Factory\Response\UnauthorizedResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ValidationErrorFactory;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustomerFactory;
+use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerUlidParameterFactory;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class ParamCustomerEndpointFactory extends EndpointFactory
@@ -40,7 +39,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private UlidUriCustomerFactory $parameterFactory,
+        private CustomerUlidParameterFactory $parameterFactory,
         private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
         private ValidationErrorFactory $validationErrorResponseFactory,
         private BadRequestResponseFactory $badRequestResponseFactory,
@@ -92,75 +91,48 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
 
     private function setPutOperation(OpenApi $openApi): void
     {
-        $pathItem = $this->getPathItem($openApi);
-        $operationPut = $pathItem->getPut();
-        $mergedResponses = $this->mergeResponses(
-            $operationPut->getResponses(),
-            $this->getUpdateResponses()
-        );
-
-        $openApi->getPaths()->addPath(
+        $this->applyOperation(
+            $openApi,
             self::ENDPOINT_URI,
-            $pathItem->withPut(
-                $operationPut
-                    ->withParameters([$this->ulidWithExamplePathParam])
-                    ->withResponses($mergedResponses)
-                    ->withRequestBody($this->replaceCustomerRequest)
-            )
+            'Put',
+            [$this->ulidWithExamplePathParam],
+            $this->getUpdateResponses(),
+            $this->replaceCustomerRequest
         );
     }
 
     private function setPatchOperation(OpenApi $openApi): void
     {
-        $pathItem = $this->getPathItem($openApi);
-        $operationPatch = $pathItem->getPatch();
-        $mergedResponses = $this->mergeResponses(
-            $operationPatch->getResponses(),
-            $this->getUpdateResponses()
-        );
-        $openApi->getPaths()->addPath(
+        $this->applyOperation(
+            $openApi,
             self::ENDPOINT_URI,
-            $pathItem
-                ->withPatch(
-                    $operationPatch
-                        ->withParameters([$this->ulidWithExamplePathParam])
-                        ->withRequestBody($this->updateCustomerRequest)
-                        ->withResponses($mergedResponses)
-                )
+            'Patch',
+            [$this->ulidWithExamplePathParam],
+            $this->getUpdateResponses(),
+            $this->updateCustomerRequest
         );
     }
 
     private function setDeleteOperation(OpenApi $openApi): void
     {
-        $pathItem = $this->getPathItem($openApi);
-        $operationDelete = $pathItem->getDelete();
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withDelete(
-                $operationDelete
-                    ->withParameters([$this->ulidWithExamplePathParam])
-                    ->withResponses($this->getDeleteResponses())
-            ));
+        $this->applyOperation(
+            $openApi,
+            self::ENDPOINT_URI,
+            'Delete',
+            [$this->ulidWithExamplePathParam],
+            $this->getDeleteResponses()
+        );
     }
 
     private function setGetOperation(OpenApi $openApi): void
     {
-        $pathItem = $this->getPathItem($openApi);
-        $operationGet = $pathItem->getGet();
-        $mergedResponses = $this->mergeResponses(
-            $operationGet->getResponses(),
+        $this->applyOperation(
+            $openApi,
+            self::ENDPOINT_URI,
+            'Get',
+            [$this->ulidWithExamplePathParam],
             $this->getGetResponses()
         );
-        $openApi->getPaths()->addPath(self::ENDPOINT_URI, $pathItem
-            ->withGet(
-                $operationGet->withParameters([$this->ulidWithExamplePathParam])
-                    ->withResponses($mergedResponses)
-            ));
-    }
-
-    private function getPathItem(OpenApi $openApi): PathItem
-    {
-        $paths = $openApi->getPaths();
-        return $paths->getPath(self::ENDPOINT_URI);
     }
 
     /**

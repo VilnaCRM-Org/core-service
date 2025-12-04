@@ -139,7 +139,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     private function setupPaths(): void
     {
         $this->openApi->method('getPaths')->willReturn($this->paths);
-        $this->paths->expects($this->once())
+        $this->paths->expects($this->exactly(2))
             ->method('getPath')
             ->with('/api/customers')
             ->willReturn($this->pathItem);
@@ -190,7 +190,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
             ->method('withGet')
             ->with($this->operationGet)
             ->willReturnSelf();
-        $this->paths->expects($this->once())
+        $this->paths->expects($this->exactly(2))
             ->method('addPath')
             ->with('/api/customers', $this->pathItem);
     }

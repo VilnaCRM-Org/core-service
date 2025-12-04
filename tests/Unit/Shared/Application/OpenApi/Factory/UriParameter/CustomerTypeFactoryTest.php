@@ -6,14 +6,14 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
-use App\Shared\Application\OpenApi\Factory\UriParameter\UlidUriCustomerType;
+use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerTypeUlidParameterFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomerTypeFactoryTest extends UnitTestCase
 {
     private UriParameterBuilder $parameterBuilder;
     private Parameter $expectedParameter;
-    private UlidUriCustomerType $factory;
+    private CustomerTypeUlidParameterFactory $factory;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
         $this->setupParameterBuilderMock();
-        $this->factory = new UlidUriCustomerType($this->parameterBuilder);
+        $this->factory = new CustomerTypeUlidParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
@@ -41,7 +41,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
             false,
             false,
             [
-                'default' => '01JKX8XGHVDZ46MWYMZT94YER4',
+                'default' => '01JKX8XGHVDZ46MWYMZT94YJN7',
                 'type' => 'string',
             ]
         );
@@ -55,7 +55,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
                 'ulid',
                 'CustomerType identifier',
                 true,
-                '01JKX8XGHVDZ46MWYMZT94YER4',
+                '01JKX8XGHVDZ46MWYMZT94YJN7',
                 'string'
             )
             ->willReturn($this->expectedParameter);

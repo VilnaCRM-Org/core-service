@@ -2,7 +2,6 @@ name: Static analysis and fixers
 
 on:
   pull_request:
-    branches: ['main']
 
 jobs:
   lint:

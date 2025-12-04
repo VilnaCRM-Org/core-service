@@ -8,6 +8,13 @@ api_platform:
 
   openapi:
     overrideResponses: false
+    contact:
+      name: 'VilnaCRM Support'
+      email: 'support@vilnacrm.com'
+      url: 'https://vilnacrm.com'
+    license:
+      name: 'MIT'
+      url: 'https://opensource.org/licenses/MIT'
 
   defaults:
     pagination_partial: true

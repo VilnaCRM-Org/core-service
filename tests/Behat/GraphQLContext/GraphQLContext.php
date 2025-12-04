@@ -131,7 +131,12 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
 
         Assert::false(
             str_contains((string) $actualValue, $value),
-            sprintf('Field "%s" should not contain "%s", but it does: "%s"', $path, $value, (string) $actualValue)
+            sprintf(
+                'Field "%s" should not contain "%s", but it does: "%s"',
+                $path,
+                $value,
+                (string) $actualValue
+            )
         );
     }
 
@@ -256,7 +261,12 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
         Assert::greaterThanEq(
             count($actualValue),
             $count,
-            sprintf('Field "%s" should have at least %d items, but has %d', $path, $count, count($actualValue))
+            sprintf(
+                'Field "%s" should have at least %d items, but has %d',
+                $path,
+                $count,
+                count($actualValue)
+            )
         );
     }
 

@@ -46,21 +46,54 @@ final class UlidRangeFilter extends AbstractFilter implements
         ?Operation $operation = null,
         array &$context = []
     ): void {
-        $ulidFilterProcessor = new UlidFilterProcessor();
         $denormProp = $this->denormalizePropertyName($property);
         if (!$this->isFilterableProperty($denormProp, $resourceClass)) {
             return;
         }
 
-        $values = is_array($value) ? $value : [$value];
-        foreach ($values as $operator => $rawValue) {
-            $ulidFilterProcessor->process(
-                $denormProp,
-                (string) $operator,
-                $rawValue,
+        $this->applyUlidFilters(
+            $denormProp,
+            $this->normalizeValues($value),
+            $aggregationBuilder
+        );
+    }
+
+    /**
+     * @return array<string, string|int|float|bool|array|null>
+     */
+    private function normalizeValues(mixed $value): array
+    {
+        return is_array($value) ? $value : [$value];
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|array|null> $values
+     */
+    private function applyUlidFilters(
+        string $property,
+        array $values,
+        Builder $aggregationBuilder
+    ): void {
+        $processor = new UlidFilterProcessor();
+
+        array_walk(
+            $values,
+            static function (
+                string|int|float|bool|array|null $rawValue,
+                string|int $operator
+            ) use (
+                $processor,
+                $property,
                 $aggregationBuilder
-            );
-        }
+            ): void {
+                $processor->process(
+                    $property,
+                    (string) $operator,
+                    $rawValue,
+                    $aggregationBuilder
+                );
+            }
+        );
     }
 
     /**

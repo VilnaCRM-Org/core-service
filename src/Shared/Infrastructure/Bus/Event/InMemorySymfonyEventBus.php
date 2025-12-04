@@ -49,7 +49,12 @@ readonly class InMemorySymfonyEventBus implements EventBusInterface
         } catch (NoHandlerForMessageException) {
             throw new EventNotRegisteredException($event);
         } catch (HandlerFailedException $exception) {
-            throw $exception->getPrevious() ?? $exception;
+            throw $this->extractOriginalException($exception);
         }
+    }
+
+    private function extractOriginalException(HandlerFailedException $exception): \Throwable
+    {
+        return $exception->getPrevious() ?? $exception;
     }
 }
