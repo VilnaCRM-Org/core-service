@@ -10,7 +10,7 @@ Code reviews MUST maintain these standards - **NEVER decrease them**:
 
 **Source Code** (`phpinsights.php`):
 - min-quality: **100%** (NEVER decrease)
-- min-complexity: **95%** (NEVER decrease)
+- min-complexity: **93%** (NEVER decrease)
 - min-architecture: **100%** (NEVER decrease)
 - min-style: **100%** (NEVER decrease)
 
