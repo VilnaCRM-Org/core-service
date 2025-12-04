@@ -27,10 +27,12 @@ src/Shared/Infrastructure/
 **Purpose**: Convert between different types
 
 **Examples**:
+
 - `UlidTypeConverter` - Converts between binary, string, and Ulid types
 - `DateTimeConverter` - Converts between different datetime formats
 
 **Key characteristics**:
+
 - Focuses on type conversion
 - Takes one type, returns another
 - Usually stateless
@@ -41,10 +43,12 @@ src/Shared/Infrastructure/
 **Purpose**: Transform data between layers (DB ↔ PHP)
 
 **Examples**:
+
 - `UlidTransformer` - Transforms Ulid for Doctrine persistence
 - `CustomerTransformer` - Transforms customer data between DB and domain
 
 **Key characteristics**:
+
 - Used by Doctrine for database transformations
 - Implements transformer interfaces
 - Methods like `toPhpValue()`, `toDatabaseValue()`
@@ -54,10 +58,12 @@ src/Shared/Infrastructure/
 **Purpose**: Validate data
 
 **Examples**:
+
 - `UlidValidator` - Validates ULID format
 - `EmailValidator` - Validates email format
 
 **Key characteristics**:
+
 - Single responsibility: validation
 - Returns boolean or throws exception
 - Methods like `validate()`, `isValid()`
@@ -97,10 +103,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Build or construct complex objects
 
 **Examples**:
+
 - `ArrayResponseBuilder` - Builds array responses from data
 - `RequestBuilder` - Builds HTTP requests
 
 **Key characteristics**:
+
 - Constructs complex objects step by step
 - Often has fluent interface
 - Methods like `build()`, `with*()`, `add*()`
@@ -110,10 +118,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Fix or modify existing data/objects
 
 **Examples**:
+
 - `ContentPropertyFixer` - Fixes content properties in schemas
 - `SchemaFixer` - Fixes schema inconsistencies
 
 **Key characteristics**:
+
 - Modifies existing structures
 - Takes input, returns modified version
 - Methods like `fix()`, `apply()`
@@ -123,10 +133,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Clean or filter data
 
 **Examples**:
+
 - `ArrayValueCleaner` - Cleans array values
 - `StringCleaner` - Removes unwanted characters
 
 **Key characteristics**:
+
 - Removes unwanted data
 - Normalizes values
 - Methods like `clean()`, `sanitize()`
@@ -136,10 +148,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Serialize or normalize data
 
 **Examples**:
+
 - `OpenApiNormalizer` - Normalizes OpenAPI structures
 - `JsonSerializer` - Serializes to JSON
 
 **Key characteristics**:
+
 - Converts objects to arrays/strings
 - Implements Symfony normalizer interfaces
 - Methods like `normalize()`, `denormalize()`, `serialize()`
@@ -149,10 +163,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Create objects
 
 **Examples**:
+
 - `OpenApiFactory` - Creates OpenAPI specifications
 - `CustomerFactory` - Creates customer entities
 
 **Key characteristics**:
+
 - Primary responsibility is object creation
 - Uses `new` keyword (allowed in factories)
 - Methods like `create()`, `createFrom*()`
@@ -162,10 +178,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Process data or requests
 
 **Examples**:
+
 - `PathParametersProcessor` - Processes path parameters
 - `RequestProcessor` - Processes HTTP requests
 
 **Key characteristics**:
+
 - Processes and transforms data
 - Often part of a pipeline
 - Methods like `process()`, `handle()`
@@ -175,10 +193,12 @@ src/Shared/Application/OpenApi/
 **Purpose**: Resolve values, references, or configurations
 
 **Examples**:
+
 - `CustomerUpdateScalarResolver` - Resolves scalar values
 - `ConfigResolver` - Resolves configuration values
 
 **Key characteristics**:
+
 - Determines or resolves values
 - Often handles complex logic
 - Methods like `resolve()`, `get*()`
@@ -213,10 +233,12 @@ src/Core/Customer/Domain/
 **Purpose**: Domain entities with identity
 
 **Examples**:
+
 - `Customer` - Customer entity
 - `CustomerType` - Customer type entity
 
 **Key characteristics**:
+
 - Have unique identity
 - Mutable state
 - Business logic
@@ -227,10 +249,12 @@ src/Core/Customer/Domain/
 **Purpose**: Immutable value objects
 
 **Examples**:
+
 - `CustomerUpdate` - Represents customer update data
 - `Ulid` - Represents ULID value
 
 **Key characteristics**:
+
 - Immutable
 - Defined by their values
 - No identity
@@ -241,10 +265,12 @@ src/Core/Customer/Domain/
 **Purpose**: Repository interfaces (not implementations)
 
 **Examples**:
+
 - `CustomerRepositoryInterface` - Customer repository contract
 - `CustomerTypeRepositoryInterface` - Customer type repository contract
 
 **Key characteristics**:
+
 - Interfaces only (implementations in Infrastructure)
 - Define persistence contracts
 - Methods like `find()`, `save()`, `findBy*()`
@@ -254,10 +280,12 @@ src/Core/Customer/Domain/
 **Purpose**: Create domain entities
 
 **Examples**:
+
 - `CustomerFactory` - Creates customer entities
 - `CustomerTypeFactory` - Creates customer type entities
 
 **Key characteristics**:
+
 - Domain logic for entity creation
 - Validates business rules
 - Methods like `create()`, `createFrom*()`
@@ -267,10 +295,12 @@ src/Core/Customer/Domain/
 **Purpose**: Domain events
 
 **Examples**:
+
 - `CustomerCreated` - Event when customer is created
 - `CustomerUpdated` - Event when customer is updated
 
 **Key characteristics**:
+
 - Immutable
 - Past tense naming
 - Carry event data
@@ -305,10 +335,12 @@ src/Core/Customer/Application/
 **Purpose**: Command objects (CQRS write operations)
 
 **Examples**:
+
 - `CreateCustomerCommand` - Command to create customer
 - `UpdateCustomerCommand` - Command to update customer
 
 **Key characteristics**:
+
 - Immutable
 - Implement `CommandInterface`
 - Represent intent
@@ -319,10 +351,12 @@ src/Core/Customer/Application/
 **Purpose**: Handle commands and execute business logic
 
 **Examples**:
+
 - `CreateCustomerCommandHandler` - Handles customer creation
 - `UpdateCustomerCommandHandler` - Handles customer updates
 
 **Key characteristics**:
+
 - Implement `CommandHandlerInterface`
 - Execute business logic
 - Coordinate domain objects
@@ -335,6 +369,7 @@ src/Core/Customer/Application/
 ### "Where does my new class belong?"
 
 1. **What does it DO?**
+
    - Creates objects → `Factory/`
    - Validates data → `Validator/`
    - Converts types → `Converter/`
@@ -347,6 +382,7 @@ src/Core/Customer/Application/
    - Resolves values → `Resolver/`
 
 2. **Which LAYER?**
+
    - Domain logic → `Domain/`
    - Application logic → `Application/`
    - Infrastructure (DB, external) → `Infrastructure/`
@@ -360,23 +396,27 @@ src/Core/Customer/Application/
 ### Examples
 
 **"I need to create a class that validates email format"**
+
 - DOES: Validates → `Validator/`
 - LAYER: Can be shared → `Shared/Infrastructure/`
 - RESULT: `src/Shared/Infrastructure/Validator/EmailValidator.php`
 
 **"I need to create a class that builds OpenAPI schemas"**
+
 - DOES: Builds → `Builder/`
 - LAYER: Application (OpenAPI is app-level) → `Application/`
 - CONTEXT: OpenAPI is shared → `Shared/Application/OpenApi/`
 - RESULT: `src/Shared/Application/OpenApi/Builder/SchemaBuilder.php`
 
 **"I need to create a class that resolves scalar values for customer updates"**
+
 - DOES: Resolves → `Resolver/`
 - LAYER: Application logic → `Application/`
 - CONTEXT: Customer-specific → `Core/Customer/`
 - RESULT: `src/Core/Customer/Application/Resolver/CustomerUpdateScalarResolver.php`
 
 **"I need to create a customer entity"**
+
 - DOES: Domain entity → `Entity/`
 - LAYER: Domain → `Domain/`
 - CONTEXT: Customer → `Core/Customer/`

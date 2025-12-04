@@ -13,10 +13,12 @@ Quick reference for identifying class types and their patterns.
 **Location**: `*/Converter/`
 
 **Examples**:
+
 - `UlidTypeConverter` - Converts between Ulid types
 - `DateTimeConverter` - Converts datetime formats
 
 **Method signatures**:
+
 ```php
 public function toX(mixed $value): X
 public function fromY(mixed $value): X
@@ -24,6 +26,7 @@ public function convert(A $from): B
 ```
 
 **Key traits**:
+
 - Takes one type, returns another
 - Usually stateless
 - No side effects
@@ -40,10 +43,12 @@ public function convert(A $from): B
 **Location**: `*/Transformer/`
 
 **Examples**:
+
 - `UlidTransformer` - Doctrine transformer for Ulid
 - `CustomerRelationTransformer` - Transforms customer relations
 
 **Method signatures**:
+
 ```php
 public function toPhpValue(mixed $value): mixed
 public function toDatabaseValue(mixed $value): mixed
@@ -51,6 +56,7 @@ public function transform(array $data): object
 ```
 
 **Key traits**:
+
 - Often implements framework interfaces
 - Used by ORM/serialization
 - Bidirectional transformation
@@ -66,10 +72,12 @@ public function transform(array $data): object
 **Location**: `*/Validator/`
 
 **Examples**:
+
 - `UlidValidator` - Validates ULID format
 - `EmailValidator` - Validates email
 
 **Method signatures**:
+
 ```php
 public function validate(mixed $value): bool
 public function isValid(mixed $value): bool
@@ -77,6 +85,7 @@ public function assert(mixed $value): void
 ```
 
 **Key traits**:
+
 - Single responsibility: validation
 - No data modification
 - Returns bool or throws exception
@@ -93,10 +102,12 @@ public function assert(mixed $value): void
 **Location**: `*/Builder/`
 
 **Examples**:
+
 - `ArrayResponseBuilder` - Builds array responses
 - `QueryBuilder` - Builds queries
 
 **Method signatures**:
+
 ```php
 public function build(): Result
 public function withX(...): self
@@ -104,6 +115,7 @@ public function addY(...): self
 ```
 
 **Key traits**:
+
 - Fluent interface
 - Step-by-step construction
 - Returns `self` for chaining
@@ -120,16 +132,19 @@ public function addY(...): self
 **Location**: `*/Fixer/`
 
 **Examples**:
+
 - `ContentPropertyFixer` - Fixes content properties
 - `SchemaFixer` - Fixes schema issues
 
 **Method signatures**:
+
 ```php
 public function fix(mixed $value): mixed
 public function apply(mixed $target): mixed
 ```
 
 **Key traits**:
+
 - Modifies existing data
 - Returns modified version
 - Usually immutable (returns new instance)
@@ -145,16 +160,19 @@ public function apply(mixed $target): mixed
 **Location**: `*/Cleaner/`
 
 **Examples**:
+
 - `ArrayValueCleaner` - Cleans array values
 - `StringCleaner` - Cleans strings
 
 **Method signatures**:
+
 ```php
 public function clean(mixed $value): mixed
 public function sanitize(mixed $value): mixed
 ```
 
 **Key traits**:
+
 - Removes unwanted data
 - Normalizes values
 - Returns cleaned version
@@ -170,10 +188,12 @@ public function sanitize(mixed $value): mixed
 **Location**: `*/Factory/`
 
 **Examples**:
+
 - `CustomerFactory` - Creates customers
 - `CommandFactory` - Creates commands
 
 **Method signatures**:
+
 ```php
 public function create(...): object
 public function createFromArray(array $data): object
@@ -181,6 +201,7 @@ public static function make(...): object
 ```
 
 **Key traits**:
+
 - Can use `new` keyword
 - Encapsulates creation logic
 - Often validates before creation
@@ -196,16 +217,19 @@ public static function make(...): object
 **Location**: `*/Resolver/`
 
 **Examples**:
+
 - `CustomerUpdateScalarResolver` - Resolves scalar values
 - `ConfigResolver` - Resolves configuration
 
 **Method signatures**:
+
 ```php
 public function resolve(...): mixed
 public function resolveX(...): X
 ```
 
 **Key traits**:
+
 - Complex resolution logic
 - May have dependencies
 - Returns resolved value
@@ -221,16 +245,19 @@ public function resolveX(...): X
 **Location**: `*/Processor/`
 
 **Examples**:
+
 - `PathParametersProcessor` - Processes parameters
 - `RequestProcessor` - Processes requests
 
 **Method signatures**:
+
 ```php
 public function process(mixed $input): mixed
 public function handle(mixed $request): mixed
 ```
 
 **Key traits**:
+
 - Part of processing pipeline
 - May modify input
 - Returns processed result
@@ -246,10 +273,12 @@ public function handle(mixed $request): mixed
 **Location**: `*/Serializer/`
 
 **Examples**:
+
 - `OpenApiNormalizer` - Normalizes OpenAPI
 - `JsonSerializer` - Serializes to JSON
 
 **Method signatures**:
+
 ```php
 public function normalize(mixed $object): array
 public function denormalize(array $data): object
@@ -257,6 +286,7 @@ public function serialize(mixed $data): string
 ```
 
 **Key traits**:
+
 - Implements Symfony interfaces
 - Converts objects to arrays/strings
 - Bidirectional
@@ -322,6 +352,7 @@ Review the class purpose again!
 ## Common Method Name Patterns
 
 ### Creation Methods
+
 ```php
 create()
 createFrom*()
@@ -331,6 +362,7 @@ __construct()  // In factories
 ```
 
 ### Conversion Methods
+
 ```php
 toX()
 fromY()
@@ -339,6 +371,7 @@ parse()
 ```
 
 ### Transformation Methods
+
 ```php
 transform()
 toPhpValue()
@@ -348,6 +381,7 @@ denormalize()
 ```
 
 ### Validation Methods
+
 ```php
 validate()
 isValid()
@@ -356,6 +390,7 @@ check()
 ```
 
 ### Modification Methods
+
 ```php
 fix()
 clean()
@@ -365,6 +400,7 @@ modify()
 ```
 
 ### Resolution Methods
+
 ```php
 resolve()
 get*()
@@ -373,6 +409,7 @@ determine()
 ```
 
 ### Processing Methods
+
 ```php
 process()
 handle()
@@ -433,20 +470,20 @@ final class UlidHelper  // ❌ What does it help with?
 
 ## Class Responsibility Matrix
 
-| If the class... | It's a... | Goes in... |
-|----------------|-----------|------------|
-| Creates objects | Factory | `*/Factory/` |
-| Validates data | Validator | `*/Validator/` |
-| Converts types | Converter | `*/Converter/` |
-| Transforms for DB | Transformer | `*/Transformer/` |
-| Builds step-by-step | Builder | `*/Builder/` |
-| Fixes structures | Fixer | `*/Fixer/` |
-| Cleans data | Cleaner | `*/Cleaner/` |
-| Resolves values | Resolver | `*/Resolver/` |
-| Processes requests | Processor | `*/Processor/` |
-| Serializes data | Serializer/Normalizer | `*/Serializer/` |
-| Is a domain entity | Entity | `Domain/Entity/` |
-| Is immutable data | ValueObject | `Domain/ValueObject/` |
-| Defines persistence | Repository Interface | `Domain/Repository/` |
-| Handles commands | CommandHandler | `Application/CommandHandler/` |
-| Represents command | Command | `Application/Command/` |
+| If the class...     | It's a...             | Goes in...                    |
+| ------------------- | --------------------- | ----------------------------- |
+| Creates objects     | Factory               | `*/Factory/`                  |
+| Validates data      | Validator             | `*/Validator/`                |
+| Converts types      | Converter             | `*/Converter/`                |
+| Transforms for DB   | Transformer           | `*/Transformer/`              |
+| Builds step-by-step | Builder               | `*/Builder/`                  |
+| Fixes structures    | Fixer                 | `*/Fixer/`                    |
+| Cleans data         | Cleaner               | `*/Cleaner/`                  |
+| Resolves values     | Resolver              | `*/Resolver/`                 |
+| Processes requests  | Processor             | `*/Processor/`                |
+| Serializes data     | Serializer/Normalizer | `*/Serializer/`               |
+| Is a domain entity  | Entity                | `Domain/Entity/`              |
+| Is immutable data   | ValueObject           | `Domain/ValueObject/`         |
+| Defines persistence | Repository Interface  | `Domain/Repository/`          |
+| Handles commands    | CommandHandler        | `Application/CommandHandler/` |
+| Represents command  | Command               | `Application/Command/`        |

@@ -5,6 +5,7 @@ Common problems and solutions when organizing code.
 ## Problem 1: "I don't know where my class belongs"
 
 ### Symptoms
+
 - Class has vague name like `Helper`, `Utils`, `Manager`
 - Unsure which directory to put it in
 - Class seems to do multiple things
@@ -12,6 +13,7 @@ Common problems and solutions when organizing code.
 ### Solution
 
 1. **Identify primary responsibility**:
+
    ```
    What is the ONE thing this class does?
    - Creates objects → Factory
@@ -21,6 +23,7 @@ Common problems and solutions when organizing code.
    ```
 
 2. **If it does multiple things, split it**:
+
    ```php
    // ❌ Bad: One class doing everything
    class CustomerHelper
@@ -43,11 +46,13 @@ Common problems and solutions when organizing code.
 ## Problem 2: "Namespace doesn't match directory"
 
 ### Symptoms
+
 - Psalm errors about class not found
 - IDE shows wrong namespace
 - Class imports fail
 
 ### Example
+
 ```php
 // ❌ File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Transformer;  // WRONG!
@@ -67,6 +72,7 @@ final class UlidValidator { }
 ```
 
 **Commands**:
+
 ```bash
 # Check for mismatches
 grep -r "^namespace" src/ --include="*.php" | grep -v "Tests"
@@ -80,11 +86,13 @@ make phpcsfixer
 ## Problem 3: "Class is in wrong directory"
 
 ### Symptoms
+
 - Class name ends with "Validator" but is in `Transformer/` directory
 - Code review feedback: "This belongs in X/"
 - Directory name doesn't match class responsibility
 
 ### Example
+
 ```php
 // ❌ File: src/Shared/Infrastructure/Transformer/UlidValidator.php
 final class UlidValidator { }  // It's a VALIDATOR, not a Transformer!
@@ -93,12 +101,14 @@ final class UlidValidator { }  // It's a VALIDATOR, not a Transformer!
 ### Solution
 
 1. **Move the file**:
+
    ```bash
    mv src/Shared/Infrastructure/Transformer/UlidValidator.php \
       src/Shared/Infrastructure/Validator/UlidValidator.php
    ```
 
 2. **Update namespace**:
+
    ```php
    // Change from:
    namespace App\Shared\Infrastructure\Transformer;
@@ -108,11 +118,13 @@ final class UlidValidator { }  // It's a VALIDATOR, not a Transformer!
    ```
 
 3. **Find all usages**:
+
    ```bash
    grep -r "use.*Transformer\\UlidValidator" src/ tests/
    ```
 
 4. **Update imports** in all files:
+
    ```php
    // Change from:
    use App\Shared\Infrastructure\Transformer\UlidValidator;
@@ -122,12 +134,14 @@ final class UlidValidator { }  // It's a VALIDATOR, not a Transformer!
    ```
 
 5. **Move test file**:
+
    ```bash
    mv tests/Unit/Shared/Infrastructure/Transformer/UlidValidatorTest.php \
       tests/Unit/Shared/Infrastructure/Validator/UlidValidatorTest.php
    ```
 
 6. **Update test namespace**:
+
    ```php
    namespace Tests\Unit\Shared\Infrastructure\Validator;
    ```
@@ -144,11 +158,13 @@ final class UlidValidator { }  // It's a VALIDATOR, not a Transformer!
 ## Problem 4: "Variable name is too vague"
 
 ### Symptoms
+
 - Variables named `$converter`, `$resolver`, `$data`
 - Not clear what they convert/resolve/contain
 - Code review feedback about naming
 
 ### Example
+
 ```php
 // ❌ Vague
 private UlidTypeConverter $converter;      // Converter of what?
@@ -168,6 +184,7 @@ private array $customerData;
 ```
 
 **Search and replace**:
+
 ```bash
 # Find vague names
 grep -r "private.*\$converter;" src/
@@ -182,11 +199,13 @@ grep -r "private.*\$data;" src/
 ## Problem 5: "Parameter name misleading"
 
 ### Symptoms
+
 - Parameter named `$binary` but accepts `mixed`
 - Parameter named `$string` but accepts `mixed`
 - Type hint doesn't match parameter name
 
 ### Example
+
 ```php
 // ❌ Misleading
 public function fromBinary(mixed $binary): Ulid  // Accepts any type, not just binary!
@@ -215,12 +234,14 @@ public function fromBinary(mixed $value): Ulid  // Accurate: accepts any type
 ## Problem 6: "Default instantiation in constructor"
 
 ### Symptoms
+
 - Constructor has optional parameters with `null` default
 - Default instantiation using `??` operator
 - Hard to test with mocks
 - Psalm errors about hidden dependencies
 
 ### Example
+
 ```php
 // ❌ Default instantiation
 public function __construct(
@@ -243,6 +264,7 @@ public function __construct(
 ```
 
 **Configure in services.yaml**:
+
 ```yaml
 services:
   App\Some\Class:
@@ -255,12 +277,14 @@ services:
 ## Problem 7: "Static methods hard to test"
 
 ### Symptoms
+
 - Methods defined as `static`
 - Can't mock in tests
 - Tight coupling
 - Code review feedback about testability
 
 ### Example
+
 ```php
 // ❌ Static method
 final class PathsMapper
@@ -288,6 +312,7 @@ final class PathsMapper
 ```
 
 **Update usage**:
+
 ```php
 // Before
 $result = PathsMapper::map($openApi, $callback);
@@ -306,12 +331,14 @@ $result = $this->mapper->map($openApi, $callback);
 ## Problem 8: "Not using constructor property promotion"
 
 ### Symptoms
+
 - Properties declared separately
 - Assignment in constructor body
 - More boilerplate code
 - Code review feedback
 
 ### Example
+
 ```php
 // ❌ Old style
 final class CustomerFactory
@@ -350,6 +377,7 @@ final readonly class CustomerFactory
 ## Problem 9: "Tests failing after moving class"
 
 ### Symptoms
+
 - Tests pass locally but fail in CI
 - Class not found errors
 - Namespace errors in tests
@@ -369,6 +397,7 @@ final readonly class CustomerFactory
 ### Common missed steps
 
 1. **Test file not moved**:
+
    ```bash
    # Ensure test file mirrors source structure
    src/Shared/Infrastructure/Validator/UlidValidator.php
@@ -376,6 +405,7 @@ final readonly class CustomerFactory
    ```
 
 2. **Test namespace not updated**:
+
    ```php
    // Update from:
    namespace Tests\Unit\Shared\Infrastructure\Transformer;
@@ -385,6 +415,7 @@ final readonly class CustomerFactory
    ```
 
 3. **Imports in test not updated**:
+
    ```php
    // Update from:
    use App\Shared\Infrastructure\Transformer\UlidValidator;
@@ -398,6 +429,7 @@ final readonly class CustomerFactory
 ## Problem 10: "PHPInsights complexity too high"
 
 ### Symptoms
+
 - PHPInsights reports complexity score below 95%
 - Methods are too complex
 - Too many branches/conditions
@@ -405,11 +437,13 @@ final readonly class CustomerFactory
 ### Solution
 
 1. **Run PHPMD to identify complex methods**:
+
    ```bash
    make phpmd
    ```
 
 2. **Extract methods**:
+
    ```php
    // ❌ Complex method (complexity: 10)
    public function validate($value): bool
@@ -438,6 +472,7 @@ final readonly class CustomerFactory
    ```
 
 3. **Use strategy pattern** for complex conditionals:
+
    ```php
    // Extract validation rules into separate classes
    interface ValidationRule
@@ -454,11 +489,13 @@ final readonly class CustomerFactory
 ## Problem 11: "Circular dependencies"
 
 ### Symptoms
+
 - Class A depends on B, B depends on A
 - Service configuration errors
 - Hard to test
 
 ### Example
+
 ```php
 // ❌ Circular dependency
 class A {
@@ -473,6 +510,7 @@ class B {
 ### Solution
 
 1. **Extract interface**:
+
    ```php
    interface AInterface { }
    interface BInterface { }
@@ -487,6 +525,7 @@ class B {
    ```
 
 2. **Use event system**:
+
    ```php
    // Instead of direct dependency, use events
    class A {
@@ -511,12 +550,14 @@ class B {
 ## Quick Diagnostic Commands
 
 ### Check namespace consistency
+
 ```bash
 # Find files where namespace doesn't match path
 find src/ -name "*.php" -exec sh -c 'grep "^namespace" {} | grep -v "$(echo {} | sed "s|src/||" | sed "s|\.php||" | sed "s|/|\\\\|g" | sed "s|^|App\\\\|")"' \;
 ```
 
 ### Find vague class names
+
 ```bash
 grep -r "class.*Helper" src/
 grep -r "class.*Utils" src/
@@ -524,17 +565,20 @@ grep -r "class.*Manager" src/
 ```
 
 ### Find classes with default instantiation
+
 ```bash
 grep -r "= new " src/ | grep "public function __construct"
 grep -r "?? new" src/
 ```
 
 ### Find static methods (excluding named constructors)
+
 ```bash
 grep -r "public static function" src/ | grep -v "create" | grep -v "from"
 ```
 
 ### Check test coverage for moved class
+
 ```bash
 # Find test file for a class
 CLASS="CustomerUpdateScalarResolver"
