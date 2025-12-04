@@ -9,12 +9,14 @@ Code reviews MUST maintain these standards - **NEVER decrease them**:
 ### PHPInsights Requirements
 
 **Source Code** (`phpinsights.php`):
+
 - min-quality: **100%** (NEVER decrease)
 - min-complexity: **93%** (NEVER decrease)
 - min-architecture: **100%** (NEVER decrease)
 - min-style: **100%** (NEVER decrease)
 
 **Test Code** (`phpinsights-tests.php`):
+
 - min-quality: **95%** (NEVER decrease)
 - min-complexity: **95%** (NEVER decrease)
 - min-architecture: **90%** (NEVER decrease)
@@ -191,8 +193,9 @@ make deptrac  # Must show 0 violations
 **Scenario**: Review comment suggests adding complex validation logic
 
 **Response**:
+
 ```
-Thank you for the suggestion. However, adding this logic would increase 
+Thank you for the suggestion. However, adding this logic would increase
 cyclomatic complexity above our 5 per method limit.
 
 Instead, I'll:
@@ -208,6 +211,7 @@ This keeps our quality standards intact while addressing the concern.
 **Scenario**: Review comment: "This is trivial, tests not needed"
 
 **Response**:
+
 ```
 We maintain 100% test coverage and 100% MSI (mutation testing).
 All code must be tested, including trivial cases, to ensure:
@@ -224,6 +228,7 @@ I'll add comprehensive tests including edge cases.
 **Scenario**: Review comment: "Lower PHPInsights threshold to merge faster"
 
 **Response**:
+
 ```
 Quality thresholds are protected and cannot be decreased:
 - PHPInsights: 100% quality, 95% complexity, 100% architecture, 100% style

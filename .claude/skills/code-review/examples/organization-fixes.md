@@ -5,12 +5,14 @@ Real-world examples of code organization issues found in code reviews and how to
 ## Example 1: Class in Wrong Directory Type
 
 ### Review Comment
+
 ```
 UlidValidator should be in Validator/ directory, not Transformer/.
 Transformers are for data transformation (DB <-> PHP), not validation.
 ```
 
 ### Before
+
 ```php
 // File: src/Shared/Infrastructure/Transformer/UlidValidator.php
 namespace App\Shared\Infrastructure\Transformer;
@@ -28,6 +30,7 @@ final class UlidValidator extends ConstraintValidator
 ```
 
 ### After
+
 ```php
 // File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Validator;
@@ -45,6 +48,7 @@ final class UlidValidator extends ConstraintValidator
 ```
 
 ### Fix Commands
+
 ```bash
 # Move file
 mv src/Shared/Infrastructure/Transformer/UlidValidator.php \
@@ -65,12 +69,14 @@ make unit-tests
 ## Example 2: Vague Variable Names
 
 ### Review Comment
+
 ```
 Variable name `$converter` is too vague. What kind of converter?
 Use specific names: `$typeConverter` for type conversion.
 ```
 
 ### Before
+
 ```php
 final readonly class UlidType extends Type
 {
@@ -87,6 +93,7 @@ final readonly class UlidType extends Type
 ```
 
 ### After
+
 ```php
 final readonly class UlidType extends Type
 {
@@ -103,6 +110,7 @@ final readonly class UlidType extends Type
 ```
 
 ### Fix Commands
+
 ```bash
 # Update variable name in class
 # Update all usages in methods
@@ -114,12 +122,14 @@ make unit-tests
 ## Example 3: Resolver in Wrong Directory
 
 ### Review Comment
+
 ```
 CustomerUpdateScalarResolver resolves values, not creates them.
 Should be in Resolver/, not Factory/.
 ```
 
 ### Before
+
 ```php
 // File: src/Core/Customer/Application/Factory/CustomerUpdateScalarResolver.php
 namespace App\Core\Customer\Application\Factory;
@@ -134,6 +144,7 @@ final readonly class CustomerUpdateScalarResolver
 ```
 
 ### After
+
 ```php
 // File: src/Core/Customer/Application/Resolver/CustomerUpdateScalarResolver.php
 namespace App\Core\Customer\Application\Resolver;
@@ -148,6 +159,7 @@ final readonly class CustomerUpdateScalarResolver
 ```
 
 ### Fix Commands
+
 ```bash
 # Move file
 mv src/Core/Customer/Application/Factory/CustomerUpdateScalarResolver.php \
@@ -168,31 +180,34 @@ make unit-tests
 ## Example 4: Misleading Parameter Names
 
 ### Review Comment
+
 ```
 Parameter named `$binary` but accepts `mixed` type.
 Use accurate name like `$value` to match actual type.
 ```
 
 ### Before
+
 ```php
 public function fromBinary(mixed $binary): Ulid  // ❌ Misleading
 {
     if ($binary === null) {
         throw ConversionException::conversionFailed($binary, 'ulid');
     }
-    
+
     return Ulid::fromBinary((string) $binary);
 }
 ```
 
 ### After
+
 ```php
 public function fromBinary(mixed $value): Ulid  // ✅ Accurate
 {
     if ($value === null) {
         throw ConversionException::conversionFailed($value, 'ulid');
     }
-    
+
     return Ulid::fromBinary((string) $value);
 }
 ```
@@ -200,14 +215,16 @@ public function fromBinary(mixed $value): Ulid  // ✅ Accurate
 ## Example 5: Helper Class Code Smell
 
 ### Review Comment
+
 ```
 `CustomerHelper` is a code smell. Extract specific responsibilities:
 - Email validation → CustomerEmailValidator
-- Name formatting → CustomerNameFormatter  
+- Name formatting → CustomerNameFormatter
 - Data conversion → CustomerDataConverter
 ```
 
 ### Before
+
 ```php
 // File: src/Core/Customer/Application/Helper/CustomerHelper.php
 namespace App\Core\Customer\Application\Helper;
@@ -221,6 +238,7 @@ final class CustomerHelper
 ```
 
 ### After (Multiple Specific Classes)
+
 ```php
 // File: src/Core/Customer/Application/Validator/CustomerEmailValidator.php
 namespace App\Core\Customer\Application\Validator;
@@ -250,12 +268,14 @@ final readonly class CustomerArrayConverter
 ## Example 6: Namespace Mismatch
 
 ### Review Comment
+
 ```
 Namespace doesn't match directory structure.
 File is in Validator/ but namespace says Transformer/.
 ```
 
 ### Before
+
 ```php
 // File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Transformer;  // ❌ Wrong!
@@ -266,6 +286,7 @@ final class UlidValidator extends ConstraintValidator
 ```
 
 ### After
+
 ```php
 // File: src/Shared/Infrastructure/Validator/UlidValidator.php
 namespace App\Shared\Infrastructure\Validator;  // ✅ Correct!

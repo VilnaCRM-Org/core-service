@@ -144,25 +144,28 @@ namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 **Action on Violations**:
 
 1. **Class in Wrong Directory**:
+
    ```bash
    # Move file to correct directory
    mv src/Path/WrongDir/ClassName.php src/Path/CorrectDir/ClassName.php
-   
+
    # Update namespace in file
    # Update all imports across codebase
    grep -r "use.*WrongDir\\ClassName" src/ tests/
    ```
 
 2. **Wrong Class Name**:
+
    - Rename class to follow naming conventions
    - Update all references to renamed class
    - Ensure name reflects actual functionality
 
 3. **Vague Variable/Parameter Names**:
+
    ```php
    ❌ BEFORE: private UlidTypeConverter $converter;
    ✅ AFTER:  private UlidTypeConverter $typeConverter;
-   
+
    ❌ BEFORE: private CustomerUpdateScalarResolver $resolver;
    ✅ AFTER:  private CustomerUpdateScalarResolver $scalarResolver;
    ```
@@ -228,7 +231,7 @@ make ci  # Must output "✅ CI checks successfully passed!"
 3. **Architecture Violations**: `make deptrac`
 4. **Test Failures**: `make unit-tests` / `make integration-tests`
 5. **Mutation Testing**: `make infection` (must maintain 100% MSI)
-6. **Complexity Issues**: 
+6. **Complexity Issues**:
    - Run `make phpmd` first to identify specific hotspots
    - Refactor complex methods (keep complexity < 5 per method)
    - Re-run `make phpinsights`
@@ -356,6 +359,7 @@ src/Shared/Infrastructure/Validator/UlidValidator.php
 ```
 
 **Fix**:
+
 ```bash
 mv src/Shared/Infrastructure/Transformer/UlidValidator.php \
    src/Shared/Infrastructure/Validator/UlidValidator.php
