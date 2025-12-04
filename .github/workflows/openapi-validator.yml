@@ -3,9 +3,6 @@ name: Validate OpenAPI Spec
 on:
   pull_request:
 
-permissions:
-  contents: read
-
 jobs:
   validate-openapi:
     name: Spectral Lint
