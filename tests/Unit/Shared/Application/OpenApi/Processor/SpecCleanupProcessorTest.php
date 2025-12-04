@@ -13,10 +13,13 @@ use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\Model\Schema;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Applier\SpecExtensionPropertyApplier;
+use App\Shared\Application\OpenApi\Cleaner\SpecMetadataCleaner;
 use App\Shared\Application\OpenApi\Processor\SpecCleanupProcessor;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 use ReflectionMethod;
+use ReflectionProperty;
 
 final class SpecCleanupProcessorTest extends UnitTestCase
 {
@@ -44,7 +47,10 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             $components
         ))->withExtensionProperty('x-build', 'ci');
 
-        $processed = (new SpecCleanupProcessor())->process($openApi);
+        $processed = (new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        ))->process($openApi);
 
         $processedInfo = $processed->getInfo();
         self::assertNull($processedInfo->getTermsOfService());
@@ -71,14 +77,20 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             new Paths()
         );
 
-        $processed = (new SpecCleanupProcessor())->process($openApi);
+        $processed = (new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        ))->process($openApi);
 
         self::assertSame([], $processed->getExtensionProperties());
     }
 
     public function testCleanComponentsHandlesNullViaReflection(): void
     {
-        $processor = new SpecCleanupProcessor();
+        $processor = new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        );
         $method = new ReflectionMethod(SpecCleanupProcessor::class, 'cleanComponents');
         $method->setAccessible(true);
 
@@ -96,7 +108,10 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             webhooks: $webhooks
         );
 
-        $processed = (new SpecCleanupProcessor())->process($openApi);
+        $processed = (new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        ))->process($openApi);
 
         self::assertSame($webhooks, $processed->getWebhooks());
     }
@@ -111,7 +126,10 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             webhooks: null
         );
 
-        $processed = (new SpecCleanupProcessor())->process($openApi);
+        $processed = (new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        ))->process($openApi);
 
         self::assertInstanceOf(ArrayObject::class, $processed->getWebhooks());
         self::assertCount(0, (array) $processed->getWebhooks());
@@ -119,7 +137,10 @@ final class SpecCleanupProcessorTest extends UnitTestCase
 
     public function testApplyExtensionPropertiesHandlesNullValue(): void
     {
-        $processor = new SpecCleanupProcessor();
+        $processor = new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        );
         $method = new ReflectionMethod(SpecCleanupProcessor::class, 'applyExtensionProperties');
         $method->setAccessible(true);
 
@@ -132,5 +153,25 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         $result = $method->invoke($processor, null, $openApi);
 
         self::assertSame($openApi, $result);
+    }
+
+    public function testConstructorUsesProvidedCollaborators(): void
+    {
+        $metadataCleaner = new SpecMetadataCleaner();
+        $extensionApplier = new SpecExtensionPropertyApplier();
+
+        $processor = new SpecCleanupProcessor($metadataCleaner, $extensionApplier);
+
+        $metadataProperty = new ReflectionProperty(SpecCleanupProcessor::class, 'metadataCleaner');
+        $metadataProperty->setAccessible(true);
+
+        $extensionProperty = new ReflectionProperty(
+            SpecCleanupProcessor::class,
+            'extensionApplier'
+        );
+        $extensionProperty->setAccessible(true);
+
+        self::assertSame($metadataCleaner, $metadataProperty->getValue($processor));
+        self::assertSame($extensionApplier, $extensionProperty->getValue($processor));
     }
 }

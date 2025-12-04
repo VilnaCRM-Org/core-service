@@ -438,10 +438,6 @@ public function process(ArrayObject $content): bool
 
 ---
 
-# Refactoring Strategies for DDD/Hexagonal/CQRS
-
-Detailed refactoring patterns specific to this project's hexagonal architecture, Domain-Driven Design, and CQRS implementation.
-
 ## Quick Start: Find What to Refactor
 
 Before diving into refactoring patterns, identify which classes actually need refactoring.
@@ -1178,18 +1174,11 @@ final readonly class CustomerProcessor implements ProcessorInterface
 // Command Handler handles everything
 final readonly class CreateCustomerCommandHandler implements CommandHandlerInterface
 {
-    public function __construct(
-        private CustomerRepositoryInterface $repository,
-        private CustomerFactoryInterface $customerFactory,
-        private EventPublisherInterface $eventPublisher
-    ) {}
-
     public function __invoke(CreateCustomerCommand $command): void
     {
         $email = Email::fromString($command->email); // Validates
 
-        // ✅ Use factory instead of static method
-        $customer = $this->customerFactory->create(
+        $customer = Customer::create(
             CustomerId::fromString($command->id),
             $email,
             $this->emailUniquenessChecker
@@ -1268,7 +1257,7 @@ make deptrac
 
 **Example of Uncovered Violation**:
 
-```
+```text
 Uncovered: App\Shared\Application\Service\StringFieldResolver
 ```
 
@@ -1591,18 +1580,18 @@ Ask yourself these questions:
 
 #### Options for the Final 0.1%
 
-**Option A: Accept Current Quality**
+##### Option A: Accept Current Quality (with further refactoring)
 
-```
+```text
 ✅ Complexity: 93.9% (avg CCN: 1.18)
 ✅ Code: 100%
 ✅ Architecture: 100%
 ✅ Style: 100%
 ```
 
-**Justification**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, the protected threshold remains at 94% and should not be lowered.
+**Approach**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, **project policy requires maintaining the 95% threshold**. Continue with micro-optimizations using Option B to reach 95%.
 
-**Option B: Strategic Micro-Optimization**
+##### Option B: Strategic Micro-Optimization
 
 Target only the highest-impact changes:
 
@@ -1611,22 +1600,20 @@ Target only the highest-impact changes:
 3. Verify improvement
 4. Stop if no improvement or readability suffers
 
-**Option C: Protected Threshold Policy**
+##### Option C: Adjust Threshold (❌ FORBIDDEN IN THIS PROJECT)
 
 ```php
 // phpinsights.php
+// ❌ NEVER DO THIS IN THIS PROJECT
 'requirements' => [
-    'min-complexity' => 93,  // Protected threshold - NEVER lower
+    'min-complexity' => 93.9,  // ❌ Lowering thresholds is FORBIDDEN
     // ... other thresholds remain at 100
 ],
 ```
 
-**Policy**: The 94% threshold is protected and must NOT be lowered. If you're at less than 94:
+**Why this is forbidden**: This project has a strict policy that **phpinsights thresholds must NEVER be lowered**. The minimum complexity threshold is 95%, and this must be maintained or exceeded. If you cannot reach 95%, continue refactoring using Option B or seek additional guidance.
 
-- Apply Option B (Strategic Micro-Optimization)
-- Target specific high-complexity classes
-- Use proven refactoring patterns
-- Maintain code readability while improving metrics
+**This example is shown only to illustrate what NOT to do**. In other codebases without this policy, threshold adjustment might be acceptable, but not here.
 
 ---
 

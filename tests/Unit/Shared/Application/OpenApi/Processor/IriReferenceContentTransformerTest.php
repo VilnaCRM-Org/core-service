@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
-use App\Shared\Application\OpenApi\Processor\IriReferenceContentTransformer;
-use App\Shared\Application\OpenApi\Processor\IriReferenceMediaTypeTransformer;
-use App\Shared\Application\OpenApi\Processor\IriReferenceMediaTypeTransformerInterface;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
+use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingMediaTypeTransformer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -17,7 +18,11 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->transformer = new IriReferenceContentTransformer();
+        $this->transformer = new IriReferenceContentTransformer(
+            new IriReferenceMediaTypeTransformer(
+                new IriReferencePropertyTransformer()
+            )
+        );
     }
 
     public function testTransformReturnsNullWhenNothingChanges(): void
@@ -70,7 +75,10 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
         $result = $this->transformer->transform($content);
 
         self::assertNotNull($result);
-        self::assertArrayHasKey('format', $result['application/json']['schema']['properties']['relation']);
+        self::assertArrayHasKey(
+            'format',
+            $result['application/json']['schema']['properties']['relation']
+        );
     }
 
     public function testTransformIgnoresNonArrayDefinitions(): void
@@ -96,6 +104,10 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
 
         self::assertNotNull($result);
         self::assertSame(
+            'string',
+            $result['application/json']['schema']['properties']['status']['type']
+        );
+        self::assertSame(
             'iri-reference',
             $result['application/json']['schema']['properties']['status']['format']
         );
@@ -118,24 +130,10 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
 
         $result = $transformer->transform($content);
 
-        self::assertTrue($mediaTypeTransformer->invoked);
+        self::assertTrue($mediaTypeTransformer->wasInvoked());
         self::assertSame(
             RecordingMediaTypeTransformer::TRANSFORMED_FLAG,
             $result['application/json']
         );
-    }
-}
-
-final class RecordingMediaTypeTransformer implements IriReferenceMediaTypeTransformerInterface
-{
-    public const TRANSFORMED_FLAG = ['transformed' => true];
-
-    public bool $invoked = false;
-
-    public function transform(array $mediaType): array
-    {
-        $this->invoked = true;
-
-        return self::TRANSFORMED_FLAG;
     }
 }

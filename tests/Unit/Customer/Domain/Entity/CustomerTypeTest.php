@@ -21,7 +21,11 @@ final class CustomerTypeTest extends UnitTestCase
         $expectedUlid = $this->faker->ulid();
 
         $ulidFactory = new UlidFactory();
-        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
+        $ulidTransformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
         $ulid = $ulidTransformer->transformFromSymfonyUlid($expectedUlid);
 
         $customerType = new CustomerType($expectedValue, $ulid);
@@ -36,7 +40,11 @@ final class CustomerTypeTest extends UnitTestCase
         $initialUlid = $this->faker->ulid();
 
         $ulidFactory = new UlidFactory();
-        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
+        $ulidTransformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
         $ulid = $ulidTransformer->transformFromSymfonyUlid($initialUlid);
 
         $customerType = new CustomerType($expectedValue, $ulid);

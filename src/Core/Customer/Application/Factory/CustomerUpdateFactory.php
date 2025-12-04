@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Factory;
 
+use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
@@ -13,7 +14,7 @@ final readonly class CustomerUpdateFactory implements
 {
     public function __construct(
         private CustomerRelationTransformerInterface $relationResolver,
-        private ?CustomerUpdateScalarResolver $scalarResolver = null,
+        private CustomerUpdateScalarResolver $scalarResolver,
     ) {
     }
 
@@ -30,8 +31,7 @@ final readonly class CustomerUpdateFactory implements
      */
     public function create(Customer $customer, array $input): CustomerUpdate
     {
-        $scalarResolver = $this->scalarResolver ?? new CustomerUpdateScalarResolver();
-        $stringFields = $scalarResolver->resolveStrings($customer, $input);
+        $stringFields = $this->scalarResolver->resolveStrings($customer, $input);
 
         return new CustomerUpdate(
             $stringFields['initials'],
@@ -40,7 +40,7 @@ final readonly class CustomerUpdateFactory implements
             $stringFields['leadSource'],
             $this->relationResolver->resolveType($input['type'] ?? null, $customer),
             $this->relationResolver->resolveStatus($input['status'] ?? null, $customer),
-            $scalarResolver->resolveConfirmed($customer, $input)
+            $this->scalarResolver->resolveConfirmed($customer, $input)
         );
     }
 }

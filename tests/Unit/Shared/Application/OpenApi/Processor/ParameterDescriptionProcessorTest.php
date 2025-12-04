@@ -37,7 +37,11 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
         );
 
         $processed = (new ParameterDescriptionProcessor())->process($openApi);
-        $updatedParameters = $processed->getPaths()->getPath('/customers')->getGet()->getParameters();
+        $updatedParameters = $processed
+            ->getPaths()
+            ->getPath('/customers')
+            ->getGet()
+            ->getParameters();
 
         self::assertSame(
             'Sort by customer unique identifier',
@@ -69,7 +73,11 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
         );
 
         $processed = (new ParameterDescriptionProcessor())->process($openApi);
-        $updatedParameters = $processed->getPaths()->getPath('/customers')->getGet()->getParameters();
+        $updatedParameters = $processed
+            ->getPaths()
+            ->getPath('/customers')
+            ->getGet()
+            ->getParameters();
 
         self::assertSame(
             'Filter by multiple customer initials (exact match)',
@@ -109,7 +117,11 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
         );
 
         $processed = (new ParameterDescriptionProcessor())->process($openApi);
-        $updatedParameters = $processed->getPaths()->getPath('/customers')->getGet()->getParameters();
+        $updatedParameters = $processed
+            ->getPaths()
+            ->getPath('/customers')
+            ->getGet()
+            ->getParameters();
 
         self::assertSame('Page number for pagination', $updatedParameters[0]->getDescription());
         self::assertSame('Number of items per page', $updatedParameters[1]->getDescription());
@@ -131,7 +143,11 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
         );
 
         $processed = (new ParameterDescriptionProcessor())->process($openApi);
-        $updatedParameters = $processed->getPaths()->getPath('/customers')->getGet()->getParameters();
+        $updatedParameters = $processed
+            ->getPaths()
+            ->getPath('/customers')
+            ->getGet()
+            ->getParameters();
 
         self::assertSame(
             'Filter by customer initials (exact match)',

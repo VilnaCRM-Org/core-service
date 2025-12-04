@@ -6,32 +6,21 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Applier\SpecExtensionPropertyApplier;
+use App\Shared\Application\OpenApi\Cleaner\SpecMetadataCleaner;
 use ArrayObject;
 
 final class SpecCleanupProcessor
 {
-    private SpecMetadataCleaner $metadataCleaner;
-    private SpecExtensionPropertyApplier $extensionApplier;
-
     public function __construct(
-        ?SpecMetadataCleaner $metadataCleaner = null,
-        ?SpecExtensionPropertyApplier $extensionApplier = null,
+        private readonly SpecMetadataCleaner $metadataCleaner,
+        private readonly SpecExtensionPropertyApplier $extensionApplier,
     ) {
-        if ($metadataCleaner === null) {
-            $metadataCleaner = new SpecMetadataCleaner();
-        }
-
-        if ($extensionApplier === null) {
-            $extensionApplier = new SpecExtensionPropertyApplier();
-        }
-
-        $this->metadataCleaner = $metadataCleaner;
-        $this->extensionApplier = $extensionApplier;
     }
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $normalizedOpenApi = $this->createNormalizedOpenApi($openApi);
+        $normalizedOpenApi = $this->metadataCleaner->createNormalizedOpenApi($openApi);
 
         return $this->applyExtensionProperties(
             $openApi->getExtensionProperties(),
@@ -39,9 +28,9 @@ final class SpecCleanupProcessor
         );
     }
 
-    private function createNormalizedOpenApi(OpenApi $openApi): OpenApi
+    private function cleanComponents(?Components $components): ?Components
     {
-        return $this->metadataCleaner->createNormalizedOpenApi($openApi);
+        return $this->metadataCleaner->cleanComponents($components);
     }
 
     private function applyExtensionProperties(
@@ -49,10 +38,5 @@ final class SpecCleanupProcessor
         OpenApi $openApi
     ): OpenApi {
         return $this->extensionApplier->apply($extensionProperties, $openApi);
-    }
-
-    private function cleanComponents(?Components $components): ?Components
-    {
-        return $this->metadataCleaner->cleanComponents($components);
     }
 }

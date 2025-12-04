@@ -21,7 +21,11 @@ final class CustomerStatusTest extends UnitTestCase
         $expectedUlid = $this->faker->ulid();
 
         $ulidFactory = new UlidFactory();
-        $ulidTransformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidValueTransformer($ulidFactory));
+        $ulidTransformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
         $ulid = $ulidTransformer->transformFromSymfonyUlid($expectedUlid);
 
         $customerStatus = new CustomerStatus($expectedValue, $ulid);

@@ -10,13 +10,9 @@ use ArrayObject;
 
 final class ContextBuilder
 {
-    private ParameterSchemaFactory $parameterSchemaFactory;
-
     public function __construct(
-        ?ParameterSchemaFactory $parameterSchemaFactory = null
+        private ParameterSchemaFactory $parameterSchemaFactory
     ) {
-        $this->parameterSchemaFactory = $parameterSchemaFactory
-            ?? new ParameterSchemaFactory();
     }
 
     /**
@@ -26,15 +22,13 @@ final class ContextBuilder
         array $params,
         string $contentType = 'application/problem+json'
     ): ArrayObject {
-        if (count($params) === 0) {
-            return new ArrayObject([
+        return $params === []
+            ? new ArrayObject([
                 $contentType => [
                     'example' => new ArrayObject(),
                 ],
-            ]);
-        }
-
-        return $this->processParams($params, $contentType);
+            ])
+            : $this->processParams($params, $contentType);
     }
 
     /**
@@ -154,10 +148,6 @@ final class ContextBuilder
      */
     private function emptyArrayToNull(array $values): ?array
     {
-        if ($values === []) {
-            return null;
-        }
-
-        return $values;
+        return $values === [] ? null : $values;
     }
 }

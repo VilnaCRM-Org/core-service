@@ -63,11 +63,7 @@ final class UlidRangeFilter extends AbstractFilter implements
      */
     private function normalizeValues(mixed $value): array
     {
-        if (is_array($value)) {
-            return $value;
-        }
-
-        return [$value];
+        return is_array($value) ? $value : [$value];
     }
 
     /**
@@ -78,16 +74,26 @@ final class UlidRangeFilter extends AbstractFilter implements
         array $values,
         Builder $aggregationBuilder
     ): void {
-        $ulidFilterProcessor = new UlidFilterProcessor();
+        $processor = new UlidFilterProcessor();
 
-        foreach ($values as $operator => $rawValue) {
-            $ulidFilterProcessor->process(
+        array_walk(
+            $values,
+            static function (
+                string|int|float|bool|array|null $rawValue,
+                string|int $operator
+            ) use (
+                $processor,
                 $property,
-                (string) $operator,
-                $rawValue,
                 $aggregationBuilder
-            );
-        }
+            ): void {
+                $processor->process(
+                    $property,
+                    (string) $operator,
+                    $rawValue,
+                    $aggregationBuilder
+                );
+            }
+        );
     }
 
     /**
@@ -138,10 +144,7 @@ final class UlidRangeFilter extends AbstractFilter implements
         string $property,
         string $resourceClass
     ): bool {
-        if (!$this->isPropertyEnabled($property, $resourceClass)) {
-            return false;
-        }
-
-        return $this->isPropertyMapped($property, $resourceClass, true);
+        return $this->isPropertyEnabled($property, $resourceClass)
+            && $this->isPropertyMapped($property, $resourceClass, true);
     }
 }

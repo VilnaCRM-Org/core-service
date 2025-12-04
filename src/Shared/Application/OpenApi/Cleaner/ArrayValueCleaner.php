@@ -11,7 +11,7 @@ final class ArrayValueCleaner
 {
     public function __construct(
         private readonly ParameterCleaner $parameterCleaner,
-        private readonly ValueFilter $valueFilter
+        private readonly ValueCleaner $valueFilter
     ) {
     }
 
@@ -24,14 +24,9 @@ final class ArrayValueCleaner
      */
     public function clean(string|int $key, array $value, callable $recursiveCleaner): ?array
     {
-        if ($this->valueFilter->shouldRemove($key, $value)) {
-            return null;
-        }
-
-        $processedValue = $this->applyParameterCleaning($key, $value);
-        $cleanedValue = $recursiveCleaner($processedValue);
-
-        return $this->filterCleanedValue($key, $cleanedValue);
+        return $this->valueFilter->shouldRemove($key, $value)
+            ? null
+            : $this->processCleanableValue($key, $value, $recursiveCleaner);
     }
 
     /**
@@ -41,11 +36,9 @@ final class ArrayValueCleaner
      */
     private function filterCleanedValue(string|int $key, array $cleanedValue): ?array
     {
-        if ($this->valueFilter->shouldRemove($key, $cleanedValue)) {
-            return null;
-        }
-
-        return $cleanedValue;
+        return $this->valueFilter->shouldRemove($key, $cleanedValue)
+            ? null
+            : $cleanedValue;
     }
 
     /**
@@ -55,10 +48,24 @@ final class ArrayValueCleaner
      */
     private function applyParameterCleaning(string|int $key, array $value): array
     {
-        if ($key === 'parameters') {
-            return $this->parameterCleaner->clean($value);
-        }
+        return $key === 'parameters'
+            ? $this->parameterCleaner->clean($value)
+            : $value;
+    }
 
-        return $value;
+    /**
+     * @param array<array-key, string|int|float|bool|array|null> $value
+     *
+     * @return array<array-key, string|int|float|bool|array|null>|null
+     */
+    private function processCleanableValue(
+        string|int $key,
+        array $value,
+        callable $recursiveCleaner
+    ): ?array {
+        $processedValue = $this->applyParameterCleaning($key, $value);
+        $cleanedValue = $recursiveCleaner($processedValue);
+
+        return $this->filterCleanedValue($key, $cleanedValue);
     }
 }

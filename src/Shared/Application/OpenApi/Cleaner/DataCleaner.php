@@ -11,7 +11,7 @@ final class DataCleaner
 {
     public function __construct(
         private readonly ArrayValueCleaner $arrayProcessor,
-        private readonly ValueFilter $valueFilter
+        private readonly ValueCleaner $valueFilter
     ) {
     }
 
@@ -24,33 +24,58 @@ final class DataCleaner
      */
     public function clean(array $data): array
     {
-        $result = [];
-        foreach ($data as $key => $value) {
-            $processed = $this->processValue($key, $value);
-            if ($processed !== null) {
-                $result[$key] = $processed;
-            }
-        }
-        return $result;
+        $keys = array_keys($data);
+
+        $values = array_map(
+            fn (
+                array|\ArrayObject|string|int|float|bool|null $value,
+                string|int $key
+            ): array|string|int|float|bool|null => $this->cleanValue($key, $value),
+            $data,
+            $keys
+        );
+
+        return array_filter(
+            array_combine($keys, $values) ?? [],
+            static fn ($value): bool => $value !== null
+        );
     }
 
-    private function processValue(
+    /**
+     * @return array<array-key, array|string|int|float|bool|null>|string|int|float|bool|null
+     */
+    private function cleanValue(
         string|int $key,
         array|\ArrayObject|string|int|float|bool|null $value
     ): array|string|int|float|bool|null {
-        //Convert ArrayObject to array
-        if ($value instanceof \ArrayObject) {
-            $value = $value->getArrayCopy();
-        }
+        $normalized = $this->normalize($value);
 
-        return match (true) {
-            $this->valueFilter->shouldRemove($key, $value) => null,
-            is_array($value) => $this->arrayProcessor->clean(
+        return $this->valueFilter->shouldRemove($key, $normalized)
+            ? null
+            : $this->cleanNormalizedValue($key, $normalized);
+    }
+
+    private function normalize(
+        array|\ArrayObject|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
+        return $value instanceof \ArrayObject ? $value->getArrayCopy() : $value;
+    }
+
+    /**
+     * @param array<array-key, array|string|int|float|bool|null>|string|int|float|bool|null $value
+     *
+     * @return array<array-key, array|string|int|float|bool|null>|string|int|float|bool|null
+     */
+    private function cleanNormalizedValue(
+        string|int $key,
+        array|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
+        return is_array($value)
+            ? $this->arrayProcessor->clean(
                 $key,
                 $value,
-                fn (array $data): array => $this->clean($data)
-            ),
-            default => $value,
-        };
+                fn (array $nested): array => $this->clean($nested)
+            )
+            : $value;
     }
 }

@@ -10,19 +10,15 @@ final class PathParameterCleaner implements PathParameterCleanerInterface
 {
     public function clean(mixed $parameter): mixed
     {
-        if (!$parameter instanceof Model\Parameter) {
-            return $parameter;
-        }
+        return $parameter instanceof Model\Parameter && $parameter->getIn() === 'path'
+            ? $this->ensureRequired($parameter)
+            : $parameter;
+    }
 
-        if ($parameter->getIn() !== 'path') {
-            return $parameter;
-        }
-
-        // Ensure OpenAPI path parameters are always marked as required
-        if ($parameter->getRequired() === true) {
-            return $parameter;
-        }
-
-        return $parameter->withRequired(true);
+    private function ensureRequired(Model\Parameter $parameter): Model\Parameter
+    {
+        return $parameter->getRequired() === true
+            ? $parameter
+            : $parameter->withRequired(true);
     }
 }

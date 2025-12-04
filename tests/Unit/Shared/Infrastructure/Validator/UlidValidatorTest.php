@@ -55,13 +55,13 @@ final class UlidValidatorTest extends UnitTestCase
         $this->assertFalse($this->validator->isValid(''));
     }
 
-    public function testIsValidWithInteger(): void
+    public function testIsNotValidWithInteger(): void
     {
-        $this->assertTrue($this->validator->isValid(123));
+        $this->assertFalse($this->validator->isValid(123));
     }
 
-    public function testIsValidWithBoolean(): void
+    public function testIsNotValidWithBoolean(): void
     {
-        $this->assertTrue($this->validator->isValid(true));
+        $this->assertFalse($this->validator->isValid(true));
     }
 }
