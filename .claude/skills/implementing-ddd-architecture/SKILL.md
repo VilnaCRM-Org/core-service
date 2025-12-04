@@ -282,7 +282,7 @@ final readonly class CustomerNameChangedSubscriber implements DomainEventSubscri
 
 ---
 
-## Constraints (Parameters)
+## Constraints
 
 ### NEVER
 
