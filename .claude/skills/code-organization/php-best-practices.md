@@ -7,6 +7,7 @@ This guide covers PHP-specific best practices for code organization, dependency 
 Always use PHP 8.0+ constructor property promotion for cleaner code:
 
 ✅ **CORRECT (Constructor Promotion)**:
+
 ```php
 final readonly class CustomerUpdateFactory
 {
@@ -19,6 +20,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 ❌ **WRONG (Old Style)**:
+
 ```php
 final readonly class CustomerUpdateFactory
 {
@@ -36,6 +38,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 **Benefits**:
+
 - Less boilerplate code
 - Clearer dependency declaration
 - Easier to maintain
@@ -46,6 +49,7 @@ final readonly class CustomerUpdateFactory
 **NEVER** instantiate dependencies with default values in constructors. Always inject them.
 
 ✅ **CORRECT (Pure DI)**:
+
 ```php
 final class IriReferenceContentTransformer
 {
@@ -57,6 +61,7 @@ final class IriReferenceContentTransformer
 ```
 
 ❌ **WRONG (Default Instantiation)**:
+
 ```php
 final class IriReferenceContentTransformer
 {
@@ -72,6 +77,7 @@ final class IriReferenceContentTransformer
 ```
 
 **Why is this wrong?**
+
 - Hard to test (can't mock dependencies)
 - Tight coupling
 - Hidden dependencies
@@ -83,6 +89,7 @@ final class IriReferenceContentTransformer
 In `src/`, always use factories instead of the `new` keyword (except for Value Objects, Exceptions, and Framework objects).
 
 ✅ **CORRECT (Using Factory)**:
+
 ```php
 // In Factory
 final class CreateCustomerCommandFactory
@@ -113,6 +120,7 @@ final class CustomerCreator
 ```
 
 ❌ **WRONG (Direct instantiation)**:
+
 ```php
 final class CustomerCreator
 {
@@ -130,18 +138,21 @@ final class CustomerCreator
 ### When `new` is acceptable in src/
 
 1. **Value Objects**:
+
    ```php
    return new CustomerUpdate($data);  // ✅ OK
    return new Ulid($value);           // ✅ OK
    ```
 
 2. **Exceptions**:
+
    ```php
    throw new CustomerNotFoundException($id);  // ✅ OK
    throw new ValidationException($message);   // ✅ OK
    ```
 
 3. **Framework Objects**:
+
    ```php
    return new Response($content);     // ✅ OK
    return new ArrayObject($data);     // ✅ OK
@@ -158,6 +169,7 @@ final class CustomerCreator
 ### 1. Always Inject All Dependencies
 
 ✅ **CORRECT (All dependencies injected)**:
+
 ```php
 final class OpenApiFactory
 {
@@ -176,6 +188,7 @@ final class OpenApiFactory
 ```
 
 ❌ **WRONG (Hidden dependencies)**:
+
 ```php
 final class OpenApiFactory
 {
@@ -194,6 +207,7 @@ final class OpenApiFactory
 ### 2. Use Interfaces for Dependencies
 
 ✅ **CORRECT (Interface injection)**:
+
 ```php
 public function __construct(
     private IriReferenceContentTransformerInterface $contentTransformer,  // ✅ Interface
@@ -203,6 +217,7 @@ public function __construct(
 ```
 
 ❌ **LESS FLEXIBLE (Concrete class)**:
+
 ```php
 public function __construct(
     private IriReferenceContentTransformer $contentTransformer,  // ❌ Concrete
@@ -212,6 +227,7 @@ public function __construct(
 ```
 
 **Why interfaces?**
+
 - Easy to mock in tests
 - Supports multiple implementations
 - Follows SOLID principles
@@ -222,6 +238,7 @@ public function __construct(
 In test files (`tests/`), using `new` is perfectly acceptable:
 
 ✅ **CORRECT (Tests can use `new`)**:
+
 ```php
 final class CustomerFactoryTest extends TestCase
 {
@@ -246,6 +263,7 @@ final class CustomerFactoryTest extends TestCase
 ### Prefer Instance Methods Over Static
 
 ❌ **AVOID (Static methods)**:
+
 ```php
 final class PathsMapper
 {
@@ -263,6 +281,7 @@ final class PathsMapper
 ```
 
 ✅ **PREFER (Instance methods)**:
+
 ```php
 final class PathsMapper
 {
@@ -280,6 +299,7 @@ final class PathsMapper
 ```
 
 **Why avoid static?**
+
 - Hard to mock in tests
 - Creates tight coupling
 - Cannot be polymorphic
@@ -287,6 +307,7 @@ final class PathsMapper
 - Makes code less flexible
 
 **When static is acceptable:**
+
 - Named constructors (e.g., `Parameter::required()`)
 - Factory methods on value objects
 - Framework requirements (e.g., `EventSubscriber::getSubscribedEvents()`)
@@ -296,6 +317,7 @@ final class PathsMapper
 ### Example 1: Moving Resolver Classes
 
 **Before (WRONG)**:
+
 ```php
 // ❌ src/Core/Customer/Application/Factory/CustomerUpdateScalarResolver.php
 namespace App\Core\Customer\Application\Factory;
@@ -307,6 +329,7 @@ final class CustomerUpdateScalarResolver  // It's a RESOLVER, not a FACTORY!
 ```
 
 **After (CORRECT)**:
+
 ```php
 // ✅ src/Core/Customer/Application/Resolver/CustomerUpdateScalarResolver.php
 namespace App\Core\Customer\Application\Resolver;
@@ -318,6 +341,7 @@ final class CustomerUpdateScalarResolver  // Now in correct directory!
 ```
 
 **What changed:**
+
 - ✅ Moved from `Factory/` to `Resolver/`
 - ✅ Updated namespace
 - ✅ Updated all imports in dependent files
@@ -326,6 +350,7 @@ final class CustomerUpdateScalarResolver  // Now in correct directory!
 ### Example 2: Removing Default Instantiation
 
 **Before (WRONG)**:
+
 ```php
 final class CustomerUpdateFactory
 {
@@ -342,6 +367,7 @@ final class CustomerUpdateFactory
 ```
 
 **After (CORRECT)**:
+
 ```php
 final readonly class CustomerUpdateFactory
 {
@@ -354,6 +380,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 **What changed:**
+
 - ✅ Removed default instantiation
 - ✅ Made dependency required
 - ✅ Used constructor property promotion
@@ -363,6 +390,7 @@ final readonly class CustomerUpdateFactory
 ### Example 3: Fixing OpenApiFactory Dependencies
 
 **Before (WRONG)**:
+
 ```php
 final class OpenApiFactory
 {
@@ -380,6 +408,7 @@ final class OpenApiFactory
 ```
 
 **After (CORRECT)**:
+
 ```php
 final class OpenApiFactory
 {
@@ -398,12 +427,14 @@ final class OpenApiFactory
 ```
 
 **What changed:**
+
 - ✅ Removed all 5 default instantiations
 - ✅ All dependencies now required
 - ✅ Configured in `services.yaml` instead
 - ✅ Fully testable with mocks
 
 **services.yaml configuration:**
+
 ```yaml
 services:
   App\Shared\Application\OpenApi\OpenApiFactory:
@@ -422,6 +453,7 @@ services:
 When refactoring for better code organization:
 
 ### Phase 1: Analyze
+
 - [ ] Identify misplaced classes (wrong directory)
 - [ ] Find classes with direct instantiation (`new` in constructors)
 - [ ] Locate optional dependencies with defaults
@@ -429,6 +461,7 @@ When refactoring for better code organization:
 - [ ] Review test coverage gaps
 
 ### Phase 2: Plan
+
 - [ ] Create target directory structure
 - [ ] List all files that need namespace updates
 - [ ] Identify test files that need updates
@@ -436,6 +469,7 @@ When refactoring for better code organization:
 - [ ] Estimate impact (how many files affected)
 
 ### Phase 3: Refactor
+
 - [ ] Move classes to correct directories
 - [ ] Update namespaces
 - [ ] Remove default instantiations
@@ -446,6 +480,7 @@ When refactoring for better code organization:
 - [ ] Configure DI in services.yaml
 
 ### Phase 4: Test
+
 - [ ] Run `make phpcsfixer`
 - [ ] Run `make psalm` (0 errors required)
 - [ ] Run `make unit-tests` (100% coverage required)
@@ -453,6 +488,7 @@ When refactoring for better code organization:
 - [ ] Run `make ci` (all checks must pass)
 
 ### Phase 5: Verify
+
 - [ ] All classes in correct directories
 - [ ] No direct instantiation in src/
 - [ ] All dependencies injected

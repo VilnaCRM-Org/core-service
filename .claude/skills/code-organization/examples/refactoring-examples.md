@@ -24,6 +24,7 @@ final class UlidValidator
 ```
 
 ### Issues
+
 - ❌ In Transformer/ directory but it's a VALIDATOR
 - ❌ Comment says "before transformation" (misleading)
 - ❌ Wrong namespace for its responsibility
@@ -48,6 +49,7 @@ final class UlidValidator
 ```
 
 ### Fixed
+
 - ✅ In Validator/ directory (correct)
 - ✅ Comment is accurate and clear
 - ✅ Namespace matches directory structure
@@ -77,6 +79,7 @@ final class UlidConverter
 ```
 
 ### Issues
+
 - ❌ In Transformer/ directory but it's a CONVERTER
 - ❌ Name "UlidConverter" too generic
 - ❌ Parameter "$binary" misleading (accepts any type)
@@ -102,6 +105,7 @@ final class UlidTypeConverter
 ```
 
 ### Fixed
+
 - ✅ In Converter/ directory (correct)
 - ✅ Name "UlidTypeConverter" is specific
 - ✅ Parameter "$value" is accurate (accepts any type)
@@ -127,6 +131,7 @@ final readonly class UlidTransformer
 ```
 
 ### Issues
+
 - ❌ Variable "$converter" too vague (converter of what?)
 - ❌ Parameter "$binary" misleading (accepts any type)
 
@@ -147,6 +152,7 @@ final readonly class UlidTransformer
 ```
 
 ### Fixed
+
 - ✅ Variable "$typeConverter" is specific
 - ✅ Parameter "$value" is accurate (accepts mixed type)
 - ✅ Clear what type of converter it is
@@ -174,6 +180,7 @@ final class CustomerUpdateScalarResolver
 ```
 
 ### Issues
+
 - ❌ In Factory/ directory but it's a RESOLVER
 - ❌ Wrong namespace for its responsibility
 - ❌ Factory directory should only contain factories
@@ -197,6 +204,7 @@ final class CustomerUpdateScalarResolver
 ```
 
 ### Fixed
+
 - ✅ In Resolver/ directory (correct)
 - ✅ Namespace matches directory structure
 - ✅ Comment remains accurate
@@ -204,12 +212,14 @@ final class CustomerUpdateScalarResolver
 ### Migration Steps
 
 1. **Move the file**:
+
    ```bash
    mv src/Core/Customer/Application/Factory/CustomerUpdateScalarResolver.php \
       src/Core/Customer/Application/Resolver/CustomerUpdateScalarResolver.php
    ```
 
 2. **Update namespace in file**:
+
    ```php
    // Old
    namespace App\Core\Customer\Application\Factory;
@@ -219,6 +229,7 @@ final class CustomerUpdateScalarResolver
    ```
 
 3. **Find and update all imports**:
+
    ```bash
    grep -r "use.*Factory\\CustomerUpdateScalarResolver" src/ tests/
    # Update each file to use:
@@ -226,6 +237,7 @@ final class CustomerUpdateScalarResolver
    ```
 
 4. **Update test file location**:
+
    ```bash
    mv tests/Unit/Core/Customer/Application/Factory/CustomerUpdateScalarResolverTest.php \
       tests/Unit/Core/Customer/Application/Resolver/CustomerUpdateScalarResolverTest.php
@@ -266,6 +278,7 @@ final class CustomerUpdateFactory
 ```
 
 ### Issues
+
 - ❌ Optional dependency with default instantiation
 - ❌ Not using constructor property promotion
 - ❌ Hard to test (can't mock the resolver)
@@ -291,6 +304,7 @@ final readonly class CustomerUpdateFactory
 ```
 
 ### Fixed
+
 - ✅ Removed default instantiation
 - ✅ Made dependency required
 - ✅ Used constructor property promotion
@@ -359,6 +373,7 @@ final class PathsMapper
 ```
 
 ### Issues
+
 - ❌ Static methods are hard to mock in tests
 - ❌ Creates tight coupling
 - ❌ Cannot use dependency injection
@@ -388,6 +403,7 @@ final class PathsMapper
 ```
 
 ### Fixed
+
 - ✅ Instance methods are easy to mock
 - ✅ Loose coupling
 - ✅ Can use dependency injection if needed
