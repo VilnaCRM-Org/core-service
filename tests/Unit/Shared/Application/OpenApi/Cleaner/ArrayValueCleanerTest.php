@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
 use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
-use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Tests\Unit\UnitTestCase;
 
 final class ArrayValueCleanerTest extends UnitTestCase
@@ -18,8 +18,8 @@ final class ArrayValueCleanerTest extends UnitTestCase
     {
         parent::setUp();
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyArrayFilter();
-        $valueFilter = new ValueFilter($emptyValueChecker);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $valueFilter = new ValueCleaner($emptyValueChecker);
         $this->processor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
     }
 
@@ -59,7 +59,10 @@ final class ArrayValueCleanerTest extends UnitTestCase
         ];
 
         $recursiveCleaner = static function (array $data): array {
-            return array_map(static fn ($value) => is_array($value) ? ['cleaned' => true] : $value, $data);
+            return array_map(
+                static fn ($value) => is_array($value) ? ['cleaned' => true] : $value,
+                $data
+            );
         };
 
         $result = $this->processor->clean('customKey', $data, $recursiveCleaner);
@@ -112,5 +115,47 @@ final class ArrayValueCleanerTest extends UnitTestCase
         // Should not remove allowEmptyValue since key is not 'parameters'
         $this->assertIsArray($result);
         $this->assertArrayHasKey('allowEmptyValue', $result[0]);
+    }
+
+    public function testProcessHandlesNumericKeys(): void
+    {
+        $data = [
+            0 => ['value' => 'first'],
+            1 => ['value' => 'second'],
+            2 => ['value' => 'third'],
+        ];
+
+        $recursiveCleaner = static fn (array $data): array => $data;
+
+        $result = $this->processor->clean('customKey', $data, $recursiveCleaner);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertArrayHasKey(1, $result);
+        $this->assertArrayHasKey(2, $result);
+        $this->assertEquals(['value' => 'first'], $result[0]);
+        $this->assertEquals(['value' => 'second'], $result[1]);
+        $this->assertEquals(['value' => 'third'], $result[2]);
+    }
+
+    public function testProcessHandlesMixedNumericAndStringKeys(): void
+    {
+        $data = [
+            0 => ['value' => 'numeric'],
+            'name' => ['value' => 'string'],
+            1 => ['value' => 'numeric2'],
+        ];
+
+        $recursiveCleaner = static fn (array $data): array => $data;
+
+        $result = $this->processor->clean('customKey', $data, $recursiveCleaner);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey(1, $result);
+        $this->assertEquals(['value' => 'numeric'], $result[0]);
+        $this->assertEquals(['value' => 'string'], $result['name']);
+        $this->assertEquals(['value' => 'numeric2'], $result[1]);
     }
 }

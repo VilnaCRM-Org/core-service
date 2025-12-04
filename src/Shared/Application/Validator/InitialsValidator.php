@@ -28,7 +28,7 @@ final class InitialsValidator extends ConstraintValidator
 
     private function shouldSkipValidation(mixed $value, Constraint $constraint): bool
     {
-        return $value === null || $value === '';
+        return $value === null;
     }
 
     private function isOnlyWhitespace(string $value): bool

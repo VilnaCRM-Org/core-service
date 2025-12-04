@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Cleaner;
 
 use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
 use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
-use App\Shared\Application\OpenApi\Cleaner\EmptyArrayFilter;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
 use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
-use App\Shared\Application\OpenApi\Cleaner\ValueFilter;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Tests\Unit\UnitTestCase;
 
 final class DataCleanerTest extends UnitTestCase
@@ -19,8 +19,8 @@ final class DataCleanerTest extends UnitTestCase
     {
         parent::setUp();
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyArrayFilter();
-        $valueFilter = new ValueFilter($emptyValueChecker);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $valueFilter = new ValueCleaner($emptyValueChecker);
         $arrayProcessor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
         $this->cleaner = new DataCleaner($arrayProcessor, $valueFilter);
     }
@@ -299,5 +299,34 @@ final class DataCleanerTest extends UnitTestCase
         $this->assertArrayHasKey('key1', $result['nested']);
         $this->assertArrayNotHasKey('key2', $result['nested']);
         $this->assertEquals('value1', $result['nested']['key1']);
+    }
+
+    public function testCleanPreservesNumericKeysInCorrectOrder(): void
+    {
+        // Test that numeric keys (like HTTP status codes) are preserved, not re-indexed
+        $data = [
+            'responses' => [
+                200 => ['description' => 'Success'],
+                201 => ['description' => 'Created'],
+                400 => ['description' => 'Bad Request'],
+                404 => ['description' => 'Not Found'],
+                500 => ['description' => 'Server Error'],
+            ],
+        ];
+
+        $result = $this->cleaner->clean($data);
+
+        // Verify all numeric keys are preserved (not re-indexed to 0, 1, 2, 3, 4)
+        $this->assertArrayHasKey('responses', $result);
+        $this->assertArrayHasKey(200, $result['responses']);
+        $this->assertArrayHasKey(201, $result['responses']);
+        $this->assertArrayHasKey(400, $result['responses']);
+        $this->assertArrayHasKey(404, $result['responses']);
+        $this->assertArrayHasKey(500, $result['responses']);
+
+        // Verify the values are correct
+        $this->assertEquals(['description' => 'Success'], $result['responses'][200]);
+        $this->assertEquals(['description' => 'Created'], $result['responses'][201]);
+        $this->assertEquals(['description' => 'Bad Request'], $result['responses'][400]);
     }
 }

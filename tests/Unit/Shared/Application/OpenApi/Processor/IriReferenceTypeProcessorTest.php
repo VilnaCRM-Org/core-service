@@ -12,12 +12,13 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Processor\IriReferenceContentTransformer;
-use App\Shared\Application\OpenApi\Processor\IriReferenceContentTransformerInterface;
-use App\Shared\Application\OpenApi\Processor\IriReferenceOperationContext;
-use App\Shared\Application\OpenApi\Processor\IriReferenceOperationContextResolver;
-use App\Shared\Application\OpenApi\Processor\IriReferenceOperationContextResolverInterface;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
+use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolver;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
+use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingContentTransformer;
+use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingContextResolver;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -31,14 +32,22 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
             ->withGet($this->createOperationWithoutIriReference());
         $paths->addPath('/customers', $pathItem);
 
-        $openApi = (new OpenApi(
+        $openApi = new OpenApi(
             new Info('VilnaCRM', '1.0', 'Spec under test'),
             [new Server('https://localhost')],
             $paths,
             new Components()
-        ));
+        );
 
-        $processed = (new IriReferenceTypeProcessor())->process($openApi);
+        $processor = new IriReferenceTypeProcessor(
+            new IriReferenceContentTransformer(
+                new IriReferenceMediaTypeTransformer(
+                    new IriReferencePropertyTransformer()
+                )
+            ),
+            new IriReferenceOperationContextResolver()
+        );
+        $processed = $processor->process($openApi);
         $updatedPath = $processed->getPaths()->getPath('/customers');
 
         $postContent = $updatedPath->getPost()?->getRequestBody()?->getContent();
@@ -73,7 +82,10 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
             new Components()
         );
 
-        $processed = (new IriReferenceTypeProcessor())->process($openApi);
+        $processed = (new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            new RecordingContextResolver()
+        ))->process($openApi);
         $processedPath = $processed->getPaths()->getPath('/customers');
 
         self::assertSame(
@@ -89,10 +101,16 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
     public function testProcessUsesInjectedContentTransformer(): void
     {
         $contentTransformer = new RecordingContentTransformer();
-        $processor = new IriReferenceTypeProcessor($contentTransformer);
+        $processor = new IriReferenceTypeProcessor(
+            $contentTransformer,
+            new RecordingContextResolver()
+        );
 
         $paths = new Paths();
-        $paths->addPath('/customers', (new PathItem())->withPost($this->createOperationWithIriReference()));
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
@@ -103,16 +121,22 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
 
         $processor->process($openApi);
 
-        self::assertTrue($contentTransformer->invoked);
+        self::assertTrue($contentTransformer->wasInvoked());
     }
 
     public function testProcessUsesInjectedContextResolver(): void
     {
         $resolver = new RecordingContextResolver();
-        $processor = new IriReferenceTypeProcessor(null, $resolver);
+        $processor = new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            $resolver
+        );
 
         $paths = new Paths();
-        $paths->addPath('/customers', (new PathItem())->withPost($this->createOperationWithIriReference()));
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
@@ -123,7 +147,31 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
 
         $processor->process($openApi);
 
-        self::assertTrue($resolver->invoked);
+        self::assertTrue($resolver->wasInvoked());
+    }
+
+    public function testProcessPreservesExtensionProperties(): void
+    {
+        $paths = new Paths();
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withPost($this->createOperationWithIriReference())
+        );
+
+        $openApi = (new OpenApi(
+            new Info('title', '1.0', ''),
+            [new Server('https://localhost')],
+            $paths,
+            new Components()
+        ))->withExtensionProperty('x-custom', 'value');
+
+        $processor = new IriReferenceTypeProcessor(
+            new RecordingContentTransformer(),
+            new RecordingContextResolver()
+        );
+        $result = $processor->process($openApi);
+
+        self::assertSame(['x-custom' => 'value'], $result->getExtensionProperties());
     }
 
     private function createOperationWithIriReference(): Operation
@@ -174,39 +222,5 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
                 ],
             ],
         ];
-    }
-}
-
-final class RecordingContentTransformer implements IriReferenceContentTransformerInterface
-{
-    public bool $invoked = false;
-
-    public function __construct(
-        private readonly IriReferenceContentTransformer $inner = new IriReferenceContentTransformer()
-    ) {
-    }
-
-    public function transform(ArrayObject $content): ?array
-    {
-        $this->invoked = true;
-
-        return $this->inner->transform($content) ?? $content->getArrayCopy();
-    }
-}
-
-final class RecordingContextResolver implements IriReferenceOperationContextResolverInterface
-{
-    public bool $invoked = false;
-
-    public function __construct(
-        private readonly IriReferenceOperationContextResolver $inner = new IriReferenceOperationContextResolver()
-    ) {
-    }
-
-    public function resolve(PathItem $pathItem, string $operation): ?IriReferenceOperationContext
-    {
-        $this->invoked = true;
-
-        return $this->inner->resolve($pathItem, $operation);
     }
 }

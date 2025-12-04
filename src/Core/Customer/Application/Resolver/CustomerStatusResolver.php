@@ -26,34 +26,17 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        $previous = $context['previous_data'] ?? null;
+        $existing = $context['previous_data'] ?? null;
 
-        return $previous instanceof CustomerStatus
-            ? $previous
-            : $this->resolveFromIri($this->requireIri($data), $context, $operation);
+        return $existing instanceof CustomerStatus
+            ? $existing
+            : $this->resolveFromIri($data->id, $context, $operation);
     }
 
     /**
      * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
-    private function resolveFromIri(
-        string $iri,
-        array $context,
-        Operation $operation
-    ): CustomerStatus {
-        $resource = $this->getResource($iri, $context, $operation);
-
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($iri);
-        }
-
-        return $resource;
-    }
-
-    /**
-     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
-     */
-    private function getResource(
+    private function fetchResource(
         string $iri,
         array $context,
         Operation $operation
@@ -65,12 +48,29 @@ final readonly class CustomerStatusResolver
         }
     }
 
-    private function requireIri(StatusPatch $data): string
+    private function requireIri(?string $iri): string
     {
-        if ($data->id === null) {
-            throw new CustomerStatusNotFoundException();
-        }
+        return $iri ?? throw new CustomerStatusNotFoundException();
+    }
 
-        return $data->id;
+    private function assertStatus(string $iri, object $resource): CustomerStatus
+    {
+        return $resource instanceof CustomerStatus
+            ? $resource
+            : throw CustomerStatusNotFoundException::withIri($iri);
+    }
+
+    /**
+     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
+     */
+    private function resolveFromIri(
+        ?string $iri,
+        array $context,
+        Operation $operation
+    ): CustomerStatus {
+        $resolvedIri = $this->requireIri($iri);
+        $resource = $this->fetchResource($resolvedIri, $context, $operation);
+
+        return $this->assertStatus($resolvedIri, $resource);
     }
 }

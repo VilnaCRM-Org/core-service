@@ -24,10 +24,10 @@ final class EmptyValueGuardTest extends UnitTestCase
         $this->assertTrue($this->checker->shouldSkip(null, $constraint));
     }
 
-    public function testShouldSkipEmptyString(): void
+    public function testShouldNotSkipEmptyString(): void
     {
         $constraint = new Initials();
-        $this->assertTrue($this->checker->shouldSkip('', $constraint));
+        $this->assertFalse($this->checker->shouldSkip('', $constraint));
     }
 
     public function testShouldNotSkipValidString(): void

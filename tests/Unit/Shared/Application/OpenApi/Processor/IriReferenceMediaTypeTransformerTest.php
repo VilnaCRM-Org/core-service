@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
-use App\Shared\Application\OpenApi\Processor\IriReferenceMediaTypeTransformer;
-use App\Shared\Application\OpenApi\Processor\IriReferencePropertyTransformerInterface;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
+use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
+use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingPropertyTransformer;
 use App\Tests\Unit\UnitTestCase;
 
 final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
@@ -15,7 +16,9 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->transformer = new IriReferenceMediaTypeTransformer();
+        $this->transformer = new IriReferenceMediaTypeTransformer(
+            new IriReferencePropertyTransformer()
+        );
     }
 
     public function testTransformReturnsOriginalWhenSchemaIsMissing(): void
@@ -64,7 +67,7 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
 
         $result = $transformer->transform($mediaType);
 
-        self::assertTrue($propertyTransformer->invoked);
+        self::assertTrue($propertyTransformer->wasInvoked());
         self::assertSame(
             RecordingPropertyTransformer::TRANSFORMED_FLAG,
             $result['schema']['properties']['customer']
@@ -110,19 +113,5 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
         $result = $this->transformer->transform($mediaType);
 
         self::assertArrayHasKey('example', $result);
-    }
-}
-
-final class RecordingPropertyTransformer implements IriReferencePropertyTransformerInterface
-{
-    public const TRANSFORMED_FLAG = ['type' => 'string', 'format' => 'custom'];
-
-    public bool $invoked = false;
-
-    public function transform(array $schema): array
-    {
-        $this->invoked = true;
-
-        return self::TRANSFORMED_FLAG;
     }
 }

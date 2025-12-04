@@ -31,13 +31,9 @@ final class OpenApiNormalizer implements NormalizerInterface
     ): array|string|int|float|bool|\ArrayObject|null {
         $data = $this->decorated->normalize($object, $format, $context);
 
-        if (!is_array($data)) {
-            return $data;
-        }
-
-        $cleaned = $this->dataCleaner->clean($data);
-
-        return $this->normalizeWebhooks($cleaned);
+        return is_array($data)
+            ? $this->normalizeWebhooks($this->dataCleaner->clean($data))
+            : $data;
     }
 
     /**
@@ -70,9 +66,19 @@ final class OpenApiNormalizer implements NormalizerInterface
      */
     private function normalizeWebhooks(array $data): array
     {
-        if (isset($data['webhooks']) && $data['webhooks'] === []) {
-            $data['webhooks'] = new stdClass();
-        }
+        return isset($data['webhooks']) && $data['webhooks'] === []
+            ? $this->withEmptyWebhooksObject($data)
+            : $data;
+    }
+
+    /**
+     * @param array<array-key, array|string|int|float|bool|\ArrayObject|null> $data
+     *
+     * @return array<array-key, array|string|int|float|bool|\ArrayObject|stdClass|null>
+     */
+    private function withEmptyWebhooksObject(array $data): array
+    {
+        $data['webhooks'] = new stdClass();
 
         return $data;
     }

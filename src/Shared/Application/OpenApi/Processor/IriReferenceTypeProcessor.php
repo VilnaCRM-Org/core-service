@@ -4,76 +4,63 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
+use App\Shared\Application\OpenApi\Mapper\PathsMapper;
+use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolverInterface;
+use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformerInterface;
+use App\Shared\Application\OpenApi\ValueObject\IriReferenceOperationContext;
 use ArrayObject;
 
 final class IriReferenceTypeProcessor
 {
-    private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
-
-    private IriReferenceContentTransformerInterface $contentTransformer;
-    private IriReferenceOperationContextResolverInterface $contextResolver;
-
     public function __construct(
-        ?IriReferenceContentTransformerInterface $contentTransformer = null,
-        ?IriReferenceOperationContextResolverInterface $contextResolver = null
+        private readonly IriReferenceContentTransformerInterface $contentTransformer,
+        private readonly IriReferenceOperationContextResolverInterface $contextResolver
     ) {
-        $this->contentTransformer = $contentTransformer ?? new IriReferenceContentTransformer();
-        $this->contextResolver = $contextResolver ?? new IriReferenceOperationContextResolver();
     }
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $paths = $openApi->getPaths();
-
-        foreach (array_keys($paths->getPaths()) as $path) {
-            $current = $paths->getPath($path);
-            $paths->addPath($path, $this->processPathItem($current));
-        }
-
-        return $openApi;
+        return PathsMapper::map(
+            $openApi,
+            fn (PathItem $pathItem): PathItem => $this->processPathItem($pathItem)
+        );
     }
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        foreach (self::OPERATIONS as $operation) {
-            $pathItem = $this->transformOperation($pathItem, $operation);
-        }
-
-        return $pathItem;
+        return PathItemOperationMapper::map(
+            $pathItem,
+            fn (Operation $operation, string $operationName): Operation => $this
+                ->transformOperation($pathItem, $operation, $operationName)
+        );
     }
 
-    private function transformOperation(PathItem $pathItem, string $operation): PathItem
-    {
-        $context = $this->contextResolver->resolve($pathItem, $operation);
+    private function transformOperation(
+        PathItem $pathItem,
+        Operation $operation,
+        string $operationName
+    ): Operation {
+        $context = $this->contextResolver->resolve($pathItem, $operationName);
 
-        if ($context === null) {
-            return $pathItem;
-        }
+        return $context === null
+            ? $operation
+            : $this->updateOperationFromContext($context, $operation);
+    }
 
+    private function updateOperationFromContext(
+        IriReferenceOperationContext $context,
+        Operation $defaultOperation
+    ): Operation {
         $processedContent = $this->contentTransformer->transform($context->content);
 
-        if ($processedContent === null) {
-            return $pathItem;
-        }
-
-        return $this->withTransformedOperation($pathItem, $operation, $context, $processedContent);
-    }
-
-    /**
-     * @param array<string, scalar|array<string, scalar|null>> $processedContent
-     */
-    private function withTransformedOperation(
-        PathItem $pathItem,
-        string $operation,
-        IriReferenceOperationContext $context,
-        array $processedContent
-    ): PathItem {
-        $updatedOperation = $context->operation->withRequestBody(
-            $context->requestBody->withContent(new ArrayObject($processedContent))
-        );
-
-        return $pathItem->{'with' . $operation}($updatedOperation);
+        return $processedContent === null
+            ? $defaultOperation
+            : $context->operation->withRequestBody(
+                $context->requestBody->withContent(new ArrayObject($processedContent))
+            );
     }
 }

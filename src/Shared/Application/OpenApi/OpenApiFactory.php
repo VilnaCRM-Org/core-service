@@ -6,40 +6,34 @@ namespace App\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Augmenter\ParameterDescriptionAugmenter;
-use App\Shared\Application\OpenApi\Augmenter\TagDescriptionAugmenter;
-use App\Shared\Application\OpenApi\Extension\OpenApiExtensionsApplier;
+use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
-use App\Shared\Application\OpenApi\Fixer\ContentPropertyFixer;
-use App\Shared\Application\OpenApi\Fixer\IriReferenceTypeFixer;
-use App\Shared\Application\OpenApi\Fixer\MediaTypePropertyFixer;
-use App\Shared\Application\OpenApi\Fixer\PropertyTypeFixer;
-use App\Shared\Application\OpenApi\Sanitizer\PathParametersSanitizer;
+use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
+use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
+use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
 use ArrayObject;
-use Traversable;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
-    private IriReferenceTypeFixer $iriReferenceTypeFixer;
+    /** @var list<EndpointFactoryInterface> */
+    private array $endpointFactories;
 
     /**
      * @param iterable<EndpointFactoryInterface> $endpointFactories
      */
     public function __construct(
         private OpenApiFactoryInterface $decorated,
-        private iterable $endpointFactories,
-        private PathParametersSanitizer $pathParametersSanitizer
-            = new PathParametersSanitizer(),
-        private ParameterDescriptionAugmenter $parameterDescriptionAugmenter
-            = new ParameterDescriptionAugmenter(),
-        ?IriReferenceTypeFixer $iriReferenceTypeFixer = null,
-        private TagDescriptionAugmenter $tagDescriptionAugmenter
-            = new TagDescriptionAugmenter(),
+        iterable $endpointFactories,
+        private PathParametersProcessor $pathParametersProcessor,
+        private ParameterDescriptionProcessor $parameterDescriptionProcessor,
+        private IriReferenceTypeProcessor $iriReferenceTypeProcessor,
+        private TagDescriptionProcessor $tagDescriptionProcessor,
         private OpenApiExtensionsApplier $extensionsApplier
-            = new OpenApiExtensionsApplier()
     ) {
-        $this->iriReferenceTypeFixer = $iriReferenceTypeFixer
-            ?? $this->createDefaultIriReferenceTypeFixer();
+        $this->endpointFactories = is_array($endpointFactories)
+            ? $endpointFactories
+            : iterator_to_array($endpointFactories);
     }
 
     /**
@@ -48,54 +42,56 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-        $factories = $this->endpointFactories instanceof Traversable
-            ? iterator_to_array($this->endpointFactories)
-            : $this->endpointFactories;
+        $this->applyEndpointFactories($openApi);
 
+        return $this->normalizeOpenApi(
+            $this->applyAugmenters($openApi)
+        );
+    }
+
+    private function applyEndpointFactories(OpenApi $openApi): void
+    {
         array_walk(
-            $factories,
-            static function (EndpointFactoryInterface $endpointFactory) use ($openApi): void {
-                $endpointFactory->createEndpoint($openApi);
+            $this->endpointFactories,
+            static function (
+                EndpointFactoryInterface $factory
+            ) use ($openApi): void {
+                $factory->createEndpoint($openApi);
             }
         );
+    }
 
-        $this->parameterDescriptionAugmenter->augment($openApi);
-        $openApi = $this->tagDescriptionAugmenter->augment($openApi);
-        $this->iriReferenceTypeFixer->fix($openApi);
-        $openApi = $this->pathParametersSanitizer->sanitize($openApi);
+    private function applyAugmenters(OpenApi $openApi): OpenApi
+    {
+        $openApi = $this->parameterDescriptionProcessor->process($openApi);
+        $openApi = $this->tagDescriptionProcessor->process($openApi);
+        $openApi = $this->iriReferenceTypeProcessor->process($openApi);
 
-        return $this->normalizeOpenApi($openApi);
+        return $this->pathParametersProcessor->process($openApi);
     }
 
     private function normalizeOpenApi(OpenApi $openApi): OpenApi
     {
-        $webhooks = $openApi->getWebhooks();
-        $normalizedOpenApi = new OpenApi(
-            $openApi->getInfo(),
-            $openApi->getServers(),
-            $openApi->getPaths(),
-            $openApi->getComponents(),
-            $openApi->getSecurity(),
-            $openApi->getTags(),
-            $openApi->getExternalDocs(),
-            $openApi->getJsonSchemaDialect(),
-            $webhooks instanceof ArrayObject && $webhooks->count() > 0
-                ? $webhooks
-                : new ArrayObject()
-        );
-
         return $this->extensionsApplier->apply(
-            $normalizedOpenApi,
+            new OpenApi(
+                $openApi->getInfo(),
+                $openApi->getServers(),
+                $openApi->getPaths(),
+                $openApi->getComponents(),
+                $openApi->getSecurity(),
+                $openApi->getTags(),
+                $openApi->getExternalDocs(),
+                $openApi->getJsonSchemaDialect(),
+                $this->normalizeWebhooks($openApi->getWebhooks())
+            ),
             $openApi->getExtensionProperties()
         );
     }
 
-    private function createDefaultIriReferenceTypeFixer(): IriReferenceTypeFixer
+    private function normalizeWebhooks(?ArrayObject $webhooks): ArrayObject
     {
-        return new IriReferenceTypeFixer(
-            new ContentPropertyFixer(
-                new MediaTypePropertyFixer(new PropertyTypeFixer())
-            )
-        );
+        return $webhooks instanceof ArrayObject && $webhooks->count() > 0
+            ? $webhooks
+            : new ArrayObject();
     }
 }
