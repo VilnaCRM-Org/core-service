@@ -313,7 +313,7 @@ workspace {
         }
 
         softwareSystem = softwareSystem "VilnaCRM" {
-            webApplication = container "Core Service" {
+            coreService = container "Core Service" {
 
                 group "Application" {
                     customerController = component "CustomerController" "Handles customer API requests" "Controller" {
@@ -362,7 +362,7 @@ workspace {
     }
 
     views {
-        component softwareSystem.webApplication "Components_All" {
+        component softwareSystem.coreService "Components_All" {
             include *
             description "All components within the Core Service"
         }
@@ -480,6 +480,6 @@ structurizr-cli validate workspace.dsl
 
 ## External Resources
 
-- **Structurizr DSL Documentation**: https://docs.structurizr.com/dsl
-- **Language Reference**: https://github.com/structurizr/dsl/blob/master/docs/language-reference.md
-- **Cookbook**: https://github.com/structurizr/dsl/blob/master/docs/cookbook/README.md
+- **Structurizr DSL Documentation**: <https://docs.structurizr.com/dsl>
+- **Language Reference**: <https://github.com/structurizr/dsl/blob/master/docs/language-reference.md>
+- **Cookbook**: <https://github.com/structurizr/dsl/blob/master/docs/cookbook/README.md>

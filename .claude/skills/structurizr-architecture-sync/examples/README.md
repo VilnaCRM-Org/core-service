@@ -224,6 +224,6 @@ Have a useful scenario not covered here? Consider:
   - [C4 Model Guide](../reference/c4-model-guide.md) - Understanding C4
 - **Decision guide**: `.claude/skills/SKILL-DECISION-GUIDE.md`
 - **External resources**:
-  - C4 Model documentation: https://c4model.com/
-  - Structurizr DSL docs: https://docs.structurizr.com/dsl
-  - User Service example (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service
+  - C4 Model documentation: <https://c4model.com/>
+  - Structurizr DSL docs: <https://docs.structurizr.com/dsl>
+  - User Service example (VilnaCRM organization reference): <https://github.com/VilnaCRM-Org/user-service>

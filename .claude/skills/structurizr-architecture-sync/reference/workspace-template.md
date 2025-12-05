@@ -295,7 +295,7 @@ views {
 ## Real Examples
 
 - **Core Service**: See `/workspace.dsl` in project root
-- **User Service** (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl
+- **User Service** (VilnaCRM organization reference): <https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl>
 
 ## Component Counts by Service
 
@@ -309,6 +309,6 @@ views {
 
 1. Copy this template
 2. Replace placeholder names with your components
-3. Verify syntax: Check http://localhost:8080 for errors
+3. Verify syntax: Check <http://localhost:8080> for errors
 4. Position components in UI and save
 5. Commit both workspace.dsl and workspace.json

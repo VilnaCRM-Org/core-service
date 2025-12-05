@@ -30,7 +30,7 @@ Keep the Structurizr workspace (`workspace.dsl`) synchronized with codebase chan
 - Layer groupings (Application/Domain/Infrastructure) are accurate
 - Component descriptions reflect current purpose
 - All infrastructure dependencies are documented
-- C4 diagrams render without errors at http://localhost:8080
+- C4 diagrams render without errors at <http://localhost:8080>
 
 ---
 
@@ -145,13 +145,13 @@ structurizr:
     - ./:/usr/local/structurizr
 ```
 
-**Access**: http://localhost:8080
+**Access**: <http://localhost:8080>
 
 ### Standard Development Flow
 
 1. **Implement code changes** → Add handler, entity, repository
 2. **Update workspace.dsl** → Add component + relationships
-3. **View locally** → Refresh http://localhost:8080
+3. **View locally** → Refresh <http://localhost:8080>
 4. **Position components** → Drag in UI, click "Save workspace"
 5. **Commit together** → Code + workspace.dsl + workspace.json in same PR
 
@@ -159,7 +159,7 @@ structurizr:
 
 **Automatic layout doesn't work well** - use manual positioning:
 
-1. Open http://localhost:8080
+1. Open <http://localhost:8080>
 2. Navigate to "Diagrams" → "Components_All"
 3. Drag components to arrange (left-to-right flow recommended)
 4. Click "Save workspace" button in top-right
@@ -377,7 +377,7 @@ Use this skill **before**:
 
 ## External Resources
 
-- **Structurizr DSL Documentation**: https://docs.structurizr.com/dsl
-- **C4 Model**: https://c4model.com/
-- **Structurizr Lite**: https://structurizr.com/help/lite
-- **User Service Example** (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service/wiki/Design-and-Architecture-Documentation
+- **Structurizr DSL Documentation**: <https://docs.structurizr.com/dsl>
+- **C4 Model**: <https://c4model.com/>
+- **Structurizr Lite**: <https://structurizr.com/help/lite>
+- **User Service Example** (VilnaCRM organization reference): <https://github.com/VilnaCRM-Org/user-service/wiki/Design-and-Architecture-Documentation>

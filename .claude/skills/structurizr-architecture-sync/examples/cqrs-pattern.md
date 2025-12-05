@@ -165,7 +165,7 @@ workspace {
         }
 
         softwareSystem = softwareSystem "VilnaCRM" {
-            webApplication = container "Core Service" {
+            coreService = container "Core Service" {
 
                 group "Application" {
                     createCustomerCommandHandler = component "CreateCustomerCommandHandler" "Handles customer creation commands" "CommandHandler" {
@@ -238,7 +238,7 @@ workspace {
     }
 
     views {
-        component softwareSystem.webApplication "Components_All" {
+        component softwareSystem.coreService "Components_All" {
             include *
         }
 

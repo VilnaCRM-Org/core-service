@@ -98,7 +98,7 @@ Show the internal structure of the Core Service:
 
 ### Workspace Structure
 
-```
+```text
 workspace.dsl
 ├── Model
 │   └── Software System: VilnaCRM
@@ -231,7 +231,7 @@ Our C4 component diagram reflects hexagonal architecture principles:
 
 ## Further Reading
 
-- **C4 Model Official Site**: https://c4model.com/
-- **C4 Model FAQ**: https://c4model.com/#faq
-- **Structurizr Documentation**: https://docs.structurizr.com/
-- **Simon Brown's Blog**: https://simonbrown.je/
+- **C4 Model Official Site**: <https://c4model.com/>
+- **C4 Model FAQ**: <https://c4model.com/#faq>
+- **Structurizr Documentation**: <https://docs.structurizr.com/>
+- **Simon Brown's Blog**: <https://simonbrown.je/>
