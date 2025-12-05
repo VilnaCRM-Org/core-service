@@ -27,7 +27,8 @@ What are you trying to do?
 │   └─ Quality thresholds → quality-standards
 │
 └─ Update documentation
-    └─ Any code change → documentation-sync
+    ├─ General docs → documentation-sync
+    └─ Architecture diagrams → structurizr-architecture-sync
 ```
 
 ## Scenario-Based Guide
@@ -121,6 +122,18 @@ This skill runs comprehensive CI checks.
 
 This skill identifies which documentation files need updating.
 
+**ALSO**: Use [structurizr-architecture-sync](structurizr-architecture-sync/SKILL.md) if you added components, handlers, or changed architecture.
+
+---
+
+### "I made architectural changes and need to update C4 diagrams"
+
+**Use**: [structurizr-architecture-sync](structurizr-architecture-sync/SKILL.md)
+
+This skill guides updating workspace.dsl for Structurizr C4 diagrams.
+
+**NOT**: documentation-sync (that's for general docs in /docs)
+
 ---
 
 ### "I need to add a new field to an entity"
@@ -156,18 +169,22 @@ This skill covers processor patterns for OpenAPI.
                     implementing-ddd-      load-testing
                       architecture         (performance)
                               │
-                              ▼
-                    database-migrations
+                    ┌─────────┼─────────┐
+                    ▼         ▼         ▼
+          database-    documentation-   structurizr-
+          migrations       sync          architecture-sync
+                                        (C4 diagrams)
 ```
 
 ## Common Confusions
 
-| Confusion                                      | Clarification                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| deptrac-fixer vs implementing-ddd-architecture | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                 |
-| testing-workflow vs load-testing               | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing |
-| quality-standards vs complexity-management     | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management    |
-| ci-workflow vs testing-workflow                | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                      |
+| Confusion                                           | Clarification                                                                                                                          |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| deptrac-fixer vs implementing-ddd-architecture      | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                                          |
+| testing-workflow vs load-testing                    | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing                          |
+| quality-standards vs complexity-management          | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management                             |
+| ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
+| documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
 
 ## Multiple Skills for One Task
 
@@ -178,8 +195,9 @@ Some tasks benefit from multiple skills:
 1. **implementing-ddd-architecture** - Design domain model
 2. **database-migrations** - Configure persistence
 3. **testing-workflow** - Write tests
-4. **documentation-sync** - Update docs
-5. **ci-workflow** - Validate everything
+4. **structurizr-architecture-sync** - Update C4 diagrams
+5. **documentation-sync** - Update docs
+6. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 
