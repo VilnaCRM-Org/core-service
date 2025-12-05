@@ -82,7 +82,7 @@ workspace {
                     }
                 }
 
-                database = component "Database" "Stores customers, statuses, types, and application data" "MongoDB" {
+                database = component "Database" "Stores application data" "MongoDB" {
                     tags "Database"
                 }
                 cache = component "Cache" "Caches application data" "Redis" {
