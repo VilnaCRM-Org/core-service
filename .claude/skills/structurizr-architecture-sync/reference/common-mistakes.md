@@ -504,7 +504,7 @@ If you encounter errors:
 
 1. **Check Structurizr UI** - Open http://localhost:8080, errors shown at top
 2. **Validate syntax** - Compare with [workspace-template.md](workspace-template.md)
-3. **Check examples** - Look at user-service: https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl
+3. **Check examples** - Look at user-service (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl
 4. **Start fresh** - Sometimes easier to rebuild from template than debug
 
 ## Related Documentation

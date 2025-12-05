@@ -338,9 +338,45 @@ Use this skill **before**:
 
 ---
 
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Structurizr UI shows "Element does not exist" error
+
+**Solution**: Check component variable names in relationships match the component definitions exactly. See [common-mistakes.md](reference/common-mistakes.md#1-filtered-views-causing-element-does-not-exist-errors).
+
+---
+
+**Issue**: Diagram shows components in wrong positions after pull
+
+**Solution**: Ensure `workspace.json` is committed along with `workspace.dsl`. The JSON file stores manual positions.
+
+---
+
+**Issue**: DSL syntax validation fails
+
+**Solution**:
+1. Check balanced braces `{}`
+2. Verify all components are defined before relationships
+3. Ensure no duplicate variable names
+4. Compare with [workspace-template.md](reference/workspace-template.md)
+
+---
+
+**Issue**: Too many components (30+), diagram is cluttered
+
+**Solution**: Follow [component-identification.md](reference/component-identification.md) - aim for 15-25 components. Omit DTOs, utilities, and factories.
+
+---
+
+**Issue**: Can't determine if component should be documented
+
+**Solution**: Use the decision matrix in [component-identification.md](reference/component-identification.md#decision-matrix) or the TL;DR section.
+
 ## External Resources
 
 - **Structurizr DSL Documentation**: https://docs.structurizr.com/dsl
 - **C4 Model**: https://c4model.com/
 - **Structurizr Lite**: https://structurizr.com/help/lite
-- **User Service Example**: https://github.com/VilnaCRM-Org/user-service/wiki/Design-and-Architecture-Documentation
+- **User Service Example** (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service/wiki/Design-and-Architecture-Documentation

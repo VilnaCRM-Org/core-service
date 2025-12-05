@@ -295,7 +295,7 @@ views {
 ## Real Examples
 
 - **Core Service**: See `/workspace.dsl` in project root
-- **User Service**: https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl
+- **User Service** (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service/blob/main/workspace.dsl
 
 ## Component Counts by Service
 

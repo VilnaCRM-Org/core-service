@@ -226,4 +226,4 @@ Have a useful scenario not covered here? Consider:
 - **External resources**:
   - C4 Model documentation: https://c4model.com/
   - Structurizr DSL docs: https://docs.structurizr.com/dsl
-  - User Service example: https://github.com/VilnaCRM-Org/user-service
+  - User Service example (VilnaCRM organization reference): https://github.com/VilnaCRM-Org/user-service
