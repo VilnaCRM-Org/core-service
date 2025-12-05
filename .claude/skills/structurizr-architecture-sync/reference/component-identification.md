@@ -5,12 +5,14 @@ How to determine what should be documented as a component in the Structurizr wor
 ## TL;DR - Quick Decision Guide
 
 **✅ DO Document**:
+
 - **Application Layer**: Controllers, Command Handlers, Query Handlers, API Processors, GraphQL Resolvers, Event Subscribers
 - **Domain Layer**: Entities, Aggregates, Domain Events, Repository Interfaces (ports), Domain Services
 - **Infrastructure Layer**: Repositories, Event Buses, Command Buses, External Adapters
 - **External Systems**: Database, Cache, Message Broker, External APIs
 
 **❌ DON'T Document**:
+
 - DTOs and Input/Output objects
 - Utilities, helpers, formatters
 - Test classes and fixtures
@@ -20,6 +22,7 @@ How to determine what should be documented as a component in the Structurizr wor
 - Factories and transformers (unless critical)
 
 **When in Doubt**: Ask yourself "Would removing this from the diagram significantly change my understanding of the architecture?"
+
 - **Yes** → Document it
 - **No** → Skip it
 

@@ -4,20 +4,21 @@ Common relationship patterns and how to document them in Structurizr DSL.
 
 ## Quick Reference Table
 
-| Relationship | Pattern | Example DSL | When to Use |
-|-------------|---------|-------------|-------------|
-| **Uses** | A uses B | `handler -> repository "uses"` | Dependency injection, method calls |
-| **Creates** | A creates B | `handler -> entity "creates"` | Factory creates objects, handlers create entities |
-| **Triggers** | Event triggers component | `event -> subscriber "triggers"` | Events triggering subscribers |
-| **Implements** | Component implements interface | `repository -> interface "implements"` | Repository implementing port |
-| **Depends On** | Component depends on interface | `handler -> interface "depends on"` | Hexagonal architecture ports |
-| **Publishes** | Component publishes event | `handler -> event "publishes"` | Event-driven communication |
-| **Persists To** | Repository to database | `repository -> database "persists to"` | Data persistence |
-| **Stores/Retrieves** | Repository manages entity | `repository -> entity "stores / retrieves"` | Entity lifecycle management |
-| **Sends Via** | Component sends via broker | `subscriber -> broker "sends via"` | Asynchronous messaging |
-| **Validates** | Validator validates component | `validator -> entity "validates"` | Business rule checking |
+| Relationship         | Pattern                        | Example DSL                                 | When to Use                                       |
+| -------------------- | ------------------------------ | ------------------------------------------- | ------------------------------------------------- |
+| **Uses**             | A uses B                       | `handler -> repository "uses"`              | Dependency injection, method calls                |
+| **Creates**          | A creates B                    | `handler -> entity "creates"`               | Factory creates objects, handlers create entities |
+| **Triggers**         | Event triggers component       | `event -> subscriber "triggers"`            | Events triggering subscribers                     |
+| **Implements**       | Component implements interface | `repository -> interface "implements"`      | Repository implementing port                      |
+| **Depends On**       | Component depends on interface | `handler -> interface "depends on"`         | Hexagonal architecture ports                      |
+| **Publishes**        | Component publishes event      | `handler -> event "publishes"`              | Event-driven communication                        |
+| **Persists To**      | Repository to database         | `repository -> database "persists to"`      | Data persistence                                  |
+| **Stores/Retrieves** | Repository manages entity      | `repository -> entity "stores / retrieves"` | Entity lifecycle management                       |
+| **Sends Via**        | Component sends via broker     | `subscriber -> broker "sends via"`          | Asynchronous messaging                            |
+| **Validates**        | Validator validates component  | `validator -> entity "validates"`           | Business rule checking                            |
 
 **Common Composite Patterns**:
+
 - **CQRS**: Controller → Command Bus → Handler → Repository → Database
 - **Event-Driven**: Handler → Event → Subscribers → External Systems
 - **Hexagonal**: Handler → Port (interface) ← Adapter (implementation) → External System

@@ -357,6 +357,7 @@ Use this skill **before**:
 **Issue**: DSL syntax validation fails
 
 **Solution**:
+
 1. Check balanced braces `{}`
 2. Verify all components are defined before relationships
 3. Ensure no duplicate variable names
