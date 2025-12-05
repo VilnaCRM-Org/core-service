@@ -12,6 +12,7 @@ What are you trying to do?
 │   ├─ High complexity → complexity-management
 │   ├─ Test failures → testing-workflow
 │   ├─ PHPInsights fails → complexity-management
+│   ├─ Slow queries/N+1 issues → query-performance-analysis
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
@@ -19,6 +20,7 @@ What are you trying to do?
 │   ├─ New API endpoint → developing-openapi-specs
 │   ├─ New load test → load-testing
 │   ├─ New database entity → database-migrations
+│   ├─ New database indexes → query-performance-analysis
 │   └─ New test cases → testing-workflow
 │
 ├─ Review/validate work
@@ -141,6 +143,29 @@ This skill covers processor patterns for OpenAPI.
 
 ---
 
+### "My endpoint is slow / I have N+1 query problems"
+
+**Use**: [query-performance-analysis](query-performance-analysis/SKILL.md)
+
+This skill detects N+1 queries, analyzes slow queries with EXPLAIN, identifies missing indexes, and provides safe migration strategies.
+
+**NOT**: database-migrations (that's for creating indexes in XML, not analyzing performance)
+**NOT**: load-testing (that's for testing under load, not fixing slow queries)
+
+**ALSO**: Use [load-testing](load-testing/SKILL.md) after fixing performance issues to prevent regression.
+
+---
+
+### "I need to add a database index for performance"
+
+**Use**: [query-performance-analysis](query-performance-analysis/SKILL.md) first to analyze what indexes are needed
+
+**THEN**: [database-migrations](database-migrations/SKILL.md) for XML mapping syntax
+
+The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAIN analysis), while database-migrations tells you HOW to add them (XML syntax).
+
+---
+
 ## Skill Relationship Map
 
 ```
@@ -155,19 +180,24 @@ This skill covers processor patterns for OpenAPI.
                               ▼                  ▼
                     implementing-ddd-      load-testing
                       architecture         (performance)
-                              │
-                              ▼
-                    database-migrations
+                              │                  │
+                    ┌─────────┼─────────┬────────┘
+                    ▼         ▼         ▼
+          database-    query-        documentation-
+          migrations   performance-   sync
+                      analysis
 ```
 
 ## Common Confusions
 
-| Confusion                                      | Clarification                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| deptrac-fixer vs implementing-ddd-architecture | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                 |
-| testing-workflow vs load-testing               | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing |
-| quality-standards vs complexity-management     | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management    |
-| ci-workflow vs testing-workflow                | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                      |
+| Confusion                                           | Clarification                                                                                                                          |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| deptrac-fixer vs implementing-ddd-architecture      | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                                          |
+| testing-workflow vs load-testing                    | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing                          |
+| quality-standards vs complexity-management          | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management                             |
+| ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
+| database-migrations vs query-performance-analysis   | **Index creation (HOW)** → database-migrations<br>**Performance analysis (WHAT/WHY)** → query-performance-analysis                     |
+| query-performance-analysis vs load-testing          | **Fix slow queries** → query-performance-analysis<br>**Test under load** → load-testing                                                |
 
 ## Multiple Skills for One Task
 
@@ -177,9 +207,11 @@ Some tasks benefit from multiple skills:
 
 1. **implementing-ddd-architecture** - Design domain model
 2. **database-migrations** - Configure persistence
-3. **testing-workflow** - Write tests
-4. **documentation-sync** - Update docs
-5. **ci-workflow** - Validate everything
+3. **query-performance-analysis** - Optimize queries and add indexes
+4. **testing-workflow** - Write tests
+5. **load-testing** - Add performance tests
+6. **documentation-sync** - Update docs
+7. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 
@@ -189,6 +221,15 @@ Some tasks benefit from multiple skills:
 
 ### Performance optimization:
 
-1. **load-testing** - Create performance tests
-2. **complexity-management** - Reduce code complexity
-3. **ci-workflow** - Ensure quality maintained
+1. **query-performance-analysis** - Fix N+1 queries, add indexes
+2. **load-testing** - Create performance tests
+3. **complexity-management** - Reduce code complexity
+4. **ci-workflow** - Ensure quality maintained
+
+### Fixing slow API endpoint:
+
+1. **query-performance-analysis** - Detect N+1, analyze with EXPLAIN
+2. **database-migrations** - Add missing indexes (XML syntax)
+3. **load-testing** - Add performance regression tests
+4. **documentation-sync** - Document performance considerations
+5. **ci-workflow** - Verify all checks pass
