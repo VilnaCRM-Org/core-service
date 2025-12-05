@@ -10,7 +10,7 @@ description: Maintain Structurizr C4 architecture diagrams in sync with code cha
 Use this skill when:
 
 - Adding new components (controllers, handlers, services, repositories)
-- Creating new entities, value objects, or aggregates
+- Creating new entities or aggregates
 - Modifying component relationships or dependencies
 - Implementing new architectural patterns (CQRS, events, subscribers)
 - Adding infrastructure components (databases, caches, message brokers)
@@ -30,7 +30,7 @@ Keep the Structurizr workspace (`workspace.dsl`) synchronized with codebase chan
 - Layer groupings (Application/Domain/Infrastructure) are accurate
 - Component descriptions reflect current purpose
 - All infrastructure dependencies are documented
-- C4 diagrams render without errors at <http://localhost:8080>
+- C4 diagrams render without errors (check at `http://localhost:${STRUCTURIZR_PORT:-8080}`)
 
 ---
 
@@ -57,8 +57,8 @@ Determine if your code changes are architecturally significant:
 
 - Factory classes
 - Transformer classes (unless critical)
-- Value objects
-- Interface definitions
+- Value objects (unless architecturally significant)
+- Interface definitions (except hexagonal ports)
 - Base classes
 - DTOs and input/output objects
 - Utility classes and helpers
@@ -106,7 +106,8 @@ View the updated diagram:
 
 ```bash
 # Refresh browser (Structurizr Lite auto-reloads)
-open http://localhost:8080
+# Port is configurable via STRUCTURIZR_PORT in .env (default: 8080)
+open http://localhost:${STRUCTURIZR_PORT:-8080}
 # Navigate to "Diagrams" → "Components_All"
 ```
 
@@ -145,13 +146,13 @@ structurizr:
     - ./:/usr/local/structurizr
 ```
 
-**Access**: <http://localhost:8080>
+**Access**: `http://localhost:${STRUCTURIZR_PORT:-8080}` (port configurable via `.env`)
 
 ### Standard Development Flow
 
 1. **Implement code changes** → Add handler, entity, repository
 2. **Update workspace.dsl** → Add component + relationships
-3. **View locally** → Refresh <http://localhost:8080>
+3. **View locally** → Refresh browser at configured port
 4. **Position components** → Drag in UI, click "Save workspace"
 5. **Commit together** → Code + workspace.dsl + workspace.json in same PR
 
@@ -159,7 +160,7 @@ structurizr:
 
 **Automatic layout doesn't work well** - use manual positioning:
 
-1. Open <http://localhost:8080>
+1. Open Structurizr UI in browser
 2. Navigate to "Diagrams" → "Components_All"
 3. Drag components to arrange (left-to-right flow recommended)
 4. Click "Save workspace" button in top-right
@@ -173,96 +174,7 @@ structurizr:
 - Repositories to the right of handlers
 - Database/Cache/Message Broker on far right (external)
 
----
-
-## Common Mistakes and Fixes
-
-### 1. Filtered Views Causing Errors
-
-❌ **WRONG**:
-
-```dsl
-views {
-    component softwareSystem.serviceName "Components_Customer" {
-        include ->customer->  // ERROR: element doesn't exist
-    }
-}
-```
-
-✅ **CORRECT**:
-
-```dsl
-views {
-    component softwareSystem.serviceName "Components_All" {
-        include *
-    }
-}
-```
-
-### 2. External Dependencies in Groups
-
-❌ **WRONG**:
-
-```dsl
-group "Infrastructure" {
-    database = component "Database" ... { tags "Database" }
-}
-```
-
-✅ **CORRECT**:
-
-```dsl
-group "Infrastructure" {
-    repository = component "Repository" ... { tags "Item" }
-}
-
-// Database OUTSIDE any group
-database = component "Database" ... { tags "Database" }
-```
-
-### 3. Using autolayout
-
-❌ **WRONG**:
-
-```dsl
-views {
-    component ... {
-        include *
-        autolayout lr 150 150  // Doesn't work well
-    }
-}
-```
-
-✅ **CORRECT**:
-
-```dsl
-views {
-    component ... {
-        include *  // Position manually in UI
-    }
-}
-```
-
-### 4. Over-Documenting Internal Details
-
-❌ **WRONG** (too many components):
-
-```dsl
-customer = component "Customer" ...
-customerId = component "CustomerId" ...
-customerEmail = component "CustomerEmail" ...
-customerFactory = component "CustomerFactory" ...
-```
-
-✅ **CORRECT** (focus on significance):
-
-```dsl
-customer = component "Customer" "Represents a customer aggregate" "Entity" {
-    tags "Item"
-}
-```
-
-**More mistakes**: See [reference/common-mistakes.md](reference/common-mistakes.md)
+**Common mistakes**: See [reference/common-mistakes.md](reference/common-mistakes.md) for complete guide.
 
 ---
 
