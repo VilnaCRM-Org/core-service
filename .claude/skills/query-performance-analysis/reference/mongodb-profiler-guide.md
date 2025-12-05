@@ -6,11 +6,11 @@ MongoDB Profiler logs all database operations for performance analysis. Essentia
 
 ## Profiling Levels
 
-| Level | Description | Use Case | Performance Impact |
-|-------|-------------|----------|-------------------|
-| 0 | Off | Production (default) | None |
-| 1 | Slow operations only | Production monitoring | Minimal |
-| 2 | All operations | Development/debugging | High |
+| Level | Description          | Use Case              | Performance Impact |
+| ----- | -------------------- | --------------------- | ------------------ |
+| 0     | Off                  | Production (default)  | None               |
+| 1     | Slow operations only | Production monitoring | Minimal            |
+| 2     | All operations       | Development/debugging | High               |
 
 ## Enable Profiler
 
@@ -33,7 +33,7 @@ db.setProfilingLevel(2, { slowms: 50 })
 
 ```javascript
 // Log only operations slower than 200ms
-db.setProfilingLevel(1, { slowms: 200 })
+db.setProfilingLevel(1, { slowms: 200 });
 ```
 
 ### Check Status
@@ -56,15 +56,18 @@ Profiled queries are stored in `system.profile` collection.
 ### View Recent Queries
 
 ```javascript
-db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
+db.system.profile.find().sort({ ts: -1 }).limit(10).pretty();
 ```
 
 ### View Slow Queries
 
 ```javascript
-db.system.profile.find({
-    millis: { $gt: 100 }
-}).sort({ millis: -1 }).pretty()
+db.system.profile
+  .find({
+    millis: { $gt: 100 },
+  })
+  .sort({ millis: -1 })
+  .pretty();
 ```
 
 ### Find Specific Operations
@@ -72,20 +75,26 @@ db.system.profile.find({
 ```javascript
 // Find queries on 'customers' collection
 // Format: ns: "<database_name>.<collection_name>"
-db.system.profile.find({
-    ns: "app.customers",
-    op: "query"
-}).pretty()
+db.system.profile
+  .find({
+    ns: 'app.customers',
+    op: 'query',
+  })
+  .pretty();
 
 // Find updates
-db.system.profile.find({
-    op: "update"
-}).pretty()
+db.system.profile
+  .find({
+    op: 'update',
+  })
+  .pretty();
 
 // Find inserts
-db.system.profile.find({
-    op: "insert"
-}).pretty()
+db.system.profile
+  .find({
+    op: 'insert',
+  })
+  .pretty();
 ```
 
 ## Profile Entry Fields
@@ -117,32 +126,32 @@ db.system.profile.find({
 ```javascript
 // Group by query pattern and count
 db.system.profile.aggregate([
-    {
-        $match: {
-            op: "query",
-            ns: { $ne: "app.system.profile" }  // Exclude profiler collection itself
-        }
+  {
+    $match: {
+      op: 'query',
+      ns: { $ne: 'app.system.profile' }, // Exclude profiler collection itself
     },
-    {
-        $group: {
-            _id: {
-                collection: "$ns",
-                filter: "$command.filter"
-            },
-            count: { $sum: 1 },
-            avgMs: { $avg: "$millis" },
-            totalMs: { $sum: "$millis" }
-        }
+  },
+  {
+    $group: {
+      _id: {
+        collection: '$ns',
+        filter: '$command.filter',
+      },
+      count: { $sum: 1 },
+      avgMs: { $avg: '$millis' },
+      totalMs: { $sum: '$millis' },
     },
-    {
-        $match: {
-            count: { $gt: 10 }  // Queries executed >10 times
-        }
+  },
+  {
+    $match: {
+      count: { $gt: 10 }, // Queries executed >10 times
     },
-    {
-        $sort: { count: -1 }
-    }
-])
+  },
+  {
+    $sort: { count: -1 },
+  },
+]);
 
 // Look for high "count" values = repeated queries = N+1 problem!
 ```
@@ -151,43 +160,49 @@ db.system.profile.aggregate([
 
 ```javascript
 // Find queries that scanned entire collection
-db.system.profile.find({
-    op: "query",
-    docsExamined: { $gt: 1000 },  // Scanned >1000 docs
-    planSummary: "COLLSCAN"        // Collection scan
-}).sort({ millis: -1 })
+db.system.profile
+  .find({
+    op: 'query',
+    docsExamined: { $gt: 1000 }, // Scanned >1000 docs
+    planSummary: 'COLLSCAN', // Collection scan
+  })
+  .sort({ millis: -1 });
 ```
 
 ### Find Inefficient Indexes
 
 ```javascript
 // Find queries where docsExamined >> nreturned
-db.system.profile.find({
-    op: "query",
+db.system.profile
+  .find({
+    op: 'query',
     $expr: {
-        $gt: [
-            { $divide: ["$docsExamined", { $max: ["$nreturned", 1] }] },
-            10  // Examined 10x more docs than returned
-        ]
-    }
-}).sort({ millis: -1 })
+      $gt: [
+        { $divide: ['$docsExamined', { $max: ['$nreturned', 1] }] },
+        10, // Examined 10x more docs than returned
+      ],
+    },
+  })
+  .sort({ millis: -1 });
 ```
 
 ### Find Slowest Queries
 
 ```javascript
-db.system.profile.find().sort({ millis: -1 }).limit(10)
+db.system.profile.find().sort({ millis: -1 }).limit(10);
 ```
 
 ### Queries by Time Range
 
 ```javascript
-db.system.profile.find({
+db.system.profile
+  .find({
     ts: {
-        $gte: ISODate("2024-01-15T10:00:00Z"),
-        $lt: ISODate("2024-01-15T11:00:00Z")
-    }
-}).sort({ millis: -1 })
+      $gte: ISODate('2024-01-15T10:00:00Z'),
+      $lt: ISODate('2024-01-15T11:00:00Z'),
+    },
+  })
+  .sort({ millis: -1 });
 ```
 
 ## Performance Summary
@@ -195,22 +210,23 @@ db.system.profile.find({
 ```javascript
 // Get overall statistics
 db.system.profile.aggregate([
-    {
-        $group: {
-            _id: "$op",
-            count: { $sum: 1 },
-            avgMs: { $avg: "$millis" },
-            maxMs: { $max: "$millis" },
-            totalMs: { $sum: "$millis" }
-        }
+  {
+    $group: {
+      _id: '$op',
+      count: { $sum: 1 },
+      avgMs: { $avg: '$millis' },
+      maxMs: { $max: '$millis' },
+      totalMs: { $sum: '$millis' },
     },
-    {
-        $sort: { totalMs: -1 }
-    }
-])
+  },
+  {
+    $sort: { totalMs: -1 },
+  },
+]);
 ```
 
 **Output Example**:
+
 ```json
 [
   {
@@ -235,26 +251,26 @@ db.system.profile.aggregate([
 
 ```javascript
 // Profile collection can grow large - clear periodically
-db.system.profile.drop()
+db.system.profile.drop();
 
 // Re-enable profiling
-db.setProfilingLevel(2, { slowms: 50 })
+db.setProfilingLevel(2, { slowms: 50 });
 ```
 
 ### Limit Profile Collection Size
 
 ```javascript
 // Create capped collection (auto-removes old entries)
-db.setProfilingLevel(0)  // Disable first
+db.setProfilingLevel(0); // Disable first
 
-db.system.profile.drop()
+db.system.profile.drop();
 
-db.createCollection("system.profile", {
-    capped: true,
-    size: 4000000  // 4MB
-})
+db.createCollection('system.profile', {
+  capped: true,
+  size: 4000000, // 4MB
+});
 
-db.setProfilingLevel(2, { slowms: 50 })  // Re-enable
+db.setProfilingLevel(2, { slowms: 50 }); // Re-enable
 ```
 
 ### Profile Sampling (Production)
@@ -262,9 +278,9 @@ db.setProfilingLevel(2, { slowms: 50 })  // Re-enable
 ```javascript
 // In production, sample only 10% of queries
 db.setProfilingLevel(1, {
-    slowms: 200,
-    sampleRate: 0.1  // Sample 10% of operations
-})
+  slowms: 200,
+  sampleRate: 0.1, // Sample 10% of operations
+});
 ```
 
 ## Integration with PHP
@@ -390,12 +406,13 @@ millis: >1000
 **Issue**: Profiler not capturing queries
 
 **Solution**:
+
 ```javascript
 // Check profiling level
-db.getProfilingStatus()
+db.getProfilingStatus();
 
 // Ensure level > 0
-db.setProfilingLevel(2)
+db.setProfilingLevel(2);
 ```
 
 ---
@@ -403,13 +420,14 @@ db.setProfilingLevel(2)
 **Issue**: Profile collection too large
 
 **Solution**:
+
 ```javascript
 // Check size
-db.system.profile.stats().size
+db.system.profile.stats().size;
 
 // Clear if needed
-db.system.profile.drop()
-db.setProfilingLevel(2, { slowms: 50 })
+db.system.profile.drop();
+db.setProfilingLevel(2, { slowms: 50 });
 ```
 
 ---
@@ -417,15 +435,16 @@ db.setProfilingLevel(2, { slowms: 50 })
 **Issue**: Can't find specific queries
 
 **Solution**:
+
 ```javascript
 // Check namespace
-db.system.profile.distinct("ns")
+db.system.profile.distinct('ns');
 
 // Check operations
-db.system.profile.distinct("op")
+db.system.profile.distinct('op');
 
 // Verify timestamp range
-db.system.profile.find().sort({ ts: -1 }).limit(1)
+db.system.profile.find().sort({ ts: -1 }).limit(1);
 ```
 
 ## External Resources

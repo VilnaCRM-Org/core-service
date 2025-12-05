@@ -9,6 +9,7 @@ Practical examples for detecting and fixing query performance issues.
 **When to use**: Endpoint makes many database queries
 
 **Covers**:
+
 - Detecting N+1 patterns in code
 - Using MongoDB profiler to find repeated queries
 - Fixing with eager loading
@@ -24,6 +25,7 @@ Practical examples for detecting and fixing query performance issues.
 **When to use**: Query execution time is high
 
 **Covers**:
+
 - Using MongoDB explain() command
 - Interpreting EXPLAIN results
 - Identifying COLLSCAN vs IXSCAN
@@ -39,6 +41,7 @@ Practical examples for detecting and fixing query performance issues.
 **When to use**: Need to identify which indexes are needed
 
 **Covers**:
+
 - Analyzing query patterns
 - Checking for missing indexes
 - Determining compound vs single indexes
@@ -54,6 +57,7 @@ Practical examples for detecting and fixing query performance issues.
 **When to use**: Adding indexes to production database
 
 **Covers**:
+
 - Online index creation (non-blocking)
 - Verification steps
 - Performance measurement before/after
@@ -89,6 +93,7 @@ Each example provides:
 ### 3. Adapt to Your Needs
 
 Examples use customer/type/status entities - adapt for:
+
 - Your entity names
 - Your query patterns
 - Your performance thresholds
@@ -111,12 +116,12 @@ db.system.profile.find().sort({ ts: -1 }).limit(10)
 
 ## Quick Reference
 
-| Problem | Example | Key Tool |
-|---------|---------|----------|
-| Many queries (N+1) | N+1 Detection | Profiler query count |
-| Slow query | Slow Query Analysis | EXPLAIN command |
-| Missing index | Index Detection | EXPLAIN + query patterns |
-| Production migration | Safe Migration | Background index creation |
+| Problem              | Example             | Key Tool                  |
+| -------------------- | ------------------- | ------------------------- |
+| Many queries (N+1)   | N+1 Detection       | Profiler query count      |
+| Slow query           | Slow Query Analysis | EXPLAIN command           |
+| Missing index        | Index Detection     | EXPLAIN + query patterns  |
+| Production migration | Safe Migration      | Background index creation |
 
 ## Combining Examples
 
@@ -147,7 +152,7 @@ Most performance issues are N+1 queries. Fix these first.
 Enable profiler in development to catch issues early:
 
 ```javascript
-db.setProfilingLevel(2, { slowms: 50 })
+db.setProfilingLevel(2, { slowms: 50 });
 ```
 
 ### 3. EXPLAIN Every Query
@@ -181,14 +186,14 @@ public function testCustomerEndpointPerformance(): void
 
 Use these as guidelines:
 
-| Operation | Target | Max Acceptable |
-|-----------|--------|----------------|
-| Read single | <50ms | 100ms |
-| Read collection (10 items) | <100ms | 200ms |
-| Read collection (100 items) | <200ms | 500ms |
-| Write single | <100ms | 300ms |
-| Write batch (10 items) | <500ms | 1000ms |
-| Query count per endpoint | <5 | 10 |
+| Operation                   | Target | Max Acceptable |
+| --------------------------- | ------ | -------------- |
+| Read single                 | <50ms  | 100ms          |
+| Read collection (10 items)  | <100ms | 200ms          |
+| Read collection (100 items) | <200ms | 500ms          |
+| Write single                | <100ms | 300ms          |
+| Write batch (10 items)      | <500ms | 1000ms         |
+| Query count per endpoint    | <5     | 10             |
 
 ## Common Patterns Across Examples
 
