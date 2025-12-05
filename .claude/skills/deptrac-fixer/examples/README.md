@@ -89,23 +89,22 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 
 ## Validation Strategy (CRITICAL)
 
-**✅ CORRECT - Three-Layer Validation:**
+**✅ CORRECT - Two-Layer Validation:**
 
-1. **Application Layer (DTOs)** - Format/structure validation
+1. **Application Layer** - Input validation (format, structure, business rules)
 
-   - Location: `config/validator/Customer.yaml`
-   - Rules: NotBlank, Email, Length, custom validators
-   - NO annotations on DTO classes!
+   - **DTO Validation Config**: `config/validator/Customer.yaml`
+     - Rules: NotBlank, Email, Length
+     - NO annotations on DTO classes!
+   - **Custom Validators**: `src/{Context}/Application/Validator/`
+     - Business logic validation (UniqueEmail, Initials, etc.)
+     - Part of Application layer, NOT a separate layer
 
 2. **Domain Layer (Entities)** - Business invariants only
 
    - Location: Entity business methods
    - Rules: State transitions, business rules
-   - NO validation in constructors (trust DTO layer)!
-
-3. **Custom Validators** - Business logic validation
-   - Location: `src/{Context}/Application/Validator/`
-   - Examples: UniqueEmail, Initials, business-specific rules
+   - NO validation in constructors (trust Application layer)!
 
 **❌ WRONG:**
 

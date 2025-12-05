@@ -1888,10 +1888,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
@@ -2045,10 +2045,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/ld+json:
@@ -2169,10 +2169,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
@@ -2326,10 +2326,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/merge-patch+json:
@@ -2827,10 +2827,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     put:
       operationId: api_customer_types_ulid_put
@@ -2984,10 +2984,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/ld+json:
@@ -3108,10 +3108,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
@@ -3265,10 +3265,10 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JKX8XGHVDZ46MWYMZT94YER4
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/merge-patch+json:
@@ -3337,7 +3337,7 @@ components:
             - 'null'
     Customer.CustomerCreate.jsonld:
       type: object
-      description: 'Creates a Customer resource'
+      description: ''
       additionalProperties: false
       deprecated: false
       required:
@@ -3385,10 +3385,14 @@ components:
             - 'null'
     Customer.CustomerPatch:
       type: object
-      description: 'Updates the Customer resource partially'
+      description: ''
       additionalProperties: false
       deprecated: false
       properties:
+        id:
+          type:
+            - string
+            - 'null'
         initials:
           maxLength: 255
           type:
@@ -3426,7 +3430,7 @@ components:
             - 'null'
     Customer.CustomerPut.jsonld:
       type: object
-      description: 'Replaces the Customer resource'
+      description: ''
       additionalProperties: false
       deprecated: false
       required:
@@ -3474,7 +3478,7 @@ components:
             - 'null'
     Customer.jsonld-output:
       type: object
-      description: 'Retrieves the collection of Customer resources'
+      description: ''
       deprecated: false
       properties:
         '@context':
@@ -3524,7 +3528,7 @@ components:
           format: date-time
     CustomerStatus.StatusCreate.jsonld:
       type: object
-      description: 'Creates a CustomerStatus resource'
+      description: ''
       additionalProperties: false
       deprecated: false
       required:
@@ -3537,7 +3541,7 @@ components:
             - 'null'
     CustomerStatus.StatusPatch:
       type: object
-      description: 'Updates the CustomerStatus resource partially'
+      description: ''
       additionalProperties: false
       deprecated: false
       properties:
@@ -3546,9 +3550,13 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerStatus.StatusPut.jsonld:
       type: object
-      description: 'Replaces the CustomerStatus resource'
+      description: ''
       additionalProperties: false
       deprecated: false
       required:
@@ -3593,7 +3601,7 @@ components:
           type: string
     CustomerType.TypeCreate.jsonld:
       type: object
-      description: 'Creates a CustomerType resource'
+      description: ''
       deprecated: false
       required:
         - value
@@ -3605,7 +3613,7 @@ components:
             - 'null'
     CustomerType.TypePatch:
       type: object
-      description: 'Updates the CustomerType resource partially'
+      description: ''
       deprecated: false
       properties:
         value:
@@ -3613,9 +3621,13 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerType.TypePut.jsonld:
       type: object
-      description: 'Replaces the CustomerType resource'
+      description: ''
       additionalProperties: false
       deprecated: false
       required:

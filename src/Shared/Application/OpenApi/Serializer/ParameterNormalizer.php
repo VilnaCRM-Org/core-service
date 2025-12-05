@@ -25,20 +25,12 @@ final class ParameterNormalizer implements NormalizerInterface
     ): array|string|int|float|bool|\ArrayObject|null {
         $data = $this->decorated->normalize($object, $format, $context);
 
-        if ($this->shouldSkipProcessing($object, $data)) {
-            return $data;
-        }
-
-        // Remove allowEmptyValue and allowReserved for path parameters as they're only valid for query parameters
-        if ($object->getIn() === 'path') {
-            unset($data['allowEmptyValue'], $data['allowReserved']);
-        }
-
-        return $data;
+        return $this->shouldSkipProcessing($object, $data)
+            ? $data
+            : $this->sanitizeParameterData($object, $data);
     }
 
     /**
-     * @param object $data
      * @param array<string, bool|int|string> $context
      */
     public function supportsNormalization(
@@ -63,10 +55,30 @@ final class ParameterNormalizer implements NormalizerInterface
         object $object,
         array|string|int|float|bool|\ArrayObject|null $data
     ): bool {
-        if (!$object instanceof Parameter) {
-            return true;
-        }
+        return !$object instanceof Parameter || !is_array($data);
+    }
 
-        return !is_array($data);
+    /**
+     * @param array<string, array|string|int|float|bool|\ArrayObject|null> $data
+     *
+     * @return array<string, array|string|int|float|bool|\ArrayObject|null>
+     */
+    private function sanitizeParameterData(Parameter $parameter, array $data): array
+    {
+        return $parameter->getIn() === 'path'
+            ? $this->removeQueryOnlyKeys($data)
+            : $data;
+    }
+
+    /**
+     * @param array<string, array|string|int|float|bool|\ArrayObject|null> $data
+     *
+     * @return array<string, array|string|int|float|bool|\ArrayObject|null>
+     */
+    private function removeQueryOnlyKeys(array $data): array
+    {
+        unset($data['allowEmptyValue'], $data['allowReserved']);
+
+        return $data;
     }
 }

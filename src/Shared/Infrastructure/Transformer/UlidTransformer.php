@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
@@ -14,24 +15,28 @@ final readonly class UlidTransformer
     public function __construct(
         private UlidFactory $ulidFactory,
         private UlidValidator $validator,
-        private UlidConverter $converter
+        private UlidValueTransformer $valueTransformer
     ) {
     }
 
-    public function toDatabaseValue(array|string|int|float|bool|object|null $value): ?Binary
+    public function toDatabaseValue(null|Ulid|string|SymfonyUlid $value): ?Binary
     {
         if (!$this->validator->isValid($value)) {
             return null;
         }
 
-        $ulid = $this->converter->toUlid($value);
+        $ulid = $this->valueTransformer->toUlid($value);
 
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPhpValue(array|string|int|float|bool|object|null $binary): Ulid
+    public function toPhpValue(Binary|string|SymfonyUlid|null $value): ?Ulid
     {
-        $symfonyUlid = $this->converter->fromBinary($binary);
+        if ($value === null) {
+            return null;
+        }
+
+        $symfonyUlid = $this->valueTransformer->fromBinary($value);
 
         return $this->transformFromSymfonyUlid($symfonyUlid);
     }

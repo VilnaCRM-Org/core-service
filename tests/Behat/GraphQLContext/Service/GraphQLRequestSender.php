@@ -16,9 +16,9 @@ final class GraphQLRequestSender
     }
 
     /**
-     * @param array<string, string|int|bool|array|null> $variables
+     * @param array<string, mixed> $variables
      *
-     * @return array{response: Response, data: array<string, string|int|bool|array|null>|null}
+     * @return array{response: Response, data: array<string, mixed>|null}
      */
     public function send(string $query, array $variables = []): array
     {

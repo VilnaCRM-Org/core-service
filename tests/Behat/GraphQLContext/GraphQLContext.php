@@ -17,18 +17,19 @@ use Webmozart\Assert\Assert;
 
 final class GraphQLContext implements Context, SnippetAcceptingContext
 {
-    private ?Response $response = null;
-
-    /** @var array<string, string|int|bool|float|array|null>|null */
-    private ?array $responseData = null;
-
     private readonly GraphQLRequestSender $requestSender;
     private readonly ResponseDataAccessor $dataAccessor;
     private readonly ErrorValidator $errorValidator;
     private readonly ValueAssertionChain $valueAssertion;
 
-    public function __construct(KernelInterface $kernel)
-    {
+    /**
+     * @param array<string, string|int|bool|float|array|null>|null $responseData
+     */
+    public function __construct(
+        KernelInterface $kernel,
+        private ?Response $response = null,
+        private ?array $responseData = null,
+    ) {
         $this->requestSender = new GraphQLRequestSender($kernel);
         $this->dataAccessor = new ResponseDataAccessor();
         $this->errorValidator = new ErrorValidator();
@@ -121,12 +122,45 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @Then the GraphQL response :path should not contain :value
+     */
+    public function theGraphQLResponseFieldShouldNotContain(string $path, string $value): void
+    {
+        $this->ensureResponseDataAvailable();
+        $actualValue = $this->dataAccessor->getFieldValue($this->responseData, $path);
+
+        Assert::false(
+            str_contains((string) $actualValue, $value),
+            sprintf(
+                'Field "%s" should not contain "%s", but it does: "%s"',
+                $path,
+                $value,
+                (string) $actualValue
+            )
+        );
+    }
+
+    /**
      * @Then the GraphQL response :path should match regex :pattern
      */
     public function theGraphQLResponseFieldShouldMatchRegex(string $path, string $pattern): void
     {
         $this->ensureResponseDataAvailable();
         $this->dataAccessor->assertFieldMatchesRegex($this->responseData, $path, $pattern);
+    }
+
+    /**
+     * @Then the GraphQL response :path should not be empty
+     */
+    public function theGraphQLResponseFieldShouldNotBeEmpty(string $path): void
+    {
+        $this->ensureResponseDataAvailable();
+        $actualValue = $this->dataAccessor->getFieldValue($this->responseData, $path);
+
+        Assert::notEmpty(
+            $actualValue,
+            sprintf('Field "%s" should not be empty, but it is', $path)
+        );
     }
 
     /**
@@ -213,6 +247,27 @@ final class GraphQLContext implements Context, SnippetAcceptingContext
     {
         $this->ensureResponseDataAvailable();
         $this->dataAccessor->assertArrayHasCount($this->responseData, $path, $count);
+    }
+
+    /**
+     * @Then the GraphQL response :path should have at least :count items
+     */
+    public function theGraphQLResponseShouldHaveAtLeastItems(string $path, int $count): void
+    {
+        $this->ensureResponseDataAvailable();
+        $actualValue = $this->dataAccessor->getFieldValue($this->responseData, $path);
+
+        Assert::isArray($actualValue, sprintf('Field "%s" is not an array', $path));
+        Assert::greaterThanEq(
+            count($actualValue),
+            $count,
+            sprintf(
+                'Field "%s" should have at least %d items, but has %d',
+                $path,
+                $count,
+                count($actualValue)
+            )
+        );
     }
 
     /**

@@ -12,16 +12,18 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*'
         - type: className
-          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer).*'
+          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor).*'
         - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Serializer).*'
+          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject).*'
+        - type: className
+          regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)'
 
     - name: Domain
       collectors:
         - type: className
           regex: '.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
         - type: className
-          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
+          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|Event|Exception|Factory|Repository|Collection).*'
         - type: className
           regex: '.*\\Shared\\Domain\\Bus\\(Command|Event).*'
 
@@ -30,7 +32,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
         - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory).*'
+          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory|Validator).*'
 
     - name: Symfony
       collectors:

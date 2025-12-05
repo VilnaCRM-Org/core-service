@@ -12,8 +12,11 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
+use App\Shared\Application\Extractor\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+
+use function trim;
 
 /**
  * @implements ProcessorInterface<TypePatch, CustomerType>
@@ -24,6 +27,7 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         private TypeRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
         private UpdateTypeCommandFactoryInterface $commandFactory,
+        private PatchUlidExtractor $patchUlidExtractor,
         private UlidFactory $ulidFactory,
     ) {
     }
@@ -39,33 +43,23 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerType {
-        $ulid = $uriVariables['ulid'];
+        $ulid = $this->patchUlidExtractor->extract(
+            $uriVariables,
+            $data->id,
+            static fn () => CustomerTypeNotFoundException::withIri('/api/customer_types/unknown')
+        );
         $iri = sprintf('/api/customer_types/%s', $ulid);
+
         $customerType = $this->repository->find(
             $this->ulidFactory->create($ulid)
         ) ?? throw CustomerTypeNotFoundException::withIri($iri);
 
-        $newValue = $this->getNewValue($data->value, $customerType->getValue());
-
-        $this->dispatchCommand($customerType, $newValue);
-
-        return $customerType;
-    }
-
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return $this->hasValidContent($newValue) ? $newValue : $defaultValue;
-    }
-
-    private function hasValidContent(?string $value): bool
-    {
-        if ($value === null) {
-            return false;
+        // Only update if value is explicitly provided and not empty
+        if ($data->value !== null && trim($data->value) !== '') {
+            $this->dispatchCommand($customerType, $data->value);
         }
 
-        return strlen(trim($value)) > 0;
+        return $customerType;
     }
 
     private function dispatchCommand(

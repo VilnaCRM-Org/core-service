@@ -5,34 +5,29 @@ description: Maintain and improve code quality using PHPInsights without decreas
 
 # Code Complexity Management
 
-## Context (Input)
+Maintain exceptional code quality standards using PHPInsights in this Symfony-based microservice. This skill ensures complexity stays manageable while preserving hexagonal architecture, DDD patterns, and CQRS design.
+
+## When to Use This Skill
+
+Use this skill when:
 
 - PHPInsights checks fail (`make phpinsights` returns errors)
 - Cyclomatic complexity exceeds thresholds
 - Code quality score drops below 100%
 - Architecture score falls below 100%
 - Style score drops below 100%
-- Complexity score falls below 93%
+- Complexity score falls below 94%
 - Adding new features that increase complexity
 - Refactoring existing code for better maintainability
+- Before committing code changes (proactive quality check)
 
-## Task (Function)
+## ⚡ Quick Start
 
-Maintain exceptional code quality standards using PHPInsights while preserving hexagonal architecture, DDD patterns, and CQRS design.
-
-**Success Criteria**:
-
-- `make phpinsights` passes without errors
-- Code quality: 100%
-- Complexity: ≥ 94%
-- Architecture: 100%
-- Style: 100%
-
----
+**New to complexity refactoring?** Start with the [Quick Start Guide](reference/quick-start.md) for a fast-track workflow with immediate action steps.
 
 ## Protected Quality Thresholds
 
-**CRITICAL**: These thresholds in `phpinsights.php` must NEVER be lowered:
+**CRITICAL**: These thresholds are defined in `phpinsights.php` and must NEVER be lowered:
 
 ```php
 'requirements' => [
@@ -59,14 +54,25 @@ Maintain exceptional code quality standards using PHPInsights while preserving h
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
+**Protected thresholds are non-negotiable**:
+
+- min-quality: 100% (never lower)
+- min-complexity: 94% (never lower)
+- min-architecture: 100% (never lower)
+- min-style: 100% (never lower)
+
+If you're tempted to lower a threshold, it means the code needs refactoring, not the config.
+
 ---
 
-## Quick Start Workflow
+## Core Workflow
 
-### Step 1: Identify Complex Classes
+### 1. Identify Complex Classes
+
+**First, find which classes need refactoring**:
 
 ```bash
-# Find top 20 most complex classes
+# Find top 20 most complex classes (default)
 make analyze-complexity
 
 # Find top 10 classes
@@ -74,9 +80,12 @@ make analyze-complexity N=10
 
 # Export as JSON for tracking
 make analyze-complexity-json N=20 > complexity-report.json
+
+# Export as CSV for spreadsheets
+make analyze-complexity-csv N=15 > complexity.csv
 ```
 
-**Output shows**:
+**Output shows** for each class:
 
 - **CCN (Cyclomatic Complexity)**: > 15 is critical
 - **WMC (Weighted Method Count)**: Sum of all method complexities
@@ -84,49 +93,84 @@ make analyze-complexity-json N=20 > complexity-report.json
 - **Max Complexity**: Highest complexity of any single method
 - **Maintainability Index**: 0-100 (target: > 65)
 
-**See**: [reference/analysis-tools.md](reference/analysis-tools.md)
+**See**: [analysis-tools.md](reference/analysis-tools.md) for complete tools documentation
 
-### Step 2: Run PHPInsights
-
-```bash
-make phpinsights
-```
-
-### Step 3: Identify Failing Metric
-
-```
-❌ [COMPLEXITY] 93.5 pts (target: 94%)
-✗ Method `CustomerCommandHandler::handle` has cyclomatic complexity of 12
-```
-
-### Step 4: Apply Refactoring Strategy
-
-**See**: [refactoring-strategies.md](refactoring-strategies.md) for proven patterns:
-
-- Extract Methods
-- Strategy Pattern
-- Early Returns
-- Functional Composition
-
-### Step 5: Verify Improvements
+### 2. Run PHPInsights Analysis
 
 ```bash
+# Using project make command (recommended)
 make phpinsights
+
+# Direct execution with verbosity
+vendor/bin/phpinsights -v
+
+# Analyze specific directory
+vendor/bin/phpinsights analyse src/Customer
+
+# Generate JSON report for parsing
+vendor/bin/phpinsights --format=json > insights-report.json
 ```
 
-Repeat until all scores meet thresholds.
+### 3. Interpret Results
 
----
+PHPInsights provides four scores:
 
-## Quick Fix Guide by Issue Type
+```
+[CODE] 100.0 pts       ✅ Target: 100%
+[COMPLEXITY] 94.2 pts  ✅ Target: 94%
+[ARCHITECTURE] 100 pts ✅ Target: 100%
+[STYLE] 100.0 pts      ✅ Target: 100%
+```
+
+**If any score is below threshold**, identify issues:
+
+```bash
+# Look for issues by severity
+✗ [Complexity] Method `CustomerCommandHandler::handle` has cyclomatic complexity of 12
+✗ [Architecture] Class `CustomerRepository` violates layer dependency rules
+✗ [Style] Line exceeds 100 characters in CustomerTransformer.php:45
+```
+
+### 4. Prioritize Fixes
+
+**Priority Order:**
+
+1. **CRITICAL (Complexity > 15)**: Immediate refactoring required
+2. **HIGH (Architecture violations)**: Breaks hexagonal/DDD boundaries
+3. **MEDIUM (Complexity 10-15)**: Plan refactoring
+4. **LOW (Style issues)**: Quick fixes, often auto-fixable
+
+### 5. Apply Fixes
+
+Based on issue type:
+
+**For Complexity Issues** → See [refactoring-strategies.md](refactoring-strategies.md)
+**For Metric Details** → See [reference/complexity-metrics.md](reference/complexity-metrics.md)
+**For Common Errors** → See [reference/troubleshooting.md](reference/troubleshooting.md)
+
+### 6. Verify Improvements
+
+```bash
+# Re-run PHPInsights
+make phpinsights
+
+# Verify all thresholds pass
+✅ Code quality: 100%
+✅ Complexity: 94%+
+✅ Architecture: 100%
+✅ Style: 100%
+```
+
+## Quick Fixes by Issue Type
 
 ### Cyclomatic Complexity Too High
 
 **Problem**: Method has too many decision points (if/else/switch/loops)
 
-**Identify hotspots**:
+**First, identify which classes need refactoring**:
 
 ```bash
+# Find top 10 most complex classes
 make analyze-complexity N=10
 ```
 
@@ -137,9 +181,7 @@ make analyze-complexity N=10
 3. **Early returns**: Reduce nesting with guard clauses
 4. **Command pattern**: Separate command handling logic
 
-**See**: [refactoring-strategies.md](refactoring-strategies.md) for DDD/CQRS-specific patterns
-
----
+See [refactoring-strategies.md](refactoring-strategies.md) for DDD/CQRS-specific patterns.
 
 ### Architecture Violations
 
@@ -152,15 +194,27 @@ make analyze-complexity N=10
 3. **Dependency injection**: Inject dependencies through constructors
 4. **Repository pattern**: Keep data access in Infrastructure layer
 
-**See**: [deptrac-fixer](../deptrac-fixer/SKILL.md) skill for fixing architectural violations
+**Project Architecture**:
 
----
+```
+src/{BoundedContext}/
+├── Domain/           # No external dependencies
+│   ├── Entity/
+│   ├── ValueObject/
+│   └── Repository/  # Interfaces only
+├── Application/      # Depends on Domain
+│   ├── Command/
+│   ├── CommandHandler/
+│   └── Event/
+└── Infrastructure/   # Depends on Domain + Application
+    └── Repository/   # Implementations
+```
 
 ### Style Issues
 
 **Problem**: Code doesn't meet PSR-12 or Symfony coding standards
 
-**Solution**:
+**Solutions**:
 
 ```bash
 # Auto-fix most style issues
@@ -170,11 +224,18 @@ make phpcsfixer
 make phpinsights
 ```
 
----
-
 ### Line Length > 100 Characters
 
-**Problem**: Lines exceed configured limit
+**Problem**: Lines exceed configured limit (100 chars)
+
+**Config**:
+
+```php
+LineLengthSniff::class => [
+    'lineLimit' => 100,
+    'ignoreComments' => true,
+],
+```
 
 **Solutions**:
 
@@ -183,132 +244,127 @@ make phpinsights
 3. Use named parameters (PHP 8+)
 4. Refactor long argument lists into DTOs
 
-**See**: [reference/project-configuration.md](reference/project-configuration.md)
+## Project-Specific Configuration
 
----
+### Excluded Sniffs
 
-## Constraints (Parameters)
+These sniffs are intentionally disabled in `phpinsights.php`:
 
-### NEVER
-
-- Lower quality thresholds in `phpinsights.php`
-- Lower thresholds in `phpinsights-tests.php`
-- Skip PHPInsights checks to "save time"
-- Disable sniffs without understanding impact
-- Ignore architecture violations
-- Put business logic in Application layer (belongs in Domain)
-
-### ALWAYS
-
-- Fix code to meet standards (not config to meet code)
-- Run `make phpinsights` after refactoring
-- Maintain hexagonal architecture while reducing complexity
-- Keep Domain layer pure (no framework dependencies)
-- Use `make analyze-complexity` to find hotspots
-- Run `make ci` before committing
-- Preserve test coverage while refactoring
-
----
-
-## Format (Output)
-
-### Expected PHPInsights Output
-
-```
-[CODE] 100.0 pts       ✅ Target: 100%
-[COMPLEXITY] 94.0 pts  ✅ Target: 94%
-[ARCHITECTURE] 100 pts ✅ Target: 100%
-[STYLE] 100.0 pts      ✅ Target: 100%
+```php
+'remove' => [
+    UnusedParameterSniff::class,              // Allow unused params in interfaces
+    SuperfluousInterfaceNamingSniff::class,   // Allow "Interface" suffix
+    SuperfluousExceptionNamingSniff::class,   // Allow "Exception" suffix
+    SpaceAfterNotSniff::class,                // Symfony style preference
+    ForbiddenSetterSniff::class,              // Allow setters where needed
+    UseSpacingSniff::class,                   // Symfony style preference
+],
 ```
 
-### Expected CI Output
+**Do NOT** create issues for these patterns - they're explicitly allowed.
 
-```
-✅ CI checks successfully passed!
-```
+### Excluded Files
 
----
+Some files are excluded from specific checks:
 
-## Verification Checklist
-
-After refactoring:
-
-- [ ] `make phpinsights` passes without errors
-- [ ] Code quality: 100%
-- [ ] Complexity: ≥ 94%
-- [ ] Architecture: 100%
-- [ ] Style: 100%
-- [ ] No layer boundary violations (`make deptrac` passes)
-- [ ] All tests still pass (`make all-tests`)
-- [ ] Test coverage maintained
-- [ ] Code remains aligned with hexagonal architecture
-
----
-
-## Related Skills
-
-- [quality-standards](../quality-standards/SKILL.md) - Overview of all protected quality thresholds
-- [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Proper layer separation and patterns
-- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Fix architectural violations
-- [ci-workflow](../ci-workflow/SKILL.md) - Run comprehensive CI checks
-- [testing-workflow](../testing-workflow/SKILL.md) - Maintain test coverage during refactoring
-
----
-
-## Quick Commands
-
-```bash
-# Find complex classes
-make analyze-complexity N=10
-
-# Run PHPInsights
-make phpinsights
-
-# Find complex methods with PHPMD
-make phpmd
-
-# Auto-fix style issues
-make phpcsfixer
-
-# Validate architecture
-make deptrac
-
-# Run all tests
-make all-tests
-
-# Full CI check
-make ci
+```php
+ForbiddenNormalClasses::class => [
+    'exclude' => [
+        'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
+        'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
+        'src/Core/Customer/Domain/Entity/Customer',
+    ],
+],
 ```
 
----
+These are intentionally not marked `final` - architectural decision.
 
-## Reference Documentation
+## Integration with Other Skills
 
-For detailed patterns, strategies, and troubleshooting:
+- **quality-standards** skill: Broader quality enforcement including Psalm, Deptrac
+- **ci-workflow** skill: PHPInsights runs as part of CI checks
+- **testing-workflow** skill: Maintain test coverage while refactoring
+- **database-migrations** skill: Ensure entity changes maintain architecture compliance
 
-- **⚡ [Quick Start Guide](reference/quick-start.md)** - Fast-track workflow for immediate action
-- **🔧 [Analysis Tools](reference/analysis-tools.md)** - Complete guide to complexity analysis commands
-- **📚 [Refactoring Strategies](refactoring-strategies.md)** - Modern PHP patterns with real-world examples
-- **📊 [Complexity Metrics](reference/complexity-metrics.md)** - Understanding what each metric means
-- **🛠️ [Troubleshooting](reference/troubleshooting.md)** - Common issues and solutions
-- **📈 [Monitoring](reference/monitoring.md)** - Track improvements over time
-- **⚙️ [Project Configuration](reference/project-configuration.md)** - Project-specific settings and patterns
+## Common Patterns in This Codebase
 
----
+### Command Handler Complexity
 
-## Priority Order for Fixes
+Command handlers should have low complexity:
 
-When facing multiple issues:
+```php
+// ✅ GOOD: Low complexity (2-3)
+final readonly class CreateCustomerCommandHandler implements CommandHandlerInterface
+{
+    public function __construct(
+        private CustomerRepository $repository,
+        private DomainEventPublisher $publisher
+    ) {}
 
-1. **CRITICAL (Complexity > 15)**: Immediate refactoring required
-2. **HIGH (Architecture violations)**: Breaks hexagonal/DDD boundaries
-3. **MEDIUM (Complexity 10-15)**: Plan refactoring
-4. **LOW (Style issues)**: Quick fixes, often auto-fixable
+    public function __invoke(CreateCustomerCommand $command): void
+    {
+        $customer = Customer::create(
+            $command->id,
+            $command->name,
+            $command->email
+        );
 
----
+        $this->repository->save($customer);
+        $this->publisher->publish(...$customer->pullDomainEvents());
+    }
+}
+```
 
-## External Resources
+**If complexity is high**: Business logic likely in wrong layer - move to Domain.
+
+### Domain Entity Complexity
+
+Domain entities can have higher complexity for business rules:
+
+```php
+// ✅ Acceptable: Complexity in domain logic
+class Customer extends AggregateRoot
+{
+    public function updateSubscription(SubscriptionPlan $plan): void
+    {
+        // Complex validation logic is appropriate here
+        $this->validateSubscriptionChange($plan);
+        $this->applyDiscount($plan);
+        $this->record(new SubscriptionChanged($this->id, $plan));
+    }
+}
+```
+
+**If too complex**: Extract to Domain Service or Value Object.
+
+## Success Criteria
+
+After running this skill, verify:
+
+✅ `make phpinsights` passes without errors
+✅ Code quality: 100%
+✅ Complexity: ≥ 94%
+✅ Architecture: 100%
+✅ Style: 100%
+✅ No layer boundary violations (checked by Deptrac)
+✅ All tests still pass (`make unit-tests`, `make integration-tests`)
+✅ Code remains aligned with hexagonal architecture
+
+## Additional Resources
+
+### Quick References
+
+- **⚡ Quick Start**: [quick-start.md](reference/quick-start.md) - Fast-track workflow for immediate action
+- **🔧 Analysis Tools**: [analysis-tools.md](reference/analysis-tools.md) - Complete guide to complexity analysis commands
+
+### Detailed Guides
+
+- **Refactoring Patterns**: [refactoring-strategies.md](refactoring-strategies.md) - Modern PHP patterns with real-world examples
+- **Understanding Metrics**: [reference/complexity-metrics.md](reference/complexity-metrics.md) - What each metric means
+- **Troubleshooting**: [reference/troubleshooting.md](reference/troubleshooting.md) - Common issues and solutions
+- **Monitoring**: [reference/monitoring.md](reference/monitoring.md) - Track improvements over time
+
+### External Resources
 
 - **PHPInsights Documentation**: https://phpinsights.com/
 - **Project Architecture**: See CLAUDE.md for hexagonal/DDD/CQRS patterns
-- **CodelyTV DDD**: Inspiration for architecture patterns

@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
+description: Systematically retrieve and address PR code review comments using make pr-comments. Enforces DDD architecture, code organization principles, and quality standards. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
 ---
 
 # Code Review Workflow Skill
@@ -10,10 +10,13 @@ description: Systematically retrieve and address PR code review comments using m
 - PR has unresolved code review comments
 - Need systematic approach to address feedback
 - Ready to implement reviewer suggestions
+- Need to verify DDD architecture compliance
+- Need to ensure code organization best practices
+- Need to maintain quality standards
 
 ## Task (Function)
 
-Retrieve PR comments, categorize by type, and implement all changes systematically.
+Retrieve PR comments, categorize by type, verify architecture compliance, enforce code organization principles, and implement all changes systematically while maintaining 100% quality standards.
 
 ## Execution Steps
 
@@ -33,8 +36,147 @@ make pr-comments FORMAT=json  # JSON output
 | ---------------------- | --------------------------- | -------- | ------------------------------------ |
 | Committable Suggestion | Code block, "```suggestion" | Highest  | Apply immediately, commit separately |
 | LLM Prompt             | "🤖 Prompt for AI Agents"   | High     | Execute prompt, implement changes    |
+| Architecture Concern   | Class naming, file location | High     | Verify DDD compliance (see Step 2.1) |
 | Question               | Ends with "?"               | Medium   | Answer inline or via code change     |
 | General Feedback       | Discussion, recommendation  | Low      | Consider and improve                 |
+
+#### Step 2.1: Architecture & Code Organization Verification
+
+For any code changes (suggestions, prompts, or new files), **MANDATORY** verification:
+
+**A. Code Organization Principle** (see `code-organization` skill):
+
+> **Directory X contains ONLY class type X**
+
+Verify class is in the correct directory for its type:
+
+- `Converter/` → ONLY converters (type conversion)
+- `Transformer/` → ONLY transformers (data transformation for DB/serialization)
+- `Validator/` → ONLY validators (validation logic)
+- `Builder/` → ONLY builders (object construction)
+- `Fixer/` → ONLY fixers (modify/correct data)
+- `Cleaner/` → ONLY cleaners (filter/clean data)
+- `Factory/` → ONLY factories (create complex objects)
+- `Resolver/` → ONLY resolvers (resolve/determine values)
+- `Serializer/` → ONLY serializers/normalizers
+
+**B. Class Naming Compliance** (see `implementing-ddd-architecture` skill):
+
+| Layer              | Class Type         | Naming Pattern                       | Example                           |
+| ------------------ | ------------------ | ------------------------------------ | --------------------------------- |
+| **Domain**         | Entity             | `{EntityName}.php`                   | `Customer.php`                    |
+|                    | Value Object       | `{ConceptName}.php`                  | `Email.php`, `Money.php`          |
+|                    | Domain Event       | `{Entity}{PastTenseAction}.php`      | `CustomerCreated.php`             |
+|                    | Repository Iface   | `{Entity}RepositoryInterface.php`    | `CustomerRepositoryInterface.php` |
+|                    | Exception          | `{SpecificError}Exception.php`       | `InvalidEmailException.php`       |
+| **Application**    | Command            | `{Action}{Entity}Command.php`        | `CreateCustomerCommand.php`       |
+|                    | Command Handler    | `{Action}{Entity}Handler.php`        | `CreateCustomerHandler.php`       |
+|                    | Event Subscriber   | `{Action}On{Event}.php`              | `SendEmailOnCustomerCreated.php`  |
+|                    | DTO                | `{Entity}{Type}.php`                 | `CustomerInput.php`               |
+|                    | Processor          | `{Action}{Entity}Processor.php`      | `CreateCustomerProcessor.php`     |
+|                    | Transformer        | `{From}To{To}Transformer.php`        | `CustomerToArrayTransformer.php`  |
+| **Infrastructure** | Repository         | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php`   |
+|                    | Doctrine Type      | `{ConceptName}Type.php`              | `UlidType.php`                    |
+|                    | Bus Implementation | `{Framework}{Type}Bus.php`           | `SymfonyCommandBus.php`           |
+
+**Directory Location Compliance**:
+
+```
+src/{Context}/
+├── Application/
+│   ├── Command/          ← Commands
+│   ├── CommandHandler/   ← Command Handlers
+│   ├── EventSubscriber/  ← Event Subscribers
+│   ├── DTO/              ← Data Transfer Objects
+│   ├── Processor/        ← API Platform Processors
+│   ├── Transformer/      ← Data Transformers
+│   └── MutationInput/    ← GraphQL Mutation Inputs
+├── Domain/
+│   ├── Entity/           ← Entities & Aggregates
+│   ├── ValueObject/      ← Value Objects
+│   ├── Event/            ← Domain Events
+│   ├── Repository/       ← Repository Interfaces
+│   └── Exception/        ← Domain Exceptions
+└── Infrastructure/
+    ├── Repository/       ← Repository Implementations
+    ├── DoctrineType/     ← Custom Doctrine Types
+    └── Bus/              ← Message Bus Implementations
+```
+
+**Verification Questions**:
+
+1. ✅ Is the class following **"Directory X contains ONLY class type X"** principle?
+   - Example: `UlidValidator` must be in `Validator/`, NOT in `Transformer/` or `Converter/`
+2. ✅ Is the class name following the DDD naming pattern for its type?
+3. ✅ Is the class in the correct directory according to its responsibility?
+4. ✅ Does the class name reflect what it actually does?
+5. ✅ Is the class in the correct layer (Domain/Application/Infrastructure)?
+6. ✅ Does Domain layer have NO framework imports (Symfony/Doctrine/API Platform)?
+7. ✅ Are variable names specific (not vague)?
+   - ✅ `$typeConverter`, `$scalarResolver` (specific)
+   - ❌ `$converter`, `$resolver` (too vague)
+8. ✅ Are parameter names accurate (match actual types)?
+   - ✅ `mixed $value` when accepts any type
+   - ❌ `string $binary` when accepts mixed
+
+**C. Namespace Consistency**:
+
+Namespace **MUST** match directory structure exactly:
+
+```php
+✅ CORRECT:
+// File: src/Shared/Infrastructure/Validator/UlidValidator.php
+namespace App\Shared\Infrastructure\Validator;
+
+❌ WRONG:
+// File: src/Shared/Infrastructure/Validator/UlidValidator.php
+namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
+```
+
+**D. PHP Best Practices**:
+
+- ✅ Use constructor property promotion
+- ✅ Inject ALL dependencies (no default instantiation)
+- ✅ Use `readonly` when appropriate
+- ✅ Use `final` for classes that shouldn't be extended
+- ❌ NO "Helper" or "Util" classes (code smell - extract specific responsibilities)
+
+**Action on Violations**:
+
+1. **Class in Wrong Directory**:
+
+   ```bash
+   # Move file to correct directory
+   mv src/Path/WrongDir/ClassName.php src/Path/CorrectDir/ClassName.php
+
+   # Update namespace in file
+   # Update all imports across codebase
+   grep -r "use.*WrongDir\\ClassName" src/ tests/
+   ```
+
+2. **Wrong Class Name**:
+
+   - Rename class to follow naming conventions
+   - Update all references to renamed class
+   - Ensure name reflects actual functionality
+
+3. **Vague Variable/Parameter Names**:
+
+   ```php
+   ❌ BEFORE: private UlidTypeConverter $converter;
+   ✅ AFTER:  private UlidTypeConverter $typeConverter;
+
+   ❌ BEFORE: private CustomerUpdateScalarResolver $resolver;
+   ✅ AFTER:  private CustomerUpdateScalarResolver $scalarResolver;
+   ```
+
+4. **Quality Verification**:
+   ```bash
+   make phpcsfixer    # Fix code style
+   make psalm         # Static analysis
+   make deptrac       # Verify no layer violations
+   make unit-tests    # Run tests
+   ```
 
 ### Step 3: Apply Changes Systematically
 
@@ -76,9 +218,32 @@ make pr-comments  # Should show zero unresolved comments
 
 ### Step 5: Run Quality Checks
 
+**MANDATORY**: Run comprehensive CI checks after implementing all changes:
+
 ```bash
-make ci  # Must show "✅ CI checks successfully passed!"
+make ci  # Must output "✅ CI checks successfully passed!"
 ```
+
+**If CI fails**, address issues systematically:
+
+1. **Code Style Issues**: `make phpcsfixer`
+2. **Static Analysis Errors**: `make psalm`
+3. **Architecture Violations**: `make deptrac`
+4. **Test Failures**: `make unit-tests` / `make integration-tests`
+5. **Mutation Testing**: `make infection` (must maintain 100% MSI)
+6. **Complexity Issues**:
+   - Run `make phpmd` first to identify specific hotspots
+   - Refactor complex methods (keep complexity < 5 per method)
+   - Re-run `make phpinsights`
+
+**Quality Standards Protection** (see `quality-standards` skill):
+
+- **PHPInsights**: 100% quality, 95% complexity, 100% architecture, 100% style
+- **Test Coverage**: 100% (no decrease allowed)
+- **Mutation Testing**: 100% MSI, 0 escaped mutants
+- **Cyclomatic Complexity**: < 5 per class/method
+
+**DO NOT** finish the task until `make ci` shows: `✅ CI checks successfully passed!`
 
 ## Comment Resolution Workflow
 
@@ -95,12 +260,33 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Ignore LLM prompts from reviewers
 - Commit without running `make ci`
 - Leave questions unanswered
+- Accept class names that don't follow DDD naming patterns
+- Place files in wrong directories (violates layer architecture)
+- Allow Domain layer to import framework code (Symfony/Doctrine/API Platform)
+- Put class in wrong type directory (e.g., Validator in Transformer/)
+- Use vague variable names like `$converter`, `$resolver` (be specific!)
+- Create "Helper" or "Util" classes (extract specific responsibilities)
+- Allow namespace to mismatch directory structure
+- Decrease quality thresholds (PHPInsights, test coverage, mutation score)
+- Allow cyclomatic complexity > 5 per method
+- Finish task before `make ci` shows success message
 
 **ALWAYS**:
 
 - Apply suggestions exactly as provided
 - Commit each suggestion separately with URL reference
+- Verify **"Directory X contains ONLY class type X"** principle
+- Verify architecture compliance for any new/modified classes
+- Check class naming follows DDD patterns (see Step 2.1)
+- Verify files are in correct directories according to layer AND type
+- Ensure namespace matches directory structure exactly
+- Use specific variable names (`$typeConverter`, not `$converter`)
+- Use accurate parameter names (match actual types)
+- Run `make deptrac` to ensure no layer violations
 - Run `make ci` after implementing changes
+- Address ALL quality standard violations before finishing
+- Maintain 100% test coverage and 100% MSI (0 escaped mutants)
+- Keep cyclomatic complexity < 5 per method
 - Mark conversations resolved after addressing
 
 ## Format (Output)
@@ -125,11 +311,111 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
 ## Verification Checklist
 
 - [ ] All PR comments retrieved via `make pr-comments`
-- [ ] Comments categorized by type
+- [ ] Comments categorized by type (suggestion/prompt/question/feedback)
+- [ ] **Code Organization verified for all changes**:
+  - [ ] **"Directory X contains ONLY class type X"** principle enforced
+  - [ ] Converters in `Converter/`, Transformers in `Transformer/`, etc.
+  - [ ] Class type matches directory (no mismatches)
+- [ ] **Architecture & DDD compliance verified**:
+  - [ ] Class names follow DDD naming patterns
+  - [ ] Files in correct directories according to layer
+  - [ ] Class names reflect what they actually do
+  - [ ] Domain layer has NO framework imports
+  - [ ] `make deptrac` passes (0 violations)
+- [ ] **Naming conventions enforced**:
+  - [ ] Variable names are specific (`$typeConverter`, not `$converter`)
+  - [ ] Parameter names match actual types
+  - [ ] Namespace matches directory structure
+  - [ ] No "Helper" or "Util" classes
+- [ ] **PHP best practices applied**:
+  - [ ] Constructor property promotion used
+  - [ ] All dependencies injected (no default instantiation)
+  - [ ] `readonly` and `final` used appropriately
 - [ ] Committable suggestions applied and committed separately
 - [ ] LLM prompts executed and implemented
 - [ ] Questions answered (code or reply)
 - [ ] General feedback evaluated and addressed
+- [ ] **Quality standards maintained**:
+  - [ ] Test coverage remains 100%
+  - [ ] Mutation testing: 100% MSI (0 escaped mutants)
+  - [ ] PHPInsights: 100% quality, 95% complexity, 100% architecture, 100% style
+  - [ ] Cyclomatic complexity < 5 per method
+  - [ ] `make ci` shows "✅ CI checks successfully passed!"
 - [ ] `make pr-comments` shows zero unresolved
-- [ ] `make ci` passes with success message
 - [ ] All conversations marked resolved on GitHub
+
+## Common Code Organization Issues in Reviews
+
+### Issue 1: Class in Wrong Type Directory
+
+**Scenario**: `UlidValidator` placed in `Transformer/` directory
+
+```bash
+❌ WRONG:
+src/Shared/Infrastructure/Transformer/UlidValidator.php
+
+✅ CORRECT:
+src/Shared/Infrastructure/Validator/UlidValidator.php
+```
+
+**Fix**:
+
+```bash
+mv src/Shared/Infrastructure/Transformer/UlidValidator.php \
+   src/Shared/Infrastructure/Validator/UlidValidator.php
+# Update namespace and all imports
+```
+
+### Issue 2: Vague Variable Names
+
+**Scenario**: Generic variable names in constructor
+
+```php
+❌ WRONG:
+public function __construct(
+    private UlidTypeConverter $converter,  // Converter of what?
+) {}
+
+✅ CORRECT:
+public function __construct(
+    private UlidTypeConverter $typeConverter,  // Specific!
+) {}
+```
+
+### Issue 3: Misleading Parameter Names
+
+**Scenario**: Parameter name doesn't match actual type
+
+```php
+❌ WRONG:
+public function fromBinary(mixed $binary): Ulid  // Accepts mixed, not just binary
+
+✅ CORRECT:
+public function fromBinary(mixed $value): Ulid  // Accurate!
+```
+
+### Issue 4: Helper/Util Classes
+
+**Scenario**: Code review flags `CustomerHelper` class
+
+```php
+❌ WRONG:
+class CustomerHelper {
+    public function validateEmail() {}
+    public function formatName() {}
+    public function convertData() {}
+}
+
+✅ CORRECT: Extract specific responsibilities
+- CustomerEmailValidator (Validator/)
+- CustomerNameFormatter (Formatter/)
+- CustomerDataConverter (Converter/)
+```
+
+## Related Skills
+
+- **quality-standards**: Maintains 100% code quality metrics
+- **code-organization**: Enforces "Directory X contains ONLY class type X"
+- **implementing-ddd-architecture**: DDD patterns and structure
+- **ci-workflow**: Comprehensive quality checks
+- **testing-workflow**: Test coverage and mutation testing

@@ -11,9 +11,9 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\CustomerFactory;
 use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\UlidConverter;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidValidator;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -27,7 +27,11 @@ final class CreateCustomerCommandTest extends UnitTestCase
         parent::setUp();
         $this->customerFactory = new CustomerFactory();
         $ulidFactory = new UlidFactory();
-        $this->transformer = new UlidTransformer($ulidFactory, new UlidValidator(), new UlidConverter($ulidFactory));
+        $this->transformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
     }
 
     public function testConstructorAcceptsCustomer(): void

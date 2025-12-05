@@ -23,7 +23,3 @@ load 'bats-assert/load'
   skip "Requires git branch setup"
 }
 
-@test "make schemathesis-validate command validates API" {
-  skip "Requires Docker - skipped in CI environment"
-}
-

@@ -17,6 +17,7 @@ return [
     'exclude' => [
         'vendor',
         'CLI/bats/php',
+        'src/Core/Customer/Application/DTO',
     ],
     'add' => [],
     'remove' => [
@@ -26,6 +27,7 @@ return [
         SpaceAfterNotSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
+        NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenPublicPropertySniff::class,
     ],
 
     'config' => [

@@ -215,7 +215,7 @@ Track progress: 15 violations → 10 → 5 → 0 ✅
 
 ---
 
-## Constraints (Parameters)
+## Constraints
 
 ### NEVER
 

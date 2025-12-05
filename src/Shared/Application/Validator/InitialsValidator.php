@@ -11,14 +11,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class InitialsValidator extends ConstraintValidator
 {
     public function __construct(
-        private readonly TranslatorInterface $translator,
-        private readonly ValidationSkipChecker $skipChecker
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($this->skipChecker->shouldSkip($value, $constraint)) {
+        if ($this->shouldSkipValidation($value, $constraint)) {
             return;
         }
 
@@ -27,12 +26,13 @@ final class InitialsValidator extends ConstraintValidator
         }
     }
 
-    private function isOnlyWhitespace(array|string|int|float|bool|null $value): bool
+    private function shouldSkipValidation(mixed $value, Constraint $constraint): bool
     {
-        if (!is_string($value)) {
-            return false;
-        }
+        return $value === null;
+    }
 
+    private function isOnlyWhitespace(string $value): bool
+    {
         return trim($value) === '';
     }
 

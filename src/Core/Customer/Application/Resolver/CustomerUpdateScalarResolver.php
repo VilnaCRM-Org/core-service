@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\Customer\Application\Resolver;
+
+use App\Core\Customer\Domain\Entity\Customer;
+
+use function trim;
+
+final class CustomerUpdateScalarResolver
+{
+    private const STRING_FIELDS = [
+        'initials' => 'getInitials',
+        'email' => 'getEmail',
+        'phone' => 'getPhone',
+        'leadSource' => 'getLeadSource',
+    ];
+
+    /**
+     * @param array{
+     *     initials?: string|null,
+     *     email?: string|null,
+     *     phone?: string|null,
+     *     leadSource?: string|null
+     * } $input
+     *
+     * @return array{
+     *     initials: string,
+     *     email: string,
+     *     phone: string,
+     *     leadSource: string
+     * }
+     */
+    public function resolveStrings(Customer $customer, array $input): array
+    {
+        return array_reduce(
+            array_keys(self::STRING_FIELDS),
+            fn (array $result, string $field): array => array_merge($result, [
+                $field => $this->stringValue(
+                    $input[$field] ?? null,
+                    $customer->{self::STRING_FIELDS[$field]}()
+                ),
+            ]),
+            []
+        );
+    }
+
+    /**
+     * @param array{
+     *     confirmed?: bool|int|string|null
+     * } $input
+     */
+    public function resolveConfirmed(Customer $customer, array $input): bool
+    {
+        return (bool) ($input['confirmed'] ?? $customer->isConfirmed());
+    }
+
+    private function stringValue(?string $candidate, string $fallback): string
+    {
+        $trimmed = trim($candidate ?? '');
+
+        return match (true) {
+            $trimmed !== '' => $trimmed,
+            default => $fallback,
+        };
+    }
+}

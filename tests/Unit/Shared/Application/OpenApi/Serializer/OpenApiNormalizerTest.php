@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Serializer;
 
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Serializer\DataCleaner;
-use App\Shared\Application\OpenApi\Serializer\EmptyValueChecker;
+use App\Shared\Application\OpenApi\Cleaner\ArrayValueCleaner;
+use App\Shared\Application\OpenApi\Cleaner\DataCleaner;
+use App\Shared\Application\OpenApi\Cleaner\EmptyArrayCleaner;
+use App\Shared\Application\OpenApi\Cleaner\ParameterCleaner;
+use App\Shared\Application\OpenApi\Cleaner\ValueCleaner;
 use App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer;
-use App\Shared\Application\OpenApi\Serializer\ParameterCleaner;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -22,9 +24,9 @@ final class OpenApiNormalizerTest extends UnitTestCase
         parent::setUp();
         $this->decorated = $this->createMock(NormalizerInterface::class);
         $parameterCleaner = new ParameterCleaner();
-        $emptyValueChecker = new EmptyValueChecker();
-        $valueFilter = new \App\Shared\Application\OpenApi\Serializer\ValueFilter($emptyValueChecker);
-        $arrayProcessor = new \App\Shared\Application\OpenApi\Serializer\ArrayValueProcessor($parameterCleaner, $valueFilter);
+        $emptyValueChecker = new EmptyArrayCleaner();
+        $valueFilter = new ValueCleaner($emptyValueChecker);
+        $arrayProcessor = new ArrayValueCleaner($parameterCleaner, $valueFilter);
         $dataCleaner = new DataCleaner($arrayProcessor, $valueFilter);
         $this->normalizer = new OpenApiNormalizer($this->decorated, $dataCleaner);
     }

@@ -19,23 +19,31 @@ final readonly class CustomerRelationTransformer implements
     ) {
     }
 
-    public function resolveType(?string $typeIri, Customer $customer): CustomerType
-    {
+    public function resolveType(
+        ?string $typeIri,
+        Customer $customer
+    ): CustomerType {
         return $this->resolveRelation(
             $typeIri,
             $customer->getType(),
             CustomerType::class,
-            static fn (string $iri) => CustomerTypeNotFoundException::withIri($iri)
+            static function (string $iri): CustomerTypeNotFoundException {
+                return CustomerTypeNotFoundException::withIri($iri);
+            }
         );
     }
 
-    public function resolveStatus(?string $statusIri, Customer $customer): CustomerStatus
-    {
+    public function resolveStatus(
+        ?string $statusIri,
+        Customer $customer
+    ): CustomerStatus {
         return $this->resolveRelation(
             $statusIri,
             $customer->getStatus(),
             CustomerStatus::class,
-            static fn (string $iri) => CustomerStatusNotFoundException::withIri($iri)
+            static function (string $iri): CustomerStatusNotFoundException {
+                return CustomerStatusNotFoundException::withIri($iri);
+            }
         );
     }
 

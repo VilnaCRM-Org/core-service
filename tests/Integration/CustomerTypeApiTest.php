@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-final class CustomerTypeApiTest extends BaseIntegrationTest
+final class CustomerTypeApiTest extends BaseTest
 {
     public function testCreateCustomerTypeWithExtraFields(): void
     {

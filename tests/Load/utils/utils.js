@@ -14,15 +14,22 @@ export default class Utils {
   }
 
   getConfig() {
-    try {
-      return JSON.parse(open('../config.json'));
-    } catch (error) {
+    const candidatePaths = [
+      '../../config.json',
+      '../config.json',
+      '../../config.json.dist',
+      '../config.json.dist',
+    ];
+
+    for (const path of candidatePaths) {
       try {
-        return JSON.parse(open('../config.json.dist'));
+        return JSON.parse(open(path));
       } catch (error) {
-        console.log('Error occurred while trying to open config');
+        // Try next candidate
       }
     }
+
+    throw new Error('Unable to load load-test configuration (config.json or config.json.dist)');
   }
 
   getBaseDomain() {

@@ -154,7 +154,7 @@ REST Request → API Platform
 
 ---
 
-## Constraints (Parameters)
+## Constraints
 
 ### NEVER
 

@@ -13,37 +13,18 @@ use App\Shared\Domain\ValueObject\Ulid;
 
 final class Customer
 {
-    private Ulid $ulid;
-    private string $email;
-    private string $phone;
-    private string $initials;
-    private bool $confirmed;
-    private string $leadSource;
-    private CustomerType $type;
-    private CustomerStatus $status;
-    private \DateTimeImmutable $createdAt;
-    private \DateTimeImmutable $updatedAt;
-
     public function __construct(
-        Ulid $ulid,
-        string $email,
-        string $phone,
-        string $initials,
-        bool $confirmed,
-        string $leadSource,
-        CustomerType $type,
-        CustomerStatus $status
+        private Ulid $ulid,
+        private string $email,
+        private string $phone,
+        private string $initials,
+        private bool $confirmed,
+        private string $leadSource,
+        private CustomerType $type,
+        private CustomerStatus $status,
+        private \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
+        private \DateTimeImmutable $updatedAt = new \DateTimeImmutable()
     ) {
-        $this->ulid = $ulid;
-        $this->email = $email;
-        $this->phone = $phone;
-        $this->initials = $initials;
-        $this->confirmed = $confirmed;
-        $this->leadSource = $leadSource;
-        $this->type = $type;
-        $this->status = $status;
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function update(CustomerUpdate $update): void

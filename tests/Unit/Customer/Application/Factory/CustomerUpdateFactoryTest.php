@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Factory\CustomerUpdateFactory;
+use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
-use App\Shared\Application\Validator\StringFieldValidator;
 use App\Tests\Unit\UnitTestCase;
+use ReflectionProperty;
 
 final class CustomerUpdateFactoryTest extends UnitTestCase
 {
@@ -93,112 +94,100 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
 
     public function testGetStringValueReturnsNewValueWhenNotEmpty(): void
     {
-        $oldInitials = $this->faker->lexify('??');
-        $oldEmail = $this->faker->email();
-        $oldPhone = $this->faker->phoneNumber();
-        $oldSource = $this->faker->word();
-        $mocks = $this->setupBasicMocks($oldInitials, $oldEmail, $oldPhone, $oldSource, false);
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $scalarResolver = new CustomerUpdateScalarResolver();
+        $factory = new CustomerUpdateFactory($relationResolver, $scalarResolver);
+        $customer = $this->createMock(Customer::class);
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
 
-        $newInitials = $this->faker->lexify('??');
-        $newEmail = $this->faker->email();
-        $newPhone = $this->faker->phoneNumber();
-        $newSource = $this->faker->word();
+        $customer->method('getInitials')->willReturn('OLD');
+        $customer->method('getEmail')->willReturn('old@test.com');
+        $customer->method('getPhone')->willReturn('+000');
+        $customer->method('getLeadSource')->willReturn('old-source');
+        $customer->method('isConfirmed')->willReturn(false);
 
-        $result = $mocks['factory']->create($mocks['customer'], [
-            'initials' => $newInitials,
-            'email' => $newEmail,
-            'phone' => $newPhone,
-            'leadSource' => $newSource,
+        $relationResolver->method('resolveType')->willReturn($type);
+        $relationResolver->method('resolveStatus')->willReturn($status);
+
+        $result = $factory->create($customer, [
+            'initials' => 'NEW',
+            'email' => 'new@test.com',
+            'phone' => '+111',
+            'leadSource' => 'new-source',
         ]);
 
-        self::assertSame($newInitials, $result->newInitials);
-        self::assertSame($newEmail, $result->newEmail);
-        self::assertSame($newPhone, $result->newPhone);
-        self::assertSame($newSource, $result->newLeadSource);
+        self::assertSame('NEW', $result->newInitials);
+        self::assertSame('new@test.com', $result->newEmail);
+        self::assertSame('+111', $result->newPhone);
+        self::assertSame('new-source', $result->newLeadSource);
     }
 
     public function testGetStringValueReturnsDefaultWhenNull(): void
     {
-        $defaultInitials = $this->faker->lexify('??');
-        $defaultEmail = $this->faker->email();
-        $defaultPhone = $this->faker->phoneNumber();
-        $defaultSource = $this->faker->word();
+        $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
+        $factory = new CustomerUpdateFactory($relationResolver, new CustomerUpdateScalarResolver());
+        $customer = $this->createMock(Customer::class);
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
 
-        $mocks = $this->setupBasicMocks(
-            $defaultInitials,
-            $defaultEmail,
-            $defaultPhone,
-            $defaultSource,
-            true
-        );
+        $customer->method('getInitials')->willReturn('DEFAULT');
+        $customer->method('getEmail')->willReturn('default@test.com');
+        $customer->method('getPhone')->willReturn('+999');
+        $customer->method('getLeadSource')->willReturn('default-source');
+        $customer->method('isConfirmed')->willReturn(true);
 
-        $result = $mocks['factory']->create($mocks['customer'], [
+        $relationResolver->method('resolveType')->willReturn($type);
+        $relationResolver->method('resolveStatus')->willReturn($status);
+
+        $result = $factory->create($customer, [
             'initials' => null,
             'email' => null,
             'phone' => null,
             'leadSource' => null,
         ]);
 
-        self::assertSame($defaultInitials, $result->newInitials);
-        self::assertSame($defaultEmail, $result->newEmail);
-        self::assertSame($defaultPhone, $result->newPhone);
-        self::assertSame($defaultSource, $result->newLeadSource);
+        self::assertSame('DEFAULT', $result->newInitials);
+        self::assertSame('default@test.com', $result->newEmail);
+        self::assertSame('+999', $result->newPhone);
+        self::assertSame('default-source', $result->newLeadSource);
     }
 
-    /**
-     * @return array{factory: CustomerUpdateFactory, customer: Customer, type: CustomerType, status: CustomerStatus}
-     */
-    private function setupBasicMocks(
-        string $initials,
-        string $email,
-        string $phone,
-        string $leadSource,
-        bool $confirmed
-    ): array {
+    public function testConstructorUsesProvidedScalarResolverInstance(): void
+    {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
-        $factory = new CustomerUpdateFactory($relationResolver, $fieldResolver);
-        $customer = $this->createMock(Customer::class);
-        $type = $this->createMock(CustomerType::class);
-        $status = $this->createMock(CustomerStatus::class);
+        $scalarResolver = new CustomerUpdateScalarResolver();
 
-        $customer->method('getInitials')->willReturn($initials);
-        $customer->method('getEmail')->willReturn($email);
-        $customer->method('getPhone')->willReturn($phone);
-        $customer->method('getLeadSource')->willReturn($leadSource);
-        $customer->method('isConfirmed')->willReturn($confirmed);
+        $factory = new CustomerUpdateFactory($relationResolver, $scalarResolver);
 
-        $relationResolver->method('resolveType')->willReturn($type);
-        $relationResolver->method('resolveStatus')->willReturn($status);
+        $resolverProperty = new ReflectionProperty(CustomerUpdateFactory::class, 'scalarResolver');
+        $resolverProperty->setAccessible(true);
 
-        return [
-            'factory' => $factory,
-            'customer' => $customer,
-            'type' => $type,
-            'status' => $status,
-        ];
+        self::assertSame($scalarResolver, $resolverProperty->getValue($factory));
     }
 
     /** @return array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> */
     private function setupAllFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, $fieldResolver),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'customerType' => $customerType,
             'customerStatus' => $customerStatus,
             'input' => [
-                'initials' => $this->faker->lexify('??'),
+                'initials' => 'AB',
                 'email' => $this->faker->email(),
                 'phone' => $this->faker->phoneNumber(),
-                'leadSource' => $this->faker->word(),
+                'leadSource' => 'website',
                 'type' => '/api/customer_types/' . $this->faker->uuid(),
                 'status' => '/api/customer_statuses/' . $this->faker->uuid(),
                 'confirmed' => true,
@@ -244,14 +233,16 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupMissingFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createExistingData();
 
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, $fieldResolver),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -264,10 +255,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createExistingData(): array
     {
         return [
-            'initials' => $this->faker->lexify('??'),
+            'initials' => 'CD',
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => $this->faker->word(),
+            'leadSource' => 'referral',
             'confirmed' => false,
         ];
     }
@@ -299,20 +290,18 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupPartialFieldsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
-        $existingData = [
-            'initials' => $this->faker->lexify('??'),
-            'leadSource' => $this->faker->word(),
-            'confirmed' => true,
-        ];
+        $existingData = ['initials' => 'EF', 'leadSource' => 'partner', 'confirmed' => true];
 
         $customer->method('getInitials')->willReturn($existingData['initials']);
         $customer->method('getLeadSource')->willReturn($existingData['leadSource']);
         $customer->method('isConfirmed')->willReturn($existingData['confirmed']);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, $fieldResolver),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -355,14 +344,16 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupEmptyStringsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createExistingCustomerData();
 
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, $fieldResolver),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -389,18 +380,20 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function setupWhitespaceStringsTestData(): array
     {
         $relationResolver = $this->createMock(CustomerRelationTransformerInterface::class);
-        $fieldResolver = new StringFieldValidator();
         $customer = $this->createMock(Customer::class);
         $existingData = $this->createCustomerDataWithOverrides([
-            'initials' => $this->faker->lexify('??'),
-            'leadSource' => $this->faker->word(),
+            'initials' => 'IJ',
+            'leadSource' => 'campaign',
             'confirmed' => false,
         ]);
 
         $this->setupCustomerMockForExistingData($customer, $existingData);
 
         return [
-            'factory' => new CustomerUpdateFactory($relationResolver, $fieldResolver),
+            'factory' => new CustomerUpdateFactory(
+                $relationResolver,
+                new CustomerUpdateScalarResolver()
+            ),
             'relationResolver' => $relationResolver,
             'customer' => $customer,
             'type' => $this->createMock(CustomerType::class),
@@ -427,10 +420,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createExistingCustomerData(): array
     {
         return [
-            'initials' => $this->faker->lexify('??'),
+            'initials' => 'GH',
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => $this->faker->word(),
+            'leadSource' => 'direct',
             'confirmed' => true,
         ];
     }
@@ -443,10 +436,10 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     private function createCustomerDataWithOverrides(array $overrides): array
     {
         return array_merge([
-            'initials' => $this->faker->lexify('??'),
+            'initials' => 'GH',
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'leadSource' => $this->faker->word(),
+            'leadSource' => 'direct',
             'confirmed' => true,
         ], $overrides);
     }

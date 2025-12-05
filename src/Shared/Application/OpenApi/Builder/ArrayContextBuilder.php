@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Builder;
 
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use ArrayObject;
 
 final class ArrayContextBuilder
@@ -13,21 +14,13 @@ final class ArrayContextBuilder
      */
     public function build(array $params): ArrayObject
     {
-        if (count($params) === 0) {
-            return new ArrayObject([
+        return $params === []
+            ? new ArrayObject([
                 'application/ld+json' => [
                     'example' => [''],
                 ],
-            ]);
-        }
-
-        $collection = $this->buildParamsCollection($params);
-
-        return $this->buildContent(
-            $collection['items'],
-            $collection['example'],
-            $collection['required']
-        );
+            ])
+            : $this->buildForCollection($params);
     }
 
     /**
@@ -46,6 +39,20 @@ final class ArrayContextBuilder
             'example' => $this->buildExample($params),
             'required' => $this->collectRequired($params),
         ];
+    }
+
+    /**
+     * @param array<Parameter> $params
+     */
+    private function buildForCollection(array $params): ArrayObject
+    {
+        $collection = $this->buildParamsCollection($params);
+
+        return $this->buildContent(
+            $collection['items'],
+            $collection['example'],
+            $collection['required']
+        );
     }
 
     /**
@@ -98,13 +105,13 @@ final class ArrayContextBuilder
      */
     private function collectRequired(array $params): array
     {
-        return array_map(
+        return array_values(array_map(
             static fn (Parameter $param): string => $param->name,
             array_filter(
                 $params,
                 static fn (Parameter $param): bool => $param->isRequired()
             )
-        );
+        ));
     }
 
     /**

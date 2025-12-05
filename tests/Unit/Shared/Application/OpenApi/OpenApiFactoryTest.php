@@ -8,8 +8,13 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\OpenApiFactory;
+use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
+use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
+use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
 use App\Tests\Unit\UnitTestCase;
 use ArrayIterator;
 use ArrayObject;
@@ -21,7 +26,15 @@ final class OpenApiFactoryTest extends UnitTestCase
         $decoratedFactory = $this->createMock(OpenApiFactoryInterface::class);
         $endpointFactory = $this->createMock(EndpointFactoryInterface::class);
 
-        $factory = new OpenApiFactory($decoratedFactory, [$endpointFactory]);
+        $factory = new OpenApiFactory(
+            $decoratedFactory,
+            [$endpointFactory],
+            $this->createMock(PathParametersProcessor::class),
+            $this->createMock(ParameterDescriptionProcessor::class),
+            $this->createMock(IriReferenceTypeProcessor::class),
+            $this->createMock(TagDescriptionProcessor::class),
+            $this->createMock(OpenApiExtensionsApplier::class)
+        );
 
         $this->assertInstanceOf(OpenApiFactory::class, $factory);
     }
@@ -41,7 +54,12 @@ final class OpenApiFactoryTest extends UnitTestCase
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
-            $endpointFactories
+            $endpointFactories,
+            $this->createMock(PathParametersProcessor::class),
+            $this->createMock(ParameterDescriptionProcessor::class),
+            $this->createMock(IriReferenceTypeProcessor::class),
+            $this->createMock(TagDescriptionProcessor::class),
+            $this->createMock(OpenApiExtensionsApplier::class)
         );
 
         $result = $factory->__invoke($context);
@@ -74,9 +92,28 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->method('createEndpoint')
             ->with($this->isInstanceOf(OpenApi::class));
 
+        $pathProcessor = $this->createMock(PathParametersProcessor::class);
+        $pathProcessor->method('process')->willReturnArgument(0);
+
+        $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
+        $paramProcessor->method('process')->willReturnArgument(0);
+
+        $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
+        $iriProcessor->method('process')->willReturnArgument(0);
+
+        $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
+        $tagProcessor->method('process')->willReturnArgument(0);
+
+        $extensionsApplier = new OpenApiExtensionsApplier();
+
         $factory = new OpenApiFactory(
             $decoratedFactory,
-            new ArrayIterator([$endpointFactory])
+            new ArrayIterator([$endpointFactory]),
+            $pathProcessor,
+            $paramProcessor,
+            $iriProcessor,
+            $tagProcessor,
+            $extensionsApplier
         );
 
         $result = $factory->__invoke([]);
@@ -111,9 +148,28 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with([])
             ->willReturn($openApi);
 
+        $pathProcessor = $this->createMock(PathParametersProcessor::class);
+        $pathProcessor->method('process')->willReturnArgument(0);
+
+        $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
+        $paramProcessor->method('process')->willReturnArgument(0);
+
+        $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
+        $iriProcessor->method('process')->willReturnArgument(0);
+
+        $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
+        $tagProcessor->method('process')->willReturnArgument(0);
+
+        $extensionsApplier = new OpenApiExtensionsApplier();
+
         $factory = new OpenApiFactory(
             $decoratedFactory,
-            []
+            [],
+            $pathProcessor,
+            $paramProcessor,
+            $iriProcessor,
+            $tagProcessor,
+            $extensionsApplier
         );
 
         $result = $factory->__invoke([]);
