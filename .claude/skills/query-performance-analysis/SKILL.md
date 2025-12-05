@@ -52,422 +52,113 @@ Analyze query performance, detect N+1 issues, identify missing indexes, and crea
 
 ---
 
-## Quick Start: Detect and Fix N+1 Queries
+## Quick Start: 5-Step Performance Analysis
 
 ### Step 1: Enable MongoDB Profiler
 
 ```bash
-# In MongoDB container
-docker compose exec mongodb mongosh
+# Connect to MongoDB container
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+
+# List all databases to find yours
+show dbs
+
+# Switch to your database (typically 'app' for this project)
+use app
 
 # Enable profiler (level 2 = all operations)
-use core_service_db
 db.setProfilingLevel(2, { slowms: 100 })
 
-# Check profiling status
+# Verify profiling is enabled
 db.getProfilingStatus()
 ```
+
+**Note**: Use `show dbs` to see all databases. The application database is typically the one with data (not 'admin', 'config', or 'local').
 
 ### Step 2: Run Your Endpoint
 
 ```bash
-# Test endpoint with curl or Postman
+# Test endpoint
 curl http://localhost/api/customers
 ```
 
-### Step 3: Analyze Queries
+### Step 3: Analyze Query Patterns
 
 ```bash
-# View profiled queries
+# View recent queries
 db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
 
-# Look for patterns:
-# - Same query executed many times
-# - Queries inside loops
-# - High execution time (millis field)
+# Find repeated queries (N+1 pattern)
+db.system.profile.aggregate([
+    { $group: { _id: "$command.filter", count: { $sum: 1 } } },
+    { $match: { count: { $gt: 10 } } },
+    { $sort: { count: -1 } }
+])
 ```
 
-### Step 4: Check for N+1 Pattern
+### Step 4: Check for Performance Issues
 
 **N+1 Problem Symptoms**:
-```
-GET /api/customers
-  Query 1: Find all customers (1 query)
-  Query 2: Find type for customer 1 (1 query)
-  Query 3: Find type for customer 2 (1 query)
-  Query 4: Find type for customer 3 (1 query)
-  ...
-  = 1 + N queries (BAD!)
-```
+- Same query executed many times
+- Query count grows with data size
+- Queries inside `foreach` loops
 
-**Fix with Eager Loading**:
-```php
-$qb = $this->documentManager->createQueryBuilder(Customer::class);
-$qb->field('type')->prime(true);  // Eager load type references
-$customers = $qb->getQuery()->execute();
-```
+**Slow Query Symptoms**:
+- `millis` field >100ms
+- `planSummary: "COLLSCAN"` (collection scan)
+- High `docsExamined` vs `nReturned`
 
----
-
-## N+1 Query Detection
-
-### What is N+1 Query Problem?
-
-**Definition**: One query to fetch main results + N additional queries to fetch related data.
-
-**Example**:
-```php
-// ❌ BAD: N+1 Query Problem
-public function getCustomersWithTypes(): array
-{
-    $customers = $this->repository->findAll();  // 1 query
-
-    foreach ($customers as $customer) {
-        // This fires a query for EACH customer!
-        $type = $this->typeRepository->findById($customer->getTypeId());  // N queries
-        $customer->setType($type);
-    }
-
-    return $customers;
-}
-
-// Result: 1 + 100 = 101 queries for 100 customers!
-```
-
-### Detection Methods
-
-#### Method 1: Symfony Profiler (Development)
+### Step 5: Disable Profiler (Important!)
 
 ```bash
-# Run endpoint, then check profiler
-open http://localhost/_profiler
+# After analysis, disable profiler to avoid overhead
+db.setProfilingLevel(0)
 
-# Look at "Database" panel
-# Count queries - if more than ~10, investigate
-```
-
-#### Method 2: MongoDB Profiler
-
-```javascript
-// Enable MongoDB profiler
-db.setProfilingLevel(2, { slowms: 50 })
-
-// After running endpoint, analyze
-db.system.profile.aggregate([
-    { $group: {
-        _id: { ns: "$ns", op: "$op" },
-        count: { $sum: 1 },
-        avgMs: { $avg: "$millis" }
-    }},
-    { $sort: { count: -1 }}
-])
-
-// Look for high "count" values - indicates repeated queries
-```
-
-#### Method 3: Manual Code Review
-
-**Red Flags**:
-```php
-// 🚨 Query inside loop
-foreach ($customers as $customer) {
-    $type = $this->repository->find($customer->getTypeId());  // BAD!
-}
-
-// 🚨 Lazy loading in loop
-foreach ($orders as $order) {
-    echo $order->getCustomer()->getName();  // Lazy load = query!
-}
-
-// 🚨 Accessing relations without eager loading
-$customers = $this->repository->findAll();
-foreach ($customers as $customer) {
-    echo $customer->getStatus()->getName();  // N+1!
-}
-```
-
-### Solutions for N+1 Queries
-
-#### Solution 1: Eager Loading (MongoDB Priming)
-
-```php
-// ✅ GOOD: Eager load with prime()
-$qb = $this->documentManager->createQueryBuilder(Customer::class);
-$qb->field('type')->prime(true);
-$qb->field('status')->prime(true);
-$customers = $qb->getQuery()->execute();
-
-// Now accessing relations doesn't trigger queries
-foreach ($customers as $customer) {
-    echo $customer->getType();    // Already loaded!
-    echo $customer->getStatus();  // Already loaded!
-}
-```
-
-#### Solution 2: Single Query with Aggregation
-
-```php
-// ✅ GOOD: Use aggregation pipeline
-$pipeline = [
-    [
-        '$lookup' => [
-            'from' => 'customer_types',
-            'localField' => 'type_id',
-            'foreignField' => '_id',
-            'as' => 'type_data'
-        ]
-    ],
-    [
-        '$lookup' => [
-            'from' => 'customer_statuses',
-            'localField' => 'status_id',
-            'foreignField' => '_id',
-            'as' => 'status_data'
-        ]
-    ]
-];
-
-$result = $this->collection->aggregate($pipeline);
-```
-
-#### Solution 3: Batch Loading
-
-```php
-// ✅ GOOD: Load all needed IDs in one query
-$typeIds = array_map(fn($c) => $c->getTypeId(), $customers);
-$types = $this->typeRepository->findByIds($typeIds);  // 1 query
-
-$typeMap = [];
-foreach ($types as $type) {
-    $typeMap[$type->getId()] = $type;
-}
-
-foreach ($customers as $customer) {
-    $customer->setType($typeMap[$customer->getTypeId()]);  // No query!
-}
+# Or enable only slow query logging (production)
+db.setProfilingLevel(1, { slowms: 200 })
 ```
 
 ---
 
-## Slow Query Analysis with EXPLAIN
+## Common Performance Issues
 
-### Using MongoDB explain()
+### Issue 1: N+1 Queries
+
+**Detection**: 100+ queries for 100 records
+
+**Fix**: Use eager loading
+
+```php
+// ❌ BAD: N+1 problem
+$customers = $repository->findAll();  // 1 query
+foreach ($customers as $customer) {
+    $type = $typeRepository->find($customer->getTypeId());  // N queries!
+}
+
+// ✅ GOOD: Eager loading
+$qb = $this->createQueryBuilder(Customer::class);
+$qb->field('type')->prime(true);  // Eager load
+$customers = $qb->getQuery()->execute();
+```
+
+**See**: [examples/n-plus-one-detection.md](examples/n-plus-one-detection.md) for complete guide
+
+---
+
+### Issue 2: Slow Queries (No Index)
+
+**Detection**: EXPLAIN shows `COLLSCAN`, execution time >100ms
+
+**Fix**: Add index
 
 ```javascript
-// In MongoDB shell
+// Check query performance
 db.customers.find({ email: "test@example.com" }).explain("executionStats")
+
+// If stage: "COLLSCAN" → add index
 ```
 
-**Key Metrics to Check**:
-
-```json
-{
-  "executionStats": {
-    "executionTimeMillis": 245,     // 🚨 Goal: <100ms
-    "totalDocsExamined": 10000,     // 🚨 Documents scanned
-    "totalKeysExamined": 1,         // ✅ Index keys used
-    "nReturned": 1,                 // Documents returned
-    "executionStages": {
-      "stage": "IXSCAN"             // ✅ Index scan (good!)
-      // or "COLLSCAN"               // 🚨 Collection scan (bad!)
-    }
-  }
-}
-```
-
-### Interpreting EXPLAIN Results
-
-#### ✅ Good Performance (Index Used)
-
-```json
-{
-  "executionTimeMillis": 5,
-  "totalDocsExamined": 1,
-  "totalKeysExamined": 1,
-  "executionStages": {
-    "stage": "IXSCAN",
-    "indexName": "email_1"
-  }
-}
-```
-
-**Analysis**: Fast! Uses index, examines only 1 document.
-
-#### 🚨 Poor Performance (Collection Scan)
-
-```json
-{
-  "executionTimeMillis": 450,
-  "totalDocsExamined": 50000,
-  "totalKeysExamined": 0,
-  "executionStages": {
-    "stage": "COLLSCAN"
-  }
-}
-```
-
-**Analysis**: Slow! Scans entire collection, no index used. **FIX**: Add index!
-
-#### ⚠️ Inefficient Index (High Examined Count)
-
-```json
-{
-  "executionTimeMillis": 180,
-  "totalDocsExamined": 5000,
-  "totalKeysExamined": 5000,
-  "nReturned": 10,
-  "executionStages": {
-    "stage": "IXSCAN",
-    "indexName": "status_1"
-  }
-}
-```
-
-**Analysis**: Uses index but examines 5000 docs to return 10. **FIX**: Add compound index or refine query.
-
----
-
-## Detecting Missing Indexes
-
-### Automated Detection
-
-#### Method 1: Analyze MongoDB Slow Queries
-
-```bash
-# Check MongoDB logs for slow queries
-docker compose logs mongodb | grep "Slow query"
-
-# Look for COLLSCAN warnings
-docker compose logs mongodb | grep "COLLSCAN"
-```
-
-#### Method 2: Query Pattern Analysis
-
-**Check Repository Methods**:
-```php
-// Find methods that filter/sort
-public function findByEmail(string $email): ?Customer
-{
-    // Does 'email' field have an index?
-}
-
-public function findActiveCustomers(): array
-{
-    // Does 'status' field have an index?
-}
-
-public function findRecentCustomers(int $limit): array
-{
-    // Does 'createdAt' field have an index for sorting?
-}
-```
-
-#### Method 3: Run Performance Check Script
-
-Create `scripts/check-query-performance.php`:
-
-```php
-<?php
-
-// Test common queries and check execution time
-$queries = [
-    'findByEmail' => ['email' => 'test@example.com'],
-    'findByStatus' => ['status' => 'active'],
-    'findRecent' => ['sort' => ['createdAt' => -1], 'limit' => 10],
-];
-
-foreach ($queries as $name => $criteria) {
-    $start = microtime(true);
-    $result = $collection->find($criteria)->toArray();
-    $duration = (microtime(true) - $start) * 1000;
-
-    echo sprintf("%s: %.2fms\n", $name, $duration);
-
-    if ($duration > 100) {
-        echo "⚠️  SLOW! Check indexes for: " . json_encode($criteria) . "\n";
-    }
-}
-```
-
-### Common Missing Index Patterns
-
-#### Pattern 1: WHERE Clause Fields
-
-```php
-// Query filters by status
-$qb->field('status')->equals('active');
-
-// ✅ NEEDS INDEX: status field
-```
-
-```xml
-<index><key name="status"/></index>
-```
-
-#### Pattern 2: ORDER BY Fields
-
-```php
-// Query sorts by createdAt DESC
-$qb->sort('createdAt', 'desc');
-
-// ✅ NEEDS INDEX: createdAt field with DESC order
-```
-
-```xml
-<index><key name="createdAt" order="desc"/></index>
-```
-
-#### Pattern 3: Compound Filters
-
-```php
-// Query filters by multiple fields
-$qb->field('status')->equals('active')
-   ->field('type')->equals('premium');
-
-// ✅ NEEDS COMPOUND INDEX: status + type
-```
-
-```xml
-<index>
-    <key name="status"/>
-    <key name="type"/>
-</index>
-```
-
-#### Pattern 4: Text Search
-
-```php
-// Query searches text fields
-$qb->text('search term');
-
-// ✅ NEEDS TEXT INDEX: searchable fields
-```
-
-```xml
-<index>
-    <key name="name"/>
-    <key name="email"/>
-    <option name="type" value="text"/>
-</index>
-```
-
----
-
-## Safe Online Index Migrations
-
-### MongoDB Index Creation (Non-Blocking)
-
-**Good News**: MongoDB 4.2+ creates indexes in the background by default!
-
-```javascript
-// This is non-blocking in MongoDB 4.2+
-db.customers.createIndex({ email: 1 })
-```
-
-### Doctrine ODM Index Creation
-
-**Step 1: Add Index to XML Mapping**
-
+**Add index in XML mapping**:
 ```xml
 <!-- config/doctrine/Customer.mongodb.xml -->
 <indexes>
@@ -475,159 +166,104 @@ db.customers.createIndex({ email: 1 })
 </indexes>
 ```
 
-**Step 2: Update Schema (Creates Index)**
-
+**Apply schema update**:
 ```bash
-# This creates indexes in background (safe for production)
 docker compose exec php bin/console doctrine:mongodb:schema:update
 ```
 
-### Verification Steps
-
-**Step 1: Verify Index Created**
-
-```javascript
-// In MongoDB shell
-db.customers.getIndexes()
-
-// Look for your new index
-{
-  "v": 2,
-  "key": { "email": 1 },
-  "name": "email_1"
-}
-```
-
-**Step 2: Verify Index is Used**
-
-```javascript
-// Run EXPLAIN on query
-db.customers.find({ email: "test@example.com" }).explain("executionStats")
-
-// Check executionStages.indexName matches your index
-"indexName": "email_1"  // ✅ Using your new index!
-```
-
-**Step 3: Measure Performance Improvement**
-
-```php
-// Before index
-$start = microtime(true);
-$customer = $repository->findByEmail('test@example.com');
-$before = (microtime(true) - $start) * 1000;
-
-// After index (should be faster!)
-$start = microtime(true);
-$customer = $repository->findByEmail('test@example.com');
-$after = (microtime(true) - $start) * 1000;
-
-echo "Before: {$before}ms, After: {$after}ms\n";
-```
-
-### Production Migration Strategy
-
-**Option 1: Blue-Green Deployment**
-1. Add index to XML mapping
-2. Deploy new code (no schema update yet)
-3. Run `doctrine:mongodb:schema:update` on live database
-4. Verify index creation
-5. Application automatically uses new index
-
-**Option 2: Manual Index Creation**
-1. Create index manually in production first:
-   ```javascript
-   db.customers.createIndex({ email: 1 })
-   ```
-2. Verify index exists
-3. Update XML mapping in code
-4. Deploy code (schema already has index)
-
-**Option 3: Phased Rollout**
-1. Add index during low-traffic window
-2. Monitor performance
-3. Verify no issues
-4. Full deployment
+**See**: [examples/slow-query-analysis.md](examples/slow-query-analysis.md) for EXPLAIN interpretation
 
 ---
 
-## Performance Regression Testing
+### Issue 3: Missing Indexes on Filtered Fields
 
-### Add Performance Tests
+**Detection**: Queries filter/sort on fields without indexes
+
+**Common patterns needing indexes**:
+- WHERE clause fields: `status = 'active'`
+- ORDER BY fields: `createdAt DESC`
+- Compound filters: `status = 'active' AND type = 'premium'`
+
+**See**: [reference/index-strategies.md](reference/index-strategies.md) for index selection guide
+
+---
+
+## Performance Thresholds
+
+| Operation | Target | Max Acceptable |
+|-----------|--------|----------------|
+| GET single | <50ms | 100ms |
+| GET collection (100 items) | <200ms | 500ms |
+| POST/PATCH/PUT | <100ms | 300ms |
+| Query count per endpoint | <5 | 10 |
+
+**See**: [reference/performance-thresholds.md](reference/performance-thresholds.md) for complete thresholds
+
+---
+
+## Safe Index Migrations
+
+**MongoDB 4.2+** creates indexes in the background by default (non-blocking).
+
+### Production Migration Strategy
+
+1. **Add index to XML mapping**
+2. **Run schema update**: `doctrine:mongodb:schema:update`
+3. **Verify index created**: `db.collection.getIndexes()`
+4. **Verify index is used**: Run EXPLAIN on queries
+5. **Measure performance improvement**
+
+**See**: [examples/safe-index-migration.md](examples/safe-index-migration.md) for detailed migration strategies
+
+---
+
+## Performance Testing
 
 ```php
-// tests/Performance/CustomerEndpointTest.php
-final class CustomerEndpointTest extends PerformanceTestCase
+final class CustomerEndpointTest extends ApiTestCase
 {
-    public function testGetCustomersPerformance(): void
+    public function testNoN1Queries(): void
     {
-        // Arrange: Create 100 customers
-        for ($i = 0; $i < 100; $i++) {
+        // Arrange: Create test data
+        for ($i = 0; $i < 50; $i++) {
             $this->createCustomer();
         }
 
-        // Act: Measure endpoint performance
+        // Act: Enable query counter
+        $this->enableQueryCounter();
+        $this->client->request('GET', '/api/customers');
+
+        // Assert: Should have minimal queries
+        $queryCount = $this->getQueryCount();
+        $this->assertLessThan(10, $queryCount, 'N+1 query detected!');
+    }
+
+    public function testEndpointPerformance(): void
+    {
+        // Measure response time
         $start = microtime(true);
         $response = $this->client->request('GET', '/api/customers');
         $duration = (microtime(true) - $start) * 1000;
 
-        // Assert: Should complete within acceptable time
-        $this->assertLessThan(200, $duration, 'GET /api/customers too slow');
-
-        // Assert: Should not have N+1 queries
-        $queryCount = $this->getQueryCount();
-        $this->assertLessThan(10, $queryCount, 'Too many queries (N+1 problem?)');
+        // Assert: Should be fast
+        $this->assertLessThan(200, $duration, "Too slow: {$duration}ms");
     }
-}
-```
-
-### Query Count Assertions
-
-```php
-public function testNoN1Queries(): void
-{
-    // Enable query counter
-    $this->enableQueryCounter();
-
-    // Execute operation
-    $customers = $this->repository->findAll();
-    foreach ($customers as $customer) {
-        $customer->getType();  // Should not trigger queries
-        $customer->getStatus();  // Should not trigger queries
-    }
-
-    // Assert: Should be 1 query (the findAll), not N+1
-    $this->assertQueryCount(1, 'N+1 query detected!');
 }
 ```
 
 ---
 
-## Integration with Other Skills
-
-**Use after**:
-- [api-platform-crud](../api-platform-crud/SKILL.md) - After creating endpoints
-- [database-migrations](../database-migrations/SKILL.md) - After adding entities/indexes
-
-**Use before**:
-- [load-testing](../load-testing/SKILL.md) - Optimize before load testing
-- [ci-workflow](../ci-workflow/SKILL.md) - Validate performance in CI
-
-**Related skills**:
-- [testing-workflow](../testing-workflow/SKILL.md) - Add performance tests
-- [structurizr-architecture-sync](../structurizr-architecture-sync/SKILL.md) - Document performance changes
-
----
-
-## Quick Reference Commands
+## Quick Commands Reference
 
 ```bash
-# Enable MongoDB profiler
-docker compose exec mongodb mongosh
-use core_service_db
+# Enable profiler
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+show dbs  # List databases, then use the one with your application data
+use app  # Application database name for this project
 db.setProfilingLevel(2, { slowms: 100 })
 
 # View slow queries
-db.system.profile.find({ millis: { $gt: 100 } }).sort({ ts: -1 })
+db.system.profile.find({ millis: { $gt: 100 } }).sort({ millis: -1 })
 
 # Check indexes
 db.customers.getIndexes()
@@ -638,20 +274,57 @@ db.customers.find({ email: "test@example.com" }).explain("executionStats")
 # Update schema (creates indexes)
 docker compose exec php bin/console doctrine:mongodb:schema:update
 
-# Run performance tests
-make unit-tests --filter=Performance
+# IMPORTANT: Disable profiler after analysis
+db.setProfilingLevel(0)
 ```
+
+---
+
+## Workflow Integration
+
+### When to Use This Skill
+
+**Use after**:
+- [api-platform-crud](../api-platform-crud/SKILL.md) - After creating endpoints
+- [database-migrations](../database-migrations/SKILL.md) - After adding entities
+
+**Use before**:
+- [load-testing](../load-testing/SKILL.md) - Optimize before load testing
+- [ci-workflow](../ci-workflow/SKILL.md) - Validate performance in CI
+
+**Related skills**:
+- [testing-workflow](../testing-workflow/SKILL.md) - Add performance tests
+- [documentation-sync](../documentation-sync/SKILL.md) - Document performance changes
 
 ---
 
 ## Reference Documentation
 
-- **[examples/n-plus-one-detection.md](examples/n-plus-one-detection.md)** - Complete N+1 detection examples
-- **[examples/slow-query-analysis.md](examples/slow-query-analysis.md)** - EXPLAIN analysis guide
+### Examples (Detailed Scenarios)
+- **[examples/README.md](examples/README.md)** - Examples index
+- **[examples/n-plus-one-detection.md](examples/n-plus-one-detection.md)** - Complete N+1 detection and fix guide
+- **[examples/slow-query-analysis.md](examples/slow-query-analysis.md)** - EXPLAIN analysis walkthrough
 - **[examples/missing-index-detection.md](examples/missing-index-detection.md)** - Finding missing indexes
+- **[examples/safe-index-migration.md](examples/safe-index-migration.md)** - Production migration strategies
+
+### Reference Guides
 - **[reference/performance-thresholds.md](reference/performance-thresholds.md)** - Acceptable performance limits
 - **[reference/mongodb-profiler-guide.md](reference/mongodb-profiler-guide.md)** - Complete profiler documentation
 - **[reference/index-strategies.md](reference/index-strategies.md)** - When to use which index type
+
+---
+
+## Comparison: This Skill vs database-migrations
+
+| Aspect | query-performance-analysis | database-migrations |
+|--------|---------------------------|---------------------|
+| **Purpose** | **WHAT** indexes to add | **HOW** to create indexes |
+| **Focus** | Performance analysis | Schema definition |
+| **Tools** | EXPLAIN, profiler | Doctrine ODM, XML mappings |
+| **When** | Debugging slow queries | Creating entities/migrations |
+| **Output** | Performance insights | XML configuration |
+
+**Workflow**: Use this skill to **identify** needed indexes, then use database-migrations for **XML syntax**.
 
 ---
 
@@ -659,7 +332,7 @@ make unit-tests --filter=Performance
 
 **Issue**: Can't enable MongoDB profiler
 
-**Solution**: Check MongoDB version (requires 4.0+), verify permissions
+**Solution**: Verify MongoDB version (4.0+), check permissions, ensure connected to correct database
 
 ---
 
@@ -668,25 +341,31 @@ make unit-tests --filter=Performance
 **Solution**:
 1. Verify index covers your query pattern
 2. Check compound index field order
-3. Ensure query uses indexed fields
+3. Ensure query uses indexed fields exactly
 
 ---
 
-**Issue**: Index not improving performance
+**Issue**: Container name error: "service 'mongodb' not found"
 
-**Solution**:
-1. Check if index is actually used (EXPLAIN)
-2. Verify index selectivity (high cardinality fields)
-3. Consider compound index with query order
+**Solution**: Use `database` as the service name (not `mongodb`):
+```bash
+docker compose exec database mongosh  # ✅ Correct
+docker compose exec mongodb mongosh   # ❌ Wrong - service doesn't exist
+```
 
 ---
 
-**Issue**: Too many indexes slowing writes
+**Issue**: Database name unknown
 
-**Solution**:
-1. Remove unused indexes
-2. Combine similar indexes into compound indexes
-3. Profile write operations for impact
+**Solution**: List databases to find the application database:
+```bash
+# Connect and list all databases
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin --eval "db.getMongo().getDBNames()"
+
+# Or interactively
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+show dbs  # Application DB is 'app' for this project (contains customers, customer_types, customer_statuses)
+```
 
 ---
 
@@ -696,3 +375,23 @@ make unit-tests --filter=Performance
 - **MongoDB Profiler**: https://docs.mongodb.com/manual/tutorial/manage-the-database-profiler/
 - **MongoDB Indexing Strategies**: https://docs.mongodb.com/manual/applications/indexes/
 - **Doctrine ODM Performance**: https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/latest/reference/performance.html
+
+---
+
+## Best Practices
+
+### DO ✅
+- Enable profiler in development for every new feature
+- Analyze queries before deploying to production
+- Add performance tests to prevent regressions
+- Use eager loading to prevent N+1 queries
+- Create indexes for frequently filtered/sorted fields
+- Disable profiler after analysis (avoid overhead)
+
+### DON'T ❌
+- Leave profiler level 2 enabled in production
+- Add indexes without analyzing query patterns
+- Ignore N+1 warnings (they compound quickly)
+- Skip EXPLAIN analysis before adding indexes
+- Forget to verify index is actually used after creation
+- Use hardcoded database names in commands (use variables)

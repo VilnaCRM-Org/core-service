@@ -24,9 +24,13 @@ public function searchCustomers(string $term): array
 ## Step 1: Enable MongoDB Profiler
 
 ```bash
-docker compose exec mongodb mongosh
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
 
-use core_service_db
+# List all databases to find yours
+show dbs
+
+# Switch to your database (typically 'app' for this project)
+use app
 db.setProfilingLevel(2, { slowms: 100 })
 ```
 
@@ -53,7 +57,7 @@ db.system.profile.find({
 ```json
 {
   "op": "query",
-  "ns": "core_service_db.customers",
+  "ns": "app.customers",  // Format: <database_name>.<collection_name>
   "command": {
     "find": "customers",
     "filter": { "name": { "$regex": "john", "$options": "i" } }

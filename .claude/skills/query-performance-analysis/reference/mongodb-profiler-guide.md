@@ -17,9 +17,13 @@ MongoDB Profiler logs all database operations for performance analysis. Essentia
 ### Development (All Queries)
 
 ```javascript
-docker compose exec mongodb mongosh
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
 
-use core_service_db
+// List databases first
+show dbs
+
+// Switch to your application database (typically 'app' for this project)
+use app
 
 // Log all operations slower than 50ms
 db.setProfilingLevel(2, { slowms: 50 })
@@ -67,8 +71,9 @@ db.system.profile.find({
 
 ```javascript
 // Find queries on 'customers' collection
+// Format: ns: "<database_name>.<collection_name>"
 db.system.profile.find({
-    ns: "core_service_db.customers",
+    ns: "app.customers",
     op: "query"
 }).pretty()
 
@@ -115,7 +120,7 @@ db.system.profile.aggregate([
     {
         $match: {
             op: "query",
-            ns: { $ne: "core_service_db.system.profile" }
+            ns: { $ne: "app.system.profile" }  // Exclude profiler collection itself
         }
     },
     {
@@ -272,7 +277,9 @@ final class ProfilerHelper
     public function getProfiledQueries(): array
     {
         $mongodb = $this->getMongoClient();
-        $collection = $mongodb->selectCollection('core_service_db', 'system.profile');
+        // Set DB_NAME in your .env file with the name from 'show dbs' command
+        $dbName = $_ENV['DB_NAME'] ?? throw new \RuntimeException('DB_NAME not configured');
+        $collection = $mongodb->selectCollection($dbName, 'system.profile');
 
         return $collection->find(
             ['millis' => ['$gt' => 100]],
@@ -283,10 +290,12 @@ final class ProfilerHelper
     public function getQueryCount(string $collectionName): int
     {
         $mongodb = $this->getMongoClient();
-        $collection = $mongodb->selectCollection('core_service_db', 'system.profile');
+        // Set DB_NAME in your .env file with the name from 'show dbs' command
+        $dbName = $_ENV['DB_NAME'] ?? throw new \RuntimeException('DB_NAME not configured');
+        $collection = $mongodb->selectCollection($dbName, 'system.profile');
 
         return $collection->countDocuments([
-            'ns' => "core_service_db.{$collectionName}",
+            'ns' => "{$dbName}.{$collectionName}",
             'op' => 'query'
         ]);
     }

@@ -61,10 +61,15 @@ open http://localhost/_profiler
 
 ```bash
 # Connect to MongoDB
-docker compose exec mongodb mongosh
+docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+
+# List all databases to find yours
+show dbs
+
+# Switch to your database (typically 'app' for this project)
+use app
 
 # Enable profiler
-use core_service_db
 db.setProfilingLevel(2, { slowms: 100 })
 ```
 
@@ -97,17 +102,17 @@ db.system.profile.aggregate([
 ```json
 [
   {
-    "_id": { "collection": "core_service_db.customer_types", "operation": "query" },
+    "_id": { "collection": "app.customer_types", "operation": "query" },
     "count": 100,  // 🚨 Same query 100 times!
     "avgMs": 5
   },
   {
-    "_id": { "collection": "core_service_db.customer_statuses", "operation": "query" },
+    "_id": { "collection": "app.customer_statuses", "operation": "query" },
     "count": 100,  // 🚨 Same query 100 times!
     "avgMs": 4
   },
   {
-    "_id": { "collection": "core_service_db.customers", "operation": "query" },
+    "_id": { "collection": "app.customers", "operation": "query" },
     "count": 1,
     "avgMs": 25
   }
