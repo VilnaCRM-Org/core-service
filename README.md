@@ -42,11 +42,19 @@ Use `make` command to set up project and automatically install all needed depend
 
 > make start
 
-Go to browser and open the link below
+Go to browser and open the link below to access REST API docs
 
 > https://localhost/api/docs
 
-That's it. You should now be ready to use PHP service template!
+You can access the GraphQL endpoint via the link below:
+
+> [GraphQL endpoint](https://localhost/api/graphql)
+
+Also, you can see architecture diagram using link below
+
+> http://localhost:8080/workspace/diagrams
+
+That's it. You should now be ready to use core service!
 
 ## Using
 

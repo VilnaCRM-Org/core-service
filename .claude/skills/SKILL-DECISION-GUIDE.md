@@ -29,7 +29,8 @@ What are you trying to do?
 │   └─ Quality thresholds → quality-standards
 │
 └─ Update documentation
-    └─ Any code change → documentation-sync
+    ├─ General docs → documentation-sync
+    └─ Architecture diagrams → structurizr-architecture-sync
 ```
 
 ## Scenario-Based Guide
@@ -123,6 +124,18 @@ This skill runs comprehensive CI checks.
 
 This skill identifies which documentation files need updating.
 
+**ALSO**: Use [structurizr-architecture-sync](structurizr-architecture-sync/SKILL.md) if you added components, handlers, or changed architecture.
+
+---
+
+### "I made architectural changes and need to update C4 diagrams"
+
+**Use**: [structurizr-architecture-sync](structurizr-architecture-sync/SKILL.md)
+
+This skill guides updating workspace.dsl for Structurizr C4 diagrams.
+
+**NOT**: documentation-sync (that's for general docs in /docs)
+
 ---
 
 ### "I need to add a new field to an entity"
@@ -181,11 +194,11 @@ The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAI
                     implementing-ddd-      load-testing
                       architecture         (performance)
                               │                  │
-                    ┌─────────┼─────────┬────────┘
-                    ▼         ▼         ▼
-          database-    query-        documentation-
-          migrations   performance-   sync
-                      analysis
+                    ┌─────────┼─────────┬────────┴────────┐
+                    ▼         ▼         ▼                 ▼
+          database-    query-        documentation-  structurizr-
+          migrations   performance-   sync           architecture-sync
+                      analysis                       (C4 diagrams)
 ```
 
 ## Common Confusions
@@ -198,6 +211,7 @@ The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAI
 | ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
 | database-migrations vs query-performance-analysis   | **Index creation (HOW)** → database-migrations<br>**Performance analysis (WHAT/WHY)** → query-performance-analysis                     |
 | query-performance-analysis vs load-testing          | **Fix slow queries** → query-performance-analysis<br>**Test under load** → load-testing                                                |
+| documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
 
 ## Multiple Skills for One Task
 
@@ -210,8 +224,9 @@ Some tasks benefit from multiple skills:
 3. **query-performance-analysis** - Optimize queries and add indexes
 4. **testing-workflow** - Write tests
 5. **load-testing** - Add performance tests
-6. **documentation-sync** - Update docs
-7. **ci-workflow** - Validate everything
+6. **structurizr-architecture-sync** - Update C4 diagrams
+7. **documentation-sync** - Update docs
+8. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 
