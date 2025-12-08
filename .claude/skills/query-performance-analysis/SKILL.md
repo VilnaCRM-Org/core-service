@@ -63,8 +63,10 @@ docker compose exec database mongosh -u root -p secret --authenticationDatabase 
 # List all databases to find yours
 show dbs
 
-# Switch to your database (typically 'app' for this project)
-use app
+# Switch to your application database (identify from list above)
+# Store database name in variable for consistency
+DB_NAME="app"  # Application database name for this project
+use $DB_NAME
 
 # Enable profiler (level 2 = all operations)
 db.setProfilingLevel(2, { slowms: 100 })
@@ -73,7 +75,7 @@ db.setProfilingLevel(2, { slowms: 100 })
 db.getProfilingStatus()
 ```
 
-**Note**: Use `show dbs` to see all databases. The application database is typically the one with data (not 'admin', 'config', or 'local').
+**Note**: Use `show dbs` to see all databases. The application database is typically the one with data (not 'admin', 'config', or 'local'). This project uses `app` as the database name.
 
 ### Step 2: Run Your Endpoint
 
@@ -203,15 +205,21 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 
 ## Safe Index Migrations
 
-**MongoDB 4.2+** creates indexes in the background by default (non-blocking).
+**MongoDB 4.2+** uses an optimized hybrid index build approach:
+- Obtains exclusive locks **only briefly** at start and end of the build
+- Allows concurrent reads and writes during most of the build process
+- **Note**: Brief locking at start/end can still impact write latency
+
+**Recommendation**: Schedule index creation during low-traffic periods or maintenance windows to avoid latency spikes, especially for large collections.
 
 ### Production Migration Strategy
 
 1. **Add index to XML mapping**
-2. **Run schema update**: `doctrine:mongodb:schema:update`
-3. **Verify index created**: `db.collection.getIndexes()`
-4. **Verify index is used**: Run EXPLAIN on queries
-5. **Measure performance improvement**
+2. **Schedule during low traffic** (or maintenance window for large collections)
+3. **Run schema update**: `doctrine:mongodb:schema:update`
+4. **Verify index created**: `db.collection.getIndexes()`
+5. **Verify index is used**: Run EXPLAIN on queries
+6. **Measure performance improvement**
 
 **See**: [examples/safe-index-migration.md](examples/safe-index-migration.md) for detailed migration strategies
 
@@ -259,7 +267,8 @@ final class CustomerEndpointTest extends ApiTestCase
 # Enable profiler
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
 show dbs  # List databases, then use the one with your application data
-use app  # Application database name for this project
+DB_NAME="app"  # Application database name for this project
+use $DB_NAME
 db.setProfilingLevel(2, { slowms: 100 })
 
 # View slow queries
@@ -362,9 +371,13 @@ docker compose exec mongodb mongosh   # ❌ Wrong - service doesn't exist
 # Connect and list all databases
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin --eval "db.getMongo().getDBNames()"
 
-# Or interactively
+# Or interactively - identify your database first
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
-show dbs  # Application DB is 'app' for this project (contains customers, customer_types, customer_statuses)
+show dbs  # Look for the database with your application data (not 'admin', 'config', or 'local')
+
+# Once identified, store in variable for reuse
+DB_NAME="app"  # Application database name for this project (contains customers, customer_types, customer_statuses)
+use $DB_NAME
 ```
 
 ---
@@ -394,4 +407,5 @@ show dbs  # Application DB is 'app' for this project (contains customers, custom
 - Ignore N+1 warnings (they compound quickly)
 - Skip EXPLAIN analysis before adding indexes
 - Forget to verify index is actually used after creation
-- Use hardcoded database names in commands (use variables)
+- Hardcode database names (use `DB_NAME` variable or identify from `show dbs` first)
+- Assume index creation is completely non-blocking (brief locks still occur at start/end)
