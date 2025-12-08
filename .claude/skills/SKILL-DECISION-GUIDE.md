@@ -19,7 +19,8 @@ What are you trying to do?
 │   ├─ New API endpoint → developing-openapi-specs
 │   ├─ New load test → load-testing
 │   ├─ New database entity → database-migrations
-│   └─ New test cases → testing-workflow
+│   ├─ New test cases → testing-workflow
+│   └─ Add observability → observability-instrumentation
 │
 ├─ Review/validate work
 │   ├─ Before committing → ci-workflow
@@ -154,6 +155,30 @@ This skill covers processor patterns for OpenAPI.
 
 ---
 
+### "I need to add logging, metrics, and tracing to my code"
+
+**Use**: [observability-instrumentation](observability-instrumentation/SKILL.md)
+
+This skill guides adding structured logs with correlation IDs, metrics (latency, errors, RPS), and tracing for DB/HTTP operations.
+
+**When to use**:
+- Implementing new command handlers
+- Creating new API endpoints
+- Adding database operations
+- Instrumenting existing code for production
+- Preparing code for deployment
+
+**What it provides**:
+- Structured logging patterns with correlation ID
+- Metrics collection (duration, errors, throughput)
+- DB/HTTP operation tracing
+- PR evidence collection templates
+
+**NOT**: testing-workflow (that's for functional tests)
+**NOT**: load-testing (that's for performance tests)
+
+---
+
 ## Skill Relationship Map
 
 ```
@@ -193,11 +218,12 @@ Some tasks benefit from multiple skills:
 ### Creating a complete new feature:
 
 1. **implementing-ddd-architecture** - Design domain model
-2. **database-migrations** - Configure persistence
-3. **testing-workflow** - Write tests
-4. **structurizr-architecture-sync** - Update C4 diagrams
-5. **documentation-sync** - Update docs
-6. **ci-workflow** - Validate everything
+2. **observability-instrumentation** - Add logging, metrics, tracing
+3. **database-migrations** - Configure persistence
+4. **testing-workflow** - Write tests
+5. **structurizr-architecture-sync** - Update C4 diagrams
+6. **documentation-sync** - Update docs
+7. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 

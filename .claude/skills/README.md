@@ -379,6 +379,55 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
+### 13. Observability Instrumentation (`observability-instrumentation/`)
+
+**Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
+
+**When activated**:
+
+- Implementing new features or command handlers
+- Creating new API endpoints (REST/GraphQL)
+- Adding database operations or external HTTP calls
+- Instrumenting existing code for production monitoring
+- Preparing code for deployment
+- Before creating pull requests (attach observability evidence)
+
+**What it does**:
+
+- Guides implementation of structured logging with correlation IDs
+- Provides metrics patterns (latency, errors, throughput/RPS)
+- Shows how to trace DB/HTTP operations
+- Explains correlation ID management and propagation
+- Documents PR evidence collection and templates
+- Ensures code is observable, debuggable, and production-ready
+
+**Three Pillars of Observability**:
+
+1. **Logs**: Structured logging with correlation ID tracking
+2. **Metrics**: Latency, error rates, and throughput measurements
+3. **Traces**: DB/HTTP operation timing and flow tracking
+
+**Key patterns**:
+
+- Structured arrays (not string concatenation) for logs
+- Correlation ID in every log entry
+- Duration metrics for all operations
+- Error counters with error type tagging
+- DB/HTTP operation tracing with timing
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and three pillars)
+- `examples/instrumented-command-handler.md` (Complete working example)
+- `reference/structured-logging.md` (Logging patterns and best practices)
+- `reference/metrics-patterns.md` (Metrics collection and naming)
+- `reference/pr-evidence-guide.md` (Evidence templates for PRs)
+- `reference/quick-start.md` (10-minute implementation guide)
+
+**Integration**: Works alongside implementing-ddd-architecture, api-platform-crud, and ci-workflow skills
+
+---
+
 ## How Skills Work
 
 ### Cross-Platform Compatibility
