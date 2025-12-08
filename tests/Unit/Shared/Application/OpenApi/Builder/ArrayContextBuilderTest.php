@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 
 use App\Shared\Application\OpenApi\Builder\ArrayContextBuilder;
-use App\Shared\Application\OpenApi\Builder\Parameter;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -78,6 +78,31 @@ final class ArrayContextBuilderTest extends UnitTestCase
         );
     }
 
+    public function testBuildDoesNotMarkOptionalParametersAsRequired(): void
+    {
+        $requiredParam = Parameter::required('id', 'string', $this->faker->uuid());
+        $optionalParam = Parameter::optional('reference', 'string', $this->faker->uuid());
+
+        $content = $this->contextBuilder->build([$requiredParam, $optionalParam]);
+        $schema = $content['application/ld+json']['schema'];
+
+        $this->assertSame(['id'], $schema['required']);
+        $this->assertSame([0], array_keys($schema['required']));
+    }
+
+    public function testBuildRequiredArrayHasSequentialKeys(): void
+    {
+        $requiredName = Parameter::required('name', 'string', 'John');
+        $optionalEmail = Parameter::optional('email', 'string', 'john@example.com');
+        $requiredAge = Parameter::required('age', 'integer', '30');
+
+        $content = $this->contextBuilder->build([$requiredName, $optionalEmail, $requiredAge]);
+        $schema = $content['application/ld+json']['schema'];
+
+        $this->assertSame(['name', 'age'], $schema['required']);
+        $this->assertSame([0, 1], array_keys($schema['required']));
+    }
+
     /**
      * @return  array<string,string|array<string>>
      */
@@ -89,13 +114,9 @@ final class ArrayContextBuilderTest extends UnitTestCase
                 'properties' => [
                     'name' => [
                         'type' => 'string',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                     'age' => [
                         'type' => 'integer',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                 ],
             ],
@@ -114,8 +135,6 @@ final class ArrayContextBuilderTest extends UnitTestCase
                 'properties' => [
                     'address' => [
                         'type' => 'object',
-                        'maxLength' => null,
-                        'format' => null,
                     ],
                 ],
             ],

@@ -51,8 +51,19 @@ final class InitialsValidatorTest extends UnitTestCase
 
     public function testEmptyStringValue(): void
     {
-        $this->context->expects($this->never())
-            ->method('buildViolation');
+        $constraintViolationBuilder = $this->createMock(
+            ConstraintViolationBuilderInterface::class
+        );
+        $error = $this->faker->word();
+        $this->translator->method('trans')
+            ->with('initials.spaces')
+            ->willReturn($error);
+        $this->context->method('buildViolation')
+            ->with($error)
+            ->willReturn($constraintViolationBuilder);
+        $constraintViolationBuilder->expects($this->once())
+            ->method('addViolation');
+
         $this->validator->validate(
             '',
             new Initials()

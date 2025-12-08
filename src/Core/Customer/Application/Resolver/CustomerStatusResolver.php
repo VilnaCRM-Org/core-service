@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Resolver;
 
-use ApiPlatform\Metadata\Exception\InvalidArgumentException as ApiPlatformInvalidArgumentException;
 use ApiPlatform\Metadata\Exception\ItemNotFoundException;
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
@@ -27,42 +26,51 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        $previous = $context['previous_data'] ?? null;
-        if ($previous instanceof CustomerStatus) {
-            return $previous;
+        $existing = $context['previous_data'] ?? null;
+
+        return $existing instanceof CustomerStatus
+            ? $existing
+            : $this->resolveFromIri($data->id, $context, $operation);
+    }
+
+    /**
+     * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
+     */
+    private function fetchResource(
+        string $iri,
+        array $context,
+        Operation $operation
+    ): object {
+        try {
+            return $this->iriConverter->getResourceFromIri($iri, $context, $operation);
+        } catch (ItemNotFoundException) {
+            throw CustomerStatusNotFoundException::withIri($iri);
         }
+    }
 
-        $iri = $data->id ?? throw new CustomerStatusNotFoundException();
+    private function requireIri(?string $iri): string
+    {
+        return $iri ?? throw new CustomerStatusNotFoundException();
+    }
 
-        return $this->resolveFromIri($iri, $context, $operation);
+    private function assertStatus(string $iri, object $resource): CustomerStatus
+    {
+        return $resource instanceof CustomerStatus
+            ? $resource
+            : throw CustomerStatusNotFoundException::withIri($iri);
     }
 
     /**
      * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
     private function resolveFromIri(
-        string $iri,
+        ?string $iri,
         array $context,
         Operation $operation
     ): CustomerStatus {
-        try {
-            $resource = $this->iriConverter->getResourceFromIri(
-                $iri,
-                $context,
-                $operation
-            );
-        } catch (ApiPlatformInvalidArgumentException $exception) {
-            if ($exception instanceof ItemNotFoundException) {
-                throw CustomerStatusNotFoundException::withIri($iri);
-            }
+        $resolvedIri = $this->requireIri($iri);
+        $resource = $this->fetchResource($resolvedIri, $context, $operation);
 
-            throw $exception;
-        }
-
-        if (!$resource instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($iri);
-        }
-
-        return $resource;
+        return $this->assertStatus($resolvedIri, $resource);
     }
 }

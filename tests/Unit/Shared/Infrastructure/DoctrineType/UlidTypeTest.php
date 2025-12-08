@@ -36,6 +36,13 @@ final class UlidTypeTest extends UnitTestCase
         $this->assertInstanceOf(Binary::class, $result);
     }
 
+    public function testConvertToDatabaseValueWithNull(): void
+    {
+        $ulidType = $this->getUlidTypeInstance();
+        $result = $ulidType->convertToDatabaseValue(null);
+        $this->assertNull($result);
+    }
+
     public function testConvertToPHPValueWithNull(): void
     {
         $ulidType = $this->getUlidTypeInstance();
@@ -68,6 +75,17 @@ final class UlidTypeTest extends UnitTestCase
                 'Ulid transformation logic not fully implemented for testing.'
             );
         }
+    }
+
+    public function testConvertToPHPValueWithNonBinaryValue(): void
+    {
+        $ulidType = $this->getUlidTypeInstance();
+
+        $binaryString = hex2bin('0189a7e5d3f4e2a3b4c5d6e7f8901234');
+
+        $result = $ulidType->convertToPHPValue($binaryString);
+
+        $this->assertInstanceOf(Ulid::class, $result);
     }
 
     public function testClosureToMongo(): void

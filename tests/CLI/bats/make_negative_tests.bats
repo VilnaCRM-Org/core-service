@@ -56,6 +56,10 @@ load 'bats-assert/load'
 @test "make psalm should fail when there are errors" {
   mv tests/CLI/bats/php/PsalmErrorExample.php src/Shared/Application/
 
+  # Regenerate autoloader and clear Psalm cache
+  composer dump-autoload
+  docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache
+
   run make psalm
 
   mv src/Shared/Application/PsalmErrorExample.php tests/CLI/bats/php/
