@@ -6,37 +6,37 @@ Acceptable performance limits for database operations.
 
 ### API Endpoints
 
-| Operation Type | Target | Max Acceptable | Critical |
-|----------------|--------|----------------|----------|
-| GET single resource | <50ms | 100ms | >200ms |
-| GET collection (10 items) | <100ms | 200ms | >500ms |
-| GET collection (100 items) | <200ms | 500ms | >1000ms |
-| POST (create) | <100ms | 300ms | >500ms |
-| PATCH/PUT (update) | <100ms | 300ms | >500ms |
-| DELETE | <50ms | 200ms | >400ms |
-| Search/Filter | <150ms | 300ms | >600ms |
+| Operation Type             | Target | Max Acceptable | Critical |
+| -------------------------- | ------ | -------------- | -------- |
+| GET single resource        | <50ms  | 100ms          | >200ms   |
+| GET collection (10 items)  | <100ms | 200ms          | >500ms   |
+| GET collection (100 items) | <200ms | 500ms          | >1000ms  |
+| POST (create)              | <100ms | 300ms          | >500ms   |
+| PATCH/PUT (update)         | <100ms | 300ms          | >500ms   |
+| DELETE                     | <50ms  | 200ms          | >400ms   |
+| Search/Filter              | <150ms | 300ms          | >600ms   |
 
 ### Database Queries
 
-| Query Type | Target | Max Acceptable | Critical |
-|------------|--------|----------------|----------|
-| Find by ID | <10ms | 50ms | >100ms |
-| Find by indexed field | <20ms | 100ms | >200ms |
-| Find by non-indexed field | N/A | N/A | Add index! |
-| Collection scan (<1000 docs) | <50ms | 100ms | >200ms |
-| Collection scan (>1000 docs) | N/A | N/A | Add index! |
-| Aggregation (simple) | <100ms | 200ms | >500ms |
-| Aggregation (complex) | <300ms | 500ms | >1000ms |
-| Text search | <50ms | 150ms | >300ms |
+| Query Type                   | Target | Max Acceptable | Critical   |
+| ---------------------------- | ------ | -------------- | ---------- |
+| Find by ID                   | <10ms  | 50ms           | >100ms     |
+| Find by indexed field        | <20ms  | 100ms          | >200ms     |
+| Find by non-indexed field    | N/A    | N/A            | Add index! |
+| Collection scan (<1000 docs) | <50ms  | 100ms          | >200ms     |
+| Collection scan (>1000 docs) | N/A    | N/A            | Add index! |
+| Aggregation (simple)         | <100ms | 200ms          | >500ms     |
+| Aggregation (complex)        | <300ms | 500ms          | >1000ms    |
+| Text search                  | <50ms  | 150ms          | >300ms     |
 
 ## Query Count Thresholds
 
-| Operation | Target | Max Acceptable | Critical |
-|-----------|--------|----------------|----------|
-| GET single resource | 1-2 | 3 | >5 |
-| GET collection | 1-3 | 5 | >10 |
-| POST (create) | 1-2 | 4 | >8 |
-| Complex operation | 3-5 | 10 | >15 |
+| Operation           | Target | Max Acceptable | Critical |
+| ------------------- | ------ | -------------- | -------- |
+| GET single resource | 1-2    | 3              | >5       |
+| GET collection      | 1-3    | 5              | >10      |
+| POST (create)       | 1-2    | 4              | >8       |
+| Complex operation   | 3-5    | 10             | >15      |
 
 **Note**: More than 10 queries usually indicates N+1 problem!
 
@@ -44,15 +44,16 @@ Acceptable performance limits for database operations.
 
 **Formula**: `totalDocsExamined / nReturned`
 
-| Ratio | Performance | Action |
-|-------|-------------|--------|
-| 1:1 | ✅ Excellent | Using perfect index |
-| 2:1 | ✅ Good | Acceptable |
-| 10:1 | ⚠️ Poor | Review index selectivity |
-| 100:1 | 🚨 Critical | Add better index or refine query |
-| 1000:1+ | 🚨 Unacceptable | Immediate action required |
+| Ratio   | Performance     | Action                           |
+| ------- | --------------- | -------------------------------- |
+| 1:1     | ✅ Excellent    | Using perfect index              |
+| 2:1     | ✅ Good         | Acceptable                       |
+| 10:1    | ⚠️ Poor         | Review index selectivity         |
+| 100:1   | 🚨 Critical     | Add better index or refine query |
+| 1000:1+ | 🚨 Unacceptable | Immediate action required        |
 
 **Example**:
+
 ```
 nReturned: 10
 totalDocsExamined: 100
@@ -68,29 +69,29 @@ Ratio: 100/10 = 10:1 (Poor - review index)
 ```javascript
 // Check index usage
 db.customers.aggregate([
-    {
-        $indexStats: {}
-    }
-])
+  {
+    $indexStats: {},
+  },
+]);
 ```
 
 ### Ideal Index Characteristics
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Index size | <10% of collection size | Compact indexes are efficient |
-| Index selectivity | >10% unique values | High cardinality = better selectivity |
-| Index usage count | High | Unused indexes should be dropped |
+| Metric            | Target                  | Notes                                 |
+| ----------------- | ----------------------- | ------------------------------------- |
+| Index size        | <10% of collection size | Compact indexes are efficient         |
+| Index selectivity | >10% unique values      | High cardinality = better selectivity |
+| Index usage count | High                    | Unused indexes should be dropped      |
 
 ## Collection Size Guidelines
 
-| Collection Size | Max Query Time | Strategy |
-|-----------------|----------------|----------|
-| <1,000 docs | 50ms | Indexes optional |
-| 1,000-10,000 docs | 100ms | Index frequently queried fields |
-| 10,000-100,000 docs | 200ms | Compound indexes, careful query design |
-| 100,000-1M docs | 300ms | Aggressive indexing, aggregation pipelines |
-| >1M docs | 500ms | Sharding consideration, caching layer |
+| Collection Size     | Max Query Time | Strategy                                   |
+| ------------------- | -------------- | ------------------------------------------ |
+| <1,000 docs         | 50ms           | Indexes optional                           |
+| 1,000-10,000 docs   | 100ms          | Index frequently queried fields            |
+| 10,000-100,000 docs | 200ms          | Compound indexes, careful query design     |
+| 100,000-1M docs     | 300ms          | Aggressive indexing, aggregation pipelines |
+| >1M docs            | 500ms          | Sharding consideration, caching layer      |
 
 ## MongoDB-Specific Thresholds
 
@@ -107,16 +108,16 @@ db.setProfilingLevel(2, {
 
 ### Connection Pool
 
-| Metric | Target | Max |
-|--------|--------|-----|
-| Active connections | <50 | 100 |
-| Connection wait time | <10ms | 50ms |
+| Metric               | Target | Max  |
+| -------------------- | ------ | ---- |
+| Active connections   | <50    | 100  |
+| Connection wait time | <10ms  | 50ms |
 
 ### Memory Usage
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Index size | >50% RAM | >80% RAM |
+| Metric      | Warning  | Critical |
+| ----------- | -------- | -------- |
+| Index size  | >50% RAM | >80% RAM |
 | Working set | >60% RAM | >90% RAM |
 
 ## Performance Degradation Triggers
@@ -134,33 +135,35 @@ Investigate when:
 ### Concurrent Users
 
 | Users | Target p95 | Max Acceptable |
-|-------|------------|----------------|
-| 10 | <100ms | 200ms |
-| 50 | <200ms | 400ms |
-| 100 | <300ms | 600ms |
-| 500 | <500ms | 1000ms |
-| 1000 | <800ms | 1500ms |
+| ----- | ---------- | -------------- |
+| 10    | <100ms     | 200ms          |
+| 50    | <200ms     | 400ms          |
+| 100   | <300ms     | 600ms          |
+| 500   | <500ms     | 1000ms         |
+| 1000  | <800ms     | 1500ms         |
 
 ### Throughput
 
-| Operation | Target RPS | Acceptable |
-|-----------|------------|------------|
-| Read single | 1000+ | 500+ |
-| Read collection | 500+ | 200+ |
-| Write single | 500+ | 200+ |
-| Complex operation | 100+ | 50+ |
+| Operation         | Target RPS | Acceptable |
+| ----------------- | ---------- | ---------- |
+| Read single       | 1000+      | 500+       |
+| Read collection   | 500+       | 200+       |
+| Write single      | 500+       | 200+       |
+| Complex operation | 100+       | 50+        |
 
 ## Monitoring and Alerting
 
 ### Alert Thresholds
 
 **Warning** (investigate):
+
 - Query time >200ms
 - Query count >10 per request
 - Document examination ratio >10:1
 - Collection scans on collections >10,000 docs
 
 **Critical** (immediate action):
+
 - Query time >1000ms
 - Query count >20 per request
 - Document examination ratio >100:1
@@ -210,7 +213,7 @@ public function testCustomerEndpointPerformance(): void
   expr: api_request_duration_ms > 200
   for: 5m
   annotations:
-    summary: "API endpoint exceeds 200ms threshold"
+    summary: 'API endpoint exceeds 200ms threshold'
 ```
 
 ### In Code Reviews

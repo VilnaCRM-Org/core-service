@@ -99,16 +99,17 @@ db.system.profile.aggregate([
 ```
 
 **Output**:
+
 ```json
 [
   {
     "_id": { "collection": "app.customer_types", "operation": "query" },
-    "count": 100,  // 🚨 Same query 100 times!
+    "count": 100, // 🚨 Same query 100 times!
     "avgMs": 5
   },
   {
     "_id": { "collection": "app.customer_statuses", "operation": "query" },
-    "count": 100,  // 🚨 Same query 100 times!
+    "count": 100, // 🚨 Same query 100 times!
     "avgMs": 4
   },
   {
@@ -289,8 +290,8 @@ public function getCustomers(): array
 ### Step 1: Clear MongoDB Profile
 
 ```javascript
-db.system.profile.drop()
-db.setProfilingLevel(2, { slowms: 100 })
+db.system.profile.drop();
+db.setProfilingLevel(2, { slowms: 100 });
 ```
 
 ### Step 2: Run Endpoint Again
@@ -302,17 +303,18 @@ curl http://localhost/api/customers
 ### Step 3: Check Query Count
 
 ```javascript
-db.system.profile.count()
+db.system.profile.count();
 // Should be 3 (or 1 with aggregation)
 ```
 
 ### Step 4: Check Execution Time
 
 ```javascript
-db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
+db.system.profile.find().sort({ ts: -1 }).limit(10).pretty();
 ```
 
 **Before fix**:
+
 ```json
 {
   "totalQueries": 201,
@@ -321,6 +323,7 @@ db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
 ```
 
 **After fix (batch loading)**:
+
 ```json
 {
   "totalQueries": 3,
@@ -398,6 +401,7 @@ final class CustomerEndpointTest extends ApiTestCase
 ### Q: How do I know if I have an N+1 problem?
 
 **A**: Look for these signs:
+
 - Query count grows with data size (100 items = 100+ queries)
 - Same query executed many times with different parameters
 - Queries inside `foreach` loops in your code
@@ -406,6 +410,7 @@ final class CustomerEndpointTest extends ApiTestCase
 ### Q: Which solution should I use?
 
 **A**:
+
 - **Priming (Solution 1)**: Simplest, works well with Doctrine ODM
 - **Batch loading (Solution 2)**: More control, works with any ORM
 - **Aggregation (Solution 3)**: Best performance, requires MongoDB knowledge

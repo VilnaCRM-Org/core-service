@@ -48,23 +48,28 @@ curl "http://localhost/api/customers?search=john"
 
 ```javascript
 // Find queries slower than 100ms
-db.system.profile.find({
-    millis: { $gt: 100 }
-}).sort({ ts: -1 }).limit(5).pretty()
+db.system.profile
+  .find({
+    millis: { $gt: 100 },
+  })
+  .sort({ ts: -1 })
+  .limit(5)
+  .pretty();
 ```
 
 **Output**:
+
 ```json
 {
   "op": "query",
-  "ns": "app.customers",  // Format: <database_name>.<collection_name>
+  "ns": "app.customers", // Format: <database_name>.<collection_name>
   "command": {
     "find": "customers",
     "filter": { "name": { "$regex": "john", "$options": "i" } }
   },
   "execStats": {
-    "executionTimeMillis": 2847,  // 🚨 2.8 seconds!
-    "totalDocsExamined": 50000,   // 🚨 Scanned all docs!
+    "executionTimeMillis": 2847, // 🚨 2.8 seconds!
+    "totalDocsExamined": 50000, // 🚨 Scanned all docs!
     "nReturned": 12
   }
 }
@@ -75,17 +80,20 @@ db.system.profile.find({
 ## Step 4: Run EXPLAIN
 
 ```javascript
-db.customers.find({
-    name: { $regex: /john/i }
-}).explain("executionStats")
+db.customers
+  .find({
+    name: { $regex: /john/i },
+  })
+  .explain('executionStats');
 ```
 
 **Full Output**:
+
 ```json
 {
   "queryPlanner": {
     "winningPlan": {
-      "stage": "COLLSCAN",  // 🚨 Collection scan!
+      "stage": "COLLSCAN", // 🚨 Collection scan!
       "filter": {
         "name": { "$regex": "john" }
       }
@@ -96,8 +104,8 @@ db.customers.find({
     "executionSuccess": true,
     "nReturned": 12,
     "executionTimeMillis": 2847,
-    "totalKeysExamined": 0,        // 🚨 No index used!
-    "totalDocsExamined": 50000,    // 🚨 Scanned entire collection!
+    "totalKeysExamined": 0, // 🚨 No index used!
+    "totalDocsExamined": 50000, // 🚨 Scanned entire collection!
     "executionStages": {
       "stage": "COLLSCAN",
       "nReturned": 12,
@@ -145,11 +153,13 @@ Regex query on `name` field with no index → **full collection scan**.
 ```
 
 **Update schema**:
+
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:update
 ```
 
 **Update query to use text search**:
+
 ```php
 public function searchCustomers(string $term): array
 {
@@ -172,6 +182,7 @@ public function searchCustomers(string $term): array
 ```
 
 **Update query**:
+
 ```php
 public function searchCustomers(string $term): array
 {
@@ -194,26 +205,29 @@ public function searchCustomers(string $term): array
 
 ```javascript
 // For text index
-db.customers.find({
-    $text: { $search: "john" }
-}).explain("executionStats")
+db.customers
+  .find({
+    $text: { $search: 'john' },
+  })
+  .explain('executionStats');
 ```
 
 **Output After Fix**:
+
 ```json
 {
   "queryPlanner": {
     "winningPlan": {
-      "stage": "TEXT",  // ✅ Using text index!
+      "stage": "TEXT", // ✅ Using text index!
       "indexName": "name_text_email_text"
     }
   },
   "executionStats": {
     "executionSuccess": true,
     "nReturned": 12,
-    "executionTimeMillis": 15,     // ✅ 15ms (was 2847ms!)
-    "totalKeysExamined": 24,       // ✅ Only examined index entries
-    "totalDocsExamined": 12,       // ✅ Only examined matching docs
+    "executionTimeMillis": 15, // ✅ 15ms (was 2847ms!)
+    "totalKeysExamined": 24, // ✅ Only examined index entries
+    "totalDocsExamined": 12, // ✅ Only examined matching docs
     "executionStages": {
       "stage": "TEXT",
       "nReturned": 12,
@@ -233,14 +247,14 @@ db.customers.find({
 
 ## EXPLAIN Key Metrics Reference
 
-| Field | Good Value | Bad Value | Meaning |
-|-------|-----------|-----------|---------|
-| `stage` | `IXSCAN`, `TEXT`, `IDHACK` | `COLLSCAN` | Execution method |
-| `executionTimeMillis` | <100ms | >500ms | Total query time |
-| `totalKeysExamined` | Low number | 0 | Index entries examined |
-| `totalDocsExamined` | ≈ nReturned | >> nReturned | Documents scanned |
-| `nReturned` | Any | Any | Documents returned |
-| `indexName` | Present | Absent | Index used |
+| Field                 | Good Value                 | Bad Value    | Meaning                |
+| --------------------- | -------------------------- | ------------ | ---------------------- |
+| `stage`               | `IXSCAN`, `TEXT`, `IDHACK` | `COLLSCAN`   | Execution method       |
+| `executionTimeMillis` | <100ms                     | >500ms       | Total query time       |
+| `totalKeysExamined`   | Low number                 | 0            | Index entries examined |
+| `totalDocsExamined`   | ≈ nReturned                | >> nReturned | Documents scanned      |
+| `nReturned`           | Any                        | Any          | Documents returned     |
+| `indexName`           | Present                    | Absent       | Index used             |
 
 ---
 
@@ -250,7 +264,7 @@ db.customers.find({
 
 ```javascript
 // Slow
-db.customers.find({ status: "active" })
+db.customers.find({ status: 'active' });
 
 // Stage: COLLSCAN, Examined: 50000
 ```
@@ -263,7 +277,7 @@ db.customers.find({ status: "active" })
 
 ```javascript
 // Has index but not selective
-db.customers.find({ status: "active" })  // 49,000 of 50,000 are active!
+db.customers.find({ status: 'active' }); // 49,000 of 50,000 are active!
 
 // Stage: IXSCAN, Examined: 49000, Returned: 49000
 ```
@@ -284,7 +298,7 @@ db.customers.find({ status: "active" })  // 49,000 of 50,000 are active!
 
 ```javascript
 // This can't use the index efficiently!
-db.customers.find({ createdAt: { $gt: date } })
+db.customers.find({ createdAt: { $gt: date } });
 
 // Stage: COLLSCAN (skips first field in compound index)
 ```
@@ -297,7 +311,7 @@ db.customers.find({ createdAt: { $gt: date } })
 
 ```javascript
 // Can't use index
-db.customers.find({ name: { $regex: /john/i } })
+db.customers.find({ name: { $regex: /john/i } });
 
 // Stage: COLLSCAN
 ```
@@ -310,7 +324,7 @@ db.customers.find({ name: { $regex: /john/i } })
 
 ```javascript
 // Sort field not indexed
-db.customers.find({}).sort({ createdAt: -1 })
+db.customers.find({}).sort({ createdAt: -1 });
 
 // Stage: COLLSCAN + in-memory sort
 ```
@@ -372,6 +386,7 @@ final class CustomerSearchPerformanceTest extends ApiTestCase
 ### Q: When should I run EXPLAIN?
 
 **A**: Always run EXPLAIN when:
+
 - Query takes >100ms
 - Adding a new query pattern
 - Suspecting index isn't being used
@@ -380,6 +395,7 @@ final class CustomerSearchPerformanceTest extends ApiTestCase
 ### Q: What if IXSCAN shows high `docsExamined`?
 
 **A**: Index isn't selective enough. Consider:
+
 - Compound index with better field order
 - More specific query filters
 - Different index strategy
@@ -387,6 +403,7 @@ final class CustomerSearchPerformanceTest extends ApiTestCase
 ### Q: Can I run EXPLAIN in production?
 
 **A**: Yes, but:
+
 - Use `explain("executionStats")` (doesn't execute query)
 - Don't run on every request (performance overhead)
 - Use selectively for debugging
@@ -394,10 +411,13 @@ final class CustomerSearchPerformanceTest extends ApiTestCase
 ### Q: How do I find ALL slow queries?
 
 **A**: Use profiler:
+
 ```javascript
-db.system.profile.find({
-    millis: { $gt: 100 }
-}).sort({ millis: -1 })
+db.system.profile
+  .find({
+    millis: { $gt: 100 },
+  })
+  .sort({ millis: -1 });
 ```
 
 ---

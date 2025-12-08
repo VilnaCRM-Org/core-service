@@ -23,6 +23,7 @@ Use this skill when:
 Analyze query performance, detect N+1 issues, identify missing indexes, and create safe online index migrations with verification steps.
 
 **Success Criteria**:
+
 - N+1 queries detected and fixed
 - Slow queries identified with EXPLAIN analysis
 - Missing indexes detected and added
@@ -35,6 +36,7 @@ Analyze query performance, detect N+1 issues, identify missing indexes, and crea
 ## TL;DR - Quick Performance Checklist
 
 **Before Merging Code:**
+
 - [ ] Run endpoint with profiler - check query count
 - [ ] No N+1 queries (queries in loops)
 - [ ] Slow queries (<100ms) analyzed with EXPLAIN
@@ -44,6 +46,7 @@ Analyze query performance, detect N+1 issues, identify missing indexes, and crea
 - [ ] Performance test added to prevent regression
 
 **When Adding Indexes:**
+
 - [ ] Index covers actual query patterns
 - [ ] Compound index field order correct
 - [ ] Index creation is safe for production
@@ -101,11 +104,13 @@ db.system.profile.aggregate([
 ### Step 4: Check for Performance Issues
 
 **N+1 Problem Symptoms**:
+
 - Same query executed many times
 - Query count grows with data size
 - Queries inside `foreach` loops
 
 **Slow Query Symptoms**:
+
 - `millis` field >100ms
 - `planSummary: "COLLSCAN"` (collection scan)
 - High `docsExamined` vs `nReturned`
@@ -155,12 +160,13 @@ $customers = $qb->getQuery()->execute();
 
 ```javascript
 // Check query performance
-db.customers.find({ email: "test@example.com" }).explain("executionStats")
+db.customers.find({ email: 'test@example.com' }).explain('executionStats');
 
 // If stage: "COLLSCAN" → add index
 ```
 
 **Add index in XML mapping**:
+
 ```xml
 <!-- config/doctrine/Customer.mongodb.xml -->
 <indexes>
@@ -169,6 +175,7 @@ db.customers.find({ email: "test@example.com" }).explain("executionStats")
 ```
 
 **Apply schema update**:
+
 ```bash
 docker compose exec php bin/console doctrine:mongodb:schema:update
 ```
@@ -182,6 +189,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 **Detection**: Queries filter/sort on fields without indexes
 
 **Common patterns needing indexes**:
+
 - WHERE clause fields: `status = 'active'`
 - ORDER BY fields: `createdAt DESC`
 - Compound filters: `status = 'active' AND type = 'premium'`
@@ -192,12 +200,12 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 
 ## Performance Thresholds
 
-| Operation | Target | Max Acceptable |
-|-----------|--------|----------------|
-| GET single | <50ms | 100ms |
-| GET collection (100 items) | <200ms | 500ms |
-| POST/PATCH/PUT | <100ms | 300ms |
-| Query count per endpoint | <5 | 10 |
+| Operation                  | Target | Max Acceptable |
+| -------------------------- | ------ | -------------- |
+| GET single                 | <50ms  | 100ms          |
+| GET collection (100 items) | <200ms | 500ms          |
+| POST/PATCH/PUT             | <100ms | 300ms          |
+| Query count per endpoint   | <5     | 10             |
 
 **See**: [reference/performance-thresholds.md](reference/performance-thresholds.md) for complete thresholds
 
@@ -294,14 +302,17 @@ db.setProfilingLevel(0)
 ### When to Use This Skill
 
 **Use after**:
+
 - [api-platform-crud](../api-platform-crud/SKILL.md) - After creating endpoints
 - [database-migrations](../database-migrations/SKILL.md) - After adding entities
 
 **Use before**:
+
 - [load-testing](../load-testing/SKILL.md) - Optimize before load testing
 - [ci-workflow](../ci-workflow/SKILL.md) - Validate performance in CI
 
 **Related skills**:
+
 - [testing-workflow](../testing-workflow/SKILL.md) - Add performance tests
 - [documentation-sync](../documentation-sync/SKILL.md) - Document performance changes
 
@@ -310,6 +321,7 @@ db.setProfilingLevel(0)
 ## Reference Documentation
 
 ### Examples (Detailed Scenarios)
+
 - **[examples/README.md](examples/README.md)** - Examples index
 - **[examples/n-plus-one-detection.md](examples/n-plus-one-detection.md)** - Complete N+1 detection and fix guide
 - **[examples/slow-query-analysis.md](examples/slow-query-analysis.md)** - EXPLAIN analysis walkthrough
@@ -317,6 +329,7 @@ db.setProfilingLevel(0)
 - **[examples/safe-index-migration.md](examples/safe-index-migration.md)** - Production migration strategies
 
 ### Reference Guides
+
 - **[reference/performance-thresholds.md](reference/performance-thresholds.md)** - Acceptable performance limits
 - **[reference/mongodb-profiler-guide.md](reference/mongodb-profiler-guide.md)** - Complete profiler documentation
 - **[reference/index-strategies.md](reference/index-strategies.md)** - When to use which index type
@@ -325,13 +338,13 @@ db.setProfilingLevel(0)
 
 ## Comparison: This Skill vs database-migrations
 
-| Aspect | query-performance-analysis | database-migrations |
-|--------|---------------------------|---------------------|
-| **Purpose** | **WHAT** indexes to add | **HOW** to create indexes |
-| **Focus** | Performance analysis | Schema definition |
-| **Tools** | EXPLAIN, profiler | Doctrine ODM, XML mappings |
-| **When** | Debugging slow queries | Creating entities/migrations |
-| **Output** | Performance insights | XML configuration |
+| Aspect      | query-performance-analysis | database-migrations          |
+| ----------- | -------------------------- | ---------------------------- |
+| **Purpose** | **WHAT** indexes to add    | **HOW** to create indexes    |
+| **Focus**   | Performance analysis       | Schema definition            |
+| **Tools**   | EXPLAIN, profiler          | Doctrine ODM, XML mappings   |
+| **When**    | Debugging slow queries     | Creating entities/migrations |
+| **Output**  | Performance insights       | XML configuration            |
 
 **Workflow**: Use this skill to **identify** needed indexes, then use database-migrations for **XML syntax**.
 
@@ -348,6 +361,7 @@ db.setProfilingLevel(0)
 **Issue**: EXPLAIN shows COLLSCAN but index exists
 
 **Solution**:
+
 1. Verify index covers your query pattern
 2. Check compound index field order
 3. Ensure query uses indexed fields exactly
@@ -357,6 +371,7 @@ db.setProfilingLevel(0)
 **Issue**: Container name error: "service 'mongodb' not found"
 
 **Solution**: Use `database` as the service name (not `mongodb`):
+
 ```bash
 docker compose exec database mongosh  # ✅ Correct
 docker compose exec mongodb mongosh   # ❌ Wrong - service doesn't exist
@@ -367,6 +382,7 @@ docker compose exec mongodb mongosh   # ❌ Wrong - service doesn't exist
 **Issue**: Database name unknown
 
 **Solution**: List databases to find the application database:
+
 ```bash
 # Connect and list all databases
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin --eval "db.getMongo().getDBNames()"
@@ -394,6 +410,7 @@ use $DB_NAME
 ## Best Practices
 
 ### DO ✅
+
 - Enable profiler in development for every new feature
 - Analyze queries before deploying to production
 - Add performance tests to prevent regressions
@@ -402,6 +419,7 @@ use $DB_NAME
 - Disable profiler after analysis (avoid overhead)
 
 ### DON'T ❌
+
 - Leave profiler level 2 enabled in production
 - Add indexes without analyzing query patterns
 - Ignore N+1 warnings (they compound quickly)
