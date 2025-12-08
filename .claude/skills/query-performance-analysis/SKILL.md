@@ -62,19 +62,19 @@ Analyze query performance, detect N+1 issues, identify missing indexes, and crea
 ```bash
 # Connect to MongoDB container
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+```
 
-# List all databases to find yours
+```javascript
+// List all databases to find yours
 show dbs
 
-# Switch to your application database (identify from list above)
-# Store database name in variable for consistency
-DB_NAME="app"  # Application database name for this project
-use $DB_NAME
+// Switch to your application database (app for this project)
+use app
 
-# Enable profiler (level 2 = all operations)
+// Enable profiler (level 2 = all operations)
 db.setProfilingLevel(2, { slowms: 100 })
 
-# Verify profiling is enabled
+// Verify profiling is enabled
 db.getProfilingStatus()
 ```
 
@@ -89,11 +89,11 @@ curl http://localhost/api/customers
 
 ### Step 3: Analyze Query Patterns
 
-```bash
-# View recent queries
+```javascript
+// View recent queries
 db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
 
-# Find repeated queries (N+1 pattern)
+// Find repeated queries (N+1 pattern)
 db.system.profile.aggregate([
     { $group: { _id: "$command.filter", count: { $sum: 1 } } },
     { $match: { count: { $gt: 10 } } },
@@ -117,11 +117,11 @@ db.system.profile.aggregate([
 
 ### Step 5: Disable Profiler (Important!)
 
-```bash
-# After analysis, disable profiler to avoid overhead
+```javascript
+// After analysis, disable profiler to avoid overhead
 db.setProfilingLevel(0)
 
-# Or enable only slow query logging (production)
+// Or enable only slow query logging (production)
 db.setProfilingLevel(1, { slowms: 200 })
 ```
 
@@ -229,8 +229,6 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 5. **Verify index is used**: Run EXPLAIN on queries
 6. **Measure performance improvement**
 
-**See**: [examples/safe-index-migration.md](examples/safe-index-migration.md) for detailed migration strategies
-
 ---
 
 ## Performance Testing
@@ -274,25 +272,32 @@ final class CustomerEndpointTest extends ApiTestCase
 ```bash
 # Enable profiler
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
-show dbs  # List databases, then use the one with your application data
-DB_NAME="app"  # Application database name for this project
-use $DB_NAME
+```
+
+```javascript
+// List databases, then use the one with your application data
+show dbs
+use app  // Application database name for this project
+
+// Enable profiler
 db.setProfilingLevel(2, { slowms: 100 })
 
-# View slow queries
+// View slow queries
 db.system.profile.find({ millis: { $gt: 100 } }).sort({ millis: -1 })
 
-# Check indexes
+// Check indexes
 db.customers.getIndexes()
 
-# EXPLAIN query
+// EXPLAIN query
 db.customers.find({ email: "test@example.com" }).explain("executionStats")
 
+// IMPORTANT: Disable profiler after analysis
+db.setProfilingLevel(0)
+```
+
+```bash
 # Update schema (creates indexes)
 docker compose exec php bin/console doctrine:mongodb:schema:update
-
-# IMPORTANT: Disable profiler after analysis
-db.setProfilingLevel(0)
 ```
 
 ---
@@ -325,8 +330,6 @@ db.setProfilingLevel(0)
 - **[examples/README.md](examples/README.md)** - Examples index
 - **[examples/n-plus-one-detection.md](examples/n-plus-one-detection.md)** - Complete N+1 detection and fix guide
 - **[examples/slow-query-analysis.md](examples/slow-query-analysis.md)** - EXPLAIN analysis walkthrough
-- **[examples/missing-index-detection.md](examples/missing-index-detection.md)** - Finding missing indexes
-- **[examples/safe-index-migration.md](examples/safe-index-migration.md)** - Production migration strategies
 
 ### Reference Guides
 
@@ -389,21 +392,24 @@ docker compose exec database mongosh -u root -p secret --authenticationDatabase 
 
 # Or interactively - identify your database first
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
-show dbs  # Look for the database with your application data (not 'admin', 'config', or 'local')
+```
 
-# Once identified, store in variable for reuse
-DB_NAME="app"  # Application database name for this project (contains customers, customer_types, customer_statuses)
-use $DB_NAME
+```javascript
+// Look for the database with your application data (not 'admin', 'config', or 'local')
+show dbs
+
+// Use your application database (app for this project, contains customers, customer_types, customer_statuses)
+use app
 ```
 
 ---
 
 ## External Resources
 
-- **MongoDB EXPLAIN Documentation**: https://docs.mongodb.com/manual/reference/explain-results/
-- **MongoDB Profiler**: https://docs.mongodb.com/manual/tutorial/manage-the-database-profiler/
-- **MongoDB Indexing Strategies**: https://docs.mongodb.com/manual/applications/indexes/
-- **Doctrine ODM Performance**: https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/latest/reference/performance.html
+- **[MongoDB EXPLAIN Documentation](https://docs.mongodb.com/manual/reference/explain-results/)**
+- **[MongoDB Profiler](https://docs.mongodb.com/manual/tutorial/manage-the-database-profiler/)**
+- **[MongoDB Indexing Strategies](https://docs.mongodb.com/manual/applications/indexes/)**
+- **[Doctrine ODM Performance](https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/latest/reference/performance.html)**
 
 ---
 

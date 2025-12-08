@@ -36,38 +36,6 @@ Practical examples for detecting and fixing query performance issues.
 
 ---
 
-### 3. [Missing Index Detection](missing-index-detection.md)
-
-**When to use**: Need to identify which indexes are needed
-
-**Covers**:
-
-- Analyzing query patterns
-- Checking for missing indexes
-- Determining compound vs single indexes
-- Index field order for compound indexes
-- Verifying index usage
-
-**Scenario**: Filtering by status and type is slow
-
----
-
-### 4. [Safe Index Migration](safe-index-migration.md)
-
-**When to use**: Adding indexes to production database
-
-**Covers**:
-
-- Online index creation (non-blocking)
-- Verification steps
-- Performance measurement before/after
-- Production deployment strategies
-- Rollback procedures
-
-**Scenario**: Adding email index to customers collection with 1M documents
-
----
-
 ## How to Use These Examples
 
 ### 1. Choose the Right Example
@@ -76,8 +44,6 @@ Match your problem to an example:
 
 - **Too many queries** → N+1 Query Detection
 - **Slow query execution** → Slow Query Analysis
-- **Don't know which indexes needed** → Missing Index Detection
-- **Adding index to production** → Safe Index Migration
 
 ### 2. Follow the Step-by-Step Guide
 
@@ -116,12 +82,10 @@ db.system.profile.find().sort({ ts: -1 }).limit(10)
 
 ## Quick Reference
 
-| Problem              | Example             | Key Tool                  |
-| -------------------- | ------------------- | ------------------------- |
-| Many queries (N+1)   | N+1 Detection       | Profiler query count      |
-| Slow query           | Slow Query Analysis | EXPLAIN command           |
-| Missing index        | Index Detection     | EXPLAIN + query patterns  |
-| Production migration | Safe Migration      | Background index creation |
+| Problem            | Example             | Key Tool             |
+| ------------------ | ------------------- | -------------------- |
+| Many queries (N+1) | N+1 Detection       | Profiler query count |
+| Slow query         | Slow Query Analysis | EXPLAIN command      |
 
 ## Combining Examples
 
@@ -131,15 +95,7 @@ Some scenarios require multiple examples:
 
 1. **N+1 Detection** → Find and fix repeated queries
 2. **Slow Query Analysis** → Find remaining slow queries
-3. **Missing Index Detection** → Add needed indexes
-4. **Safe Index Migration** → Deploy to production
-
-### New Feature Performance
-
-1. **Missing Index Detection** → Analyze query patterns
-2. **Safe Index Migration** → Add indexes safely
-3. **N+1 Detection** → Verify no N+1 queries
-4. **Load Testing** (see load-testing skill) → Confirm performance
+3. **Load Testing** (see [load-testing](../../load-testing/SKILL.md)) → Confirm performance
 
 ## Tips for Success
 

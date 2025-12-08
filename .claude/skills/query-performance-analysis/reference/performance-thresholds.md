@@ -98,12 +98,14 @@ db.customers.aggregate([
 ### Profiler Slow Query Threshold
 
 ```javascript
-// Set profiler threshold based on environment
-db.setProfilingLevel(2, {
-    slowms: 100  // Development: 100ms
-    slowms: 50   // Staging: 50ms
-    slowms: 200  // Production: 200ms (less noise)
-})
+// Development (all operations for thorough analysis)
+db.setProfilingLevel(2, { slowms: 100 }); // Level 2: all operations, 100ms threshold
+
+// Staging (all operations with tighter threshold)
+db.setProfilingLevel(2, { slowms: 50 }); // Level 2: all operations, 50ms threshold
+
+// Production (slow queries only to minimize overhead)
+db.setProfilingLevel(1, { slowms: 200 }); // Level 1: slow queries only, 200ms threshold
 ```
 
 ### Connection Pool
