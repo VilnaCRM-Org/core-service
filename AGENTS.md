@@ -135,24 +135,6 @@ Never run PHP commands directly on the host system.
 - `make generate-graphql-spec` -- Export GraphQL specification
 - `make validate-openapi-spec` -- Validate OpenAPI spec with Spectral
 - `make openapi-diff` -- Compare OpenAPI spec against base reference
-- `make schemathesis-validate` -- Validate API against OpenAPI spec
-
-## Schemathesis Validation Guidance
-
-- Always diagnose the failing request reported by `make schemathesis-validate`; reproduce it with `curl` and adjust Symfony validators/DTOs so the API enforces the expected rules.
-- Seed deterministic data and keep the OpenAPI description (request factories, serializer groups, schema builders, examples) consistent with those fixtures.
-- Do **not** introduce request listeners or per-user-agent logic to coerce Schemathesis payloads; fixes belong in validation or documentation so every client benefits.
-- Iterate on validation/schema changes until `make schemathesis-validate` completes without errors.
-
-### Detailed Remediation Steps
-
-1. Run `make schemathesis-validate`, capture every failing curl snippet, and replay it from within the PHP container to observe the actual response (status code, headers, body).
-2. Triage failures by category and address the root issue:
-   - **500 errors / missing header handling**: add guards in listeners/transformers so unauthenticated flows return `application/problem+json` 401/400 responses rather than HTML error pages.
-   - **Schema-compliant payload rejected**: hydrate fixtures so documented examples reference real data, then align Symfony validators and command handlers with the schema contracts.
-   - **Repeated 404 warnings**: extend fixture loading instead of skipping endpoints; create deterministic ULIDs/UUIDs for resource flows and reuse them in OpenAPI examples.
-3. Update OpenAPI examples and serializer groups so the documented payloads exactly match the seeded data (no placeholder values that Schemathesis cannot reach).
-4. Re-run `make generate-openapi-spec` if invoked in isolation, or just rerun `make schemathesis-validate`. Repeat until both **Examples** and **Coverage** phases report zero failures and zero warnings.
 
 ## Claude Code Skills
 

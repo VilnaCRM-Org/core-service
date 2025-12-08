@@ -5,14 +5,10 @@ include .env.test
 PROJECT       = core-service
 GIT_AUTHOR    = Kravalg
 
-# TLS verification for Schemathesis (disabled for local self-signed certs, override in CI)
-TLS_VERIFY    ?= --tls-verify=false
-
 # Executables: local only
 SYMFONY_BIN   = symfony
 DOCKER        = docker
 DOCKER_COMPOSE = docker compose
-SCHEMATHESIS_IMAGE = schemathesis/schemathesis:latest
 
 # Executables
 EXEC_PHP      = $(DOCKER_COMPOSE) exec php
@@ -199,6 +195,15 @@ infection: ## Run mutation testing with 100% MSI requirement
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
 
+analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
+	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
+
+analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
+	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
+
+analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
+	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
+
 reset-db: ## Recreate the database schema for ephemeral test runs
 	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
 	-@$(SYMFONY) doctrine:mongodb:schema:drop
@@ -265,11 +270,11 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
 
-schemathesis-validate: reset-db generate-openapi-spec ## Validate the running API against the OpenAPI spec with Schemathesis
-	$(DOCKER) run --rm --network=host -v $(CURDIR)/.github/openapi-spec:/data $(SCHEMATHESIS_IMAGE) run --checks all /data/spec.yaml --url https://localhost $(TLS_VERIFY)
-
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
+
+validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
+	./scripts/validate-openapi-spec.sh
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	tests/Load/aws-execute-load-tests.sh
@@ -313,6 +318,8 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
+	echo "1️⃣3️⃣ Validating OpenAPI specification..."; \
+	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
 	if [ -n "$$failed_checks" ]; then \
 		echo ""; \
 		echo "💥 CI checks completed with failures:"; \
