@@ -449,5 +449,5 @@ db.system.profile.find().sort({ ts: -1 }).limit(1);
 
 ## External Resources
 
-- MongoDB Profiler Documentation: https://docs.mongodb.com/manual/tutorial/manage-the-database-profiler/
-- Analyzing MongoDB Performance: https://docs.mongodb.com/manual/administration/analyzing-mongodb-performance/
+- **[MongoDB Profiler Documentation](https://docs.mongodb.com/manual/tutorial/manage-the-database-profiler/)**
+- **[Analyzing MongoDB Performance](https://docs.mongodb.com/manual/administration/analyzing-mongodb-performance/)**

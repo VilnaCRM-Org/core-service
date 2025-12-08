@@ -25,11 +25,13 @@ public function searchCustomers(string $term): array
 
 ```bash
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+```
 
-# List all databases to find yours
+```javascript
+// List all databases to find yours
 show dbs
 
-# Switch to your database (typically 'app' for this project)
+// Switch to your database (typically 'app' for this project)
 use app
 db.setProfilingLevel(2, { slowms: 100 })
 ```

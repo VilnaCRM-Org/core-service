@@ -387,6 +387,6 @@ After creating an index:
 
 ## External Resources
 
-- MongoDB Index Types: https://docs.mongodb.com/manual/indexes/#index-types
-- Compound Index Performance: https://docs.mongodb.com/manual/core/index-compound/
-- ESR Rule (Equality, Sort, Range): https://docs.mongodb.com/manual/tutorial/equality-sort-range-rule/
+- **[MongoDB Index Types](https://docs.mongodb.com/manual/indexes/#index-types)**
+- **[Compound Index Performance](https://docs.mongodb.com/manual/core/index-compound/)**
+- **[ESR Rule (Equality, Sort, Range)](https://docs.mongodb.com/manual/tutorial/equality-sort-range-rule/)**

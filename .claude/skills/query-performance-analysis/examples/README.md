@@ -69,14 +69,18 @@ Examples use customer/type/status entities - adapt for:
 
 After applying a fix:
 
-```bash
-# Re-run profiler
+```javascript
+// Re-run profiler
 db.setProfilingLevel(2, { slowms: 100 })
+```
 
+```bash
 # Test endpoint
 curl http://localhost/api/your-endpoint
+```
 
-# Check query count and timing
+```javascript
+// Check query count and timing
 db.system.profile.find().sort({ ts: -1 }).limit(10)
 ```
 

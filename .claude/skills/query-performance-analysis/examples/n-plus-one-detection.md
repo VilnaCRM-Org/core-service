@@ -62,14 +62,16 @@ open http://localhost/_profiler
 ```bash
 # Connect to MongoDB
 docker compose exec database mongosh -u root -p secret --authenticationDatabase admin
+```
 
-# List all databases to find yours
+```javascript
+// List all databases to find yours
 show dbs
 
-# Switch to your database (typically 'app' for this project)
+// Switch to your database (typically 'app' for this project)
 use app
 
-# Enable profiler
+// Enable profiler
 db.setProfilingLevel(2, { slowms: 100 })
 ```
 
@@ -78,8 +80,10 @@ db.setProfilingLevel(2, { slowms: 100 })
 ```bash
 # Run endpoint
 curl http://localhost/api/customers
+```
 
-# Check profiled queries
+```javascript
+// Check profiled queries
 db.system.profile.aggregate([
     {
         $group: {

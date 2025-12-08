@@ -249,5 +249,5 @@ public function generateAnnualReport(): void
 
 ## References
 
-- MongoDB Performance Best Practices: https://docs.mongodb.com/manual/administration/analyzing-mongodb-performance/
-- Web Performance Budgets: https://web.dev/performance-budgets-101/
+- **[MongoDB Performance Best Practices](https://docs.mongodb.com/manual/administration/analyzing-mongodb-performance/)**
+- **[Web Performance Budgets](https://web.dev/performance-budgets-101/)**
