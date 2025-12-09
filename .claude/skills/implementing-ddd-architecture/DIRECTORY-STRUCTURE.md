@@ -4,7 +4,7 @@
 
 ## Quick Reference: File Placement Decision Tree
 
-```
+```text
 Is it business logic?
 ├─ YES → Domain layer
 │   ├─ Has identity? → Entity (Domain/Entity/)
@@ -32,7 +32,7 @@ Is it business logic?
 
 ## Complete Directory Structure (CodelyTV Pattern)
 
-```
+```text
 src/
 ├── Mooc/                           # Bounded Context (Application)
 │   ├── Courses/                    # Module (Aggregate Root)
@@ -134,7 +134,7 @@ src/
 
 ## Our Project Structure (Adapted)
 
-```
+```text
 src/
 ├── Customer/                       # Bounded Context
 │   ├── Application/                # Use cases
@@ -304,7 +304,7 @@ src/Order/
 
 Adding "change email" feature to Customer:
 
-```
+```text
 src/Customer/
 ├── Application/
 │   ├── Command/
@@ -322,7 +322,7 @@ src/Customer/
 
 ### WRONG: Business logic in Infrastructure
 
-```
+```text
 src/Customer/Infrastructure/Service/CustomerValidator.php
 // Business validation should be in Domain (Value Objects)
 ```
@@ -331,7 +331,7 @@ src/Customer/Infrastructure/Service/CustomerValidator.php
 
 ### WRONG: Framework code in Domain
 
-```
+```text
 src/Customer/Domain/Entity/Customer.php
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 ```
@@ -340,7 +340,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 ### WRONG: Use case logic in Entity
 
-```
+```text
 src/Customer/Domain/Entity/Customer.php
 public function sendWelcomeEmail() // Application concern!
 ```
