@@ -1,7 +1,8 @@
-# Database Migrations Examples
+# Database Migration Examples
 
-This directory contains practical examples demonstrating database migration patterns and workflows.
+This directory contains practical examples for working with database migrations, entities, and repositories in MongoDB.
 
-## Planned Examples
+## Available Examples
 
-Examples referenced in SKILL.md will be added here as the skill documentation expands.
+*Examples will be added as needed for common migration patterns and entity management scenarios.*
+
