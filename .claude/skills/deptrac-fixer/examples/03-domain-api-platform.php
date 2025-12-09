@@ -136,15 +136,15 @@ final class Customer
 # config/api_platform/resources/Customer.yaml
 
 resources:
-  App\Customer\Domain\Entity\Customer:
+  App\Core\Customer\Domain\Entity\Customer:
     shortName: Customer
     description: Customer resource
 
     operations:
       ApiPlatform\Metadata\Get:
-        uriTemplate: /customers/{id}
+        uriTemplate: /customers/{ulid}
         requirements:
-          id: .+
+          ulid: .+
 
       ApiPlatform\Metadata\GetCollection:
         uriTemplate: /customers
@@ -155,11 +155,11 @@ resources:
         processor: App\Customer\Application\Processor\CreateCustomerProcessor
 
       ApiPlatform\Metadata\Put:
-        uriTemplate: /customers/{id}
+        uriTemplate: /customers/{ulid}
         processor: App\Customer\Application\Processor\UpdateCustomerProcessor
 
       ApiPlatform\Metadata\Delete:
-        uriTemplate: /customers/{id}
+        uriTemplate: /customers/{ulid}
 
     normalizationContext:
       groups: ['customer:read']
@@ -185,13 +185,15 @@ api_platform:
 /*
 # config/serialization/Customer.yaml
 
-App\Customer\Domain\Entity\Customer:
+App\Core\Customer\Domain\Entity\Customer:
   attributes:
-    id:
+    ulid:
       groups: ['customer:read']
     email:
       groups: ['customer:read', 'customer:write']
-    name:
+    initials:
+      groups: ['customer:read', 'customer:write']
+    phone:
       groups: ['customer:read', 'customer:write']
     createdAt:
       groups: ['customer:read']
