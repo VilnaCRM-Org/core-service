@@ -4,5 +4,4 @@ This directory contains practical examples for working with database migrations,
 
 ## Available Examples
 
-*Examples will be added as needed for common migration patterns and entity management scenarios.*
-
+_Examples will be added as needed for common migration patterns and entity management scenarios._
