@@ -266,13 +266,13 @@ Tags provide dimensions for filtering metrics.
 
 ### Common Tags
 
-| Tag | Purpose | Example Values |
-|-----|---------|----------------|
-| **status** | Operation result | `success`, `error` |
-| **error_type** | Exception class | `ConnectionException`, `ValidationException` |
-| **operation** | Specific operation | `create`, `update`, `delete` |
-| **entity_type** | Entity being operated on | `customer`, `order` |
-| **source** | Origin of request | `api`, `cli`, `queue` |
+| Tag             | Purpose                  | Example Values                               |
+| --------------- | ------------------------ | -------------------------------------------- |
+| **status**      | Operation result         | `success`, `error`                           |
+| **error_type**  | Exception class          | `ConnectionException`, `ValidationException` |
+| **operation**   | Specific operation       | `create`, `update`, `delete`                 |
+| **entity_type** | Entity being operated on | `customer`, `order`                          |
+| **source**      | Origin of request        | `api`, `cli`, `queue`                        |
 
 ### Example with Tags
 
@@ -456,6 +456,7 @@ error_rate = errors / total
 ```
 
 Example:
+
 - `customer.create.total`: 1000
 - `customer.create.errors`: 10
 - Error rate: 10 / 1000 = 1%
@@ -466,12 +467,12 @@ Example:
 
 Define SLOs (Service Level Objectives):
 
-| Metric | Threshold | Alert |
-|--------|-----------|-------|
-| p95 latency | > 500ms | Warning |
-| p99 latency | > 1000ms | Critical |
-| Error rate | > 1% | Warning |
-| Error rate | > 5% | Critical |
+| Metric      | Threshold | Alert    |
+| ----------- | --------- | -------- |
+| p95 latency | > 500ms   | Warning  |
+| p99 latency | > 1000ms  | Critical |
+| Error rate  | > 1%      | Warning  |
+| Error rate  | > 5%      | Critical |
 
 ---
 
@@ -600,6 +601,7 @@ $customer = $this->timeOperation(
 ---
 
 **Next Steps**:
+
 - [Structured Logging](structured-logging.md) - Combine metrics with structured logs
 - [PR Evidence Guide](pr-evidence-guide.md) - Show metrics evidence in PRs
 - [Complete Example](../examples/instrumented-command-handler.md) - See full implementation

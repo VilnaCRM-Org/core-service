@@ -5,6 +5,7 @@ How to collect and present observability evidence in pull requests to demonstrat
 ## Why Attach Evidence?
 
 Observability evidence in PRs:
+
 - **Proves code is instrumented** correctly
 - **Shows correlation tracking** works
 - **Demonstrates metrics collection** is functioning
@@ -64,6 +65,7 @@ Or use your metrics backend (Prometheus, Datadog, etc.)
 ### Step 4: Calculate Trace Timings
 
 From logs, extract duration_ms values:
+
 - Total operation duration
 - Database operation duration
 - HTTP call duration
@@ -74,7 +76,7 @@ From logs, extract duration_ms values:
 
 Copy this template into your PR description:
 
-```markdown
+````markdown
 ## Description
 
 [Brief description of changes]
@@ -82,17 +84,20 @@ Copy this template into your PR description:
 ## Observability Instrumentation
 
 ### ✅ Structured Logging
+
 - [x] Correlation ID added to all log entries
 - [x] Structured context (arrays, not strings)
 - [x] Appropriate log levels (debug, info, warning, error)
 - [x] No sensitive data logged
 
 ### ✅ Metrics
+
 - [x] Operation duration tracked
 - [x] Error counters implemented
 - [x] Throughput metrics added
 
 ### ✅ Traces
+
 - [x] Database operations traced
 - [x] HTTP calls traced (if applicable)
 - [x] Operation timing recorded
@@ -148,22 +153,23 @@ Copy this template into your PR description:
   }
 }
 ```
+````
 
 ### Metrics Recorded
 
-| Metric | Value | Tags |
-|--------|-------|------|
-| `customer.create.duration` | 45.67ms | `status=success` |
-| `customer.create.total` | 1 | - |
-| `mongodb.customer.save.duration` | 12.45ms | - |
+| Metric                           | Value   | Tags             |
+| -------------------------------- | ------- | ---------------- |
+| `customer.create.duration`       | 45.67ms | `status=success` |
+| `customer.create.total`          | 1       | -                |
+| `mongodb.customer.save.duration` | 12.45ms | -                |
 
 ### Trace Summary
 
-| Operation | Duration | Status |
-|-----------|----------|--------|
-| Total handler execution | 45.67ms | ✅ Success |
-| MongoDB save | 12.45ms | ✅ Success |
-| Event publishing | ~2ms | ✅ Success |
+| Operation               | Duration | Status     |
+| ----------------------- | -------- | ---------- |
+| Total handler execution | 45.67ms  | ✅ Success |
+| MongoDB save            | 12.45ms  | ✅ Success |
+| Event publishing        | ~2ms     | ✅ Success |
 
 ### Error Scenario (if applicable)
 
@@ -182,6 +188,7 @@ Copy this template into your PR description:
 ```
 
 **Error metrics**:
+
 - `customer.create.errors`: 1 (error_type=ConnectionTimeoutException)
 
 ---
@@ -193,7 +200,8 @@ Copy this template into your PR description:
 - [x] Confirmed metrics are recorded
 - [x] Validated trace timing accuracy
 - [x] Tested error scenarios with full logging
-```
+
+````
 
 ---
 
@@ -217,16 +225,19 @@ For smaller PRs, use this condensed version:
     "duration_ms": 45.67
   }
 }
-```
+````
 
 ### Metrics
+
 - `customer.create.duration`: 45.67ms (success)
 - `mongodb.save.duration`: 12.45ms
 
 ### Traces
+
 - Total: 45.67ms
 - DB operation: 12.45ms
-```
+
+````
 
 ---
 
@@ -246,7 +257,7 @@ For visual learners, include screenshots from log aggregation tools:
 ![Correlation flow](./evidence/kibana-correlation-flow.png)
 
 All logs successfully tracked with correlation ID `550e8400...`.
-```
+````
 
 ### Datadog/Grafana
 
@@ -398,6 +409,7 @@ Add this to your PR checklist:
 > [paste evidence]
 >
 > As you can see, the correlation ID appears in:
+>
 > - Command handler start
 > - MongoDB save operation
 > - Domain event publishing
@@ -414,6 +426,7 @@ Add this to your PR checklist:
 **Problem**: Logs don't show correlation ID flow
 
 **Fix**: Ensure correlation ID is:
+
 1. Generated at operation start
 2. Passed to all methods
 3. Included in every log entry
@@ -423,6 +436,7 @@ Add this to your PR checklist:
 **Problem**: Duration metrics missing
 
 **Fix**: Add timing measurements:
+
 ```php
 $startTime = microtime(true);
 // operation
@@ -435,6 +449,7 @@ $this->logger->info('...', ['duration_ms' => $duration]);
 **Problem**: Only success case shown
 
 **Fix**: Test and capture error scenarios:
+
 - Simulate database failure
 - Capture error logs
 - Show error metrics
@@ -456,6 +471,7 @@ PR evidence is complete when:
 ---
 
 **Next Steps**:
+
 - Review your PR description
 - Run your code and collect evidence
 - Copy evidence template

@@ -5,12 +5,14 @@ Comprehensive guide to implementing structured logging in the VilnaCRM Core Serv
 ## Why Structured Logging?
 
 **Traditional logging** (string concatenation):
+
 ```php
 // ❌ Bad - Unstructured, hard to parse
 $logger->info("Creating customer " . $customerId . " with email " . $email);
 ```
 
 **Structured logging** (arrays):
+
 ```php
 // ✅ Good - Structured, searchable, parseable
 $logger->info('Creating customer', [
@@ -20,6 +22,7 @@ $logger->info('Creating customer', [
 ```
 
 **Benefits**:
+
 - **Searchable**: Query by specific fields
 - **Parseable**: JSON format for log aggregators
 - **Contextual**: Rich metadata for debugging
@@ -31,12 +34,12 @@ $logger->info('Creating customer', [
 
 Use appropriate log levels following PSR-3:
 
-| Level | When to Use | Example |
-|-------|-------------|---------|
-| **debug** | Detailed diagnostic info | Variable values, method entry/exit |
-| **info** | Important business events | Customer created, order placed |
-| **warning** | Non-critical issues | Email failed (retryable), cache miss |
-| **error** | Critical failures | Database down, API call failed |
+| Level       | When to Use               | Example                              |
+| ----------- | ------------------------- | ------------------------------------ |
+| **debug**   | Detailed diagnostic info  | Variable values, method entry/exit   |
+| **info**    | Important business events | Customer created, order placed       |
+| **warning** | Non-critical issues       | Email failed (retryable), cache miss |
+| **error**   | Critical failures         | Database down, API call failed       |
 
 ### Examples
 
@@ -330,14 +333,14 @@ $this->logger->info('Payment processed', [
 
 ### Sensitive Data Types to Avoid
 
-| Type | Examples | Safe Alternative |
-|------|----------|-----------------|
-| Passwords | Plain text passwords | Password length, hash type |
-| Tokens | API keys, JWT tokens | Token prefix, expiry time |
-| Credit Cards | Full card numbers | Last 4 digits |
-| SSN/Tax IDs | Full identifiers | Last 4 digits |
-| API Keys | Secret keys | Key ID, key type |
-| Personal Email | Full addresses | Email domain |
+| Type           | Examples             | Safe Alternative           |
+| -------------- | -------------------- | -------------------------- |
+| Passwords      | Plain text passwords | Password length, hash type |
+| Tokens         | API keys, JWT tokens | Token prefix, expiry time  |
+| Credit Cards   | Full card numbers    | Last 4 digits              |
+| SSN/Tax IDs    | Full identifiers     | Last 4 digits              |
+| API Keys       | Secret keys          | Key ID, key type           |
+| Personal Email | Full addresses       | Email domain               |
 
 ---
 
@@ -361,12 +364,12 @@ final readonly class MyService
 ```yaml
 # config/packages/monolog.yaml
 monolog:
-    channels: ['app', 'customer', 'order']
+  channels: ['app', 'customer', 'order']
 
 services:
-    App\Customer\Application\:
-        tags:
-            - { name: monolog.logger, channel: customer }
+  App\Customer\Application\:
+    tags:
+      - { name: monolog.logger, channel: customer }
 ```
 
 ### JSON Formatter for Production
@@ -374,12 +377,12 @@ services:
 ```yaml
 # config/packages/prod/monolog.yaml
 monolog:
-    handlers:
-        main:
-            type: stream
-            path: "%kernel.logs_dir%/%kernel.environment%.log"
-            level: info
-            formatter: 'monolog.formatter.json'
+  handlers:
+    main:
+      type: stream
+      path: '%kernel.logs_dir%/%kernel.environment%.log'
+      level: info
+      formatter: 'monolog.formatter.json'
 ```
 
 ---
@@ -400,6 +403,7 @@ Structured logs are automatically indexed by field:
 ```
 
 **Query example**:
+
 ```
 correlation_id:"550e8400-e29b-41d4-a716-446655440000"
 operation:"mongodb.save" AND duration_ms:>100
@@ -518,5 +522,6 @@ final class MyServiceTest extends TestCase
 ---
 
 **Next Steps**:
+
 - [Metrics Patterns](metrics-patterns.md) - Add quantitative observability with duration, errors, and throughput
 - [Complete Example](../examples/instrumented-command-handler.md) - See full implementation with logs, metrics, and traces

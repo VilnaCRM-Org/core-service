@@ -34,6 +34,7 @@ Use this skill when:
 **Purpose**: Understand what happened and trace requests across services
 
 **Requirements**:
+
 - Use PSR-3 LoggerInterface (Symfony/Monolog)
 - Include correlation ID in all log entries
 - Log structured data (arrays, not strings)
@@ -44,6 +45,7 @@ Use this skill when:
 **Purpose**: Quantify system behavior and detect anomalies
 
 **Key Metrics**:
+
 - **Latency**: Response/operation duration
 - **Errors**: Failure counts and error rates
 - **Throughput**: Requests per second (RPS)
@@ -53,6 +55,7 @@ Use this skill when:
 **Purpose**: Track request flow through the system
 
 **What to Trace**:
+
 - Database operations (MongoDB queries)
 - HTTP calls to external services
 - Command/Query handler execution
@@ -151,12 +154,12 @@ public function __invoke(CreateCustomerCommand $command): void
 
 **Key metrics to track**:
 
-| Metric Type | Example | When to Use |
-|-------------|---------|-------------|
-| Duration | `handler.execution.duration_ms` | Every operation |
-| Counter | `handler.execution.total` | Throughput tracking |
-| Error Rate | `handler.execution.errors` | Failure detection |
-| Business Metric | `customer.created.total` | Domain events |
+| Metric Type     | Example                         | When to Use         |
+| --------------- | ------------------------------- | ------------------- |
+| Duration        | `handler.execution.duration_ms` | Every operation     |
+| Counter         | `handler.execution.total`       | Throughput tracking |
+| Error Rate      | `handler.execution.errors`      | Failure detection   |
+| Business Metric | `customer.created.total`        | Domain events       |
 
 **See**: [metrics-patterns.md](reference/metrics-patterns.md) for complete guide
 
@@ -260,6 +263,7 @@ private function callExternalApiWithTrace(string $url, string $correlationId): a
 **After implementing observability, collect evidence**:
 
 1. **Run the code** and capture log output:
+
 ```bash
 # Tail logs while testing
 make sh
@@ -267,6 +271,7 @@ tail -f var/log/dev.log | grep correlation_id
 ```
 
 2. **Extract observability evidence**:
+
 - Correlation ID tracking across operations
 - Structured log entries with context
 - Metric recordings (duration, errors)
@@ -274,10 +279,11 @@ tail -f var/log/dev.log | grep correlation_id
 
 3. **Add to PR description**:
 
-```markdown
+````markdown
 ## Observability Evidence
 
 ### Structured Logs
+
 ```json
 {
   "level": "info",
@@ -287,16 +293,20 @@ tail -f var/log/dev.log | grep correlation_id
   "timestamp": 1702425600
 }
 ```
+````
 
 ### Metrics Recorded
+
 - `customer.create.duration`: 45ms (success)
 - `mongodb.save.duration`: 12ms
 - `customer.create.errors`: 0
 
 ### Traces
+
 - DB operation: 12ms (mongodb.save)
 - Total handler execution: 45ms
-```
+
+````
 
 **See**: [pr-evidence-guide.md](reference/pr-evidence-guide.md) for templates
 
@@ -315,7 +325,7 @@ private function generateCorrelationId(): string
     // Alternative: Use Symfony ULID
     // return (string) new Ulid();
 }
-```
+````
 
 **Extract from request headers** (if available via API Gateway/HTTP layer):
 
@@ -418,11 +428,13 @@ email.sent.total
 ### Layer-Specific Guidance
 
 **Domain Layer**:
+
 - ❌ NO direct logging (pure domain logic)
 - ✅ Emit Domain Events for observability
 - ✅ Use exceptions to signal errors
 
 **Application Layer** (Command Handlers):
+
 - ✅ Inject LoggerInterface
 - ✅ Log command execution start/end
 - ✅ Track handler duration metrics
@@ -430,6 +442,7 @@ email.sent.total
 - ✅ Log domain events being published
 
 **Infrastructure Layer** (Repositories, HTTP clients):
+
 - ✅ Inject LoggerInterface
 - ✅ Log database operations (query, save, delete)
 - ✅ Log external HTTP calls
@@ -566,14 +579,14 @@ After instrumenting code, verify:
 
 ## Common Patterns Summary
 
-| Pattern | When | Example |
-|---------|------|---------|
-| **Structured Log** | Every operation | `$logger->info('msg', ['correlation_id' => $id])` |
-| **Duration Metric** | Every handler/operation | `$metrics->record('op.duration', $ms)` |
-| **Error Counter** | Catch blocks | `$metrics->increment('op.errors')` |
-| **DB Trace** | Repository methods | Log before/after with timing |
-| **HTTP Trace** | External calls | Log request/response with timing |
-| **Correlation ID** | Start of request | Generate/extract from headers |
+| Pattern             | When                    | Example                                           |
+| ------------------- | ----------------------- | ------------------------------------------------- |
+| **Structured Log**  | Every operation         | `$logger->info('msg', ['correlation_id' => $id])` |
+| **Duration Metric** | Every handler/operation | `$metrics->record('op.duration', $ms)`            |
+| **Error Counter**   | Catch blocks            | `$metrics->increment('op.errors')`                |
+| **DB Trace**        | Repository methods      | Log before/after with timing                      |
+| **HTTP Trace**      | External calls          | Log request/response with timing                  |
+| **Correlation ID**  | Start of request        | Generate/extract from headers                     |
 
 ---
 

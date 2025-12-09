@@ -139,10 +139,10 @@ Complex skills have multi-file structure:
 
 ### 📊 Observability & Performance Skills
 
-| Skill                             | File                                       | When to Use                                               |
-| --------------------------------- | ------------------------------------------ | --------------------------------------------------------- |
-| **Observability Instrumentation** | `observability-instrumentation/SKILL.md`   | Add structured logs, metrics, traces to new/existing code |
-| **Query Performance Analysis**    | `query-performance-analysis/SKILL.md`      | Detect N+1 queries, analyze slow queries, add indexes     |
+| Skill                             | File                                     | When to Use                                               |
+| --------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| **Observability Instrumentation** | `observability-instrumentation/SKILL.md` | Add structured logs, metrics, traces to new/existing code |
+| **Query Performance Analysis**    | `query-performance-analysis/SKILL.md`    | Detect N+1 queries, analyze slow queries, add indexes     |
 
 ## Practical Examples
 

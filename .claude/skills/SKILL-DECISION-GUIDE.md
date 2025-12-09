@@ -164,6 +164,7 @@ This skill covers processor patterns for OpenAPI.
 This skill guides adding structured logs with correlation IDs, metrics (latency, errors, RPS), and tracing for DB/HTTP operations.
 
 **When to use**:
+
 - Implementing new command handlers
 - Creating new API endpoints
 - Adding database operations
@@ -171,6 +172,7 @@ This skill guides adding structured logs with correlation IDs, metrics (latency,
 - Preparing code for deployment
 
 **What it provides**:
+
 - Structured logging patterns with correlation ID
 - Metrics collection (duration, errors, throughput)
 - DB/HTTP operation tracing

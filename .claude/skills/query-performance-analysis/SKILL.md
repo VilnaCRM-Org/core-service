@@ -91,14 +91,14 @@ curl http://localhost/api/customers
 
 ```javascript
 // View recent queries
-db.system.profile.find().sort({ ts: -1 }).limit(10).pretty()
+db.system.profile.find().sort({ ts: -1 }).limit(10).pretty();
 
 // Find repeated queries (N+1 pattern)
 db.system.profile.aggregate([
-    { $group: { _id: "$command.filter", count: { $sum: 1 } } },
-    { $match: { count: { $gt: 10 } } },
-    { $sort: { count: -1 } }
-])
+  { $group: { _id: '$command.filter', count: { $sum: 1 } } },
+  { $match: { count: { $gt: 10 } } },
+  { $sort: { count: -1 } },
+]);
 ```
 
 ### Step 4: Check for Performance Issues
@@ -119,10 +119,10 @@ db.system.profile.aggregate([
 
 ```javascript
 // After analysis, disable profiler to avoid overhead
-db.setProfilingLevel(0)
+db.setProfilingLevel(0);
 
 // Or enable only slow query logging (production)
-db.setProfilingLevel(1, { slowms: 200 })
+db.setProfilingLevel(1, { slowms: 200 });
 ```
 
 ---
@@ -214,6 +214,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 ## Safe Index Migrations
 
 **MongoDB 4.2+** uses an optimized hybrid index build approach:
+
 - Obtains exclusive locks **only briefly** at start and end of the build
 - Allows concurrent reads and writes during most of the build process
 - **Note**: Brief locking at start/end can still impact write latency

@@ -5,6 +5,7 @@ This example demonstrates a fully instrumented command handler with all three pi
 ## Scenario
 
 Creating a new customer with:
+
 - Structured logging with correlation ID
 - Latency and error metrics
 - Database operation tracing
@@ -364,13 +365,13 @@ domain.events.published: 2 (event_type=customer)
 
 ## Trace Summary
 
-| Operation | Duration | Status |
-|-----------|----------|--------|
-| Total handler execution | 278.34ms | ✅ Success |
-| Customer domain creation | ~1ms | ✅ Success |
-| MongoDB save | 12.45ms | ✅ Success |
-| Email service call | 234.56ms | ✅ Success |
-| Event publishing | ~2ms | ✅ Success |
+| Operation                | Duration | Status     |
+| ------------------------ | -------- | ---------- |
+| Total handler execution  | 278.34ms | ✅ Success |
+| Customer domain creation | ~1ms     | ✅ Success |
+| MongoDB save             | 12.45ms  | ✅ Success |
+| Email service call       | 234.56ms | ✅ Success |
+| Event publishing         | ~2ms     | ✅ Success |
 
 ---
 
@@ -410,6 +411,7 @@ If the MongoDB save fails:
 ```
 
 **Metrics**:
+
 ```
 customer.create.duration: 15.67ms (status=error)
 customer.create.errors: 1 (error_type=ConnectionTimeoutException)
