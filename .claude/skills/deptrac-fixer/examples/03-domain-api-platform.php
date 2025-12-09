@@ -339,7 +339,7 @@ namespace App\Customer\Application\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Customer\Application\DTO\CustomerResource;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 
 final readonly class CustomerProvider implements ProviderInterface
@@ -373,7 +373,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Application\DTO\CreateCustomerInput;
 use App\Customer\Application\DTO\CustomerResource;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 
@@ -401,6 +401,12 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
 
         // Fetch and return created entity
         $customer = $this->repository->findById($id);
+
+        if ($customer === null) {
+            // In a real application, this could throw a domain/application exception
+            // since the entity was just created and should exist
+            throw new \RuntimeException('Created customer could not be reloaded from repository.');
+        }
 
         return CustomerResource::fromEntity($customer);
     }
