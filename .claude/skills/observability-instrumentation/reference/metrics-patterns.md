@@ -600,6 +600,6 @@ $customer = $this->timeOperation(
 ---
 
 **Next Steps**:
-- [Tracing Patterns](tracing-patterns.md) - Add distributed tracing
-- [Structured Logging](structured-logging.md) - Combine with logs
-- [PR Evidence Guide](pr-evidence-guide.md) - Show metrics in PRs
+- [Structured Logging](structured-logging.md) - Combine metrics with structured logs
+- [PR Evidence Guide](pr-evidence-guide.md) - Show metrics evidence in PRs
+- [Complete Example](../examples/instrumented-command-handler.md) - See full implementation

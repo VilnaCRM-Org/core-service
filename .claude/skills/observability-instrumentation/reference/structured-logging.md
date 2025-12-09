@@ -518,6 +518,5 @@ final class MyServiceTest extends TestCase
 ---
 
 **Next Steps**:
-- [Metrics Patterns](metrics-patterns.md) - Add quantitative observability
-- [Tracing Patterns](tracing-patterns.md) - Track operation flow
-- [Correlation ID Patterns](correlation-id-patterns.md) - Manage request tracing
+- [Metrics Patterns](metrics-patterns.md) - Add quantitative observability with duration, errors, and throughput
+- [Complete Example](../examples/instrumented-command-handler.md) - See full implementation with logs, metrics, and traces

@@ -253,7 +253,7 @@ private function callExternalApiWithTrace(string $url, string $correlationId): a
 }
 ```
 
-**See**: [tracing-patterns.md](reference/tracing-patterns.md) for complete patterns
+**See complete example**: [instrumented-command-handler.md](examples/instrumented-command-handler.md) shows full DB and HTTP tracing
 
 ### Step 4: Attach Evidence to Pull Requests
 
@@ -309,15 +309,22 @@ tail -f var/log/dev.log | grep correlation_id
 ```php
 private function generateCorrelationId(): string
 {
-    // Option 1: From request headers (API Gateway)
-    return $request->headers->get('X-Correlation-ID')
-        ?? Uuid::v4()->toString();
-
-    // Option 2: Generate new UUID
+    // Generate new UUID v4
     return Uuid::v4()->toString();
 
-    // Option 3: Use Symfony UID
-    return (string) new Ulid();
+    // Alternative: Use Symfony ULID
+    // return (string) new Ulid();
+}
+```
+
+**Extract from request headers** (if available via API Gateway/HTTP layer):
+
+```php
+// In a controller or HTTP middleware where Request is available
+private function getOrGenerateCorrelationId(Request $request): string
+{
+    return $request->headers->get('X-Correlation-ID')
+        ?? Uuid::v4()->toString();
 }
 ```
 
@@ -346,7 +353,7 @@ final class RequestCorrelationIdMiddleware
 }
 ```
 
-**See**: [correlation-id-patterns.md](reference/correlation-id-patterns.md)
+**Note**: The middleware example above shows advanced usage. For most command handlers, simply generating a new UUID at the start of execution is sufficient.
 
 ---
 
@@ -428,7 +435,7 @@ email.sent.total
 - ✅ Log external HTTP calls
 - ✅ Track operation-specific metrics
 
-**See**: [architecture-integration.md](reference/architecture-integration.md)
+**See complete examples** in [instrumented-command-handler.md](examples/instrumented-command-handler.md) and [structured-logging.md](reference/structured-logging.md)
 
 ---
 
@@ -537,31 +544,23 @@ After instrumenting code, verify:
 
 ### Quick References
 
-- **[Quick Start Guide](reference/quick-start.md)** - Fast-track instrumentation workflow
-- **[Cheat Sheet](reference/cheat-sheet.md)** - Common patterns at a glance
-
-### Detailed Guides
-
-- **[Structured Logging](reference/structured-logging.md)** - Complete logging patterns
-- **[Metrics Patterns](reference/metrics-patterns.md)** - Metric types and naming
-- **[Tracing Patterns](reference/tracing-patterns.md)** - DB/HTTP tracing strategies
-- **[Correlation ID Management](reference/correlation-id-patterns.md)** - ID generation and propagation
-- **[Architecture Integration](reference/architecture-integration.md)** - Layer-specific guidance
-- **[PR Evidence Guide](reference/pr-evidence-guide.md)** - Evidence collection and templates
+- **[Quick Start Guide](reference/quick-start.md)** - Fast-track instrumentation workflow (10 minutes)
+- **[Structured Logging](reference/structured-logging.md)** - Complete logging patterns with examples
+- **[Metrics Patterns](reference/metrics-patterns.md)** - Metric types, naming conventions, and collection
+- **[PR Evidence Guide](reference/pr-evidence-guide.md)** - Evidence collection templates for PRs
 
 ### Complete Examples
 
-- **[Instrumented Command Handler](examples/instrumented-command-handler.md)** - Full command handler with all three pillars
-- **[Repository with Tracing](examples/repository-tracing.md)** - Database operation instrumentation
-- **[HTTP Client with Tracing](examples/http-client-tracing.md)** - External API call instrumentation
-- **[API Endpoint Instrumentation](examples/api-endpoint-instrumentation.md)** - REST/GraphQL observability
+- **[Instrumented Command Handler](examples/instrumented-command-handler.md)** - Full working example with logs, metrics, and traces
 
-### Integration
+### Integration with Other Skills
 
-- **CI Workflow** skill: Run comprehensive checks before committing
+- **CI Workflow** skill: Run `make ci` to validate instrumented code before committing
 - **Testing Workflow** skill: Test observability in unit/integration tests
 - **Code Review** skill: Review observability evidence in PRs
-- **Documentation Sync** skill: Document observability patterns
+- **Implementing DDD Architecture** skill: Layer-specific instrumentation guidance
+- **API Platform CRUD** skill: Add observability to API endpoints
+- **Database Migrations** skill: Instrument repository operations
 
 ---
 

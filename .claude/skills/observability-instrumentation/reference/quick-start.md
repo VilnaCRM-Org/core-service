@@ -326,10 +326,10 @@ Once you have basic observability:
 
 ## Full Guides
 
-- [Structured Logging](structured-logging.md) - Complete logging patterns
-- [Metrics Patterns](metrics-patterns.md) - Comprehensive metrics guide
-- [Tracing Patterns](tracing-patterns.md) - DB/HTTP tracing strategies
-- [Complete Example](../examples/instrumented-command-handler.md) - Full working example
+- [Structured Logging](structured-logging.md) - Complete logging patterns with PSR-3
+- [Metrics Patterns](metrics-patterns.md) - Comprehensive metrics collection guide
+- [PR Evidence Guide](pr-evidence-guide.md) - How to collect and present evidence
+- [Complete Example](../examples/instrumented-command-handler.md) - Full working example with all three pillars
 
 ---
 
