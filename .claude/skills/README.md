@@ -428,6 +428,53 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
+### 14. Query Performance Analysis (`query-performance-analysis/`)
+
+**Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
+
+**When activated**:
+
+- New or modified endpoints are slow
+- Profiler shows many database queries for single operation
+- Need to detect N+1 query problems
+- Query execution time is high
+- Missing index warnings in MongoDB logs
+- Performance regression after code changes
+- Planning safe index migrations for production
+
+**What it does**:
+
+- Detects N+1 query patterns using MongoDB profiler
+- Analyzes slow queries with EXPLAIN execution plans
+- Identifies missing or inefficient indexes
+- Provides safe online index migration strategies
+- Verifies index effectiveness with before/after comparisons
+- Creates performance regression tests
+
+**Key features**:
+
+- N+1 query detection and fixing
+- EXPLAIN analysis for slow queries
+- Index strategy selection (single field, compound, covered queries)
+- Safe background index builds for production
+- Performance threshold enforcement (<100ms reads, <500ms writes)
+- Integration with load-testing for regression prevention
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and performance checklist)
+- `examples/n-plus-one-detection.md` (N+1 detection and fixing example)
+- `examples/slow-query-analysis.md` (EXPLAIN analysis walkthrough)
+- `reference/mongodb-profiler-guide.md` (Profiler setup and usage)
+- `reference/index-strategies.md` (When to use which index type)
+- `reference/performance-thresholds.md` (Acceptable performance limits)
+
+**Integration**: Works alongside database-migrations (index syntax), load-testing (regression tests), and observability-instrumentation (performance metrics)
+
+**Complements**: Use with database-migrations for index creation XML syntax
+
+---
+
 ## How Skills Work
 
 ### Cross-Platform Compatibility
