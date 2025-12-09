@@ -6,7 +6,7 @@ Real-world examples of code organization issues found in code reviews and how to
 
 ### Review Comment
 
-```
+```text
 UlidValidator should be in Validator/ directory, not Transformer/.
 Transformers are for data transformation (DB <-> PHP), not validation.
 ```
@@ -70,7 +70,7 @@ make unit-tests
 
 ### Review Comment
 
-```
+```text
 Variable name `$converter` is too vague. What kind of converter?
 Use specific names: `$typeConverter` for type conversion.
 ```
@@ -123,7 +123,7 @@ make unit-tests
 
 ### Review Comment
 
-```
+```text
 CustomerUpdateScalarResolver resolves values, not creates them.
 Should be in Resolver/, not Factory/.
 ```
@@ -181,7 +181,7 @@ make unit-tests
 
 ### Review Comment
 
-```
+```text
 Parameter named `$binary` but accepts `mixed` type.
 Use accurate name like `$value` to match actual type.
 ```
@@ -216,7 +216,7 @@ public function fromBinary(mixed $value): Ulid  // ✅ Accurate
 
 ### Review Comment
 
-```
+```text
 `CustomerHelper` is a code smell. Extract specific responsibilities:
 - Email validation → CustomerEmailValidator
 - Name formatting → CustomerNameFormatter
@@ -269,7 +269,7 @@ final readonly class CustomerArrayConverter
 
 ### Review Comment
 
-```
+```text
 Namespace doesn't match directory structure.
 File is in Validator/ but namespace says Transformer/.
 ```
@@ -320,7 +320,7 @@ make ci  # Must show "✅ CI checks successfully passed!"
 
 ## Decision Tree: Where Does It Belong?
 
-```
+```text
 What does the class DO?
 
 ├─ Converts between types (string ↔ object)? → Converter/
