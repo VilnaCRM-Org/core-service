@@ -8,7 +8,7 @@ This document provides comprehensive implementation details referenced from [SKI
 
 The OpenAPI layer follows a **Processor Pattern** with clear separation of concerns:
 
-```
+```text
 src/Shared/Application/OpenApi/
 ├── Builder/              # Schema and parameter builders
 ├── Factory/              # Endpoint, request, response, and URI parameter factories
