@@ -255,7 +255,7 @@ final class CustomerResource
      * Factory method to create DTO from domain entity
      * Works with primitives - no Value Object unwrapping needed
      */
-    public static function fromEntity(\App\Customer\Domain\Entity\Customer $customer): self
+    public static function fromEntity(\App\Core\Customer\Domain\Entity\Customer $customer): self
     {
         $dto = new self();
         $dto->id = $customer->getUlid();           // Returns string directly
