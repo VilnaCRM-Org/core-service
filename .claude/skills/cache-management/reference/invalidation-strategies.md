@@ -30,14 +30,14 @@ public function save(Customer $customer): void
 
 ## Invalidation Strategy Matrix
 
-| Strategy           | When to Use                         | Complexity | Consistency    |
-| ------------------ | ----------------------------------- | ---------- | -------------- |
-| **Write-through**  | Single entity CRUD operations       | Low        | Strong         |
-| **Tag-based**      | Batch invalidation, related data    | Low        | Strong         |
-| **Event-driven**   | Complex domain events, decoupling   | Medium     | Strong         |
-| **Time-based**     | Static data, aggregations           | Low        | Eventual       |
-| **Manual**         | One-off operations, bulk imports    | Low        | User-triggered |
-| **Lazy (TTL)**     | Acceptable staleness, low churn     | Very Low   | Eventual       |
+| Strategy          | When to Use                       | Complexity | Consistency    |
+| ----------------- | --------------------------------- | ---------- | -------------- |
+| **Write-through** | Single entity CRUD operations     | Low        | Strong         |
+| **Tag-based**     | Batch invalidation, related data  | Low        | Strong         |
+| **Event-driven**  | Complex domain events, decoupling | Medium     | Strong         |
+| **Time-based**    | Static data, aggregations         | Low        | Eventual       |
+| **Manual**        | One-off operations, bulk imports  | Low        | User-triggered |
+| **Lazy (TTL)**    | Acceptable staleness, low churn   | Very Low   | Eventual       |
 
 ---
 
@@ -46,6 +46,7 @@ public function save(Customer $customer): void
 **Pattern**: Invalidate immediately after write operation
 
 **Use when**:
+
 - Creating, updating, or deleting entities
 - Single entity operations
 - Strong consistency required
@@ -107,11 +108,13 @@ final class CustomerRepository
 ```
 
 **Advantages**:
+
 - Simple and predictable
 - Strong consistency guaranteed
 - Easy to test
 
 **Disadvantages**:
+
 - Must invalidate every cache key manually
 - Doesn't handle related entity caches
 
@@ -122,6 +125,7 @@ final class CustomerRepository
 **Pattern**: Use cache tags to invalidate multiple related cache entries at once
 
 **Use when**:
+
 - Invalidating multiple cache entries
 - Clearing all caches for an entity type
 - Invalidating related data
@@ -239,6 +243,7 @@ $this->cache->invalidateTags([
 **Pattern**: Invalidate cache in response to domain events
 
 **Use when**:
+
 - Decoupling cache invalidation from business logic
 - Complex domain events with multiple side effects
 - Invalidating across bounded contexts
@@ -354,12 +359,14 @@ final readonly class CustomerCacheInvalidationSubscriber
 ```
 
 **Advantages**:
+
 - Decouples cache invalidation from business logic
 - Easy to add new invalidation logic
 - Supports complex invalidation rules
 - Can invalidate across multiple repositories
 
 **Disadvantages**:
+
 - More complex than direct invalidation
 - Harder to trace invalidation flow
 - Event bus overhead
@@ -371,6 +378,7 @@ final readonly class CustomerCacheInvalidationSubscriber
 **Pattern**: Rely solely on TTL for cache expiration
 
 **Use when**:
+
 - Data changes infrequently
 - Staleness is acceptable
 - No write operations in your control
@@ -403,15 +411,18 @@ public function getDailyStatistics(string $date): array
 ```
 
 **Advantages**:
+
 - Simple implementation
 - No invalidation logic needed
 
 **Disadvantages**:
+
 - Stale data until TTL expires
 - Can't force refresh
 - Not suitable for frequently changing data
 
 **When acceptable**:
+
 - External data imports (invalidate manually when import completes)
 - Historical/archival data (never changes)
 - Aggregated statistics (recomputed on schedule)
@@ -423,6 +434,7 @@ public function getDailyStatistics(string $date): array
 **Pattern**: Provide manual cache clearing commands/endpoints
 
 **Use when**:
+
 - Bulk imports or migrations
 - Data structure changes
 - Emergency cache clearing
@@ -646,16 +658,16 @@ public function testRelatedCachesInvalidated(): void
 
 ## Recommended Strategy by Use Case
 
-| Use Case                        | Recommended Strategy          | Rationale                        |
-| ------------------------------- | ----------------------------- | -------------------------------- |
-| Single entity CRUD              | Write-through                 | Simple, predictable              |
-| Entity with related data        | Tag-based                     | Invalidate multiple caches       |
-| Complex domain events           | Event-driven                  | Decouple logic, flexibility      |
-| External data imports           | Manual + Time-based           | Control when refresh happens     |
-| Historical/archival data        | Time-based only               | Data never changes               |
-| High-frequency writes           | SWR (see swr-pattern.md)      | Reduce invalidation overhead     |
-| Multi-tenant isolation          | Tag-based (with tenant tags)  | Isolate cache by tenant          |
-| Cross-service invalidation      | Event-driven (message bus)    | Distributed invalidation         |
+| Use Case                   | Recommended Strategy         | Rationale                    |
+| -------------------------- | ---------------------------- | ---------------------------- |
+| Single entity CRUD         | Write-through                | Simple, predictable          |
+| Entity with related data   | Tag-based                    | Invalidate multiple caches   |
+| Complex domain events      | Event-driven                 | Decouple logic, flexibility  |
+| External data imports      | Manual + Time-based          | Control when refresh happens |
+| Historical/archival data   | Time-based only              | Data never changes           |
+| High-frequency writes      | SWR (see swr-pattern.md)     | Reduce invalidation overhead |
+| Multi-tenant isolation     | Tag-based (with tenant tags) | Isolate cache by tenant      |
+| Cross-service invalidation | Event-driven (message bus)   | Distributed invalidation     |
 
 ---
 
@@ -671,6 +683,7 @@ public function testRelatedCachesInvalidated(): void
 6. **Document invalidation strategy** in cache policy
 
 **Invalidation Checklist**:
+
 - ✅ Invalidate on create/update/delete
 - ✅ Use cache tags for batch operations
 - ✅ Invalidate related caches (lists, aggregations)

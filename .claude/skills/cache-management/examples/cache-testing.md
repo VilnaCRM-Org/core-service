@@ -670,6 +670,7 @@ This comprehensive test suite covers:
 ✅ **SWR behavior** - Performance characteristics
 
 **Testing Checklist**:
+
 - ✅ Test cache miss and cache hit scenarios
 - ✅ Test explicit invalidation on create/update/delete
 - ✅ Test related cache invalidation (lists, lookups)
@@ -680,6 +681,7 @@ This comprehensive test suite covers:
 - ✅ Measure and assert performance improvements
 
 **Best Practices**:
+
 - Use in-memory cache adapter for fast tests
 - Use shorter TTL in test environment
 - Test both cache hits and misses

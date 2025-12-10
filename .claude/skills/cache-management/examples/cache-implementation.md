@@ -590,6 +590,7 @@ This complete example demonstrates:
 ✅ **Production-ready** patterns
 
 **File locations** (following hexagonal architecture):
+
 - Repository: `src/Customer/Infrastructure/Persistence/CustomerRepository.php`
 - Command Handler: `src/Customer/Application/CommandHandler/UpdateCustomerCommandHandler.php`
 - Cache Warmer: `src/Customer/Infrastructure/Cache/CustomerCacheWarmer.php`

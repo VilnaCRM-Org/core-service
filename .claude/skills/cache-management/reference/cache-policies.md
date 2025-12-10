@@ -47,6 +47,7 @@ public function findById(string $id): ?Customer
 **Format**: `{namespace}.{entity}.{identifier}.{variation}`
 
 **Components**:
+
 - **Namespace**: Domain/module (e.g., `customer`, `order`, `product`)
 - **Entity**: Specific entity type (optional if namespace is entity)
 - **Identifier**: Unique ID, filter, or query parameter
@@ -77,6 +78,7 @@ public function findById(string $id): ?Customer
 ### Key Design Best Practices
 
 **✅ DO**:
+
 - Use lowercase with dots/underscores
 - Include namespace to avoid collisions
 - Keep keys short but descriptive
@@ -85,6 +87,7 @@ public function findById(string $id): ?Customer
 - Make keys predictable and debuggable
 
 **❌ DON'T**:
+
 - Use special characters (!, @, #, $, %, etc.)
 - Include sensitive data in keys
 - Create extremely long keys (>100 chars)
@@ -111,14 +114,17 @@ public function findById(string $id): ?Customer
 **Consider these factors when choosing TTL**:
 
 1. **Data change frequency**
+
    - Frequently updated → Shorter TTL
    - Rarely updated → Longer TTL
 
 2. **Business impact of stale data**
+
    - High impact (prices, inventory) → Shorter TTL or invalidation
    - Low impact (descriptions, images) → Longer TTL
 
 3. **Query cost**
+
    - Expensive queries → Longer TTL with invalidation
    - Cheap queries → Shorter TTL or no cache
 
@@ -155,6 +161,7 @@ $item->expiresAfter(43200); // 12 hours
 ### 1. Strong Consistency (No Cache)
 
 **When to use**:
+
 - Real-time data required
 - Security-sensitive operations
 - Financial transactions
@@ -174,6 +181,7 @@ public function getCurrentBalance(string $userId): Money
 ### 2. Eventual Consistency
 
 **When to use**:
+
 - Read-heavy operations
 - Tolerate brief staleness
 - Non-critical data
@@ -201,6 +209,7 @@ public function findById(string $id): ?Customer
 ### 3. Stale-While-Revalidate (SWR)
 
 **When to use**:
+
 - High traffic queries
 - Tolerate stale data briefly
 - Want fast responses + fresh data
@@ -405,22 +414,27 @@ private function calculateTtl(string $date): int
 Before implementing cache, answer these questions:
 
 1. **What is the query cost?**
+
    - High cost → Consider caching
    - Low cost → May not need cache
 
 2. **How frequently does data change?**
+
    - Rarely → Longer TTL
    - Frequently → Shorter TTL or no cache
 
 3. **What's the business impact of stale data?**
+
    - High impact → Strong consistency or short TTL
    - Low impact → Eventual consistency or SWR
 
 4. **What's the read:write ratio?**
+
    - High (>10:1) → Great candidate for caching
    - Low (<3:1) → Cache invalidation overhead may outweigh benefits
 
 5. **Can invalidation be triggered explicitly?**
+
    - Yes → Use invalidation + longer TTL
    - No → Use shorter TTL
 
@@ -508,6 +522,7 @@ public function warmCache(): void
 5. Document policy decisions for maintainability
 
 **Policy Declaration is MANDATORY** - Every cached query must have:
+
 - ✅ Explicit cache key pattern
 - ✅ Defined TTL with rationale
 - ✅ Declared consistency class

@@ -6,10 +6,10 @@ Complete guide for implementing stale-while-revalidate caching pattern for high-
 
 **CRITICAL**: SWR implementation depends on which cache interface you use:
 
-| Interface                     | Methods Available                                      | Use Case                                 |
-| ----------------------------- | ------------------------------------------------------ | ---------------------------------------- |
-| `TagAwareCacheInterface`      | `get()`, `invalidateTags()`, `beta` parameter          | **Recommended**: Simple SWR with tags    |
-| `TagAwareAdapterInterface`    | `getItem()`, `save()`, `isHit()`, custom metadata      | Advanced: Custom SWR logic               |
+| Interface                  | Methods Available                                 | Use Case                              |
+| -------------------------- | ------------------------------------------------- | ------------------------------------- |
+| `TagAwareCacheInterface`   | `get()`, `invalidateTags()`, `beta` parameter     | **Recommended**: Simple SWR with tags |
+| `TagAwareAdapterInterface` | `getItem()`, `save()`, `isHit()`, custom metadata | Advanced: Custom SWR logic            |
 
 **For most cases, use `TagAwareCacheInterface` with the `beta` parameter.** See examples below.
 
@@ -22,12 +22,14 @@ Complete guide for implementing stale-while-revalidate caching pattern for high-
 3. Returns **fresh data on subsequent requests**
 
 **Benefits**:
+
 - Fast response times (always serves from cache if available)
 - Fresh data (background refresh keeps cache up-to-date)
 - Reduced database load (background refresh, not on every request)
 - Better user experience (no waiting for refresh)
 
 **Trade-off**:
+
 - Users may see stale data briefly between TTL expiration and background refresh
 
 ---
@@ -35,12 +37,14 @@ Complete guide for implementing stale-while-revalidate caching pattern for high-
 ## When to Use SWR
 
 **Ideal for**:
+
 - High-traffic, read-heavy endpoints (100+ req/sec)
 - Data that tolerates brief staleness (user profiles, product catalogs)
 - Expensive queries that benefit from caching
 - Scenarios where consistency isn't critical
 
 **NOT recommended for**:
+
 - Financial transactions or inventory
 - Real-time data requirements
 - Security-sensitive operations
@@ -138,12 +142,14 @@ final readonly class CustomerRepository
 ```
 
 **Pros**:
+
 - Simple, uses standard `TagAwareCacheInterface`
 - Built-in Symfony support for probabilistic refresh
 - Works with cache tags for invalidation
 - No need for PSR-6 adapter injection
 
 **Cons**:
+
 - Less control over SWR timing
 - No custom metadata tracking
 - Refresh happens inline (not truly async)
@@ -271,12 +277,14 @@ final readonly class CustomerRepository
 ```
 
 **Pros**:
+
 - Fine-grained control over SWR timing
 - Custom metadata for staleness detection
 - True background refresh via message bus
 - Explicit control over refresh triggers
 
 **Cons**:
+
 - More complex implementation
 - Requires PSR-6 adapter injection
 - More code to maintain
@@ -311,17 +319,17 @@ final readonly class RefreshCustomerCacheHandler
 
         // Update cache using standard get() with callback
         $cacheKey = "customer.{$message->customerId}";
-        
+
         $this->cache->get(
             $cacheKey,
             function (ItemInterface $item) use ($customer, $message) {
                 $item->expiresAfter(300);
                 $item->tag(['customer', "customer.{$message->customerId}"]);
-                
+
                 $this->logger->info('Customer cache refreshed successfully', [
                     'customer_id' => $message->customerId,
                 ]);
-                
+
                 return $customer;
             }
         );
@@ -532,6 +540,7 @@ public function testLoadFromDatabaseAfterSwrWindowExpires(): void
 ### Response Time Distribution
 
 **Standard Caching**:
+
 ```
 |------------- TTL (5 min) -------------|
 ↓                                        ↓
@@ -541,6 +550,7 @@ Cache hit                                Cache miss
 ```
 
 **SWR Caching**:
+
 ```
 |-- TTL (5 min) --|-- SWR (1 min) --|
 ↓                 ↓                 ↓
@@ -615,6 +625,7 @@ public function save(Customer $customer): void
 ```
 
 **Result**:
+
 - **Reads**: Fast (SWR), with background refresh
 - **Writes**: Immediate cache invalidation (strong consistency)
 
@@ -623,6 +634,7 @@ public function save(Customer $customer): void
 ## Summary
 
 **SWR Pattern Checklist**:
+
 - ✅ Declare SWR in cache policy
 - ✅ Set appropriate TTL and SWR window
 - ✅ Implement background refresh mechanism
@@ -633,12 +645,14 @@ public function save(Customer $customer): void
 - ✅ Combine with explicit invalidation for writes
 
 **When to Use SWR**:
+
 - High traffic (>100 req/sec)
 - Tolerate brief staleness
 - Expensive queries
 - Read-heavy operations
 
 **When NOT to Use SWR**:
+
 - Financial/critical data
 - Real-time requirements
 - Low traffic

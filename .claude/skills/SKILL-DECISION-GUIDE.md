@@ -235,6 +235,7 @@ This skill provides explicit invalidation strategies (write-through, tag-based, 
 **Use**: [cache-management](cache-management/SKILL.md)
 
 This skill provides complete test patterns for:
+
 - Stale reads after writes
 - Cache warmup on cold start
 - TTL expiration behavior

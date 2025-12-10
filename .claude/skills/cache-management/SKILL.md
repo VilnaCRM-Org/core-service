@@ -189,6 +189,7 @@ make ci
 **What**: Declare cache configuration before implementation
 
 **Key Elements**:
+
 - Cache key pattern (namespace + identifier)
 - TTL (based on data freshness requirements)
 - Consistency class (Strong, Eventual, SWR)
@@ -196,12 +197,12 @@ make ci
 
 **Example Policy Decision Matrix**:
 
-| Data Type       | TTL      | Consistency | Invalidation         |
-| --------------- | -------- | ----------- | -------------------- |
-| User profile    | 5-10 min | SWR         | On update/delete     |
-| Product catalog | 1 hour   | SWR         | On product change    |
-| Configuration   | 1 day    | Strong      | Manual/deployment    |
-| Search results  | 1 min    | Eventual    | Time-based only      |
+| Data Type       | TTL      | Consistency | Invalidation      |
+| --------------- | -------- | ----------- | ----------------- |
+| User profile    | 5-10 min | SWR         | On update/delete  |
+| Product catalog | 1 hour   | SWR         | On product change |
+| Configuration   | 1 day    | Strong      | Manual/deployment |
+| Search results  | 1 min    | Eventual    | Time-based only   |
 
 **See**: [reference/cache-policies.md](reference/cache-policies.md) for complete guide
 
@@ -210,6 +211,7 @@ make ci
 **What**: Explicit cache clearing on write operations
 
 **Strategies**:
+
 - **Write-through**: Invalidate immediately after writes
 - **Tag-based**: Batch invalidation using cache tags
 - **Event-driven**: Invalidate via domain events
@@ -234,6 +236,7 @@ $this->repository->save($customer);
 **What**: Comprehensive test coverage for all cache behaviors
 
 **Required Tests**:
+
 - ✅ Stale reads after writes
 - ✅ Cache warmup on cold start
 - ✅ TTL expiration behavior
@@ -269,6 +272,7 @@ public function __construct(
 ```
 
 **CRITICAL**: You **MUST** use `TagAwareCacheInterface` (not `CacheInterface`) when using:
+
 - `$item->tag([...])` - Tagging cache items
 - `$cache->invalidateTags([...])` - Batch invalidation by tags
 
@@ -312,6 +316,7 @@ make ci
 **When to use**: High-traffic queries that tolerate brief staleness
 
 **How it works**:
+
 1. Serve cached data immediately (even if stale)
 2. Refresh cache in background
 3. Return fresh data on next request
@@ -336,14 +341,17 @@ public function findById(string $id): ?Customer
 ## Integration with Hexagonal Architecture
 
 ### Domain Layer
+
 - **NO caching** - Pure business logic
 - Domain entities are cache-agnostic
 
 ### Application Layer (Command Handlers)
+
 - **Invalidate cache** after successful commands
 - Use domain events to trigger invalidation
 
 ### Infrastructure Layer (Repositories)
+
 - **Implement caching** in repository methods
 - Read-through cache pattern
 - Explicit invalidation on writes
@@ -398,6 +406,7 @@ $this->logger->info('Cache miss - loading from database', [
 ```
 
 **Track metrics**:
+
 - Cache hit rate: `cache.hit.total / (cache.hit.total + cache.miss.total)`
 - Cache miss rate: `cache.miss.total / total_requests`
 - Cache operation latency: `cache.operation.duration_ms`
@@ -436,41 +445,47 @@ $this->logger->info('Cache miss - loading from database', [
 ## Integration with Other Skills
 
 **Identify queries to cache**:
+
 - [query-performance-analysis](../query-performance-analysis/SKILL.md) - Find slow queries
 
 **Add observability**:
+
 - [observability-instrumentation](../observability-instrumentation/SKILL.md) - Cache metrics and logs
 
 **Test cache behavior**:
+
 - [testing-workflow](../testing-workflow/SKILL.md) - Test framework guidance
 
 **Architecture placement**:
+
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Layer separation
 
 ---
 
 ## Quick Reference
 
-| Pattern                  | Code Example                                              |
-| ------------------------ | --------------------------------------------------------- |
-| **Read-through cache**   | `$cache->get($key, fn($item) => $loadFromDb())`          |
-| **Set TTL**              | `$item->expiresAfter(300)` (seconds)                      |
-| **Set cache tag**        | `$item->tag(['entity', 'entity.id'])`                     |
-| **Invalidate by tag**    | `$cache->invalidateTags(['entity.id'])`                   |
-| **Clear all cache**      | `$cache->clear()`                                         |
-| **Build cache key**      | `"{prefix}.{id}"` (namespace + identifier)                |
-| **Enable SWR**           | `$cache->get($key, $callback, beta: 1.0)`                 |
+| Pattern                | Code Example                                    |
+| ---------------------- | ----------------------------------------------- |
+| **Read-through cache** | `$cache->get($key, fn($item) => $loadFromDb())` |
+| **Set TTL**            | `$item->expiresAfter(300)` (seconds)            |
+| **Set cache tag**      | `$item->tag(['entity', 'entity.id'])`           |
+| **Invalidate by tag**  | `$cache->invalidateTags(['entity.id'])`         |
+| **Clear all cache**    | `$cache->clear()`                               |
+| **Build cache key**    | `"{prefix}.{id}"` (namespace + identifier)      |
+| **Enable SWR**         | `$cache->get($key, $callback, beta: 1.0)`       |
 
 ---
 
 ## Additional Resources
 
 ### Reference Documentation
+
 - **[Cache Policies](reference/cache-policies.md)** - TTL selection, consistency classes, policy matrix
 - **[Invalidation Strategies](reference/invalidation-strategies.md)** - Write-through, tag-based, event-driven patterns
 - **[SWR Pattern](reference/swr-pattern.md)** - Complete stale-while-revalidate implementation
 
 ### Complete Examples
+
 - **[Cache Implementation](examples/cache-implementation.md)** - Full repository with caching, invalidation, observability
 - **[Cache Testing](examples/cache-testing.md)** - Complete test suite for all cache behaviors
 
