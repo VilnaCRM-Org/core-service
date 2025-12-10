@@ -4,7 +4,7 @@ This document provides a comprehensive reference for the project's directory str
 
 ## Infrastructure Layer
 
-```
+```text
 src/Shared/Infrastructure/
 ├── Converter/       → Type conversion (Type A → Type B)
 │   └── UlidTypeConverter.php
@@ -72,7 +72,7 @@ src/Shared/Infrastructure/
 
 ## Application Layer
 
-```
+```text
 src/Shared/Application/OpenApi/
 ├── Builder/         → Building/constructing components
 │   └── ArrayResponseBuilder.php
@@ -207,7 +207,7 @@ src/Shared/Application/OpenApi/
 
 ## Domain Layer
 
-```
+```text
 src/Core/Customer/Domain/
 ├── Entity/          → Domain entities
 │   ├── Customer.php
@@ -310,7 +310,7 @@ src/Core/Customer/Domain/
 
 ## Application Command Layer
 
-```
+```text
 src/Core/Customer/Application/
 ├── Command/             → Command objects
 │   ├── CreateCustomerCommand.php
@@ -395,27 +395,27 @@ src/Core/Customer/Application/
 
 ### Examples
 
-**"I need to create a class that validates email format"**
+#### I need to create a class that validates email format
 
 - DOES: Validates → `Validator/`
 - LAYER: Can be shared → `Shared/Infrastructure/`
 - RESULT: `src/Shared/Infrastructure/Validator/EmailValidator.php`
 
-**"I need to create a class that builds OpenAPI schemas"**
+#### I need to create a class that builds OpenAPI schemas
 
 - DOES: Builds → `Builder/`
 - LAYER: Application (OpenAPI is app-level) → `Application/`
 - CONTEXT: OpenAPI is shared → `Shared/Application/OpenApi/`
 - RESULT: `src/Shared/Application/OpenApi/Builder/SchemaBuilder.php`
 
-**"I need to create a class that resolves scalar values for customer updates"**
+#### I need to create a class that resolves scalar values for customer updates
 
 - DOES: Resolves → `Resolver/`
 - LAYER: Application logic → `Application/`
 - CONTEXT: Customer-specific → `Core/Customer/`
 - RESULT: `src/Core/Customer/Application/Resolver/CustomerUpdateScalarResolver.php`
 
-**"I need to create a customer entity"**
+#### I need to create a customer entity
 
 - DOES: Domain entity → `Entity/`
 - LAYER: Domain → `Domain/`

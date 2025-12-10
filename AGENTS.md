@@ -1,10 +1,116 @@
-# Repository Guidelines
+# Repository Guidelines for AI Agents
 
 VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
 
-## Critical: Always use make commands or docker exec into the PHP container
+## 🚨 CRITICAL FOR ALL AI AGENTS - READ THIS FIRST! 🚨
 
-Never run PHP commands directly outside the container.
+**BEFORE attempting to fix ANY issue in this repository, you MUST follow this workflow:**
+
+### Mandatory Workflow for AI Agents
+
+1. **READ** → `.claude/skills/AI-AGENT-GUIDE.md` (comprehensive guide for all AI agents)
+2. **IDENTIFY** → Use `.claude/skills/SKILL-DECISION-GUIDE.md` to find the correct skill for your task
+3. **EXECUTE** → Read the specific skill file (e.g., `.claude/skills/deptrac-fixer/SKILL.md`)
+4. **FOLLOW** → Execute the step-by-step instructions in the skill file exactly as written
+
+### ❌ DO NOT
+
+- Fix issues directly from AGENTS.md without reading the skills
+- Skip the skill decision guide
+- Guess the fix based on general DDD knowledge
+- Use only partial information from this file
+
+### ✅ DO
+
+- Always start with `.claude/skills/AI-AGENT-GUIDE.md`
+- Use the decision tree in `SKILL-DECISION-GUIDE.md`
+- Read the complete skill file for your specific task
+- Check supporting files (`reference/`, `examples/`) as referenced in the skill
+
+### Why This Matters
+
+- The skills contain the **ACTUAL architecture patterns** used in this codebase
+- AGENTS.md is a **reference**, not a complete fix guide
+- Skills are **regularly updated** with correct patterns
+- Following skills ensures **consistency** with the codebase
+
+## Quick Reference
+
+### Essential Execution Rules
+
+1. **MANDATORY: Use Make Commands or Docker Container Access Only**
+
+   - `make command-name` (preferred)
+   - `docker compose exec php command` (direct container access)
+   - `make sh` then run commands inside
+   - **NEVER** run PHP commands directly on the host system
+
+2. **CRITICAL: Run CI Before Finishing Tasks**
+   - Execute `make ci` before completing any task
+   - Must see "✅ CI checks successfully passed!" in output
+   - Fix all issues if "❌ CI checks failed:" appears
+   - **DO NOT** finish tasks until CI passes completely
+
+### Quick Skill Guide
+
+| Task Type                  | Skill                           | When to Use                                |
+| -------------------------- | ------------------------------- | ------------------------------------------ |
+| **Fix Deptrac violations** | `deptrac-fixer`                 | Architecture boundary violations detected  |
+| **Fix complexity issues**  | `complexity-management`         | PHPInsights complexity score drops         |
+| **Run CI checks**          | `ci-workflow`                   | Before committing, validating changes      |
+| **Debug test failures**    | `testing-workflow`              | PHPUnit, Behat, or Infection issues        |
+| **Handle PR feedback**     | `code-review`                   | Processing code review comments            |
+| **Create DDD patterns**    | `implementing-ddd-architecture` | New entities, value objects, aggregates    |
+| **Add CRUD endpoints**     | `api-platform-crud`             | New API resources with full CRUD           |
+| **Create load tests**      | `load-testing`                  | K6 performance tests (REST/GraphQL)        |
+| **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields          |
+| **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                 |
+| **Develop OpenAPI layer**  | `openapi-development`           | OpenAPI processors, complexity patterns    |
+| **Organize code**          | `code-organization`             | Proper class placement, naming consistency |
+| **Sync documentation**     | `documentation-sync`            | After any code changes                     |
+| **Quality overview**       | `quality-standards`             | Understanding protected thresholds         |
+
+> **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
+
+### Protected Quality Thresholds
+
+This project enforces **strict quality thresholds** that MUST NOT be lowered:
+
+| Tool              | Metric       | Required           | Skill for Issues        |
+| ----------------- | ------------ | ------------------ | ----------------------- |
+| **PHPInsights**   | Complexity   | 93% src, 95% tests | `complexity-management` |
+| **PHPInsights**   | Quality      | 100%               | `complexity-management` |
+| **PHPInsights**   | Architecture | 100%               | `deptrac-fixer`         |
+| **PHPInsights**   | Style        | 100%               | Run `make phpcsfixer`   |
+| **Deptrac**       | Violations   | 0                  | `deptrac-fixer`         |
+| **Psalm**         | Errors       | 0                  | Fix reported issues     |
+| **Test Coverage** | Lines        | 100%               | `testing-workflow`      |
+| **Infection MSI** | Score        | 100%               | `testing-workflow`      |
+
+> **⚠️ NEVER lower thresholds**. Always fix code to meet standards. See `quality-standards` skill for details.
+
+### Essential Commands
+
+| Category         | Command                      | Description             | Related Skill              |
+| ---------------- | ---------------------------- | ----------------------- | -------------------------- |
+| **Docker**       | `make start`                 | Start containers        | -                          |
+|                  | `make sh`                    | Access PHP container    | -                          |
+|                  | `make build`                 | Build containers        | -                          |
+| **Quality**      | `make phpcsfixer`            | Fix code style          | -                          |
+|                  | `make psalm`                 | Static analysis         | -                          |
+|                  | `make phpinsights`           | Quality checks          | `complexity-management`    |
+|                  | `make deptrac`               | Architecture validation | `deptrac-fixer`            |
+| **Testing**      | `make unit-tests`            | Unit tests only         | `testing-workflow`         |
+|                  | `make integration-tests`     | Integration tests       | `testing-workflow`         |
+|                  | `make e2e-tests`             | Behat E2E tests         | `testing-workflow`         |
+|                  | `make all-tests`             | All functional tests    | `testing-workflow`         |
+|                  | `make infection`             | Mutation testing        | `testing-workflow`         |
+| **Load Testing** | `make smoke-load-tests`      | Minimal load test       | `load-testing`             |
+|                  | `make load-tests`            | All load tests          | `load-testing`             |
+| **CI**           | `make ci`                    | Run all CI checks       | `ci-workflow`              |
+| **Database**     | `make setup-test-db`         | Reset test MongoDB      | `database-migrations`      |
+| **API Docs**     | `make generate-openapi-spec` | Export OpenAPI          | `developing-openapi-specs` |
+| **Code Review**  | `make pr-comments`           | Fetch PR comments       | `code-review`              |
 
 ## What Is Core Service?
 
@@ -26,16 +132,6 @@ The VilnaCRM Core Service is designed to provide core business functionality wit
 - **Modern PHP Stack**: Leverages latest PHP features and best practices
 
 ## Command Reference
-
-### MANDATORY: Use Make Commands or Container Access Only
-
-#### Approved execution methods
-
-1. **Make commands** (preferred): `make command-name`
-2. **Direct container access**: `docker compose exec php command`
-3. **Container shell**: `make sh` then run commands inside
-
-Never run PHP commands directly on the host system.
 
 ### Quick Start
 
@@ -185,7 +281,13 @@ Skills are **model-invoked** - Claude automatically activates them based on cont
 
 See [.claude/skills/README.md](.claude/skills/README.md) for complete skill documentation and usage patterns.
 
-## Architecture Deep Dive
+## Architecture Overview
+
+This project follows **Hexagonal Architecture** with **DDD** and **CQRS** patterns. Architecture boundaries are enforced via Deptrac.
+
+**CRITICAL RULE**: Domain layer must have NO framework dependencies.
+
+> **For complete architectural patterns, layer rules, and directory structure, see `.claude/skills/implementing-ddd-architecture/SKILL.md`**
 
 ### Bounded Contexts (DDD)
 
@@ -336,1016 +438,47 @@ Provides internal services like health checks and monitoring.
 
 ### Development Workflow
 
-- Check make targets: `make` or `make help`
-- View logs: `make logs` or `make new-logs`
-- Access container shell: `make sh`
-- Stop services: `make stop`
-- Restart services: `make down && make start`
+1. **Start Environment** → `make build` (first time), `make start`, `make install`
+2. **Make Changes** → Follow architecture patterns from skills, respect layer boundaries
+3. **Quality Checks** → Run relevant quality commands (see Essential Commands table)
+4. **Complete Task** → Run `make ci` (MUST see "✅ CI checks successfully passed!")
 
-### Database Operations
+### Fixing Issues Workflow
 
-- Setup test database: `make setup-test-db`
-- Reset database: `make reset-db`
-- Load fixtures: `make load-fixtures`
+1. **Identify Issue Type** → Use `.claude/skills/SKILL-DECISION-GUIDE.md`
+2. **Read Appropriate Skill** → Follow instructions exactly
+3. **Apply Fix** → Use patterns from skill examples
+4. **Verify** → Run relevant quality checks
+5. **Complete** → Run `make ci` before finishing
 
-### Build and Deployment
+### Code Review Workflow
 
-- Clear cache: `make cache-clear`
-- Warmup cache: `make cache-warmup`
-- Generate API specs: `make generate-openapi-spec` and `make generate-graphql-spec`
+1. **Fetch Comments** → `make pr-comments`
+2. **Address Systematically** → See `.claude/skills/code-review/SKILL.md`
+3. **Verify Changes** → Run quality checks after each fix
+4. **Complete** → Run `make ci` before pushing
 
-### CI/CD Integration
+## Key Principles
 
-The repository includes GitHub Actions workflows for:
+1. **Skills First**: Always consult skills before making changes
+2. **Quality Standards**: Never lower thresholds, always improve code
+3. **Architecture Boundaries**: Respect Deptrac rules, NO frameworks in Domain
+4. **Make Commands**: NEVER run PHP commands outside container
+5. **CI Validation**: MUST pass `make ci` before completing tasks
+6. **Documentation Sync**: Update docs when changing code (see `documentation-sync` skill)
 
-- Automated testing (PHPUnit, Behat, load tests)
-- Code quality checks (Psalm, PHPInsights, PHP CS Fixer, PHPMD)
-- Security scanning and dependency analysis
-- API specification validation and diff checking
-- Automated releases and template synchronization
+## Getting Help
 
-## Key Projects and Structure
+- **General guidance**: `.claude/skills/AI-AGENT-GUIDE.md`
+- **Skill selection**: `.claude/skills/SKILL-DECISION-GUIDE.md`
+- **Specific workflows**: `.claude/skills/{skill-name}/SKILL.md`
+- **Examples**: `.claude/skills/{skill-name}/examples/`
+- **Troubleshooting**: `.claude/skills/{skill-name}/reference/`
 
-### Source Code Organization
+## Technology Stack
 
-```text
-src/
-├── Core/              # Core domain logic
-│   └── Customer/      # Customer bounded context
-│       ├── Application/   # Application services, commands
-│       ├── Domain/        # Domain entities, value objects, repositories
-│       └── Infrastructure/ # Database, external services integration
-├── Internal/          # Internal services (health checks, monitoring)
-└── Shared/            # Shared components and utilities
-    ├── Application/   # Application layer cross-cutting concerns
-    ├── Domain/        # Domain layer abstractions and interfaces
-    └── Infrastructure/ # Infrastructure layer implementations
-```
+PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation for complete technical details.
 
-### Important Files
+---
 
-- `Makefile` -- All development commands and shortcuts
-- `docker-compose.yml` -- Production container configuration
-- `docker-compose.override.yml` -- Development environment overrides
-- `composer.json` -- PHP dependencies and project metadata
-- `config/bundles.php` -- Symfony bundle configuration
-- `phpunit.xml.dist` -- Test configuration
-- `behat.yml.dist` -- E2E test configuration
-
-### Configuration Files to Check When Making Changes
-
-- Always check `config/api_platform/` after modifying API resources
-- Always check `config/doctrine/` after modifying entities (XML mappings)
-- Always check `config/routes/` after adding new endpoints
-- Review `src/Core/Customer/Application/` when modifying business logic
-
-### API Platform, Swagger, and OpenAPI Integration
-
-### API Platform Configuration
-
-This service uses **API Platform 4** for REST API and GraphQL functionality. API Platform automatically generates OpenAPI documentation and provides Swagger UI.
-
-#### Key Configuration Files
-
-- `config/api_platform/resources.yaml` - Main API resource definitions
-- Individual entity annotations (Customer, etc.)
-- DTO classes for input/output
-
-### Swagger/OpenAPI Documentation Best Practices
-
-### Use API Platform Built-in Functionality, NOT OpenAPI Library Directly
-
-- **DO NOT** use `OpenApi\Annotations` (OA\*) annotations in DTOs
-- **DO** rely on API Platform's automatic schema generation
-- **DO** use Symfony Serializer Groups for input/output control
-- **DO** define proper denormalizationContext in API Platform configuration
-
-#### Correct DTO Structure:
-
-```php
-<?php
-
-namespace App\Core\Customer\Application\DTO;
-
-use Symfony\Component\Serializer\Annotation\Groups;
-
-final readonly class ExampleDto
-{
-    public function __construct(
-        #[Groups(['example:write'])]
-        public ?string $field = null
-    ) {
-    }
-}
-```
-
-#### Correct API Platform Configuration:
-
-```yaml
-App\Core\Customer\Domain\Entity\Customer:
-  operations:
-    example_operation:
-      class: 'ApiPlatform\Metadata\Post'
-      uriTemplate: '/customers/{id}/example'
-      input: 'App\Core\Customer\Application\DTO\ExampleDto'
-      processor: 'App\Core\Customer\Application\Processor\ExampleProcessor'
-      denormalizationContext:
-        groups: ['example:write']
-```
-
-### How API Platform Generates Swagger Documentation
-
-1. **Automatic Schema Generation**: API Platform scans DTOs and generates OpenAPI schemas
-2. **Serializer Groups**: Groups defined in denormalizationContext control which fields appear in request body
-3. **Type Inference**: PHP types and nullable properties automatically generate correct schemas
-4. **No Manual Annotations Needed**: Avoid OA\* annotations as they conflict with automatic generation
-
-### Swagger UI Access
-
-- **REST API Docs**: [API Docs](https://localhost/api/docs)
-- **GraphQL Playground**: [GraphQL Playground](https://localhost/api/graphql)
-- **OpenAPI Spec**: Generated via `make generate-openapi-spec`
-- **GraphQL Spec**: Generated via `make generate-graphql-spec`
-
-### Troubleshooting Swagger Issues
-
-#### Problem: Request body schema is empty in Swagger
-
-##### Solution
-
-1. Remove all `OpenApi\Annotations` (OA\*) from DTOs
-2. Ensure Serializer Groups are properly defined
-3. Verify denormalizationContext groups match DTO Groups annotations
-4. Check that input DTO is correctly specified in API Platform configuration
-
-#### Problem: Parameters not showing in Swagger
-
-##### Solution
-
-1. Verify uriTemplate parameters match processor expectations
-2. Check that path parameters are properly handled in processors
-3. Ensure proper API Platform operation configuration
-
-## Timing Expectations and Timeouts
-
-#### Critical timeout values
-
-- Docker build: 30+ minutes (NEVER CANCEL)
-- Complete test suite: 20+ minutes (NEVER CANCEL)
-- Load tests: 30+ minutes (NEVER CANCEL)
-- Dependency installation: 5+ minutes (NEVER CANCEL)
-- Application startup: 10+ minutes (NEVER CANCEL)
-
-#### Common command timings
-
-- `make build`: 15-30 minutes first time, 5-10 minutes subsequent
-- `make start`: 5-10 minutes
-- `make install`: 3-5 minutes
-- `make all-tests` 10-15 minutes
-- `make phpcsfixer`: 1-2 minutes
-- `make psalm`: 2-3 minutes
-
-## Troubleshooting
-
-### Common Issues
-
-- **Docker build fails**: Network restrictions may be blocking repository access. Check network connectivity and firewall settings.
-- **Database connection errors**: Ensure `make start` completed successfully and MongoDB container is healthy. Check `docker compose logs`.
-- **Memory issues during tests**: Use `php -d memory_limit=-1` for memory-intensive operations like infection testing (already configured in Makefile).
-- **Load test errors**: Ensure test database is properly set up and service is running.
-
-### Performance Optimization
-
-- Use `--no-dev` flag for production composer installs
-- Database indexing configured for MongoDB
-- Symfony cache warmup recommended: `make cache-warmup`
-
-## Environment Variables
-
-Key environment variables in `.env`:
-
-- `APP_ENV` - Application environment (dev, test, prod)
-- `DB_URL` - MongoDB connection string
-- `AWS_SQS_*` - AWS SQS configuration for message queues
-
-Key environment variables in `.env.test`:
-
-- Test-specific database configuration
-- Load test configuration
-
-## Architecture and Design Patterns
-
-This application implements:
-
-- **Hexagonal Architecture**: Clear separation of domain, application, and infrastructure
-- **DDD (Domain-Driven Design)**: Customer domain with entities, value objects, and repositories
-- **CQRS (Command Query Responsibility Segregation)**: Separate commands and queries
-- **Event-Driven Design**: Domain events for entity lifecycle events
-- **API-First Design**: REST and GraphQL APIs using API Platform
-
-When making changes, respect these architectural boundaries and patterns.
-
-## Software Engineering Best Practices
-
-### Code Quality and Complexity Management
-
-#### Mandatory: Always follow software engineering best practices to maintain code quality
-
-#### Cyclomatic Complexity Management
-
-- **Keep cyclomatic complexity below 5 per class/method** (enforced by PHPInsights)
-- **When complexity exceeds threshold, refactor by:**
-  - Creating new methods to extract complex logic
-  - Extracting strategy classes for complex validation or business rules
-  - Using composition instead of inheritance where appropriate
-  - Breaking down large methods into smaller, focused methods
-  - Using the Strategy Pattern for complex conditional logic
-
-#### Example: Refactoring High Complexity Validators
-
-```php
-// ❌ BAD: High cyclomatic complexity (8)
-public function validate($value, Constraint $constraint): void
-{
-    if ($value === null || ($constraint->isOptional() && $value === '')) {
-        return;
-    }
-    if (!(strlen($value) >= 8 && strlen($value) <= 64)) {
-        $this->addViolation('invalid.length');
-    }
-    // ... more complex conditions
-}
-
-// ✅ GOOD: Low complexity using strategy classes
-public function validate($value, Constraint $constraint): void
-{
-    if ($this->skipChecker->shouldSkip($value, $constraint)) {
-        return;
-    }
-    $this->performValidations($value);
-}
-```
-
-#### Other Best Practices
-
-- **Single Responsibility**: Each class/method should have one clear purpose
-- **DRY Principle**: Don't repeat yourself - extract common logic into reusable components
-- **SOLID Principles**: Follow dependency inversion, open/closed, and other SOLID principles
-- **Meaningful Names**: Use descriptive class, method, and variable names
-- **Small Methods**: Keep methods under 20 lines when possible
-- **Consistent Code Style**: Follow PSR-12 standards enforced by PHP CS Fixer
-
-### Quality Gates
-
-All code must pass these quality gates before commit:
-
-- **PHPInsights**: 100% code quality, 95%+ complexity score, 100% architecture score, 100% style score
-- **Psalm**: Static analysis with no errors
-- **PHP CS Fixer**: PSR-12 compliance
-- **Unit/Integration Tests**: 100% test coverage
-- **Mutation Testing**: 100% MSI (0 escaped mutants)
-
-### Achieving 100% Mutation Testing Coverage
-
-#### Understanding mutation testing
-
-Mutation testing validates test quality by making small changes (mutations) to source code and checking if tests catch these changes. Escaped mutants indicate gaps in test coverage.
-
-#### When unit tests can't catch escaped mutants
-
-If extending unit tests doesn't achieve 100% mutation score, consider refactoring the original classes to make them more testable:
-
-#### 1. **Constructor Default Parameters**
-
-```php
-// ❌ HARD TO TEST: Default values in constructor
-public function __construct(
-    private int $maxRequests = 3,
-    private int $timeWindow = 3600
-) {}
-
-// ✅ TESTABLE: Expose defaults or use factory methods
-public function __construct(
-    private int $maxRequests,
-    private int $timeWindow
-) {}
-
-public static function withDefaults(): self
-{
-    return new self(3, 3600);
-}
-```
-
-#### 2. **DateTime Boundary Conditions**
-
-```php
-// ❌ HARD TO TEST: Fixed current time
-public function isExpired(): bool
-{
-    return $this->expiresAt < new DateTime();
-}
-
-// ✅ TESTABLE: Injectable time parameter
-public function isExpired(?DateTime $currentTime = null): bool
-{
-    $currentTime ??= new DateTime();
-    return $this->expiresAt < $currentTime;
-}
-```
-
-#### 3. **Complex Boolean Logic**
-
-```php
-// ❌ HARD TO TEST: Complex nested conditions
-public function validate($value): bool
-{
-    return $value !== null &&
-           strlen($value) >= 8 &&
-           strlen($value) <= 64 &&
-           preg_match('/[A-Z]/', $value) &&
-           preg_match('/[0-9]/', $value);
-}
-
-// ✅ TESTABLE: Extract validation steps
-public function validate($value): bool
-{
-    if (!$this->hasValidLength($value)) return false;
-    if (!$this->hasUppercase($value)) return false;
-    if (!$this->hasDigit($value)) return false;
-    return true;
-}
-```
-
-#### 4. **Static Method Calls**
-
-```php
-// ❌ HARD TO TEST: Direct static calls
-public function generateToken(): string
-{
-    return bin2hex(random_bytes(16));
-}
-
-// ✅ TESTABLE: Dependency injection or factory
-public function generateToken(): string
-{
-    return $this->tokenGenerator->generate();
-}
-```
-
-#### Mutation Testing Strategy
-
-1. **Run `make infection`** to identify escaped mutants
-2. **Analyze mutant types**: Constructor parameters, boundary conditions, logical operators
-3. **First try**: Add targeted unit tests for specific edge cases
-4. **If tests can't catch mutants**: Refactor original classes for better testability
-5. **Maintain backward compatibility** when refactoring existing public APIs
-6. **Update interface signatures** to match implementation changes
-
-#### Target: 100% MSI (Mutation Score Indicator)
-
-- All mutants killed
-- Zero escaped mutants
-- All boundary conditions, default values, and logical operators tested
-
-## Code Review Workflow and PR Refactoring
-
-### Automated Code Review Comment Retrieval
-
-#### CRITICAL: Always use `make pr-comments` to retrieve and address all code review comments systematically.
-
-The repository provides a comprehensive code review workflow that enables automatic retrieval and systematic addressing of all unresolved comments on a Pull Request.
-
-#### Using the PR Comments Command
-
-##### Basic usage
-
-```bash
-make pr-comments                    # Auto-detect PR from current branch
-make pr-comments PR=215             # Specify PR number explicitly
-make pr-comments FORMAT=json        # Get comments in JSON format
-make pr-comments FORMAT=markdown    # Get comments in Markdown format
-```
-
-##### Command features
-
-- **Auto-detection**: Automatically detects PR number from current git branch
-- **Multiple formats**: Text (default), JSON, and Markdown output options
-- **GitHub Enterprise support**: Configurable via `GITHUB_HOST` environment variable
-- **Comprehensive output**: Shows file paths, line numbers, authors, timestamps, and GitHub URLs
-- **Unresolved focus**: Only retrieves unresolved comments that require action
-
-#### Code Review Refactoring Workflow
-
-##### MANDATORY: Follow this Systematic Approach for Addressing Code Review Feedback
-
-##### 1. **Retrieve All Code Review Comments**
-
-```bash
-make pr-comments
-```
-
-This command will output all unresolved comments in a readable format, showing:
-
-- File path and line number where comment was made
-- Author and timestamp of the comment
-- Full comment content including suggestions and prompts
-- Direct GitHub URL for context
-
-##### 2. **Analyze Comment Types and Prioritize**
-
-Categorize each comment by type:
-
-#### A. Committable Suggestions (Highest Priority)
-
-- Comments containing code suggestions that can be directly applied
-- Usually prefixed with "suggestion" or contain code blocks
-- **Action**: Apply the suggested changes exactly as provided
-- **Priority**: Address these first as they provide explicit solutions
-
-#### B. LLM Prompts and Instructions (High Priority)
-
-- Comments providing specific instructions on how to refactor
-- May include architectural guidance or implementation approaches
-- **Action**: Use these as detailed prompts for code generation/refactoring
-- **Priority**: Address after committable suggestions
-
-#### C. Questions and Clarifications (Medium Priority)
-
-- Comments asking for explanation or clarification of implementation
-- **Action**: Reply with explanations and make code more self-documenting if needed
-- **Priority**: Can be addressed alongside code changes
-
-#### D. General Feedback and Observations (Low Priority)
-
-- Comments providing general observations or praise
-- **Action**: Consider for future improvements, no immediate action needed
-- **Priority**: Address if time permits
-
-### Systematic Implementation Strategy
-
-#### For Committable Suggestions
-
-```bash
-# Apply suggestion directly to the code
-# Example: If comment suggests changing variable name
-# Before: $userInfo = ...
-# After: $userData = ...  (as suggested)
-
-# Commit the change immediately
-git add .
-git commit -m "Apply code review suggestion: improve variable naming"
-```
-
-#### For LLM Prompts
-
-```bash
-# Use the comment as a detailed prompt for refactoring
-# Example: "Refactor this method to use dependency injection"
-# 1. Analyze current implementation
-# 2. Design dependency injection approach
-# 3. Implement changes following SOLID principles
-# 4. Update tests accordingly
-# 5. Verify with make ci
-```
-
-#### For Complex Refactoring Requests
-
-```bash
-# Break down large refactoring into smaller commits
-# 1. Create interfaces/abstractions first
-# 2. Implement new classes/methods
-# 3. Update existing code to use new structure
-# 4. Remove deprecated code
-# 5. Update tests and documentation
-```
-
-#### 4. Quality Assurance After Each Change
-
-#### MANDATORY: Run quality checks after addressing each comment or group of related comments
-
-```bash
-# For code changes
-make phpcsfixer              # Fix code style
-make psalm                   # Static analysis
-make unit-tests             # Run unit tests
-make ci                     # Full CI suite (for significant changes)
-
-# For test changes
-make unit-tests             # Verify tests pass
-make infection              # Check mutation testing coverage
-```
-
-#### 5. Documentation and Verification
-
-##### Update Documentation When Comments Suggest
-
-- API documentation changes
-- README updates
-- Inline code comments for clarity (only when absolutely necessary)
-- Architecture decision records
-
-##### Verify Changes Meet Requirements
-
-- All tests pass with expected coverage
-- No regressions introduced
-- Code quality metrics maintained
-- Architectural boundaries respected
-
-#### 6. Comment Response Strategy
-
-##### Reply to Comments Systematically
-
-- **Questions**: Provide clear, concise answers
-- **Implemented suggestions**: Reply with commit hash that addresses the comment
-- **Complex refactoring**: Explain approach taken and reference relevant commits
-- **Cannot implement**: Explain technical constraints and propose alternatives
-
-#### Advanced Code Review Patterns
-
-#### Handling Conflicting Comments:
-
-1. Prioritize architectural concerns over stylistic preferences
-2. Discuss conflicting suggestions with reviewers before implementing
-3. Document decisions in commit messages or PR comments
-
-#### Large-Scale Refactoring:
-
-1. Create separate commits for each logical change
-2. Maintain backward compatibility when possible
-3. Update tests incrementally with code changes
-4. Use feature flags for risky changes
-
-#### Performance and Security Comments:
-
-1. Address security concerns immediately with highest priority
-2. Benchmark performance changes when suggested
-3. Document performance trade-offs in code comments
-
-#### Integration with Development Workflow
-
-#### Before Starting Code Review Refactoring:
-
-```bash
-git status                  # Ensure clean working directory
-git pull origin main        # Get latest changes
-make pr-comments           # Get current comment status
-```
-
-#### During Refactoring:
-
-```bash
-# Work on one comment or related group at a time
-# Commit frequently with descriptive messages
-# Reference comment URLs in commit messages for traceability
-```
-
-#### After Completing All Comments:
-
-```bash
-make ci                    # Full quality check
-make pr-comments           # Verify no new unresolved comments
-git push                   # Push all changes
-```
-
-This systematic approach ensures that all code review feedback is addressed thoroughly, maintaining high code quality while efficiently incorporating reviewer suggestions and maintaining project standards.
-
-## Documentation Synchronization Requirements
-
-#### Mandatory: Keep documentation in the `docs/` directory synchronized with code changes
-
-### Core Documentation Synchronization Rules
-
-##### 1. Feature implementation documentation updates
-
-When implementing new features or modifying existing ones:
-
-- **API Changes**: Update `docs/api-endpoints.md` with new endpoints, modified request/response schemas, authentication requirements, and examples
-- **Architecture Changes**: Update `docs/design-and-architecture.md` when adding new components, modifying existing patterns, or changing system interactions
-- **Configuration Changes**: Update `docs/advanced-configuration.md` when adding new environment variables, configuration options, or deployment parameters
-- **Performance Impact**: Update `docs/performance.md` when changes affect system performance or resource usage
-
-##### 2. Testing documentation updates
-
-When adding or modifying tests:
-
-- **Test Coverage**: Update `docs/testing.md` with new test categories, testing strategies, or coverage requirements
-- **Test Commands**: Update testing section if new make commands or testing procedures are introduced
-- **BDD Scenarios**: Document new Behat scenarios or testing workflows
-
-##### 3. Developer experience documentation updates
-
-When modifying development workflows:
-
-- **Getting Started**: Update `docs/getting-started.md` if setup procedures change
-- **Developer Guide**: Update `docs/developer-guide.md` with new development patterns, tools, or workflows
-- **Onboarding**: Update `docs/onboarding.md` if new team member procedures change
-
-##### 4. Security and operational documentation updates
-
-When implementing security or operational changes:
-
-- **Security**: Update `docs/security.md` with new authentication methods, authorization rules, or security considerations
-- **Operational**: Update `docs/operational.md` with new monitoring, logging, or maintenance procedures
-
-##### 5. User-facing documentation updates
-
-When adding user-facing features:
-
-- **User Guide**: Update `docs/user-guide.md` with new user workflows, features, or API usage examples
-- **API Documentation**: Ensure OpenAPI/GraphQL schemas in `.github/openapi-spec/` and `.github/graphql-spec/` are updated
-
-### Specific Documentation Update Scenarios
-
-##### When adding new REST API endpoints
-
-```markdown
-1. Update `docs/api-endpoints.md` with:
-
-   - Endpoint URL and HTTP method
-   - Request/response schemas with examples
-   - Authentication/authorization requirements
-   - Error codes and responses
-   - Rate limiting information
-
-2. Update `docs/user-guide.md` with usage examples
-3. Update OpenAPI specification in `.github/openapi-spec/`
-```
-
-##### When adding new GraphQL operations
-
-```markdown
-1. Update `docs/api-endpoints.md` with:
-
-   - Query/mutation schemas
-   - Input/output types
-   - Example requests and responses
-   - Authentication requirements
-
-2. Update GraphQL schema in `.github/graphql-spec/`
-3. Update `docs/user-guide.md` with client integration examples
-```
-
-##### When modifying the database schema
-
-```markdown
-1. Update `docs/design-and-architecture.md` with:
-
-   - Updated entity relationships
-   - New collections or fields
-   - Schema considerations
-
-2. Update `docs/developer-guide.md` with:
-   - New entity usage patterns
-   - Repository method examples
-```
-
-##### When adding new configuration options
-
-```markdown
-1. Update `docs/advanced-configuration.md` with:
-
-   - New environment variables
-   - Configuration examples
-   - Default values and validation rules
-   - Docker compose updates if needed
-
-2. Update `docs/getting-started.md` if required for basic setup
-```
-
-##### When implementing new domain features
-
-```markdown
-1. Update `docs/design-and-architecture.md` with:
-
-   - New domain models and aggregates
-   - Command/query handlers
-   - Domain events and their handlers
-   - Bounded context interactions
-
-2. Update `docs/glossary.md` with new domain terms
-3. Update `docs/developer-guide.md` with usage examples
-```
-
-##### When modifying authentication or authorization
-
-```markdown
-1. Update `docs/security.md` with:
-
-   - New authentication flows
-   - Permission changes
-   - Security considerations
-
-2. Update `docs/api-endpoints.md` with updated auth requirements
-3. Update `docs/user-guide.md` with client authentication examples
-```
-
-##### When adding new testing strategies or tools
-
-```markdown
-1. Update `docs/testing.md` with:
-
-   - New test categories or patterns
-   - Updated coverage requirements
-   - New testing commands or procedures
-
-2. Update `docs/developer-guide.md` if development workflow changes
-```
-
-##### When implementing performance optimizations
-
-```markdown
-1. Update `docs/performance.md` with:
-
-   - Performance benchmarks and improvements
-   - New caching strategies
-   - Resource usage optimizations
-```
-
-### Documentation Quality Standards
-
-##### Consistency requirements
-
-- Follow existing documentation structure and formatting
-- Use consistent terminology from `docs/glossary.md`
-- Include practical code examples with proper syntax highlighting
-- Add cross-references to related documentation sections
-
-##### Completeness requirements
-
-- Document all public APIs, endpoints, and user-facing features
-- Include error handling and edge cases
-- Provide both basic and advanced usage examples
-- Update version information when applicable
-
-##### Maintenance requirements
-
-- Remove outdated information when features are deprecated
-- Update release notes with significant changes
-- Ensure all links and references remain valid
-- Update diagrams if architecture changes
-
-### Documentation Validation Process
-
-##### Before committing code changes
-
-1. **Review Documentation Impact**: Identify which documentation files need updates based on your code changes
-2. **Update Relevant Files**: Make comprehensive updates to all affected documentation
-3. **Cross-Reference Check**: Ensure all internal links and references remain valid
-4. **Example Validation**: Test all code examples and ensure they work with current implementation
-5. **Consistency Check**: Verify terminology alignment with `docs/glossary.md`
-
-##### Documentation update checklist
-
-- [ ] API documentation updated for endpoint/schema changes
-- [ ] Architecture documentation reflects structural changes
-- [ ] Configuration documentation includes new options
-- [ ] Testing documentation covers new test scenarios
-- [ ] User guide includes new feature usage examples
-- [ ] Security documentation addresses new auth/security aspects
-- [ ] Performance documentation reflects optimization changes
-- [ ] Glossary updated with new domain terms
-- [ ] Release notes updated for significant changes
-- [ ] All code examples tested and validated
-
-### Automated Documentation Maintenance
-
-##### Integration with CI/CD
-
-- Documentation updates should be part of the same pull request as code changes
-- The `make ci` command validates code quality that affects documentation accuracy
-- Use the existing quality checks to ensure documentation standards
-
-##### Version synchronization
-
-- Keep documentation version aligned with application version
-- Update release notes for each release with documentation changes
-- Maintain backward compatibility notes in relevant documentation sections
-
-This comprehensive approach ensures that documentation remains an accurate, up-to-date reflection of the codebase, providing developers and users with reliable documentation that evolves alongside the system.
-
-## Quality Standards Protection
-
-#### Mandatory: Maintain or improve quality standards—never decrease current quality levels
-
-### Protected Quality Metrics
-
-##### PHPInsights quality requirements (`phpinsights.php`)
-
-- **min-quality**: 100% (NEVER decrease below 100%)
-- **min-complexity**: 95% (NEVER decrease below 95%)
-- **min-architecture**: 100% (NEVER decrease below 100%)
-- **min-style**: 100% (NEVER decrease below 100%)
-
-##### PHPInsights test quality requirements (`phpinsights-tests.php`)
-
-- **min-quality**: 95% (NEVER decrease below 95%)
-- **min-complexity**: 95% (NEVER decrease below 95%)
-- **min-architecture**: 90% (NEVER decrease below 90%)
-- **min-style**: 95% (NEVER decrease below 95%)
-
-### Resolving PHPInsights Complexity Failures
-
-- When `make phpinsights` reports only `[ERROR] The complexity score is too low` without pointing to specific files, **run PHP Mess Detector first** to gather actionable hotspots:
-  - `make phpmd`
-  - If you are troubleshooting manually, you can invoke the same command directly to inspect results quickly.
-- Address every PHPMD finding (especially high cyclomatic complexity warnings) before re-running PHPInsights.
-- After fixes, execute `make phpinsights` again; the complexity score must now meet or exceed the protected thresholds.
-
-##### Test coverage requirements
-
-- **Unit test coverage**: 100% (NEVER decrease below 100%)
-- **Integration test coverage**: Must maintain comprehensive coverage
-- **Mutation testing (Infection)**: 100% MSI (NEVER decrease below 100% - 0 escaped mutants)
-
-##### Prohibited quality downgrades
-
-```php
-// ❌ FORBIDDEN: Decreasing PHPInsights requirements
-'requirements' => [
-    'min-quality' => 95,    // FORBIDDEN: Was 100%
-    'min-complexity' => 90, // FORBIDDEN: Was 95%
-    'min-architecture' => 95, // FORBIDDEN: Was 100%
-    'min-style' => 95,      // FORBIDDEN: Was 100%
-],
-
-// ❌ FORBIDDEN: Adjusting infection threshold below 100%
-{
-  "mutators": {
-    "@default": true
-  },
-  "minMsi": 99  // FORBIDDEN: Must be 100%
-}
-```
-
-##### Quality enforcement rules
-
-1. **Never modify quality thresholds downward** in any configuration file:
-
-   - `phpinsights.php` requirements section
-   - `phpinsights-tests.php` requirements section
-   - `infection.json5` mutation score indicator
-   - `phpunit.xml.dist` coverage settings
-
-2. **Always maintain or improve coverage** when adding new code:
-
-   - Write tests for all new functionality
-   - Ensure 100% line and branch coverage
-   - Add mutation tests for complex logic
-   - Update integration and E2E tests as needed
-
-3. **Code quality must meet or exceed standards**:
-
-   - Cyclomatic complexity below 5 per method
-   - No architectural violations in Deptrac
-   - PSR-12 code style compliance
-   - Zero static analysis errors in Psalm
-
-4. **Quality gate enforcement**:
-   - `make ci` must output "✅ CI checks successfully passed!"
-   - All quality checks must pass before code can be committed
-   - Any quality regression must be fixed immediately
-   - No exceptions or temporary quality downgrades allowed
-
-### Quality Improvement Guidelines
-
-##### When refactoring or adding features
-
-- **Improve quality scores** when possible, but never decrease them
-- **Add more comprehensive tests** to catch edge cases
-- **Reduce cyclomatic complexity** through better code organization
-- **Enhance architectural separation** following DDD/CQRS patterns
-- **Maintain backward compatibility** while improving code quality
-
-##### If quality checks fail
-
-1. **Fix the underlying issue** rather than lowering standards
-2. **Refactor complex code** to reduce complexity scores
-3. **Add missing tests** to maintain coverage
-4. **Update architecture** to resolve dependency violations
-5. **Follow SOLID principles** to improve design quality
-
-This ensures the codebase maintains its high-quality standards while continuously improving over time.
-
-## Additional Development Guidelines
-
-### Code Comments and Self-Explanatory Code
-
-#### Mandatory: Remove all inline comments and write self-explanatory code
-
-- **No inline comments** in PHP, JavaScript, Docker, or any other code files
-- **Self-explanatory code** should tell its own story through clear naming and structure
-- **Function extraction** is preferred over explanatory comments
-- If complex logic needs explanation, extract it into a method with a descriptive name
-
-##### Examples
-
-```php
-// ❌ BAD: Inline comment explaining code
-if ($value === '') {
-    return false; // empty is not "only spaces"
-}
-
-// ✅ GOOD: Self-explanatory method name
-private function isEmptyButNotOnlySpaces(string $value): bool
-{
-    return $value === '';
-}
-```
-
-### Symfony Built-in Features Preference
-
-#### Mandatory: Use Symfony and API Platform built-in features instead of custom implementations
-
-- **Validators**: Use Symfony's built-in validators instead of custom validation classes
-- **Rate Limiting**: Use Symfony Rate Limiter component instead of custom rate-limiting
-- **Caching**: Use Symfony Cache component for rate-limiting and other caching needs
-- **API Platform**: Rely on automatic OpenAPI generation instead of manual `openapi.requestBody` decorations
-
-### Testing Standards
-
-#### Mandatory: Use Faker library for all test data generation
-
-- **No hardcoded values** in tests (emails, names, tokens, IDs, etc.)
-- **Faker integration** available in test base classes
-- **Dynamic test data** ensures tests are more robust and realistic
-
-##### Examples
-
-```php
-// ❌ BAD: Hardcoded test values
-$email = 'test@example.com';
-$token = 'test_token_123';
-$name = 'Test Customer';
-
-// ✅ GOOD: Faker-generated values
-$email = $this->faker->unique()->email();
-$token = $this->faker->lexify('??????????');
-$name = $this->faker->company();
-```
-
-### Database Schema Management
-
-#### Mandatory: Clean MongoDB schema management
-
-- **Doctrine ODM**: Use Doctrine MongoDB ODM for entity mapping
-- **XML Mappings**: Define entity mappings in `config/doctrine/` directory
-- **Schema Commands**: Use `make reset-db` and `make setup-test-db` for schema management
-
-### API Platform Best Practices
-
-#### Mandatory: Follow API Platform patterns for clean API design
-
-- **Input DTOs**: Use `input:` parameter in API Platform configuration instead of `openapi.requestBody`
-- **Automatic schema generation**: Let API Platform generate OpenAPI schemas from DTOs
-- **Empty response classes**: Use separate Empty DTO class for endpoints that don't return response bodies
-- **HTTP status codes**: Use appropriate HTTP status codes (204 No Content) instead of success messages
-- **No response messages**: For operations that don't return data, return only HTTP status codes
-
-### Pluralization and Internationalization
-
-#### Mandatory: Proper pluralization for time units and user-facing text
-
-- **Time units**: Use correct singular/plural forms (1 hour vs 2 hours)
-- **Dynamic pluralization**: Implement logic to handle both singular and plural forms
-- **Consistent messaging**: Ensure all user-facing text follows proper grammar rules
-
-## Resolving PHPInsights Complexity Failures
-
-When `make phpinsights` reports complexity issues:
-
-1. **Run PHPMD first**: `make phpmd` to identify specific complexity hotspots
-2. **Analyze findings**: Review each high-complexity warning
-3. **Refactor**: Apply complexity reduction strategies (extract methods, strategy patterns, etc.)
-4. **Rerun PHPInsights**: `make phpinsights` must now pass with scores meeting thresholds
-5. **Verify**: Ensure all tests still pass after refactoring
-
-## Best Practices Summary
-
-##### Before every commit
-
-1. Run `make ci` and ensure "✅ CI checks successfully passed!" message
-2. Verify 100% test coverage maintained
-3. Ensure 100% MSI (0 escaped mutants) in mutation testing
-4. Check that all quality metrics meet or exceed thresholds
-5. Update relevant documentation in `docs/` directory
-6. Use clear, descriptive commit messages following conventional commits
-
-##### During development
-
-1. Use make commands exclusively (never direct PHP commands)
-2. Write self-documenting code without inline comments
-3. Keep cyclomatic complexity below 5 per method
-4. Use Faker for all test data generation
-5. Follow DDD/CQRS/Hexagonal architecture patterns
-6. Respect bounded context boundaries
-7. Use Symfony and API Platform built-in features
-
-##### Code review
-
-1. Use `make pr-comments` to retrieve and address all feedback
-2. Prioritize committable suggestions first
-3. Run quality checks after each change
-4. Document architectural decisions
-5. Ensure backward compatibility when refactoring
-
-This comprehensive guide ensures consistent, high-quality development practices across the Core Service codebase while maintaining architectural integrity and code quality standards.
+**For detailed implementation patterns, workflows, and examples → See modular skills in `.claude/skills/` directory.**

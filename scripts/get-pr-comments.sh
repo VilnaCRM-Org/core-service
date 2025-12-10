@@ -343,6 +343,13 @@ get_pr_comments() {
     esac
 }
 
+# Calculate category counts (reusable across output formats)
+calculate_category_counts() {
+    local comments="$1"
+
+    echo "$(echo "$comments" | jq '[.[] | select(.category == "committable")] | length')|$(echo "$comments" | jq '[.[] | select(.category == "llm-prompt")] | length')|$(echo "$comments" | jq '[.[] | select(.category == "question")] | length')|$(echo "$comments" | jq '[.[] | select(.category == "feedback")] | length')"
+}
+
 # Output functions
 output_text() {
     local comments="$1"
@@ -372,10 +379,7 @@ output_text() {
     echo "==============================================="
     echo ""
 
-    local committable_count=$(echo "$comments" | jq '[.[] | select(.category == "committable")] | length')
-    local llm_prompt_count=$(echo "$comments" | jq '[.[] | select(.category == "llm-prompt")] | length')
-    local question_count=$(echo "$comments" | jq '[.[] | select(.category == "question")] | length')
-    local feedback_count=$(echo "$comments" | jq '[.[] | select(.category == "feedback")] | length')
+    IFS='|' read -r committable_count llm_prompt_count question_count feedback_count <<< "$(calculate_category_counts "$comments")"
 
     echo "By Category:"
     echo "  - Committable Suggestions (HIGHEST): $committable_count"
@@ -440,10 +444,7 @@ output_markdown() {
     echo "**Total unresolved comments found:** $comment_count"
     echo ""
 
-    local committable_count=$(echo "$comments" | jq '[.[] | select(.category == "committable")] | length')
-    local llm_prompt_count=$(echo "$comments" | jq '[.[] | select(.category == "llm-prompt")] | length')
-    local question_count=$(echo "$comments" | jq '[.[] | select(.category == "question")] | length')
-    local feedback_count=$(echo "$comments" | jq '[.[] | select(.category == "feedback")] | length')
+    IFS='|' read -r committable_count llm_prompt_count question_count feedback_count <<< "$(calculate_category_counts "$comments")"
 
     echo "### By Category"
     echo ""
