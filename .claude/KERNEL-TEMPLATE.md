@@ -209,7 +209,14 @@ Skills already refactored (✅):
 2. ✅ testing-workflow (401→153 lines, 62% reduction)
 3. ✅ code-review (308→130 lines, 58% reduction)
 
-Skills needing refactoring (⏳): 4. ⏳ quality-standards (418 lines) 5. ⏳ complexity-management (370 lines) 6. ⏳ openapi-development (842 lines - split into multi-file) 7. ⏳ database-migrations (299 lines) 8. ⏳ documentation-sync (180 lines) 9. ⏳ load-testing (210 lines)
+Skills needing refactoring (⏳):
+
+4. ⏳ quality-standards (418 lines)
+5. ⏳ complexity-management (370 lines)
+6. ⏳ openapi-development (842 lines - split into multi-file)
+7. ⏳ database-migrations (299 lines)
+8. ⏳ documentation-sync (180 lines)
+9. ⏳ load-testing (210 lines)
 
 ## Tips for Large Skills (>300 lines)
 

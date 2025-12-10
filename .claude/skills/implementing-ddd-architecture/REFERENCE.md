@@ -659,13 +659,13 @@ class Product
 ```
 
 ```xml
-<!-- config/doctrine/Product.orm.xml -->
-<doctrine-mapping>
+<!-- config/doctrine/Product.mongodb.xml -->
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping">
     <document name="App\Product\Domain\Entity\Product" collection="products">
-        <field name="id" type="ulid" id="true" strategy="NONE"/>
+        <id name="id" type="ulid" strategy="NONE"/>
         <field name="name" type="string"/>
     </document>
-</doctrine-mapping>
+</doctrine-mongo-mapping>
 ```
 
 #### Violation Type 3: Domain → API Platform (Attributes)
