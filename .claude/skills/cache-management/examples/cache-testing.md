@@ -36,19 +36,19 @@ namespace Tests\Integration\Customer\Infrastructure\Persistence;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Infrastructure\Persistence\CustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositoryInvalidationTest extends KernelTestCase
 {
     private CustomerRepository $repository;
-    private CacheInterface $cache;
+    private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->repository = self::getContainer()->get(CustomerRepository::class);
-        $this->cache = self::getContainer()->get(CacheInterface::class);
+        $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
 
         // Clear cache before each test
         $this->cache->clear();
@@ -169,13 +169,13 @@ use App\Customer\Domain\Entity\Customer;
 use App\Customer\Infrastructure\Cache\CustomerCacheWarmer;
 use App\Customer\Infrastructure\Persistence\CustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositoryCacheTest extends KernelTestCase
 {
     private CustomerRepository $repository;
     private CustomerCacheWarmer $cacheWarmer;
-    private CacheInterface $cache;
+    private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
@@ -183,7 +183,7 @@ final class CustomerRepositoryCacheTest extends KernelTestCase
 
         $this->repository = self::getContainer()->get(CustomerRepository::class);
         $this->cacheWarmer = self::getContainer()->get(CustomerCacheWarmer::class);
-        $this->cache = self::getContainer()->get(CacheInterface::class);
+        $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
     }
 
     public function testColdStartCacheMiss(): void
@@ -277,19 +277,19 @@ namespace Tests\Integration\Customer\Infrastructure\Persistence;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Infrastructure\Persistence\CustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositoryTtlTest extends KernelTestCase
 {
     private CustomerRepository $repository;
-    private CacheInterface $cache;
+    private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->repository = self::getContainer()->get(CustomerRepository::class);
-        $this->cache = self::getContainer()->get(CacheInterface::class);
+        $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
 
         $this->cache->clear();
     }
@@ -410,19 +410,19 @@ namespace Tests\Integration\Customer\Infrastructure\Persistence;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Infrastructure\Persistence\CustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositoryTagInvalidationTest extends KernelTestCase
 {
     private CustomerRepository $repository;
-    private CacheInterface $cache;
+    private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->repository = self::getContainer()->get(CustomerRepository::class);
-        $this->cache = self::getContainer()->get(CacheInterface::class);
+        $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
 
         $this->cache->clear();
     }
@@ -565,19 +565,19 @@ namespace Tests\Integration\Customer\Infrastructure\Persistence;
 use App\Customer\Domain\Entity\Customer;
 use App\Customer\Infrastructure\Persistence\CustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositorySwrTest extends KernelTestCase
 {
     private CustomerRepository $repository;
-    private CacheInterface $cache;
+    private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->repository = self::getContainer()->get(CustomerRepository::class);
-        $this->cache = self::getContainer()->get(CacheInterface::class);
+        $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
 
         $this->cache->clear();
     }

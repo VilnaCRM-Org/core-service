@@ -15,7 +15,7 @@ use App\Customer\Domain\Entity\Customer;
 use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 /**
@@ -30,7 +30,7 @@ final class CustomerRepository implements CustomerRepositoryInterface
 {
     public function __construct(
         private readonly DocumentManager $dm,
-        private readonly CacheInterface $cache,
+        private readonly TagAwareCacheInterface $cache,
         private readonly LoggerInterface $logger
     ) {}
 
@@ -469,7 +469,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use App\Customer\Infrastructure\Cache\CustomerCacheWarmer;
 
 #[AsCommand(
@@ -479,7 +479,7 @@ use App\Customer\Infrastructure\Cache\CustomerCacheWarmer;
 final class CustomerCacheCommand extends Command
 {
     public function __construct(
-        private readonly CacheInterface $cache,
+        private readonly TagAwareCacheInterface $cache,
         private readonly CustomerCacheWarmer $cacheWarmer
     ) {
         parent::__construct();

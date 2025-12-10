@@ -41,6 +41,7 @@ Implement production-ready caching with proper key design, TTL management, consi
 ║  ALWAYS declare cache policy BEFORE implementing.             ║
 ║  ALWAYS invalidate explicitly on writes.                      ║
 ║  NEVER rely solely on TTL for write-updated data.             ║
+║  ALWAYS use TagAwareCacheInterface for cache tags.            ║
 ║                                                               ║
 ║  ❌ FORBIDDEN: Implicit invalidation, missing tests           ║
 ║  ✅ REQUIRED:  Explicit policy, explicit invalidation, tests  ║
@@ -50,6 +51,7 @@ Implement production-ready caching with proper key design, TTL management, consi
 **Non-negotiable requirements**:
 
 - Declare cache policy (key, TTL, consistency) before coding
+- Use `TagAwareCacheInterface` (not `CacheInterface`) for tag support
 - Invalidate cache explicitly on create/update/delete
 - Add cache tags for batch invalidation
 - Test stale reads after writes
@@ -75,7 +77,7 @@ Implement production-ready caching with proper key design, TTL management, consi
 - [ ] Cache tags configured on all cached items
 - [ ] Explicit invalidation on all write operations
 - [ ] Logging added for cache hits/misses
-- [ ] Repository uses CacheInterface injection
+- [ ] Repository uses TagAwareCacheInterface injection (required for tags)
 
 **Testing:**
 
@@ -254,15 +256,23 @@ Use [query-performance-analysis](../query-performance-analysis/SKILL.md) to iden
 
 Document key pattern, TTL, consistency class, invalidation strategy, and tags
 
-**Step 3: Inject CacheInterface**
+**Step 3: Inject TagAwareCacheInterface**
 
 ```php
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
 public function __construct(
     private DocumentManager $dm,
-    private CacheInterface $cache,
+    private TagAwareCacheInterface $cache,
     private LoggerInterface $logger
 ) {}
 ```
+
+**CRITICAL**: You **MUST** use `TagAwareCacheInterface` (not `CacheInterface`) when using:
+- `$item->tag([...])` - Tagging cache items
+- `$cache->invalidateTags([...])` - Batch invalidation by tags
+
+Plain `CacheInterface` does not provide these methods.
 
 **Step 4: Implement Read-Through Caching**
 
@@ -355,6 +365,11 @@ final readonly class UpdateCustomerCommandHandler
 // Infrastructure Layer
 final class CustomerRepository
 {
+    public function __construct(
+        private DocumentManager $dm,
+        private TagAwareCacheInterface $cache  // MUST use TagAwareCacheInterface for tag() and invalidateTags()
+    ) {}
+
     public function findById(string $id): ?Customer
     {
         return $this->cache->get(...);  // Read-through caching

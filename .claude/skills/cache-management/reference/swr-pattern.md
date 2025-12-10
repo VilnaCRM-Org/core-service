@@ -2,6 +2,17 @@
 
 Complete guide for implementing stale-while-revalidate caching pattern for high-traffic, read-heavy queries that tolerate brief staleness.
 
+## ⚠️ Interface Requirements
+
+**CRITICAL**: SWR implementation depends on which cache interface you use:
+
+| Interface                     | Methods Available                                      | Use Case                                 |
+| ----------------------------- | ------------------------------------------------------ | ---------------------------------------- |
+| `TagAwareCacheInterface`      | `get()`, `invalidateTags()`, `beta` parameter          | **Recommended**: Simple SWR with tags    |
+| `TagAwareAdapterInterface`    | `getItem()`, `save()`, `isHit()`, custom metadata      | Advanced: Custom SWR logic               |
+
+**For most cases, use `TagAwareCacheInterface` with the `beta` parameter.** See examples below.
+
 ## What is SWR?
 
 **Stale-While-Revalidate** is a caching strategy that:
@@ -77,18 +88,19 @@ The formula: If `(TTL - age) < beta * log(random())`, refresh in background
 
 ---
 
-## Advanced SWR: Custom Implementation
+## Recommended SWR Implementation
 
-For more control, implement custom SWR logic:
+### Simple SWR with Beta Parameter (Recommended)
+
+**For most use cases**, use `TagAwareCacheInterface` with the `beta` parameter. This leverages Symfony's built-in probabilistic early expiration:
 
 ```php
 final readonly class CustomerRepository
 {
     public function __construct(
         private DocumentManager $dm,
-        private CacheInterface $cache,
-        private LoggerInterface $logger,
-        private MessageBusInterface $messageBus // For background refresh
+        private TagAwareCacheInterface $cache,
+        private LoggerInterface $logger
     ) {}
 
     public function findByIdWithSwr(string $id): ?Customer
@@ -96,7 +108,73 @@ final readonly class CustomerRepository
         $cacheKey = "customer.{$id}";
 
         try {
-            $cacheItem = $this->cache->getItem($cacheKey);
+            return $this->cache->get(
+                $cacheKey,
+                function (ItemInterface $item) use ($id, $cacheKey) {
+                    $item->expiresAfter(300); // TTL: 5 minutes
+                    $item->tag(['customer', "customer.{$id}"]);
+
+                    $this->logger->info('Cache miss - loading customer from database', [
+                        'cache_key' => $cacheKey,
+                        'customer_id' => $id,
+                    ]);
+
+                    return $this->dm->find(Customer::class, $id);
+                },
+                beta: 1.0 // Enable probabilistic early expiration for SWR
+            );
+
+        } catch (\Exception $e) {
+            $this->logger->error('Cache error - falling back to database', [
+                'cache_key' => $cacheKey,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Fallback to database on cache error
+            return $this->dm->find(Customer::class, $id);
+        }
+    }
+}
+```
+
+**Pros**:
+- Simple, uses standard `TagAwareCacheInterface`
+- Built-in Symfony support for probabilistic refresh
+- Works with cache tags for invalidation
+- No need for PSR-6 adapter injection
+
+**Cons**:
+- Less control over SWR timing
+- No custom metadata tracking
+- Refresh happens inline (not truly async)
+
+---
+
+### Advanced SWR with PSR-6 Adapter (For Custom Control)
+
+**For advanced use cases** where you need fine-grained control over SWR behavior with custom metadata tracking, inject the PSR-6 `TagAwareAdapterInterface` directly:
+
+**Important**: This requires `getItem()`, `save()` methods from PSR-6, not available in `TagAwareCacheInterface`.
+
+```php
+use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
+use Psr\Cache\CacheItemInterface;
+
+final readonly class CustomerRepository
+{
+    public function __construct(
+        private DocumentManager $dm,
+        private TagAwareAdapterInterface $cacheAdapter, // PSR-6 for getItem() support
+        private LoggerInterface $logger,
+        private MessageBusInterface $messageBus
+    ) {}
+
+    public function findByIdWithCustomSwr(string $id): ?Customer
+    {
+        $cacheKey = "customer.{$id}";
+
+        try {
+            $cacheItem = $this->cacheAdapter->getItem($cacheKey);
 
             if ($cacheItem->isHit()) {
                 $customer = $cacheItem->get();
@@ -171,7 +249,7 @@ final readonly class CustomerRepository
             ]);
         }
 
-        $this->cache->save($item);
+        $this->cacheAdapter->save($item);
 
         $this->logger->info('Customer loaded and cached', [
             'customer_id' => $id,
@@ -192,6 +270,18 @@ final readonly class CustomerRepository
 }
 ```
 
+**Pros**:
+- Fine-grained control over SWR timing
+- Custom metadata for staleness detection
+- True background refresh via message bus
+- Explicit control over refresh triggers
+
+**Cons**:
+- More complex implementation
+- Requires PSR-6 adapter injection
+- More code to maintain
+- Need message bus setup for background jobs
+
 ### Background Refresh Message Handler
 
 ```php
@@ -199,7 +289,7 @@ final readonly class RefreshCustomerCacheHandler
 {
     public function __construct(
         private DocumentManager $dm,
-        private CacheInterface $cache,
+        private TagAwareCacheInterface $cache,
         private LoggerInterface $logger
     ) {}
 
@@ -219,28 +309,22 @@ final readonly class RefreshCustomerCacheHandler
             return;
         }
 
-        // Update cache
+        // Update cache using standard get() with callback
         $cacheKey = "customer.{$message->customerId}";
-        $cacheItem = $this->cache->getItem($cacheKey);
-
-        $cacheItem->set($customer);
-        $cacheItem->expiresAfter(300);
-        $cacheItem->tag(['customer', "customer.{$message->customerId}"]);
-
-        if (method_exists($cacheItem, 'setMetadata')) {
-            $cacheItem->setMetadata([
-                'created_at' => time(),
-                'ttl' => 300,
-                'swr_window' => 60,
-                'refreshed_at' => time(),
-            ]);
-        }
-
-        $this->cache->save($cacheItem);
-
-        $this->logger->info('Customer cache refreshed successfully', [
-            'customer_id' => $message->customerId,
-        ]);
+        
+        $this->cache->get(
+            $cacheKey,
+            function (ItemInterface $item) use ($customer, $message) {
+                $item->expiresAfter(300);
+                $item->tag(['customer', "customer.{$message->customerId}"]);
+                
+                $this->logger->info('Customer cache refreshed successfully', [
+                    'customer_id' => $message->customerId,
+                ]);
+                
+                return $customer;
+            }
+        );
     }
 }
 ```

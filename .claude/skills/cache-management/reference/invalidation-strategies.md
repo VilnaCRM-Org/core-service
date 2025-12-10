@@ -57,7 +57,7 @@ final class CustomerRepository
 {
     public function __construct(
         private DocumentManager $dm,
-        private CacheInterface $cache,
+        private TagAwareCacheInterface $cache,
         private LoggerInterface $logger
     ) {}
 
@@ -291,7 +291,7 @@ final readonly class UpdateCustomerCommandHandler
 final readonly class CustomerCacheInvalidationSubscriber
 {
     public function __construct(
-        private CacheInterface $cache,
+        private TagAwareCacheInterface $cache,
         private LoggerInterface $logger
     ) {}
 
@@ -440,7 +440,7 @@ public function getDailyStatistics(string $date): array
 final class InvalidateCacheCommand extends Command
 {
     public function __construct(
-        private CacheInterface $cache,
+        private TagAwareCacheInterface $cache,
         private LoggerInterface $logger
     ) {
         parent::__construct();
@@ -493,7 +493,7 @@ php bin/console cache:invalidate customer order product
 final class InvalidateCacheAction
 {
     public function __construct(
-        private CacheInterface $cache,
+        private TagAwareCacheInterface $cache,
         private LoggerInterface $logger
     ) {}
 
