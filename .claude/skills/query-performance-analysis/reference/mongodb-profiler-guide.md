@@ -8,9 +8,9 @@ MongoDB Profiler logs all database operations for performance analysis. Essentia
 
 | Level | Description          | Use Case              | Performance Impact |
 | ----- | -------------------- | --------------------- | ------------------ |
-| 0     | Off                  | Production (default)  | None               |
-| 1     | Slow operations only | Production monitoring | Minimal            |
-| 2     | All operations       | Development/debugging | High               |
+| 0     | Off                  | Production (Default)  | None               |
+| 1     | Slow operations only | Production Monitoring | Minimal            |
+| 2     | All operations       | Development/Debugging | High               |
 
 ## Enable Profiler
 
@@ -375,28 +375,28 @@ final class ProfilerHelper
 
 ### 🚨 Red Flag #1: High Query Count
 
-```
+```text
 count: 100+ for same query pattern
 → N+1 problem!
 ```
 
 ### 🚨 Red Flag #2: COLLSCAN
 
-```
+```text
 planSummary: "COLLSCAN"
 → Missing index!
 ```
 
 ### 🚨 Red Flag #3: High docsExamined
 
-```
+```text
 docsExamined: 10000, nreturned: 10
 → Inefficient index or query!
 ```
 
 ### 🚨 Red Flag #4: Slow Execution
 
-```
+```text
 millis: >1000
 → Needs optimization!
 ```

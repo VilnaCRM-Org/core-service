@@ -159,7 +159,7 @@ db.customers
 
 1. **Equality fields** narrow down results fastest
 2. **Sort fields** can use index for sorting
-3. **Range fields** would stop index usage for subsequent fields
+3. **Range fields** limit how subsequent fields in the index can be used for filtering (though those fields may still be used for sorting in some cases)
 
 ---
 

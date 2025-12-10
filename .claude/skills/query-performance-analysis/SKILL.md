@@ -219,7 +219,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 - Allows concurrent reads and writes during most of the build process
 - **Note**: Brief locking at start/end can still impact write latency
 
-**Recommendation**: Schedule index creation during low-traffic periods or maintenance windows to avoid latency spikes, especially for large collections.
+**Recommendation**: For all production index builds, schedule index creation during low-traffic periods or maintenance windows to avoid latency spikes. This is important regardless of collection size, but exercise extra caution with large collections, as longer build times increase the risk and duration of impact.
 
 ### Production Migration Strategy
 
