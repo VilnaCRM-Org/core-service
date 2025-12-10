@@ -417,6 +417,43 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
+### 14. Observability Instrumentation (`observability-instrumentation/`)
+
+**Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
+
+**When activated**:
+
+- Implementing new features or command handlers
+- Creating new API endpoints (REST/GraphQL)
+- Adding database operations or external HTTP calls
+- Refactoring existing code that lacks observability
+- Preparing code for production deployment
+- Debugging performance or reliability issues
+- Before creating pull requests (attach observability evidence)
+
+**What it does**:
+
+- Implements Three Pillars: Logs, Metrics, and Traces
+- Adds structured logging with correlation ID tracking
+- Instruments latency, error rates, and throughput metrics
+- Wraps DB/HTTP calls with timing and context
+- Provides PR evidence guide for attaching observability data
+- Ensures production-ready monitoring for all new code
+- Follows PSR-3 logging standards (Symfony/Monolog)
+
+**Key commands**: Docker logs, Symfony profiler, metrics endpoints
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` - Core observability patterns and workflow (593 lines)
+- `examples/instrumented-command-handler.md` - Complete working example
+- `reference/structured-logging.md` - Logging patterns with correlation ID
+- `reference/metrics-patterns.md` - Latency, errors, RPS instrumentation
+- `reference/pr-evidence-guide.md` - Attaching observability evidence to PRs
+- `reference/quick-start.md` - Quick start for new developers
+
+---
+
 ## How Skills Work
 
 ### Cross-Platform Compatibility

@@ -20,6 +20,7 @@ What are you trying to do?
 │   ├─ New API endpoint → developing-openapi-specs
 │   ├─ New load test → load-testing
 │   ├─ New database entity → database-migrations
+│   ├─ Add observability → observability-instrumentation
 │   └─ New test cases → testing-workflow
 │
 ├─ Review/validate work
@@ -149,6 +150,17 @@ This skill detects N+1 queries with MongoDB profiler and provides index optimiza
 
 ---
 
+### "I'm implementing a new feature and need to add logging/metrics"
+
+**Use**: [observability-instrumentation](observability-instrumentation/SKILL.md)
+
+This skill guides adding structured logs, metrics, and traces to new code.
+
+**NOT**: query-performance-analysis (that's for optimizing existing queries)
+**ALSO**: Use after implementing with implementing-ddd-architecture
+
+---
+
 ### "I need to add a new field to an entity"
 
 **Use**: [database-migrations](database-migrations/SKILL.md)
@@ -196,6 +208,7 @@ This skill covers processor patterns for OpenAPI.
 | deptrac-fixer vs implementing-ddd-architecture      | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                                          |
 | testing-workflow vs load-testing                    | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing                          |
 | load-testing vs query-performance-analysis          | **Load/stress testing** → load-testing<br>**Query optimization & N+1 detection** → query-performance-analysis                          |
+| query-performance-analysis vs observability         | **Query optimization** → query-performance-analysis<br>**Logging, metrics, traces for new code** → observability-instrumentation        |
 | quality-standards vs complexity-management          | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management                             |
 | ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
 | documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
@@ -208,10 +221,11 @@ Some tasks benefit from multiple skills:
 
 1. **implementing-ddd-architecture** - Design domain model
 2. **database-migrations** - Configure persistence
-3. **testing-workflow** - Write tests
-4. **structurizr-architecture-sync** - Update C4 diagrams
-5. **documentation-sync** - Update docs
-6. **ci-workflow** - Validate everything
+3. **observability-instrumentation** - Add logs, metrics, traces
+4. **testing-workflow** - Write tests
+5. **structurizr-architecture-sync** - Update C4 diagrams
+6. **documentation-sync** - Update docs
+7. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 
