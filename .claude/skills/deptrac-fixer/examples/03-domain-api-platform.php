@@ -136,15 +136,15 @@ final class Customer
 # config/api_platform/resources/Customer.yaml
 
 resources:
-  App\Core\Customer\Domain\Entity\Customer:
+  App\Customer\Domain\Entity\Customer:
     shortName: Customer
     description: Customer resource
 
     operations:
       ApiPlatform\Metadata\Get:
-        uriTemplate: /customers/{ulid}
+        uriTemplate: /customers/{id}
         requirements:
-          ulid: .+
+          id: .+
 
       ApiPlatform\Metadata\GetCollection:
         uriTemplate: /customers
@@ -155,11 +155,11 @@ resources:
         processor: App\Customer\Application\Processor\CreateCustomerProcessor
 
       ApiPlatform\Metadata\Put:
-        uriTemplate: /customers/{ulid}
+        uriTemplate: /customers/{id}
         processor: App\Customer\Application\Processor\UpdateCustomerProcessor
 
       ApiPlatform\Metadata\Delete:
-        uriTemplate: /customers/{ulid}
+        uriTemplate: /customers/{id}
 
     normalizationContext:
       groups: ['customer:read']
@@ -185,15 +185,13 @@ api_platform:
 /*
 # config/serialization/Customer.yaml
 
-App\Core\Customer\Domain\Entity\Customer:
+App\Customer\Domain\Entity\Customer:
   attributes:
-    ulid:
+    id:
       groups: ['customer:read']
     email:
       groups: ['customer:read', 'customer:write']
-    initials:
-      groups: ['customer:read', 'customer:write']
-    phone:
+    name:
       groups: ['customer:read', 'customer:write']
     createdAt:
       groups: ['customer:read']
@@ -257,7 +255,7 @@ final class CustomerResource
      * Factory method to create DTO from domain entity
      * Works with primitives - no Value Object unwrapping needed
      */
-    public static function fromEntity(\App\Core\Customer\Domain\Entity\Customer $customer): self
+    public static function fromEntity(\App\Customer\Domain\Entity\Customer $customer): self
     {
         $dto = new self();
         $dto->id = $customer->getUlid();           // Returns string directly
@@ -339,7 +337,7 @@ namespace App\Customer\Application\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Customer\Application\DTO\CustomerResource;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 
 final readonly class CustomerProvider implements ProviderInterface
@@ -351,7 +349,7 @@ final readonly class CustomerProvider implements ProviderInterface
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?CustomerResource
     {
-        $id = new Ulid($uriVariables['ulid']);
+        $id = new Ulid($uriVariables['id']);
         $customer = $this->repository->findById($id);
 
         if ($customer === null) {
@@ -373,7 +371,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Customer\Application\Command\CreateCustomerCommand;
 use App\Customer\Application\DTO\CreateCustomerInput;
 use App\Customer\Application\DTO\CustomerResource;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 
@@ -401,12 +399,6 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
 
         // Fetch and return created entity
         $customer = $this->repository->findById($id);
-
-        if ($customer === null) {
-            // In a real application, this could throw a domain/application exception
-            // since the entity was just created and should exist
-            throw new \RuntimeException('Created customer could not be reloaded from repository.');
-        }
 
         return CustomerResource::fromEntity($customer);
     }

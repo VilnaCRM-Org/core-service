@@ -14,7 +14,7 @@ Common problems and solutions when organizing code.
 
 1. **Identify primary responsibility**:
 
-   ```text
+   ```
    What is the ONE thing this class does?
    - Creates objects → Factory
    - Validates data → Validator

@@ -59,6 +59,16 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 - Shows: CommandBusInterface injection, CustomerFactoryInterface usage
 - Demonstrates: Proper layer separation with command/handler pattern
 
+### 5. [05-complete-entity-refactoring.php](05-complete-entity-refactoring.php)
+
+**Full entity refactoring with all patterns combined**
+
+**Key Patterns:**
+
+- Complete example combining all fixes
+- Shows real-world refactoring workflow
+- Demonstrates all pragmatic patterns together
+
 ## How to Use These Examples
 
 1. **Identify your violation type** from `make deptrac` output

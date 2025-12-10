@@ -550,10 +550,6 @@ namespace App\Customer\Application\CommandHandler;
 
 class UpdateCustomerStatusHandler implements CommandHandlerInterface
 {
-    public function __construct(
-        private CustomerRepositoryInterface $repository
-    ) {}
-
     public function __invoke(UpdateCustomerStatusCommand $command): void
     {
         $customer = $this->repository->findById($command->customerId);
