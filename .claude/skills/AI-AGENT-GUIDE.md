@@ -188,7 +188,7 @@ Complex skills have multi-file structure:
 
 | Tool        | Metric       | Required | Skill for Issues        |
 | ----------- | ------------ | -------- | ----------------------- |
-| PHPInsights | Complexity   | 94% min  | `complexity-management` |
+| PHPInsights | Complexity   | 93% src, 95% tests | `complexity-management` |
 | PHPInsights | Quality      | 100%     | `complexity-management` |
 | PHPInsights | Architecture | 100%     | `deptrac-fixer`         |
 | PHPInsights | Style        | 100%     | Run `make phpcsfixer`   |

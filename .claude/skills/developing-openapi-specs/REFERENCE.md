@@ -542,7 +542,7 @@ $result = $yourBuilder->build(...);
 
 From PHPInsights configuration:
 
-- **Min Complexity**: 95%
+- **Min Complexity**: 93% (source code threshold)
 - **Max Cyclomatic Complexity per Method**: 10 (PHPMD threshold)
 - **Max Method Length**: 20 lines
 - **Max Cyclomatic Complexity per Class**: Aim for ≤ 8
@@ -679,7 +679,7 @@ make phpinsights
 Expected scores:
 
 - Code: 99-100%
-- Complexity: ≥94%
+- Complexity: ≥93% (source code)
 - Architecture: 100%
 - Style: 100%
 

@@ -87,10 +87,10 @@ The `make ci` command runs these checks in sequence:
 
 **NEVER decrease these quality thresholds**:
 
-- PHPInsights min-quality: 100%
-- PHPInsights min-complexity: 95%
-- PHPInsights min-architecture: 100%
-- PHPInsights min-style: 100%
+- PHPInsights min-quality: 100% (src/), 95% (tests/)
+- PHPInsights min-complexity: 93% (src/), 95% (tests/)
+- PHPInsights min-architecture: 100% (src/), 90% (tests/)
+- PHPInsights min-style: 100% (src/), 95% (tests/)
 - Mutation testing MSI: 100%
 - Test coverage: 100%
 

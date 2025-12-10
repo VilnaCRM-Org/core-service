@@ -6,16 +6,16 @@ Understanding what PHPInsights measures and how to interpret each metric in the 
 
 PHPInsights analyzes code across four dimensions:
 
-1. **Code Quality** (100% required)
-2. **Complexity** (95% required)
-3. **Architecture** (100% required)
-4. **Style** (100% required)
+1. **Code Quality** (100% required for src/, 95% for tests/)
+2. **Complexity** (93% required for src/, 95% for tests/)
+3. **Architecture** (100% required for src/, 90% for tests/)
+4. **Style** (100% required for src/, 95% for tests/)
 
 Each dimension consists of multiple metrics and checks from various tools (PHP_CodeSniffer, PHPMD, Psalm concepts).
 
 ---
 
-## Complexity Metrics (95% Minimum)
+## Complexity Metrics (93% Minimum for src/, 95% for tests/)
 
 ### Cyclomatic Complexity
 

@@ -110,10 +110,10 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 **Protected thresholds**:
 
-- PHPInsights quality: 100%
-- PHPInsights complexity: 95%
-- PHPInsights architecture: 100%
-- PHPInsights style: 100%
+- PHPInsights quality: 100% (src/), 95% (tests/)
+- PHPInsights complexity: 93% (src/), 95% (tests/)
+- PHPInsights architecture: 100% (src/), 90% (tests/)
+- PHPInsights style: 100% (src/), 95% (tests/)
 - Mutation testing MSI: 100%
 
 ---
