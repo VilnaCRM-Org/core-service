@@ -6,11 +6,11 @@ MongoDB Profiler logs all database operations for performance analysis. Essentia
 
 ## Profiling Levels
 
-| Level | Description          | Use Case               | Performance Impact |
-| ----- | -------------------- | ---------------------- | ------------------ |
-| 0     | Off                  | Production (Default)   | None               |
-| 1     | Slow operations only | Production Monitoring  | Minimal            |
-| 2     | All operations       | Development/Debugging  | High               |
+| Level | Description          | Use Case              | Performance Impact |
+| ----- | -------------------- | --------------------- | ------------------ |
+| 0     | Off                  | Production (Default)  | None               |
+| 1     | Slow operations only | Production Monitoring | Minimal            |
+| 2     | All operations       | Development/Debugging | High               |
 
 ## Enable Profiler
 
