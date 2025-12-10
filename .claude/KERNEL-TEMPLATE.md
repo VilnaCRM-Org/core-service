@@ -222,7 +222,7 @@ For skills like `openapi-development` (842 lines):
 
 Example structure:
 
-```
+```text
 skill-name/
 ├── SKILL.md (follows KERNEL, <200 lines)
 ├── reference/
