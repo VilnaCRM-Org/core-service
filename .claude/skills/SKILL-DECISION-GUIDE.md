@@ -13,6 +13,7 @@ What are you trying to do?
 │   ├─ Test failures → testing-workflow
 │   ├─ PHPInsights fails → complexity-management
 │   ├─ Slow queries/N+1 issues → query-performance-analysis
+│   ├─ Stale cached data issues → cache-management
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
@@ -22,6 +23,7 @@ What are you trying to do?
 │   ├─ New database entity → database-migrations
 │   ├─ New database indexes → query-performance-analysis
 │   ├─ New test cases → testing-workflow
+│   ├─ Add caching layer → cache-management
 │   └─ Add observability → observability-instrumentation
 │
 ├─ Review/validate work
@@ -206,6 +208,50 @@ The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAI
 
 ---
 
+### "I need to add caching to reduce database load"
+
+**Use**: [cache-management](cache-management/SKILL.md)
+
+This skill guides cache policy declaration, read-through caching, explicit invalidation, SWR pattern, and comprehensive testing.
+
+**ALSO**: Use [query-performance-analysis](query-performance-analysis/SKILL.md) first to identify which queries are slow and worth caching.
+
+**ALSO**: Use [observability-instrumentation](observability-instrumentation/SKILL.md) to add cache metrics (hit rate, latency).
+
+---
+
+### "Cached data is stale after updates"
+
+**Use**: [cache-management](cache-management/SKILL.md)
+
+This skill provides explicit invalidation strategies (write-through, tag-based, event-driven) and tests for stale read scenarios.
+
+**NOT**: query-performance-analysis (that's for query optimization, not cache invalidation)
+
+---
+
+### "I need to test cache behavior (stale reads, cold start)"
+
+**Use**: [cache-management](cache-management/SKILL.md)
+
+This skill provides complete test patterns for:
+- Stale reads after writes
+- Cache warmup on cold start
+- TTL expiration behavior
+- Tag-based invalidation
+
+**ALSO**: Use [testing-workflow](testing-workflow/SKILL.md) for general test guidance.
+
+---
+
+### "I want to implement stale-while-revalidate (SWR)"
+
+**Use**: [cache-management](cache-management/SKILL.md)
+
+This skill provides complete SWR implementation guide with background refresh patterns.
+
+---
+
 ## Skill Relationship Map
 
 ```
@@ -221,11 +267,11 @@ The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAI
                     implementing-ddd-      load-testing
                       architecture         (performance)
                               │                  │
-                    ┌─────────┼─────────┬────────┴────────┐
-                    ▼         ▼         ▼                 ▼
-          database-    query-        documentation-  structurizr-
-          migrations   performance-   sync           architecture-sync
-                      analysis                       (C4 diagrams)
+                    ┌─────────┼─────────┬────────┴────────┬────────────┐
+                    ▼         ▼         ▼                 ▼            ▼
+          database-    query-        cache-          documentation- structurizr-
+          migrations   performance-  management      sync           architecture-sync
+                      analysis                                      (C4 diagrams)
 ```
 
 ## Common Confusions
@@ -238,6 +284,8 @@ The query-performance-analysis skill tells you WHAT indexes to add (using EXPLAI
 | ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
 | database-migrations vs query-performance-analysis   | **Index creation (HOW)** → database-migrations<br>**Performance analysis (WHAT/WHY)** → query-performance-analysis                     |
 | query-performance-analysis vs load-testing          | **Fix slow queries** → query-performance-analysis<br>**Test under load** → load-testing                                                |
+| query-performance-analysis vs cache-management      | **Fix slow queries (indexes)** → query-performance-analysis<br>**Add caching layer** → cache-management                                |
+| cache-management vs observability-instrumentation   | **Implement caching** → cache-management<br>**Add metrics/logs for cache** → observability-instrumentation                             |
 | documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
 
 ## Multiple Skills for One Task
@@ -250,11 +298,12 @@ Some tasks benefit from multiple skills:
 2. **observability-instrumentation** - Add logging, metrics, tracing
 3. **database-migrations** - Configure persistence
 4. **query-performance-analysis** - Optimize queries and add indexes
-5. **testing-workflow** - Write tests
-6. **load-testing** - Add performance tests
-7. **structurizr-architecture-sync** - Update C4 diagrams
-8. **documentation-sync** - Update docs
-9. **ci-workflow** - Validate everything
+5. **cache-management** - Add caching layer for read-heavy operations
+6. **testing-workflow** - Write tests (including cache tests)
+7. **load-testing** - Add performance tests
+8. **structurizr-architecture-sync** - Update C4 diagrams
+9. **documentation-sync** - Update docs
+10. **ci-workflow** - Validate everything
 
 ### Fixing architecture issues:
 
@@ -265,14 +314,18 @@ Some tasks benefit from multiple skills:
 ### Performance optimization:
 
 1. **query-performance-analysis** - Fix N+1 queries, add indexes
-2. **load-testing** - Create performance tests
-3. **complexity-management** - Reduce code complexity
-4. **ci-workflow** - Ensure quality maintained
+2. **cache-management** - Add caching layer for read-heavy queries
+3. **observability-instrumentation** - Add cache metrics (hit rate, latency)
+4. **load-testing** - Create performance tests
+5. **complexity-management** - Reduce code complexity
+6. **ci-workflow** - Ensure quality maintained
 
 ### Fixing slow API endpoint:
 
 1. **query-performance-analysis** - Detect N+1, analyze with EXPLAIN
 2. **database-migrations** - Add missing indexes (XML syntax)
-3. **load-testing** - Add performance regression tests
-4. **documentation-sync** - Document performance considerations
-5. **ci-workflow** - Verify all checks pass
+3. **cache-management** - Add caching with proper invalidation
+4. **testing-workflow** - Add cache tests (stale reads, cold start)
+5. **load-testing** - Add performance regression tests
+6. **documentation-sync** - Document performance considerations and cache policy
+7. **ci-workflow** - Verify all checks pass
