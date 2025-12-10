@@ -53,22 +53,22 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 
 ### Quick Skill Guide
 
-| Task Type                  | Skill                           | When to Use                                |
-| -------------------------- | ------------------------------- | ------------------------------------------ |
-| **Fix Deptrac violations** | `deptrac-fixer`                 | Architecture boundary violations detected  |
-| **Fix complexity issues**  | `complexity-management`         | PHPInsights complexity score drops         |
-| **Run CI checks**          | `ci-workflow`                   | Before committing, validating changes      |
-| **Debug test failures**    | `testing-workflow`              | PHPUnit, Behat, or Infection issues        |
-| **Handle PR feedback**     | `code-review`                   | Processing code review comments            |
-| **Create DDD patterns**    | `implementing-ddd-architecture` | New entities, value objects, aggregates    |
-| **Add CRUD endpoints**     | `api-platform-crud`             | New API resources with full CRUD           |
-| **Create load tests**      | `load-testing`                  | K6 performance tests (REST/GraphQL)        |
-| **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields          |
-| **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                 |
-| **Develop OpenAPI layer**  | `openapi-development`           | OpenAPI processors, complexity patterns    |
-| **Organize code**          | `code-organization`             | Proper class placement, naming consistency |
-| **Sync documentation**     | `documentation-sync`            | After any code changes                     |
-| **Quality overview**       | `quality-standards`             | Understanding protected thresholds         |
+| Task Type                  | Skill                           | When to Use                                  |
+| -------------------------- | ------------------------------- | -------------------------------------------- |
+| **Fix Deptrac violations** | `deptrac-fixer`                 | Architecture boundary violations detected    |
+| **Fix complexity issues**  | `complexity-management`         | PHPInsights complexity score drops           |
+| **Run CI checks**          | `ci-workflow`                   | Before committing, validating changes        |
+| **Debug test failures**    | `testing-workflow`              | PHPUnit, Behat, or Infection issues          |
+| **Handle PR feedback**     | `code-review`                   | Processing code review comments              |
+| **Create DDD patterns**    | `implementing-ddd-architecture` | New entities, value objects, aggregates      |
+| **Add CRUD endpoints**     | `api-platform-crud`             | New API resources with full CRUD             |
+| **Create load tests**      | `load-testing`                  | K6 performance tests (REST/GraphQL)          |
+| **Update entity schema**   | `database-migrations`           | Modifying entities, adding fields            |
+| **Document APIs**          | `developing-openapi-specs`      | OpenAPI endpoint factories                   |
+| **Develop OpenAPI layer**  | `openapi-development`           | OpenAPI processors, complexity patterns      |
+| **Organize code**          | `code-organization`             | Proper class placement, naming consistency   |
+| **Sync documentation**     | `documentation-sync`            | After any code changes                       |
+| **Quality overview**       | `quality-standards`             | Understanding protected thresholds           |
 | **Optimize queries**       | `query-performance-analysis`    | N+1 detection, slow queries, missing indexes |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.

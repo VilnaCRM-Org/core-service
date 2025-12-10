@@ -85,21 +85,21 @@ curl http://localhost/api/customers
 ```javascript
 // Check profiled queries
 db.system.profile.aggregate([
-    {
-        $group: {
-            _id: {
-                collection: "$ns",
-                operation: "$op",
-                query: "$command.filter"
-            },
-            count: { $sum: 1 },
-            avgMs: { $avg: "$millis" }
-        }
+  {
+    $group: {
+      _id: {
+        collection: '$ns',
+        operation: '$op',
+        query: '$command.filter',
+      },
+      count: { $sum: 1 },
+      avgMs: { $avg: '$millis' },
     },
-    {
-        $sort: { count: -1 }
-    }
-])
+  },
+  {
+    $sort: { count: -1 },
+  },
+]);
 ```
 
 **Output**:
