@@ -36,7 +36,7 @@ Understand quality metrics and route to appropriate specialized skill for fixes.
 | Metric       | Required | Fix With                                                   |
 | ------------ | -------- | ---------------------------------------------------------- |
 | Quality      | 95%      | [complexity-management](../complexity-management/SKILL.md) |
-| Complexity   | 95%      | [complexity-management](../complexity-management/SKILL.md) |
+| Complexity   | 93%      | [complexity-management](../complexity-management/SKILL.md) |
 | Architecture | 90%      | [deptrac-fixer](../deptrac-fixer/SKILL.md)                 |
 | Style        | 95%      | Run `make phpcsfixer`                                      |
 

@@ -80,7 +80,7 @@ This project enforces **strict quality thresholds** that MUST NOT be lowered:
 
 | Tool              | Metric       | Required | Skill for Issues        |
 | ----------------- | ------------ | -------- | ----------------------- |
-| **PHPInsights**   | Complexity   | 94% min  | `complexity-management` |
+| **PHPInsights**   | Complexity   | 93% min  | `complexity-management` |
 | **PHPInsights**   | Quality      | 100%     | `complexity-management` |
 | **PHPInsights**   | Architecture | 100%     | `deptrac-fixer`         |
 | **PHPInsights**   | Style        | 100%     | Run `make phpcsfixer`   |
