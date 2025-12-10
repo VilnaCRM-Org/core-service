@@ -267,6 +267,7 @@ final readonly class CreateProductProcessor implements ProcessorInterface
 namespace App\Catalog\Domain\Repository;
 
 use App\Catalog\Domain\Entity\Product;
+use App\Catalog\Domain\ValueObject\ProductName;
 use App\Shared\Domain\ValueObject\Ulid;
 
 /**
