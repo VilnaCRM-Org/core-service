@@ -6,11 +6,11 @@ MongoDB Profiler logs all database operations for performance analysis. Essentia
 
 ## Profiling Levels
 
-| Level | Description          | Use Case              | Performance Impact |
-| ----- | -------------------- | --------------------- | ------------------ |
-| 0     | Off                  | Production (Default)  | None               |
-| 1     | Slow operations only | Production Monitoring | Minimal            |
-| 2     | All operations       | Development/Debugging | High               |
+| Level | Description          | Use Case               | Performance Impact |
+| ----- | -------------------- | ---------------------- | ------------------ |
+| 0     | Off                  | Production (Default)   | None               |
+| 1     | Slow operations only | Production Monitoring  | Minimal            |
+| 2     | All operations       | Development/Debugging  | High               |
 
 ## Enable Profiler
 
@@ -74,10 +74,9 @@ db.system.profile
 
 ```javascript
 // Find queries on 'customers' collection
-// Format: ns: "<database_name>.<collection_name>"
 db.system.profile
   .find({
-    ns: 'app.customers',
+    ns: 'app.customers', // Format: ns: "<database_name>.<collection_name>"
     op: 'query',
   })
   .pretty();
@@ -288,13 +287,15 @@ db.setProfilingLevel(1, {
 ### Log Profiler Results in Tests
 
 ```php
+use RuntimeException;
+
 final class ProfilerHelper
 {
     public function getProfiledQueries(): array
     {
         $mongodb = $this->getMongoClient();
         // Set DB_NAME in your .env file with the name from 'show dbs' command
-        $dbName = $_ENV['DB_NAME'] ?? throw new \RuntimeException('DB_NAME not configured');
+        $dbName = $_ENV['DB_NAME'] ?? throw new RuntimeException('DB_NAME not configured');
         $collection = $mongodb->selectCollection($dbName, 'system.profile');
 
         return $collection->find(
@@ -307,7 +308,7 @@ final class ProfilerHelper
     {
         $mongodb = $this->getMongoClient();
         // Set DB_NAME in your .env file with the name from 'show dbs' command
-        $dbName = $_ENV['DB_NAME'] ?? throw new \RuntimeException('DB_NAME not configured');
+        $dbName = $_ENV['DB_NAME'] ?? throw new RuntimeException('DB_NAME not configured');
         $collection = $mongodb->selectCollection($dbName, 'system.profile');
 
         return $collection->countDocuments([
