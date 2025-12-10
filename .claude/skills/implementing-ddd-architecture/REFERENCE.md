@@ -330,7 +330,7 @@ interface ProductRepositoryInterface
 
 ### Step 4: Create Doctrine Mapping (Infrastructure Config)
 
-**Location**: `config/doctrine/{Entity}.orm.xml`
+**Location**: `config/doctrine/{Entity}.mongodb.xml`
 
 **Tasks**:
 
