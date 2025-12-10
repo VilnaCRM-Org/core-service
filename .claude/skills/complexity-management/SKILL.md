@@ -66,12 +66,14 @@ Use this skill when:
 **Protected thresholds are non-negotiable**:
 
 For source code (src/):
+
 - min-quality: 100% (never lower)
 - min-complexity: 93% (never lower)
 - min-architecture: 100% (never lower)
 - min-style: 100% (never lower)
 
 For tests (tests/):
+
 - min-quality: 95% (never lower)
 - min-complexity: 95% (never lower)
 - min-architecture: 90% (never lower)

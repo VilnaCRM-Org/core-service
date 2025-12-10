@@ -76,16 +76,16 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 
 This project enforces **strict quality thresholds** that MUST NOT be lowered:
 
-| Tool              | Metric       | Required            | Skill for Issues        |
-| ----------------- | ------------ | ------------------- | ----------------------- |
-| **PHPInsights**   | Complexity   | 93% src, 95% tests  | `complexity-management` |
-| **PHPInsights**   | Quality      | 100%                | `complexity-management` |
-| **PHPInsights**   | Architecture | 100%                | `deptrac-fixer`         |
-| **PHPInsights**   | Style        | 100%                | Run `make phpcsfixer`   |
-| **Deptrac**       | Violations   | 0        | `deptrac-fixer`         |
-| **Psalm**         | Errors       | 0        | Fix reported issues     |
-| **Test Coverage** | Lines        | 100%     | `testing-workflow`      |
-| **Infection MSI** | Score        | 100%     | `testing-workflow`      |
+| Tool              | Metric       | Required           | Skill for Issues        |
+| ----------------- | ------------ | ------------------ | ----------------------- |
+| **PHPInsights**   | Complexity   | 93% src, 95% tests | `complexity-management` |
+| **PHPInsights**   | Quality      | 100%               | `complexity-management` |
+| **PHPInsights**   | Architecture | 100%               | `deptrac-fixer`         |
+| **PHPInsights**   | Style        | 100%               | Run `make phpcsfixer`   |
+| **Deptrac**       | Violations   | 0                  | `deptrac-fixer`         |
+| **Psalm**         | Errors       | 0                  | Fix reported issues     |
+| **Test Coverage** | Lines        | 100%               | `testing-workflow`      |
+| **Infection MSI** | Score        | 100%               | `testing-workflow`      |
 
 > **⚠️ NEVER lower thresholds**. Always fix code to meet standards. See `quality-standards` skill for details.
 

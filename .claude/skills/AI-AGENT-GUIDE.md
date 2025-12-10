@@ -186,15 +186,15 @@ Complex skills have multi-file structure:
 
 **CRITICAL**: This project has **protected quality thresholds** that MUST NOT be lowered:
 
-| Tool        | Metric       | Required | Skill for Issues        |
-| ----------- | ------------ | -------- | ----------------------- |
+| Tool        | Metric       | Required           | Skill for Issues        |
+| ----------- | ------------ | ------------------ | ----------------------- |
 | PHPInsights | Complexity   | 93% src, 95% tests | `complexity-management` |
-| PHPInsights | Quality      | 100%     | `complexity-management` |
-| PHPInsights | Architecture | 100%     | `deptrac-fixer`         |
-| PHPInsights | Style        | 100%     | Run `make phpcsfixer`   |
-| Deptrac     | Violations   | 0        | `deptrac-fixer`         |
-| Psalm       | Errors       | 0        | Fix reported issues     |
-| Infection   | MSI          | High %   | `testing-workflow`      |
+| PHPInsights | Quality      | 100%               | `complexity-management` |
+| PHPInsights | Architecture | 100%               | `deptrac-fixer`         |
+| PHPInsights | Style        | 100%               | Run `make phpcsfixer`   |
+| Deptrac     | Violations   | 0                  | `deptrac-fixer`         |
+| Psalm       | Errors       | 0                  | Fix reported issues     |
+| Infection   | MSI          | High %             | `testing-workflow`      |
 
 **Always improve code quality to meet standards. Never lower thresholds.**
 
