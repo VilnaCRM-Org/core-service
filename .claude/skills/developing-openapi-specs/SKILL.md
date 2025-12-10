@@ -150,7 +150,7 @@ private function fixProperties(array $mediaTypeObject): ?array
 
 ## Complexity Target Metrics
 
-- **Min Complexity**: 94%
+- **Min Complexity**: 93% (source code threshold)
 - **Max Cyclomatic Complexity/Method**: 10
 - **Max Method Length**: 20 lines
 - **Max Class Complexity**: ≤ 8
@@ -217,7 +217,7 @@ make unit-tests                  # Run tests
 **Expected Results**:
 
 - OpenAPI validation: "No results with severity 'hint' or higher"
-- PHPInsights: Code 100%, Complexity ≥94%, Architecture 100%, Style 100%
+- PHPInsights: Code 100%, Complexity ≥93% (src), Architecture 100%, Style 100%
 - Unit tests: 100% coverage
 
 ## Architecture Layer (DDD)

@@ -1,6 +1,6 @@
 ---
 name: complexity-management
-description: Maintain and improve code quality using PHPInsights without decreasing quality thresholds. Use when PHPInsights fails, cyclomatic complexity is too high, code quality drops, or when refactoring for better maintainability. Always maintains 93% complexity and 100% quality/architecture/style scores.
+description: Maintain and improve code quality using PHPInsights without decreasing quality thresholds. Use when PHPInsights fails, cyclomatic complexity is too high, code quality drops, or when refactoring for better maintainability. Always maintains 93% complexity for src/ and 95% for tests/, plus 100% quality/architecture/style scores.
 ---
 
 # Code Complexity Management
@@ -16,7 +16,7 @@ Use this skill when:
 - Code quality score drops below 100%
 - Architecture score falls below 100%
 - Style score drops below 100%
-- Complexity score falls below 94%
+- Complexity score falls below thresholds (93% for src/, 95% for tests/)
 - Adding new features that increase complexity
 - Refactoring existing code for better maintainability
 - Before committing code changes (proactive quality check)
@@ -27,14 +27,23 @@ Use this skill when:
 
 ## Protected Quality Thresholds
 
-**CRITICAL**: These thresholds are defined in `phpinsights.php` and must NEVER be lowered:
+**CRITICAL**: These thresholds are defined in `phpinsights.php` (for src/) and `phpinsights-tests.php` (for tests/) and must NEVER be lowered:
 
 ```php
+// phpinsights.php (source code in src/)
 'requirements' => [
     'min-quality' => 100,      // Code quality
-    'min-complexity' => 94,    // Cyclomatic complexity
+    'min-complexity' => 93,    // Cyclomatic complexity for src/
     'min-architecture' => 100, // Architecture compliance
     'min-style' => 100,        // Coding style
+],
+
+// phpinsights-tests.php (test code in tests/)
+'requirements' => [
+    'min-quality' => 95,       // Code quality for tests
+    'min-complexity' => 95,    // Cyclomatic complexity for tests/
+    'min-architecture' => 90,  // Architecture compliance for tests
+    'min-style' => 95,         // Coding style for tests
 ],
 ```
 
@@ -56,10 +65,19 @@ Use this skill when:
 
 **Protected thresholds are non-negotiable**:
 
+For source code (src/):
+
 - min-quality: 100% (never lower)
-- min-complexity: 94% (never lower)
+- min-complexity: 93% (never lower)
 - min-architecture: 100% (never lower)
 - min-style: 100% (never lower)
+
+For tests (tests/):
+
+- min-quality: 95% (never lower)
+- min-complexity: 95% (never lower)
+- min-architecture: 90% (never lower)
+- min-style: 95% (never lower)
 
 If you're tempted to lower a threshold, it means the code needs refactoring, not the config.
 
@@ -117,7 +135,7 @@ PHPInsights provides four scores:
 
 ```
 [CODE] 100.0 pts       ✅ Target: 100%
-[COMPLEXITY] 94.2 pts  ✅ Target: 94%
+[COMPLEXITY] 93.5 pts  ✅ Target: 93%+ (src), 95%+ (tests)
 [ARCHITECTURE] 100 pts ✅ Target: 100%
 [STYLE] 100.0 pts      ✅ Target: 100%
 ```
@@ -156,7 +174,7 @@ make phpinsights
 
 # Verify all thresholds pass
 ✅ Code quality: 100%
-✅ Complexity: 94%+
+✅ Complexity: 93%+ (src), 95%+ (tests)
 ✅ Architecture: 100%
 ✅ Style: 100%
 ```
@@ -343,7 +361,7 @@ After running this skill, verify:
 
 ✅ `make phpinsights` passes without errors
 ✅ Code quality: 100%
-✅ Complexity: ≥ 94%
+✅ Complexity: ≥ 93% (src), ≥ 95% (tests)
 ✅ Architecture: 100%
 ✅ Style: 100%
 ✅ No layer boundary violations (checked by Deptrac)

@@ -35,6 +35,8 @@ src/Shared/Application/OpenApi/
 4. **Match Expressions**: Use PHP 8 `match` instead of if-else chains for lower complexity
 5. **Early Returns**: Use guard clauses and early returns to reduce nesting
 
+**📖 For detailed patterns and techniques**, see [Processor Patterns Reference](reference/processor-patterns.md)
+
 ## Directory Structure
 
 ### Builder/
@@ -118,254 +120,6 @@ public function __invoke(array $context = []): OpenApi
     return $openApi;
 }
 ```
-
-## Key Patterns from user-service
-
-### 1. Constants for HTTP Operations
-
-**Problem**: Method chaining creates long, repetitive code
-**Solution**: Use a constant and loop
-
-```php
-private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
-
-private function processPathItem(PathItem $pathItem): PathItem
-{
-    foreach (self::OPERATIONS as $operation) {
-        $pathItem = $pathItem->{'with' . $operation}(
-            $this->processOperation($pathItem->{'get' . $operation}())
-        );
-    }
-    return $pathItem;
-}
-```
-
-**Benefits**:
-
-- Reduces code duplication
-- Lower cyclomatic complexity
-- Easier to maintain
-
-### 2. Match Expressions Over If-Else
-
-**Problem**: If-else chains increase cyclomatic complexity
-**Solution**: Use PHP 8's `match` expression
-
-```php
-// ❌ Bad: High complexity
-private function processOperation(?Operation $operation): ?Operation
-{
-    if ($operation === null) {
-        return null;
-    }
-    if ($operation->getParameters() === []) {
-        return $operation;
-    }
-    return $operation->withParameters(...);
-}
-
-// ✅ Good: Lower complexity
-private function processOperation(?Operation $operation): ?Operation
-{
-    return match (true) {
-        $operation === null => null,
-        $operation->getParameters() === [] => $operation,
-        default => $operation->withParameters(...),
-    };
-}
-```
-
-**Benefits**:
-
-- Each match branch counts as 1 complexity (vs 2+ for if-else)
-- More readable
-- Forces exhaustive handling
-
-### 3. Functional Array Operations
-
-**Problem**: Foreach loops with mutations increase complexity
-**Solution**: Use `array_map`, `array_filter`, `array_combine`
-
-```php
-// ❌ Bad: Procedural with mutation
-private function collectRequired(array $params): array
-{
-    $required = [];
-    foreach ($params as $param) {
-        if ($param->isRequired()) {
-            $required[] = $param->name;
-        }
-    }
-    return $required;
-}
-
-// ✅ Good: Functional
-private function collectRequired(array $params): array
-{
-    return array_values(
-        array_map(
-            static fn (Parameter $parameter) => $parameter->name,
-            array_filter(
-                $params,
-                static fn (Parameter $parameter) => $parameter->isRequired()
-            )
-        )
-    );
-}
-```
-
-**Benefits**:
-
-- No mutation
-- Lower complexity (filter + map count as 1 each vs foreach with if)
-- More declarative
-
-### 4. Static Methods for Pure Functions
-
-**Problem**: Instance methods when no state is needed
-**Solution**: Use static methods for pure transformations
-
-```php
-// ✅ Good: Static for pure function
-private static function augmentParameter(mixed $parameter, array $descriptions): mixed
-{
-    $paramName = $parameter->getName();
-    $description = $parameter->getDescription();
-    $hasDescription = $description !== null && $description !== '';
-
-    return match (true) {
-        !isset($descriptions[$paramName]) => $parameter,
-        $hasDescription => $parameter,
-        default => $parameter->withDescription($descriptions[$paramName]),
-    };
-}
-```
-
-**Benefits**:
-
-- Clear that function has no side effects
-- Can be tested in isolation
-- Signals immutability
-
-### 5. Method Extraction for Complexity Reduction
-
-**Problem**: Methods with too many branches or too long
-**Solution**: Extract focused helper methods
-
-```php
-// ❌ Bad: 21 lines, complexity 9
-private function processContent(Operation $operation): Operation
-{
-    $content = $operation->getRequestBody()->getContent();
-    $modified = false;
-
-    foreach ($content as $mediaType => $mediaTypeObject) {
-        if (!isset($mediaTypeObject['schema']['properties'])) {
-            continue;
-        }
-        foreach ($mediaTypeObject['schema']['properties'] as $propName => $propSchema) {
-            if (!isset($propSchema['type']) || $propSchema['type'] !== 'iri-reference') {
-                continue;
-            }
-            // mutation logic...
-            $modified = true;
-        }
-    }
-    return $modified ? $operation->withRequestBody(...) : $operation;
-}
-
-// ✅ Good: 14 lines, complexity 4
-private function processContent(Operation $operation): Operation
-{
-    $requestBody = $operation->getRequestBody();
-    $content = $requestBody->getContent();
-    $modified = false;
-
-    foreach ($content as $mediaType => $mediaTypeObject) {
-        $fixedProperties = $this->fixProperties($mediaTypeObject);
-        if ($fixedProperties !== null) {
-            $content[$mediaType]['schema']['properties'] = $fixedProperties;
-            $modified = true;
-        }
-    }
-
-    return $modified
-        ? $operation->withRequestBody($requestBody->withContent(new ArrayObject($content->getArrayCopy())))
-        : $operation;
-}
-
-// Extracted method: 15 lines, complexity 4
-private function fixProperties(array $mediaTypeObject): ?array
-{
-    if (!isset($mediaTypeObject['schema']['properties'])) {
-        return null;
-    }
-
-    $properties = $mediaTypeObject['schema']['properties'];
-    $fixedProperties = array_map(
-        static fn ($propSchema) => self::fixProperty($propSchema),
-        $properties
-    );
-
-    return $fixedProperties === $properties ? null : $fixedProperties;
-}
-```
-
-**Benefits**:
-
-- Each method stays under 20 lines (PHPInsights limit)
-- Each method has complexity ≤ 10 (PHPMD limit)
-- Better testability
-- Clear naming documents intent
-
-### 6. Avoiding empty() for Type Safety
-
-**Problem**: `empty()` is forbidden by PHPInsights
-**Solution**: Use explicit type checks
-
-```php
-// ❌ Bad: Using empty()
-if (empty($parameters)) {
-    return $operation;
-}
-if (empty($parameter->getDescription())) {
-    // ...
-}
-
-// ✅ Good: Explicit checks
-if ($parameters === []) {
-    return $operation;
-}
-$description = $parameter->getDescription();
-if ($description === null || $description === '') {
-    // ...
-}
-```
-
-**Benefits**:
-
-- Type-safe
-- Clear intent
-- Passes PHPInsights
-
-### 7. Delegation Over Implementation
-
-**Problem**: Large classes with many responsibilities
-**Solution**: Delegate to specialized classes
-
-```php
-// ✅ Good: OpenApiFactory delegates to processors
-$this->parameterDescriptionAugmenter->augment($openApi);
-$openApi = $this->tagDescriptionAugmenter->augment($openApi);
-$this->iriReferenceTypeFixer->fix($openApi);
-$openApi = $this->pathParametersSanitizer->sanitize($openApi);
-```
-
-**Benefits**:
-
-- Each processor has single responsibility
-- Easy to add new processors
-- Clear execution pipeline
 
 ## How to Add New Components
 
@@ -553,122 +307,28 @@ $result = $yourBuilder->build(...);
 
 From PHPInsights configuration:
 
-- **Min Complexity**: 94%
+- **Min Complexity**: 93% (source code threshold)
 - **Max Cyclomatic Complexity per Method**: 10 (PHPMD threshold)
 - **Max Method Length**: 20 lines
 - **Max Cyclomatic Complexity per Class**: Aim for ≤ 8
 
-### Techniques to Reduce Complexity
+### Quick Tips
 
-1. **Use Match Instead of If-Else**
-
-   - Each `match` case = 1 complexity
-   - Each `if` = +1, each `elseif` = +1
-
-2. **Extract Conditions to Variables**
-
-```php
-// ❌ Bad: Complexity 3
-if (isset($descriptions[$paramName]) && ($description === null || $description === '')) {
-    // ...
-}
-
-// ✅ Good: Complexity 2
-$hasDescription = $description !== null && $description !== '';
-if (isset($descriptions[$paramName]) && !$hasDescription) {
-    // ...
-}
-```
-
-3. **Use Early Returns**
-
-```php
-// ❌ Bad: Nested conditions
-if ($operation !== null) {
-    if ($operation->getParameters() !== []) {
-        return $operation->withParameters(...);
-    }
-}
-return $operation;
-
-// ✅ Good: Early returns
-if ($operation === null) {
-    return null;
-}
-if ($operation->getParameters() === []) {
-    return $operation;
-}
-return $operation->withParameters(...);
-```
-
-4. **Replace Loops with array_map/array_filter**
-
-```php
-// ❌ Bad: foreach with if
-$result = [];
-foreach ($items as $item) {
-    if ($item->isValid()) {
-        $result[] = $item->transform();
-    }
-}
-
-// ✅ Good: functional
-$result = array_map(
-    fn ($item) => $item->transform(),
-    array_filter($items, fn ($item) => $item->isValid())
-);
-```
-
-5. **Split Long Methods**
-   - Extract helper methods when over 20 lines
-   - Each extracted method should have single responsibility
-   - Use descriptive names that document intent
+1. **Use Match Instead of If-Else** - Each `match` case = 1 complexity vs each `if`/`elseif` = +1
+2. **Extract Conditions to Variables** - Reduce boolean complexity
+3. **Use Early Returns** - Avoid nested conditionals
+4. **Replace Loops with array_map/array_filter** - More declarative, lower complexity
+5. **Split Long Methods** - Extract helper methods when over 20 lines
 
 ### Common Pitfalls
 
-1. **Don't Mutate OpenApi Objects Directly**
+1. **Don't Mutate OpenApi Objects Directly** - Use `with*()` methods instead
+2. **Don't Use empty()** - Forbidden by PHPInsights, use explicit checks (`$array === []`)
+3. **Don't Create God Classes** - Split into multiple processors
+4. **Don't Forget OPERATIONS Constant** - Loop instead of chaining
 
-```php
-// ❌ Bad: Direct mutation
-$operation->parameters[] = $newParameter;
-
-// ✅ Good: Use with methods
-$operation = $operation->withParameters(
-    array_merge($operation->getParameters(), [$newParameter])
-);
-```
-
-2. **Don't Use empty()**
-
-```php
-// ❌ Bad: Forbidden by PHPInsights
-if (empty($array)) { }
-
-// ✅ Good: Explicit check
-if ($array === []) { }
-```
-
-3. **Don't Create God Classes**
-
-   - Split into multiple processors
-   - Each processor = one concern
-
-4. **Don't Forget OPERATIONS Constant**
-
-```php
-// ❌ Bad: Repetitive
-$pathItem
-    ->withGet(...)
-    ->withPost(...)
-    ->withPut(...)
-    ->withPatch(...)
-    ->withDelete(...);
-
-// ✅ Good: Loop
-foreach (self::OPERATIONS as $operation) {
-    $pathItem = $pathItem->{'with' . $operation}(...);
-}
-```
+**📖 For detailed complexity patterns**, see [Processor Patterns Reference](reference/processor-patterns.md)
+**📖 For general complexity management**, see [complexity-management skill](../complexity-management/SKILL.md)
 
 ## Testing Your Changes
 
@@ -690,7 +350,7 @@ make phpinsights
 Expected scores:
 
 - Code: 99-100%
-- Complexity: ≥94%
+- Complexity: ≥93% (source code)
 - Architecture: 100%
 - Style: 100%
 
@@ -710,21 +370,18 @@ make phpmd
 
 Expected: No violations
 
-## Examples from Codebase
+## Additional Resources
 
-### Example 1: ParameterDescriptionAugmenter
+**📖 [Processor Patterns Reference](reference/processor-patterns.md)** - Detailed patterns and techniques for reducing complexity
 
-Shows all key patterns:
+**📖 [Complete Examples](examples/complete-examples.md)** - Real-world examples from the codebase with troubleshooting and configuration
 
-- OPERATIONS constant
-- Match expressions
-- Functional programming
-- Method extraction
-- Static pure functions
+**🔧 Related Skills**:
 
-**Location**: `src/Shared/Application/OpenApi/Processor/ParameterDescriptionAugmenter.php`
+- [complexity-management](../complexity-management/SKILL.md) - General complexity reduction strategies
+- [deptrac-fixer](../deptrac-fixer/SKILL.md) - Fixing architecture violations
 
-**Key Methods**:
+---
 
 - `augmentOperation()`: Uses match expression
 - `augmentParameters()`: Uses array_map
@@ -840,3 +497,5 @@ When contributing to OpenAPI layer:
 - [ ] Test with `make validate-openapi-spec`
 - [ ] Verify with `make phpinsights`
 - [ ] Run `make unit-tests`
+
+**Summary**: This skill provides the core workflow for contributing to the OpenAPI layer. For detailed patterns, examples, and troubleshooting, see the reference files above.
