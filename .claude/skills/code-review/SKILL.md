@@ -1,308 +1,421 @@
 ---
 name: code-review
-description: Systematically retrieve and address PR code review comments using make pr-comments. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
+description: Systematically retrieve and address PR code review comments using make pr-comments. Enforces DDD architecture, code organization principles, and quality standards. Use when handling code review feedback, refactoring based on reviewer suggestions, or addressing PR comments.
 ---
 
 # Code Review Workflow Skill
 
-This skill provides a systematic approach to retrieving and addressing all code review comments on Pull Requests.
+## Context (Input)
 
-## When to Use This Skill
+- PR has unresolved code review comments
+- Need systematic approach to address feedback
+- Ready to implement reviewer suggestions
+- Need to verify DDD architecture compliance
+- Need to ensure code organization best practices
+- Need to maintain quality standards
 
-Activate this skill when:
+## Task (Function)
 
-- User asks to address code review comments
-- Working on PR feedback
-- Refactoring based on reviewer suggestions
-- Need to retrieve unresolved PR comments
-- Preparing to respond to reviewers
+Retrieve PR comments, categorize by type, verify architecture compliance, enforce code organization principles, and implement all changes systematically while maintaining 100% quality standards.
 
-## Step 1: Retrieve All PR Comments
+## Execution Steps
 
-### Auto-detect PR from current branch
-
-```bash
-make pr-comments
-```
-
-### Specify PR number explicitly
+### Step 1: Get PR Comments
 
 ```bash
-make pr-comments PR=215
+make pr-comments              # Auto-detect from current branch
+make pr-comments PR=62       # Specify PR number
+make pr-comments FORMAT=json  # JSON output
 ```
 
-### Different output formats
+**Output**: All unresolved comments with file/line, author, timestamp, URL
 
-```bash
-make pr-comments FORMAT=json      # JSON format
-make pr-comments FORMAT=markdown  # Markdown format
+### Step 2: Categorize Comments
+
+| Type                   | Identifier                  | Priority | Action                               |
+| ---------------------- | --------------------------- | -------- | ------------------------------------ |
+| Committable Suggestion | Code block, "```suggestion" | Highest  | Apply immediately, commit separately |
+| LLM Prompt             | "🤖 Prompt for AI Agents"   | High     | Execute prompt, implement changes    |
+| Architecture Concern   | Class naming, file location | High     | Verify DDD compliance (see Step 2.1) |
+| Question               | Ends with "?"               | Medium   | Answer inline or via code change     |
+| General Feedback       | Discussion, recommendation  | Low      | Consider and improve                 |
+
+#### Step 2.1: Architecture & Code Organization Verification
+
+For any code changes (suggestions, prompts, or new files), **MANDATORY** verification:
+
+**A. Code Organization Principle** (see `code-organization` skill):
+
+> **Directory X contains ONLY class type X**
+
+Verify class is in the correct directory for its type:
+
+- `Converter/` → ONLY converters (type conversion)
+- `Transformer/` → ONLY transformers (data transformation for DB/serialization)
+- `Validator/` → ONLY validators (validation logic)
+- `Builder/` → ONLY builders (object construction)
+- `Fixer/` → ONLY fixers (modify/correct data)
+- `Cleaner/` → ONLY cleaners (filter/clean data)
+- `Factory/` → ONLY factories (create complex objects)
+- `Resolver/` → ONLY resolvers (resolve/determine values)
+- `Serializer/` → ONLY serializers/normalizers
+
+**B. Class Naming Compliance** (see `implementing-ddd-architecture` skill):
+
+| Layer              | Class Type         | Naming Pattern                       | Example                           |
+| ------------------ | ------------------ | ------------------------------------ | --------------------------------- |
+| **Domain**         | Entity             | `{EntityName}.php`                   | `Customer.php`                    |
+|                    | Value Object       | `{ConceptName}.php`                  | `Email.php`, `Money.php`          |
+|                    | Domain Event       | `{Entity}{PastTenseAction}.php`      | `CustomerCreated.php`             |
+|                    | Repository Iface   | `{Entity}RepositoryInterface.php`    | `CustomerRepositoryInterface.php` |
+|                    | Exception          | `{SpecificError}Exception.php`       | `InvalidEmailException.php`       |
+| **Application**    | Command            | `{Action}{Entity}Command.php`        | `CreateCustomerCommand.php`       |
+|                    | Command Handler    | `{Action}{Entity}Handler.php`        | `CreateCustomerHandler.php`       |
+|                    | Event Subscriber   | `{Action}On{Event}.php`              | `SendEmailOnCustomerCreated.php`  |
+|                    | DTO                | `{Entity}{Type}.php`                 | `CustomerInput.php`               |
+|                    | Processor          | `{Action}{Entity}Processor.php`      | `CreateCustomerProcessor.php`     |
+|                    | Transformer        | `{From}To{To}Transformer.php`        | `CustomerToArrayTransformer.php`  |
+| **Infrastructure** | Repository         | `{Technology}{Entity}Repository.php` | `MongoDBCustomerRepository.php`   |
+|                    | Doctrine Type      | `{ConceptName}Type.php`              | `UlidType.php`                    |
+|                    | Bus Implementation | `{Framework}{Type}Bus.php`           | `SymfonyCommandBus.php`           |
+
+**Directory Location Compliance**:
+
+```
+src/{Context}/
+├── Application/
+│   ├── Command/          ← Commands
+│   ├── CommandHandler/   ← Command Handlers
+│   ├── EventSubscriber/  ← Event Subscribers
+│   ├── DTO/              ← Data Transfer Objects
+│   ├── Processor/        ← API Platform Processors
+│   ├── Transformer/      ← Data Transformers
+│   └── MutationInput/    ← GraphQL Mutation Inputs
+├── Domain/
+│   ├── Entity/           ← Entities & Aggregates
+│   ├── ValueObject/      ← Value Objects
+│   ├── Event/            ← Domain Events
+│   ├── Repository/       ← Repository Interfaces
+│   └── Exception/        ← Domain Exceptions
+└── Infrastructure/
+    ├── Repository/       ← Repository Implementations
+    ├── DoctrineType/     ← Custom Doctrine Types
+    └── Bus/              ← Message Bus Implementations
 ```
 
-### What You Get
+**Verification Questions**:
 
-The command outputs all **unresolved** comments with:
+1. ✅ Is the class following **"Directory X contains ONLY class type X"** principle?
+   - Example: `UlidValidator` must be in `Validator/`, NOT in `Transformer/` or `Converter/`
+2. ✅ Is the class name following the DDD naming pattern for its type?
+3. ✅ Is the class in the correct directory according to its responsibility?
+4. ✅ Does the class name reflect what it actually does?
+5. ✅ Is the class in the correct layer (Domain/Application/Infrastructure)?
+6. ✅ Does Domain layer have NO framework imports (Symfony/Doctrine/API Platform)?
+7. ✅ Are variable names specific (not vague)?
+   - ✅ `$typeConverter`, `$scalarResolver` (specific)
+   - ❌ `$converter`, `$resolver` (too vague)
+8. ✅ Are parameter names accurate (match actual types)?
+   - ✅ `mixed $value` when accepts any type
+   - ❌ `string $binary` when accepts mixed
 
-- File path and line number
-- Author and timestamp
-- Full comment content
-- Direct GitHub URL for context
+**C. Namespace Consistency**:
 
-## Step 2: Categorize Comments by Type
+Namespace **MUST** match directory structure exactly:
 
-Analyze each comment and categorize:
+```php
+✅ CORRECT:
+// File: src/Shared/Infrastructure/Validator/UlidValidator.php
+namespace App\Shared\Infrastructure\Validator;
 
-### A. Committable Suggestions (Highest Priority)
-
-**Characteristics**:
-
-- Contains code suggestions
-- Usually prefixed with "suggestion"
-- Has code blocks to apply
-
-**Action**:
-
-1. Apply the suggested change exactly as provided
-2. Commit immediately with descriptive message
-3. Reference comment URL in commit message
-
-**Example**:
-
-```bash
-# Apply suggestion directly
-# Commit the change
-git add .
-git commit -m "Apply code review suggestion: improve variable naming
-
-Ref: https://github.com/user/repo/pull/215#discussion_r123456"
+❌ WRONG:
+// File: src/Shared/Infrastructure/Validator/UlidValidator.php
+namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 ```
 
-### B. LLM Prompts and Instructions (High Priority)
+**D. PHP Best Practices**:
 
-**Characteristics**:
+- ✅ Use constructor property promotion
+- ✅ Inject ALL dependencies (no default instantiation)
+- ✅ Use `readonly` when appropriate
+- ✅ Use `final` for classes that shouldn't be extended
+- ❌ NO "Helper" or "Util" classes (code smell - extract specific responsibilities)
 
-- Provides specific refactoring instructions
-- Includes architectural guidance
-- Describes implementation approach
+**Action on Violations**:
 
-**Action**:
+1. **Class in Wrong Directory**:
 
-1. Use comment as detailed prompt for code generation
-2. Analyze current implementation
-3. Design and implement changes following instructions
-4. Update tests accordingly
-5. Verify with `make ci`
-
-### C. Questions and Clarifications (Medium Priority)
-
-**Characteristics**:
-
-- Asks for explanation
-- Requests clarification of implementation
-
-**Action**:
-
-1. Reply with clear explanation
-2. Make code more self-documenting if needed
-3. Add documentation if helpful
-
-### D. General Feedback (Low Priority)
-
-**Characteristics**:
-
-- General observations
-- Praise or acknowledgment
-
-**Action**:
-
-- Consider for future improvements
-- No immediate action needed
-
-## Step 3: Systematic Implementation
-
-### For Committable Suggestions
-
-Work through each suggestion:
-
-1. **Locate the code** referenced in comment
-2. **Apply the suggestion** exactly as provided
-3. **Verify the change** makes sense
-4. **Run quality checks**:
    ```bash
-   make phpcsfixer
-   make psalm
+   # Move file to correct directory
+   mv src/Path/WrongDir/ClassName.php src/Path/CorrectDir/ClassName.php
+
+   # Update namespace in file
+   # Update all imports across codebase
+   grep -r "use.*WrongDir\\ClassName" src/ tests/
    ```
-5. **Commit immediately**:
+
+2. **Wrong Class Name**:
+
+   - Rename class to follow naming conventions
+   - Update all references to renamed class
+   - Ensure name reflects actual functionality
+
+3. **Vague Variable/Parameter Names**:
+
+   ```php
+   ❌ BEFORE: private UlidTypeConverter $converter;
+   ✅ AFTER:  private UlidTypeConverter $typeConverter;
+
+   ❌ BEFORE: private CustomerUpdateScalarResolver $resolver;
+   ✅ AFTER:  private CustomerUpdateScalarResolver $scalarResolver;
+   ```
+
+4. **Quality Verification**:
    ```bash
-   git add .
-   git commit -m "Apply suggestion: [brief description]"
+   make phpcsfixer    # Fix code style
+   make psalm         # Static analysis
+   make deptrac       # Verify no layer violations
+   make unit-tests    # Run tests
    ```
 
-### For LLM Prompts
+### Step 3: Apply Changes Systematically
 
-Break down complex refactoring:
+#### For Committable Suggestions
 
-1. **Create interfaces/abstractions first**
-2. **Implement new classes/methods**
-3. **Update existing code** to use new structure
-4. **Remove deprecated code**
-5. **Update tests and documentation**
-6. **Commit each logical change separately**
+1. Apply code change exactly as suggested
+2. Commit with reference:
 
-### For Complex Refactoring
+   ```bash
+   git commit -m "Apply review suggestion: [brief description]
 
-Create separate commits:
+   Ref: [comment URL]"
+   ```
 
-```bash
-git commit -m "refactor: extract validation strategy interface"
-git commit -m "refactor: implement concrete validation strategies"
-git commit -m "refactor: update validator to use strategies"
-git commit -m "refactor: remove old validation logic"
-git commit -m "test: update tests for new validation approach"
-```
+#### For LLM Prompts
 
-## Step 4: Quality Assurance
+1. Copy prompt from comment
+2. Execute as instructed
+3. Verify output meets requirements
+4. Commit with reference
 
-**After each change or group of related changes**:
+#### For Questions
 
-### For Code Changes
+1. Determine if code change or reply needed
+2. If code: implement + commit
+3. If reply: respond on GitHub
 
-```bash
-make phpcsfixer      # Fix code style
-make psalm           # Static analysis
-make unit-tests      # Run unit tests
-```
+#### For Feedback
 
-### For Significant Changes
+1. Evaluate suggestion merit
+2. Implement if beneficial
+3. Document reasoning if declined
+
+### Step 4: Verify All Addressed
 
 ```bash
-make ci              # Full CI suite
+make pr-comments  # Should show zero unresolved comments
 ```
 
-### For Test Changes
+### Step 5: Run Quality Checks
+
+**MANDATORY**: Run comprehensive CI checks after implementing all changes:
 
 ```bash
-make unit-tests      # Verify tests pass
-make infection       # Check mutation coverage
+make ci  # Must output "✅ CI checks successfully passed!"
 ```
 
-## Step 5: Comment Response Strategy
+**If CI fails**, address issues systematically:
 
-### Reply Systematically
+1. **Code Style Issues**: `make phpcsfixer`
+2. **Static Analysis Errors**: `make psalm`
+3. **Architecture Violations**: `make deptrac`
+4. **Test Failures**: `make unit-tests` / `make integration-tests`
+5. **Mutation Testing**: `make infection` (must maintain 100% MSI)
+6. **Complexity Issues**:
+   - Run `make phpmd` first to identify specific hotspots
+   - Refactor complex methods (keep complexity < 5 per method)
+   - Re-run `make phpinsights`
 
-**For Questions**:
+**Quality Standards Protection** (see `quality-standards` skill):
 
-```markdown
-Good question! [Clear, concise answer]
+- **PHPInsights**: 100% quality, 95% complexity, 100% architecture, 100% style
+- **Test Coverage**: 100% (no decrease allowed)
+- **Mutation Testing**: 100% MSI, 0 escaped mutants
+- **Cyclomatic Complexity**: < 5 per class/method
 
-[Optional: Reference to documentation or code]
+**DO NOT** finish the task until `make ci` shows: `✅ CI checks successfully passed!`
+
+## Comment Resolution Workflow
+
+```mermaid
+PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 ```
 
-**For Implemented Suggestions**:
+## Constraints (Parameters)
 
-```markdown
-✅ Implemented in [commit hash]
+**NEVER**:
 
-[Optional: Brief explanation of approach if needed]
+- Skip committable suggestions
+- Batch unrelated changes in one commit
+- Ignore LLM prompts from reviewers
+- Commit without running `make ci`
+- Leave questions unanswered
+- Accept class names that don't follow DDD naming patterns
+- Place files in wrong directories (violates layer architecture)
+- Allow Domain layer to import framework code (Symfony/Doctrine/API Platform)
+- Put class in wrong type directory (e.g., Validator in Transformer/)
+- Use vague variable names like `$converter`, `$resolver` (be specific!)
+- Create "Helper" or "Util" classes (extract specific responsibilities)
+- Allow namespace to mismatch directory structure
+- Decrease quality thresholds (PHPInsights, test coverage, mutation score)
+- Allow cyclomatic complexity > 5 per method
+- Finish task before `make ci` shows success message
+
+**ALWAYS**:
+
+- Apply suggestions exactly as provided
+- Commit each suggestion separately with URL reference
+- Verify **"Directory X contains ONLY class type X"** principle
+- Verify architecture compliance for any new/modified classes
+- Check class naming follows DDD patterns (see Step 2.1)
+- Verify files are in correct directories according to layer AND type
+- Ensure namespace matches directory structure exactly
+- Use specific variable names (`$typeConverter`, not `$converter`)
+- Use accurate parameter names (match actual types)
+- Run `make deptrac` to ensure no layer violations
+- Run `make ci` after implementing changes
+- Address ALL quality standard violations before finishing
+- Maintain 100% test coverage and 100% MSI (0 escaped mutants)
+- Keep cyclomatic complexity < 5 per method
+- Mark conversations resolved after addressing
+
+## Format (Output)
+
+**Commit Message Template**:
+
+```
+Apply review suggestion: [concise description]
+
+[Optional: explanation if non-obvious]
+
+Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
 ```
 
-**For Complex Refactoring**:
-
-```markdown
-Refactored as suggested across these commits:
-
-- [commit hash]: [brief description]
-- [commit hash]: [brief description]
-
-[Explanation of approach and any trade-offs]
-```
-
-**For Cannot Implement**:
-
-```markdown
-I understand the concern, but [technical constraint].
-
-Alternative approach: [propose alternative]
-
-What do you think?
-```
-
-## Step 6: Verification
-
-### Before Completing Review Cycle
+**Final Verification**:
 
 ```bash
-# Ensure clean working directory
-git status
-
-# Get latest changes
-git pull origin main
-
-# Check current comment status
-make pr-comments
-
-# Run full CI
-make ci
-
-# Verify success message
-# Must see: "✅ CI checks successfully passed!"
+✅ make pr-comments shows 0 unresolved
+✅ make ci shows "CI checks successfully passed!"
 ```
 
-### Push Changes
+## Verification Checklist
+
+- [ ] All PR comments retrieved via `make pr-comments`
+- [ ] Comments categorized by type (suggestion/prompt/question/feedback)
+- [ ] **Code Organization verified for all changes**:
+  - [ ] **"Directory X contains ONLY class type X"** principle enforced
+  - [ ] Converters in `Converter/`, Transformers in `Transformer/`, etc.
+  - [ ] Class type matches directory (no mismatches)
+- [ ] **Architecture & DDD compliance verified**:
+  - [ ] Class names follow DDD naming patterns
+  - [ ] Files in correct directories according to layer
+  - [ ] Class names reflect what they actually do
+  - [ ] Domain layer has NO framework imports
+  - [ ] `make deptrac` passes (0 violations)
+- [ ] **Naming conventions enforced**:
+  - [ ] Variable names are specific (`$typeConverter`, not `$converter`)
+  - [ ] Parameter names match actual types
+  - [ ] Namespace matches directory structure
+  - [ ] No "Helper" or "Util" classes
+- [ ] **PHP best practices applied**:
+  - [ ] Constructor property promotion used
+  - [ ] All dependencies injected (no default instantiation)
+  - [ ] `readonly` and `final` used appropriately
+- [ ] Committable suggestions applied and committed separately
+- [ ] LLM prompts executed and implemented
+- [ ] Questions answered (code or reply)
+- [ ] General feedback evaluated and addressed
+- [ ] **Quality standards maintained**:
+  - [ ] Test coverage remains 100%
+  - [ ] Mutation testing: 100% MSI (0 escaped mutants)
+  - [ ] PHPInsights: 100% quality, 95% complexity, 100% architecture, 100% style
+  - [ ] Cyclomatic complexity < 5 per method
+  - [ ] `make ci` shows "✅ CI checks successfully passed!"
+- [ ] `make pr-comments` shows zero unresolved
+- [ ] All conversations marked resolved on GitHub
+
+## Common Code Organization Issues in Reviews
+
+### Issue 1: Class in Wrong Type Directory
+
+**Scenario**: `UlidValidator` placed in `Transformer/` directory
 
 ```bash
-git push
+❌ WRONG:
+src/Shared/Infrastructure/Transformer/UlidValidator.php
+
+✅ CORRECT:
+src/Shared/Infrastructure/Validator/UlidValidator.php
 ```
 
-## Advanced Patterns
-
-### Handling Conflicting Comments
-
-1. **Prioritize architectural concerns** over stylistic preferences
-2. **Discuss with reviewers** before implementing conflicting suggestions
-3. **Document decision** in commit message or PR comment
-
-### Large-Scale Refactoring
-
-1. **Create separate commits** for each logical change
-2. **Maintain backward compatibility** when possible
-3. **Update tests incrementally** with code changes
-4. **Use feature flags** for risky changes
-
-### Performance and Security Comments
-
-1. **Address security concerns immediately** (highest priority)
-2. **Benchmark performance changes** when suggested
-3. **Document trade-offs** in code comments
-
-## Integration with Workflow
-
-### Before Starting
+**Fix**:
 
 ```bash
-git status                  # Clean working directory
-git pull origin main        # Latest changes
-make pr-comments           # Current comment status
+mv src/Shared/Infrastructure/Transformer/UlidValidator.php \
+   src/Shared/Infrastructure/Validator/UlidValidator.php
+# Update namespace and all imports
 ```
 
-### During Refactoring
+### Issue 2: Vague Variable Names
 
-- Work on one comment or related group at a time
-- Commit frequently with descriptive messages
-- Reference comment URLs in commit messages
+**Scenario**: Generic variable names in constructor
 
-### After Completing
+```php
+❌ WRONG:
+public function __construct(
+    private UlidTypeConverter $converter,  // Converter of what?
+) {}
 
-```bash
-make ci                    # Full quality check
-make pr-comments           # Verify no new unresolved comments
-git push                   # Push all changes
+✅ CORRECT:
+public function __construct(
+    private UlidTypeConverter $typeConverter,  // Specific!
+) {}
 ```
 
-## Success Criteria
+### Issue 3: Misleading Parameter Names
 
-- All unresolved comments addressed
-- Clear responses provided to questions
-- All suggested changes implemented or alternatives proposed
-- All commits have descriptive messages
-- CI checks pass: "✅ CI checks successfully passed!"
-- Changes pushed to remote branch
+**Scenario**: Parameter name doesn't match actual type
+
+```php
+❌ WRONG:
+public function fromBinary(mixed $binary): Ulid  // Accepts mixed, not just binary
+
+✅ CORRECT:
+public function fromBinary(mixed $value): Ulid  // Accurate!
+```
+
+### Issue 4: Helper/Util Classes
+
+**Scenario**: Code review flags `CustomerHelper` class
+
+```php
+❌ WRONG:
+class CustomerHelper {
+    public function validateEmail() {}
+    public function formatName() {}
+    public function convertData() {}
+}
+
+✅ CORRECT: Extract specific responsibilities
+- CustomerEmailValidator (Validator/)
+- CustomerNameFormatter (Formatter/)
+- CustomerDataConverter (Converter/)
+```
+
+## Related Skills
+
+- **quality-standards**: Maintains 100% code quality metrics
+- **code-organization**: Enforces "Directory X contains ONLY class type X"
+- **implementing-ddd-architecture**: DDD patterns and structure
+- **ci-workflow**: Comprehensive quality checks
+- **testing-workflow**: Test coverage and mutation testing

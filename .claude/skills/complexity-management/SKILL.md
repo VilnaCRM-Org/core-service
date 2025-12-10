@@ -32,7 +32,7 @@ Use this skill when:
 ```php
 'requirements' => [
     'min-quality' => 100,      // Code quality
-    'min-complexity' => 94,    // Cyclomatic complexity
+    'min-complexity' => 95,    // Cyclomatic complexity
     'min-architecture' => 100, // Architecture compliance
     'min-style' => 100,        // Coding style
 ],
@@ -57,7 +57,7 @@ Use this skill when:
 **Protected thresholds are non-negotiable**:
 
 - min-quality: 100% (never lower)
-- min-complexity: 94% (never lower)
+- min-complexity: 95% (never lower)
 - min-architecture: 100% (never lower)
 - min-style: 100% (never lower)
 

@@ -10,7 +10,7 @@ When `make phpinsights` fails:
 
    ```
    [CODE] 100.0 pts       ✅
-   [COMPLEXITY] 89.3 pts  ❌ (requires 94%)
+   [COMPLEXITY] 89.3 pts  ❌ (requires 95%)
    [ARCHITECTURE] 100 pts ✅
    [STYLE] 97.8 pts       ❌ (requires 100%)
    ```
@@ -47,7 +47,7 @@ When `make phpinsights` fails:
 ```php
 // phpinsights.php
 'requirements' => [
-    'min-complexity' => 89,  // ❌ Lowered from 94 to make it pass
+    'min-complexity' => 89,  // ❌ Lowered from 95 to make it pass
 ],
 ```
 
@@ -153,7 +153,7 @@ make phpinsights              # Verify all checks pass
 
 ---
 
-## Complexity Failures (< 94%)
+## Complexity Failures (< 95%)
 
 ### ❌ "Function/Method has cyclomatic complexity of X (maximum: Y)"
 
