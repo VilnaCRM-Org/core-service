@@ -753,7 +753,7 @@ Key configuration:
 ```php
 'requirements' => [
     'min-quality' => 100,
-    'min-complexity' => 94,  // Matches user-service
+    'min-complexity' => 93,  // Project standard
     'min-architecture' => 100,
     'min-style' => 100,
 ],
