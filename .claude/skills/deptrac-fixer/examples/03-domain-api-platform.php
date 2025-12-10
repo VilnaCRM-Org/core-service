@@ -351,7 +351,7 @@ final readonly class CustomerProvider implements ProviderInterface
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?CustomerResource
     {
-        $id = new Ulid($uriVariables['id']);
+        $id = new Ulid($uriVariables['ulid']);
         $customer = $this->repository->findById($id);
 
         if ($customer === null) {
