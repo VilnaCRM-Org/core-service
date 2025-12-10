@@ -342,16 +342,16 @@ interface ProductRepositoryInterface
 **Example**:
 
 ```xml
-<!-- config/doctrine/Product.orm.xml -->
+<!-- config/doctrine/Product.mongodb.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
-<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
-    <document name="App\Catalog\Domain\Entity\Product" collection="products">
-        <field name="id" type="ulid" id="true" strategy="NONE"/>
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping">
+    <document name="App\Catalog\Domain\Entity\Product" db="core_service" collection="products">
+        <id name="id" type="ulid" strategy="NONE"/>
         <field name="name" type="string"/>
-        <embed-one target-document="App\Catalog\Domain\ValueObject\Money" field="price"/>
-        <field name="createdAt" type="datetime_immutable"/>
+        <embed-one field="price" target-document="App\Catalog\Domain\ValueObject\Money"/>
+        <field name="createdAt" type="date_immutable"/>
     </document>
-</doctrine-mapping>
+</doctrine-mongo-mapping>
 ```
 
 ### Step 5: Implement Repository (Infrastructure Layer)
