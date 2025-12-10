@@ -379,6 +379,44 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
+### 13. Query Performance Analysis (`query-performance-analysis/`)
+
+**Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe online index migrations
+
+**When activated**:
+
+- New or modified endpoints are slow
+- Profiler shows many database queries for single operation
+- Need to detect N+1 query problems
+- Query execution time is high
+- Missing index warnings in MongoDB logs
+- Performance regression after code changes
+- Planning safe index migrations for production
+- Need to verify index effectiveness
+
+**What it does**:
+
+- Analyzes query performance with MongoDB profiler
+- Detects N+1 query issues with profiling
+- Identifies missing indexes using EXPLAIN analysis
+- Provides safe online index migration strategies
+- Documents performance thresholds (<100ms reads, <500ms writes)
+- Guides eager loading implementation to fix N+1 queries
+- Ensures index migrations are production-safe (no downtime)
+
+**Key commands**: `docker compose exec mongo mongosh`, MongoDB profiler commands
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` - Core workflow and performance checklist (435 lines)
+- `examples/n-plus-one-detection.md` - N+1 query detection guide
+- `examples/slow-query-analysis.md` - Slow query analysis examples
+- `reference/mongodb-profiler-guide.md` - Profiling and performance monitoring
+- `reference/index-strategies.md` - MongoDB index selection strategies
+- `reference/performance-thresholds.md` - Performance targets and thresholds
+
+---
+
 ## How Skills Work
 
 ### Cross-Platform Compatibility

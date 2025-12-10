@@ -12,6 +12,7 @@ What are you trying to do?
 │   ├─ High complexity → complexity-management
 │   ├─ Test failures → testing-workflow
 │   ├─ PHPInsights fails → complexity-management
+│   ├─ Slow queries/N+1 → query-performance-analysis
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
@@ -24,6 +25,7 @@ What are you trying to do?
 ├─ Review/validate work
 │   ├─ Before committing → ci-workflow
 │   ├─ PR feedback → code-review
+│   ├─ Query performance → query-performance-analysis
 │   └─ Quality thresholds → quality-standards
 │
 └─ Update documentation
@@ -136,6 +138,17 @@ This skill guides updating workspace.dsl for Structurizr C4 diagrams.
 
 ---
 
+### "Endpoints are slow or have N+1 query problems"
+
+**Use**: [query-performance-analysis](query-performance-analysis/SKILL.md)
+
+This skill detects N+1 queries with MongoDB profiler and provides index optimization strategies.
+
+**NOT**: load-testing (that's for load/stress testing)
+**NOT**: testing-workflow (that's for functional tests)
+
+---
+
 ### "I need to add a new field to an entity"
 
 **Use**: [database-migrations](database-migrations/SKILL.md)
@@ -182,6 +195,7 @@ This skill covers processor patterns for OpenAPI.
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | deptrac-fixer vs implementing-ddd-architecture      | **Fix violations** → deptrac-fixer<br>**Design new patterns** → implementing-ddd-architecture                                          |
 | testing-workflow vs load-testing                    | **Functional tests** (unit, integration, E2E) → testing-workflow<br>**Performance tests** (K6) → load-testing                          |
+| load-testing vs query-performance-analysis          | **Load/stress testing** → load-testing<br>**Query optimization & N+1 detection** → query-performance-analysis                          |
 | quality-standards vs complexity-management          | **Overview of all metrics** → quality-standards<br>**Fix complexity specifically** → complexity-management                             |
 | ci-workflow vs testing-workflow                     | **Run all CI checks** → ci-workflow<br>**Debug specific test issues** → testing-workflow                                               |
 | documentation-sync vs structurizr-architecture-sync | **General documentation** (/docs) → documentation-sync<br>**C4 architecture diagrams** (workspace.dsl) → structurizr-architecture-sync |
