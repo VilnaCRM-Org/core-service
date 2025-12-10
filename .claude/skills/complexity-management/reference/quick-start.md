@@ -6,7 +6,7 @@ Fast-track guide for code agents to systematically reduce complexity. Start here
 
 Reduce cyclomatic complexity to meet PHPInsights standards:
 
-- **Target**: 95% complexity minimum
+- **Target**: 94% complexity minimum
 - **Method complexity**: < 5 average per method
 - **Maintain**: 100% test coverage, 100% mutation score
 
@@ -210,7 +210,7 @@ After refactoring each class, verify:
 
 Your refactoring is complete when:
 
-- **PHPInsights complexity**: ≥ 95%
+- **PHPInsights complexity**: ≥ 94%
 - **Code quality**: 100%
 - **Architecture**: 100%
 - **Style**: 100%
@@ -293,7 +293,7 @@ diff complexity-before.json complexity-after.json
 
 You'll know refactoring is working when:
 
-- ✅ PHPInsights complexity trending up (94.0% → 94.5% → 95.0%)
+- ✅ PHPInsights complexity trending up (93.5% → 94% → 94.5%)
 - ✅ Classes dropping out of top 20 complexity list
 - ✅ Average complexity decreasing
 - ✅ All CI checks consistently green

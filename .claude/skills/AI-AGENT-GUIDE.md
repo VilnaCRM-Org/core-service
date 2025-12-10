@@ -103,7 +103,7 @@ Complex skills have multi-file structure:
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
 
-## Available Skills (12 Total)
+## Available Skills (14 Total)
 
 ### 🔧 Workflow Skills
 
@@ -136,6 +136,13 @@ Complex skills have multi-file structure:
 | --------------------- | ---------------------------- | -------------------------------------------- |
 | **API Platform CRUD** | `api-platform-crud/SKILL.md` | Create complete REST API CRUD with DDD/CQRS  |
 | **Load Testing**      | `load-testing/SKILL.md`      | Create K6 performance tests for REST/GraphQL |
+
+### 📊 Observability & Performance Skills
+
+| Skill                             | File                                     | When to Use                                               |
+| --------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| **Observability Instrumentation** | `observability-instrumentation/SKILL.md` | Add structured logs, metrics, traces to new/existing code |
+| **Query Performance Analysis**    | `query-performance-analysis/SKILL.md`    | Detect N+1 queries, analyze slow queries, add indexes     |
 
 ## Practical Examples
 

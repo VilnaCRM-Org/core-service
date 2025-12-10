@@ -6,8 +6,8 @@ declare(strict_types=1);
  * ⚠️ WARNING: This file demonstrates ANTI-PATTERNS first, then CORRECT patterns!
  *
  * FILE STRUCTURE:
- * - Section: ❌ ANTI-PATTERNS (what NOT to do) [see header below]
- * - Section: ✅ CORRECT PATTERNS (what to do instead) [see header below]
+ * - Lines 18-81:  ❌ ANTI-PATTERNS (what NOT to do)
+ * - Lines 84+:    ✅ CORRECT PATTERNS (what to do instead)
  *
  * This is a decision guide showing when to use Value Objects vs primitives.
  * NOT every field needs to be a Value Object!

@@ -81,19 +81,19 @@ Repeat until: "✅ No violations found"
 Domain ─────────────────> (NO dependencies)
            │
            │
-Application ──────────> Domain + Infrastructure + Symfony + API Platform + Logging + GraphQL + BSON
+Application ──────────> Domain + Infrastructure + Symfony + API Platform
            │
            │
-Infrastructure ───────> Domain + Application + Symfony + Doctrine + Logging + BSON
+Infrastructure ───────> Domain + Application + Symfony + Doctrine
 ```
 
 **Allowed Dependencies:**
 
-| Layer              | Can Depend On                                                            |
-| ------------------ | ------------------------------------------------------------------------ |
-| **Domain**         | ❌ Nothing (pure PHP only)                                               |
-| **Application**    | ✅ Domain, Infrastructure, Symfony, API Platform, Logging, GraphQL, BSON |
-| **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, Logging, BSON                 |
+| Layer              | Can Depend On                                      |
+| ------------------ | -------------------------------------------------- |
+| **Domain**         | ❌ Nothing (pure PHP only)                         |
+| **Application**    | ✅ Domain, Infrastructure, Symfony, API Platform   |
+| **Infrastructure** | ✅ Domain, Application, Symfony, Doctrine, MongoDB |
 
 **See**: [CODELY-STRUCTURE.md](CODELY-STRUCTURE.md) for complete directory hierarchy.
 

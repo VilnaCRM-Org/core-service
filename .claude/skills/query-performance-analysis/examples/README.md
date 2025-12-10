@@ -71,7 +71,7 @@ After applying a fix:
 
 ```javascript
 // Re-run profiler
-db.setProfilingLevel(2, { slowms: 100 })
+db.setProfilingLevel(2, { slowms: 100 });
 ```
 
 ```bash
@@ -81,7 +81,7 @@ curl http://localhost/api/your-endpoint
 
 ```javascript
 // Check query count and timing
-db.system.profile.find().sort({ ts: -1 }).limit(10)
+db.system.profile.find().sort({ ts: -1 }).limit(10);
 ```
 
 ## Quick Reference

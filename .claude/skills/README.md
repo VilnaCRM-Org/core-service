@@ -379,9 +379,58 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 13. Query Performance Analysis (`query-performance-analysis/`)
+### 13. Observability Instrumentation (`observability-instrumentation/`)
 
-**Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe online index migrations
+**Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
+
+**When activated**:
+
+- Implementing new features or command handlers
+- Creating new API endpoints (REST/GraphQL)
+- Adding database operations or external HTTP calls
+- Instrumenting existing code for production monitoring
+- Preparing code for deployment
+- Before creating pull requests (attach observability evidence)
+
+**What it does**:
+
+- Guides implementation of structured logging with correlation IDs
+- Provides metrics patterns (latency, errors, throughput/RPS)
+- Shows how to trace DB/HTTP operations
+- Explains correlation ID management and propagation
+- Documents PR evidence collection and templates
+- Ensures code is observable, debuggable, and production-ready
+
+**Three Pillars of Observability**:
+
+1. **Logs**: Structured logging with correlation ID tracking
+2. **Metrics**: Latency, error rates, and throughput measurements
+3. **Traces**: DB/HTTP operation timing and flow tracking
+
+**Key patterns**:
+
+- Structured arrays (not string concatenation) for logs
+- Correlation ID in every log entry
+- Duration metrics for all operations
+- Error counters with error type tagging
+- DB/HTTP operation tracing with timing
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and three pillars)
+- `examples/instrumented-command-handler.md` (Complete working example)
+- `reference/structured-logging.md` (Logging patterns and best practices)
+- `reference/metrics-patterns.md` (Metrics collection and naming)
+- `reference/pr-evidence-guide.md` (Evidence templates for PRs)
+- `reference/quick-start.md` (10-minute implementation guide)
+
+**Integration**: Works alongside implementing-ddd-architecture, api-platform-crud, and ci-workflow skills
+
+---
+
+### 14. Query Performance Analysis (`query-performance-analysis/`)
+
+**Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
 
 **When activated**:
 
@@ -392,65 +441,37 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - Missing index warnings in MongoDB logs
 - Performance regression after code changes
 - Planning safe index migrations for production
-- Need to verify index effectiveness
 
 **What it does**:
 
-- Analyzes query performance with MongoDB profiler
-- Detects N+1 query issues with profiling
-- Identifies missing indexes using EXPLAIN analysis
+- Detects N+1 query patterns using MongoDB profiler
+- Analyzes slow queries with EXPLAIN execution plans
+- Identifies missing or inefficient indexes
 - Provides safe online index migration strategies
-- Documents performance thresholds (<100ms reads, <500ms writes)
-- Guides eager loading implementation to fix N+1 queries
-- Ensures index migrations are production-safe (no downtime)
+- Verifies index effectiveness with before/after comparisons
+- Creates performance regression tests
 
-**Key commands**: `docker compose exec mongo mongosh`, MongoDB profiler commands
+**Key features**:
 
-**Structure**: Multi-file with comprehensive guides:
-
-- `SKILL.md` - Core workflow and performance checklist (435 lines)
-- `examples/n-plus-one-detection.md` - N+1 query detection guide
-- `examples/slow-query-analysis.md` - Slow query analysis examples
-- `reference/mongodb-profiler-guide.md` - Profiling and performance monitoring
-- `reference/index-strategies.md` - MongoDB index selection strategies
-- `reference/performance-thresholds.md` - Performance targets and thresholds
-
----
-
-### 14. Observability Instrumentation (`observability-instrumentation/`)
-
-**Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
-
-**When activated**:
-
-- Implementing new features or command handlers
-- Creating new API endpoints (REST/GraphQL)
-- Adding database operations or external HTTP calls
-- Refactoring existing code that lacks observability
-- Preparing code for production deployment
-- Debugging performance or reliability issues
-- Before creating pull requests (attach observability evidence)
-
-**What it does**:
-
-- Implements Three Pillars: Logs, Metrics, and Traces
-- Adds structured logging with correlation ID tracking
-- Instruments latency, error rates, and throughput metrics
-- Wraps DB/HTTP calls with timing and context
-- Provides PR evidence guide for attaching observability data
-- Ensures production-ready monitoring for all new code
-- Follows PSR-3 logging standards (Symfony/Monolog)
-
-**Key commands**: Docker logs, Symfony profiler, metrics endpoints
+- N+1 query detection and fixing
+- EXPLAIN analysis for slow queries
+- Index strategy selection (single field, compound, covered queries)
+- Safe background index builds for production
+- Performance threshold enforcement (<100ms reads, <500ms writes)
+- Integration with load-testing for regression prevention
 
 **Structure**: Multi-file with comprehensive guides:
 
-- `SKILL.md` - Core observability patterns and workflow (593 lines)
-- `examples/instrumented-command-handler.md` - Complete working example
-- `reference/structured-logging.md` - Logging patterns with correlation ID
-- `reference/metrics-patterns.md` - Latency, errors, RPS instrumentation
-- `reference/pr-evidence-guide.md` - Attaching observability evidence to PRs
-- `reference/quick-start.md` - Quick start for new developers
+- `SKILL.md` (Core workflow and performance checklist)
+- `examples/n-plus-one-detection.md` (N+1 detection and fixing example)
+- `examples/slow-query-analysis.md` (EXPLAIN analysis walkthrough)
+- `reference/mongodb-profiler-guide.md` (Profiler setup and usage)
+- `reference/index-strategies.md` (When to use which index type)
+- `reference/performance-thresholds.md` (Acceptable performance limits)
+
+**Integration**: Works alongside database-migrations (index syntax), load-testing (regression tests), and observability-instrumentation (performance metrics)
+
+**Complements**: Use with database-migrations for index creation XML syntax
 
 ---
 
