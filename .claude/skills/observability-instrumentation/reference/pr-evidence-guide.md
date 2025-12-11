@@ -201,7 +201,7 @@ Copy this template into your PR description:
 - [x] Validated trace timing accuracy
 - [x] Tested error scenarios with full logging
 
-```
+````
 
 ---
 
@@ -225,7 +225,7 @@ For smaller PRs, use this condensed version:
     "duration_ms": 45.67
   }
 }
-```
+````
 
 ### Metrics
 
@@ -237,7 +237,7 @@ For smaller PRs, use this condensed version:
 - Total: 45.67ms
 - DB operation: 12.45ms
 
-```
+````
 
 ---
 
@@ -257,7 +257,7 @@ For visual learners, include screenshots from log aggregation tools:
 ![Correlation flow](./evidence/kibana-correlation-flow.png)
 
 All logs successfully tracked with correlation ID `550e8400...`.
-```
+````
 
 ### Datadog/Grafana
 
