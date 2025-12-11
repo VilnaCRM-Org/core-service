@@ -352,7 +352,7 @@ Key operations have metrics.
 
 ### ✅ Traces Show Timing
 
-```
+```json
 Total: 45.67ms
   ├─ DB: 12.45ms
   └─ HTTP: 30.12ms
