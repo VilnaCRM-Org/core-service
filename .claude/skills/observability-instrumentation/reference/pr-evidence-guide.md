@@ -31,7 +31,7 @@ bin/console app:create-customer --id=01JCXYZ... --email=test@example.com
 
 ### Step 2: Capture Logs
 
-**Option A: Tail logs in real-time**
+#### Option A: Tail logs in real-time
 
 ```bash
 # In another terminal
@@ -39,13 +39,13 @@ make sh
 tail -f var/log/dev.log | grep correlation_id
 ```
 
-**Option B: Filter logs after execution**
+#### Option B: Filter logs after execution
 
 ```bash
 grep "correlation_id" var/log/dev.log | tail -20
 ```
 
-**Option C: Extract specific correlation ID**
+#### Option C: Extract specific correlation ID
 
 ```bash
 grep "550e8400-e29b-41d4-a716-446655440000" var/log/dev.log
@@ -201,7 +201,7 @@ Copy this template into your PR description:
 - [x] Validated trace timing accuracy
 - [x] Tested error scenarios with full logging
 
-````
+```
 
 ---
 
@@ -225,7 +225,7 @@ For smaller PRs, use this condensed version:
     "duration_ms": 45.67
   }
 }
-````
+```
 
 ### Metrics
 
@@ -237,7 +237,7 @@ For smaller PRs, use this condensed version:
 - Total: 45.67ms
 - DB operation: 12.45ms
 
-````
+```
 
 ---
 
@@ -257,7 +257,7 @@ For visual learners, include screenshots from log aggregation tools:
 ![Correlation flow](./evidence/kibana-correlation-flow.png)
 
 All logs successfully tracked with correlation ID `550e8400...`.
-````
+```
 
 ### Datadog/Grafana
 
@@ -343,7 +343,7 @@ Not string concatenation.
 
 ### ✅ Metrics Recorded
 
-```
+```text
 customer.create.duration: 45.67ms
 customer.create.errors: 0
 ```
@@ -352,7 +352,7 @@ Key operations have metrics.
 
 ### ✅ Traces Show Timing
 
-```json
+```text
 Total: 45.67ms
   ├─ DB: 12.45ms
   └─ HTTP: 30.12ms

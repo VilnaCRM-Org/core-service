@@ -84,7 +84,7 @@ $this->metrics->increment('operation.total');
 
 ### Examples
 
-```
+```bash
 # Command handlers
 customer.create.duration_ms
 customer.create.total
@@ -451,7 +451,7 @@ $this->metrics->record('customer.create.duration', $duration);
 
 Calculate error rate:
 
-```
+```bash
 error_rate = errors / total
 ```
 
