@@ -330,7 +330,7 @@ jobs:
             | Metric | Score | Target | Status |
             |--------|-------|--------|--------|
             | Code Quality | ${report.summary.code}% | 100% | ${report.summary.code >= 100 ? '✅' : '❌'} |
-            | Complexity | ${report.summary.complexity}% | 94% | ${report.summary.complexity >= 94 ? '✅' : '❌'} |
+            | Complexity | ${report.summary.complexity}% | 95% | ${report.summary.complexity >= 95 ? '✅' : '❌'} |
             | Architecture | ${report.summary.architecture}% | 100% | ${report.summary.architecture >= 100 ? '✅' : '❌'} |
             | Style | ${report.summary.style}% | 100% | ${report.summary.style >= 100 ? '✅' : '❌'} |
 
@@ -354,8 +354,8 @@ Add quality gate to CI:
   run: |
     COMPLEXITY=$(jq -r '.summary.complexity' phpinsights-report.json)
 
-    if (( $(echo "$COMPLEXITY < 94" | bc -l) )); then
-      echo "❌ Complexity score $COMPLEXITY% is below threshold (94%)"
+    if (( $(echo "$COMPLEXITY < 95" | bc -l) )); then
+      echo "❌ Complexity score $COMPLEXITY% is below threshold (95%)"
       exit 1
     fi
 
@@ -680,15 +680,17 @@ Every quarter, review:
 
 ### Annual Goals
 
-Set ambitious annual targets:
+Set ambitious annual targets beyond the minimum 95% threshold:
 
 ```
-Current:  Complexity 94%, Code 100%, Architecture 100%, Style 100%
-Q1 Goal:  Complexity 95%, maintain others
-Q2 Goal:  Complexity 96%, maintain others
-Q3 Goal:  Complexity 97%, maintain others
-Q4 Goal:  Complexity 98%, maintain others
+Minimum:  Complexity 95%, Code 100%, Architecture 100%, Style 100%  (enforced baseline)
+Q1 Goal:  Complexity 96%, maintain others
+Q2 Goal:  Complexity 97%, maintain others
+Q3 Goal:  Complexity 98%, maintain others
+Q4 Goal:  Complexity 99%, maintain others
 ```
+
+**Note**: 95% is the non-negotiable minimum. Goals should aim for continuous improvement above this baseline.
 
 ---
 
