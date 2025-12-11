@@ -380,6 +380,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 ---
 
 <<<<<<< HEAD
+
 ### 13. Observability Instrumentation (`observability-instrumentation/`)
 
 **Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
