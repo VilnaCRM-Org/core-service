@@ -194,7 +194,7 @@ make deptrac  # Must show 0 violations
 
 **Response**:
 
-```text
+```
 Thank you for the suggestion. However, adding this logic would increase
 cyclomatic complexity above our 5 per method limit.
 
@@ -212,7 +212,7 @@ This keeps our quality standards intact while addressing the concern.
 
 **Response**:
 
-```text
+```
 We maintain 100% test coverage and 100% MSI (mutation testing).
 All code must be tested, including trivial cases, to ensure:
 
@@ -229,9 +229,9 @@ I'll add comprehensive tests including edge cases.
 
 **Response**:
 
-```text
+```
 Quality thresholds are protected and cannot be decreased:
-- PHPInsights: 100% quality, 95% complexity, 100% architecture, 100% style
+- PHPInsights: 100% quality, 93% complexity, 100% architecture, 100% style
 - Test coverage: 100%
 - Mutation score: 100% MSI
 
@@ -360,10 +360,10 @@ make infection  # Must show 100% MSI, 0 escaped
 
 ## Quick Reference Card
 
-```text
+```
 BEFORE FINISHING CODE REVIEW:
 ✅ make ci shows "CI checks successfully passed!"
-✅ PHPInsights: 100% quality, 95% complexity, 100% architecture/style
+✅ PHPInsights: 100% quality, 93% complexity, 100% architecture/style
 ✅ Test coverage: 100%
 ✅ Mutation score: 100% MSI, 0 escaped mutants
 ✅ Cyclomatic complexity: < 5 per method

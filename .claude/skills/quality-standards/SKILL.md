@@ -145,7 +145,7 @@ make ci
 
 Check output for specific failure:
 
-```text
+```
 ❌ CI checks failed:
   - phpinsights: Complexity score too low (93.5% < 94%)
 ```
@@ -194,13 +194,13 @@ Repeat until: "✅ CI checks successfully passed!"
 
 ### Expected CI Output
 
-```text
+```
 ✅ CI checks successfully passed!
 ```
 
 ### Expected PHPInsights Output
 
-```text
+```
 [CODE] 100.0 pts       ✅ Target: 100%
 [COMPLEXITY] 94.0 pts  ✅ Target: 94%
 [ARCHITECTURE] 100 pts ✅ Target: 100%
@@ -209,13 +209,13 @@ Repeat until: "✅ CI checks successfully passed!"
 
 ### Expected Deptrac Output
 
-```text
+```
 ✅ No violations found
 ```
 
 ### Expected Infection Output
 
-```text
+```
 Mutation Score Indicator (MSI): 100%
 ```
 

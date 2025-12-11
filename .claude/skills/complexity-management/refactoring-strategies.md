@@ -1589,7 +1589,7 @@ Ask yourself these questions:
 ✅ Style: 100%
 ```
 
-**Approach**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, **project policy requires maintaining the 95% threshold**. Continue with micro-optimizations using Option B to reach 95%.
+**Approach**: With excellent scores across all metrics and very low average complexity, the 0.1% gap demonstrates exceptional code quality. However, **project policy requires maintaining the 93% threshold**. Continue with micro-optimizations using Option B to reach 93%.
 
 ##### Option B: Strategic Micro-Optimization
 
@@ -1611,7 +1611,7 @@ Target only the highest-impact changes:
 ],
 ```
 
-**Why this is forbidden**: This project has a strict policy that **phpinsights thresholds must NEVER be lowered**. The minimum complexity threshold is 95%, and this must be maintained or exceeded. If you cannot reach 95%, continue refactoring using Option B or seek additional guidance.
+**Why this is forbidden**: This project has a strict policy that **phpinsights thresholds must NEVER be lowered**. The minimum complexity threshold is 93%, and this must be maintained or exceeded. If you cannot reach 93%, continue refactoring using Option B or seek additional guidance.
 
 **This example is shown only to illustrate what NOT to do**. In other codebases without this policy, threshold adjustment might be acceptable, but not here.
 

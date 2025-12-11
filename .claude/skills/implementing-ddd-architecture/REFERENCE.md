@@ -330,7 +330,7 @@ interface ProductRepositoryInterface
 
 ### Step 4: Create Doctrine Mapping (Infrastructure Config)
 
-**Location**: `config/doctrine/{Entity}.mongodb.xml`
+**Location**: `config/doctrine/{Entity}.orm.xml`
 
 **Tasks**:
 
@@ -342,16 +342,16 @@ interface ProductRepositoryInterface
 **Example**:
 
 ```xml
-<!-- config/doctrine/Product.mongodb.xml -->
+<!-- config/doctrine/Product.orm.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
-<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping">
-    <document name="App\Catalog\Domain\Entity\Product" db="core_service" collection="products">
-        <id name="id" type="ulid" strategy="NONE"/>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+    <document name="App\Catalog\Domain\Entity\Product" collection="products">
+        <field name="id" type="ulid" id="true" strategy="NONE"/>
         <field name="name" type="string"/>
-        <embed-one field="price" target-document="App\Catalog\Domain\ValueObject\Money"/>
-        <field name="createdAt" type="date_immutable"/>
+        <embed-one target-document="App\Catalog\Domain\ValueObject\Money" field="price"/>
+        <field name="createdAt" type="datetime_immutable"/>
     </document>
-</doctrine-mongo-mapping>
+</doctrine-mapping>
 ```
 
 ### Step 5: Implement Repository (Infrastructure Layer)
@@ -659,13 +659,13 @@ class Product
 ```
 
 ```xml
-<!-- config/doctrine/Product.mongodb.xml -->
-<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping">
+<!-- config/doctrine/Product.orm.xml -->
+<doctrine-mapping>
     <document name="App\Product\Domain\Entity\Product" collection="products">
-        <id name="id" type="ulid" strategy="NONE"/>
+        <field name="id" type="ulid" id="true" strategy="NONE"/>
         <field name="name" type="string"/>
     </document>
-</doctrine-mongo-mapping>
+</doctrine-mapping>
 ```
 
 #### Violation Type 3: Domain → API Platform (Attributes)

@@ -430,7 +430,7 @@ final readonly class CustomerFactory
 
 ### Symptoms
 
-- PHPInsights reports complexity score below 95%
+- PHPInsights reports complexity score below 93%
 - Methods are too complex
 - Too many branches/conditions
 

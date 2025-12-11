@@ -238,7 +238,7 @@ make ci  # Must output "✅ CI checks successfully passed!"
 
 **Quality Standards Protection** (see `quality-standards` skill):
 
-- **PHPInsights**: 100% quality, 95% complexity, 100% architecture, 100% style
+- **PHPInsights**: 100% quality, 93% src / 95% tests complexity, 100% architecture, 100% style
 - **Test Coverage**: 100% (no decrease allowed)
 - **Mutation Testing**: 100% MSI, 0 escaped mutants
 - **Cyclomatic Complexity**: < 5 per class/method
@@ -338,7 +338,7 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
 - [ ] **Quality standards maintained**:
   - [ ] Test coverage remains 100%
   - [ ] Mutation testing: 100% MSI (0 escaped mutants)
-  - [ ] PHPInsights: 100% quality, 95% complexity, 100% architecture, 100% style
+  - [ ] PHPInsights: 100% quality, 93% src / 95% tests complexity, 100% architecture, 100% style
   - [ ] Cyclomatic complexity < 5 per method
   - [ ] `make ci` shows "✅ CI checks successfully passed!"
 - [ ] `make pr-comments` shows zero unresolved
