@@ -10,6 +10,7 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
  * @internal
@@ -17,6 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 final class CreateCustomerCommandHandlerTest extends UnitTestCase
 {
     private CustomerRepositoryInterface&MockObject $repository;
+    private TagAwareCacheInterface&MockObject $cache;
     private CreateCustomerCommandHandler $handler;
 
     protected function setUp(): void
@@ -26,12 +28,17 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
         $this->repository = $this->createMock(
             CustomerRepositoryInterface::class
         );
-        $this->handler = new CreateCustomerCommandHandler($this->repository);
+        $this->cache = $this->createMock(TagAwareCacheInterface::class);
+        $this->handler = new CreateCustomerCommandHandler($this->repository, $this->cache);
     }
 
     public function testInvokeSavesCustomer(): void
     {
         $customer = $this->createMock(Customer::class);
+        $customerId = (string) $this->faker->ulid();
+        $email = 'TeSt+Create@Example.COM';
+        $customer->method('getUlid')->willReturn($customerId);
+        $customer->method('getEmail')->willReturn($email);
 
         $command = new CreateCustomerCommand($customer);
 
@@ -39,6 +46,13 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
             ->expects($this->once())
             ->method('save')
             ->with($customer);
+
+        $this->cache->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.' . $customerId,
+                'customer.email.' . hash('sha256', strtolower($email)),
+            ]);
 
         ($this->handler)($command);
     }

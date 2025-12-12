@@ -96,6 +96,18 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
 
+  App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\CommandHandler\CreateCustomerCommandHandler:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\CommandHandler\UpdateCustomerCommandHandler:
+    arguments:
+      $cache: '@cache.customer'
+
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
 

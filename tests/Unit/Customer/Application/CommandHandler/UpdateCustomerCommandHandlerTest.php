@@ -17,12 +17,14 @@ use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class UpdateCustomerCommandHandlerTest extends UnitTestCase
 {
     private CustomerRepositoryInterface|MockObject $repository;
     private UpdateCustomerCommandHandler $handler;
     private UlidTransformer $ulidTransformer;
+    private TagAwareCacheInterface|MockObject $cache;
 
     protected function setUp(): void
     {
@@ -30,13 +32,14 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
 
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
+        $this->cache = $this->createMock(TagAwareCacheInterface::class);
         $ulidFactory = new UlidFactory();
         $this->ulidTransformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
             new UlidValueTransformer($ulidFactory)
         );
-        $this->handler = new UpdateCustomerCommandHandler($this->repository);
+        $this->handler = new UpdateCustomerCommandHandler($this->repository, $this->cache);
     }
 
     public function createCommand(
@@ -87,8 +90,31 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         UpdateCustomerCommand $command,
         Customer $customer
     ): void {
+        $customerId = (string) $this->faker->ulid();
+        $previousEmail = 'Old+Update@Example.COM';
+        $currentEmail = 'New+Update@Example.COM';
+
         $this->repository->expects($this->once())
             ->method('save')->with($customer);
+        $customer->expects($this->once())
+            ->method('getUlid')
+            ->willReturn($customerId);
+        $customer->expects($this->exactly(2))
+            ->method('getEmail')
+            ->willReturn($previousEmail, $currentEmail);
+        $this->cache->expects($this->exactly(2))
+            ->method('invalidateTags')
+            ->withConsecutive(
+                [[
+                    'customer.' . $customerId,
+                    'customer.email.' . hash('sha256', strtolower($currentEmail)),
+                ],
+                ],
+                [[
+                    'customer.email.' . hash('sha256', strtolower($previousEmail)),
+                ],
+                ]
+            );
         ($this->handler)($command);
     }
 }
