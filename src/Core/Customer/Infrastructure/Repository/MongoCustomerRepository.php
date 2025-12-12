@@ -32,17 +32,6 @@ final class MongoCustomerRepository extends BaseRepository implements
     }
 
     /**
-     * Find customer by ID (database only, no caching)
-     */
-    public function find(
-        mixed $id,
-        int $lockMode = 0,
-        ?int $lockVersion = null
-    ): ?object {
-        return $this->documentManager->find(Customer::class, $id, $lockMode, $lockVersion);
-    }
-
-    /**
      * Find customer by email (database only, no caching)
      */
     public function findByEmail(string $email): ?Customer

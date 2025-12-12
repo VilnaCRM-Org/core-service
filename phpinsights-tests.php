@@ -45,6 +45,8 @@ return [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
+                'tests/Unit/Customer/Infrastructure/State/CachedCustomerCollectionProviderTest',
+                'tests/Unit/Customer/Infrastructure/State/CachedCustomerItemProviderTest',
             ],
         ],
         UnnecessaryStringConcatSniff::class => [

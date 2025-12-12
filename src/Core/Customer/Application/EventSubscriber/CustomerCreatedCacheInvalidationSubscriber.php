@@ -30,6 +30,7 @@ final readonly class CustomerCreatedCacheInvalidationSubscriber implements
         $this->cache->invalidateTags([
             'customer.' . $event->customerId(),
             'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+            'customer.collection',
         ]);
 
         $this->logger->info('Cache invalidated after customer creation', [

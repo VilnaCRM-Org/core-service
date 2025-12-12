@@ -45,6 +45,22 @@ final readonly class CacheKeyBuilder
     }
 
     /**
+     * Build cache key for customer collections (filters normalized + hashed)
+     *
+     * @param array<string, string|int|float|bool|array|null> $filters
+     */
+    public function buildCustomerCollectionKey(array $filters): string
+    {
+        ksort($filters);
+
+        return $this->build(
+            'customer',
+            'collection',
+            hash('sha256', json_encode($filters, \JSON_THROW_ON_ERROR))
+        );
+    }
+
+    /**
      * Hash email consistently (lowercase + SHA256)
      *
      * Strategy:

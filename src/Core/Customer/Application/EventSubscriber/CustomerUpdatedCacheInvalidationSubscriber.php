@@ -31,6 +31,7 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
         $tagsToInvalidate = [
             'customer.' . $event->customerId(),
             'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->currentEmail()),
+            'customer.collection',
         ];
 
         // If email changed, invalidate previous email cache too

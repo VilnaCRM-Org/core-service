@@ -66,6 +66,7 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->with([
                 'customer.' . $customerId,
                 'customer.email.' . $emailHash,
+                'customer.collection',
             ]);
 
         $this->logger
@@ -114,6 +115,7 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->with([
                 'customer.' . $customerId,
                 'customer.email.' . $currentEmailHash,
+                'customer.collection',
                 'customer.email.' . $previousEmailHash,
             ]);
 

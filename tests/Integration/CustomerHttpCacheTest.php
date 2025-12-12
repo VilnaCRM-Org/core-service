@@ -25,7 +25,7 @@ final class CustomerHttpCacheTest extends ApiTestCase
         $client = self::createClient();
         $customer = $this->createTestCustomer();
 
-        $response = $client->request('GET', "{$this->baseUrl}/{$customer->getUlid()}");
+        $client->request('GET', "{$this->baseUrl}/{$customer->getUlid()}");
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Cache-Control', 'max-age=600, public, s-maxage=600');
@@ -37,7 +37,7 @@ final class CustomerHttpCacheTest extends ApiTestCase
         $client = self::createClient();
         $this->createTestCustomer();
 
-        $response = $client->request('GET', $this->baseUrl);
+        $client->request('GET', $this->baseUrl);
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Cache-Control', 'max-age=300, public, s-maxage=600');

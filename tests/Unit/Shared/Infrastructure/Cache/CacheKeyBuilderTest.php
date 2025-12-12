@@ -5,70 +5,47 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Cache;
 
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
-use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
-final class CacheKeyBuilderTest extends UnitTestCase
+final class CacheKeyBuilderTest extends TestCase
 {
-    private CacheKeyBuilder $cacheKeyBuilder;
+    private CacheKeyBuilder $builder;
 
     protected function setUp(): void
     {
-        parent::setUp();
-
-        $this->cacheKeyBuilder = new CacheKeyBuilder();
-    }
-
-    public function testBuildCreatesKeyFromNamespaceAndParts(): void
-    {
-        $result = $this->cacheKeyBuilder->build('customer', '12345');
-
-        self::assertSame('customer.12345', $result);
-    }
-
-    public function testBuildWithMultipleParts(): void
-    {
-        $result = $this->cacheKeyBuilder->build('customer', 'email', 'hash123');
-
-        self::assertSame('customer.email.hash123', $result);
+        $this->builder = new CacheKeyBuilder();
     }
 
     public function testBuildCustomerKey(): void
     {
-        $customerId = '01JKX8XGHVDZ46MWYMZT94YER4';
-        $result = $this->cacheKeyBuilder->buildCustomerKey($customerId);
-
-        self::assertSame('customer.' . $customerId, $result);
+        self::assertSame('customer.abc', $this->builder->buildCustomerKey('abc'));
     }
 
-    public function testBuildCustomerEmailKey(): void
+    public function testBuildCustomerEmailKeyHashesLowercasedEmail(): void
     {
-        $email = 'test@example.com';
-        $expectedHash = hash('sha256', strtolower($email));
+        $key = $this->builder->buildCustomerEmailKey('John@Example.COM');
+        $expectedHash = hash('sha256', 'john@example.com');
 
-        $result = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
-
-        self::assertSame('customer.email.' . $expectedHash, $result);
+        self::assertSame('customer.email.' . $expectedHash, $key);
     }
 
-    public function testHashEmailConvertsToLowercase(): void
+    public function testBuildCustomerCollectionKeySortsFilters(): void
     {
-        $email1 = 'Test@Example.COM';
-        $email2 = 'test@example.com';
+        $key = $this->builder->buildCustomerCollectionKey(['b' => 2, 'a' => 1]);
+        $expected = hash('sha256', json_encode(['a' => 1, 'b' => 2], \JSON_THROW_ON_ERROR));
 
-        $hash1 = $this->cacheKeyBuilder->hashEmail($email1);
-        $hash2 = $this->cacheKeyBuilder->hashEmail($email2);
-
-        self::assertSame($hash1, $hash2);
+        self::assertSame('customer.collection.' . $expected, $key);
     }
 
-    public function testHashEmailUsesSha256(): void
+    public function testBuildSupportsCustomNamespaces(): void
     {
-        $email = 'test@example.com';
-        $expectedHash = hash('sha256', strtolower($email));
+        self::assertSame('foo.bar.baz', $this->builder->build('foo', 'bar', 'baz'));
+    }
 
-        $result = $this->cacheKeyBuilder->hashEmail($email);
+    public function testHashEmailIsPublic(): void
+    {
+        $hash = $this->builder->hashEmail('UPPER@example.COM');
 
-        self::assertSame($expectedHash, $result);
-        self::assertSame(64, strlen($result)); // SHA256 produces 64 hex characters
+        self::assertSame(hash('sha256', 'upper@example.com'), $hash);
     }
 }
