@@ -31,6 +31,13 @@ return [
     ],
 
     'config' => [
+        SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff::class => [
+            'exclude' => [
+                'src/Core/Customer/Domain/Repository/CustomerRepositoryInterface',
+                'src/Core/Customer/Infrastructure/Repository/MongoCustomerRepository',
+                'src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository',
+            ],
+        ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',

@@ -71,6 +71,7 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 | **Quality overview**       | `quality-standards`             | Understanding protected thresholds           |
 | **Optimize queries**       | `query-performance-analysis`    | N+1 detection, slow queries, missing indexes |
 | **Add observability**      | `observability-instrumentation` | Logs, metrics, traces for new features       |
+| **Implement caching**      | `cache-management`              | Cache policies, invalidation, SWR, testing   |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
 
