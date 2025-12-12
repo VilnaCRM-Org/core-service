@@ -352,7 +352,7 @@ final readonly class CreateCustomerCommandHandler implements CommandHandlerInter
 
 ## Metrics Recorded
 
-```
+```text
 customer.create.duration: 278.34ms (status=success)
 customer.create.total: 1
 mongodb.customer.save.duration: 12.45ms
@@ -412,7 +412,7 @@ If the MongoDB save fails:
 
 **Metrics**:
 
-```
+```text
 customer.create.duration: 15.67ms (status=error)
 customer.create.errors: 1 (error_type=ConnectionTimeoutException)
 mongodb.customer.save.errors: 1 (error_type=ConnectionTimeoutException)

@@ -45,7 +45,11 @@ Create entities with XML mapping and repositories following hexagonal architectu
 
 ### Creating a New Entity
 
+<<<<<<< HEAD
 **Step 1: Create Entity (Domain Layer)**
+=======
+#### Step 1: Create Entity (Domain Layer)
+>>>>>>> origin/main
 
 ```php
 // src/Core/{Context}/Domain/Entity/{Entity}.php
@@ -64,7 +68,11 @@ final class Customer
 }
 ```
 
+<<<<<<< HEAD
 **Step 2: Create XML Mapping**
+=======
+#### Step 2: Create XML Mapping
+>>>>>>> origin/main
 
 ```xml
 <!-- config/doctrine/Customer.mongodb.xml -->
@@ -80,7 +88,11 @@ final class Customer
 </document>
 ```
 
+<<<<<<< HEAD
 **Step 3: Configure API Platform**
+=======
+#### Step 3: Configure API Platform
+>>>>>>> origin/main
 
 ```yaml
 # config/api_platform/resources/customer.yaml
@@ -92,7 +104,11 @@ App\Core\Customer\Domain\Entity\Customer:
     post: ~
 ```
 
+<<<<<<< HEAD
 **Step 4: Update Schema**
+=======
+#### Step 4: Update Schema
+>>>>>>> origin/main
 
 ```bash
 make cache-clear
@@ -116,7 +132,11 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 
 ### Creating Repositories
 
+<<<<<<< HEAD
 **Step 1: Define Interface (Domain)**
+=======
+#### Step 1: Define Interface (Domain)
+>>>>>>> origin/main
 
 ```php
 // Domain/Repository/CustomerRepositoryInterface.php
@@ -127,7 +147,11 @@ interface CustomerRepositoryInterface
 }
 ```
 
+<<<<<<< HEAD
 **Step 2: Implement (Infrastructure)**
+=======
+#### Step 2: Implement (Infrastructure)
+>>>>>>> origin/main
 
 ```php
 // Infrastructure/Repository/CustomerRepository.php

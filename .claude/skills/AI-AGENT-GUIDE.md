@@ -288,8 +288,14 @@ Complex skills have multi-file structure:
 ├── documentation-sync/
 │   └── SKILL.md                # Doc synchronization workflow
 │
-└── quality-standards/
-    └── SKILL.md                # Quality thresholds overview
+├── observability-instrumentation/
+│   └── SKILL.md                # Add instrumentation to code
+│
+├── quality-standards/
+│   └── SKILL.md                # Quality thresholds overview
+│
+└── query-performance-analysis/
+    └── SKILL.md                # Detect and fix slow queries
 ```
 
 ## Tips for Effective Use
