@@ -25,14 +25,14 @@ App\Core\Customer\Domain\Entity\Customer:
         - mongodb.range
       # HTTP Cache headers for collection (shorter TTL)
       cacheHeaders:
-        max_age: 300  # 5 minutes client cache
-        shared_max_age: 600  # 10 minutes CDN/proxy cache
+        max_age: 300 # 5 minutes client cache
+        shared_max_age: 600 # 10 minutes CDN/proxy cache
         vary: ['Accept', 'Authorization']
     ApiPlatform\Metadata\Get:
       # HTTP Cache headers for single resource
       cacheHeaders:
-        max_age: 600  # 10 minutes (matches application cache TTL)
-        shared_max_age: 600  # 10 minutes CDN/proxy cache
+        max_age: 600 # 10 minutes (matches application cache TTL)
+        shared_max_age: 600 # 10 minutes CDN/proxy cache
         vary: ['Accept', 'Authorization']
         # Enable ETag for conditional requests (304 Not Modified)
         etag: true
