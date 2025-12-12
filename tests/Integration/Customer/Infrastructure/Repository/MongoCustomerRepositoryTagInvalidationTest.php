@@ -7,7 +7,7 @@ namespace Tests\Integration\Customer\Infrastructure\Repository;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
 use App\Shared\Domain\ValueObject\Ulid;
@@ -19,7 +19,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
 {
-    private MongoCustomerRepository $repository;
+    private CustomerRepositoryInterface $repository;
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private TagAwareCacheInterface $cache;
@@ -32,7 +32,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->repository = self::getContainer()->get(MongoCustomerRepository::class);
+        $this->repository = self::getContainer()->get(CustomerRepositoryInterface::class);
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cache = self::getContainer()->get('cache.customer');

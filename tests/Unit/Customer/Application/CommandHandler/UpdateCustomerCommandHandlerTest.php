@@ -9,22 +9,23 @@ use App\Core\Customer\Application\CommandHandler\UpdateCustomerCommandHandler;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Domain\Bus\Event\EventBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class UpdateCustomerCommandHandlerTest extends UnitTestCase
 {
     private CustomerRepositoryInterface|MockObject $repository;
     private UpdateCustomerCommandHandler $handler;
     private UlidTransformer $ulidTransformer;
-    private TagAwareCacheInterface|MockObject $cache;
+    private EventBusInterface|MockObject $eventBus;
 
     protected function setUp(): void
     {
@@ -32,14 +33,14 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
 
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
-        $this->cache = $this->createMock(TagAwareCacheInterface::class);
+        $this->eventBus = $this->createMock(EventBusInterface::class);
         $ulidFactory = new UlidFactory();
         $this->ulidTransformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
             new UlidValueTransformer($ulidFactory)
         );
-        $this->handler = new UpdateCustomerCommandHandler($this->repository, $this->cache);
+        $this->handler = new UpdateCustomerCommandHandler($this->repository, $this->eventBus);
     }
 
     public function createCommand(
@@ -102,19 +103,21 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         $customer->expects($this->exactly(2))
             ->method('getEmail')
             ->willReturn($previousEmail, $currentEmail);
-        $this->cache->expects($this->exactly(2))
-            ->method('invalidateTags')
-            ->withConsecutive(
-                [[
-                    'customer.' . $customerId,
-                    'customer.email.' . hash('sha256', strtolower($currentEmail)),
-                ],
-                ],
-                [[
-                    'customer.email.' . hash('sha256', strtolower($previousEmail)),
-                ],
-                ]
-            );
+
+        $this->eventBus->expects($this->once())
+            ->method('publish')
+            ->with($this->callback(static function ($event) use ($customerId, $currentEmail, $previousEmail) {
+                if (! $event instanceof CustomerUpdatedEvent) {
+                    return false;
+                }
+
+                // Verify event properties match expected values
+                return $event->customerId() === $customerId
+                    && $event->currentEmail() === $currentEmail
+                    && $event->previousEmail() === $previousEmail
+                    && $event->emailChanged() === true;
+            }));
+
         ($this->handler)($command);
     }
 }

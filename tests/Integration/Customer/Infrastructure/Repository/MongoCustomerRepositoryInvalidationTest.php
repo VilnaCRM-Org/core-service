@@ -7,9 +7,12 @@ namespace Tests\Integration\Customer\Infrastructure\Repository;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
+use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
+use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
+use App\Shared\Domain\Bus\Event\EventBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -18,7 +21,8 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 {
-    private MongoCustomerRepository $repository;
+    private CustomerRepositoryInterface $repository;
+    private EventBusInterface $eventBus;
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private CacheItemPoolInterface $cachePool;
@@ -30,7 +34,8 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->repository = self::getContainer()->get(MongoCustomerRepository::class);
+        $this->repository = self::getContainer()->get(CustomerRepositoryInterface::class);
+        $this->eventBus = self::getContainer()->get(EventBusInterface::class);
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cachePool = self::getContainer()->get('cache.customer');
@@ -55,12 +60,18 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         $result2 = $this->repository->find($customerId);
         self::assertSame('John Doe', $result2->getInitials());
 
+        // Update customer and publish event for cache invalidation
         $customer->setInitials('Jane Doe');
         $this->repository->save($customer);
-        $this->tagCache->invalidateTags([
-            "customer.{$customerId}",
-            'customer.email.' . hash('sha256', strtolower($customer->getEmail())),
-        ]);
+
+        // Event-driven cache invalidation
+        $this->eventBus->publish(
+            new CustomerUpdatedEvent(
+                customerId: $customerId,
+                currentEmail: $customer->getEmail(),
+                previousEmail: null // Email didn't change
+            )
+        );
 
         $result3 = $this->repository->find($customerId);
         self::assertSame('Jane Doe', $result3->getInitials());
@@ -81,10 +92,14 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         self::assertNotNull($result1);
 
         $this->repository->delete($customer);
-        $this->tagCache->invalidateTags([
-            "customer.{$customerId}",
-            'customer.email.' . hash('sha256', strtolower($customerEmail)),
-        ]);
+
+        // Event-driven cache invalidation
+        $this->eventBus->publish(
+            new CustomerDeletedEvent(
+                customerId: $customerId,
+                customerEmail: $customerEmail
+            )
+        );
 
         $result2 = $this->repository->find($customerId);
         self::assertNull($result2);
@@ -100,20 +115,26 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         self::assertNotNull($result1);
         self::assertTrue($this->cachePool->getItem('customer.email.' . hash('sha256', strtolower($oldEmail)))->isHit());
 
+        // Change email and save
         $customer->setEmail($newEmail);
         $this->repository->save($customer);
-        $this->tagCache->invalidateTags([
-            "customer.{$customer->getUlid()}",
-            'customer.email.' . hash('sha256', strtolower($newEmail)),
-        ]);
-        $this->tagCache->invalidateTags([
-            'customer.email.' . hash('sha256', strtolower($oldEmail)),
-        ]);
 
+        // Event-driven cache invalidation with email change
+        // This tests the edge case where both old and new email caches are invalidated
+        $this->eventBus->publish(
+            new CustomerUpdatedEvent(
+                customerId: $customer->getUlid(),
+                currentEmail: $newEmail,
+                previousEmail: $oldEmail // Email changed, so previousEmail is set
+            )
+        );
+
+        // Verify old email cache is invalidated
         self::assertFalse($this->cachePool->getItem('customer.email.' . hash('sha256', strtolower($oldEmail)))->isHit());
         $result2 = $this->repository->findByEmail($oldEmail);
         self::assertNull($result2);
 
+        // Verify new email works
         $result3 = $this->repository->findByEmail($newEmail);
         self::assertNotNull($result3);
         self::assertSame($customer->getUlid(), $result3->getUlid());

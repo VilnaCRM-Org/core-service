@@ -7,10 +7,11 @@ namespace App\Tests\Unit\Customer\Application\CommandHandler;
 use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\CommandHandler\CreateCustomerCommandHandler;
 use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Shared\Domain\Bus\Event\EventBusInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
  * @internal
@@ -18,7 +19,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 final class CreateCustomerCommandHandlerTest extends UnitTestCase
 {
     private CustomerRepositoryInterface&MockObject $repository;
-    private TagAwareCacheInterface&MockObject $cache;
+    private EventBusInterface&MockObject $eventBus;
     private CreateCustomerCommandHandler $handler;
 
     protected function setUp(): void
@@ -28,8 +29,8 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
         $this->repository = $this->createMock(
             CustomerRepositoryInterface::class
         );
-        $this->cache = $this->createMock(TagAwareCacheInterface::class);
-        $this->handler = new CreateCustomerCommandHandler($this->repository, $this->cache);
+        $this->eventBus = $this->createMock(EventBusInterface::class);
+        $this->handler = new CreateCustomerCommandHandler($this->repository, $this->eventBus);
     }
 
     public function testInvokeSavesCustomer(): void
@@ -47,12 +48,9 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
             ->method('save')
             ->with($customer);
 
-        $this->cache->expects($this->once())
-            ->method('invalidateTags')
-            ->with([
-                'customer.' . $customerId,
-                'customer.email.' . hash('sha256', strtolower($email)),
-            ]);
+        $this->eventBus->expects($this->once())
+            ->method('publish')
+            ->with($this->isInstanceOf(CustomerCreatedEvent::class));
 
         ($this->handler)($command);
     }
