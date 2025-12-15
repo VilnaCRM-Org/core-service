@@ -305,43 +305,20 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
 
     public function testCallProxiesToInnerRepositoryForDoctrineRepoMethods(): void
     {
-        // Create an anonymous class extending the mock to add a test method
-        $innerMock = new class($this->innerRepository) implements CustomerRepositoryInterface {
-            public function __construct(private CustomerRepositoryInterface $inner)
-            {
-            }
+        // Create fresh instances to avoid Psalm control flow analysis issues
+        $innerRepository = $this->createMock(CustomerRepositoryInterface::class);
+        $cache = $this->createMock(TagAwareCacheInterface::class);
+        $cacheKeyBuilder = $this->createMock(CacheKeyBuilder::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
-            public function save(object $customer): void
-            {
-                $this->inner->save($customer);
-            }
-
-            public function findByEmail(string $email): ?\App\Core\Customer\Domain\Entity\CustomerInterface
-            {
-                return $this->inner->findByEmail($email);
-            }
-
-            public function find(mixed $id, int $lockMode = 0, ?int $lockVersion = null): ?object
-            {
-                return $this->inner->find($id, $lockMode, $lockVersion);
-            }
-
-            public function delete(object $customer): void
-            {
-                $this->inner->delete($customer);
-            }
-
-            public function getClassName(): string
-            {
-                return Customer::class;
-            }
-        };
+        // Create a test helper that implements the interface plus an extra method
+        $innerRepo = new CustomerRepositoryTestHelper($innerRepository);
 
         $repository = new CachedCustomerRepository(
-            $innerMock,
-            $this->cache,
-            $this->cacheKeyBuilder,
-            $this->logger
+            $innerRepo,
+            $cache,
+            $cacheKeyBuilder,
+            $logger
         );
 
         // Call a method not in the interface - should be proxied via __call()
