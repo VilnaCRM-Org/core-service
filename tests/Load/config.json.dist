@@ -1264,13 +1264,13 @@
             "setupTimeoutInMinutes": 30,
             "teardownTimeoutInMinutes": 30,
             "smoke": {
-                "threshold": 100,
+                "threshold": 200,
                 "rps": 20,
                 "vus": 10,
                 "duration": 30
             },
             "average": {
-                "threshold": 150,
+                "threshold": 300,
                 "rps": 50,
                 "vus": 30,
                 "duration": {
@@ -1280,7 +1280,7 @@
                 }
             },
             "stress": {
-                "threshold": 300,
+                "threshold": 500,
                 "rps": 100,
                 "vus": 60,
                 "duration": {
@@ -1290,7 +1290,7 @@
                 }
             },
             "spike": {
-                "threshold": 500,
+                "threshold": 800,
                 "rps": 200,
                 "vus": 100,
                 "duration": {

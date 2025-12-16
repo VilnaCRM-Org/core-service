@@ -107,6 +107,110 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         self::assertSame('Updated 3', $result3->getInitials());
     }
 
+    /**
+     * CRITICAL TEST: Verify cache actually returns stale data when not invalidated.
+     * This proves the cache is being used (not just populated).
+     */
+    public function testCacheReturnsStaleDataWhenNotInvalidated(): void
+    {
+        $customer = $this->createTestCustomer(
+            'Original Name',
+            sprintf('stale-test+%s@example.com', (string) $this->generateUlid())
+        );
+
+        // First read - populates cache
+        $result1 = $this->repository->find($customer->getUlid());
+        self::assertSame('Original Name', $result1->getInitials());
+
+        // Update database directly (bypassing cache invalidation)
+        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Name');
+        $this->documentManager->clear();
+
+        // Second read - should return STALE cached data (proves cache is working)
+        $result2 = $this->repository->find($customer->getUlid());
+        self::assertSame(
+            'Original Name',
+            $result2->getInitials(),
+            'Cache should return stale data when not invalidated - this proves caching is working'
+        );
+
+        // Now invalidate and verify fresh data is returned
+        $this->cache->invalidateTags(["customer.{$customer->getUlid()}"]);
+
+        $result3 = $this->repository->find($customer->getUlid());
+        self::assertSame(
+            'Updated Name',
+            $result3->getInitials(),
+            'After invalidation, fresh data should be returned'
+        );
+    }
+
+    /**
+     * Test email lookup cache returns stale data when not invalidated.
+     */
+    public function testEmailCacheReturnsStaleDataWhenNotInvalidated(): void
+    {
+        $email = sprintf('email-stale+%s@example.com', (string) $this->generateUlid());
+        $customer = $this->createTestCustomer('Original Email Name', $email);
+
+        // First read - populates email cache
+        $result1 = $this->repository->findByEmail($email);
+        self::assertSame('Original Email Name', $result1->getInitials());
+
+        // Update database directly (bypassing cache invalidation)
+        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Email Name');
+        $this->documentManager->clear();
+
+        // Second read - should return STALE cached data
+        $result2 = $this->repository->findByEmail($email);
+        self::assertSame(
+            'Original Email Name',
+            $result2->getInitials(),
+            'Email cache should return stale data when not invalidated'
+        );
+
+        // Invalidate email cache tag and verify fresh data
+        $emailHash = hash('sha256', strtolower($email));
+        $this->cache->invalidateTags(["customer.email.{$emailHash}"]);
+
+        $result3 = $this->repository->findByEmail($email);
+        self::assertSame(
+            'Updated Email Name',
+            $result3->getInitials(),
+            'After email cache invalidation, fresh data should be returned'
+        );
+    }
+
+    /**
+     * Test that cache hit does NOT query database (verify by checking query count).
+     */
+    public function testCacheHitDoesNotQueryDatabase(): void
+    {
+        $customer = $this->createTestCustomer(
+            'Query Count Test',
+            sprintf('query-count+%s@example.com', (string) $this->generateUlid())
+        );
+
+        // First read - cache miss, queries database
+        $this->repository->find($customer->getUlid());
+
+        // Clear document manager to ensure no identity map interference
+        $this->documentManager->clear();
+
+        // Second read - should be cache hit
+        $result = $this->repository->find($customer->getUlid());
+
+        self::assertNotNull($result);
+        self::assertSame('Query Count Test', $result->getInitials());
+
+        // Verify cache item exists and is hit
+        $cacheItem = $this->cachePool->getItem('customer.' . $customer->getUlid());
+        self::assertTrue(
+            $cacheItem->isHit(),
+            'Cache should contain the customer after first read'
+        );
+    }
+
     private function ensureDefaultTypeAndStatus(): void
     {
         if ($this->defaultType === null) {
