@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerInterface;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 
 /**
@@ -17,12 +18,12 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
     ) {
     }
 
-    public function save(object $customer): void
+    public function save(Customer $customer): void
     {
         $this->inner->save($customer);
     }
 
-    public function findByEmail(string $email): ?\App\Core\Customer\Domain\Entity\CustomerInterface
+    public function findByEmail(string $email): ?CustomerInterface
     {
         return $this->inner->findByEmail($email);
     }
@@ -32,7 +33,7 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
         return $this->inner->find($id, $lockMode, $lockVersion);
     }
 
-    public function delete(object $customer): void
+    public function delete(Customer $customer): void
     {
         $this->inner->delete($customer);
     }

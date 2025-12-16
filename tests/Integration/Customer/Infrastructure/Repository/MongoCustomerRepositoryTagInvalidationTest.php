@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -24,6 +25,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
     private MongoStatusRepository $statusRepository;
     private TagAwareCacheInterface $cache;
     private CacheItemPoolInterface $cachePool;
+    private CacheKeyBuilder $cacheKeyBuilder;
     private DocumentManager $documentManager;
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
@@ -37,6 +39,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cache = self::getContainer()->get('cache.customer');
         $this->cachePool = self::getContainer()->get('cache.customer');
+        $this->cacheKeyBuilder = self::getContainer()->get(CacheKeyBuilder::class);
         $this->documentManager = self::getContainer()->get('doctrine_mongodb.odm.document_manager');
 
         $this->cachePool->clear();
@@ -170,7 +173,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         );
 
         // Invalidate email cache tag and verify fresh data
-        $emailHash = hash('sha256', strtolower($email));
+        $emailHash = $this->cacheKeyBuilder->hashEmail($email);
         $this->cache->invalidateTags(["customer.email.{$emailHash}"]);
 
         $result3 = $this->repository->findByEmail($email);

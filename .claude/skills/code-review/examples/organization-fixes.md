@@ -249,11 +249,7 @@ final class CustomerEmailValidator extends ConstraintValidator
 }
 
 // File: src/Core/Customer/Application/Formatter/CustomerNameFormatter.php
-<<<<<<< HEAD
-namespace App\Core/Customer/Application/Formatter;
-=======
 namespace App\Core\Customer\Application\Formatter;
->>>>>>> origin/main
 
 final readonly class CustomerNameFormatter
 {

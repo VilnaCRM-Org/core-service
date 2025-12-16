@@ -31,23 +31,23 @@ tests/
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Customer\Infrastructure\Persistence;
+namespace Tests\Integration\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Persistence\CustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class CustomerRepositoryInvalidationTest extends KernelTestCase
 {
-    private CustomerRepository $repository;
+    private CustomerRepositoryInterface $repository;
     private TagAwareCacheInterface $cache;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
-        $this->repository = self::getContainer()->get(CustomerRepository::class);
+        $this->repository = self::getContainer()->get(CustomerRepositoryInterface::class);
         $this->cache = self::getContainer()->get(TagAwareCacheInterface::class);
 
         // Clear cache before each test
