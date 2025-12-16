@@ -37,7 +37,7 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
         $this->ensureDefaultTypeAndStatus();
     }
 
-    public function testSwrServesCachedDataFast(): void
+    public function testCachePopulationOnFirstRead(): void
     {
         $customer = $this->createTestCustomer(
             'John Doe',
@@ -49,21 +49,6 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
 
         self::assertNotNull($result1);
         self::assertSame($result1->getUlid(), $result2->getUlid());
-        self::assertTrue($this->cachePool->getItem('customer.' . $customer->getUlid())->isHit());
-    }
-
-    public function testCacheHitIsFasterThanMiss(): void
-    {
-        $customer = $this->createTestCustomer(
-            'John Doe',
-            sprintf('john+%s@example.com', (string) $this->generateUlid())
-        );
-
-        $result1 = $this->repository->find($customer->getUlid());
-        $result2 = $this->repository->find($customer->getUlid());
-
-        self::assertNotNull($result1);
-        self::assertNotNull($result2);
         self::assertTrue($this->cachePool->getItem('customer.' . $customer->getUlid())->isHit());
     }
 
