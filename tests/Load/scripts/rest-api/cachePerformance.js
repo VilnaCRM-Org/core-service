@@ -30,10 +30,7 @@ export function setup() {
   const warmupCount = Math.min(customers.length, 100);
   for (let i = 0; i < warmupCount; i++) {
     const customer = customers[i];
-    const response = http.get(
-      `${utils.getBaseHttpUrl()}/${customer.id}`,
-      utils.getJsonHeader()
-    );
+    const response = http.get(`${utils.getBaseHttpUrl()}/${customer.id}`, utils.getJsonHeader());
 
     if (response.status === 200) {
       console.log(`Warmed up customer ${i + 1}/${warmupCount}`);
@@ -86,7 +83,7 @@ export function handleSummary(data) {
   const hitCount = data.metrics.cache_hits ? data.metrics.cache_hits.values.count : 0;
   const missCount = data.metrics.cache_misses ? data.metrics.cache_misses.values.count : 0;
   const totalRequests = hitCount + missCount;
-  const hitRatio = totalRequests > 0 ? (hitCount / totalRequests * 100).toFixed(2) : 0;
+  const hitRatio = totalRequests > 0 ? ((hitCount / totalRequests) * 100).toFixed(2) : 0;
 
   const avgHitDuration = data.metrics.cache_hit_duration
     ? data.metrics.cache_hit_duration.values.avg.toFixed(2)
@@ -107,7 +104,7 @@ export function handleSummary(data) {
   // Fail if cache hit ratio is below 80% after warmup
   if (totalRequests > 10 && parseFloat(hitRatio) < 80) {
     console.error(`FAIL: Cache hit ratio (${hitRatio}%) is below 80% threshold`);
-    return { 'stdout': JSON.stringify({ failed: true, reason: 'Low cache hit ratio' }) };
+    return { stdout: JSON.stringify({ failed: true, reason: 'Low cache hit ratio' }) };
   }
 
   return {};
