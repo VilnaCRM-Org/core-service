@@ -432,7 +432,7 @@ public function search(SearchQuery $query): SearchResults
 
 ### Standard Caching (No SWR)
 
-```
+```text
 Request → Cache Hit? → Yes → Return cached data ✓
                     ↓
                     No → Load from DB → Cache → Return ✗ (slow)
@@ -445,7 +445,7 @@ Request → Cache Miss → Load from DB → Cache → Return ✗ (slow)
 
 ### SWR Caching
 
-```
+```text
 Request → Cache Hit (fresh)? → Yes → Return cached data ✓ (fast)
                             ↓
                             No (but stale)? → Return stale data ✓ (fast)
@@ -541,7 +541,7 @@ public function testLoadFromDatabaseAfterSwrWindowExpires(): void
 
 **Standard Caching**:
 
-```
+```text
 |------------- TTL (5 min) -------------|
 ↓                                        ↓
 Fast (0-5ms) ........................... Slow (50-100ms) [DB load]
@@ -551,7 +551,7 @@ Cache hit                                Cache miss
 
 **SWR Caching**:
 
-```
+```text
 |-- TTL (5 min) --|-- SWR (1 min) --|
 ↓                 ↓                 ↓
 Fast ............ Fast ........... Slow (first request only)

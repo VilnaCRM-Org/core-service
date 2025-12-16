@@ -70,13 +70,23 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
     private function ensureDefaultTypeAndStatus(): void
     {
         if ($this->defaultType === null) {
-            $this->defaultType = new CustomerType('individual', $this->generateUlid());
-            $this->typeRepository->save($this->defaultType);
+            $existing = $this->typeRepository->findOneByCriteria(['value' => 'individual']);
+            $this->defaultType = $existing instanceof CustomerType
+                ? $existing
+                : new CustomerType('individual', $this->generateUlid());
+            if (! $existing) {
+                $this->typeRepository->save($this->defaultType);
+            }
         }
 
         if ($this->defaultStatus === null) {
-            $this->defaultStatus = new CustomerStatus('active', $this->generateUlid());
-            $this->statusRepository->save($this->defaultStatus);
+            $existing = $this->statusRepository->findOneByCriteria(['value' => 'active']);
+            $this->defaultStatus = $existing instanceof CustomerStatus
+                ? $existing
+                : new CustomerStatus('active', $this->generateUlid());
+            if (! $existing) {
+                $this->statusRepository->save($this->defaultStatus);
+            }
         }
     }
 
