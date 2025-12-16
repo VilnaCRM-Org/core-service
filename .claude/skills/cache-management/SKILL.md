@@ -59,18 +59,18 @@ Implement production-ready caching with proper key design, TTL management, event
 
 ## File Locations (This Codebase)
 
-| Component                    | Location                                                                 |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| CacheKeyBuilder              | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                    |
-| CachedCustomerRepository     | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php` |
-| Created Invalidation Sub     | `src/Core/Customer/Application/EventSubscriber/CustomerCreatedCacheInvalidationSubscriber.php` |
-| Updated Invalidation Sub     | `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php` |
-| Deleted Invalidation Sub     | `src/Core/Customer/Application/EventSubscriber/CustomerDeletedCacheInvalidationSubscriber.php` |
-| Cache Pool Config            | `config/packages/cache.yaml`                                             |
-| Test Cache Config            | `config/packages/test/cache.yaml`                                        |
-| Services Config              | `config/services.yaml`                                                   |
-| Repository Unit Tests        | `tests/Unit/Customer/Infrastructure/Repository/CachedCustomerRepositoryTest.php` |
-| Subscriber Unit Tests        | `tests/Unit/Customer/Application/EventSubscriber/*CacheInvalidation*Test.php` |
+| Component                | Location                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| CacheKeyBuilder          | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                                          |
+| CachedCustomerRepository | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`                     |
+| Created Invalidation Sub | `src/Core/Customer/Application/EventSubscriber/CustomerCreatedCacheInvalidationSubscriber.php` |
+| Updated Invalidation Sub | `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php` |
+| Deleted Invalidation Sub | `src/Core/Customer/Application/EventSubscriber/CustomerDeletedCacheInvalidationSubscriber.php` |
+| Cache Pool Config        | `config/packages/cache.yaml`                                                                   |
+| Test Cache Config        | `config/packages/test/cache.yaml`                                                              |
+| Services Config          | `config/services.yaml`                                                                         |
+| Repository Unit Tests    | `tests/Unit/Customer/Infrastructure/Repository/CachedCustomerRepositoryTest.php`               |
+| Subscriber Unit Tests    | `tests/Unit/Customer/Application/EventSubscriber/*CacheInvalidation*Test.php`                  |
 
 ---
 
@@ -491,13 +491,13 @@ framework:
     pools:
       app:
         adapter: cache.adapter.redis
-        default_lifetime: 86400  # 24 hours
+        default_lifetime: 86400 # 24 hours
         provider: '%env(resolve:REDIS_URL)%'
       cache.customer:
         adapter: cache.adapter.redis
-        default_lifetime: 600    # 10 minutes
+        default_lifetime: 600 # 10 minutes
         provider: '%env(resolve:REDIS_URL)%'
-        tags: true               # REQUIRED for TagAwareCacheInterface
+        tags: true # REQUIRED for TagAwareCacheInterface
 ```
 
 **Test** - `config/packages/test/cache.yaml`:
@@ -514,7 +514,7 @@ framework:
       cache.customer:
         adapter: cache.adapter.array
         provider: null
-        tags: true  # CRITICAL: Must have tags: true for TagAwareCacheInterface!
+        tags: true # CRITICAL: Must have tags: true for TagAwareCacheInterface!
 ```
 
 **CRITICAL**: Test cache pools MUST have `tags: true` for `$cache->invalidateTags()` to work!

@@ -27,14 +27,14 @@ Full working example of production-grade caching using **Decorator Pattern** and
 
 ## File Locations
 
-| File                                   | Location                                                                           |
-| -------------------------------------- | ---------------------------------------------------------------------------------- |
-| CacheKeyBuilder                        | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                              |
-| CachedCustomerRepository               | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`         |
-| MongoCustomerRepository                | `src/Core/Customer/Infrastructure/Repository/MongoCustomerRepository.php`          |
-| CustomerCreatedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerCreatedCacheInvalidationSubscriber.php` |
-| CustomerUpdatedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php` |
-| CustomerDeletedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerDeletedCacheInvalidationSubscriber.php` |
+| File                                | Location                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| CacheKeyBuilder                     | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                                          |
+| CachedCustomerRepository            | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`                     |
+| MongoCustomerRepository             | `src/Core/Customer/Infrastructure/Repository/MongoCustomerRepository.php`                      |
+| CustomerCreatedCacheInvalidationSub | `src/Core/Customer/Application/EventSubscriber/CustomerCreatedCacheInvalidationSubscriber.php` |
+| CustomerUpdatedCacheInvalidationSub | `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php` |
+| CustomerDeletedCacheInvalidationSub | `src/Core/Customer/Application/EventSubscriber/CustomerDeletedCacheInvalidationSubscriber.php` |
 
 ---
 
@@ -466,13 +466,13 @@ framework:
     pools:
       app:
         adapter: cache.adapter.redis
-        default_lifetime: 86400  # 24 hours
+        default_lifetime: 86400 # 24 hours
         provider: '%env(resolve:REDIS_URL)%'
       cache.customer:
         adapter: cache.adapter.redis
-        default_lifetime: 600    # 10 minutes
+        default_lifetime: 600 # 10 minutes
         provider: '%env(resolve:REDIS_URL)%'
-        tags: true               # REQUIRED for TagAwareCacheInterface
+        tags: true # REQUIRED for TagAwareCacheInterface
 ```
 
 **Test** - `config/packages/test/cache.yaml`:
@@ -489,7 +489,7 @@ framework:
       cache.customer:
         adapter: cache.adapter.array
         provider: null
-        tags: true  # CRITICAL: Must have tags: true for TagAwareCacheInterface!
+        tags: true # CRITICAL: Must have tags: true for TagAwareCacheInterface!
 ```
 
 ---
@@ -517,11 +517,11 @@ This complete example demonstrates:
 
 **File Locations** (this codebase):
 
-| Component               | Location                                                                    |
-| ----------------------- | --------------------------------------------------------------------------- |
-| CacheKeyBuilder         | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                       |
-| CachedCustomerRepository| `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php` |
-| Event Subscribers       | `src/Core/Customer/Application/EventSubscriber/*CacheInvalidation*.php`    |
-| Services Config         | `config/services.yaml`                                                      |
-| Cache Config            | `config/packages/cache.yaml`                                                |
-| Test Cache Config       | `config/packages/test/cache.yaml`                                           |
+| Component                | Location                                                                   |
+| ------------------------ | -------------------------------------------------------------------------- |
+| CacheKeyBuilder          | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                      |
+| CachedCustomerRepository | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php` |
+| Event Subscribers        | `src/Core/Customer/Application/EventSubscriber/*CacheInvalidation*.php`    |
+| Services Config          | `config/services.yaml`                                                     |
+| Cache Config             | `config/packages/cache.yaml`                                               |
+| Test Cache Config        | `config/packages/test/cache.yaml`                                          |

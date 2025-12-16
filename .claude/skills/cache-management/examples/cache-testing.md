@@ -632,7 +632,7 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
 framework:
   cache:
     app: cache.adapter.array
-    default_redis_provider: null  # Disable Redis in tests
+    default_redis_provider: null # Disable Redis in tests
     pools:
       app:
         adapter: cache.adapter.array
@@ -640,7 +640,7 @@ framework:
       cache.customer:
         adapter: cache.adapter.array
         provider: null
-        tags: true  # CRITICAL: Must have tags: true for TagAwareCacheInterface!
+        tags: true # CRITICAL: Must have tags: true for TagAwareCacheInterface!
 ```
 
 **IMPORTANT**: The `tags: true` setting is REQUIRED when using `TagAwareCacheInterface`. Without it, `invalidateTags()` calls will fail in tests!
