@@ -27,18 +27,29 @@ final readonly class CustomerDeletedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerDeletedEvent $event): void
     {
-        $this->cache->invalidateTags([
-            'customer.' . $event->customerId(),
-            'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
-            'customer.collection',
-        ]);
+        // Cache invalidation is best-effort: don't fail the business operation if cache is down
+        try {
+            $this->cache->invalidateTags([
+                'customer.' . $event->customerId(),
+                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+                'customer.collection',
+            ]);
 
-        $this->logger->info('Cache invalidated after customer deletion', [
-            'customer_id' => $event->customerId(),
-            'event_id' => $event->eventId(),
-            'operation' => 'cache.invalidation',
-            'reason' => 'customer_deleted',
-        ]);
+            $this->logger->info('Cache invalidated after customer deletion', [
+                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
+                'operation' => 'cache.invalidation',
+                'reason' => 'customer_deleted',
+            ]);
+        } catch (\Throwable $e) {
+            // Log cache error but allow the business operation to succeed
+            $this->logger->error('Cache invalidation failed after customer deletion', [
+                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
+                'error' => $e->getMessage(),
+                'operation' => 'cache.invalidation.error',
+            ]);
+        }
     }
 
     /**

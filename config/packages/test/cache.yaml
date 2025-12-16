@@ -9,3 +9,4 @@ framework:
       cache.customer:
         adapter: cache.adapter.array
         provider: null
+        tags: true

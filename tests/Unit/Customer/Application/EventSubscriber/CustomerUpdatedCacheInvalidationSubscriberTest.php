@@ -134,4 +134,50 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
 
         ($this->subscriber)($event);
     }
+
+    public function testInvokeLogsErrorWhenCacheInvalidationFails(): void
+    {
+        $customerId = (string) $this->faker->ulid();
+        $currentEmail = 'test@example.com';
+        $emailHash = 'email_hash_123';
+
+        $event = new CustomerUpdatedEvent(
+            customerId: $customerId,
+            currentEmail: $currentEmail,
+            previousEmail: null
+        );
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($currentEmail)
+            ->willReturn($emailHash);
+
+        // Simulate cache failure
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willThrowException(new \RuntimeException('Redis connection failed'));
+
+        // Should log error, not info
+        $this->logger
+            ->expects($this->never())
+            ->method('info');
+
+        $this->logger
+            ->expects($this->once())
+            ->method('error')
+            ->with(
+                'Cache invalidation failed after customer update',
+                $this->callback(static function ($context) use ($customerId) {
+                    return $context['customer_id'] === $customerId
+                        && $context['error'] === 'Redis connection failed'
+                        && $context['operation'] === 'cache.invalidation.error'
+                        && isset($context['event_id']);
+                })
+            );
+
+        // Should not throw exception
+        ($this->subscriber)($event);
+    }
 }

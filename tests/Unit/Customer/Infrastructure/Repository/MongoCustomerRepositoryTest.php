@@ -10,16 +10,12 @@ use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\Persisters\DocumentPersister;
-use Doctrine\ODM\MongoDB\UnitOfWork;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
 {
     private ManagerRegistry&MockObject $registry;
     private DocumentManager&MockObject $documentManager;
-    private UnitOfWork&MockObject $unitOfWork;
-    private DocumentPersister&MockObject $documentPersister;
     private ClassMetadata&MockObject $classMetadata;
     private MongoCustomerRepository $repository;
 
@@ -29,8 +25,6 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
 
         $this->documentManager = $this->createMock(DocumentManager::class);
         $this->registry = $this->createMock(ManagerRegistry::class);
-        $this->unitOfWork = $this->createMock(UnitOfWork::class);
-        $this->documentPersister = $this->createMock(DocumentPersister::class);
         $this->classMetadata = $this->createMock(ClassMetadata::class);
         $this->classMetadata->name = Customer::class;
 
@@ -44,56 +38,14 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->with(Customer::class)
             ->willReturn($this->classMetadata);
 
-        $this->documentManager
-            ->method('getUnitOfWork')
-            ->willReturn($this->unitOfWork);
-
         $this->repository = new MongoCustomerRepository($this->registry);
     }
 
-    public function testFindCallsDocumentManagerFind(): void
-    {
-        $customerId = (string) $this->faker->ulid();
-        $customer = $this->createMock(Customer::class);
-
-        $this->unitOfWork
-            ->expects($this->once())
-            ->method('tryGetById')
-            ->with($customerId, $this->classMetadata)
-            ->willReturn($customer);
-
-        $result = $this->repository->find($customerId);
-
-        self::assertSame($customer, $result);
-    }
-
-    public function testFindReturnsNullWhenNotFound(): void
-    {
-        $customerId = (string) $this->faker->ulid();
-
-        $this->unitOfWork
-            ->expects($this->once())
-            ->method('tryGetById')
-            ->with($customerId, $this->classMetadata)
-            ->willReturn(null);
-
-        $this->unitOfWork
-            ->expects($this->once())
-            ->method('getDocumentPersister')
-            ->with(Customer::class)
-            ->willReturn($this->documentPersister);
-
-        $this->documentPersister
-            ->expects($this->once())
-            ->method('load')
-            ->with(['_id' => $customerId], null, [], 0, null)
-            ->willReturn(null);
-
-        $result = $this->repository->find($customerId);
-
-        self::assertNull($result);
-    }
-
+    /**
+     * Note: find() is inherited from ServiceDocumentRepository and is tested in integration tests.
+     * Unit testing find() would require mocking Doctrine internals which tests Doctrine's
+     * implementation rather than our code.
+     */
     public function testDeleteManagedCustomer(): void
     {
         $customer = $this->createMock(Customer::class);

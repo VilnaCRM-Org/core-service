@@ -28,23 +28,46 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        $tagsToInvalidate = [
+        // Cache invalidation is best-effort: don't fail the business operation if cache is down
+        try {
+            $tagsToInvalidate = $this->buildTagsToInvalidate($event);
+            $this->cache->invalidateTags($tagsToInvalidate);
+            $this->logSuccess($event);
+        } catch (\Throwable $e) {
+            $this->logError($event, $e);
+        }
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function subscribedTo(): array
+    {
+        return [CustomerUpdatedEvent::class];
+    }
+
+    /**
+     * @return array<string>
+     */
+    private function buildTagsToInvalidate(CustomerUpdatedEvent $event): array
+    {
+        $tags = [
             'customer.' . $event->customerId(),
             'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->currentEmail()),
             'customer.collection',
         ];
 
         // If email changed, invalidate previous email cache too
-        if ($event->emailChanged()) {
-            $previousEmail = $event->previousEmail();
-            if ($previousEmail !== null) {
-                $tagsToInvalidate[] = 'customer.email.' .
-                    $this->cacheKeyBuilder->hashEmail($previousEmail);
-            }
+        if ($event->emailChanged() && $event->previousEmail() !== null) {
+            $tags[] = 'customer.email.' .
+                $this->cacheKeyBuilder->hashEmail($event->previousEmail());
         }
 
-        $this->cache->invalidateTags($tagsToInvalidate);
+        return $tags;
+    }
 
+    private function logSuccess(CustomerUpdatedEvent $event): void
+    {
         $this->logger->info('Cache invalidated after customer update', [
             'customer_id' => $event->customerId(),
             'email_changed' => $event->emailChanged(),
@@ -54,11 +77,13 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
         ]);
     }
 
-    /**
-     * @return array<class-string>
-     */
-    public function subscribedTo(): array
+    private function logError(CustomerUpdatedEvent $event, \Throwable $e): void
     {
-        return [CustomerUpdatedEvent::class];
+        $this->logger->error('Cache invalidation failed after customer update', [
+            'customer_id' => $event->customerId(),
+            'event_id' => $event->eventId(),
+            'error' => $e->getMessage(),
+            'operation' => 'cache.invalidation.error',
+        ]);
     }
 }
