@@ -187,7 +187,7 @@ cache-performance-tests: setup-test-db ## Run cache performance integration test
 	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
 
 cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load tests
-	tests/Load/execute-load-test.sh cachePerformance true false false false smoke-
+	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
 
 build-k6-docker:
 	$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .
