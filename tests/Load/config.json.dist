@@ -1259,6 +1259,45 @@
                     "fall": 3
                 }
             }
+        },
+        "cachePerformance": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 100,
+                "rps": 20,
+                "vus": 10,
+                "duration": 30
+            },
+            "average": {
+                "threshold": 150,
+                "rps": 50,
+                "vus": 30,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 20,
+                    "fall": 3
+                }
+            },
+            "stress": {
+                "threshold": 300,
+                "rps": 100,
+                "vus": 60,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 15,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 500,
+                "rps": 200,
+                "vus": 100,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
         }
     }
 }
