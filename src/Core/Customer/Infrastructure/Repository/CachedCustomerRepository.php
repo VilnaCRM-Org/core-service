@@ -46,7 +46,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      * This ensures compatibility with API Platform's collection provider
      * which may call Doctrine repository methods not in our interface.
      *
-     * @param array<int, string> $arguments
+     * @param array<int, mixed> $arguments
      */
     public function __call(string $method, array $arguments): mixed
     {

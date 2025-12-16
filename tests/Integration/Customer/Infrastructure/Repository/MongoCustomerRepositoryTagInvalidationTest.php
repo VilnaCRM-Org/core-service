@@ -61,6 +61,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         self::assertSame('Customer 2', $result2a->getInitials());
 
         $this->updateCustomerDirectly($customer1->getUlid(), 'Updated Customer 1');
+        $this->documentManager->clear();
 
         $this->cache->invalidateTags(["customer.{$customer1->getUlid()}"]);
 
@@ -93,6 +94,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         $this->updateCustomerDirectly($customer1->getUlid(), 'Updated 1');
         $this->updateCustomerDirectly($customer2->getUlid(), 'Updated 2');
         $this->updateCustomerDirectly($customer3->getUlid(), 'Updated 3');
+        $this->documentManager->clear();
 
         $this->cache->invalidateTags(['customer']);
 
@@ -139,6 +141,7 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
     private function updateCustomerDirectly(string $customerId, string $newInitials): void
     {
         $customer = $this->documentManager->find(Customer::class, $customerId);
+        self::assertNotNull($customer, "Customer {$customerId} not found for direct update");
         $customer->setInitials($newInitials);
 
         $this->documentManager->flush();

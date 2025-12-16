@@ -4,7 +4,7 @@ Comprehensive test suite for cache behavior: stale reads after writes, cache war
 
 ## Test Suite Structure
 
-```
+```text
 tests/
 ├── Unit/
 │   └── Customer/
