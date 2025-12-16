@@ -1,127 +1,178 @@
 # Complete Cache Implementation Example
 
-Full working example of a repository with production-grade caching, including cache policies, invalidation, SWR, and observability.
+Full working example of production-grade caching using **Decorator Pattern** and **Event-Driven Invalidation**.
 
-## Complete CustomerRepository with Caching
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Command Handler                                            │
+│  └─ repository.save(customer)                               │
+│  └─ eventBus.publish(CustomerUpdatedEvent)                  │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  CachedCustomerRepository (Decorator)                       │
+│  └─ inner.save(customer)  // delegates to Mongo             │
+│  └─ (NO invalidation here - handled by events!)             │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  CustomerUpdatedCacheInvalidationSubscriber                 │
+│  └─ cache.invalidateTags([...])  // event-driven!           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## File Locations
+
+| File                                   | Location                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------- |
+| CacheKeyBuilder                        | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                              |
+| CachedCustomerRepository               | `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`         |
+| MongoCustomerRepository                | `src/Core/Customer/Infrastructure/Repository/MongoCustomerRepository.php`          |
+| CustomerCreatedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerCreatedCacheInvalidationSubscriber.php` |
+| CustomerUpdatedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php` |
+| CustomerDeletedCacheInvalidationSub    | `src/Core/Customer/Application/EventSubscriber/CustomerDeletedCacheInvalidationSubscriber.php` |
+
+---
+
+## 1. CacheKeyBuilder Service
+
+**Location**: `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Customer\Infrastructure\Persistence;
-
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
+namespace App\Shared\Infrastructure\Cache;
 
 /**
- * Customer Repository with Production-Grade Caching
+ * Cache Key Builder Service
  *
- * Cache Policies:
- * - findById: TTL 600s, SWR, tag-based invalidation
- * - findActiveCustomers: TTL 300s, invalidate on create/update/delete
- * - findByEmail: TTL 300s, invalidate on email change
+ * Responsibilities:
+ * - Centralized cache key generation
+ * - Consistent email hashing strategy
+ * - Eliminates duplication across repository and event handlers
  */
-final class CustomerRepository implements CustomerRepositoryInterface
+final readonly class CacheKeyBuilder
 {
-    public function __construct(
-        private readonly DocumentManager $dm,
-        private readonly TagAwareCacheInterface $cache,
-        private readonly LoggerInterface $logger
-    ) {}
-
-    /**
-     * Cache Policy: findById
-     *
-     * Key Pattern: customer.{id}
-     * TTL: 600s (10 minutes)
-     * Consistency: Stale-While-Revalidate
-     * Invalidation: On customer update/delete
-     * Tags: [customer, customer.{id}]
-     */
-    public function findById(string $id): ?Customer
+    public function build(string $namespace, string ...$parts): string
     {
-        $cacheKey = $this->buildCacheKey('customer', $id);
-        $startTime = microtime(true);
+        return $namespace . '.' . implode('.', $parts);
+    }
 
-        try {
-            $customer = $this->cache->get(
-                $cacheKey,
-                function (ItemInterface $item) use ($id, $cacheKey) {
-                    // TTL: 10 minutes
-                    $item->expiresAfter(600);
+    public function buildCustomerKey(string $customerId): string
+    {
+        return $this->build('customer', $customerId);
+    }
 
-                    // Tags for invalidation
-                    $item->tag(['customer', "customer.{$id}"]);
-
-                    $this->logger->info('Cache miss - loading customer from database', [
-                        'cache_key' => $cacheKey,
-                        'customer_id' => $id,
-                        'operation' => 'cache.miss',
-                    ]);
-
-                    // Load from database
-                    return $this->dm->find(Customer::class, $id);
-                },
-                beta: 1.0 // Enable SWR (stale-while-revalidate)
-            );
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->debug('Customer query completed', [
-                'cache_key' => $cacheKey,
-                'customer_id' => $id,
-                'duration_ms' => $duration,
-                'found' => $customer !== null,
-                'operation' => 'cache.hit',
-            ]);
-
-            return $customer;
-
-        } catch (\Throwable $e) {
-            $this->logger->error('Cache error - falling back to database', [
-                'cache_key' => $cacheKey,
-                'customer_id' => $id,
-                'error' => $e->getMessage(),
-            ]);
-
-            // Fallback to database on cache failure
-            return $this->dm->find(Customer::class, $id);
-        }
+    public function buildCustomerEmailKey(string $email): string
+    {
+        return $this->build('customer', 'email', $this->hashEmail($email));
     }
 
     /**
-     * Cache Policy: findActiveCustomers
-     *
-     * Key Pattern: customer.list.active.page.{page}
-     * TTL: 300s (5 minutes)
-     * Consistency: Eventual
-     * Invalidation: On customer create/update/delete
-     * Tags: [customer, customer.list, customer.list.active]
+     * Build cache key for collections (filters normalized + hashed)
+     * @param array<string, string|int|float|bool|array|null> $filters
      */
-    public function findActiveCustomers(int $page = 1, int $limit = 20): array
+    public function buildCustomerCollectionKey(array $filters): string
     {
-        $cacheKey = $this->buildCacheKey('customer', 'list', 'active', 'page', (string)$page);
-
-        return $this->cache->get(
-            $cacheKey,
-            function (ItemInterface $item) use ($page, $limit, $cacheKey) {
-                $item->expiresAfter(300); // 5 minutes
-                $item->tag(['customer', 'customer.list', 'customer.list.active']);
-
-                $this->logger->info('Cache miss - loading active customers', [
-                    'cache_key' => $cacheKey,
-                    'page' => $page,
-                    'limit' => $limit,
-                ]);
-
-                return $this->queryActiveCustomers($page, $limit);
-            }
+        ksort($filters);
+        return $this->build(
+            'customer',
+            'collection',
+            hash('sha256', json_encode($filters, \JSON_THROW_ON_ERROR))
         );
+    }
+
+    /**
+     * Hash email consistently (lowercase + SHA256)
+     */
+    public function hashEmail(string $email): string
+    {
+        return hash('sha256', strtolower($email));
+    }
+}
+```
+
+---
+
+## 2. Cached Repository Decorator
+
+**Location**: `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\Customer\Infrastructure\Repository;
+
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
+use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
+/**
+ * Cached Customer Repository Decorator
+ *
+ * Responsibilities:
+ * - Read-through caching with Stale-While-Revalidate (SWR)
+ * - Cache key management via CacheKeyBuilder
+ * - Graceful fallback to database on cache errors
+ * - Delegates ALL persistence operations to inner repository
+ *
+ * Cache Invalidation:
+ * - Handled by *CacheInvalidationSubscriber classes via domain events
+ * - This class only reads from cache, never invalidates (except delete)
+ */
+final class CachedCustomerRepository implements CustomerRepositoryInterface
+{
+    public function __construct(
+        private CustomerRepositoryInterface $inner,
+        private TagAwareCacheInterface $cache,
+        private CacheKeyBuilder $cacheKeyBuilder,
+        private LoggerInterface $logger
+    ) {}
+
+    /**
+     * Proxy all other method calls to inner repository
+     * Required for API Platform's collection provider compatibility
+     * @param array<int, mixed> $arguments
+     */
+    public function __call(string $method, array $arguments): mixed
+    {
+        return $this->inner->{$method}(...$arguments);
+    }
+
+    /**
+     * Cache Policy: find by ID
+     *
+     * Key Pattern: customer.{id}
+     * TTL: 600s (10 minutes)
+     * Consistency: Stale-While-Revalidate (beta: 1.0)
+     * Invalidation: Via domain events
+     * Tags: [customer, customer.{id}]
+     */
+    public function find(mixed $id, int $lockMode = 0, ?int $lockVersion = null): ?Customer
+    {
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey((string) $id);
+
+        try {
+            return $this->cache->get(
+                $cacheKey,
+                fn (ItemInterface $item) => $this->loadCustomerFromDb($id, $lockMode, $lockVersion, $cacheKey, $item),
+                beta: 1.0  // Enable Stale-While-Revalidate
+            );
+        } catch (\Throwable $e) {
+            $this->logCacheError($cacheKey, $e);
+            return $this->inner->find($id, $lockMode, $lockVersion);
+        }
     }
 
     /**
@@ -129,448 +180,316 @@ final class CustomerRepository implements CustomerRepositoryInterface
      *
      * Key Pattern: customer.email.{hash}
      * TTL: 300s (5 minutes)
-     * Consistency: Eventual
-     * Invalidation: On customer update (if email changed)
-     * Tags: [customer, customer.email]
+     * Tags: [customer, customer.email, customer.email.{hash}]
      */
     public function findByEmail(string $email): ?Customer
     {
-        $emailHash = hash('sha256', strtolower($email));
-        $cacheKey = $this->buildCacheKey('customer', 'email', $emailHash);
-
-        return $this->cache->get(
-            $cacheKey,
-            function (ItemInterface $item) use ($email, $emailHash) {
-                $item->expiresAfter(300);
-                $item->tag(['customer', 'customer.email', "customer.email.{$emailHash}"]);
-
-                return $this->dm->getRepository(Customer::class)->findOneBy([
-                    'email' => $email,
-                ]);
-            }
-        );
-    }
-
-    /**
-     * Save with Explicit Cache Invalidation
-     */
-    public function save(Customer $customer): void
-    {
-        $customerId = $customer->id();
-        $startTime = microtime(true);
-
-        $this->logger->info('Saving customer', [
-            'customer_id' => $customerId,
-        ]);
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
 
         try {
-            // Persist to database
-            $this->dm->persist($customer);
-            $this->dm->flush();
-
-            // Explicit cache invalidation
-            $this->invalidateCustomerCache($customerId, $customer->email());
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->info('Customer saved and cache invalidated', [
-                'customer_id' => $customerId,
-                'duration_ms' => $duration,
-            ]);
-
+            return $this->cache->get(
+                $cacheKey,
+                fn (ItemInterface $item) => $this->loadCustomerByEmail($email, $cacheKey, $item)
+            );
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to save customer', [
-                'customer_id' => $customerId,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
+            $this->logCacheError($cacheKey, $e);
+            return $this->inner->findByEmail($email);
         }
     }
 
+    public function save(Customer $customer): void
+    {
+        $this->inner->save($customer);
+        // NO cache invalidation here - handled by domain event subscribers
+    }
+
     /**
-     * Delete with Explicit Cache Invalidation
+     * Delete is special: invalidate BEFORE deletion (best-effort)
      */
     public function delete(Customer $customer): void
     {
-        $customerId = $customer->id();
-        $customerEmail = $customer->email();
-
-        $this->logger->info('Deleting customer', [
-            'customer_id' => $customerId,
-        ]);
-
         try {
-            // Remove from database
-            $this->dm->remove($customer);
-            $this->dm->flush();
-
-            // Explicit cache invalidation
-            $this->invalidateCustomerCache($customerId, $customerEmail);
-
-            $this->logger->info('Customer deleted and cache invalidated', [
-                'customer_id' => $customerId,
+            $this->cache->invalidateTags([
+                "customer.{$customer->getUlid()}",
+                "customer.email.{$this->cacheKeyBuilder->hashEmail($customer->getEmail())}",
+                'customer.collection',
             ]);
-
+            $this->logger->info('Cache invalidated before customer deletion', [
+                'customer_id' => $customer->getUlid(),
+                'operation' => 'cache.invalidation',
+                'reason' => 'customer_deleted',
+            ]);
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to delete customer', [
-                'customer_id' => $customerId,
+            $this->logger->error('Cache invalidation failed during deletion - proceeding anyway', [
+                'customer_id' => $customer->getUlid(),
                 'error' => $e->getMessage(),
+                'operation' => 'cache.invalidation.error',
             ]);
-
-            throw $e;
         }
+        $this->inner->delete($customer);
     }
 
-    /**
-     * Invalidate all caches related to a customer
-     */
-    private function invalidateCustomerCache(string $customerId, string $email): void
+    private function loadCustomerFromDb(mixed $id, int $lockMode, ?int $lockVersion, string $cacheKey, ItemInterface $item): ?Customer
     {
-        $emailHash = hash('sha256', strtolower($email));
+        $item->expiresAfter(600);  // 10 minutes TTL
+        $item->tag(['customer', "customer.{$id}"]);
 
-        // Invalidate specific customer cache
-        $tagsToInvalidate = [
-            "customer.{$customerId}",       // Specific customer
-            'customer.list',                 // All customer lists
-            "customer.email.{$emailHash}",  // Email-based lookup
-        ];
-
-        $this->cache->invalidateTags($tagsToInvalidate);
-
-        $this->logger->debug('Cache invalidated', [
-            'customer_id' => $customerId,
-            'tags' => $tagsToInvalidate,
+        $this->logger->info('Cache miss - loading customer from database', [
+            'cache_key' => $cacheKey,
+            'customer_id' => $id,
+            'operation' => 'cache.miss',
         ]);
+
+        return $this->inner->find($id, $lockMode, $lockVersion);
     }
 
-    /**
-     * Build cache key from parts
-     */
-    private function buildCacheKey(string $prefix, string ...$parts): string
+    private function loadCustomerByEmail(string $email, string $cacheKey, ItemInterface $item): ?Customer
     {
-        return $prefix . '.' . implode('.', $parts);
+        $item->expiresAfter(300);  // 5 minutes TTL
+        $emailHash = $this->cacheKeyBuilder->hashEmail($email);
+        $item->tag(['customer', 'customer.email', "customer.email.{$emailHash}"]);
+
+        $this->logger->info('Cache miss - loading customer by email', [
+            'cache_key' => $cacheKey,
+            'operation' => 'cache.miss',
+        ]);
+
+        return $this->inner->findByEmail($email);
     }
 
-    /**
-     * Query active customers from database
-     */
-    private function queryActiveCustomers(int $page, int $limit): array
+    private function logCacheError(string $cacheKey, \Throwable $e): void
     {
-        $offset = ($page - 1) * $limit;
-
-        return $this->dm->getRepository(Customer::class)->findBy(
-            ['status' => 'active'],
-            ['createdAt' => 'DESC'],
-            $limit,
-            $offset
-        );
+        $this->logger->error('Cache error - falling back to database', [
+            'cache_key' => $cacheKey,
+            'error' => $e->getMessage(),
+            'operation' => 'cache.error',
+        ]);
     }
 }
 ```
 
 ---
 
-## Command Handler with Cache Invalidation
+## 3. Cache Invalidation Event Subscribers
+
+### CustomerUpdatedCacheInvalidationSubscriber (handles email changes)
+
+**Location**: `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedCacheInvalidationSubscriber.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Customer\Application\CommandHandler;
+namespace App\Core\Customer\Application\EventSubscriber;
 
-use App\Customer\Application\Command\UpdateCustomerCommand;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Shared\Application\CommandHandler\CommandHandlerInterface;
+use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
-
-final readonly class UpdateCustomerCommandHandler implements CommandHandlerInterface
-{
-    public function __construct(
-        private CustomerRepositoryInterface $repository,
-        private LoggerInterface $logger
-    ) {}
-
-    public function __invoke(UpdateCustomerCommand $command): void
-    {
-        $correlationId = $this->generateCorrelationId();
-        $startTime = microtime(true);
-
-        $this->logger->info('Processing UpdateCustomerCommand', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $command->id,
-            'changed_fields' => $command->changedFields,
-        ]);
-
-        try {
-            // Load customer (from cache if available)
-            $customer = $this->repository->findById($command->id);
-
-            if ($customer === null) {
-                throw new \DomainException("Customer not found: {$command->id}");
-            }
-
-            // Update customer
-            if (isset($command->name)) {
-                $customer->updateName($command->name);
-            }
-
-            if (isset($command->email)) {
-                $customer->updateEmail($command->email);
-            }
-
-            // Save with automatic cache invalidation
-            $this->repository->save($customer);
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->info('Customer updated successfully', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $command->id,
-                'duration_ms' => $duration,
-            ]);
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->error('Failed to update customer', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $command->id,
-                'duration_ms' => $duration,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-    }
-
-    private function generateCorrelationId(): string
-    {
-        return bin2hex(random_bytes(16));
-    }
-}
-```
-
----
-
-## Cache Warming Service
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Customer\Infrastructure\Cache;
-
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
- * Cache Warming Service
- *
- * Pre-populates cache with frequently accessed data
- * Run on application startup or scheduled intervals
+ * Customer Updated Event Cache Invalidation Subscriber
+ * Handles email change edge case (both old and new email caches)
  */
-final readonly class CustomerCacheWarmer
+final readonly class CustomerUpdatedCacheInvalidationSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
-        private CustomerRepositoryInterface $repository,
+        private TagAwareCacheInterface $cache,
+        private CacheKeyBuilder $cacheKeyBuilder,
         private LoggerInterface $logger
     ) {}
 
-    /**
-     * Warm cache with top customers
-     */
-    public function warmTopCustomers(int $limit = 100): void
+    public function __invoke(CustomerUpdatedEvent $event): void
     {
-        $startTime = microtime(true);
-
-        $this->logger->info('Starting customer cache warmup', [
-            'limit' => $limit,
-        ]);
-
+        // Best-effort: don't fail business operation if cache is down
         try {
-            $topCustomerIds = $this->getTopCustomerIds($limit);
-
-            $warmedCount = 0;
-            foreach ($topCustomerIds as $customerId) {
-                // Load customer - will populate cache
-                $customer = $this->repository->findById($customerId);
-
-                if ($customer !== null) {
-                    $warmedCount++;
-                }
-            }
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->info('Customer cache warmup completed', [
-                'warmed_count' => $warmedCount,
-                'requested_count' => $limit,
-                'duration_ms' => $duration,
-            ]);
-
+            $tagsToInvalidate = $this->buildTagsToInvalidate($event);
+            $this->cache->invalidateTags($tagsToInvalidate);
+            $this->logSuccess($event);
         } catch (\Throwable $e) {
-            $this->logger->error('Cache warmup failed', [
-                'error' => $e->getMessage(),
-            ]);
+            $this->logError($event, $e);
         }
     }
 
-    /**
-     * Warm cache with active customer list
-     */
-    public function warmActiveCustomersList(int $pages = 5): void
+    /** @return array<class-string> */
+    public function subscribedTo(): array
     {
-        $this->logger->info('Warming active customers list cache', [
-            'pages' => $pages,
-        ]);
+        return [CustomerUpdatedEvent::class];
+    }
 
-        for ($page = 1; $page <= $pages; $page++) {
-            // Load page - will populate cache
-            $this->repository->findActiveCustomers($page);
+    /** @return array<string> */
+    private function buildTagsToInvalidate(CustomerUpdatedEvent $event): array
+    {
+        $tags = [
+            'customer.' . $event->customerId(),
+            'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->currentEmail()),
+            'customer.collection',
+        ];
+
+        // CRITICAL: If email changed, invalidate previous email cache too!
+        if ($event->emailChanged() && $event->previousEmail() !== null) {
+            $tags[] = 'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->previousEmail());
         }
 
-        $this->logger->info('Active customers list cache warmed', [
-            'pages_warmed' => $pages,
+        return $tags;
+    }
+
+    private function logSuccess(CustomerUpdatedEvent $event): void
+    {
+        $this->logger->info('Cache invalidated after customer update', [
+            'customer_id' => $event->customerId(),
+            'email_changed' => $event->emailChanged(),
+            'event_id' => $event->eventId(),
+            'operation' => 'cache.invalidation',
+            'reason' => 'customer_updated',
         ]);
     }
 
-    /**
-     * Get IDs of most frequently accessed customers
-     */
-    private function getTopCustomerIds(int $limit): array
+    private function logError(CustomerUpdatedEvent $event, \Throwable $e): void
     {
-        // In production, this could be based on:
-        // - Analytics data
-        // - Recent access logs
-        // - Business importance
-        // For now, return active customers
-        return ['customer-1', 'customer-2', 'customer-3']; // Placeholder
+        $this->logger->error('Cache invalidation failed after customer update', [
+            'customer_id' => $event->customerId(),
+            'event_id' => $event->eventId(),
+            'error' => $e->getMessage(),
+            'operation' => 'cache.invalidation.error',
+        ]);
     }
 }
 ```
 
----
-
-## Console Command for Cache Management
+### CustomerCreatedCacheInvalidationSubscriber
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Customer\Infrastructure\Console;
+namespace App\Core\Customer\Application\EventSubscriber;
 
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
+use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use App\Customer\Infrastructure\Cache\CustomerCacheWarmer;
 
-#[AsCommand(
-    name: 'cache:customer',
-    description: 'Manage customer cache (warm, invalidate, clear)'
-)]
-final class CustomerCacheCommand extends Command
+final readonly class CustomerCreatedCacheInvalidationSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
-        private readonly TagAwareCacheInterface $cache,
-        private readonly CustomerCacheWarmer $cacheWarmer
-    ) {
-        parent::__construct();
-    }
+        private TagAwareCacheInterface $cache,
+        private CacheKeyBuilder $cacheKeyBuilder,
+        private LoggerInterface $logger
+    ) {}
 
-    protected function configure(): void
+    public function __invoke(CustomerCreatedEvent $event): void
     {
-        $this
-            ->addArgument('action', InputArgument::REQUIRED, 'Action: warm, invalidate, clear')
-            ->addOption('customer-id', 'c', InputOption::VALUE_OPTIONAL, 'Customer ID for invalidation')
-            ->addOption('tags', 't', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL, 'Tags to invalidate')
-            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limit for cache warming', 100);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $action = $input->getArgument('action');
-
-        return match($action) {
-            'warm' => $this->warmCache($input, $output),
-            'invalidate' => $this->invalidateCache($input, $output),
-            'clear' => $this->clearCache($output),
-            default => $this->handleInvalidAction($output, $action),
-        };
-    }
-
-    private function warmCache(InputInterface $input, OutputInterface $output): int
-    {
-        $limit = (int)$input->getOption('limit');
-
-        $output->writeln("<info>Warming customer cache (limit: {$limit})...</info>");
-
-        $this->cacheWarmer->warmTopCustomers($limit);
-        $this->cacheWarmer->warmActiveCustomersList();
-
-        $output->writeln('<info>Cache warming completed!</info>');
-
-        return Command::SUCCESS;
-    }
-
-    private function invalidateCache(InputInterface $input, OutputInterface $output): int
-    {
-        $customerId = $input->getOption('customer-id');
-        $tags = $input->getOption('tags');
-
-        if ($customerId) {
-            $this->cache->invalidateTags(["customer.{$customerId}"]);
-            $output->writeln("<info>Invalidated cache for customer: {$customerId}</info>");
-        } elseif (!empty($tags)) {
-            $this->cache->invalidateTags($tags);
-            $output->writeln('<info>Invalidated cache tags: ' . implode(', ', $tags) . '</info>');
-        } else {
-            $output->writeln('<error>Please provide --customer-id or --tags</error>');
-            return Command::FAILURE;
+        try {
+            $this->cache->invalidateTags([
+                'customer.' . $event->customerId(),
+                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+                'customer.collection',
+            ]);
+            $this->logger->info('Cache invalidated after customer creation', [
+                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
+                'operation' => 'cache.invalidation',
+                'reason' => 'customer_created',
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->error('Cache invalidation failed after customer creation', [
+                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
+                'error' => $e->getMessage(),
+                'operation' => 'cache.invalidation.error',
+            ]);
         }
-
-        return Command::SUCCESS;
     }
 
-    private function clearCache(OutputInterface $output): int
+    /** @return array<class-string> */
+    public function subscribedTo(): array
     {
-        $this->cache->clear();
-        $output->writeln('<info>All customer cache cleared!</info>');
-
-        return Command::SUCCESS;
-    }
-
-    private function handleInvalidAction(OutputInterface $output, string $action): int
-    {
-        $output->writeln("<error>Invalid action: {$action}</error>");
-        $output->writeln('<info>Valid actions: warm, invalidate, clear</info>');
-
-        return Command::FAILURE;
+        return [CustomerCreatedEvent::class];
     }
 }
 ```
 
-**Usage**:
+---
 
-```bash
-# Warm cache
-php bin/console cache:customer warm --limit=200
+## 4. services.yaml Configuration
 
-# Invalidate specific customer
-php bin/console cache:customer invalidate --customer-id=abc123
+**Location**: `config/services.yaml`
 
-# Invalidate by tags
-php bin/console cache:customer invalidate --tags=customer.list --tags=customer.email
+```yaml
+services:
+  # Base repository - used by API Platform for collections
+  App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
+    public: true
 
-# Clear all customer cache
-php bin/console cache:customer clear
+  # Cached repository - wraps base repository with caching
+  App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository:
+    arguments:
+      $inner: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
+      $cache: '@cache.customer'
+
+  # Alias interface to cached repository for dependency injection
+  App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
+    alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
+    public: true
+
+  # Cache invalidation event subscribers - explicitly inject cache.customer
+  App\Core\Customer\Application\EventSubscriber\CustomerCreatedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\EventSubscriber\CustomerDeletedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+```
+
+---
+
+## 5. Cache Pool Configuration
+
+**Production** - `config/packages/cache.yaml`:
+
+```yaml
+framework:
+  cache:
+    app: cache.adapter.redis
+    default_redis_provider: '%env(resolve:REDIS_URL)%'
+
+    pools:
+      app:
+        adapter: cache.adapter.redis
+        default_lifetime: 86400  # 24 hours
+        provider: '%env(resolve:REDIS_URL)%'
+      cache.customer:
+        adapter: cache.adapter.redis
+        default_lifetime: 600    # 10 minutes
+        provider: '%env(resolve:REDIS_URL)%'
+        tags: true               # REQUIRED for TagAwareCacheInterface
+```
+
+**Test** - `config/packages/test/cache.yaml`:
+
+```yaml
+framework:
+  cache:
+    app: cache.adapter.array
+    default_redis_provider: null
+    pools:
+      app:
+        adapter: cache.adapter.array
+        provider: null
+      cache.customer:
+        adapter: cache.adapter.array
+        provider: null
+        tags: true  # CRITICAL: Must have tags: true for TagAwareCacheInterface!
 ```
 
 ---
@@ -579,19 +498,30 @@ php bin/console cache:customer clear
 
 This complete example demonstrates:
 
-✅ **Cache policies declared** for each query
-✅ **Read-through caching** with SWR
-✅ **Explicit invalidation** on writes
-✅ **Cache tags** for flexible invalidation
-✅ **Observability** (structured logs)
-✅ **Cache warming** for cold starts
-✅ **Console commands** for cache management
-✅ **Error handling** and fallbacks
-✅ **Production-ready** patterns
+✅ **Decorator pattern** - `CachedCustomerRepository` wraps `MongoCustomerRepository`
+✅ **Event-driven invalidation** - Subscribers handle invalidation via domain events
+✅ **Best-effort invalidation** - try/catch prevents cache failures from breaking business operations
+✅ **CacheKeyBuilder service** - Centralized key generation, no drift
+✅ **Cache policies declared** for each query (TTL, tags, SWR)
+✅ **Email change handling** - Invalidates both old and new email caches
+✅ **Observability** (structured logs for hit/miss/error)
+✅ **Graceful fallback** to database on cache errors
+✅ **API Platform compatibility** via `__call()` magic method
 
-**File locations** (following hexagonal architecture):
+**Key Architecture Decisions**:
 
-- Repository: `src/Customer/Infrastructure/Persistence/CustomerRepository.php`
-- Command Handler: `src/Customer/Application/CommandHandler/UpdateCustomerCommandHandler.php`
-- Cache Warmer: `src/Customer/Infrastructure/Cache/CustomerCacheWarmer.php`
-- Console Command: `src/Customer/Infrastructure/Console/CustomerCacheCommand.php`
+1. **Decorator Pattern**: Separation of caching from persistence logic
+2. **Event-Driven Invalidation**: Decoupled from repository, testable, flexible
+3. **Best-Effort**: Cache failures never break business operations
+4. **Centralized Key Building**: Prevents key drift across services
+
+**File Locations** (this codebase):
+
+| Component               | Location                                                                    |
+| ----------------------- | --------------------------------------------------------------------------- |
+| CacheKeyBuilder         | `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`                       |
+| CachedCustomerRepository| `src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php` |
+| Event Subscribers       | `src/Core/Customer/Application/EventSubscriber/*CacheInvalidation*.php`    |
+| Services Config         | `config/services.yaml`                                                      |
+| Cache Config            | `config/packages/cache.yaml`                                                |
+| Test Cache Config       | `config/packages/test/cache.yaml`                                           |

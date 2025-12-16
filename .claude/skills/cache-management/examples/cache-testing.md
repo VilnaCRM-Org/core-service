@@ -631,16 +631,19 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
 ```yaml
 framework:
   cache:
-    app: cache.adapter.array # Use array adapter for tests (fast, in-memory)
-
-    # Alternative: Use filesystem with short TTL for TTL tests
-    # app: cache.adapter.filesystem
-    # default_lifetime: 2 # 2 seconds for faster TTL tests
-
+    app: cache.adapter.array
+    default_redis_provider: null  # Disable Redis in tests
     pools:
-      cache.test:
+      app:
         adapter: cache.adapter.array
+        provider: null
+      cache.customer:
+        adapter: cache.adapter.array
+        provider: null
+        tags: true  # CRITICAL: Must have tags: true for TagAwareCacheInterface!
 ```
+
+**IMPORTANT**: The `tags: true` setting is REQUIRED when using `TagAwareCacheInterface`. Without it, `invalidateTags()` calls will fail in tests!
 
 ---
 
