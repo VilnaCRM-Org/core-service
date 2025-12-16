@@ -38,24 +38,25 @@ Implement production-ready caching with proper key design, TTL management, consi
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║  ALWAYS declare cache policy BEFORE implementing.             ║
-║  ALWAYS invalidate explicitly on writes.                      ║
-║  NEVER rely solely on TTL for write-updated data.             ║
-║  ALWAYS use TagAwareCacheInterface for cache tags.            ║
+║  ALWAYS use Decorator Pattern for caching (wrap repositories) ║
+║  ALWAYS use CacheKeyBuilder service (prevent key drift)       ║
+║  ALWAYS invalidate via Domain Events (decouple from business) ║
+║  ALWAYS use TagAwareCacheInterface for cache tags             ║
+║  ALWAYS wrap invalidation in try/catch (best-effort)          ║
 ║                                                               ║
-║  ❌ FORBIDDEN: Implicit invalidation, missing tests           ║
-║  ✅ REQUIRED:  Explicit policy, explicit invalidation, tests  ║
+║  ❌ FORBIDDEN: Caching in repository, implicit invalidation   ║
+║  ✅ REQUIRED:  Decorator pattern, event-driven invalidation   ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 **Non-negotiable requirements**:
 
-- Declare cache policy (key, TTL, consistency) before coding
+- Use Decorator Pattern: `CachedXxxRepository` wraps `MongoXxxRepository`
+- Use centralized `CacheKeyBuilder` service (in `Shared/Infrastructure/Cache`)
+- Invalidate via Domain Event Subscribers (not in repository)
+- Wrap cache operations in try/catch (never fail business operations)
 - Use `TagAwareCacheInterface` (not `CacheInterface`) for tag support
-- Invalidate cache explicitly on create/update/delete
-- Add cache tags for batch invalidation
-- Test stale reads after writes
-- Test cache warmup on cold start
+- Configure test cache pools with `tags: true` in `config/packages/test/cache.yaml`
 - Log cache operations for observability
 
 ---
@@ -67,25 +68,30 @@ Implement production-ready caching with proper key design, TTL management, consi
 - [ ] Identified slow query worth caching (use query-performance-analysis)
 - [ ] Cache policy declared (key pattern, TTL, consistency class)
 - [ ] Cache tags defined for invalidation strategy
-- [ ] Observability plan (logs, metrics)
+- [ ] Domain events defined for cache invalidation triggers
+
+**Architecture Setup:**
+
+- [ ] Created `CachedXxxRepository` decorator class
+- [ ] Created `CacheKeyBuilder` service (or extended existing one)
+- [ ] Created cache invalidation event subscribers (one per event)
+- [ ] Configured services.yaml with explicit cache pool injection
 
 **During Implementation:**
 
-- [ ] Read-through caching implemented
-- [ ] Cache key builder uses consistent pattern
-- [ ] TTL set based on data freshness requirements
-- [ ] Cache tags configured on all cached items
-- [ ] Explicit invalidation on all write operations
-- [ ] Logging added for cache hits/misses
-- [ ] Repository uses TagAwareCacheInterface injection (required for tags)
+- [ ] Decorator wraps inner repository (not extends)
+- [ ] CacheKeyBuilder used for all cache keys (prevents drift)
+- [ ] Cache operations wrapped in try/catch (best-effort)
+- [ ] Event subscribers use same CacheKeyBuilder for tags
+- [ ] Logging added for cache hits/misses/errors
+- [ ] Repository uses `TagAwareCacheInterface` (required for tags)
 
 **Testing:**
 
-- [ ] Test: Stale reads after writes (invalidation works)
-- [ ] Test: Cache warmup on cold start (cache miss handling)
-- [ ] Test: TTL expiration reloads fresh data
-- [ ] Test: Tag-based invalidation works correctly
-- [ ] Test: SWR serves stale data while refreshing (if using SWR)
+- [ ] Test cache pool configured with `tags: true`
+- [ ] Unit tests for cache invalidation subscribers
+- [ ] Integration tests for stale reads after writes
+- [ ] Test: Cache error fallback to database works
 
 **Before Merge:**
 
@@ -96,7 +102,7 @@ Implement production-ready caching with proper key design, TTL management, consi
 
 ---
 
-## Quick Start: Cache in 5 Steps
+## Quick Start: Cache in 7 Steps
 
 ### Step 1: Declare Cache Policy
 
@@ -109,72 +115,142 @@ Implement production-ready caching with proper key design, TTL management, consi
  * Key Pattern: customer.{id}
  * TTL: 600s (10 minutes)
  * Consistency: Stale-While-Revalidate
- * Invalidation: On customer update/delete commands
+ * Invalidation: Via domain events (CustomerCreated/Updated/Deleted)
  * Tags: [customer, customer.{id}]
  * Notes: Read-heavy operation, tolerates brief staleness
  */
 ```
 
-**See**: [reference/cache-policies.md](reference/cache-policies.md) for policy selection guide
+### Step 2: Create CacheKeyBuilder Service
 
-### Step 2: Implement Read-Through Caching
+**Location**: `src/Shared/Infrastructure/Cache/CacheKeyBuilder.php`
 
 ```php
-public function findById(string $id): ?Customer
+final readonly class CacheKeyBuilder
 {
-    return $this->cache->get(
-        "customer.{$id}",
-        function (ItemInterface $item) use ($id) {
-            $item->expiresAfter(600);  // TTL: 10 minutes
-            $item->tag(['customer', "customer.{$id}"]);
+    public function buildCustomerKey(string $customerId): string
+    {
+        return $this->build('customer', $customerId);
+    }
 
-            return $this->dm->find(Customer::class, $id);
-        },
-        beta: 1.0  // Enable SWR
-    );
+    public function buildCustomerEmailKey(string $email): string
+    {
+        return $this->build('customer', 'email', $this->hashEmail($email));
+    }
+
+    public function hashEmail(string $email): string
+    {
+        return hash('sha256', strtolower($email));
+    }
+
+    private function build(string $namespace, string ...$parts): string
+    {
+        return $namespace . '.' . implode('.', $parts);
+    }
 }
 ```
 
-**See**: [examples/cache-implementation.md](examples/cache-implementation.md) for complete repository
+### Step 3: Create Cached Repository Decorator
 
-### Step 3: Add Explicit Invalidation
+**Location**: `src/Core/{Entity}/Infrastructure/Repository/Cached{Entity}Repository.php`
 
 ```php
-public function save(Customer $customer): void
+final class CachedCustomerRepository implements CustomerRepositoryInterface
 {
-    $this->dm->persist($customer);
-    $this->dm->flush();
+    public function __construct(
+        private CustomerRepositoryInterface $inner,  // Wraps MongoCustomerRepository
+        private TagAwareCacheInterface $cache,
+        private CacheKeyBuilder $cacheKeyBuilder,
+        private LoggerInterface $logger
+    ) {}
 
-    // Explicit invalidation
-    $this->cache->invalidateTags(["customer.{$customer->id()}"]);
+    public function find(mixed $id, ...): ?Customer
+    {
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey((string) $id);
+
+        try {
+            return $this->cache->get(
+                $cacheKey,
+                fn (ItemInterface $item) => $this->loadFromDb($id, $item),
+                beta: 1.0  // Enable SWR
+            );
+        } catch (\Throwable $e) {
+            $this->logCacheError($cacheKey, $e);
+            return $this->inner->find($id, ...);  // Graceful fallback
+        }
+    }
 }
 ```
 
-**See**: [reference/invalidation-strategies.md](reference/invalidation-strategies.md) for all patterns
+### Step 4: Create Event Subscribers for Invalidation
 
-### Step 4: Add Comprehensive Tests
+**Location**: `src/Core/{Entity}/Application/EventSubscriber/{Event}CacheInvalidationSubscriber.php`
 
 ```php
-public function testCacheInvalidatedAfterUpdate(): void
+final readonly class CustomerUpdatedCacheInvalidationSubscriber implements DomainEventSubscriberInterface
 {
-    $customer = $this->createTestCustomer();
+    public function __construct(
+        private TagAwareCacheInterface $cache,
+        private CacheKeyBuilder $cacheKeyBuilder,
+        private LoggerInterface $logger
+    ) {}
 
-    // First read - cache miss
-    $result1 = $this->repository->findById($customer->id());
-
-    // Update customer
-    $customer->updateName('New Name');
-    $this->repository->save($customer);
-
-    // Verify cache was invalidated (fresh data)
-    $result2 = $this->repository->findById($customer->id());
-    self::assertSame('New Name', $result2->name());
+    public function __invoke(CustomerUpdatedEvent $event): void
+    {
+        // Best-effort: don't fail business operation if cache is down
+        try {
+            $this->cache->invalidateTags([
+                'customer.' . $event->customerId(),
+                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->currentEmail()),
+                'customer.collection',
+            ]);
+            $this->logger->info('Cache invalidated after customer update', [...]);
+        } catch (\Throwable $e) {
+            $this->logger->error('Cache invalidation failed', [...]);
+        }
+    }
 }
 ```
 
-**See**: [examples/cache-testing.md](examples/cache-testing.md) for complete test suite
+### Step 5: Configure services.yaml
 
-### Step 5: Verify with CI
+```yaml
+# Base repository - used by API Platform
+App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
+  public: true
+
+# Cached decorator - wraps base repository
+App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository:
+  arguments:
+    $inner: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
+    $cache: '@cache.customer'
+
+# Alias interface to cached repository
+App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
+  alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
+
+# Event subscribers - explicit cache pool injection
+App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber:
+  arguments:
+    $cache: '@cache.customer'
+```
+
+### Step 6: Configure Test Cache Pool
+
+**CRITICAL**: Test cache pools MUST have `tags: true` for TagAwareCacheInterface!
+
+**Location**: `config/packages/test/cache.yaml`
+
+```yaml
+framework:
+  cache:
+    pools:
+      cache.customer:
+        adapter: cache.adapter.array
+        tags: true  # REQUIRED for TagAwareCacheInterface in tests
+```
+
+### Step 7: Verify with CI
 
 ```bash
 make ci
