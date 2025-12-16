@@ -59,8 +59,9 @@ export default function cachePerformance(data) {
 
   const duration = Date.now() - startTime;
 
-  // Check response
-  const isSuccess = utils.checkResponse(response, 'is status 200', res => res.status === 200);
+  // Check response - checkResponse doesn't return a value, so check status directly
+  utils.checkResponse(response, 'is status 200', res => res.status === 200);
+  const isSuccess = response.status === 200;
 
   if (isSuccess) {
     // After warmup, all requests should be cache hits
