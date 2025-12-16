@@ -115,13 +115,13 @@ export function handleSummary(data) {
   console.log('This load test measures performance under concurrent load.\n');
 
   // Fail only on actual errors, not on heuristic-based cache detection
-  const httpFailRate = data.metrics.http_req_failed
-    ? data.metrics.http_req_failed.values.rate
-    : 0;
+  const httpFailRate = data.metrics.http_req_failed ? data.metrics.http_req_failed.values.rate : 0;
 
   if (httpFailRate > 0.01) {
     // More than 1% failure rate
-    console.error(`FAIL: HTTP error rate (${(httpFailRate * 100).toFixed(2)}%) exceeds 1% threshold`);
+    console.error(
+      `FAIL: HTTP error rate (${(httpFailRate * 100).toFixed(2)}%) exceeds 1% threshold`
+    );
     return { stdout: JSON.stringify({ failed: true, reason: 'High error rate' }) };
   }
 
