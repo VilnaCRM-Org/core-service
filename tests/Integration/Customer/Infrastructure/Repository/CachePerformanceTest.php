@@ -168,7 +168,7 @@ final class CachePerformanceTest extends KernelTestCase
     public function testEmailLookupCachePerformance(): void
     {
         $email = sprintf('email-perf+%s@example.com', (string) $this->generateUlid());
-        $customer = $this->createTestCustomer('Email Perf Test', $email);
+        $this->createTestCustomer('Email Perf Test', $email);
 
         $this->cachePool->clear();
 

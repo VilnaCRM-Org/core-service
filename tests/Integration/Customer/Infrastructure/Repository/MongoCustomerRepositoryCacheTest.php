@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
 use App\Shared\Domain\ValueObject\Ulid;
+use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
@@ -21,6 +22,7 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private CacheItemPoolInterface $cachePool;
+    private CacheKeyBuilder $cacheKeyBuilder;
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
 
@@ -32,6 +34,7 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cachePool = self::getContainer()->get('cache.customer');
+        $this->cacheKeyBuilder = self::getContainer()->get(CacheKeyBuilder::class);
 
         $this->ensureDefaultTypeAndStatus();
     }
@@ -50,7 +53,9 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         self::assertNotNull($result);
         self::assertSame($customer->getUlid(), $result->getUlid());
         self::assertSame('John Doe', $result->getInitials());
-        self::assertTrue($this->cachePool->getItem('customer.' . $customer->getUlid())->isHit());
+
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey($customer->getUlid());
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
     }
 
     public function testCacheHitAfterCacheMiss(): void
@@ -68,7 +73,9 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         $result2 = $this->repository->find($customer->getUlid());
         self::assertNotNull($result2);
         self::assertSame($result1->getUlid(), $result2->getUlid());
-        self::assertTrue($this->cachePool->getItem('customer.' . $customer->getUlid())->isHit());
+
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey($customer->getUlid());
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
     }
 
     public function testEmailCacheColdStart(): void
@@ -83,8 +90,8 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         self::assertNotNull($result);
         self::assertSame($customer->getUlid(), $result->getUlid());
 
-        $emailHash = hash('sha256', strtolower($email));
-        self::assertTrue($this->cachePool->getItem('customer.email.' . $emailHash)->isHit());
+        $emailCacheKey = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
+        self::assertTrue($this->cachePool->getItem($emailCacheKey)->isHit());
     }
 
     private function ensureDefaultTypeAndStatus(): void

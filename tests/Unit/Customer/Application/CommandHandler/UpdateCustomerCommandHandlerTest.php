@@ -79,6 +79,66 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         $this->createCommand($customer, $updateData);
     }
 
+    public function testInvokeWithUnchangedEmailPublishesEventWithSameEmail(): void
+    {
+        $typeUlid = $this->ulidTransformer->transformFromSymfonyUlid(
+            $this->faker->ulid(),
+        );
+        $statusUlid = $this->ulidTransformer->transformFromSymfonyUlid(
+            $this->faker->ulid(),
+        );
+
+        $customerType = new CustomerType('individual', $typeUlid);
+        $customerStatus = new CustomerStatus('active', $statusUlid);
+
+        $customer = $this->createMock(Customer::class);
+        $updateData = new CustomerUpdate(
+            newInitials: $this->faker->name(),
+            newEmail: $this->faker->email(),
+            newPhone: $this->faker->phoneNumber(),
+            newLeadSource: $this->faker->word(),
+            newType: $customerType,
+            newStatus: $customerStatus,
+            newConfirmed: $this->faker->boolean(),
+        );
+
+        $customerId = (string) $this->faker->ulid();
+        $email = 'unchanged@example.com';
+
+        $customer->expects($this->once())
+            ->method('update')->with($updateData);
+
+        $this->repository->expects($this->once())
+            ->method('save')->with($customer);
+
+        $customer->expects($this->once())
+            ->method('getUlid')
+            ->willReturn($customerId);
+
+        // Email unchanged - return same value on both calls
+        $customer->expects($this->exactly(2))
+            ->method('getEmail')
+            ->willReturn($email);
+
+        $this->eventBus->expects($this->once())
+            ->method('publish')
+            ->with($this->callback(static function ($event) use ($customerId, $email) {
+                if (! $event instanceof CustomerUpdatedEvent) {
+                    return false;
+                }
+
+                // Verify event properties match and emailChanged is false
+                // Note: previousEmail is null when email hasn't changed (see UpdateCustomerCommandHandler line 53)
+                return $event->customerId() === $customerId
+                    && $event->currentEmail() === $email
+                    && $event->previousEmail() === null
+                    && $event->emailChanged() === false;
+            }));
+
+        $command = new UpdateCustomerCommand($customer, $updateData);
+        ($this->handler)($command);
+    }
+
     private function expectCustomerSetters(
         Customer $customer,
         CustomerUpdate $updateData

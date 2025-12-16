@@ -185,7 +185,9 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
     }
 
     /**
-     * Test that cache hit does NOT query database (verify by checking query count).
+     * Test that cache item is marked as hit on subsequent reads.
+     *
+     * Note: This verifies cache hit status but does not measure actual database queries.
      */
     public function testCacheHitDoesNotQueryDatabase(): void
     {

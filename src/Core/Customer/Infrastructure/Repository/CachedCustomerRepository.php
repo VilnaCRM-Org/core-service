@@ -129,10 +129,23 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
-     * Delegate deletion to inner repository (no caching on writes)
+     * Delegate deletion to inner repository and invalidate cache
      */
     public function delete(Customer $customer): void
     {
+        // Invalidate cache before deletion
+        $this->cache->invalidateTags([
+            "customer.{$customer->getUlid()}",
+            "customer.email.{$this->cacheKeyBuilder->hashEmail($customer->getEmail())}",
+            'customer.collection',
+        ]);
+
+        $this->logger->info('Cache invalidated before customer deletion', [
+            'customer_id' => $customer->getUlid(),
+            'operation' => 'cache.invalidation',
+            'reason' => 'customer_deleted',
+        ]);
+
         $this->inner->delete($customer);
     }
 

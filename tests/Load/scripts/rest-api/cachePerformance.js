@@ -35,7 +35,7 @@ export function setup() {
     const customer = customers[i];
     const response = http.get(`${utils.getBaseHttpUrl()}/${customer.id}`, utils.getJsonHeader());
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.body && response.body.length > 0) {
       warmupSuccesses++;
     }
   }

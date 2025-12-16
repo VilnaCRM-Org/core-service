@@ -14,10 +14,10 @@ tests/
 └── Integration/
     └── Customer/
         └── Infrastructure/
-            └── Persistence/
-                ├── CustomerRepositoryCacheTest.php
-                ├── CustomerRepositoryInvalidationTest.php
-                └── CustomerRepositorySwrTest.php
+            └── Repository/
+                ├── MongoCustomerRepositoryCacheTest.php
+                ├── MongoCustomerRepositoryInvalidationTest.php
+                └── MongoCustomerRepositorySwrTest.php
 ```
 
 ---
@@ -38,7 +38,7 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-final class CustomerRepositoryInvalidationTest extends KernelTestCase
+final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 {
     private CustomerRepositoryInterface $repository;
     private TagAwareCacheInterface $cache;
@@ -163,15 +163,15 @@ final class CustomerRepositoryInvalidationTest extends KernelTestCase
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Customer\Infrastructure\Persistence;
+namespace Tests\Integration\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Cache\CustomerCacheWarmer;
-use App\Customer\Infrastructure\Persistence\CustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Cache\CustomerCacheWarmer;
+use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-final class CustomerRepositoryCacheTest extends KernelTestCase
+final class MongoCustomerRepositoryCacheTest extends KernelTestCase
 {
     private CustomerRepository $repository;
     private CustomerCacheWarmer $cacheWarmer;
@@ -272,10 +272,10 @@ final class CustomerRepositoryCacheTest extends KernelTestCase
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Customer\Infrastructure\Persistence;
+namespace Tests\Integration\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Persistence\CustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -405,10 +405,10 @@ final class CustomerRepositoryTtlTest extends KernelTestCase
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Customer\Infrastructure\Persistence;
+namespace Tests\Integration\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Persistence\CustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -560,14 +560,14 @@ final class CustomerRepositoryTagInvalidationTest extends KernelTestCase
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Customer\Infrastructure\Persistence;
+namespace Tests\Integration\Customer\Infrastructure\Repository;
 
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Infrastructure\Persistence\CustomerRepository;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-final class CustomerRepositorySwrTest extends KernelTestCase
+final class MongoCustomerRepositorySwrTest extends KernelTestCase
 {
     private CustomerRepository $repository;
     private TagAwareCacheInterface $cache;
