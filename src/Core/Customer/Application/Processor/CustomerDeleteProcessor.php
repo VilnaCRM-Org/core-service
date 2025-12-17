@@ -12,7 +12,7 @@ use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use InvalidArgumentException;
 
 /**
- * @implements ProcessorInterface<Customer, Customer>
+ * @implements ProcessorInterface<Customer, null>
  */
 final readonly class CustomerDeleteProcessor implements ProcessorInterface
 {
@@ -30,13 +30,13 @@ final readonly class CustomerDeleteProcessor implements ProcessorInterface
         Operation $operation,
         array $uriVariables = [],
         array $context = [],
-    ): Customer {
+    ): null {
         if (!$data instanceof Customer) {
             throw new InvalidArgumentException('Expected instance of Customer');
         }
 
         $this->commandBus->dispatch(new DeleteCustomerCommand($data));
 
-        return $data;
+        return null;
     }
 }

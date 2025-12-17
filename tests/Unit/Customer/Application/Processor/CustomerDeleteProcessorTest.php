@@ -13,6 +13,9 @@ use App\Tests\Unit\UnitTestCase;
 use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ */
 final class CustomerDeleteProcessorTest extends UnitTestCase
 {
     private CommandBusInterface&MockObject $commandBus;
@@ -38,7 +41,7 @@ final class CustomerDeleteProcessorTest extends UnitTestCase
 
         $result = $this->processor->process($customer, $operation);
 
-        self::assertSame($customer, $result);
+        self::assertNull($result);
     }
 
     public function testProcessThrowsWhenDataIsNotCustomer(): void
