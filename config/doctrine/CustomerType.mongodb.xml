@@ -15,5 +15,11 @@
 
         <field field-name="value" type="string" />
 
+        <indexes>
+            <index>
+                <key name="value" order="asc" />
+            </index>
+        </indexes>
+
     </document>
 </doctrine-mongo-mapping>

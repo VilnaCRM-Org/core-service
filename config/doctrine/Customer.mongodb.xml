@@ -32,6 +32,43 @@
             <index unique="true">
                 <key name="email" />
             </index>
+
+            <!-- Optimize API Platform exact filters + cursor pagination (sorted by ulid/_id) -->
+            <index>
+                <key name="initials" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="phone" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="leadSource" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="createdAt" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="updatedAt" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+
+            <index>
+                <key name="confirmed" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+
+            <!-- References are stored as IDs; indexing helps filters and hydration lookups -->
+            <index>
+                <key name="status" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="type" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
         </indexes>
     </document>
 </doctrine-mongo-mapping>
