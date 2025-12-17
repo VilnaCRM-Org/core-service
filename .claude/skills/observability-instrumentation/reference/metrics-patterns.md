@@ -1,607 +1,338 @@
-# Metrics Patterns
+# Business Metrics with AWS EMF
 
-Comprehensive guide to implementing metrics collection for observability.
+Guide to implementing business metrics using AWS CloudWatch Embedded Metric Format (EMF). This codebase uses AWS AppRunner which provides infrastructure metrics (latency, errors, RPS) automatically - this guide focuses on **business metrics only**.
 
-## The Three Key Metrics
+## What Are Business Metrics?
 
-### 1. Latency (Duration)
+Business metrics track domain events and business value - things that matter to the business, not infrastructure.
 
-**What**: How long operations take
+| Business Metrics (Track These) | Infrastructure Metrics (AWS Provides) |
+|-------------------------------|--------------------------------------|
+| CustomersCreated              | Request latency (p50, p95, p99)      |
+| OrdersPlaced                  | Error rates                          |
+| PaymentsProcessed             | Requests per second                  |
+| OrderValue (amount)           | CPU/Memory usage                     |
+| LoginAttempts                 | Connection counts                    |
 
-**Why**: Detect performance degradation
+---
 
-**How**: Record duration in milliseconds
+## AWS EMF Format
 
-```php
-$startTime = microtime(true);
-// ... operation
-$duration = (microtime(true) - $startTime) * 1000; // Convert to milliseconds
+AWS Embedded Metric Format allows logs to be automatically extracted as CloudWatch metrics.
 
-$this->metrics->record('operation.duration', $duration, [
-    'status' => 'success',
-]);
-```
+### EMF Log Structure
 
-### 2. Errors (Failures)
-
-**What**: Count of failed operations
-
-**Why**: Detect reliability issues
-
-**How**: Increment counter on errors
-
-```php
-try {
-    // ... operation
-} catch (\Throwable $e) {
-    $this->metrics->increment('operation.errors', [
-        'error_type' => get_class($e),
-    ]);
-    throw $e;
+```json
+{
+  "_aws": {
+    "Timestamp": 1702425600000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "CCore/BusinessMetrics",
+        "Dimensions": [["Endpoint", "Operation"]],
+        "Metrics": [
+          { "Name": "CustomersCreated", "Unit": "Count" }
+        ]
+      }
+    ]
+  },
+  "Endpoint": "Customer",
+  "Operation": "_api_/customers_post",
+  "CustomersCreated": 1
 }
 ```
 
-### 3. Throughput (RPS - Requests Per Second)
+When written to stdout, CloudWatch automatically:
+1. Extracts `CustomersCreated` as a metric
+2. Associates it with the `CCore/BusinessMetrics` namespace
+3. Applies dimensions `Endpoint` and `Operation`
 
-**What**: Number of operations per time unit
+---
 
-**Why**: Understand load and capacity
+## Using BusinessMetricsEmitterInterface
 
-**How**: Increment counter for each operation
+### Inject the Interface
 
 ```php
-$this->metrics->increment('operation.total');
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+
+final readonly class CreateCustomerCommandHandler
+{
+    public function __construct(
+        private CustomerRepositoryInterface $repository,
+        private BusinessMetricsEmitterInterface $metrics
+    ) {}
+}
+```
+
+### Emit Single Metric
+
+```php
+public function __invoke(CreateCustomerCommand $command): void
+{
+    // ... create customer logic
+
+    $this->metrics->emit('CustomersCreated', 1, [
+        'Endpoint' => 'Customer',
+        'Operation' => 'create',
+    ]);
+}
+```
+
+### Emit Multiple Metrics
+
+```php
+public function __invoke(PlaceOrderCommand $command): void
+{
+    // ... place order logic
+
+    $this->metrics->emitMultiple([
+        'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
+        'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
+    ], [
+        'Endpoint' => 'Order',
+        'PaymentMethod' => $order->paymentMethod(),
+    ]);
+}
 ```
 
 ---
 
 ## Metric Naming Convention
 
-**Format**: `{component}.{operation}.{metric_type}`
+### Format
 
-### Components
-
-- **customer** - Customer bounded context
-- **order** - Order bounded context
-- **mongodb** - Database operations
-- **http** - HTTP operations
-- **cache** - Cache operations
-
-### Operations
-
-- **create** - Create operations
-- **update** - Update operations
-- **delete** - Delete operations
-- **find** - Query operations
-- **save** - Persistence operations
-
-### Metric Types
-
-- **duration** or **duration_ms** - Timing in milliseconds
-- **total** - Count of operations
-- **errors** - Count of failures
-- **size** - Size in bytes
+```
+{Entity}{Action}   # PascalCase, plural noun, past tense
+```
 
 ### Examples
 
-```bash
-# Command handlers
-customer.create.duration_ms
-customer.create.total
-customer.create.errors
-customer.update.duration_ms
-order.place.duration_ms
+| Good | Bad |
+|------|-----|
+| `CustomersCreated` | `customer_created` |
+| `OrdersPlaced` | `orders.placed.count` |
+| `PaymentsProcessed` | `payment-processed` |
+| `LoginAttempts` | `login_attempts_total` |
 
-# Repository operations
-mongodb.save.duration_ms
-mongodb.find.duration_ms
-mongodb.query.errors
+### Guidelines
 
-# HTTP operations
-http.email.send.duration_ms
-http.email.send.errors
-http.api.call.total
-
-# Cache operations
-cache.hit.total
-cache.miss.total
-cache.read.duration_ms
-```
+- Use **PascalCase** for metric names
+- Use **plural nouns** for counters (CustomersCreated, not CustomerCreated)
+- Use **past tense** for completed actions
+- Keep names **concise** but descriptive
 
 ---
 
-## Metrics Interface
+## Dimensions Best Practices
 
-### Basic Metrics Collector
+### Recommended Dimensions
 
-```php
-<?php
+| Dimension | Description | Cardinality |
+|-----------|-------------|-------------|
+| `Endpoint` | API resource name | Low |
+| `Operation` | CRUD action | Very Low |
+| `PaymentMethod` | Payment type | Low |
+| `CustomerType` | Customer segment | Low |
 
-declare(strict_types=1);
+### Avoid High-Cardinality Dimensions
 
-namespace App\Shared\Application\Service;
+**Don't use:**
+- Customer IDs
+- Order IDs
+- Session IDs
+- Timestamps
+- Email addresses
 
-interface MetricsCollector
-{
-    /**
-     * Record a metric value (gauge or timing)
-     *
-     * @param string $name Metric name
-     * @param float $value Metric value
-     * @param array<string, string> $tags Optional tags
-     */
-    public function record(string $name, float $value, array $tags = []): void;
-
-    /**
-     * Increment a counter
-     *
-     * @param string $name Counter name
-     * @param array<string, string> $tags Optional tags
-     * @param int $value Increment by (default 1)
-     */
-    public function increment(string $name, array $tags = [], int $value = 1): void;
-
-    /**
-     * Decrement a counter
-     *
-     * @param string $name Counter name
-     * @param array<string, string> $tags Optional tags
-     * @param int $value Decrement by (default 1)
-     */
-    public function decrement(string $name, array $tags = [], int $value = 1): void;
-}
-```
-
-### Simple Implementation (Development)
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Shared\Infrastructure\Service;
-
-use App\Shared\Application\Service\MetricsCollector;
-use Psr\Log\LoggerInterface;
-
-final readonly class LoggingMetricsCollector implements MetricsCollector
-{
-    public function __construct(
-        private LoggerInterface $logger
-    ) {}
-
-    public function record(string $name, float $value, array $tags = []): void
-    {
-        $this->logger->info('METRIC', [
-            'metric_name' => $name,
-            'metric_value' => $value,
-            'metric_tags' => $tags,
-            'metric_type' => 'gauge',
-        ]);
-    }
-
-    public function increment(string $name, array $tags = [], int $value = 1): void
-    {
-        $this->logger->info('METRIC', [
-            'metric_name' => $name,
-            'metric_value' => $value,
-            'metric_tags' => $tags,
-            'metric_type' => 'counter',
-        ]);
-    }
-
-    public function decrement(string $name, array $tags = [], int $value = 1): void
-    {
-        $this->logger->info('METRIC', [
-            'metric_name' => $name,
-            'metric_value' => -$value,
-            'metric_tags' => $tags,
-            'metric_type' => 'counter',
-        ]);
-    }
-}
-```
+High-cardinality dimensions create too many unique metric streams and increase CloudWatch costs significantly.
 
 ---
 
-## Complete Handler Example
+## Business Metrics by Domain
+
+### Customer Domain
 
 ```php
-final readonly class CreateCustomerCommandHandler
-{
-    public function __construct(
-        private CustomerRepository $repository,
-        private MetricsCollector $metrics,
-        private LoggerInterface $logger
-    ) {}
-
-    public function __invoke(CreateCustomerCommand $command): void
-    {
-        $startTime = microtime(true);
-
-        try {
-            // 1. Execute operation
-            $customer = Customer::create(/* ... */);
-            $this->repository->save($customer);
-
-            // 2. Record success metrics
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            // Duration with success tag
-            $this->metrics->record('customer.create.duration', $duration, [
-                'status' => 'success',
-            ]);
-
-            // Throughput counter
-            $this->metrics->increment('customer.create.total');
-
-            // Business metric
-            $this->metrics->increment('customer.total');
-
-        } catch (\Throwable $e) {
-            // 3. Record error metrics
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            // Duration with error tag
-            $this->metrics->record('customer.create.duration', $duration, [
-                'status' => 'error',
-            ]);
-
-            // Error counter with error type
-            $this->metrics->increment('customer.create.errors', [
-                'error_type' => get_class($e),
-            ]);
-
-            throw $e;
-        }
-    }
-}
-```
-
----
-
-## Tags (Labels)
-
-Tags provide dimensions for filtering metrics.
-
-### Common Tags
-
-| Tag             | Purpose                  | Example Values                               |
-| --------------- | ------------------------ | -------------------------------------------- |
-| **status**      | Operation result         | `success`, `error`                           |
-| **error_type**  | Exception class          | `ConnectionException`, `ValidationException` |
-| **operation**   | Specific operation       | `create`, `update`, `delete`                 |
-| **entity_type** | Entity being operated on | `customer`, `order`                          |
-| **source**      | Origin of request        | `api`, `cli`, `queue`                        |
-
-### Example with Tags
-
-```php
-// Success with tags
-$this->metrics->record('handler.duration', $duration, [
-    'handler' => 'CreateCustomerCommandHandler',
-    'status' => 'success',
-    'source' => 'api',
+// Customer registration
+$this->metrics->emit('CustomersCreated', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'create',
 ]);
 
-// Error with tags
-$this->metrics->increment('handler.errors', [
-    'handler' => 'CreateCustomerCommandHandler',
-    'error_type' => 'ValidationException',
-    'source' => 'api',
+// Customer update
+$this->metrics->emit('CustomersUpdated', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'update',
+]);
+
+// Customer deletion
+$this->metrics->emit('CustomersDeleted', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'delete',
+]);
+```
+
+### Order Domain
+
+```php
+// Order placed
+$this->metrics->emitMultiple([
+    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
+    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
+    'OrderItemCount' => ['value' => $order->itemCount(), 'unit' => 'Count'],
+], [
+    'Endpoint' => 'Order',
+    'PaymentMethod' => $order->paymentMethod(),
+]);
+
+// Order cancelled
+$this->metrics->emit('OrdersCancelled', 1, [
+    'Endpoint' => 'Order',
+    'CancellationReason' => $reason,
+]);
+```
+
+### Payment Domain
+
+```php
+// Payment processed
+$this->metrics->emitMultiple([
+    'PaymentsProcessed' => ['value' => 1, 'unit' => 'Count'],
+    'PaymentAmount' => ['value' => $payment->amount(), 'unit' => 'None'],
+], [
+    'Endpoint' => 'Payment',
+    'PaymentProvider' => $payment->provider(),
+    'PaymentMethod' => $payment->method(),
+]);
+
+// Payment failed
+$this->metrics->emit('PaymentsFailed', 1, [
+    'Endpoint' => 'Payment',
+    'FailureReason' => $failureCategory, // Low cardinality: 'insufficient_funds', 'expired_card', etc.
+]);
+```
+
+### Authentication Domain
+
+```php
+// Login attempt
+$this->metrics->emit('LoginAttempts', 1, [
+    'Endpoint' => 'Auth',
+    'Result' => $success ? 'success' : 'failure',
+]);
+
+// Password reset requested
+$this->metrics->emit('PasswordResetsRequested', 1, [
+    'Endpoint' => 'Auth',
 ]);
 ```
 
 ---
 
-## Metrics by Layer
+## Units Reference
 
-### Application Layer (Command Handlers)
+| Unit | Use For |
+|------|---------|
+| `Count` | Counters (items created, events occurred) |
+| `None` | Monetary values, quantities without unit |
+| `Seconds` | Time durations |
+| `Bytes` | Data sizes |
+| `Percent` | Percentages |
 
-```php
-final readonly class CreateCustomerCommandHandler
-{
-    public function __invoke(CreateCustomerCommand $command): void
-    {
-        $startTime = microtime(true);
+---
 
-        try {
-            // Execute
-            $this->execute($command);
+## CloudWatch Queries
 
-            // Metrics
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('customer.create.duration', $duration, ['status' => 'success']);
-            $this->metrics->increment('customer.create.total');
+After deploying, query your business metrics:
 
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('customer.create.duration', $duration, ['status' => 'error']);
-            $this->metrics->increment('customer.create.errors', ['error_type' => get_class($e)]);
-            throw $e;
-        }
-    }
-}
-```
+```sql
+-- Total endpoint invocations by resource
+SELECT SUM(EndpointInvocations)
+FROM "CCore/BusinessMetrics"
+GROUP BY Endpoint
 
-### Infrastructure Layer (Repositories)
+-- Customers created over time
+SELECT SUM(CustomersCreated)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Customer'
 
-```php
-final class MongoCustomerRepository
-{
-    public function save(Customer $customer): void
-    {
-        $startTime = microtime(true);
-
-        try {
-            $this->documentManager->persist($customer);
-            $this->documentManager->flush();
-
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('mongodb.customer.save.duration', $duration);
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('mongodb.customer.save.duration', $duration, ['status' => 'error']);
-            $this->metrics->increment('mongodb.customer.save.errors', ['error_type' => get_class($e)]);
-            throw $e;
-        }
-    }
-
-    public function findById(CustomerId $id): ?Customer
-    {
-        $startTime = microtime(true);
-
-        try {
-            $customer = $this->documentManager->find(Customer::class, $id->value());
-
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('mongodb.customer.find.duration', $duration);
-
-            // Track cache hits/misses
-            if ($customer === null) {
-                $this->metrics->increment('mongodb.customer.find.misses');
-            } else {
-                $this->metrics->increment('mongodb.customer.find.hits');
-            }
-
-            return $customer;
-
-        } catch (\Throwable $e) {
-            $this->metrics->increment('mongodb.customer.find.errors', ['error_type' => get_class($e)]);
-            throw $e;
-        }
-    }
-}
-```
-
-### Infrastructure Layer (HTTP Clients)
-
-```php
-final class EmailServiceHttpClient
-{
-    public function sendEmail(string $to, string $subject): void
-    {
-        $startTime = microtime(true);
-
-        try {
-            $response = $this->httpClient->post('/api/email', [/* ... */]);
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->metrics->record('http.email.send.duration', $duration, [
-                'status_code' => (string) $response->getStatusCode(),
-            ]);
-
-            $this->metrics->increment('http.email.sent.total');
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->metrics->record('http.email.send.duration', $duration, ['status' => 'error']);
-            $this->metrics->increment('http.email.send.errors', [
-                'error_type' => get_class($e),
-            ]);
-
-            throw $e;
-        }
-    }
-}
+-- Order value by payment method
+SELECT AVG(OrderValue)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Order'
+GROUP BY PaymentMethod
 ```
 
 ---
 
-## Business Metrics
+## What NOT to Track
 
-Track domain-specific events:
+AWS AppRunner already provides infrastructure metrics. Do NOT implement:
+
+- Request latency (p50, p95, p99)
+- Error rates and counts
+- Requests per second (RPS)
+- Response times
+- HTTP status codes
+- Memory/CPU usage
+- Connection metrics
+
+Focus ONLY on business events and values.
+
+---
+
+## Testing Business Metrics
+
+Use the spy in unit tests:
 
 ```php
-// After creating customer
-$this->metrics->increment('business.customer.registered.total');
+use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
-// After placing order
-$this->metrics->increment('business.order.placed.total');
-$this->metrics->record('business.order.value', $order->total());
-
-// After payment
-$this->metrics->increment('business.payment.processed.total', [
-    'payment_method' => $paymentMethod,
-]);
-```
-
----
-
-## Percentiles and Histograms
-
-For advanced metrics backends (Prometheus, Datadog):
-
-```php
-// Record timing for histogram/percentile calculation
-$this->metrics->record('customer.create.duration', $duration);
-
-// Backend calculates:
-// - p50 (median): 45ms
-// - p95: 120ms
-// - p99: 250ms
-```
-
----
-
-## Rate Calculation
-
-Calculate error rate:
-
-```bash
-error_rate = errors / total
-```
-
-Example:
-
-- `customer.create.total`: 1000
-- `customer.create.errors`: 10
-- Error rate: 10 / 1000 = 1%
-
----
-
-## Alerting Thresholds
-
-Define SLOs (Service Level Objectives):
-
-| Metric      | Threshold | Alert    |
-| ----------- | --------- | -------- |
-| p95 latency | > 500ms   | Warning  |
-| p99 latency | > 1000ms  | Critical |
-| Error rate  | > 1%      | Warning  |
-| Error rate  | > 5%      | Critical |
-
----
-
-## Testing Metrics
-
-### Unit Test
-
-```php
-final class MetricsCollectorSpy implements MetricsCollector
+final class CreateCustomerCommandHandlerTest extends TestCase
 {
-    private array $recorded = [];
-    private array $incremented = [];
-
-    public function record(string $name, float $value, array $tags = []): void
+    public function testEmitsCustomerCreatedMetric(): void
     {
-        $this->recorded[] = compact('name', 'value', 'tags');
-    }
-
-    public function increment(string $name, array $tags = [], int $value = 1): void
-    {
-        $this->incremented[] = compact('name', 'tags', 'value');
-    }
-
-    public function assertRecorded(string $name, ?float $value = null): void
-    {
-        foreach ($this->recorded as $record) {
-            if ($record['name'] === $name) {
-                if ($value === null || abs($record['value'] - $value) < 0.01) {
-                    return;
-                }
-            }
-        }
-        throw new \AssertionError("Metric '$name' not recorded");
-    }
-
-    public function assertIncremented(string $name): void
-    {
-        foreach ($this->incremented as $record) {
-            if ($record['name'] === $name) {
-                return;
-            }
-        }
-        throw new \AssertionError("Counter '$name' not incremented");
-    }
-}
-
-// Usage in test
-final class CreateCustomerHandlerTest extends TestCase
-{
-    public function testRecordsMetrics(): void
-    {
-        $metrics = new MetricsCollectorSpy();
-        $handler = new CreateCustomerCommandHandler(/* ..., */ $metrics);
+        $metricsSpy = new BusinessMetricsEmitterSpy();
+        $handler = new CreateCustomerCommandHandler($repository, $metricsSpy);
 
         $handler(new CreateCustomerCommand(/* ... */));
 
-        $metrics->assertRecorded('customer.create.duration');
-        $metrics->assertIncremented('customer.create.total');
+        $emitted = $metricsSpy->emitted();
+        self::assertCount(1, $emitted);
+        self::assertSame('CustomersCreated', $emitted[0]['name']);
+        self::assertSame(1, $emitted[0]['value']);
+        self::assertSame('Customer', $emitted[0]['dimensions']['Endpoint']);
+    }
+
+    public function testEmitsMetricWithCorrectDimensions(): void
+    {
+        $metricsSpy = new BusinessMetricsEmitterSpy();
+        $handler = new CreateCustomerCommandHandler($repository, $metricsSpy);
+
+        $handler(new CreateCustomerCommand(/* ... */));
+
+        $metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
+            'Endpoint' => 'Customer',
+            'Operation' => 'create',
+        ]);
     }
 }
-```
-
----
-
-## Common Patterns
-
-### Pattern 1: Success/Error Tagging
-
-```php
-$tags = ['status' => $success ? 'success' : 'error'];
-$this->metrics->record('operation.duration', $duration, $tags);
-```
-
-### Pattern 2: Try-Catch Metrics
-
-```php
-try {
-    $result = $this->operation();
-    $this->metrics->increment('operation.success');
-    return $result;
-} catch (\Throwable $e) {
-    $this->metrics->increment('operation.errors', ['error_type' => get_class($e)]);
-    throw $e;
-}
-```
-
-### Pattern 3: Timing Helper
-
-```php
-private function timeOperation(callable $operation, string $metricName): mixed
-{
-    $startTime = microtime(true);
-
-    try {
-        $result = $operation();
-        $duration = (microtime(true) - $startTime) * 1000;
-        $this->metrics->record($metricName, $duration, ['status' => 'success']);
-        return $result;
-
-    } catch (\Throwable $e) {
-        $duration = (microtime(true) - $startTime) * 1000;
-        $this->metrics->record($metricName, $duration, ['status' => 'error']);
-        $this->metrics->increment("$metricName.errors", ['error_type' => get_class($e)]);
-        throw $e;
-    }
-}
-
-// Usage
-$customer = $this->timeOperation(
-    fn() => $this->repository->save($customer),
-    'mongodb.customer.save.duration'
-);
 ```
 
 ---
 
 ## Success Criteria
 
-- ✅ Duration metrics recorded for all operations
-- ✅ Error counters increment on failures
-- ✅ Throughput counters track operation volume
-- ✅ Tags provide meaningful dimensions
-- ✅ Metric names follow naming convention
-- ✅ Business metrics track domain events
+- ✅ Business metrics track domain events (not infrastructure)
+- ✅ Metrics use PascalCase naming convention
+- ✅ Dimensions have low cardinality (no IDs, timestamps)
+- ✅ Unit tests verify metric emission
+- ✅ EMF format outputs to stdout for CloudWatch extraction
+- ✅ Namespace is `CCore/BusinessMetrics`
 
 ---
 
 **Next Steps**:
-
-- [Structured Logging](structured-logging.md) - Combine metrics with structured logs
-- [PR Evidence Guide](pr-evidence-guide.md) - Show metrics evidence in PRs
-- [Complete Example](../examples/instrumented-command-handler.md) - See full implementation
+- [Quick Start Guide](quick-start.md) - Add business metrics to your code
+- [Structured Logging](structured-logging.md) - Add correlation IDs for debugging
+- [Complete Example](../examples/instrumented-command-handler.md) - Full working example

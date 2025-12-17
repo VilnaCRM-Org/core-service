@@ -1,74 +1,44 @@
 # PR Evidence Guide
 
-How to collect and present observability evidence in pull requests to demonstrate your code is production-ready.
+How to collect and present observability evidence in pull requests to demonstrate your business metrics implementation is production-ready.
 
 ## Why Attach Evidence?
 
-Observability evidence in PRs:
-
-- **Proves code is instrumented** correctly
-- **Shows correlation tracking** works
-- **Demonstrates metrics collection** is functioning
-- **Provides debugging baseline** for future issues
-- **Validates tracing** of DB/HTTP operations
+Evidence in PRs:
+- **Proves metrics work** - Shows EMF output is correct
+- **Validates dimensions** - Confirms low cardinality
+- **Demonstrates testing** - Shows unit tests pass
+- **Provides baseline** - Documents expected behavior
 
 ---
 
 ## Evidence Collection Workflow
 
-### Step 1: Run Your Code Locally
+### Step 1: Run Tests
 
 ```bash
-# Start containers
-make start
+# Run observability tests
+make test -- --filter=Observability
 
-# Access container shell
-make sh
-
-# Run your operation (API call, command, etc.)
-bin/console app:create-customer --id=01JCXYZ... --email=test@example.com
+# Or run all tests
+make test
 ```
 
-### Step 2: Capture Logs
+### Step 2: Check EMF Output
 
-#### Option A: Tail logs in real-time
+For integration testing, you can verify EMF output format:
 
 ```bash
-# In another terminal
-make sh
-tail -f var/log/dev.log | grep correlation_id
+# View EMF-formatted output
+docker-compose logs app | grep "_aws"
 ```
 
-#### Option B: Filter logs after execution
+### Step 3: Capture Unit Test Results
 
 ```bash
-grep "correlation_id" var/log/dev.log | tail -20
+# Run specific test with verbose output
+make test -- --filter=BusinessMetricsEmitter -v
 ```
-
-#### Option C: Extract specific correlation ID
-
-```bash
-grep "550e8400-e29b-41d4-a716-446655440000" var/log/dev.log
-```
-
-### Step 3: Extract Metrics
-
-If using metrics collection:
-
-```bash
-# Review metrics output
-grep "METRIC" var/log/dev.log | tail -10
-```
-
-Or use your metrics backend (Prometheus, Datadog, etc.)
-
-### Step 4: Calculate Trace Timings
-
-From logs, extract duration_ms values:
-
-- Total operation duration
-- Database operation duration
-- HTTP call duration
 
 ---
 
@@ -76,304 +46,128 @@ From logs, extract duration_ms values:
 
 Copy this template into your PR description:
 
-````markdown
-## Description
+```markdown
+## Summary
 
-[Brief description of changes]
+Added business metrics for [feature description].
 
-## Observability Instrumentation
+## Business Metrics Added
 
-### ✅ Structured Logging
+| Metric Name | Dimensions | Purpose |
+|-------------|------------|---------|
+| `CustomersCreated` | Endpoint, Operation | Track customer registrations |
+| `OrdersPlaced` | Endpoint, PaymentMethod | Track order volume |
+| `OrderValue` | Endpoint, PaymentMethod | Track order amounts |
 
-- [x] Correlation ID added to all log entries
-- [x] Structured context (arrays, not strings)
-- [x] Appropriate log levels (debug, info, warning, error)
-- [x] No sensitive data logged
-
-### ✅ Metrics
-
-- [x] Operation duration tracked
-- [x] Error counters implemented
-- [x] Throughput metrics added
-
-### ✅ Traces
-
-- [x] Database operations traced
-- [x] HTTP calls traced (if applicable)
-- [x] Operation timing recorded
-
----
-
-## Evidence
-
-### Sample Correlation Flow
-
-**Correlation ID**: `550e8400-e29b-41d4-a716-446655440000`
+## EMF Output Example
 
 ```json
 {
-  "level": "info",
-  "message": "Processing CreateCustomerCommand",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "command": "App\\Customer\\Application\\Command\\CreateCustomerCommand",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "timestamp": 1702425600
-  }
-}
-
-{
-  "level": "debug",
-  "message": "Saving customer to MongoDB",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "mongodb.save"
-  }
-}
-
-{
-  "level": "info",
-  "message": "Customer saved to MongoDB",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "mongodb.save",
-    "duration_ms": 12.45
-  }
-}
-
-{
-  "level": "info",
-  "message": "Customer created successfully",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "duration_ms": 45.67
-  }
-}
-```
-````
-
-### Metrics Recorded
-
-| Metric                           | Value   | Tags             |
-| -------------------------------- | ------- | ---------------- |
-| `customer.create.duration`       | 45.67ms | `status=success` |
-| `customer.create.total`          | 1       | -                |
-| `mongodb.customer.save.duration` | 12.45ms | -                |
-
-### Trace Summary
-
-| Operation               | Duration | Status     |
-| ----------------------- | -------- | ---------- |
-| Total handler execution | 45.67ms  | ✅ Success |
-| MongoDB save            | 12.45ms  | ✅ Success |
-| Event publishing        | ~2ms     | ✅ Success |
-
-### Error Scenario (if applicable)
-
-```json
-{
-  "level": "error",
-  "message": "Failed to create customer",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "error_type": "MongoDB\\Driver\\Exception\\ConnectionTimeoutException",
-    "error_message": "Connection timeout",
-    "trace": "..."
-  }
+  "_aws": {
+    "Timestamp": 1702425600000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "CCore/BusinessMetrics",
+        "Dimensions": [["Endpoint", "Operation"]],
+        "Metrics": [
+          { "Name": "CustomersCreated", "Unit": "Count" }
+        ]
+      }
+    ]
+  },
+  "Endpoint": "Customer",
+  "Operation": "create",
+  "CustomersCreated": 1
 }
 ```
 
-**Error metrics**:
+## Tests
 
-- `customer.create.errors`: 1 (error_type=ConnectionTimeoutException)
+- [x] Unit tests verify metric emission
+- [x] Unit tests verify correct dimensions
+- [x] Integration test confirms EMF format
+- [x] All observability tests pass
 
----
+## Checklist
 
-## Testing
-
-- [x] Manually tested correlation ID propagation
-- [x] Verified structured log format
-- [x] Confirmed metrics are recorded
-- [x] Validated trace timing accuracy
-- [x] Tested error scenarios with full logging
-
-````
+- [x] Metric names use PascalCase
+- [x] Dimensions are low cardinality (no IDs, timestamps)
+- [x] BusinessMetricsEmitterSpy used in tests
+- [x] No infrastructure metrics added (AWS AppRunner provides those)
+```
 
 ---
 
 ## Minimal Evidence Template
 
-For smaller PRs, use this condensed version:
+For smaller PRs:
 
 ```markdown
-## Observability Evidence
+## Business Metrics Evidence
 
-**Correlation ID**: `550e8400-e29b-41d4-a716-446655440000`
+### Metric Added
+- `CustomersCreated` with dimensions `Endpoint`, `Operation`
 
-### Logs
-```json
-{
-  "level": "info",
-  "message": "Customer created successfully",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ...",
-    "duration_ms": 45.67
-  }
-}
-````
-
-### Metrics
-
-- `customer.create.duration`: 45.67ms (success)
-- `mongodb.save.duration`: 12.45ms
-
-### Traces
-
-- Total: 45.67ms
-- DB operation: 12.45ms
-
-````
-
----
-
-## Advanced: Screenshot Evidence
-
-For visual learners, include screenshots from log aggregation tools:
-
-### Kibana/OpenSearch
-
-1. Search by correlation ID
-2. Capture screenshot showing all related logs
-3. Add to PR description
-
-```markdown
-### Log Flow in Kibana
-
-![Correlation flow](./evidence/kibana-correlation-flow.png)
-
-All logs successfully tracked with correlation ID `550e8400...`.
-````
-
-### Datadog/Grafana
-
-1. Query metrics dashboard
-2. Capture graph showing metric recordings
-3. Add to PR
-
-```markdown
-### Metrics Dashboard
-
-![Metrics recorded](./evidence/datadog-metrics.png)
-
-Latency metrics successfully recorded for customer creation.
+### Test Coverage
+```bash
+make test -- --filter=CreateCustomerCommandHandlerTest
+OK (2 tests, 4 assertions)
 ```
 
----
-
-## Automated Evidence Collection
-
-### Script: Extract Observability Evidence
-
-Save as `scripts/extract-observability-evidence.sh`:
-
-```bash
-#!/bin/bash
-
-CORRELATION_ID=$1
-LOG_FILE=${2:-var/log/dev.log}
-
-if [ -z "$CORRELATION_ID" ]; then
-    echo "Usage: $0 <correlation-id> [log-file]"
-    exit 1
-fi
-
-echo "## Observability Evidence"
-echo ""
-echo "**Correlation ID**: \`$CORRELATION_ID\`"
-echo ""
-echo "### Logs"
-echo "\`\`\`json"
-grep "$CORRELATION_ID" "$LOG_FILE" | head -10
-echo "\`\`\`"
-echo ""
-echo "### Timing"
-echo ""
-echo "| Operation | Duration |"
-echo "|-----------|----------|"
-grep "$CORRELATION_ID" "$LOG_FILE" | grep "duration_ms" | \
-  sed -E 's/.*"message":"([^"]+)".*"duration_ms":([0-9.]+).*/| \1 | \2ms |/'
-```
-
-**Usage**:
-
-```bash
-./scripts/extract-observability-evidence.sh 550e8400-e29b-41d4-a716-446655440000
+### EMF Format Verified
+- Namespace: `CCore/BusinessMetrics`
+- Unit: `Count`
+- Dimensions: Low cardinality confirmed
 ```
 
 ---
 
 ## What Reviewers Look For
 
-Reviewers should verify:
+### Correct Metric Naming
 
-### ✅ Correlation ID Present
+```php
+// Good: PascalCase, plural, past tense
+$this->metrics->emit('CustomersCreated', 1, ...);
 
-```json
-"correlation_id": "550e8400-e29b-41d4-a716-446655440000"
+// Bad: snake_case
+$this->metrics->emit('customers_created', 1, ...);
 ```
 
-Every log entry includes it.
+### Low Cardinality Dimensions
 
-### ✅ Structured Format
+```php
+// Good: Low cardinality
+['Endpoint' => 'Customer', 'Operation' => 'create']
 
-```json
+// Bad: High cardinality (IDs)
+['CustomerId' => $customerId, 'Timestamp' => time()]
+```
+
+### Test Coverage
+
+```php
+// Tests verify metric emission
+public function testEmitsBusinessMetric(): void
 {
-  "level": "info",
-  "message": "...",
-  "context": { ... }
+    ($this->handler)($command);
+
+    $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
+        'Endpoint' => 'Customer',
+        'Operation' => 'create',
+    ]);
 }
 ```
 
-Not string concatenation.
+### No Infrastructure Metrics
 
-### ✅ Metrics Recorded
+Reviewers should verify the PR does NOT add:
+- Latency tracking
+- Error counters
+- Request timing
+- HTTP status metrics
 
-```text
-customer.create.duration: 45.67ms
-customer.create.errors: 0
-```
-
-Key operations have metrics.
-
-### ✅ Traces Show Timing
-
-```text
-Total: 45.67ms
-  ├─ DB: 12.45ms
-  └─ HTTP: 30.12ms
-```
-
-Breakdown of operation timing.
-
-### ✅ Error Handling Visible
-
-```json
-{
-  "level": "error",
-  "message": "...",
-  "context": {
-    "error": "...",
-    "trace": "..."
-  }
-}
-```
-
-Errors logged with context.
+These are provided by AWS AppRunner automatically.
 
 ---
 
@@ -382,16 +176,14 @@ Errors logged with context.
 Add this to your PR checklist:
 
 ```markdown
-## Observability Checklist
+## Business Metrics Checklist
 
-- [ ] All operations log with correlation ID
-- [ ] Structured logging used (arrays, not strings)
-- [ ] Metrics recorded for duration and errors
-- [ ] Database operations traced
-- [ ] HTTP calls traced (if applicable)
-- [ ] Error scenarios logged with full context
-- [ ] No sensitive data in logs
-- [ ] Evidence attached to PR description
+- [ ] Metric names use PascalCase (CustomersCreated, not customers_created)
+- [ ] Dimensions are low cardinality (no IDs, timestamps)
+- [ ] Unit tests use BusinessMetricsEmitterSpy
+- [ ] Unit tests verify metric name and dimensions
+- [ ] No infrastructure metrics added (latency, errors, RPS)
+- [ ] EMF format documented in PR description
 ```
 
 ---
@@ -400,59 +192,82 @@ Add this to your PR checklist:
 
 ### Reviewer Request
 
-> Can you provide observability evidence showing the correlation ID flows through the entire operation? I'd like to see logs from start to finish with the same correlation ID.
+> Can you add a test that verifies the metric dimensions are correct?
 
 ### Author Response
 
-> Absolutely! Here's the complete log flow for correlation ID `550e8400-e29b-41d4-a716-446655440000`:
+> Added! The test now uses `assertEmittedWithDimensions`:
 >
-> [paste evidence]
->
-> As you can see, the correlation ID appears in:
->
-> - Command handler start
-> - MongoDB save operation
-> - Domain event publishing
-> - Command handler completion
->
-> Total operation: 45.67ms with database operation taking 12.45ms.
+> ```php
+> $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
+>     'Endpoint' => 'Customer',
+>     'Operation' => 'create',
+> ]);
+> ```
+
+---
+
+### Reviewer Request
+
+> This dimension `CustomerId` has high cardinality. Can you remove it?
+
+### Author Response
+
+> Good catch! Removed the high-cardinality dimension. Now using only `Endpoint` and `Operation` which are low cardinality.
 
 ---
 
 ## Common Evidence Issues
 
-### Issue: No Correlation ID Tracking
+### Issue: Missing Test for Dimensions
 
-**Problem**: Logs don't show correlation ID flow
+**Problem**: Test only checks metric name, not dimensions
 
-**Fix**: Ensure correlation ID is:
-
-1. Generated at operation start
-2. Passed to all methods
-3. Included in every log entry
-
-### Issue: Incomplete Timing Data
-
-**Problem**: Duration metrics missing
-
-**Fix**: Add timing measurements:
+**Fix**: Use `assertEmittedWithDimensions`:
 
 ```php
-$startTime = microtime(true);
-// operation
-$duration = (microtime(true) - $startTime) * 1000;
-$this->logger->info('...', ['duration_ms' => $duration]);
+// Before: Only checks name
+self::assertSame('CustomersCreated', $emitted[0]['name']);
+
+// After: Checks name AND dimensions
+$this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
+    'Endpoint' => 'Customer',
+    'Operation' => 'create',
+]);
 ```
 
-### Issue: No Error Scenario Evidence
+### Issue: High-Cardinality Dimension
 
-**Problem**: Only success case shown
+**Problem**: Using IDs or timestamps as dimensions
 
-**Fix**: Test and capture error scenarios:
+**Fix**: Remove high-cardinality dimensions:
 
-- Simulate database failure
-- Capture error logs
-- Show error metrics
+```php
+// Before: High cardinality
+$this->metrics->emit('CustomersCreated', 1, [
+    'CustomerId' => $customerId,  // Remove this
+]);
+
+// After: Low cardinality only
+$this->metrics->emit('CustomersCreated', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'create',
+]);
+```
+
+### Issue: Infrastructure Metric Added
+
+**Problem**: Adding latency or error tracking
+
+**Fix**: Remove infrastructure metrics - AWS AppRunner provides them:
+
+```php
+// Before: Infrastructure metric (remove this)
+$this->metrics->emit('CustomerCreateLatency', $duration, ...);
+
+// After: Only business metrics
+$this->metrics->emit('CustomersCreated', 1, ...);
+```
 
 ---
 
@@ -460,20 +275,18 @@ $this->logger->info('...', ['duration_ms' => $duration]);
 
 PR evidence is complete when:
 
-- ✅ Correlation ID visible in all log entries
-- ✅ Structured log format demonstrated
-- ✅ Metrics recorded and shown
-- ✅ Timing breakdown provided
-- ✅ Error scenario documented (if applicable)
-- ✅ No sensitive data exposed
-- ✅ Reviewers can verify observability is production-ready
+- ✅ Metric names documented with PascalCase format
+- ✅ Dimensions listed with cardinality noted
+- ✅ EMF output example provided
+- ✅ Unit tests pass and are documented
+- ✅ No infrastructure metrics included
+- ✅ Reviewers can verify business metrics are correct
 
 ---
 
 **Next Steps**:
-
 - Review your PR description
-- Run your code and collect evidence
+- Run tests and capture output
 - Copy evidence template
-- Fill in actual log/metric data
+- Fill in actual metric data
 - Submit PR with evidence

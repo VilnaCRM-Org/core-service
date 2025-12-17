@@ -1,106 +1,66 @@
-# Quick Start Guide
+# Quick Start: Business Metrics with AWS EMF
 
-Fast-track guide to adding observability to your code in 10 minutes.
+Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Metric Format.
 
-## The 5-Minute Pattern
+## What You'll Add
 
-### Step 1: Inject Dependencies (30 seconds)
+- **Business metrics** - Track domain events (CustomersCreated, OrdersPlaced)
+- **EMF format** - Logs automatically become CloudWatch metrics
+- **Low overhead** - Just inject the interface and emit
+
+## The 3-Step Pattern
+
+### Step 1: Inject the Interface (30 seconds)
 
 ```php
-use Psr\Log\LoggerInterface;
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 
 final readonly class YourCommandHandler
 {
     public function __construct(
         private YourRepository $repository,
-        private LoggerInterface $logger  // Add this
+        private BusinessMetricsEmitterInterface $metrics  // Add this
     ) {}
 }
 ```
 
-### Step 2: Add Correlation ID (1 minute)
+### Step 2: Emit Business Metric (1 minute)
 
 ```php
 public function __invoke(YourCommand $command): void
 {
-    $correlationId = Uuid::v4()->toString();
-
-    $this->logger->info('Processing command', [
-        'correlation_id' => $correlationId,
-        'command' => get_class($command),
-    ]);
-
-    // ... rest of your code
-}
-```
-
-### Step 3: Wrap with Try-Catch (2 minutes)
-
-```php
-public function __invoke(YourCommand $command): void
-{
-    $correlationId = Uuid::v4()->toString();
-    $startTime = microtime(true);
-
-    $this->logger->info('Processing command', [
-        'correlation_id' => $correlationId,
-        'command' => get_class($command),
-    ]);
-
-    try {
-        // Your existing code here
-        $result = $this->execute($command);
-
-        $duration = (microtime(true) - $startTime) * 1000;
-
-        $this->logger->info('Command processed', [
-            'correlation_id' => $correlationId,
-            'duration_ms' => $duration,
-        ]);
-
-    } catch (\Throwable $e) {
-        $duration = (microtime(true) - $startTime) * 1000;
-
-        $this->logger->error('Command failed', [
-            'correlation_id' => $correlationId,
-            'duration_ms' => $duration,
-            'error' => $e->getMessage(),
-        ]);
-
-        throw $e;
-    }
-}
-```
-
-### Step 4: Add DB Tracing (1 minute)
-
-```php
-private function saveWithTrace(Entity $entity, string $correlationId): void
-{
-    $this->logger->debug('Saving to database', [
-        'correlation_id' => $correlationId,
-        'operation' => 'mongodb.save',
-    ]);
-
+    // Your existing business logic
+    $entity = $this->createEntity($command);
     $this->repository->save($entity);
 
-    $this->logger->info('Saved to database', [
-        'correlation_id' => $correlationId,
-        'operation' => 'mongodb.save',
+    // Emit business metric
+    $this->metrics->emit('EntitiesCreated', 1, [
+        'Endpoint' => 'YourEntity',
+        'Operation' => 'create',
     ]);
 }
 ```
 
-### Step 5: Test It (30 seconds)
+### Step 3: Add Test (2 minutes)
 
-```bash
-make sh
-tail -f var/log/dev.log | grep correlation_id
+```php
+use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
+
+public function testEmitsBusinessMetric(): void
+{
+    $metricsSpy = new BusinessMetricsEmitterSpy();
+    $handler = new YourCommandHandler($repository, $metricsSpy);
+
+    $handler(new YourCommand(/* ... */));
+
+    $metricsSpy->assertEmittedWithDimensions('EntitiesCreated', [
+        'Endpoint' => 'YourEntity',
+        'Operation' => 'create',
+    ]);
+}
 ```
 
-Run your operation and verify logs appear.
-
-**Done! You now have observable code.**
+**Done! Your business metric will appear in CloudWatch.**
 
 ---
 
@@ -115,224 +75,176 @@ namespace App\YourContext\Application\CommandHandler;
 
 use App\YourContext\Application\Command\YourCommand;
 use App\YourContext\Domain\Repository\YourRepositoryInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Uid\Uuid;
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 
 final readonly class YourCommandHandler
 {
     public function __construct(
         private YourRepositoryInterface $repository,
-        private LoggerInterface $logger
+        private BusinessMetricsEmitterInterface $metrics
     ) {}
 
     public function __invoke(YourCommand $command): void
     {
-        $correlationId = Uuid::v4()->toString();
-        $startTime = microtime(true);
+        // YOUR BUSINESS LOGIC HERE
+        $entity = YourEntity::create(/* ... */);
+        $this->repository->save($entity);
 
-        $this->logger->info('Processing command', [
-            'correlation_id' => $correlationId,
-            'command' => get_class($command),
-            'entity_id' => $command->id,  // Adjust based on your command
+        // EMIT BUSINESS METRIC
+        $this->metrics->emit('EntitiesCreated', 1, [
+            'Endpoint' => 'YourEntity',
+            'Operation' => 'create',
         ]);
-
-        try {
-            // YOUR CODE HERE
-            $entity = $this->createEntity($command);
-            $this->saveWithTrace($entity, $correlationId);
-
-            // Success logging
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->logger->info('Command processed successfully', [
-                'correlation_id' => $correlationId,
-                'entity_id' => $entity->id(),
-                'duration_ms' => round($duration, 2),
-            ]);
-
-        } catch (\Throwable $e) {
-            // Error logging
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->logger->error('Command processing failed', [
-                'correlation_id' => $correlationId,
-                'entity_id' => $command->id ?? 'unknown',
-                'duration_ms' => round($duration, 2),
-                'error_type' => get_class($e),
-                'error_message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            throw $e;
-        }
-    }
-
-    private function saveWithTrace($entity, string $correlationId): void
-    {
-        $startTime = microtime(true);
-
-        $this->logger->debug('Saving to database', [
-            'correlation_id' => $correlationId,
-            'entity_id' => $entity->id(),
-            'operation' => 'mongodb.save',
-        ]);
-
-        try {
-            $this->repository->save($entity);
-
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->logger->info('Saved to database', [
-                'correlation_id' => $correlationId,
-                'entity_id' => $entity->id(),
-                'operation' => 'mongodb.save',
-                'duration_ms' => round($duration, 2),
-            ]);
-
-        } catch (\Throwable $e) {
-            $this->logger->error('Database save failed', [
-                'correlation_id' => $correlationId,
-                'entity_id' => $entity->id(),
-                'operation' => 'mongodb.save',
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
     }
 }
 ```
+
+---
+
+## Common Business Metrics
+
+### For Create Operations
+
+```php
+$this->metrics->emit('CustomersCreated', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'create',
+]);
+```
+
+### For Update Operations
+
+```php
+$this->metrics->emit('CustomersUpdated', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'update',
+]);
+```
+
+### For Delete Operations
+
+```php
+$this->metrics->emit('CustomersDeleted', 1, [
+    'Endpoint' => 'Customer',
+    'Operation' => 'delete',
+]);
+```
+
+### For Business Values
+
+```php
+$this->metrics->emitMultiple([
+    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
+    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
+], [
+    'Endpoint' => 'Order',
+    'PaymentMethod' => $order->paymentMethod(),
+]);
+```
+
+---
+
+## Automatic Endpoint Metrics
+
+The codebase already automatically emits `EndpointInvocations` for every `/api` request via `ApiEndpointBusinessMetricsSubscriber`. You don't need to add anything for basic endpoint tracking.
+
+Your job is to add **domain-specific business metrics** that track business events.
+
+---
+
+## Quick Reference
+
+### Metric Naming
+
+| Pattern | Example |
+|---------|---------|
+| `{Entity}{Action}` | `CustomersCreated`, `OrdersPlaced` |
+| PascalCase | `PaymentsProcessed`, not `payments_processed` |
+| Plural + Past tense | `LoginAttempts`, not `LoginAttempt` |
+
+### Dimensions (Low Cardinality Only)
+
+| Good Dimensions | Bad Dimensions (Avoid!) |
+|-----------------|------------------------|
+| `Endpoint` | `CustomerId` |
+| `Operation` | `OrderId` |
+| `PaymentMethod` | `SessionId` |
+| `CustomerType` | `Timestamp` |
+
+---
+
+## Test Template
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\YourContext\Application\CommandHandler;
+
+use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
+use App\Tests\Unit\UnitTestCase;
+use App\YourContext\Application\CommandHandler\YourCommandHandler;
+use App\YourContext\Application\Command\YourCommand;
+
+final class YourCommandHandlerTest extends UnitTestCase
+{
+    private BusinessMetricsEmitterSpy $metricsSpy;
+    private YourCommandHandler $handler;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->metricsSpy = new BusinessMetricsEmitterSpy();
+        $this->handler = new YourCommandHandler(
+            $this->createMock(YourRepositoryInterface::class),
+            $this->metricsSpy
+        );
+    }
+
+    public function testEmitsBusinessMetricOnSuccess(): void
+    {
+        ($this->handler)(new YourCommand(/* ... */));
+
+        $this->metricsSpy->assertEmittedWithDimensions('EntitiesCreated', [
+            'Endpoint' => 'YourEntity',
+            'Operation' => 'create',
+        ]);
+    }
+}
+```
+
+---
+
+## What NOT to Track
+
+AWS AppRunner provides infrastructure metrics automatically. Don't add:
+
+- ❌ Request latency
+- ❌ Error rates
+- ❌ Response times
+- ❌ RPS (requests per second)
+- ❌ HTTP status codes
+
+Focus ONLY on business events.
 
 ---
 
 ## Verification Checklist
 
-After implementing, verify:
+After implementing:
 
-- [ ] Run your code: `make sh` then execute operation
-- [ ] Check logs: `grep correlation_id var/log/dev.log`
-- [ ] Verify correlation ID appears in all log entries
-- [ ] Confirm duration is tracked
-- [ ] Test error case and verify error logging
-
----
-
-## Adding Metrics (Optional - 2 more minutes)
-
-If you have MetricsCollector configured:
-
-```php
-public function __construct(
-    private YourRepositoryInterface $repository,
-    private LoggerInterface $logger,
-    private MetricsCollector $metrics  // Add this
-) {}
-
-public function __invoke(YourCommand $command): void
-{
-    $startTime = microtime(true);
-
-    try {
-        // Your code...
-
-        // Add success metrics
-        $duration = (microtime(true) - $startTime) * 1000;
-        $this->metrics->record('your.operation.duration', $duration, ['status' => 'success']);
-        $this->metrics->increment('your.operation.total');
-
-    } catch (\Throwable $e) {
-        // Add error metrics
-        $duration = (microtime(true) - $startTime) * 1000;
-        $this->metrics->record('your.operation.duration', $duration, ['status' => 'error']);
-        $this->metrics->increment('your.operation.errors', ['error_type' => get_class($e)]);
-
-        throw $e;
-    }
-}
-```
-
----
-
-## Common Mistakes to Avoid
-
-### ❌ Don't: String Concatenation
-
-```php
-$this->logger->info("Processing customer " . $customerId);
-```
-
-### ✅ Do: Structured Arrays
-
-```php
-$this->logger->info('Processing customer', [
-    'correlation_id' => $correlationId,
-    'customer_id' => $customerId,
-]);
-```
-
----
-
-### ❌ Don't: Missing Correlation ID
-
-```php
-$this->logger->info('Operation started');
-```
-
-### ✅ Do: Include Correlation ID
-
-```php
-$this->logger->info('Operation started', [
-    'correlation_id' => $correlationId,
-]);
-```
-
----
-
-### ❌ Don't: Swallow Exceptions
-
-```php
-try {
-    $this->operation();
-} catch (\Throwable $e) {
-    $this->logger->error('Failed');
-    // Exception lost!
-}
-```
-
-### ✅ Do: Log and Rethrow
-
-```php
-try {
-    $this->operation();
-} catch (\Throwable $e) {
-    $this->logger->error('Failed', [
-        'error' => $e->getMessage(),
-        'trace' => $e->getTraceAsString(),
-    ]);
-    throw $e;  // Important!
-}
-```
-
----
-
-## Next Steps
-
-Once you have basic observability:
-
-1. **Add metrics** - Track duration and errors
-2. **Instrument repository** - Add DB operation tracing
-3. **Instrument HTTP calls** - Add external service tracing
-4. **Collect evidence** - Capture logs for PR
-5. **Review** - Use [PR Evidence Guide](pr-evidence-guide.md)
+- [ ] Handler injects `BusinessMetricsEmitterInterface`
+- [ ] Metric uses PascalCase name (e.g., `CustomersCreated`)
+- [ ] Dimensions are low cardinality (no IDs)
+- [ ] Unit test verifies metric emission
+- [ ] Run `make test` to confirm tests pass
 
 ---
 
 ## Full Guides
 
-- [Structured Logging](structured-logging.md) - Complete logging patterns with PSR-3
-- [Metrics Patterns](metrics-patterns.md) - Comprehensive metrics collection guide
-- [PR Evidence Guide](pr-evidence-guide.md) - How to collect and present evidence
-- [Complete Example](../examples/instrumented-command-handler.md) - Full working example with all three pillars
-
----
-
-**Time to implement**: 5-10 minutes
-**Impact**: Production-ready observability
-**Benefit**: Debuggable, traceable, measurable code
+- [Metrics Patterns](metrics-patterns.md) - Complete business metrics guide
+- [Structured Logging](structured-logging.md) - Add correlation IDs for debugging
+- [PR Evidence Guide](pr-evidence-guide.md) - How to document metrics in PRs
+- [Complete Example](../examples/instrumented-command-handler.md) - Full working example

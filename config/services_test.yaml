@@ -7,5 +7,10 @@ services:
     public: true
     class: Symfony\Component\Cache\Adapter\ArrayAdapter
 
+  App\Shared\Application\Observability\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
+
+  App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
+    public: true
+
   App\Tests\Behat\:
     resource: '../tests/Behat/*'
