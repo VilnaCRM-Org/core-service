@@ -7,12 +7,12 @@ Guide to implementing business metrics using AWS CloudWatch Embedded Metric Form
 Business metrics track domain events and business value - things that matter to the business, not infrastructure.
 
 | Business Metrics (Track These) | Infrastructure Metrics (AWS Provides) |
-|-------------------------------|--------------------------------------|
-| CustomersCreated              | Request latency (p50, p95, p99)      |
-| OrdersPlaced                  | Error rates                          |
-| PaymentsProcessed             | Requests per second                  |
-| OrderValue (amount)           | CPU/Memory usage                     |
-| LoginAttempts                 | Connection counts                    |
+| ------------------------------ | ------------------------------------- |
+| CustomersCreated               | Request latency (p50, p95, p99)       |
+| OrdersPlaced                   | Error rates                           |
+| PaymentsProcessed              | Requests per second                   |
+| OrderValue (amount)            | CPU/Memory usage                      |
+| LoginAttempts                  | Connection counts                     |
 
 ---
 
@@ -30,9 +30,7 @@ AWS Embedded Metric Format allows logs to be automatically extracted as CloudWat
       {
         "Namespace": "CCore/BusinessMetrics",
         "Dimensions": [["Endpoint", "Operation"]],
-        "Metrics": [
-          { "Name": "CustomersCreated", "Unit": "Count" }
-        ]
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
       }
     ]
   },
@@ -43,6 +41,7 @@ AWS Embedded Metric Format allows logs to be automatically extracted as CloudWat
 ```
 
 When written to stdout, CloudWatch automatically:
+
 1. Extracts `CustomersCreated` as a metric
 2. Associates it with the `CCore/BusinessMetrics` namespace
 3. Applies dimensions `Endpoint` and `Operation`
@@ -108,12 +107,12 @@ public function __invoke(PlaceOrderCommand $command): void
 
 ### Examples
 
-| Good | Bad |
-|------|-----|
-| `CustomersCreated` | `customer_created` |
-| `OrdersPlaced` | `orders.placed.count` |
-| `PaymentsProcessed` | `payment-processed` |
-| `LoginAttempts` | `login_attempts_total` |
+| Good                | Bad                    |
+| ------------------- | ---------------------- |
+| `CustomersCreated`  | `customer_created`     |
+| `OrdersPlaced`      | `orders.placed.count`  |
+| `PaymentsProcessed` | `payment-processed`    |
+| `LoginAttempts`     | `login_attempts_total` |
 
 ### Guidelines
 
@@ -128,16 +127,17 @@ public function __invoke(PlaceOrderCommand $command): void
 
 ### Recommended Dimensions
 
-| Dimension | Description | Cardinality |
-|-----------|-------------|-------------|
-| `Endpoint` | API resource name | Low |
-| `Operation` | CRUD action | Very Low |
-| `PaymentMethod` | Payment type | Low |
-| `CustomerType` | Customer segment | Low |
+| Dimension       | Description       | Cardinality |
+| --------------- | ----------------- | ----------- |
+| `Endpoint`      | API resource name | Low         |
+| `Operation`     | CRUD action       | Very Low    |
+| `PaymentMethod` | Payment type      | Low         |
+| `CustomerType`  | Customer segment  | Low         |
 
 ### Avoid High-Cardinality Dimensions
 
 **Don't use:**
+
 - Customer IDs
 - Order IDs
 - Session IDs
@@ -231,13 +231,13 @@ $this->metrics->emit('PasswordResetsRequested', 1, [
 
 ## Units Reference
 
-| Unit | Use For |
-|------|---------|
-| `Count` | Counters (items created, events occurred) |
-| `None` | Monetary values, quantities without unit |
-| `Seconds` | Time durations |
-| `Bytes` | Data sizes |
-| `Percent` | Percentages |
+| Unit      | Use For                                   |
+| --------- | ----------------------------------------- |
+| `Count`   | Counters (items created, events occurred) |
+| `None`    | Monetary values, quantities without unit  |
+| `Seconds` | Time durations                            |
+| `Bytes`   | Data sizes                                |
+| `Percent` | Percentages                               |
 
 ---
 
@@ -333,6 +333,7 @@ final class CreateCustomerCommandHandlerTest extends TestCase
 ---
 
 **Next Steps**:
+
 - [Quick Start Guide](quick-start.md) - Add business metrics to your code
 - [Structured Logging](structured-logging.md) - Add correlation IDs for debugging
 - [Complete Example](../examples/instrumented-command-handler.md) - Full working example

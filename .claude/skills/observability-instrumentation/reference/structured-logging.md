@@ -22,6 +22,7 @@ $logger->info('Creating customer', [
 ```
 
 **Benefits**:
+
 - **Searchable**: Query by specific fields
 - **Parseable**: JSON format for log aggregators
 - **Contextual**: Rich metadata for debugging
@@ -33,12 +34,12 @@ $logger->info('Creating customer', [
 
 Use appropriate log levels following PSR-3:
 
-| Level | When to Use | Example |
-|-------|-------------|---------|
-| **debug** | Detailed diagnostic info | Variable values, method entry/exit |
-| **info** | Important business events | Customer created, order placed |
-| **warning** | Non-critical issues | Email failed (retryable), cache miss |
-| **error** | Critical failures | Database down, API call failed |
+| Level       | When to Use               | Example                              |
+| ----------- | ------------------------- | ------------------------------------ |
+| **debug**   | Detailed diagnostic info  | Variable values, method entry/exit   |
+| **info**    | Important business events | Customer created, order placed       |
+| **warning** | Non-critical issues       | Email failed (retryable), cache miss |
+| **error**   | Critical failures         | Database down, API call failed       |
 
 ### Examples
 
@@ -184,14 +185,14 @@ $this->logger->info('Payment processed', [
 
 ### Sensitive Data Types to Avoid
 
-| Type | Examples | Safe Alternative |
-|------|----------|------------------|
-| Passwords | Plain text passwords | Password length, hash type |
-| Tokens | API keys, JWT tokens | Token prefix, expiry time |
-| Credit Cards | Full card numbers | Last 4 digits |
-| SSN/Tax IDs | Full identifiers | Last 4 digits |
-| API Keys | Secret keys | Key ID, key type |
-| Personal Email | Full addresses | Email domain |
+| Type           | Examples             | Safe Alternative           |
+| -------------- | -------------------- | -------------------------- |
+| Passwords      | Plain text passwords | Password length, hash type |
+| Tokens         | API keys, JWT tokens | Token prefix, expiry time  |
+| Credit Cards   | Full card numbers    | Last 4 digits              |
+| SSN/Tax IDs    | Full identifiers     | Last 4 digits              |
+| API Keys       | Secret keys          | Key ID, key type           |
+| Personal Email | Full addresses       | Email domain               |
 
 ---
 
@@ -267,14 +268,15 @@ $this->logger->info('Customers processed', ['count' => count($customers)]);
 
 ## Logging vs Business Metrics
 
-| Use Logging For | Use Business Metrics For |
-|-----------------|-------------------------|
-| Debugging context | Business KPIs |
-| Error details | Domain event counts |
-| Operation flow | Business values (order amounts) |
-| Troubleshooting | CloudWatch dashboards |
+| Use Logging For   | Use Business Metrics For        |
+| ----------------- | ------------------------------- |
+| Debugging context | Business KPIs                   |
+| Error details     | Domain event counts             |
+| Operation flow    | Business values (order amounts) |
+| Troubleshooting   | CloudWatch dashboards           |
 
 Both complement each other:
+
 - **Logs**: Detailed context for debugging specific issues
 - **Metrics**: Aggregated counts for business intelligence
 
@@ -292,5 +294,6 @@ Both complement each other:
 ---
 
 **Next Steps**:
+
 - [Metrics Patterns](metrics-patterns.md) - Add business metrics with AWS EMF
 - [Complete Example](../examples/instrumented-command-handler.md) - See full implementation

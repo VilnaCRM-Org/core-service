@@ -5,6 +5,7 @@ This example demonstrates a fully instrumented command handler with AWS EMF busi
 ## Scenario
 
 Creating a new customer with:
+
 - Business metric emission via AWS EMF
 - Proper dimension usage
 - Unit test coverage
@@ -75,9 +76,7 @@ When this handler executes, the following EMF log is written to stdout:
       {
         "Namespace": "CCore/BusinessMetrics",
         "Dimensions": [["Endpoint", "Operation"]],
-        "Metrics": [
-          { "Name": "CustomersCreated", "Unit": "Count" }
-        ]
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
       }
     ]
   },

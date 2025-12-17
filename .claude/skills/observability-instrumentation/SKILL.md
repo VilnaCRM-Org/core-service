@@ -81,9 +81,7 @@ AWS Embedded Metric Format allows you to embed custom metrics in structured log 
       {
         "Namespace": "CCore/BusinessMetrics",
         "Dimensions": [["Endpoint", "Operation"]],
-        "Metrics": [
-          { "Name": "EndpointInvocations", "Unit": "Count" }
-        ]
+        "Metrics": [{ "Name": "EndpointInvocations", "Unit": "Count" }]
       }
     ]
   },
@@ -94,6 +92,7 @@ AWS Embedded Metric Format allows you to embed custom metrics in structured log 
 ```
 
 When this log is written to stdout, CloudWatch automatically:
+
 1. Extracts `EndpointInvocations` as a metric
 2. Associates it with the `CCore/BusinessMetrics` namespace
 3. Applies dimensions `Endpoint` and `Operation`
@@ -191,16 +190,17 @@ $this->metrics->emitMultiple([
 
 ### Recommended Dimensions
 
-| Dimension | Description | Cardinality |
-|-----------|-------------|-------------|
-| `Endpoint` | API resource name | Low |
-| `Operation` | CRUD action | Very Low |
-| `PaymentMethod` | Payment type | Low |
-| `CustomerType` | Customer segment | Low |
+| Dimension       | Description       | Cardinality |
+| --------------- | ----------------- | ----------- |
+| `Endpoint`      | API resource name | Low         |
+| `Operation`     | CRUD action       | Very Low    |
+| `PaymentMethod` | Payment type      | Low         |
+| `CustomerType`  | Customer segment  | Low         |
 
 ### Avoid High-Cardinality Dimensions
 
 **Don't use:**
+
 - Customer IDs
 - Order IDs
 - Session IDs
@@ -220,11 +220,11 @@ These create too many unique metric streams and increase CloudWatch costs.
 
 ### Examples
 
-| Good | Bad |
-|------|-----|
-| `CustomersCreated` | `customer_created` |
-| `OrdersPlaced` | `orders.placed.count` |
-| `PaymentsProcessed` | `payment-processed` |
+| Good                | Bad                   |
+| ------------------- | --------------------- |
+| `CustomersCreated`  | `customer_created`    |
+| `OrdersPlaced`      | `orders.placed.count` |
+| `PaymentsProcessed` | `payment-processed`   |
 
 ### Guidelines
 
@@ -263,8 +263,7 @@ final class YourCommandHandlerTest extends TestCase
 In `config/services_test.yaml`, the spy is already configured:
 
 ```yaml
-App\Shared\Application\Observability\BusinessMetricsEmitterInterface:
-  '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
+App\Shared\Application\Observability\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
 
 App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
   public: true
@@ -295,6 +294,7 @@ WHERE Endpoint = 'Customer'
 Remember: AWS AppRunner already provides infrastructure metrics.
 
 **Don't track:**
+
 - Request latency
 - Error rates
 - Response times
@@ -303,6 +303,7 @@ Remember: AWS AppRunner already provides infrastructure metrics.
 - CPU usage
 
 **Do track:**
+
 - Business events (orders placed, customers created)
 - Business values (order amounts, payment totals)
 - Domain-specific actions (logins, uploads, exports)

@@ -186,7 +186,7 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 
 ### Issue 3: Missing Indexes on Filtered Fields
 
-#### Cursor pagination + ULID (_id) index strategy (this repo)
+#### Cursor pagination + ULID (\_id) index strategy (this repo)
 
 This service uses **cursor pagination** on `ulid` via API Platform, and Doctrine ODM maps `ulid` as the MongoDB document identifier (`_id`) via:
 
