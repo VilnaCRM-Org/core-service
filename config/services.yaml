@@ -111,11 +111,6 @@ services:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
     public: true
 
-  # Command handlers - publish events instead of direct cache invalidation
-  App\Core\Customer\Application\CommandHandler\CreateCustomerCommandHandler: ~
-
-  App\Core\Customer\Application\CommandHandler\UpdateCustomerCommandHandler: ~
-
   # Cache invalidation event subscribers - explicitly inject cache.customer
   App\Core\Customer\Application\EventSubscriber\CustomerCreatedCacheInvalidationSubscriber:
     arguments:

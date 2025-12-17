@@ -57,8 +57,5 @@ jobs:
       - name: Start application for load tests
         run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
 
-      - name: Wait for services
-        run: sleep 30
-
       - name: Run Cache Performance Load Tests
         run: make cache-performance-load-tests

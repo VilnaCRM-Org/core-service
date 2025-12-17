@@ -203,30 +203,10 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         // NO cache invalidation here - handled by domain event subscribers
     }
 
-    /**
-     * Delete is special: invalidate BEFORE deletion (best-effort)
-     */
     public function delete(Customer $customer): void
     {
-        try {
-            $this->cache->invalidateTags([
-                "customer.{$customer->getUlid()}",
-                "customer.email.{$this->cacheKeyBuilder->hashEmail($customer->getEmail())}",
-                'customer.collection',
-            ]);
-            $this->logger->info('Cache invalidated before customer deletion', [
-                'customer_id' => $customer->getUlid(),
-                'operation' => 'cache.invalidation',
-                'reason' => 'customer_deleted',
-            ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Cache invalidation failed during deletion - proceeding anyway', [
-                'customer_id' => $customer->getUlid(),
-                'error' => $e->getMessage(),
-                'operation' => 'cache.invalidation.error',
-            ]);
-        }
         $this->inner->delete($customer);
+        // NO cache invalidation here - handled by CustomerDeletedEvent subscriber
     }
 
     private function loadCustomerFromDb(mixed $id, int $lockMode, ?int $lockVersion, string $cacheKey, ItemInterface $item): ?Customer

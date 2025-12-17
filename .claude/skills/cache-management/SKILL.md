@@ -34,7 +34,7 @@ Implement production-ready caching with proper key design, TTL management, event
 
 ## ⚠️ CRITICAL CACHE POLICY
 
-```
+```text
 ╔═══════════════════════════════════════════════════════════════╗
 ║  ALWAYS use Decorator Pattern for caching (wrap repositories) ║
 ║  ALWAYS use CacheKeyBuilder service (prevent key drift)       ║
@@ -640,7 +640,7 @@ public function findById(string $id): ?Customer
 
 **Architecture Flow**:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  Command Handler                                            │
 │  └─ repository.save(customer)                               │

@@ -129,34 +129,12 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
-     * Delegate deletion to inner repository and invalidate cache
+     * Delegate deletion to inner repository (no invalidation here)
      *
-     * Cache invalidation is best-effort: deletion proceeds even if cache fails
+     * Cache invalidation is handled via CustomerDeletedEvent subscribers.
      */
     public function delete(Customer $customer): void
     {
-        // Try to invalidate cache, but don't fail deletion if cache is down
-        try {
-            $this->cache->invalidateTags([
-                "customer.{$customer->getUlid()}",
-                "customer.email.{$this->cacheKeyBuilder->hashEmail($customer->getEmail())}",
-                'customer.collection',
-            ]);
-
-            $this->logger->info('Cache invalidated before customer deletion', [
-                'customer_id' => $customer->getUlid(),
-                'operation' => 'cache.invalidation',
-                'reason' => 'customer_deleted',
-            ]);
-        } catch (\Throwable $e) {
-            // Log cache error but proceed with deletion
-            $this->logger->error('Cache invalidation failed during deletion - proceeding anyway', [
-                'customer_id' => $customer->getUlid(),
-                'error' => $e->getMessage(),
-                'operation' => 'cache.invalidation.error',
-            ]);
-        }
-
         $this->inner->delete($customer);
     }
 

@@ -48,7 +48,8 @@ App\Core\Customer\Domain\Entity\Customer:
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      processor: App\Core\Customer\Application\Processor\CustomerDeleteProcessor
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\CustomerCreate
       processor: App\Core\Customer\Application\Processor\CreateCustomerProcessor
@@ -87,5 +88,6 @@ App\Core\Customer\Domain\Entity\Customer:
         allow_extra_attributes: false
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
+      processor: App\Core\Customer\Application\Processor\CustomerDeleteProcessor
       normalizationContext:
         groups: ['deleteMutationOutput']
