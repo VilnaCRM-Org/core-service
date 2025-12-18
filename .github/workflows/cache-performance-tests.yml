@@ -26,14 +26,8 @@ jobs:
         with:
           php-version: ${{ vars.PHP_VERSION }}
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start application
         run: make start
-
-      - name: Wait for services
-        run: sleep 10
 
       - name: Run Cache Performance Integration Tests
         run: make cache-performance-tests
@@ -51,11 +45,8 @@ jobs:
         with:
           php-version: ${{ vars.PHP_VERSION }}
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start application for load tests
-        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
+        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d --wait
 
       - name: Run Cache Performance Load Tests
         run: make cache-performance-load-tests
