@@ -143,7 +143,42 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 6. Database Migrations (`database-migrations/`)
+### 6. Documentation Creation (`documentation-creation/`)
+
+**Purpose**: Create comprehensive project documentation by adapting from a reference repository
+
+**When activated**:
+
+- Setting up initial documentation for a project
+- Creating docs following another project's structure
+- Building a complete documentation suite from scratch
+- Adapting documentation from a reference repository
+
+**What it does**:
+
+- Fetches documentation from a reference repository
+- Adapts content to match target project specifics
+- Verifies all references against actual codebase
+- Ensures consistent style and cross-linking
+- Removes inapplicable content (e.g., FrankenPHP docs when using PHP-FPM)
+
+**Key verification steps**:
+
+- Technology stack accuracy (PHP version, framework, database, runtime)
+- Directory structure verification (all mentioned paths exist)
+- Command verification (all make commands exist)
+- Link verification (internal and external links work)
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and quick start)
+- `reference/doc-templates.md` (Templates for each doc type)
+- `reference/verification-checklist.md` (Detailed verification steps)
+- `examples/core-service-example.md` (Real-world example)
+
+---
+
+### 7. Database Migrations (`database-migrations/`)
 
 **Purpose**: Create and manage database migrations using Doctrine ODM for MongoDB
 
@@ -174,7 +209,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 7. Load Testing (`load-testing/`)
+### 8. Load Testing (`load-testing/`)
 
 **Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
 
@@ -208,7 +243,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 8. Implementing DDD Architecture (`implementing-ddd-architecture/`)
+### 9. Implementing DDD Architecture (`implementing-ddd-architecture/`)
 
 **Purpose**: Design and implement DDD patterns (entities, value objects, aggregates, CQRS)
 
@@ -247,7 +282,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 9. Deptrac Fixer (`deptrac-fixer/`)
+### 10. Deptrac Fixer (`deptrac-fixer/`)
 
 **Purpose**: Diagnose and fix Deptrac architectural violations automatically
 
@@ -292,7 +327,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 10. Complexity Management (`complexity-management/`)
+### 11. Complexity Management (`complexity-management/`)
 
 **Purpose**: Maintain and improve code quality using PHPInsights without decreasing thresholds
 
@@ -323,7 +358,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 11. Developing OpenAPI Specs (`developing-openapi-specs/`)
+### 12. Developing OpenAPI Specs (`developing-openapi-specs/`)
 
 **Purpose**: Guide for contributing to the OpenAPI layer using processor pattern
 
@@ -345,7 +380,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 12. API Platform CRUD (`api-platform-crud/`)
+### 13. API Platform CRUD (`api-platform-crud/`)
 
 **Purpose**: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns
 
@@ -379,7 +414,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 13. Observability Instrumentation (`observability-instrumentation/`)
+### 14. Observability Instrumentation (`observability-instrumentation/`)
 
 **Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
 
@@ -428,7 +463,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 14. Query Performance Analysis (`query-performance-analysis/`)
+### 15. Query Performance Analysis (`query-performance-analysis/`)
 
 **Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
 
