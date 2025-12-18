@@ -95,7 +95,7 @@ grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile | head -30
 Create a technology summary table:
 
 | Component  | Technology | Version |
-|------------|------------|---------|
+| ---------- | ---------- | ------- |
 | Language   | PHP        | X.Y     |
 | Runtime    | PHP-FPM    | -       |
 | Framework  | Symfony    | X.Y     |
@@ -131,12 +131,14 @@ For each documentation file:
 1. **Use the appropriate template** from [reference/doc-templates.md](reference/doc-templates.md)
 
 2. **Fill in project-specific content**:
+
    - Project name and description
    - Entity names from codebase
    - Bounded context names
    - URLs and repository links
 
 3. **Verify all references**:
+
    - Directory paths exist
    - Commands exist in Makefile
    - Entity names match codebase
@@ -200,7 +202,7 @@ Welcome to the **{Project Name}** documentation...
 ## Technology Stack
 
 | Component | Technology | Version |
-|-----------|------------|---------|
+| --------- | ---------- | ------- |
 | Language  | PHP        | X.Y     |
 | Framework | Symfony    | X.Y     |
 | Database  | MongoDB    | X.Y     |
