@@ -6,7 +6,7 @@ This reference provides templates for each documentation file type. Adapt these 
 
 ## main.md - Project Overview
 
-~~~markdown
+```markdown
 # {Project Name}
 
 ## What Is {Project Name}?
@@ -43,13 +43,13 @@ Our approach to building {Project Name} is guided by these core principles:
 - [Design and Architecture](design-and-architecture.md)
 - [API Endpoints](api-endpoints.md)
 - [Developer Guide](developer-guide.md)
-~~~
+```
 
 ---
 
 ## getting-started.md - Installation Guide
 
-~~~markdown
+````markdown
 # Getting Started
 
 ## Prerequisites
@@ -99,13 +99,13 @@ make unit-tests
 - Read the [Design and Architecture](design-and-architecture.md) guide
 - Explore the [API Endpoints](api-endpoints.md)
 - Check the [Developer Guide](developer-guide.md)
-~~~
+````
 
 ---
 
 ## design-and-architecture.md - Architecture Documentation
 
-~~~markdown
+````markdown
 # Design and Architecture
 
 ## Architectural Style
@@ -160,13 +160,13 @@ Domain ← Application ← Infrastructure
   └───────────┴──────────────┘
        No reverse dependencies
 ```
-~~~
+````
 
 ---
 
 ## developer-guide.md - Development Workflow
 
-~~~markdown
+````markdown
 # Developer Guide
 
 ## Code Structure
@@ -220,13 +220,13 @@ make integration-tests  # Integration tests
 make behat              # End-to-end tests (Behat)
 make infection          # Mutation testing
 ```
-~~~
+````
 
 ---
 
 ## api-endpoints.md - API Documentation
 
-~~~markdown
+````markdown
 # API Endpoints
 
 ## REST API
@@ -298,13 +298,13 @@ mutation {
   }
 }
 ```
-~~~
+````
 
 ---
 
 ## testing.md - Testing Documentation
 
-~~~markdown
+````markdown
 # Testing
 
 ## Test Types
@@ -365,7 +365,7 @@ Location: `tests/Load/`
 | -------------- | ------- |
 | Line Coverage  | 100%    |
 | Mutation Score | 100%    |
-~~~
+````
 
 ---
 
