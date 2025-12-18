@@ -27,13 +27,13 @@ grep -i "mongo" docker-compose.yml
 
 **Technology Stack Identified**:
 
-| Component  | Technology      | Version |
-|------------|-----------------|---------|
-| Language   | PHP             | 8.3     |
-| Runtime    | PHP-FPM         | Alpine  |
-| Framework  | Symfony         | 7.2     |
-| Database   | MongoDB         | 6.0     |
-| Web Server | Caddy           | -       |
+| Component  | Technology | Version |
+| ---------- | ---------- | ------- |
+| Language   | PHP        | 8.3     |
+| Runtime    | PHP-FPM    | Alpine  |
+| Framework  | Symfony    | 7.2     |
+| Database   | MongoDB    | 6.0     |
+| Web Server | Caddy      | -       |
 
 ### 2. Bounded Context Analysis
 
@@ -47,11 +47,11 @@ ls -la src/
 
 **Bounded Contexts**:
 
-| Context | Purpose |
-|---------|---------|
-| `Shared` | Cross-cutting concerns, kernel, infrastructure |
-| `Core/Customer` | Main business domain |
-| `Internal/HealthCheck` | Internal health monitoring |
+| Context                | Purpose                                        |
+| ---------------------- | ---------------------------------------------- |
+| `Shared`               | Cross-cutting concerns, kernel, infrastructure |
+| `Core/Customer`        | Main business domain                           |
+| `Internal/HealthCheck` | Internal health monitoring                     |
 
 ### 3. Entity Discovery
 
