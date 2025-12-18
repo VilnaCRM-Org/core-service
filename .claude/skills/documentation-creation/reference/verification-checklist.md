@@ -138,7 +138,7 @@ ls src/Core/*/Domain/Entity/
 grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile
 
 # Check specific commands
-for cmd in "unit-tests" "integration-tests" "e2e-tests" "ci" "build" "up" "down"; do
+for cmd in "unit-tests" "integration-tests" "behat" "all-tests" "infection" "ci" "build" "up" "down"; do
   grep -q "^$cmd:" Makefile && echo "Found: $cmd" || echo "Missing: $cmd"
 done
 ```
@@ -151,7 +151,7 @@ done
 
 ```bash
 # Verify docker-compose commands work
-docker-compose config --services
+docker compose config --services
 ```
 
 - [ ] All documented docker commands work
@@ -216,7 +216,7 @@ grep -r "#[A-Za-z]" docs/*.md
 
 ```bash
 # Check for references to wrong project
-grep -ri "user-service\|user_service" docs/
+grep -ri "<reference-repo-name>\|<reference_repo_name>" docs/
 ```
 
 - [ ] Project name consistent throughout

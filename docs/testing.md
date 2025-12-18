@@ -88,62 +88,51 @@ For scripting and executing our load tests, we rely on **k6**, a powerful and mo
 
 ### Configuration
 
-The `config.json.dist` in the `/tests/Load` directory serves as an example of load tests configuration. You can copy `config.json.dist` to `config.json` and customize variables for local development.
+The `tests/Load/config.json.dist` file serves as an example of load tests configuration. You can copy `tests/Load/config.json.dist` to `tests/Load/config.json` and customize variables for local development.
 
 There is a wide range of customizable options, starting with a global setting for all load test scripts. Here is an example of them:
 
-```bash
-    "apiHost":"localhost",
-    "apiPort":"80",
-    "batchSize":50,
-    "delayBetweenScenarios":60,
-    "customersFileLocation":"/loadTests/",
-    "customersFileName":"customers.json",
+```json
+{
+  "apiHost": "localhost",
+  "apiPort": "80",
+  "delayBetweenScenarios": 60,
+  "batchSize": 50,
+  "resultsDirectory": "results",
+  "customersFileName": "customers.json",
+  "customersFileLocation": "/loadTests/"
+}
 ```
 
 **Note:** Update `apiHost` with your actual domain when running load tests against production or staging environments.
 
 Also, you can customize plenty of options for each separate script, and even for each load type. Here is an example:
 
-```bash
-    "getCustomer": {
-            "setupTimeoutInMinutes": 30,
-            "teardownTimeoutInMinutes":30,
-            "smoke": {
-                "threshold": 200,
-                "rps": 10,
-                "vus": 5,
-                "duration": 10
-            },
-            "average": {
-                "threshold": 400,
-                "rps": 25,
-                "vus": 20,
-                "duration": {
-                    "rise": 2,
-                    "plateau": 8,
-                    "fall": 2
-                }
-            },
-            "stress": {
-                "threshold": 800,
-                "rps": 75,
-                "vus": 60,
-                "duration": {
-                    "rise": 3,
-                    "plateau": 10,
-                    "fall": 3
-                }
-            },
-            "spike": {
-                "threshold": 1500,
-                "rps": 150,
-                "vus": 120,
-                "duration": {
-                    "rise": 3,
-                    "fall": 3
-                }
-            }
+```json
+{
+  "endpoints": {
+    "health": {
+      "setupTimeoutInMinutes": 30,
+      "teardownTimeoutInMinutes": 30,
+      "smoke": {
+        "threshold": 9000,
+        "rps": 10,
+        "vus": 5,
+        "duration": 10
+      },
+      "average": {
+        "threshold": 200,
+        "rps": 25,
+        "vus": 25,
+        "duration": {
+          "rise": 3,
+          "plateau": 10,
+          "fall": 3
+        }
+      }
+    }
+  }
+}
 ```
 
 ### Execution
@@ -157,7 +146,7 @@ Run `make load-tests` to execute load tests for each endpoint with all load scen
     make spike-load-tests
 ```
 
-After the load test execution, you'll find `.html` reports in a `/tests/Load/results` folder.
+After the load test execution, you'll find results under `tests/Load/results/`.
 
 ## End-to-End (E2E) Testing
 
@@ -181,6 +170,6 @@ Check [this link](https://behat.org/en/latest/user_guide/writing_scenarios.html)
 
 ### Execution:
 
-Run `make behat` or `make e2e-tests` to execute end-to-end tests.
+Run `make behat` to execute end-to-end tests.
 
 Learn more about [Advanced Configuration Guide](advanced-configuration.md).

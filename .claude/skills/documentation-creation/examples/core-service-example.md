@@ -147,7 +147,7 @@ ls src/Shared/Infrastructure/      # Exists
 
 ```bash
 # Verify make commands
-grep -E "^(unit-tests|integration-tests|e2e-tests):" Makefile
+grep -E "^(unit-tests|integration-tests|behat|all-tests|ci):" Makefile
 # All found
 ```
 

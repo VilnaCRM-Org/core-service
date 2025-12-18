@@ -33,10 +33,10 @@ Our approach to building {Project Name} is guided by these core principles:
 
 ## Quick Links
 
-- [Getting Started](getting-started.md)
-- [Design and Architecture](design-and-architecture.md)
-- [API Endpoints](api-endpoints.md)
-- [Developer Guide](developer-guide.md)
+- `getting-started.md`
+- `design-and-architecture.md`
+- `api-endpoints.md`
+- `developer-guide.md`
 ```
 
 ---
@@ -95,9 +95,9 @@ make unit-tests
 
 ## Next Steps
 
-- Read the [Design and Architecture](design-and-architecture.md) guide
-- Explore the [API Endpoints](api-endpoints.md)
-- Check the [Developer Guide](developer-guide.md)
+- Read the `design-and-architecture.md` guide
+- Explore the `api-endpoints.md`
+- Check the `developer-guide.md`
 ```
 
 ---
@@ -198,7 +198,7 @@ src/
 | `make down`              | Stop all services       |
 | `make unit-tests`        | Run unit tests          |
 | `make integration-tests` | Run integration tests   |
-| `make e2e-tests`         | Run E2E tests           |
+| `make behat`             | Run E2E tests (Behat)   |
 | `make ci`                | Run full CI pipeline    |
 
 ## Code Quality
@@ -216,8 +216,8 @@ make deptrac # Architecture checks
 \`\`\`bash
 make unit-tests # Fast unit tests
 make integration-tests # Integration tests
-make e2e-tests # End-to-end tests
-make mutation-tests # Mutation testing
+make behat # End-to-end tests (Behat)
+make infection # Mutation testing
 \`\`\`
 ```
 
@@ -335,7 +335,7 @@ Location: `tests/Integration/`
 Full API endpoint testing with Behat.
 
 \`\`\`bash
-make e2e-tests
+make behat
 \`\`\`
 
 Location: `tests/Behat/`
@@ -345,7 +345,7 @@ Location: `tests/Behat/`
 Verify test quality with Infection.
 
 \`\`\`bash
-make mutation-tests
+make infection
 \`\`\`
 
 ### Load Tests

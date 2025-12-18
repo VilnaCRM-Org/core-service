@@ -7,7 +7,7 @@ description: Create comprehensive project documentation by adapting from a refer
 
 ## Overview
 
-This skill guides the creation of comprehensive project documentation by adapting content from a well-structured reference repository (like user-service). It ensures documentation accurately reflects the target project while maintaining consistent style and structure.
+This skill guides the creation of comprehensive project documentation by adapting content from a well-structured reference repository. It ensures documentation accurately reflects the target project while maintaining consistent style and structure.
 
 **Use this skill for**: Initial documentation creation from scratch
 **Use documentation-sync for**: Updating existing documentation when code changes
@@ -115,7 +115,7 @@ For each documentation file:
 
 1. **Replace project-specific references**:
 
-   - Project name (e.g., "user-service" → "core-service")
+   - Project name (replace reference repository name with target repository name)
    - Entity names (e.g., "User" → "Customer")
    - Bounded context names
    - URLs and repository links
@@ -172,7 +172,7 @@ Run comprehensive verification:
 
    ```bash
    # Verify mentioned make commands exist
-   for cmd in "unit-tests" "integration-tests" "e2e-tests"; do
+   for cmd in "unit-tests" "integration-tests" "behat" "infection"; do
      grep -q "^$cmd:" Makefile && echo "Found: $cmd" || echo "Missing: $cmd"
    done
    ```
@@ -298,7 +298,7 @@ grep -i "fpm\|frankenphp" Dockerfile
 
 ### Missing Directories
 
-**Problem**: Documenting `src/User/` when it doesn't exist
+**Problem**: Documenting directories that don't exist in `src/`
 
 **Solution**:
 
@@ -310,7 +310,7 @@ ls -la src/
 
 ### Outdated Commands
 
-**Problem**: Documenting `make test` when command is `make unit-tests`
+**Problem**: Documenting non-existent `make` targets
 
 **Solution**:
 

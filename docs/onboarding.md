@@ -169,7 +169,6 @@ Additionally, we use:
 - **User Flow**: [miro board](https://miro.com/app/board/uXjVPQ3J5kI=/)
 - **C4 diagram**: [miro board](https://miro.com/app/board/uXjVPRE64mI=/)
 - **Core Service**: [GitHub - core service](https://github.com/VilnaCRM-Org/core-service) and its [Wiki](https://github.com/VilnaCRM-Org/core-service/wiki)
-- **User Service**: [GitHub - user service](https://github.com/VilnaCRM-Org/user-service)
 - **Pull Requests**: [How to work with Pull Requests](https://github.com/VilnaCRM-Org/docs/wiki/Pull-Requests,-CI-Pipelines,-and-Review-Process)
 
 ### Recommended Online Courses & Tutorials

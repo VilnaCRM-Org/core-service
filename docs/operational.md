@@ -31,7 +31,7 @@ MongoDB is configured with proper authentication and access controls:
 - **Environment Variables:** Database credentials are stored in environment variables and never committed to version control.
 - **Connection Encryption:** Supports encrypted connections for production environments.
 
-You can find our MongoDB configuration in the `config/packages/doctrine_mongodb.yaml` file.
+You can find our MongoDB configuration in the `config/packages/doctrine.yaml` file.
 
 ### Data Validation
 
