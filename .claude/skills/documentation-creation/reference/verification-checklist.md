@@ -2,16 +2,11 @@
 
 Use this checklist to verify documentation accuracy after creation.
 
-## Pre-Creation Verification
+## Pre-Creation Analysis
 
-### Source Analysis
+### Project Analysis
 
-- [ ] Identified all documentation files in reference repository
-- [ ] Understood structure and organization pattern
-- [ ] Noted cross-linking patterns between documents
-- [ ] Identified project-specific content that needs adaptation
-
-### Target Analysis
+Before creating documentation, analyze the project:
 
 - [ ] Explored `src/` directory structure
 - [ ] Identified all bounded contexts
@@ -215,13 +210,13 @@ grep -r "#[A-Za-z]" docs/*.md
 ### Project Name
 
 ```bash
-# Check for references to wrong project
-grep -ri "<reference-repo-name>\|<reference_repo_name>" docs/
+# Check for consistency
+grep -ri "core-service\|core service" docs/ | head -10
 ```
 
 - [ ] Project name consistent throughout
-- [ ] No references to source/reference project name
 - [ ] URLs use correct project name
+- [ ] No placeholder text remaining
 
 ### Terminology
 
@@ -262,6 +257,7 @@ grep -ri "version\|v[0-9]" docs/
 - [ ] Code blocks use correct language tags
 - [ ] Tables are properly formatted
 - [ ] Headings follow logical hierarchy
+- [ ] Long documents (100+ lines) have Table of Contents
 
 ### Accuracy
 
@@ -278,7 +274,7 @@ After creating documentation, ensure CI still passes:
 # Run full CI to ensure no issues introduced
 make ci
 
-# Expected output: "✅ CI checks successfully passed!"
+# Expected output: All checks pass
 ```
 
 - [ ] `make ci` passes successfully
@@ -325,7 +321,7 @@ echo "=== Directory Structure ==="
 ls -la src/
 
 echo "=== Available Commands ==="
-grep -E "^[a-zA-Z].*:" Makefile | head -20
+grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile | head -20
 
 echo "=== Test Directories ==="
 ls tests/

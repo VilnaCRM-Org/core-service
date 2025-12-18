@@ -11,23 +11,29 @@ Complete walkthrough of creating and verifying documentation for `core-service`.
 **Highlights**:
 
 - Technology stack analysis (PHP-FPM, Symfony, MongoDB)
-- Core domain overview (Customer, CustomerType, CustomerStatus)
+- Bounded context discovery (Shared, Core/Customer, Internal/HealthCheck)
+- Entity identification (Customer, CustomerType, CustomerStatus)
 - Directory structure verification against `src/`
-- Link and command verification
+- Command and link verification
 
 ## How to Use Examples
 
 1. Read through the example to understand the workflow
-2. Follow the same pattern for your documentation project
+2. Follow the same pattern for your documentation project:
+   - Analyze project structure first
+   - Document the technology stack
+   - Identify bounded contexts and entities
+   - Create documentation files using templates
+   - Verify all references
 3. Use the verification checklist from `../reference/verification-checklist.md`
 4. Adapt templates from `../reference/doc-templates.md`
 
-## Contributing Examples
+## Adding New Examples
 
-When adding new examples:
+When adding new documentation examples:
 
-1. Document the source and target repositories
-2. Include technology stack comparison
-3. Show key adaptations made
+1. Document the project being analyzed
+2. Include technology stack discovery commands and results
+3. Show bounded context and entity analysis
 4. List verification steps performed
 5. Note lessons learned

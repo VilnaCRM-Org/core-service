@@ -1,13 +1,13 @@
 ---
 name: documentation-creation
-description: Create comprehensive project documentation by adapting from a reference repository. Use when setting up INITIAL documentation for a new project, creating docs following another VilnaCRM project's structure, or building a complete documentation suite from scratch. NOT for updating existing docs (use documentation-sync instead). Covers fetching reference docs, adapting content to target project specifics, verifying accuracy, and maintaining consistent style.
+description: Create comprehensive project documentation from scratch. Use when setting up INITIAL documentation for a new project or building a complete documentation suite. NOT for updating existing docs (use documentation-sync instead). Covers project analysis, documentation structure, templates, and verification.
 ---
 
 # Documentation Creation Skill
 
 ## Overview
 
-This skill guides the creation of comprehensive project documentation by adapting content from a well-structured reference repository. It ensures documentation accurately reflects the target project while maintaining consistent style and structure.
+This skill guides the creation of comprehensive project documentation from scratch by analyzing the project codebase and applying established VilnaCRM documentation patterns. It ensures documentation accurately reflects the actual project implementation.
 
 **Use this skill for**: Initial documentation creation from scratch
 **Use documentation-sync for**: Updating existing documentation when code changes
@@ -15,16 +15,16 @@ This skill guides the creation of comprehensive project documentation by adaptin
 ## Context (Input)
 
 - Need to create documentation for a project from scratch
-- Have a reference repository with well-structured documentation
-- Want consistent style across all documentation files
-- Need to verify documentation accuracy against actual codebase
+- Want consistent style following VilnaCRM patterns
+- Need to ensure documentation accuracy against actual codebase
+- Project has no existing comprehensive documentation
 
 ## Task (Function)
 
 Create comprehensive, accurate project documentation by:
 
-1. Fetching documentation from a reference repository
-2. Adapting content to match target project specifics
+1. Analyzing the project codebase thoroughly
+2. Creating documentation using established templates
 3. Verifying all references against actual codebase
 4. Ensuring consistent style and cross-linking
 
@@ -40,32 +40,16 @@ Create comprehensive, accurate project documentation by:
 
 ## Quick Start: Documentation Creation Workflow
 
-### Step 1: Analyze Reference Repository
+### Step 1: Analyze Project Structure
 
-Fetch and analyze the reference repository's documentation structure:
-
-```bash
-# Use WebFetch to retrieve documentation listing
-# Identify all documentation files in the reference
-```
-
-Key items to identify:
-
-- [ ] List of all documentation files
-- [ ] Structure and organization pattern
-- [ ] Common sections across documents
-- [ ] Cross-linking patterns
-
-### Step 2: Analyze Target Project
-
-Before creating any documentation, thoroughly understand the target project:
+Before creating any documentation, thoroughly understand the project:
 
 ```bash
 # Check project structure
 ls -la src/
 
 # Identify technology stack
-cat composer.json
+cat composer.json | grep -A5 "require"
 cat Dockerfile
 cat docker-compose.yml
 
@@ -74,18 +58,49 @@ ls -la src/Core/
 ls -la src/Shared/
 ls -la src/Internal/
 
-# Check for existing commands, handlers, entities
+# Check for entities
+find src -path "*/Entity/*.php"
+
+# Check for commands and handlers
 find src -name "*Command.php" | head -20
-find src -name "*Entity.php" | head -20
+find src -name "*Handler.php" | head -20
 ```
 
-Key items to document:
+**Key items to document**:
 
-- [ ] Technology stack (PHP version, framework, database)
+- [ ] Technology stack (PHP version, framework, database, runtime)
 - [ ] Architecture style (DDD, hexagonal, CQRS)
 - [ ] Bounded contexts and their purposes
 - [ ] Main entities and their relationships
 - [ ] Available commands and testing tools
+
+### Step 2: Create Technology Stack Summary
+
+Document the verified technology stack:
+
+```bash
+# PHP version
+grep -i "php:" Dockerfile
+
+# Framework
+grep -i "symfony" composer.json
+
+# Database
+grep -i "mongo\|postgres" docker-compose.yml
+
+# Available make commands
+grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile | head -30
+```
+
+Create a technology summary table:
+
+| Component  | Technology | Version |
+|------------|------------|---------|
+| Language   | PHP        | X.Y     |
+| Runtime    | PHP-FPM    | -       |
+| Framework  | Symfony    | X.Y     |
+| Database   | MongoDB    | X.Y     |
+| Web Server | Caddy      | -       |
 
 ### Step 3: Create Documentation Files
 
@@ -109,38 +124,24 @@ Create each documentation file following this order:
 16. **release-notes.md** - Release process
 17. **versioning.md** - Versioning policy
 
-### Step 4: Adapt Content to Target Project
+### Step 4: Write Each Documentation File
 
 For each documentation file:
 
-1. **Replace project-specific references**:
+1. **Use the appropriate template** from [reference/doc-templates.md](reference/doc-templates.md)
 
-   - Project name (replace reference repository name with target repository name)
-   - Entity names (e.g., "User" → "Customer")
+2. **Fill in project-specific content**:
+   - Project name and description
+   - Entity names from codebase
    - Bounded context names
    - URLs and repository links
 
-2. **Update technology references**:
+3. **Verify all references**:
+   - Directory paths exist
+   - Commands exist in Makefile
+   - Entity names match codebase
 
-   - Framework versions
-   - Database type (e.g., MongoDB, PostgreSQL)
-   - Runtime environment (e.g., PHP-FPM)
-   - Container orchestration
-
-3. **Verify directory paths**:
-
-   ```bash
-   # Check that mentioned directories exist
-   ls -la src/Core/{Context}/
-   ls -la src/Shared/Domain/
-   ```
-
-4. **Verify command existence**:
-
-   ```bash
-   # Check Makefile for available commands
-   grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile | head -30
-   ```
+4. **Add cross-links** to related documentation
 
 ### Step 5: Verify Accuracy
 
@@ -188,7 +189,9 @@ Run comprehensive verification:
 ### Overview Document (main.md)
 
 ```markdown
-Welcome to the **{Project Name}** GitHub page...
+# {Project Name}
+
+Welcome to the **{Project Name}** documentation...
 
 ## Design Principles
 
@@ -196,15 +199,18 @@ Welcome to the **{Project Name}** GitHub page...
 
 ## Technology Stack
 
-- **Language:** PHP {version}
-- **Framework:** {framework} {version}
-- **Database:** {database} {version}
-  ...
+| Component | Technology | Version |
+|-----------|------------|---------|
+| Language  | PHP        | X.Y     |
+| Framework | Symfony    | X.Y     |
+| Database  | MongoDB    | X.Y     |
 ```
 
 ### Getting Started (getting-started.md)
 
 ```markdown
+# Getting Started
+
 ## Prerequisites
 
 {List required software with versions}
@@ -226,20 +232,20 @@ See [reference/doc-templates.md](reference/doc-templates.md) for complete templa
 
 ### NEVER
 
-- Copy content without verifying accuracy against target project
 - Include references to non-existent directories or files
 - Claim features or technologies the project doesn't use
-- Leave placeholder text from reference repository
+- Leave placeholder text unreplaced
 - Skip verification step after creating documentation
+- Document commands that don't exist in Makefile
 
 ### ALWAYS
 
 - Verify every directory path mentioned exists
 - Confirm technology stack matches project reality
-- Test command examples in target project
+- Test command examples work in the project
 - Update all cross-references to point to correct files
 - Maintain consistent terminology throughout
-- Remove or adapt sections that don't apply to target project
+- Add Table of Contents to longer documents (100+ lines)
 
 ---
 
@@ -252,7 +258,7 @@ After creating documentation:
 - [ ] PHP version matches Dockerfile
 - [ ] Framework version matches composer.json
 - [ ] Database type matches docker-compose.yml
-- [ ] Runtime environment correctly described (e.g., PHP-FPM)
+- [ ] Runtime environment correctly described
 - [ ] No false claims about unused technologies
 
 ### Structure Accuracy
@@ -278,7 +284,7 @@ After creating documentation:
 
 - [ ] Project name consistent throughout
 - [ ] Terminology consistent across documents
-- [ ] No leftover references to source project
+- [ ] No placeholder text remaining
 
 ---
 
@@ -291,9 +297,10 @@ After creating documentation:
 **Solution**:
 
 ```bash
-# Check actual runtime
+# Verify before documenting
 grep -i "fpm" Dockerfile
-# Only document technologies actually used by the project
+cat docker-compose.yml
+# Only document what actually exists
 ```
 
 ### Missing Directories
@@ -305,7 +312,8 @@ grep -i "fpm" Dockerfile
 ```bash
 # Verify before documenting
 ls -la src/
-# Update to match actual structure (e.g., src/Core/Customer/)
+ls -la src/Core/
+# Update to match actual structure
 ```
 
 ### Outdated Commands
@@ -316,7 +324,23 @@ ls -la src/
 
 ```bash
 # Check actual Makefile
-grep -E "^[a-z].*:" Makefile
+grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile
+```
+
+### Missing Table of Contents
+
+**Problem**: Long documents hard to navigate
+
+**Solution**: Add TOC to documents over 100 lines:
+
+```markdown
+## Table of Contents
+
+- [Section 1](#section-1)
+- [Section 2](#section-2)
+- [Section 3](#section-3)
+
+---
 ```
 
 ---
@@ -386,7 +410,7 @@ All verification checks pass:
 ls -laR src/ | head -50
 
 # Find entities
-find src -name "*Entity.php"
+find src -path "*/Entity/*.php"
 
 # Find commands
 find src -name "*Command.php"
@@ -399,4 +423,8 @@ grep -i "fpm" Dockerfile
 
 # Check database
 grep -i "mongo\|postgres" docker-compose.yml
+
+# Verify technology stack
+grep -i "php:" Dockerfile
+grep -i "symfony" composer.json
 ```

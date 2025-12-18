@@ -145,23 +145,22 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ### 6. Documentation Creation (`documentation-creation/`)
 
-**Purpose**: Create comprehensive project documentation by adapting from a reference repository
+**Purpose**: Create comprehensive project documentation from scratch
 
 **When activated**:
 
 - Setting up INITIAL documentation for a new project
-- Creating docs following VilnaCRM project structure
 - Building a complete documentation suite from scratch
+- Project has no existing comprehensive documentation
 
 **Note**: For updating EXISTING documentation when code changes, use `documentation-sync` instead.
 
 **What it does**:
 
-- Fetches documentation from a reference repository
-- Adapts content to match target project specifics
+- Analyzes project codebase thoroughly (structure, entities, commands)
+- Creates documentation using established VilnaCRM templates
 - Verifies all references against actual codebase
 - Ensures consistent style and cross-linking
-- Removes inapplicable content for unused technologies
 - Validates VilnaCRM-specific standards (100% coverage, PHPInsights thresholds)
 
 **Key verification steps**:
