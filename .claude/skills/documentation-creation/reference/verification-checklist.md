@@ -270,6 +270,46 @@ grep -ri "version\|v[0-9]" docs/
 - [ ] All directory paths verified
 - [ ] All links checked
 
+### CI Validation
+
+After creating documentation, ensure CI still passes:
+
+```bash
+# Run full CI to ensure no issues introduced
+make ci
+
+# Expected output: "✅ CI checks successfully passed!"
+```
+
+- [ ] `make ci` passes successfully
+- [ ] No markdown linting errors (if configured)
+- [ ] Documentation doesn't break any existing tests
+
+---
+
+## VilnaCRM-Specific Checks
+
+For VilnaCRM ecosystem projects:
+
+### Quality Standards
+
+- [ ] Coverage requirements show 100% (not lower thresholds)
+- [ ] PHPInsights thresholds documented correctly (93%+ complexity, 100% quality/arch/style)
+- [ ] Mutation testing shows 100% MSI requirement
+
+### Architecture
+
+- [ ] Hexagonal architecture described correctly
+- [ ] DDD patterns match actual implementation
+- [ ] CQRS pattern documented accurately
+- [ ] Bounded contexts match `src/` structure
+
+### Commands
+
+- [ ] All `make` commands verified against Makefile
+- [ ] Load test commands documented (smoke, average, stress, spike)
+- [ ] CI command documented (`make ci`)
+
 ---
 
 ## Verification Commands Summary

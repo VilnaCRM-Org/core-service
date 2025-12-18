@@ -149,10 +149,12 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 **When activated**:
 
-- Setting up initial documentation for a project
-- Creating docs following another project's structure
+- Setting up INITIAL documentation for a new project
+- Creating docs following another VilnaCRM project's structure
 - Building a complete documentation suite from scratch
-- Adapting documentation from a reference repository
+- Adapting documentation from a reference repository (e.g., user-service → core-service)
+
+**Note**: For updating EXISTING documentation when code changes, use `documentation-sync` instead.
 
 **What it does**:
 
@@ -161,6 +163,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - Verifies all references against actual codebase
 - Ensures consistent style and cross-linking
 - Removes inapplicable content (e.g., FrankenPHP docs when using PHP-FPM)
+- Validates VilnaCRM-specific standards (100% coverage, PHPInsights thresholds)
 
 **Key verification steps**:
 
@@ -168,12 +171,13 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - Directory structure verification (all mentioned paths exist)
 - Command verification (all make commands exist)
 - Link verification (internal and external links work)
+- CI validation (`make ci` passes)
 
 **Structure**: Multi-file with comprehensive guides:
 
 - `SKILL.md` (Core workflow and quick start)
 - `reference/doc-templates.md` (Templates for each doc type)
-- `reference/verification-checklist.md` (Detailed verification steps)
+- `reference/verification-checklist.md` (Detailed verification steps with VilnaCRM-specific checks)
 - `examples/core-service-example.md` (Real-world example)
 
 ---

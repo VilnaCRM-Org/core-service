@@ -357,8 +357,8 @@ Location: `tests/Load/`
 
 | Metric | Minimum |
 | ------ | ------- |
-| Line Coverage | 80% |
-| Mutation Score | 70% |
+| Line Coverage | 100% |
+| Mutation Score | 100% |
 ```
 
 ---

@@ -1,13 +1,16 @@
 ---
 name: documentation-creation
-description: Create comprehensive project documentation by adapting from a reference repository. Use when setting up initial documentation, creating docs following another project's structure, or building a complete documentation suite from scratch. Covers fetching reference docs, adapting content to target project specifics, verifying accuracy, and maintaining consistent style.
+description: Create comprehensive project documentation by adapting from a reference repository. Use when setting up INITIAL documentation for a new project, creating docs following another VilnaCRM project's structure, or building a complete documentation suite from scratch. NOT for updating existing docs (use documentation-sync instead). Covers fetching reference docs, adapting content to target project specifics, verifying accuracy, and maintaining consistent style.
 ---
 
 # Documentation Creation Skill
 
 ## Overview
 
-This skill guides the creation of comprehensive project documentation by adapting content from a well-structured reference repository. It ensures documentation accurately reflects the target project while maintaining consistent style and structure.
+This skill guides the creation of comprehensive project documentation by adapting content from a well-structured reference repository (like user-service). It ensures documentation accurately reflects the target project while maintaining consistent style and structure.
+
+**Use this skill for**: Initial documentation creation from scratch
+**Use documentation-sync for**: Updating existing documentation when code changes
 
 ## Context (Input)
 
@@ -311,11 +314,51 @@ grep -E "^[a-z].*:" Makefile
 
 ---
 
+## Format (Output)
+
+### Expected Documentation Structure
+
+```
+docs/
+├── main.md                    # Project overview
+├── getting-started.md         # Installation guide
+├── design-and-architecture.md # Architecture patterns
+├── developer-guide.md         # Development workflow
+├── api-endpoints.md           # REST/GraphQL docs
+├── testing.md                 # Testing strategy
+├── glossary.md                # Domain terminology
+├── user-guide.md              # API usage examples
+├── advanced-configuration.md  # Environment config
+├── performance.md             # Benchmarks
+├── security.md                # Security measures
+├── operational.md             # Operations guide
+├── onboarding.md              # Contributor guide
+├── community-and-support.md   # Support channels
+├── legal-and-licensing.md     # License info
+├── release-notes.md           # Release process
+└── versioning.md              # Versioning policy
+```
+
+### Expected Verification Result
+
+All verification checks pass:
+- Technology stack matches reality
+- All directory paths exist
+- All commands work
+- All links resolve
+
+---
+
 ## Related Skills
 
-- [documentation-sync](../documentation-sync/SKILL.md) - Keep docs in sync with code changes
+- [documentation-sync](../documentation-sync/SKILL.md) - Keep docs in sync with code changes (use AFTER initial creation)
 - [api-platform-crud](../api-platform-crud/SKILL.md) - API documentation patterns
 - [testing-workflow](../testing-workflow/SKILL.md) - Testing documentation
+- [load-testing](../load-testing/SKILL.md) - Performance documentation
+
+**Skill Relationship**:
+- **documentation-creation** (this skill): Create initial documentation from scratch
+- **documentation-sync**: Keep existing documentation updated when code changes
 
 ---
 
