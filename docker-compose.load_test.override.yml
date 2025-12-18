@@ -84,7 +84,7 @@ services:
       - ./infrastructure/docker/php/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
 
   redis:
-    image: redis:8-alpine
+    image: redis:8.0.0-alpine
     ports:
       - '6379:6379'
 
