@@ -9,6 +9,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
@@ -24,6 +26,7 @@ services:
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:${DB_PORT}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
 
   caddy:
     build:
@@ -69,6 +72,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:8.0.0-alpine
+    ports:
+      - '6379:6379'
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
