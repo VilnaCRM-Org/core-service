@@ -1,10 +1,12 @@
+# API Endpoints
+
 This document outlines the API endpoints in the Core Service, as defined in the OpenAPI specification and implemented in the codebase.
 
-## OpenApi specification
+## OpenAPI specification
 
-You can go [here](https://github.com/VilnaCRM-Org/core-service/blob/main/.github/openapi-spec/spec.yaml), to get our OpenApi specification as a `.yaml` file, and then use [Swagger Editor](https://editor.swagger.io/) to browse it.
+You can go [here](https://github.com/VilnaCRM-Org/core-service/blob/main/.github/openapi-spec/spec.yaml), to get our OpenAPI specification as a `.yaml` file, and then use [Swagger Editor](https://editor.swagger.io/) to browse it.
 
-If you've set up Core Service **locally**, you can check [this URL](https://localhost/api/docs) to see the same OpenApi specification with an interactive interface.
+If you've set up Core Service **locally**, you can check [this URL](https://localhost/api/docs) to see the same OpenAPI specification with an interactive interface.
 
 ### How to read the documentation
 
@@ -22,7 +24,7 @@ At the right side of the screen, you'll see a tab named `Docs`. There you'll fin
 
 On the left side of the screen, you'll see a place for writing queries, from it you can send the requests.
 
-Learn more about [GraphQl Queries and Mutations](https://graphql.org/learn/queries/).
+Learn more about [GraphQL Queries and Mutations](https://graphql.org/learn/queries/).
 
 Learn more about [Developer Guide](developer-guide.md).
 

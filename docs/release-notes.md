@@ -1,3 +1,5 @@
+# Release Notes
+
 This page provides an overview of the release history and significant updates made to the Core Service. Each release note is a summary of new features, improvements, and bug fixes that have been implemented, providing users and developers with a clear understanding of the project's evolution.
 
 ## Changelog

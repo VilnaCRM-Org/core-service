@@ -6,7 +6,7 @@ This directory contains comprehensive load tests for the Core Service REST API u
 
 The load tests cover all major REST API endpoints:
 
-- **Health Check**: `/health`
+- **Health Check**: `/api/health`
 - **Customers API**: `/api/customers` (GET, POST, PATCH, PUT, DELETE)
 - **Customer Types API**: `/api/customer_types` (GET, POST, PATCH, PUT, DELETE)
 - **Customer Statuses API**: `/api/customer_statuses` (GET, POST, PATCH, PUT, DELETE)

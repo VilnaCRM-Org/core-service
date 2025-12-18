@@ -1,3 +1,5 @@
+# Community and Support
+
 Welcome to the Community and Support page for our project! We're glad you're here. This page provides information on how to get involved with the project, where to find help, and how to connect with the community.
 
 ## Getting Involved
@@ -6,9 +8,9 @@ There are many ways to contribute to our project, from writing code and document
 
 ## Support Channels
 
-- **GitHub Issues**: For reporting bugs or requesting new features, please use our [GitHub Issues](https://github.com/vilnacrm-org/core-service/issues).
+- **GitHub Issues**: For reporting bugs or requesting new features, please use our [GitHub Issues](https://github.com/VilnaCRM-Org/core-service/issues).
 - **Branches**: Branches should be based on issues, if your problem does not have issue, please previously create an issue [create branch](https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-a-branch-for-an-issue).
-- **Pull Requests**: If you've made improvements to our project, open a [pull request](https://github.com/vilnacrm-org/core-service/pulls) to contribute your changes to the project.
+- **Pull Requests**: If you've made improvements to our project, open a [pull request](https://github.com/VilnaCRM-Org/core-service/pulls) to contribute your changes to the project.
 
 ## Reporting Issues
 
@@ -16,7 +18,7 @@ If you encounter a security issue, please report it responsibly. Check our [Secu
 
 ## Need More Help?
 
-If you've gone through the channels above and still need help, feel free to reach out to the project maintainers directly via [GitHub](https://github.com/vilnacrm-org/core-service). We're here to help!
+If you've gone through the channels above and still need help, feel free to reach out to the project maintainers directly via [GitHub](https://github.com/VilnaCRM-Org/core-service). We're here to help!
 
 Thank you for being a part of our community!
 

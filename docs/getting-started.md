@@ -1,3 +1,5 @@
+# Getting Started
+
 Welcome to the Core Service, a modern PHP microservice for customer management within the VilnaCRM ecosystem. This guide will help you set up the service, configure it, and quickly get started with its basic functionalities.
 
 ## Installation Instructions

@@ -1,3 +1,5 @@
+# Glossary
+
 This glossary page aims to explain the naming conventions used for classes within the Domain layer of the `core-service` project. Understanding these conventions will help contributors and developers navigate and contribute to the project more effectively.
 
 ## General Naming Conventions
@@ -77,6 +79,6 @@ Here is a breakdown of the meaning of our classes from the Domain layer:
 - **CreateStatusCommand**: Dispatched to create a new customer status.
 - **UpdateCustomerStatusCommand**: Dispatched to update an existing customer status.
 
-This glossary will be updated as the project evolves. If you encounter a term or class naming convention you believe should be included here, please [open an issue](https://github.com/vilnacrm-org/core-service/issues/new) to suggest it.
+This glossary will be updated as the project evolves. If you encounter a term or class naming convention you believe should be included here, please [open an issue](https://github.com/VilnaCRM-Org/core-service/issues/new) to suggest it.
 
 Learn more about [Versioning and Change Management](versioning.md).

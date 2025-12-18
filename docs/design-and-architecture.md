@@ -1,3 +1,5 @@
+# Design and Architecture
+
 The Core Service is architected around several foundational design principles, each contributing to the system's robustness, scalability, and maintainability. Below, we delve into how these principles are reflected in the codebase and folder structure.
 
 ## Domain-Driven Design (DDD)

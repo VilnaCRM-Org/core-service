@@ -1,3 +1,5 @@
+# Testing
+
 This document provides an overview of the testing strategies employed in the Core Service. Our comprehensive testing approach ensures high-quality software delivery, encompassing unit tests, integration tests, end-to-end (E2E) tests, mutation tests, load tests, and more.
 
 ## Prerequisites

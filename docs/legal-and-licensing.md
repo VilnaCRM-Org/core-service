@@ -1,3 +1,5 @@
+# Legal and Licensing
+
 This page outlines the legal terms and licensing information for the `core-service` project. Our project is dedicated to contributing to the commons of creative, cultural, and scientific works with the intention that they be as freely available as possible for legal use, sharing, repurposing, and remixing by the public.
 
 ## License

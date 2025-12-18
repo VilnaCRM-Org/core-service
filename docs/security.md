@@ -1,3 +1,5 @@
+# Security
+
 This document outlines the security measures and best practices implemented in the Core Service project. Our goal is to maintain the highest standards of security to protect our data and operations from unauthorized access and vulnerabilities.
 
 ## Security Best Practices

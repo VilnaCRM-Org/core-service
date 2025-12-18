@@ -1,3 +1,5 @@
+# User Guide
+
 Welcome to the User Guide for Core Service. This guide aims to provide you with all the necessary information to use our service and its features.
 
 ## Localization

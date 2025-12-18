@@ -1,3 +1,5 @@
+# Developer Guide
+
 Welcome to the developer guide for the Core Service. This guide aims to provide you with all the necessary information to get started with development, including an overview of the code structure.
 
 ## Code Structure
@@ -10,21 +12,39 @@ There are 3 bounded contexts in Core Service:
 
 The Shared context provides foundational support across the Core Service application. It includes utilities and infrastructure components common to other contexts, ensuring consistency and reducing duplication.
 
-- **Application:** This layer mainly consists of classes, responsible for handling cross-cutting concerns across the application, such as Validators and Transformers. Also, it has an OpenApi folder, which is responsible for building OpenAPI docs for the Core Service, facilitating API discoverability and usability by generating detailed documentation for various API endpoints, request bodies, and response structures.
+- **Application:** This layer mainly consists of classes, responsible for handling cross-cutting concerns across the application, such as Validators and Transformers. Also, it has an `OpenApi/` folder, which is responsible for building OpenAPI docs for the Core Service, facilitating API discoverability and usability by generating detailed documentation for various API endpoints, request bodies, and response structures.
 
 ```bash
 Shared/Application
 ├── Extractor
 ├── GraphQL
 ├── OpenApi
+│   ├── Applier
 │   ├── Builder
-│   └── Factory
-│       ├── Endpoint
-│       ├── Request
-│       ├── Response
-│       └── UriParameter
+│   ├── Cleaner
+│   ├── Factory
+│   │   ├── Endpoint
+│   │   │   ├── Customer
+│   │   │   ├── CustomerStatus
+│   │   │   └── CustomerType
+│   │   ├── Request
+│   │   │   ├── Customer
+│   │   │   ├── CustomerStatus
+│   │   │   └── CustomerType
+│   │   ├── Response
+│   │   │   ├── Customer
+│   │   │   ├── CustomerStatus
+│   │   │   └── CustomerType
+│   │   └── UriParameter
+│   ├── Mapper
+│   ├── Processor
+│   ├── Resolver
+│   ├── Serializer
+│   ├── Transformer
+│   └── ValueObject
 ├── Transformer
 └── Validator
+    └── Guard
 ```
 
 - **Domain:** This layer mainly consists of interfaces for classes in the Infrastructure layer, and abstract classes to be inherited in other bounded contexts. Also, it has entities, that can not be encapsulated in a specific bounded context.

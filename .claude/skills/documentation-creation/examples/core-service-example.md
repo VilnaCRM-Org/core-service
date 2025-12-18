@@ -1,16 +1,15 @@
 # Core Service Documentation Creation Example
 
-This example documents the process of creating documentation for `core-service` based on the `user-service` repository documentation structure.
+This example documents the process of creating documentation for `core-service` in a self-sufficient way.
 
 ## Context
 
-- **Source Repository**: VilnaCRM-Org/user-service (branch: copilot/fix-45)
 - **Target Repository**: VilnaCRM-Org/core-service
-- **Goal**: Create comprehensive documentation following user-service style
+- **Goal**: Create comprehensive documentation that reflects this repository accurately
 
-## Step 1: Analyze Reference Repository
+## Step 1: Analyze Existing Documentation Structure
 
-Fetched documentation listing from user-service:
+Documentation files in this repository:
 
 ```
 docs/
@@ -26,8 +25,6 @@ docs/
 ├── onboarding.md
 ├── operational.md
 ├── performance.md
-├── performance-frankenphp.md      # Not applicable
-├── php-fpm-vs-frankenphp.md       # Not applicable
 ├── release-notes.md
 ├── security.md
 ├── testing.md
@@ -90,7 +87,7 @@ find src -path "*/Entity/*.php"
 
 ## Step 3: Create Documentation
 
-Created 17 documentation files (excluded FrankenPHP docs):
+Created 17 documentation files:
 
 1. **main.md** - Overview with core-service specifics
 2. **getting-started.md** - Installation with Docker/Caddy
@@ -110,34 +107,22 @@ Created 17 documentation files (excluded FrankenPHP docs):
 16. **release-notes.md** - Release process
 17. **versioning.md** - Versioning policy
 
-## Step 4: Key Adaptations Made
+## Step 4: Key Repository-Specific Notes
 
-### Entity Substitutions
+### Core entities
 
-| User-Service | Core-Service   |
-| ------------ | -------------- |
-| User         | Customer       |
-| N/A          | CustomerType   |
-| N/A          | CustomerStatus |
+- Customer
+- CustomerType
+- CustomerStatus
 
-### Technology Adaptations
+### Technology notes
 
-| Aspect      | User-Service | Core-Service    |
-| ----------- | ------------ | --------------- |
-| Runtime     | FrankenPHP   | PHP-FPM + Caddy |
-| Database    | PostgreSQL   | MongoDB         |
-| Main Entity | User         | Customer        |
+- Runtime: PHP-FPM + Caddy
+- Database: MongoDB
 
-### Removed Content
+### Documentation scope
 
-- `performance-frankenphp.md` - Not applicable (uses PHP-FPM)
-- `php-fpm-vs-frankenphp.md` - Not applicable
-
-### Modified Content
-
-- `performance.md` - Removed FrankenPHP references, kept PHP-FPM benchmarks
-- All entity references changed from User to Customer
-- All context references updated to Core/Customer
+- `performance.md` focuses on PHP-FPM performance characteristics.
 
 ## Step 5: Verification
 
@@ -168,8 +153,8 @@ grep -E "^(unit-tests|integration-tests|e2e-tests):" Makefile
 
 ## Lessons Learned
 
-1. **Always verify runtime environment** - FrankenPHP vs PHP-FPM matters for documentation
-2. **Check database type early** - MongoDB vs PostgreSQL affects many sections
+1. **Always verify runtime environment** - PHP runtime details matter for documentation
+2. **Check database type early** - database choice affects many sections
 3. **Verify entity names** - Don't assume, check the actual codebase
 4. **Remove inapplicable sections** - Better to omit than include wrong information
 5. **Test all commands** - Every make command should exist
@@ -196,5 +181,5 @@ docs/
 ├── user-guide.md
 └── versioning.md
 
-17 files (vs 19 in source - excluded 2 FrankenPHP docs)
+17 files
 ```

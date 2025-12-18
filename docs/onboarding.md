@@ -1,3 +1,5 @@
+# Onboarding Guide
+
 Welcome to **VilnaCRM**!
 
 We're excited to have you join us as a new back-end contributor. This document will help you set up your development environment, understand our project architecture and tech stack, and familiarize yourself with our coding standards and processes.

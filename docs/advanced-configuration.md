@@ -1,3 +1,5 @@
+# Advanced Configuration
+
 Welcome to the Advanced Configuration Guide for the Core Service. This guide is designed to help you customize and optimize your setup beyond the basic installation steps.
 
 ## Environment Variables

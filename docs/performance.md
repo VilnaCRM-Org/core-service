@@ -1,3 +1,5 @@
+# Performance and Optimization
+
 Welcome to the **Performance and Optimization** GitHub page, which is dedicated to showcasing our comprehensive approach to enhancing the efficiency and speed of our Core Service application. Our goal is to share insights, methodologies, and results from rigorous testing and optimization processes to help developers achieve peak performance in their own applications.
 
 ## Testing Environment
@@ -25,7 +27,7 @@ To ensure our Core Service is optimized for high performance, we conducted exten
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.
 
 Each endpoint was tested for smoke, average, stress, and spike load scenarios. You can learn more about them [here](https://grafana.com/docs/k6/latest/testing-guides/test-types/).
-Also, you can find HTML files with load test reports [here](https://github.com/VilnaCRM-Org/core-service/tree/main/tests/Load/results)
+Load test results (including optional HTML reports) are generated locally and stored under `tests/Load/results/` (not committed). See [Load Testing Results](../tests/Load/README.md#results) for details.
 
 The most important metrics for each test, which you'll find in tables include:
 

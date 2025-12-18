@@ -1,3 +1,5 @@
+# Operational Security
+
 This document outlines the operational security practices adopted by our team to ensure the integrity and confidentiality of the data managed by the Core Service. Our commitment to security involves a comprehensive approach, addressing potential vulnerabilities and protecting our customer's information.
 
 ## Security Practices

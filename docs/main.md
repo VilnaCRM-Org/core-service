@@ -1,3 +1,5 @@
+# Core Service
+
 ## What Is Core Service?
 
 The VilnaCRM Core Service is designed to manage customer data and relationships within the VilnaCRM ecosystem. It provides essential functionalities such as customer management, customer type classification, and customer status tracking, implemented with REST API and GraphQL, ensuring seamless integration with other components of the CRM system.
