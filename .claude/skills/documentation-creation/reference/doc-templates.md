@@ -24,12 +24,12 @@ Our approach to building {Project Name} is guided by these core principles:
 
 ## Technology Stack
 
-| Component | Technology | Version |
-| --------- | ---------- | ------- |
-| Language | PHP | {version} |
-| Framework | {framework} | {version} |
-| Database | {database} | {version} |
-| Web Server | {server} | {version} |
+| Component  | Technology  | Version   |
+| ---------- | ----------- | --------- |
+| Language   | PHP         | {version} |
+| Framework  | {framework} | {version} |
+| Database   | {database}  | {version} |
+| Web Server | {server}    | {version} |
 
 ## Quick Links
 
@@ -68,7 +68,9 @@ cd {repo}
 
 \`\`\`bash
 cp .env.example .env
+
 # Edit .env with your settings
+
 \`\`\`
 
 ### 3. Build and Start Services
@@ -81,10 +83,13 @@ make up
 ### 4. Verify Installation
 
 \`\`\`bash
+
 # Check service health
+
 curl https://localhost/api/health
 
 # Run tests
+
 make unit-tests
 \`\`\`
 
@@ -133,26 +138,26 @@ Key DDD concepts implemented:
 
 \`\`\`
 src/
-├── Shared/           # Cross-cutting concerns
-│   ├── Application/
-│   ├── Domain/
-│   └── Infrastructure/
-├── Core/             # Core business domain
-│   └── {Entity}/
-│       ├── Application/
-│       ├── Domain/
-│       └── Infrastructure/
-└── Internal/         # Internal services
-    └── HealthCheck/
+├── Shared/ # Cross-cutting concerns
+│ ├── Application/
+│ ├── Domain/
+│ └── Infrastructure/
+├── Core/ # Core business domain
+│ └── {Entity}/
+│ ├── Application/
+│ ├── Domain/
+│ └── Infrastructure/
+└── Internal/ # Internal services
+└── HealthCheck/
 \`\`\`
 
 ## Layer Dependencies
 
 \`\`\`
 Domain ← Application ← Infrastructure
-  ↑          ↑              ↑
-  └──────────┴──────────────┘
-       No reverse dependencies
+↑ ↑ ↑
+└──────────┴──────────────┘
+No reverse dependencies
 \`\`\`
 ```
 
@@ -170,49 +175,49 @@ Domain ← Application ← Infrastructure
 \`\`\`
 src/
 ├── {Context}/
-│   ├── Application/
-│   │   ├── Command/        # Write commands
-│   │   ├── CommandHandler/ # Command handlers
-│   │   ├── DTO/            # Data Transfer Objects
-│   │   ├── Processor/      # API processors
-│   │   └── Transformer/    # DTO transformers
-│   ├── Domain/
-│   │   ├── Entity/         # Domain entities
-│   │   ├── Repository/     # Repository interfaces
-│   │   └── ValueObject/    # Value objects
-│   └── Infrastructure/
-│       └── Repository/     # Repository implementations
+│ ├── Application/
+│ │ ├── Command/ # Write commands
+│ │ ├── CommandHandler/ # Command handlers
+│ │ ├── DTO/ # Data Transfer Objects
+│ │ ├── Processor/ # API processors
+│ │ └── Transformer/ # DTO transformers
+│ ├── Domain/
+│ │ ├── Entity/ # Domain entities
+│ │ ├── Repository/ # Repository interfaces
+│ │ └── ValueObject/ # Value objects
+│ └── Infrastructure/
+│ └── Repository/ # Repository implementations
 \`\`\`
 
 ## Development Commands
 
-| Command | Description |
-| ------- | ----------- |
-| `make build` | Build Docker containers |
-| `make up` | Start all services |
-| `make down` | Stop all services |
-| `make unit-tests` | Run unit tests |
-| `make integration-tests` | Run integration tests |
-| `make e2e-tests` | Run E2E tests |
-| `make ci` | Run full CI pipeline |
+| Command                  | Description             |
+| ------------------------ | ----------------------- |
+| `make build`             | Build Docker containers |
+| `make up`                | Start all services      |
+| `make down`              | Stop all services       |
+| `make unit-tests`        | Run unit tests          |
+| `make integration-tests` | Run integration tests   |
+| `make e2e-tests`         | Run E2E tests           |
+| `make ci`                | Run full CI pipeline    |
 
 ## Code Quality
 
 ### Linting
 
 \`\`\`bash
-make phpcsfixer    # Fix code style
-make psalm         # Static analysis
-make deptrac       # Architecture checks
+make phpcsfixer # Fix code style
+make psalm # Static analysis
+make deptrac # Architecture checks
 \`\`\`
 
 ### Testing
 
 \`\`\`bash
-make unit-tests           # Fast unit tests
-make integration-tests    # Integration tests
-make e2e-tests           # End-to-end tests
-make mutation-tests      # Mutation testing
+make unit-tests # Fast unit tests
+make integration-tests # Integration tests
+make e2e-tests # End-to-end tests
+make mutation-tests # Mutation testing
 \`\`\`
 ```
 
@@ -227,33 +232,35 @@ make mutation-tests      # Mutation testing
 
 ### {Entity} Endpoints
 
-| Method | Endpoint | Description |
-| ------ | -------- | ----------- |
-| GET | `/api/{entities}` | List all {entities} |
-| GET | `/api/{entities}/{id}` | Get single {entity} |
-| POST | `/api/{entities}` | Create {entity} |
-| PUT | `/api/{entities}/{id}` | Replace {entity} |
-| PATCH | `/api/{entities}/{id}` | Update {entity} |
-| DELETE | `/api/{entities}/{id}` | Delete {entity} |
+| Method | Endpoint               | Description         |
+| ------ | ---------------------- | ------------------- |
+| GET    | `/api/{entities}`      | List all {entities} |
+| GET    | `/api/{entities}/{id}` | Get single {entity} |
+| POST   | `/api/{entities}`      | Create {entity}     |
+| PUT    | `/api/{entities}/{id}` | Replace {entity}    |
+| PATCH  | `/api/{entities}/{id}` | Update {entity}     |
+| DELETE | `/api/{entities}/{id}` | Delete {entity}     |
 
 ### Example Request
 
 \`\`\`bash
+
 # Create {entity}
+
 curl -X POST https://localhost/api/{entities} \\
-  -H "Content-Type: application/json" \\
-  -d '{"name": "Example", "description": "Test"}'
+-H "Content-Type: application/json" \\
+-d '{"name": "Example", "description": "Test"}'
 \`\`\`
 
 ### Example Response
 
 \`\`\`json
 {
-  "@context": "/api/contexts/{Entity}",
-  "@id": "/api/{entities}/123",
-  "@type": "{Entity}",
-  "name": "Example",
-  "description": "Test"
+"@context": "/api/contexts/{Entity}",
+"@id": "/api/{entities}/123",
+"@type": "{Entity}",
+"name": "Example",
+"description": "Test"
 }
 \`\`\`
 
@@ -269,11 +276,11 @@ POST /api/graphql
 
 \`\`\`graphql
 query {
-  {entity}(id: "/api/{entities}/123") {
-    id
-    name
-    description
-  }
+{entity}(id: "/api/{entities}/123") {
+id
+name
+description
+}
 }
 \`\`\`
 
@@ -281,15 +288,15 @@ query {
 
 \`\`\`graphql
 mutation {
-  create{Entity}(input: {
-    name: "Example"
-    description: "Test"
-  }) {
-    {entity} {
-      id
-      name
-    }
-  }
+create{Entity}(input: {
+name: "Example"
+description: "Test"
+}) {
+{entity} {
+id
+name
+}
+}
 }
 \`\`\`
 ```
@@ -355,10 +362,10 @@ Location: `tests/Load/`
 
 ## Coverage Requirements
 
-| Metric | Minimum |
-| ------ | ------- |
-| Line Coverage | 100% |
-| Mutation Score | 100% |
+| Metric         | Minimum |
+| -------------- | ------- |
+| Line Coverage  | 100%    |
+| Mutation Score | 100%    |
 ```
 
 ---

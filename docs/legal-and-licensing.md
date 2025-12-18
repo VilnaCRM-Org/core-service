@@ -17,29 +17,29 @@ Learn more about the CC0 1.0 License [here](https://creativecommons.org/publicdo
 
 Here is the list of primary dependencies used in Core Service and their licenses:
 
-| Dependency                          | License                                                       |
-| ----------------------------------- | ------------------------------------------------------------- |
-| api-platform/core                   | [MIT](https://license.md/licenses/mit-license/)               |
-| doctrine/mongodb-odm                | [MIT](https://license.md/licenses/mit-license/)               |
-| doctrine/mongodb-odm-bundle         | [MIT](https://license.md/licenses/mit-license/)               |
-| fakerphp/faker                      | [MIT](https://license.md/licenses/mit-license/)               |
-| lambdish/phunctional                | [MIT](https://license.md/licenses/mit-license/)               |
-| nelmio/cors-bundle                  | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/amazon-sqs-messenger        | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/asset                       | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/cache                       | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/console                     | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/dotenv                      | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/flex                        | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/framework-bundle            | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/messenger                   | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/monolog-bundle              | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/runtime                     | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/translation                 | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/twig-bundle                 | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/uid                         | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/validator                   | [MIT](https://license.md/licenses/mit-license/)               |
-| symfony/yaml                        | [MIT](https://license.md/licenses/mit-license/)               |
-| webonyx/graphql-php                 | [MIT](https://license.md/licenses/mit-license/)               |
+| Dependency                   | License                                         |
+| ---------------------------- | ----------------------------------------------- |
+| api-platform/core            | [MIT](https://license.md/licenses/mit-license/) |
+| doctrine/mongodb-odm         | [MIT](https://license.md/licenses/mit-license/) |
+| doctrine/mongodb-odm-bundle  | [MIT](https://license.md/licenses/mit-license/) |
+| fakerphp/faker               | [MIT](https://license.md/licenses/mit-license/) |
+| lambdish/phunctional         | [MIT](https://license.md/licenses/mit-license/) |
+| nelmio/cors-bundle           | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/amazon-sqs-messenger | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/asset                | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/cache                | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/console              | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/dotenv               | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/flex                 | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/framework-bundle     | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/messenger            | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/monolog-bundle       | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/runtime              | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/translation          | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/twig-bundle          | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/uid                  | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/validator            | [MIT](https://license.md/licenses/mit-license/) |
+| symfony/yaml                 | [MIT](https://license.md/licenses/mit-license/) |
+| webonyx/graphql-php          | [MIT](https://license.md/licenses/mit-license/) |
 
 Learn more about [Glossary](glossary.md).

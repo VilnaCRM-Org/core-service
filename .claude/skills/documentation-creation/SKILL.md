@@ -114,12 +114,14 @@ Create each documentation file following this order:
 For each documentation file:
 
 1. **Replace project-specific references**:
+
    - Project name (e.g., "user-service" → "core-service")
    - Entity names (e.g., "User" → "Customer")
    - Bounded context names
    - URLs and repository links
 
 2. **Update technology references**:
+
    - Framework versions
    - Database type (PostgreSQL vs MongoDB)
    - Runtime environment (FrankenPHP vs PHP-FPM)
@@ -189,25 +191,30 @@ Run comprehensive verification:
 Welcome to the **{Project Name}** GitHub page...
 
 ## Design Principles
+
 {List project's core design principles}
 
 ## Technology Stack
+
 - **Language:** PHP {version}
 - **Framework:** {framework} {version}
 - **Database:** {database} {version}
-...
+  ...
 ```
 
 ### Getting Started (getting-started.md)
 
 ```markdown
 ## Prerequisites
+
 {List required software with versions}
 
 ## Installation
+
 {Step-by-step installation commands}
 
 ## Verification
+
 {Commands to verify installation}
 ```
 
@@ -342,6 +349,7 @@ docs/
 ### Expected Verification Result
 
 All verification checks pass:
+
 - Technology stack matches reality
 - All directory paths exist
 - All commands work
@@ -357,6 +365,7 @@ All verification checks pass:
 - [load-testing](../load-testing/SKILL.md) - Performance documentation
 
 **Skill Relationship**:
+
 - **documentation-creation** (this skill): Create initial documentation from scratch
 - **documentation-sync**: Keep existing documentation updated when code changes
 

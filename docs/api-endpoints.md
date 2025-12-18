@@ -30,42 +30,42 @@ Learn more about [Developer Guide](developer-guide.md).
 
 ### Customer Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/customers` | Get collection of customers |
-| POST | `/api/customers` | Create a new customer |
-| GET | `/api/customers/{id}` | Get a specific customer |
-| PUT | `/api/customers/{id}` | Replace a customer |
-| PATCH | `/api/customers/{id}` | Update a customer |
-| DELETE | `/api/customers/{id}` | Delete a customer |
+| Method | Endpoint              | Description                 |
+| ------ | --------------------- | --------------------------- |
+| GET    | `/api/customers`      | Get collection of customers |
+| POST   | `/api/customers`      | Create a new customer       |
+| GET    | `/api/customers/{id}` | Get a specific customer     |
+| PUT    | `/api/customers/{id}` | Replace a customer          |
+| PATCH  | `/api/customers/{id}` | Update a customer           |
+| DELETE | `/api/customers/{id}` | Delete a customer           |
 
 ### Customer Type Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/customer_types` | Get collection of customer types |
-| POST | `/api/customer_types` | Create a new customer type |
-| GET | `/api/customer_types/{id}` | Get a specific customer type |
-| PUT | `/api/customer_types/{id}` | Replace a customer type |
-| PATCH | `/api/customer_types/{id}` | Update a customer type |
-| DELETE | `/api/customer_types/{id}` | Delete a customer type |
+| Method | Endpoint                   | Description                      |
+| ------ | -------------------------- | -------------------------------- |
+| GET    | `/api/customer_types`      | Get collection of customer types |
+| POST   | `/api/customer_types`      | Create a new customer type       |
+| GET    | `/api/customer_types/{id}` | Get a specific customer type     |
+| PUT    | `/api/customer_types/{id}` | Replace a customer type          |
+| PATCH  | `/api/customer_types/{id}` | Update a customer type           |
+| DELETE | `/api/customer_types/{id}` | Delete a customer type           |
 
 ### Customer Status Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/customer_statuses` | Get collection of customer statuses |
-| POST | `/api/customer_statuses` | Create a new customer status |
-| GET | `/api/customer_statuses/{id}` | Get a specific customer status |
-| PUT | `/api/customer_statuses/{id}` | Replace a customer status |
-| PATCH | `/api/customer_statuses/{id}` | Update a customer status |
-| DELETE | `/api/customer_statuses/{id}` | Delete a customer status |
+| Method | Endpoint                      | Description                         |
+| ------ | ----------------------------- | ----------------------------------- |
+| GET    | `/api/customer_statuses`      | Get collection of customer statuses |
+| POST   | `/api/customer_statuses`      | Create a new customer status        |
+| GET    | `/api/customer_statuses/{id}` | Get a specific customer status      |
+| PUT    | `/api/customer_statuses/{id}` | Replace a customer status           |
+| PATCH  | `/api/customer_statuses/{id}` | Update a customer status            |
+| DELETE | `/api/customer_statuses/{id}` | Delete a customer status            |
 
 ### Health Check
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Check service health status |
+| Method | Endpoint      | Description                 |
+| ------ | ------------- | --------------------------- |
+| GET    | `/api/health` | Check service health status |
 
 ## Available GraphQL Operations
 
@@ -140,15 +140,17 @@ query {
 
 ```graphql
 mutation {
-  createCustomer(input: {
-    initials: "John Doe"
-    email: "john@example.com"
-    phone: "+1234567890"
-    leadSource: "Website"
-    customerType: "/api/customer_types/01HGXK..."
-    customerStatus: "/api/customer_statuses/01HGXK..."
-    confirmed: true
-  }) {
+  createCustomer(
+    input: {
+      initials: "John Doe"
+      email: "john@example.com"
+      phone: "+1234567890"
+      leadSource: "Website"
+      customerType: "/api/customer_types/01HGXK..."
+      customerStatus: "/api/customer_statuses/01HGXK..."
+      confirmed: true
+    }
+  ) {
     customer {
       id
       initials

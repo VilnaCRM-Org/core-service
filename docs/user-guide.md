@@ -40,15 +40,17 @@ curl -X POST \
 
 ```graphql
 mutation {
-  createCustomer(input: {
-    initials: "John Doe"
-    email: "john@example.com"
-    phone: "+1234567890"
-    leadSource: "Website"
-    customerType: "/api/customer_types/01HGXK..."
-    customerStatus: "/api/customer_statuses/01HGXK..."
-    confirmed: true
-  }) {
+  createCustomer(
+    input: {
+      initials: "John Doe"
+      email: "john@example.com"
+      phone: "+1234567890"
+      leadSource: "Website"
+      customerType: "/api/customer_types/01HGXK..."
+      customerStatus: "/api/customer_statuses/01HGXK..."
+      confirmed: true
+    }
+  ) {
     customer {
       id
       initials
@@ -138,10 +140,7 @@ curl -X PUT \
 
 ```graphql
 mutation {
-  updateCustomer(input: {
-    id: "/api/customers/01HGXK..."
-    phone: "+1987654321"
-  }) {
+  updateCustomer(input: { id: "/api/customers/01HGXK...", phone: "+1987654321" }) {
     customer {
       id
       phone
@@ -165,9 +164,7 @@ curl -X DELETE \
 
 ```graphql
 mutation {
-  deleteCustomer(input: {
-    id: "/api/customers/01HGXK..."
-  }) {
+  deleteCustomer(input: { id: "/api/customers/01HGXK..." }) {
     customer {
       id
     }

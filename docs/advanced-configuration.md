@@ -116,12 +116,14 @@ Testing of endpoints that return collection requires additional settings, such a
 The Core Service has load tests configured for the following endpoints:
 
 #### REST API
+
 - `health` - Health check endpoint
 - `createCustomer`, `getCustomer`, `getCustomers`, `updateCustomer`, `replaceCustomer`, `deleteCustomer`
 - `createCustomerType`, `getCustomerType`, `getCustomerTypes`, `updateCustomerType`, `deleteCustomerType`
 - `createCustomerStatus`, `getCustomerStatus`, `getCustomerStatuses`, `updateCustomerStatus`, `deleteCustomerStatus`
 
 #### GraphQL
+
 - `graphQLGetCustomer`, `graphQLGetCustomers`, `graphQLCreateCustomer`, `graphQLUpdateCustomer`, `graphQLDeleteCustomer`
 - `graphQLGetCustomerType`, `graphQLGetCustomerTypes`, `graphQLCreateCustomerType`, `graphQLUpdateCustomerType`, `graphQLDeleteCustomerType`
 - `graphQLGetCustomerStatus`, `graphQLGetCustomerStatuses`, `graphQLCreateCustomerStatus`, `graphQLUpdateCustomerStatus`, `graphQLDeleteCustomerStatus`

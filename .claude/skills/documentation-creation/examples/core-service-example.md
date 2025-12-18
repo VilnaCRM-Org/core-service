@@ -54,6 +54,7 @@ grep -i "mongo" docker-compose.yml
 ```
 
 **Findings**:
+
 - PHP 8.3 with PHP-FPM (NOT FrankenPHP)
 - Symfony 7.2
 - MongoDB 6.0
@@ -70,6 +71,7 @@ ls -la src/
 ```
 
 **Bounded Contexts**:
+
 - `Shared` - Cross-cutting concerns, kernel, infrastructure
 - `Core/Customer` - Main business domain (Customer, CustomerType, CustomerStatus)
 - `Internal/HealthCheck` - Internal health monitoring
@@ -112,19 +114,19 @@ Created 17 documentation files (excluded FrankenPHP docs):
 
 ### Entity Substitutions
 
-| User-Service | Core-Service |
-| ------------ | ------------ |
-| User | Customer |
-| N/A | CustomerType |
-| N/A | CustomerStatus |
+| User-Service | Core-Service   |
+| ------------ | -------------- |
+| User         | Customer       |
+| N/A          | CustomerType   |
+| N/A          | CustomerStatus |
 
 ### Technology Adaptations
 
-| Aspect | User-Service | Core-Service |
-| ------ | ------------ | ------------ |
-| Runtime | FrankenPHP | PHP-FPM + Caddy |
-| Database | PostgreSQL | MongoDB |
-| Main Entity | User | Customer |
+| Aspect      | User-Service | Core-Service    |
+| ----------- | ------------ | --------------- |
+| Runtime     | FrankenPHP   | PHP-FPM + Caddy |
+| Database    | PostgreSQL   | MongoDB         |
+| Main Entity | User         | Customer        |
 
 ### Removed Content
 
