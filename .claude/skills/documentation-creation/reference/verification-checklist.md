@@ -65,16 +65,16 @@ grep -i "DB_\|DATABASE_" .env.example
 ### Runtime Environment
 
 ```bash
-# Check Dockerfile for PHP-FPM vs FrankenPHP
-grep -i "fpm\|frankenphp" Dockerfile
+# Check Dockerfile for PHP runtime
+grep -i "fpm" Dockerfile
 
-# Check for Caddy/Nginx/Apache
+# Check for web server
 grep -i "caddy\|nginx\|apache" Dockerfile docker-compose.yml
 ```
 
-- [ ] Runtime correctly documented (PHP-FPM vs FrankenPHP)
+- [ ] Runtime correctly documented (e.g., PHP-FPM)
 - [ ] Web server correctly identified
-- [ ] No documentation for unused runtime
+- [ ] No documentation for unused technologies
 
 ---
 

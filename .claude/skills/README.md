@@ -150,9 +150,8 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 **When activated**:
 
 - Setting up INITIAL documentation for a new project
-- Creating docs following another VilnaCRM project's structure
+- Creating docs following VilnaCRM project structure
 - Building a complete documentation suite from scratch
-- Adapting documentation from a reference repository (e.g., user-service → core-service)
 
 **Note**: For updating EXISTING documentation when code changes, use `documentation-sync` instead.
 
@@ -162,7 +161,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - Adapts content to match target project specifics
 - Verifies all references against actual codebase
 - Ensures consistent style and cross-linking
-- Removes inapplicable content (e.g., FrankenPHP docs when using PHP-FPM)
+- Removes inapplicable content for unused technologies
 - Validates VilnaCRM-specific standards (100% coverage, PHPInsights thresholds)
 
 **Key verification steps**:
@@ -511,6 +510,78 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 **Integration**: Works alongside database-migrations (index syntax), load-testing (regression tests), and observability-instrumentation (performance metrics)
 
 **Complements**: Use with database-migrations for index creation XML syntax
+
+---
+
+### 16. Code Organization (`code-organization/`)
+
+**Purpose**: Ensure proper code organization with class names, directories, namespaces, and naming consistency
+
+**When activated**:
+
+- Creating new classes
+- Refactoring existing code
+- Moving classes between directories
+- Code review feedback about organization
+- Renaming classes or methods
+
+**What it does**:
+
+- Enforces the principle "Directory X contains ONLY class type X"
+- Guides proper class placement (Converter/, Transformer/, Validator/, etc.)
+- Ensures namespace matches directory structure
+- Provides refactoring workflow for misplaced classes
+- Documents variable and parameter naming conventions
+
+**Key principle**: Directory X should contain ONLY class type X (e.g., `Converter/` contains only converters)
+
+**Key commands**: `make phpcsfixer`, `make psalm`, `make unit-tests`
+
+**Structure**: Multi-file with guides:
+
+- `SKILL.md` (Core principle and quick reference)
+- `php-best-practices.md` (Complete PHP best practices)
+- `examples/refactoring-examples.md` (Before/after examples)
+- `reference/directory-structure.md` (Layer-by-layer breakdown)
+- `reference/common-patterns.md` (Pattern catalog)
+
+---
+
+### 17. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
+
+**Purpose**: Maintain Structurizr C4 architecture diagrams in sync with code changes
+
+**When activated**:
+
+- Adding new components (controllers, handlers, services, repositories)
+- Creating new entities or aggregates
+- Modifying component relationships or dependencies
+- Implementing new architectural patterns (CQRS, events)
+- Adding infrastructure components
+- After fixing Deptrac violations
+- Creating new bounded contexts
+
+**What it does**:
+
+- Keeps `workspace.dsl` synchronized with codebase changes
+- Ensures C4 model diagrams accurately represent current architecture
+- Guides component identification (what to document vs. skip)
+- Provides DSL syntax reference and relationship patterns
+- Aligns with Deptrac layer configuration
+
+**Key files**: `workspace.dsl`, `workspace.json`
+
+**Access**: `http://localhost:${STRUCTURIZR_PORT:-8080}`
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and 5-step quick start)
+- `reference/c4-model-guide.md` (C4 fundamentals)
+- `reference/dsl-syntax.md` (Complete DSL syntax)
+- `reference/component-identification.md` (What to document)
+- `reference/relationship-patterns.md` (Common patterns)
+- `reference/workspace-template.md` (Full template)
+- `examples/` (CQRS, API endpoint, domain entity examples)
 
 ---
 

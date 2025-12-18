@@ -2,6 +2,16 @@
 
 Welcome to the developer guide for the Core Service. This guide aims to provide you with all the necessary information to get started with development, including an overview of the code structure.
 
+## Table of Contents
+
+- [Code Structure](#code-structure)
+  - [Shared](#shared)
+  - [Core/Customer](#corecustomer)
+  - [Internal/HealthCheck](#internalhealthcheck)
+- [Deptrac](#deptrac)
+
+---
+
 ## Code Structure
 
 The Core Service repository is structured to support a modern PHP microservice architecture, utilizing Hexagonal Architecture and DDD principles.

@@ -123,8 +123,8 @@ For each documentation file:
 2. **Update technology references**:
 
    - Framework versions
-   - Database type (PostgreSQL vs MongoDB)
-   - Runtime environment (FrankenPHP vs PHP-FPM)
+   - Database type (e.g., MongoDB, PostgreSQL)
+   - Runtime environment (e.g., PHP-FPM)
    - Container orchestration
 
 3. **Verify directory paths**:
@@ -139,7 +139,7 @@ For each documentation file:
 
    ```bash
    # Check Makefile for available commands
-   grep -E "^[a-zA-Z].*:" Makefile | head -30
+   grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile | head -30
    ```
 
 ### Step 5: Verify Accuracy
@@ -252,7 +252,7 @@ After creating documentation:
 - [ ] PHP version matches Dockerfile
 - [ ] Framework version matches composer.json
 - [ ] Database type matches docker-compose.yml
-- [ ] Runtime environment correctly described (FPM vs FrankenPHP)
+- [ ] Runtime environment correctly described (e.g., PHP-FPM)
 - [ ] No false claims about unused technologies
 
 ### Structure Accuracy
@@ -286,14 +286,14 @@ After creating documentation:
 
 ### Technology Mismatch
 
-**Problem**: Documenting FrankenPHP when project uses PHP-FPM
+**Problem**: Documenting technologies the project doesn't use
 
 **Solution**:
 
 ```bash
 # Check actual runtime
-grep -i "fpm\|frankenphp" Dockerfile
-# Remove documentation for unused technology
+grep -i "fpm" Dockerfile
+# Only document technologies actually used by the project
 ```
 
 ### Missing Directories
@@ -392,10 +392,10 @@ find src -name "*Entity.php"
 find src -name "*Command.php"
 
 # Check make commands
-grep -E "^[a-zA-Z].*:" Makefile
+grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile
 
 # Verify runtime
-grep -i "fpm\|frankenphp" Dockerfile
+grep -i "fpm" Dockerfile
 
 # Check database
 grep -i "mongo\|postgres" docker-compose.yml

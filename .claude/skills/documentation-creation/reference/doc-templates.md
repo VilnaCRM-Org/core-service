@@ -2,9 +2,15 @@
 
 This reference provides templates for each documentation file type. Adapt these templates to match your project specifics.
 
+> **Note**: Templates below show the raw markdown source. Copy and adapt for your project.
+
 ## main.md - Project Overview
 
-```markdown
+~~~markdown
+# {Project Name}
+
+## What Is {Project Name}?
+
 Welcome to the **{Project Name}** GitHub page, which provides a comprehensive overview of our {domain} microservice. This documentation covers installation, architecture, API reference, and best practices for developers working with the service.
 
 ## Design Principles
@@ -33,17 +39,17 @@ Our approach to building {Project Name} is guided by these core principles:
 
 ## Quick Links
 
-- `getting-started.md`
-- `design-and-architecture.md`
-- `api-endpoints.md`
-- `developer-guide.md`
-```
+- [Getting Started](getting-started.md)
+- [Design and Architecture](design-and-architecture.md)
+- [API Endpoints](api-endpoints.md)
+- [Developer Guide](developer-guide.md)
+~~~
 
 ---
 
 ## getting-started.md - Installation Guide
 
-```markdown
+~~~markdown
 # Getting Started
 
 ## Prerequisites
@@ -59,52 +65,47 @@ Before you begin, ensure you have the following installed:
 
 ### 1. Clone the Repository
 
-\`\`\`bash
+```bash
 git clone https://github.com/{org}/{repo}.git
 cd {repo}
-\`\`\`
+```
 
 ### 2. Configure Environment
 
-\`\`\`bash
+```bash
 cp .env.example .env
-
 # Edit .env with your settings
-
-\`\`\`
+```
 
 ### 3. Build and Start Services
 
-\`\`\`bash
+```bash
 make build
 make up
-\`\`\`
+```
 
 ### 4. Verify Installation
 
-\`\`\`bash
-
+```bash
 # Check service health
-
 curl https://localhost/api/health
 
 # Run tests
-
 make unit-tests
-\`\`\`
+```
 
 ## Next Steps
 
-- Read the `design-and-architecture.md` guide
-- Explore the `api-endpoints.md`
-- Check the `developer-guide.md`
-```
+- Read the [Design and Architecture](design-and-architecture.md) guide
+- Explore the [API Endpoints](api-endpoints.md)
+- Check the [Developer Guide](developer-guide.md)
+~~~
 
 ---
 
 ## design-and-architecture.md - Architecture Documentation
 
-```markdown
+~~~markdown
 # Design and Architecture
 
 ## Architectural Style
@@ -136,58 +137,58 @@ Key DDD concepts implemented:
 
 ## Bounded Contexts
 
-\`\`\`
+```
 src/
-├── Shared/ # Cross-cutting concerns
-│ ├── Application/
-│ ├── Domain/
-│ └── Infrastructure/
-├── Core/ # Core business domain
-│ └── {Entity}/
-│ ├── Application/
-│ ├── Domain/
-│ └── Infrastructure/
-└── Internal/ # Internal services
-└── HealthCheck/
-\`\`\`
+├── Shared/              # Cross-cutting concerns
+│   ├── Application/
+│   ├── Domain/
+│   └── Infrastructure/
+├── Core/                # Core business domain
+│   └── {Entity}/
+│       ├── Application/
+│       ├── Domain/
+│       └── Infrastructure/
+└── Internal/            # Internal services
+    └── HealthCheck/
+```
 
 ## Layer Dependencies
 
-\`\`\`
-Domain ← Application ← Infrastructure
-↑ ↑ ↑
-└──────────┴──────────────┘
-No reverse dependencies
-\`\`\`
 ```
+Domain ← Application ← Infrastructure
+  ↑           ↑              ↑
+  └───────────┴──────────────┘
+       No reverse dependencies
+```
+~~~
 
 ---
 
 ## developer-guide.md - Development Workflow
 
-```markdown
+~~~markdown
 # Developer Guide
 
 ## Code Structure
 
 ### Directory Layout
 
-\`\`\`
+```
 src/
 ├── {Context}/
-│ ├── Application/
-│ │ ├── Command/ # Write commands
-│ │ ├── CommandHandler/ # Command handlers
-│ │ ├── DTO/ # Data Transfer Objects
-│ │ ├── Processor/ # API processors
-│ │ └── Transformer/ # DTO transformers
-│ ├── Domain/
-│ │ ├── Entity/ # Domain entities
-│ │ ├── Repository/ # Repository interfaces
-│ │ └── ValueObject/ # Value objects
-│ └── Infrastructure/
-│ └── Repository/ # Repository implementations
-\`\`\`
+│   ├── Application/
+│   │   ├── Command/         # Write commands
+│   │   ├── CommandHandler/  # Command handlers
+│   │   ├── DTO/             # Data Transfer Objects
+│   │   ├── Processor/       # API processors
+│   │   └── Transformer/     # DTO transformers
+│   ├── Domain/
+│   │   ├── Entity/          # Domain entities
+│   │   ├── Repository/      # Repository interfaces
+│   │   └── ValueObject/     # Value objects
+│   └── Infrastructure/
+│       └── Repository/      # Repository implementations
+```
 
 ## Development Commands
 
@@ -205,27 +206,27 @@ src/
 
 ### Linting
 
-\`\`\`bash
-make phpcsfixer # Fix code style
-make psalm # Static analysis
-make deptrac # Architecture checks
-\`\`\`
+```bash
+make phpcsfixer  # Fix code style
+make psalm       # Static analysis
+make deptrac     # Architecture checks
+```
 
 ### Testing
 
-\`\`\`bash
-make unit-tests # Fast unit tests
-make integration-tests # Integration tests
-make behat # End-to-end tests (Behat)
-make infection # Mutation testing
-\`\`\`
+```bash
+make unit-tests         # Fast unit tests
+make integration-tests  # Integration tests
+make behat              # End-to-end tests (Behat)
+make infection          # Mutation testing
 ```
+~~~
 
 ---
 
 ## api-endpoints.md - API Documentation
 
-```markdown
+~~~markdown
 # API Endpoints
 
 ## REST API
@@ -243,69 +244,67 @@ make infection # Mutation testing
 
 ### Example Request
 
-\`\`\`bash
-
+```bash
 # Create {entity}
-
-curl -X POST https://localhost/api/{entities} \\
--H "Content-Type: application/json" \\
--d '{"name": "Example", "description": "Test"}'
-\`\`\`
+curl -X POST https://localhost/api/{entities} \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Example", "description": "Test"}'
+```
 
 ### Example Response
 
-\`\`\`json
+```json
 {
-"@context": "/api/contexts/{Entity}",
-"@id": "/api/{entities}/123",
-"@type": "{Entity}",
-"name": "Example",
-"description": "Test"
+  "@context": "/api/contexts/{Entity}",
+  "@id": "/api/{entities}/123",
+  "@type": "{Entity}",
+  "name": "Example",
+  "description": "Test"
 }
-\`\`\`
+```
 
 ## GraphQL API
 
 ### Endpoint
 
-\`\`\`
+```
 POST /api/graphql
-\`\`\`
+```
 
 ### Query Example
 
-\`\`\`graphql
+```graphql
 query {
-{entity}(id: "/api/{entities}/123") {
-id
-name
-description
+  {entity}(id: "/api/{entities}/123") {
+    id
+    name
+    description
+  }
 }
-}
-\`\`\`
+```
 
 ### Mutation Example
 
-\`\`\`graphql
+```graphql
 mutation {
-create{Entity}(input: {
-name: "Example"
-description: "Test"
-}) {
-{entity} {
-id
-name
+  create{Entity}(input: {
+    name: "Example"
+    description: "Test"
+  }) {
+    {entity} {
+      id
+      name
+    }
+  }
 }
-}
-}
-\`\`\`
 ```
+~~~
 
 ---
 
 ## testing.md - Testing Documentation
 
-```markdown
+~~~markdown
 # Testing
 
 ## Test Types
@@ -314,9 +313,9 @@ name
 
 Fast, isolated tests for individual components.
 
-\`\`\`bash
+```bash
 make unit-tests
-\`\`\`
+```
 
 Location: `tests/Unit/`
 
@@ -324,9 +323,9 @@ Location: `tests/Unit/`
 
 Tests that verify component integration.
 
-\`\`\`bash
+```bash
 make integration-tests
-\`\`\`
+```
 
 Location: `tests/Integration/`
 
@@ -334,9 +333,9 @@ Location: `tests/Integration/`
 
 Full API endpoint testing with Behat.
 
-\`\`\`bash
+```bash
 make behat
-\`\`\`
+```
 
 Location: `tests/Behat/`
 
@@ -344,19 +343,19 @@ Location: `tests/Behat/`
 
 Verify test quality with Infection.
 
-\`\`\`bash
+```bash
 make infection
-\`\`\`
+```
 
 ### Load Tests
 
 Performance testing with K6.
 
-\`\`\`bash
+```bash
 make load-tests
 make smoke-load-tests
 make stress-load-tests
-\`\`\`
+```
 
 Location: `tests/Load/`
 
@@ -366,7 +365,7 @@ Location: `tests/Load/`
 | -------------- | ------- |
 | Line Coverage  | 100%    |
 | Mutation Score | 100%    |
-```
+~~~
 
 ---
 
@@ -374,8 +373,8 @@ Location: `tests/Load/`
 
 For additional documentation types (security.md, performance.md, onboarding.md, etc.), follow the same pattern:
 
-1. Clear heading structure
-2. Code examples where applicable
+1. Clear heading structure with H1 for title, H2 for major sections
+2. Code examples with appropriate language tags
 3. Tables for structured data
-4. Cross-references to related docs
-5. Practical commands and examples
+4. Cross-references to related docs using relative links
+5. Practical commands users can copy and run

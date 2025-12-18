@@ -2,6 +2,22 @@
 
 Welcome to the User Guide for Core Service. This guide aims to provide you with all the necessary information to use our service and its features.
 
+## Table of Contents
+
+- [Localization](#localization)
+- [API Overview](#api-overview)
+- [Working with Customers](#working-with-customers)
+  - [Creating a Customer](#creating-a-customer)
+  - [Retrieving Customers](#retrieving-customers)
+  - [Updating a Customer](#updating-a-customer)
+  - [Deleting a Customer](#deleting-a-customer)
+- [Working with Customer Types](#working-with-customer-types)
+- [Working with Customer Statuses](#working-with-customer-statuses)
+- [Health Check](#health-check)
+- [Interactive Documentation](#interactive-documentation)
+
+---
+
 ## Localization
 
 We support multiple languages. The default language is English, but you can easily change it by passing the `Accept-Language` header with your preferred language code. This will adjust the language of the messages and errors you receive from the Core Service.

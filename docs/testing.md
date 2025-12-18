@@ -2,6 +2,17 @@
 
 This document provides an overview of the testing strategies employed in the Core Service. Our comprehensive testing approach ensures high-quality software delivery, encompassing unit tests, integration tests, end-to-end (E2E) tests, mutation tests, load tests, and more.
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Unit Testing](#unit-testing)
+- [Integration Testing](#integration-testing)
+- [Mutation Testing](#mutation-testing)
+- [Load Testing](#load-testing)
+- [End-to-End (E2E) Testing](#end-to-end-e2e-testing)
+
+---
+
 ## Prerequisites
 
 Before executing tests, run `make setup-test-db`. This command will create a separate database for testing purposes.
