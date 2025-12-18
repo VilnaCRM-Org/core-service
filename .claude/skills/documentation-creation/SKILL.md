@@ -351,7 +351,7 @@ grep -E "^[a-zA-Z][a-zA-Z0-9_-]*:" Makefile
 
 ### Expected Documentation Structure
 
-```
+```text
 docs/
 ├── main.md                    # Project overview
 ├── getting-started.md         # Installation guide
