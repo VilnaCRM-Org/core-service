@@ -129,224 +129,308 @@ The most important metrics for each test, which you'll find in tables include:
 
 ### Update Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 28ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 4          | 4.1      | 2            | -    | 10s     | -    | 127ms |
+| average   | 12         | 9.9      | 10           | 2s   | 8s      | 2s   | 54ms  |
+| stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 61ms  |
+| spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 442ms |
 
 [Go back to navigation](#REST-API)
 
 ### Replace Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 30ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 4          | 4.1      | 2            | -    | 10s     | -    | 86ms  |
+| average   | 12         | 9.9      | 10           | 2s   | 8s      | 2s   | 77ms  |
+| stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 92ms  |
+| spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 123ms |
 
 [Go back to navigation](#REST-API)
 
 ### Delete Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 47       | 400           | 10s           | 10s           | 23ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 112ms |
+| average   | 8          | 6.6      | 6            | 2s   | 8s      | 2s   | 49ms  |
+| stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 65ms  |
+| spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 38ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 21ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.0      | 3            | -    | 10s     | -    | 43ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 34ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 76ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 81ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Type Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 10                                | 29ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Types retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | --------------------------------- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 10                                | 88ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 10                                | 42ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                | 95ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                | 38ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Create Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 52ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.0      | 2            | -    | 10s     | -    | 38ms  |
+| average   | 8          | 6.4      | 8            | 2s   | 6s      | 2s   | 37ms  |
+| stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 101ms |
+| spike     | 50         | 25.0     | 50           | 2s   | -       | 2s   | 37ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Update Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 31ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.0      | 3            | -    | 10s     | -    | 64ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 36ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 83ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 38ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Delete Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 40ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 27ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 40ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 62ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 21ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 53ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 27ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 56ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 26ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Status Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 10                                   | 24ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Statuses retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ------------------------------------ | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 10                                   | 43ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 10                                   | 42ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                   | 114ms |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                   | 77ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Create Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 30ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 42ms  |
+| average   | 8          | 6.4      | 8            | 2s   | 6s      | 2s   | 42ms  |
+| stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 42ms  |
+| spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 34ms  |
 
 [Go back to navigation](#REST-API)
 
 ### Update Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 32ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 39ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 50ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 107ms |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 233ms |
 
 [Go back to navigation](#REST-API)
 
 ### Delete Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 44ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 32ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 49ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 34ms  |
 
 [Go back to navigation](#REST-API)
 
 ### GraphQL Get Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 27ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 10         | 10.1     | 5            | -    | 10s     | -    | 92ms  |
+| average   | 25         | 20.8     | 20           | 2s   | 8s      | 2s   | 47ms  |
+| stress    | 75         | 60.9     | 60           | 3s   | 10s     | 3s   | 349ms |
+| spike     | 150        | 74.8     | 120          | 3s   | -       | 3s   | 589ms |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Get Customer Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 10                                    | 29ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Customers retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ------------------------------------- | ----- |
+| smoke     | 8          | 8.1      | 4            | -    | 10s     | -    | 10                                    | 95ms  |
+| average   | 20         | 16.6     | 15           | 2s   | 8s      | 2s   | 10                                    | 198ms |
+| stress    | 60         | 45.6     | 45           | 3s   | 10s     | 3s   | 10                                    | 908ms |
+| spike     | 120        | 46.5     | 90           | 3s   | -       | 3s   | 10                                    | 2.07s |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Create Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 24       | 200           | 10s           | 10s           | 40ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.0      | 3            | -    | 10s     | -    | 101ms |
+| average   | 15         | 12.4     | 15           | 2s   | 8s      | 2s   | 60ms  |
+| stress    | 50         | 40.6     | 50           | 3s   | 10s     | 3s   | 82ms  |
+| spike     | 100        | 49.8     | 100          | 3s   | -       | 3s   | 223ms |
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Update Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 39ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 4          | 4.0      | 2            | -    | 10s     | -    | 51ms  |
+| average   | 12         | 10.0     | 10           | 2s   | 8s      | 2s   | 48ms  |
+| stress    | 40         | 32.5     | 30           | 3s   | 10s     | 3s   | 48ms  |
+| spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 97ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Delete Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 47       | 400           | 10s           | 10s           | 26ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 67ms  |
+| average   | 8          | 6.7      | 6            | 2s   | 8s      | 2s   | 41ms  |
+| stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 73ms  |
+| spike     | 50         | 25.0     | 40           | 3s   | -       | 3s   | 72ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Get Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 28ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.0      | 3            | -    | 10s     | -    | 51ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 38ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 34ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 39ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Get Customer Type Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 10                                | 31ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Types retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | --------------------------------- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 10                                | 70ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 10                                | 63ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                | 89ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                | 109ms |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Create Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 35ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 51ms  |
+| average   | 8          | 6.4      | 8            | 2s   | 6s      | 2s   | 48ms  |
+| stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 39ms  |
+| spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 49ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Update Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 35ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 4          | 4.1      | 2            | -    | 10s     | -    | 42ms  |
+| average   | 12         | 10.0     | 10           | 2s   | 8s      | 2s   | 47ms  |
+| stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 63ms  |
+| spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 151ms |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Delete Customer Type Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 40ms  |
+| average   | 8          | 6.6      | 6            | 2s   | 8s      | 2s   | 43ms  |
+| stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 39ms  |
+| spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 44ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Get Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 28ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 45ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 41ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 74ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 37ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Get Customer Status Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 10                                   | 30ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Statuses retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ------------------------------------ | ----- |
+| smoke     | 5          | 5.0      | 3            | -    | 10s     | -    | 10                                   | 61ms  |
+| average   | 15         | 11.9     | 12           | 2s   | 6s      | 2s   | 10                                   | 56ms  |
+| stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                   | 99ms  |
+| spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                   | 122ms |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Create Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 32ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.0      | 2            | -    | 10s     | -    | 42ms  |
+| average   | 8          | 6.3      | 8            | 2s   | 6s      | 2s   | 42ms  |
+| stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 52ms  |
+| spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 55ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Update Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 39ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 4          | 4.1      | 2            | -    | 10s     | -    | 52ms  |
+| average   | 12         | 10.0     | 10           | 2s   | 8s      | 2s   | 41ms  |
+| stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 54ms  |
+| spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 45ms  |
 
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Delete Customer Status Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 3          | 3.1      | 2            | -    | 10s     | -    | 43ms  |
+| average   | 8          | 6.7      | 6            | 2s   | 8s      | 2s   | 45ms  |
+| stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 54ms  |
+| spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 45ms  |
 
 [Go back to navigation](#GraphQL)
 
