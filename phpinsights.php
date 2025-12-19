@@ -31,6 +31,13 @@ return [
     ],
 
     'config' => [
+        SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff::class => [
+            'exclude' => [
+                // Doctrine ODM requires mixed $id in find() method signature
+                'src/Core/Customer/Domain/Repository/CustomerRepositoryInterface',
+                'src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository',
+            ],
+        ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',

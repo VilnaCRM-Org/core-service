@@ -512,7 +512,55 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 16. Code Organization (`code-organization/`)
+### 16. Cache Management (`cache-management/`)
+
+**Purpose**: Implement production-grade caching with cache keys/TTLs/consistency classes, SWR (stale-while-revalidate), explicit invalidation, and comprehensive testing
+
+**When activated**:
+
+- Adding caching to expensive queries or API endpoints
+- Implementing cache invalidation strategies
+- Defining cache keys, TTLs, and consistency requirements
+- Testing cache behavior (stale reads, cold start warmup)
+- Optimizing read-heavy operations
+- Reducing database load with caching
+- Debugging cache-related issues (stale data, cache misses)
+
+**What it does**:
+
+- Guides cache policy declaration (key pattern, TTL, consistency class)
+- Implements read-through caching with Symfony Cache
+- Provides explicit invalidation strategies (write-through, tag-based, event-driven)
+- Implements stale-while-revalidate (SWR) pattern for high-traffic queries
+- Creates comprehensive test suite (stale reads, cold start, TTL expiration)
+- Ensures cache observability with logging and metrics
+
+**Key features**:
+
+- Declare cache policies (keys, TTLs, consistency classes)
+- Read-through caching with SWR support
+- Tag-based batch invalidation
+- Explicit invalidation on writes (create, update, delete)
+- Cache warmup for cold start scenarios
+- Test patterns for all cache behaviors
+- Integration with hexagonal architecture layers
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and cache management patterns)
+- `examples/cache-implementation.md` (Complete repository with caching)
+- `examples/cache-testing.md` (Full test suite for cache behavior)
+- `reference/cache-policies.md` (TTL selection, consistency classes, policy matrix)
+- `reference/invalidation-strategies.md` (Write-through, tag-based, event-driven patterns)
+- `reference/swr-pattern.md` (Complete SWR implementation guide)
+
+**Integration**: Works alongside query-performance-analysis (identify queries to cache), observability-instrumentation (cache metrics), testing-workflow (cache testing), and implementing-ddd-architecture (cache placement)
+
+**Key commands**: `php bin/console cache:customer warm`, `php bin/console cache:customer invalidate`
+
+---
+
+### 17. Code Organization (`code-organization/`)
 
 **Purpose**: Ensure proper code organization with class names, directories, namespaces, and naming consistency
 
@@ -546,7 +594,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 17. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
+### 18. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
 
 **Purpose**: Maintain Structurizr C4 architecture diagrams in sync with code changes
 
