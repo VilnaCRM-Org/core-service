@@ -5,7 +5,7 @@ export $(grep -v '^#' .env | xargs)
 
 DEFAULT_REGION="us-east-1"
 DEFAULT_AMI_ID="ami-0e86e20dae9224db8"
-DEFAULT_INSTANCE_TYPE="c7i-flex.large"
+DEFAULT_INSTANCE_TYPE="t2.micro"
 DEFAULT_INSTANCE_TAG="LoadTestInstance"
 DEFAULT_ROLE_NAME="EC2S3WriteAccessRole"
 DEFAULT_BRANCH_NAME="main"

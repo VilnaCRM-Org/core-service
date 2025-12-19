@@ -104,9 +104,6 @@ until $AWS_CLI iam get-instance-profile --instance-profile-name "$ROLE_NAME" --r
   sleep 5
 done
 
-echo "Waiting for IAM changes to propagate (30 seconds)..."
-sleep 30
-
 echo "Checking IAM role permissions..."
 if ! $AWS_CLI sts get-caller-identity --query "Account" --output text --region "$REGION"; then
   echo "Error: Unable to validate IAM role permissions."
