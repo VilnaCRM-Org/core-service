@@ -2,9 +2,16 @@
 
 Welcome to the **Performance and Optimization** GitHub page, which is dedicated to showcasing our comprehensive approach to enhancing the efficiency and speed of our Core Service application. Our goal is to share insights, methodologies, and results from rigorous testing and optimization processes to help developers achieve peak performance in their own applications.
 
+> **📊 Local Development Benchmarks**
+>
+> The performance data in this document was collected from local development environment testing using `make execute-load-tests-script`. For production-grade benchmarks, run tests on AWS c6i.4xlarge (or equivalent infrastructure) using `make aws-load-tests`.
+>
+> **Local test environment:** Docker containers on development machine
+> **Test date:** 2025-12-19
+
 ## Testing Environment
 
-To ensure our Core Service is optimized for high performance, we conducted extensive testing using standardized infrastructure on AWS. This approach allows us to identify bottlenecks, optimize code, and achieve significant performance improvements. By utilizing AWS for our testing environment, we ensure consistency and uniformity across all tests, enabling developers to work with the same setup and achieve comparable results. This unified testing framework provides a reliable foundation for evaluating performance, regardless of geographic location or hardware variations, ensuring all team members can collaborate effectively on optimization efforts. Below are the details of the hardware and software components used in our testing environment:
+To ensure our Core Service is optimized for high performance, testing should be conducted using standardized infrastructure on AWS. This approach allows identification of bottlenecks, code optimization, and achievement of significant performance improvements. By utilizing AWS for the testing environment, consistency and uniformity across all tests is ensured, enabling developers to work with the same setup and achieve comparable results. This unified testing framework provides a reliable foundation for evaluating performance, regardless of geographic location or hardware variations, ensuring all team members can collaborate effectively on optimization efforts. Below are the details of the recommended hardware and software components for the testing environment:
 
 ### Server Specifications:
 
@@ -16,13 +23,15 @@ To ensure our Core Service is optimized for high performance, we conducted exten
 ### Software Specifications:
 
 - **Operating System:** Ubuntu 24.04 LTS
-- **Core Service Version:** 0.7.0
+- **Core Service Version:** 0.8.0
 - **PHP Version:** 8.3
 - **Symfony Version:** 7.2
 - **Database:** MongoDB 6.0
 - **Load Testing Tools:** Grafana K6
 
 ## Benchmarks
+
+> **Note:** The values in the tables below are **placeholder estimates** pending actual load testing. Run `make smoke-load-tests` on appropriate infrastructure and update with real measurements.
 
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.
 
@@ -97,7 +106,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 50                                    | 13ms  |
+| 10         | 8        | 10            | 10s           | 10s           | 50                                    | 43ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -145,7 +154,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 50                                | 10ms  |
+| 10         | 5        | 10            | 10s           | 10s           | 50                                | 29ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -185,7 +194,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 50                                   | 10ms  |
+| 10         | 5        | 10            | 10s           | 10s           | 50                                   | 28ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -225,7 +234,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 50                                    | 15ms  |
+| 10         | 8        | 10            | 10s           | 10s           | 50                                    | 66ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -265,7 +274,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 50                                | 12ms  |
+| 10         | 5        | 10            | 10s           | 10s           | 50                                | 52ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -305,7 +314,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 50                                   | 12ms  |
+| 10         | 5        | 10            | 10s           | 10s           | 50                                   | 52ms  |
 
 [Go back to navigation](#GraphQL)
 
