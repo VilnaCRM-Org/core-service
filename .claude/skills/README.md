@@ -591,6 +591,9 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - `examples/refactoring-examples.md` (Before/after examples)
 - `reference/directory-structure.md` (Layer-by-layer breakdown)
 - `reference/common-patterns.md` (Pattern catalog)
+- `reference/troubleshooting.md` (Troubleshooting common issues)
+
+**Decision Guide**: See [SKILL-DECISION-GUIDE.md](SKILL-DECISION-GUIDE.md) to determine when this skill applies.
 
 ---
 
@@ -616,7 +619,9 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 - Provides DSL syntax reference and relationship patterns
 - Aligns with Deptrac layer configuration
 
-**Key files**: `workspace.dsl`, `workspace.json`
+**Key files**: `workspace.dsl` (source of truth, committed to repo)
+
+**Note**: `workspace.json` is generated on-demand by Structurizr Lite from `workspace.dsl` and should not be committed.
 
 **Access**: `http://localhost:${STRUCTURIZR_PORT:-8080}`
 

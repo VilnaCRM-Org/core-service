@@ -47,41 +47,41 @@ The most important metrics for each test, which you'll find in tables include:
 
 ### REST API
 
-- [Health](#Health-Test)
-- [Get Customer](#Get-Customer-Test)
-- [Get Customer Collection](#Get-Customer-Collection-Test)
-- [Create Customer](#Create-Customer-Test)
-- [Update Customer](#Update-Customer-Test)
-- [Replace Customer](#Replace-Customer-Test)
-- [Delete Customer](#Delete-Customer-Test)
-- [Get Customer Type](#Get-Customer-Type-Test)
-- [Get Customer Type Collection](#Get-Customer-Type-Collection-Test)
-- [Create Customer Type](#Create-Customer-Type-Test)
-- [Update Customer Type](#Update-Customer-Type-Test)
-- [Delete Customer Type](#Delete-Customer-Type-Test)
-- [Get Customer Status](#Get-Customer-Status-Test)
-- [Get Customer Status Collection](#Get-Customer-Status-Collection-Test)
-- [Create Customer Status](#Create-Customer-Status-Test)
-- [Update Customer Status](#Update-Customer-Status-Test)
-- [Delete Customer Status](#Delete-Customer-Status-Test)
+- [Health](#health-test)
+- [Get Customer](#get-customer-test)
+- [Get Customer Collection](#get-customer-collection-test)
+- [Create Customer](#create-customer-test)
+- [Update Customer](#update-customer-test)
+- [Replace Customer](#replace-customer-test)
+- [Delete Customer](#delete-customer-test)
+- [Get Customer Type](#get-customer-type-test)
+- [Get Customer Type Collection](#get-customer-type-collection-test)
+- [Create Customer Type](#create-customer-type-test)
+- [Update Customer Type](#update-customer-type-test)
+- [Delete Customer Type](#delete-customer-type-test)
+- [Get Customer Status](#get-customer-status-test)
+- [Get Customer Status Collection](#get-customer-status-collection-test)
+- [Create Customer Status](#create-customer-status-test)
+- [Update Customer Status](#update-customer-status-test)
+- [Delete Customer Status](#delete-customer-status-test)
 
 ### GraphQL
 
-- [Get Customer](#GraphQL-Get-Customer-Test)
-- [Get Customer Collection](#GraphQL-Get-Customer-Collection-Test)
-- [Create Customer](#GraphQL-Create-Customer-Test)
-- [Update Customer](#GraphQL-Update-Customer-Test)
-- [Delete Customer](#GraphQL-Delete-Customer-Test)
-- [Get Customer Type](#GraphQL-Get-Customer-Type-Test)
-- [Get Customer Type Collection](#GraphQL-Get-Customer-Type-Collection-Test)
-- [Create Customer Type](#GraphQL-Create-Customer-Type-Test)
-- [Update Customer Type](#GraphQL-Update-Customer-Type-Test)
-- [Delete Customer Type](#GraphQL-Delete-Customer-Type-Test)
-- [Get Customer Status](#GraphQL-Get-Customer-Status-Test)
-- [Get Customer Status Collection](#GraphQL-Get-Customer-Status-Collection-Test)
-- [Create Customer Status](#GraphQL-Create-Customer-Status-Test)
-- [Update Customer Status](#GraphQL-Update-Customer-Status-Test)
-- [Delete Customer Status](#GraphQL-Delete-Customer-Status-Test)
+- [Get Customer](#graphql-get-customer-test)
+- [Get Customer Collection](#graphql-get-customer-collection-test)
+- [Create Customer](#graphql-create-customer-test)
+- [Update Customer](#graphql-update-customer-test)
+- [Delete Customer](#graphql-delete-customer-test)
+- [Get Customer Type](#graphql-get-customer-type-test)
+- [Get Customer Type Collection](#graphql-get-customer-type-collection-test)
+- [Create Customer Type](#graphql-create-customer-type-test)
+- [Update Customer Type](#graphql-update-customer-type-test)
+- [Delete Customer Type](#graphql-delete-customer-type-test)
+- [Get Customer Status](#graphql-get-customer-status-test)
+- [Get Customer Status Collection](#graphql-get-customer-status-collection-test)
+- [Create Customer Status](#graphql-create-customer-status-test)
+- [Update Customer Status](#graphql-update-customer-status-test)
+- [Delete Customer Status](#graphql-delete-customer-status-test)
 
 ### Health Test
 
@@ -94,7 +94,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 > Real RPS is calculated as `request_count / scenario_stage_duration` based on `all-health.summary.json` (to avoid diluting results by the configured delay between scenarios).
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Test
 
@@ -105,7 +105,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 75         | 60.9     | 60           | 3s   | 10s     | 3s   | 248ms |
 | spike     | 150        | 74.8     | 120          | 3s   | -       | 3s   | 1070ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Collection Test
 
@@ -116,7 +116,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 60         | 48.2     | 45           | 3s   | 10s     | 3s   | 10                                    | 838ms |
 | spike     | 120        | 59.8     | 90           | 3s   | -       | 3s   | 10                                    | 1357ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Create Customer Test
 
@@ -127,7 +127,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 50         | 40.6     | 50           | 3s   | 10s     | 3s   | 79ms  |
 | spike     | 100        | 49.8     | 100          | 3s   | -       | 3s   | 172ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Update Customer Test
 
@@ -138,7 +138,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 61ms  |
 | spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 442ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Replace Customer Test
 
@@ -149,7 +149,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 92ms  |
 | spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 123ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Delete Customer Test
 
@@ -160,7 +160,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 65ms  |
 | spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 38ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Type Test
 
@@ -171,7 +171,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 76ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 81ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Type Collection Test
 
@@ -182,7 +182,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                | 95ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                | 38ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Create Customer Type Test
 
@@ -193,7 +193,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 101ms |
 | spike     | 50         | 25.0     | 50           | 2s   | -       | 2s   | 37ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Update Customer Type Test
 
@@ -204,7 +204,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 83ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 38ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Delete Customer Type Test
 
@@ -215,7 +215,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 40ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 62ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Status Test
 
@@ -226,7 +226,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 56ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 26ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Get Customer Status Collection Test
 
@@ -237,7 +237,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                   | 114ms |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                   | 77ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Create Customer Status Test
 
@@ -248,7 +248,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 42ms  |
 | spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 34ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Update Customer Status Test
 
@@ -259,7 +259,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 107ms |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 233ms |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### Delete Customer Status Test
 
@@ -270,7 +270,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 49ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 34ms  |
 
-[Go back to navigation](#REST-API)
+[Go back to navigation](#rest-api)
 
 ### GraphQL Get Customer Test
 
@@ -281,7 +281,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 75         | 60.9     | 60           | 3s   | 10s     | 3s   | 349ms |
 | spike     | 150        | 74.8     | 120          | 3s   | -       | 3s   | 589ms |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Get Customer Collection Test
 
@@ -292,7 +292,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 60         | 45.6     | 45           | 3s   | 10s     | 3s   | 10                                    | 908ms |
 | spike     | 120        | 46.5     | 90           | 3s   | -       | 3s   | 10                                    | 2.07s |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Create Customer Test
 
@@ -303,7 +303,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 50         | 40.6     | 50           | 3s   | 10s     | 3s   | 82ms  |
 | spike     | 100        | 49.8     | 100          | 3s   | -       | 3s   | 223ms |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Update Customer Test
 
@@ -314,7 +314,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 32.5     | 30           | 3s   | 10s     | 3s   | 48ms  |
 | spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 97ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Delete Customer Test
 
@@ -325,7 +325,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 73ms  |
 | spike     | 50         | 25.0     | 40           | 3s   | -       | 3s   | 72ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Get Customer Type Test
 
@@ -336,7 +336,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 34ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 39ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Get Customer Type Collection Test
 
@@ -347,7 +347,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                | 89ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                | 109ms |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Create Customer Type Test
 
@@ -358,7 +358,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 39ms  |
 | spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 49ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Update Customer Type Test
 
@@ -369,7 +369,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 63ms  |
 | spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 151ms |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Delete Customer Type Test
 
@@ -380,7 +380,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 39ms  |
 | spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 44ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Get Customer Status Test
 
@@ -391,7 +391,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 74ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 37ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Get Customer Status Collection Test
 
@@ -402,7 +402,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 33.3     | 35           | 2s   | 8s      | 2s   | 10                                   | 99ms  |
 | spike     | 80         | 39.8     | 70           | 2s   | -       | 2s   | 10                                   | 122ms |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Create Customer Status Test
 
@@ -413,7 +413,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.8     | 25           | 2s   | 8s      | 2s   | 52ms  |
 | spike     | 50         | 24.8     | 50           | 2s   | -       | 2s   | 55ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Update Customer Status Test
 
@@ -424,7 +424,7 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 40         | 32.4     | 30           | 3s   | 10s     | 3s   | 54ms  |
 | spike     | 80         | 39.8     | 60           | 3s   | -       | 3s   | 45ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 ### GraphQL Delete Customer Status Test
 
@@ -435,6 +435,6 @@ The most important metrics for each test, which you'll find in tables include:
 | stress    | 25         | 20.3     | 20           | 3s   | 10s     | 3s   | 54ms  |
 | spike     | 50         | 24.8     | 40           | 3s   | -       | 3s   | 45ms  |
 
-[Go back to navigation](#GraphQL)
+[Go back to navigation](#graphql)
 
 Learn more about [Testing Documentation](testing.md).
