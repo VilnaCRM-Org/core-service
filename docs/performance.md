@@ -1,3 +1,5 @@
+# Performance and Optimization
+
 Welcome to the **Performance and Optimization** GitHub page, which is dedicated to showcasing our comprehensive approach to enhancing the efficiency and speed of our Core Service application. Our goal is to share insights, methodologies, and results from rigorous testing and optimization processes to help developers achieve peak performance in their own applications.
 
 ## Testing Environment
@@ -300,6 +302,7 @@ The most important metrics for each test, which you'll find in tables include:
 | average   | 15         | 12.4     | 15           | 2s   | 8s      | 2s   | 60ms  |
 | stress    | 50         | 40.6     | 50           | 3s   | 10s     | 3s   | 82ms  |
 | spike     | 100        | 49.8     | 100          | 3s   | -       | 3s   | 223ms |
+
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Update Customer Test
