@@ -1,17 +1,8 @@
-# Performance and Optimization
-
 Welcome to the **Performance and Optimization** GitHub page, which is dedicated to showcasing our comprehensive approach to enhancing the efficiency and speed of our Core Service application. Our goal is to share insights, methodologies, and results from rigorous testing and optimization processes to help developers achieve peak performance in their own applications.
-
-> **📊 Local Development Benchmarks**
->
-> The performance data in this document was collected from local development environment testing using `make execute-load-tests-script`. For production-grade benchmarks, run tests on AWS c6i.4xlarge (or equivalent infrastructure) using `make aws-load-tests`.
->
-> **Local test environment:** Docker containers on development machine
-> **Test date:** 2025-12-19
 
 ## Testing Environment
 
-To ensure our Core Service is optimized for high performance, testing should be conducted using standardized infrastructure on AWS. This approach allows identification of bottlenecks, code optimization, and achievement of significant performance improvements. By utilizing AWS for the testing environment, consistency and uniformity across all tests is ensured, enabling developers to work with the same setup and achieve comparable results. This unified testing framework provides a reliable foundation for evaluating performance, regardless of geographic location or hardware variations, ensuring all team members can collaborate effectively on optimization efforts. Below are the details of the recommended hardware and software components for the testing environment:
+To ensure our Core Service is optimized for high performance, we conducted extensive testing using standardized infrastructure on AWS. This approach allows us to identify bottlenecks, optimize code, and achieve significant performance improvements. By utilizing AWS for our testing environment, we ensure consistency and uniformity across all tests, enabling developers to work with the same setup and achieve comparable results. This unified testing framework provides a reliable foundation for evaluating performance, regardless of geographic location or hardware variations, ensuring all team members can collaborate effectively on optimization efforts. Below are the details of the hardware and software components used in our testing environment:
 
 ### Server Specifications:
 
@@ -31,12 +22,10 @@ To ensure our Core Service is optimized for high performance, testing should be 
 
 ## Benchmarks
 
-> **Note:** The values in the tables below are **placeholder estimates** pending actual load testing. Run `make smoke-load-tests` on appropriate infrastructure and update with real measurements.
-
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.
 
 Each endpoint was tested for smoke, average, stress, and spike load scenarios. You can learn more about them [here](https://grafana.com/docs/k6/latest/testing-guides/test-types/).
-Load test results (including optional HTML reports) are generated locally and stored under `tests/Load/results/` (not committed). See [Load Testing Results](../tests/Load/README.md#results) for details.
+Also, you can find HTML files with load test reports [here](https://github.com/VilnaCRM-Org/core-service/tree/main/tests/Load/results)
 
 The most important metrics for each test, which you'll find in tables include:
 
@@ -52,18 +41,18 @@ The most important metrics for each test, which you'll find in tables include:
 
 - [Health](#Health-Test)
 - [Get Customer](#Get-Customer-Test)
-- [Get Customers](#Get-Customers-Test)
+- [Get Customer Collection](#Get-Customer-Collection-Test)
 - [Create Customer](#Create-Customer-Test)
 - [Update Customer](#Update-Customer-Test)
 - [Replace Customer](#Replace-Customer-Test)
 - [Delete Customer](#Delete-Customer-Test)
 - [Get Customer Type](#Get-Customer-Type-Test)
-- [Get Customer Types](#Get-Customer-Types-Test)
+- [Get Customer Type Collection](#Get-Customer-Type-Collection-Test)
 - [Create Customer Type](#Create-Customer-Type-Test)
 - [Update Customer Type](#Update-Customer-Type-Test)
 - [Delete Customer Type](#Delete-Customer-Type-Test)
 - [Get Customer Status](#Get-Customer-Status-Test)
-- [Get Customer Statuses](#Get-Customer-Statuses-Test)
+- [Get Customer Status Collection](#Get-Customer-Status-Collection-Test)
 - [Create Customer Status](#Create-Customer-Status-Test)
 - [Update Customer Status](#Update-Customer-Status-Test)
 - [Delete Customer Status](#Delete-Customer-Status-Test)
@@ -71,17 +60,17 @@ The most important metrics for each test, which you'll find in tables include:
 ### GraphQL
 
 - [Get Customer](#GraphQL-Get-Customer-Test)
-- [Get Customers](#GraphQL-Get-Customers-Test)
+- [Get Customer Collection](#GraphQL-Get-Customer-Collection-Test)
 - [Create Customer](#GraphQL-Create-Customer-Test)
 - [Update Customer](#GraphQL-Update-Customer-Test)
 - [Delete Customer](#GraphQL-Delete-Customer-Test)
 - [Get Customer Type](#GraphQL-Get-Customer-Type-Test)
-- [Get Customer Types](#GraphQL-Get-Customer-Types-Test)
+- [Get Customer Type Collection](#GraphQL-Get-Customer-Type-Collection-Test)
 - [Create Customer Type](#GraphQL-Create-Customer-Type-Test)
 - [Update Customer Type](#GraphQL-Update-Customer-Type-Test)
 - [Delete Customer Type](#GraphQL-Delete-Customer-Type-Test)
 - [Get Customer Status](#GraphQL-Get-Customer-Status-Test)
-- [Get Customer Statuses](#GraphQL-Get-Customer-Statuses-Test)
+- [Get Customer Status Collection](#GraphQL-Get-Customer-Status-Collection-Test)
 - [Create Customer Status](#GraphQL-Create-Customer-Status-Test)
 - [Update Customer Status](#GraphQL-Update-Customer-Status-Test)
 - [Delete Customer Status](#GraphQL-Delete-Customer-Status-Test)
@@ -90,7 +79,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 40       | 200           | 10s           | 10s           | 8ms   |
+| 200        | 40       | 200           | 10s           | 10s           | 28ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -98,15 +87,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 6ms   |
+| 400        | 62       | 400           | 10s           | 10s           | 32ms  |
 
 [Go back to navigation](#REST-API)
 
-### Get Customers Test
+### Get Customer Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 10         | 8        | 10            | 10s           | 10s           | 50                                    | 43ms  |
+| 400        | 62       | 400           | 10s           | 10s           | 10                                    | 41ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -114,7 +103,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 24       | 200           | 10s           | 10s           | 50ms  |
+| 200        | 24       | 200           | 10s           | 10s           | 32ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -122,7 +111,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 60ms  |
+| 200        | 23       | 200           | 10s           | 10s           | 28ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -130,7 +119,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 55ms  |
+| 200        | 23       | 200           | 10s           | 10s           | 30ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -138,7 +127,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 47       | 400           | 10s           | 10s           | 10ms  |
+| 400        | 47       | 400           | 10s           | 10s           | 23ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -146,15 +135,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 5ms   |
+| 400        | 65       | 400           | 10s           | 10s           | 21ms  |
 
 [Go back to navigation](#REST-API)
 
-### Get Customer Types Test
+### Get Customer Type Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 10         | 5        | 10            | 10s           | 10s           | 50                                | 29ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 10                                | 29ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -162,7 +151,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 40ms  |
+| 200        | 30       | 200           | 10s           | 10s           | 52ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -170,7 +159,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 45ms  |
+| 200        | 28       | 200           | 10s           | 10s           | 31ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -178,7 +167,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 8ms   |
+| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -186,15 +175,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 5ms   |
+| 400        | 65       | 400           | 10s           | 10s           | 21ms  |
 
 [Go back to navigation](#REST-API)
 
-### Get Customer Statuses Test
+### Get Customer Status Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 10         | 5        | 10            | 10s           | 10s           | 50                                   | 28ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 10                                   | 24ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -202,7 +191,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 40ms  |
+| 200        | 30       | 200           | 10s           | 10s           | 30ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -210,7 +199,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 45ms  |
+| 200        | 28       | 200           | 10s           | 10s           | 32ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -218,7 +207,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 8ms   |
+| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
 
 [Go back to navigation](#REST-API)
 
@@ -226,15 +215,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 25ms  |
+| 400        | 62       | 400           | 10s           | 10s           | 27ms  |
 
 [Go back to navigation](#GraphQL)
 
-### GraphQL Get Customers Test
+### GraphQL Get Customer Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 10         | 8        | 10            | 10s           | 10s           | 50                                    | 66ms  |
+| 400        | 62       | 400           | 10s           | 10s           | 10                                    | 29ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -242,7 +231,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 24       | 200           | 10s           | 10s           | 55ms  |
+| 200        | 24       | 200           | 10s           | 10s           | 40ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -250,7 +239,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 23       | 200           | 10s           | 10s           | 60ms  |
+| 200        | 23       | 200           | 10s           | 10s           | 39ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -258,7 +247,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 47       | 400           | 10s           | 10s           | 11ms  |
+| 400        | 47       | 400           | 10s           | 10s           | 26ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -266,15 +255,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 20ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 28ms  |
 
 [Go back to navigation](#GraphQL)
 
-### GraphQL Get Customer Types Test
+### GraphQL Get Customer Type Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Types retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | --------------------------------- | ----- |
-| 10         | 5        | 10            | 10s           | 10s           | 50                                | 52ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 10                                | 31ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -282,7 +271,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 45ms  |
+| 200        | 30       | 200           | 10s           | 10s           | 35ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -290,7 +279,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 50ms  |
+| 200        | 28       | 200           | 10s           | 10s           | 35ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -298,7 +287,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 9ms   |
+| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -306,15 +295,15 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 65       | 400           | 10s           | 10s           | 20ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 28ms  |
 
 [Go back to navigation](#GraphQL)
 
-### GraphQL Get Customer Statuses Test
+### GraphQL Get Customer Status Collection Test
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Statuses retrieved with each request | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------ | ----- |
-| 10         | 5        | 10            | 10s           | 10s           | 50                                   | 52ms  |
+| 400        | 65       | 400           | 10s           | 10s           | 10                                   | 30ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -322,7 +311,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 30       | 200           | 10s           | 10s           | 45ms  |
+| 200        | 30       | 200           | 10s           | 10s           | 32ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -330,7 +319,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 28       | 200           | 10s           | 10s           | 50ms  |
+| 200        | 28       | 200           | 10s           | 10s           | 39ms  |
 
 [Go back to navigation](#GraphQL)
 
@@ -338,7 +327,7 @@ The most important metrics for each test, which you'll find in tables include:
 
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 50       | 400           | 10s           | 10s           | 9ms   |
+| 400        | 50       | 400           | 10s           | 10s           | 20ms  |
 
 [Go back to navigation](#GraphQL)
 
