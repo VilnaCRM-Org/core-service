@@ -2,23 +2,29 @@ Welcome to the **Performance and Optimization** GitHub page, which is dedicated 
 
 ## Testing Environment
 
-To ensure our Core Service is optimized for high performance, we conducted extensive testing using standardized infrastructure on AWS. This approach allows us to identify bottlenecks, optimize code, and achieve significant performance improvements. By utilizing AWS for our testing environment, we ensure consistency and uniformity across all tests, enabling developers to work with the same setup and achieve comparable results. This unified testing framework provides a reliable foundation for evaluating performance, regardless of geographic location or hardware variations, ensuring all team members can collaborate effectively on optimization efforts. Below are the details of the hardware and software components used in our testing environment:
+We run performance tests locally using the repository Docker Compose setup (not AWS). The benchmark numbers below were collected on the following workstation; results will vary depending on CPU load, Docker resource limits, and host OS scheduling.
 
-### Server Specifications:
+### Host Machine Specifications:
 
-- **Instance Type:** c6i.4xlarge
-- **CPU:** 16 core
-- **Memory:** 32 GB RAM
-- **Storage:** 30 GB
+- **CPU:** AMD Ryzen 5 7535HS (6 cores / 12 threads, up to 4.6 GHz)
+- **Memory:** 32 GB RAM (30 GiB usable)
+- **Storage:** 1 TB NVMe (SAMSUNG MZAL81T0HDLB-00BLL)
+- **Root filesystem:** ext4, 553 GB total
+- **Operating System:** Ubuntu 24.04.2 LTS (kernel 6.14.0-36-generic)
 
-### Software Specifications:
+### Container / Tooling:
 
-- **Operating System:** Ubuntu 24.04 LTS
+- **Docker Engine:** 27.5.1
+- **Docker Compose (plugin):** v2.32.4
+- **Load Testing Tools:** Grafana k6 1.4.2 (via the repo K6 Docker image)
+
+### Application Under Test:
+
 - **Core Service Version:** 0.8.0
 - **PHP Version:** 8.3
 - **Symfony Version:** 7.2
 - **Database:** MongoDB 6.0
-- **Load Testing Tools:** Grafana K6
+- **Cache:** Redis (docker-compose service `redis`, image `redis:8.0.0-alpine`)
 
 ## Benchmarks
 
@@ -77,33 +83,47 @@ The most important metrics for each test, which you'll find in tables include:
 
 ### Health Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 40       | 200           | 10s           | 10s           | 28ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 10         | 10.0     | 5            | -    | 10s     | -    | 32ms  |
+| average   | 25         | 20.3     | 25           | 3s   | 10s     | 3s   | 22ms  |
+| stress    | 150        | 121.8    | 150          | 3s   | 10s     | 3s   | 36ms  |
+| spike     | 200        | 99.9     | 200          | 5s   | -       | 5s   | 366ms |
+
+> Real RPS is calculated as `request_count / scenario_stage_duration` based on `all-health.summary.json` (to avoid diluting results by the configured delay between scenarios).
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 32ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 10         | 10.0     | 5            | -    | 10s     | -    | 75ms  |
+| average   | 25         | 20.8     | 20           | 2s   | 8s      | 2s   | 41ms  |
+| stress    | 75         | 60.9     | 60           | 3s   | 10s     | 3s   | 248ms |
+| spike     | 150        | 74.8     | 120          | 3s   | -       | 3s   | 1070ms |
 
 [Go back to navigation](#REST-API)
 
 ### Get Customer Collection Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | Customers retrieved with each request | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ------------------------------------- | ----- |
-| 400        | 62       | 400           | 10s           | 10s           | 10                                    | 41ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | Customers retrieved with each request | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ------------------------------------- | ----- |
+| smoke     | 8          | 8.1      | 4            | -    | 10s     | -    | 10                                    | 134ms |
+| average   | 20         | 16.6     | 15           | 2s   | 8s      | 2s   | 10                                    | 163ms |
+| stress    | 60         | 48.2     | 45           | 3s   | 10s     | 3s   | 10                                    | 838ms |
+| spike     | 120        | 59.8     | 90           | 3s   | -       | 3s   | 10                                    | 1357ms |
 
 [Go back to navigation](#REST-API)
 
 ### Create Customer Test
 
-| Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
-| ---------- | -------- | ------------- | ------------- | ------------- | ----- |
-| 200        | 24       | 200           | 10s           | 10s           | 32ms  |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------ | ---- | ------- | ---- | ----- |
+| smoke     | 5          | 5.1      | 3            | -    | 10s     | -    | 66ms  |
+| average   | 15         | 12.4     | 15           | 2s   | 8s      | 2s   | 52ms  |
+| stress    | 50         | 40.6     | 50           | 3s   | 10s     | 3s   | 79ms  |
+| spike     | 100        | 49.8     | 100          | 3s   | -       | 3s   | 172ms |
 
 [Go back to navigation](#REST-API)
 
@@ -232,7 +252,6 @@ The most important metrics for each test, which you'll find in tables include:
 | Target RPS | Real RPS | Virtual Users | Rise Duration | Fall Duration | P(99) |
 | ---------- | -------- | ------------- | ------------- | ------------- | ----- |
 | 200        | 24       | 200           | 10s           | 10s           | 40ms  |
-
 [Go back to navigation](#GraphQL)
 
 ### GraphQL Update Customer Test
