@@ -98,6 +98,8 @@ services:
 
   App\Shared\Application\Observability\BusinessMetricsEmitterInterface:
     class: App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter
+    arguments:
+      $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones

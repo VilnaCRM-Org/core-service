@@ -10,9 +10,8 @@ use RuntimeException;
 
 final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmitterInterface
 {
-    private const NAMESPACE = 'CCore/BusinessMetrics';
-
     public function __construct(
+        private string $namespace = 'CCore/BusinessMetrics',
         private string $output = 'php://stdout',
         private ?LoggerInterface $logger = null
     ) {
@@ -34,7 +33,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                 'Timestamp' => $timestamp,
                 'CloudWatchMetrics' => [
                     [
-                        'Namespace' => self::NAMESPACE,
+                        'Namespace' => $this->namespace,
                         'Dimensions' => [array_keys($dimensions)],
                         'Metrics' => [
                             ['Name' => $metricName, 'Unit' => $unit],
@@ -85,7 +84,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                 'Timestamp' => $timestamp,
                 'CloudWatchMetrics' => [
                     [
-                        'Namespace' => self::NAMESPACE,
+                        'Namespace' => $this->namespace,
                         'Dimensions' => [array_keys($dimensions)],
                         'Metrics' => [],
                     ],

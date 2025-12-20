@@ -10,6 +10,8 @@ use Psr\Log\LoggerInterface;
 
 final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 {
+    private const NAMESPACE = 'CCore/BusinessMetrics';
+
     public function testEmitsValidEmfJsonForSingleMetric(): void
     {
         $file = tempnam(sys_get_temp_dir(), 'emf_');
@@ -17,7 +19,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
         $before = (int) (microtime(true) * 1000);
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($file);
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
         $emitter->emit('EndpointInvocations', 1, [
             'Endpoint' => 'HealthCheck',
             'Operation' => 'get',
@@ -54,7 +56,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
         $before = (int) (microtime(true) * 1000);
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($file);
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
         $emitter->emitMultiple([
             'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
             'OrderValue' => ['value' => 99.9, 'unit' => 'None'],
@@ -92,12 +94,30 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         self::assertSame(['Name' => 'OrderValue', 'Unit' => 'None'], $metrics[1]);
     }
 
+    public function testUsesCustomNamespace(): void
+    {
+        $customNamespace = 'CustomApp/Metrics';
+        $file = tempnam(sys_get_temp_dir(), 'emf_');
+        self::assertIsString($file);
+
+        $emitter = new AwsEmfBusinessMetricsEmitter($customNamespace, $file);
+        $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+
+        $contents = file_get_contents($file);
+        unlink($file);
+
+        self::assertIsString($contents);
+        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
+
+        self::assertSame($customNamespace, $payload['_aws']['CloudWatchMetrics'][0]['Namespace']);
+    }
+
     public function testDoesNotThrowWhenJsonEncodingFails(): void
     {
         $file = tempnam(sys_get_temp_dir(), 'emf_');
         self::assertIsString($file);
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($file);
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
 
         // Invalid UTF-8 -> json_encode(JSON_THROW_ON_ERROR) throws, but emitter must swallow it.
         $emitter->emit("\xB1", 1, ['Endpoint' => "\xB1", 'Operation' => 'get']);
@@ -114,7 +134,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         // Use a directory path (not a file) to force file_put_contents to fail
         $invalidPath = sys_get_temp_dir() . '/non_existent_dir_' . uniqid() . '/file.log';
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($invalidPath);
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $invalidPath);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to open stream');
@@ -140,7 +160,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
                 })
             );
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($file, $logger);
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file, $logger);
 
         // Invalid UTF-8 triggers JsonException
         $emitter->emit("\xB1", 1, ['Endpoint' => "\xB1", 'Operation' => 'get']);
@@ -162,7 +182,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         });
 
         try {
-            $emitter = new AwsEmfBusinessMetricsEmitter($file);
+            $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
             $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
             unlink($file);
 
@@ -188,7 +208,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         });
 
         try {
-            $emitter = new AwsEmfBusinessMetricsEmitter($invalidPath);
+            $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $invalidPath);
             try {
                 $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
                 self::fail('Expected RuntimeException was not thrown');
