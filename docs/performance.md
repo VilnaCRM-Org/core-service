@@ -101,12 +101,12 @@ The most important metrics for each test, which you'll find in tables include:
 
 ### Get Customer Test
 
-| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99)  |
-| --------- | ---------- | -------- | ------------- | ---- | ------- | ---- | ------ |
-| smoke     | 10         | 10.0     | 5             | -    | 10s     | -    | 75ms   |
-| average   | 25         | 20.8     | 20            | 2s   | 8s      | 2s   | 41ms   |
-| stress    | 75         | 60.9     | 60            | 3s   | 10s     | 3s   | 248ms  |
-| spike     | 150        | 74.8     | 120           | 3s   | -       | 3s   | 1070ms |
+| Test type | Target RPS | Real RPS | Virtual Users | Rise | Plateau | Fall | P(99) |
+| --------- | ---------- | -------- | ------------- | ---- | ------- | ---- | ----- |
+| smoke     | 10         | 10.0     | 5             | -    | 10s     | -    | 78ms  |
+| average   | 25         | 20.8     | 20            | 2s   | 8s      | 2s   | 67ms  |
+| stress    | 75         | 60.9     | 60            | 3s   | 10s     | 3s   | 80ms  |
+| spike     | 150        | 74.8     | 120           | 3s   | -       | 3s   | 138ms |
 
 <img width="1777" height="342" alt="image" src="https://github.com/user-attachments/assets/0e20cda5-bde2-4e0b-a724-c628c9294568" />
 <img width="1760" height="678" alt="image" src="https://github.com/user-attachments/assets/d781d870-28dc-427f-8b5d-364abb71535f" />
