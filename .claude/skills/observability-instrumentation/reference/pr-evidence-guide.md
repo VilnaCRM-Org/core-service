@@ -5,6 +5,7 @@ How to collect and present observability evidence in pull requests to demonstrat
 ## Why Attach Evidence?
 
 Evidence in PRs:
+
 - **Proves metrics work** - Shows EMF output is correct
 - **Validates dimensions** - Confirms low cardinality
 - **Demonstrates testing** - Shows unit tests pass
@@ -46,18 +47,18 @@ make test -- --filter=BusinessMetricsEmitter -v
 
 Copy this template into your PR description:
 
-```markdown
+````markdown
 ## Summary
 
 Added business metrics for [feature description].
 
 ## Business Metrics Added
 
-| Metric Name | Dimensions | Purpose |
-|-------------|------------|---------|
-| `CustomersCreated` | Endpoint, Operation | Track customer registrations |
-| `OrdersPlaced` | Endpoint, PaymentMethod | Track order volume |
-| `OrderValue` | Endpoint, PaymentMethod | Track order amounts |
+| Metric Name        | Dimensions              | Purpose                      |
+| ------------------ | ----------------------- | ---------------------------- |
+| `CustomersCreated` | Endpoint, Operation     | Track customer registrations |
+| `OrdersPlaced`     | Endpoint, PaymentMethod | Track order volume           |
+| `OrderValue`       | Endpoint, PaymentMethod | Track order amounts          |
 
 ## EMF Output Example
 
@@ -69,9 +70,7 @@ Added business metrics for [feature description].
       {
         "Namespace": "CCore/BusinessMetrics",
         "Dimensions": [["Endpoint", "Operation"]],
-        "Metrics": [
-          { "Name": "CustomersCreated", "Unit": "Count" }
-        ]
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
       }
     ]
   },
@@ -80,6 +79,7 @@ Added business metrics for [feature description].
   "CustomersCreated": 1
 }
 ```
+````
 
 ## Tests
 
@@ -94,7 +94,8 @@ Added business metrics for [feature description].
 - [x] Dimensions are low cardinality (no IDs, timestamps)
 - [x] BusinessMetricsEmitterSpy used in tests
 - [x] No infrastructure metrics added (AWS AppRunner provides those)
-```
+
+````
 
 ---
 
@@ -112,13 +113,15 @@ For smaller PRs:
 ```bash
 make test -- --filter=CreateCustomerCommandHandlerTest
 OK (2 tests, 4 assertions)
-```
+````
 
 ### EMF Format Verified
+
 - Namespace: `CCore/BusinessMetrics`
 - Unit: `Count`
 - Dimensions: Low cardinality confirmed
-```
+
+````
 
 ---
 
@@ -132,7 +135,7 @@ $this->metrics->emit('CustomersCreated', 1, ...);
 
 // Bad: snake_case
 $this->metrics->emit('customers_created', 1, ...);
-```
+````
 
 ### Low Cardinality Dimensions
 
@@ -162,6 +165,7 @@ public function testEmitsBusinessMetric(): void
 ### No Infrastructure Metrics
 
 Reviewers should verify the PR does NOT add:
+
 - Latency tracking
 - Error counters
 - Request timing
@@ -285,6 +289,7 @@ PR evidence is complete when:
 ---
 
 **Next Steps**:
+
 - Review your PR description
 - Run tests and capture output
 - Copy evidence template

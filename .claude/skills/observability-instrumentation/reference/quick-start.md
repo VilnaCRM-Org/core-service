@@ -156,20 +156,20 @@ Your job is to add **domain-specific business metrics** that track business even
 
 ### Metric Naming
 
-| Pattern | Example |
-|---------|---------|
-| `{Entity}{Action}` | `CustomersCreated`, `OrdersPlaced` |
-| PascalCase | `PaymentsProcessed`, not `payments_processed` |
-| Plural + Past tense | `LoginAttempts`, not `LoginAttempt` |
+| Pattern             | Example                                       |
+| ------------------- | --------------------------------------------- |
+| `{Entity}{Action}`  | `CustomersCreated`, `OrdersPlaced`            |
+| PascalCase          | `PaymentsProcessed`, not `payments_processed` |
+| Plural + Past tense | `LoginAttempts`, not `LoginAttempt`           |
 
 ### Dimensions (Low Cardinality Only)
 
 | Good Dimensions | Bad Dimensions (Avoid!) |
-|-----------------|------------------------|
-| `Endpoint` | `CustomerId` |
-| `Operation` | `OrderId` |
-| `PaymentMethod` | `SessionId` |
-| `CustomerType` | `Timestamp` |
+| --------------- | ----------------------- |
+| `Endpoint`      | `CustomerId`            |
+| `Operation`     | `OrderId`               |
+| `PaymentMethod` | `SessionId`             |
+| `CustomerType`  | `Timestamp`             |
 
 ---
 
