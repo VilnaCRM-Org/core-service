@@ -94,6 +94,25 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         self::assertSame(['Name' => 'OrderValue', 'Unit' => 'None'], $metrics[1]);
     }
 
+    public function testMetricValueOverwritesDimensionOnCollision(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'emf_');
+        self::assertIsString($file);
+
+        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
+        $emitter->emit('Endpoint', 42, ['Endpoint' => 'Customer', 'Operation' => 'create']);
+
+        $contents = file_get_contents($file);
+        unlink($file);
+
+        self::assertIsString($contents);
+        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
+
+        // Metric value should overwrite dimension value when keys collide
+        self::assertSame(42, $payload['Endpoint']);
+        self::assertSame('create', $payload['Operation']);
+    }
+
     public function testUsesCustomNamespace(): void
     {
         $customNamespace = 'CustomApp/Metrics';

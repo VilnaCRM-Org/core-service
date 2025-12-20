@@ -41,10 +41,9 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                     ],
                 ],
             ],
-            $metricName => $value,
         ];
 
-        $emfLog += $dimensions;
+        $emfLog = array_merge($emfLog, $dimensions, [$metricName => $value]);
 
         $this->write($emfLog);
     }
@@ -56,6 +55,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     public function emitMultiple(array $metrics, array $dimensions = []): void
     {
         $emfLog = $this->createBaseEmfLog($dimensions);
+        $emfLog = array_merge($emfLog, $dimensions);
 
         foreach ($metrics as $name => $config) {
             $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
@@ -64,8 +64,6 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
             ];
             $emfLog[$name] = $config['value'];
         }
-
-        $emfLog += $dimensions;
 
         $this->write($emfLog);
     }
