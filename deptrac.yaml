@@ -32,7 +32,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
         - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory|Validator).*'
+          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory|Validator|Cache).*'
 
     - name: Symfony
       collectors:

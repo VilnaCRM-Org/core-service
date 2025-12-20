@@ -1,3 +1,12 @@
+# [0.8.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.7.0...v0.8.0) (2025-12-18)
+
+
+### Features
+
+* **#85:** add cache-management Skill: Production-Grade Caching with Policies, Invalidation & Testing ([#85](https://github.com/VilnaCRM-Org/core-service/issues/85)) ([bb8bb38](https://github.com/VilnaCRM-Org/core-service/commit/bb8bb380cd3e4106260a7349fe05a19838ffaa74)), closes [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606023661](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606023661) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606023711](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606023711) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043970](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043970) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043981](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043981) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043977](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043977) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043962](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043962) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043988](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043988) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606043989](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606043989) [/github.com/VilnaCRM-Org/core-service/pull/81#discussion_r2606198370](https://github.com//github.com/VilnaCRM-Org/core-service/pull/81/issues/discussion_r2606198370) [#14](https://github.com/VilnaCRM-Org/core-service/issues/14) [PR#82](https://github.com/PR/issues/82)
+
+
+
 # [0.7.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.6.0...v0.7.0) (2025-12-11)
 
 ### Features

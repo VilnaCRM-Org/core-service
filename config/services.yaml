@@ -101,6 +101,36 @@ services:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
+  # Base repository - used by API Platform for collections
+  App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
+    public: true
+
+  # Cached repository - wraps base repository with caching
+  App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository:
+    arguments:
+      $inner: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
+      $cache: '@cache.customer'
+
+  # Alias interface to cached repository for dependency injection
+  App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
+    alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
+    public: true
+
+  # Cache invalidation event subscribers - explicitly inject cache.customer
+  App\Core\Customer\Application\EventSubscriber\CustomerCreatedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+
+  App\Core\Customer\Application\EventSubscriber\CustomerDeletedCacheInvalidationSubscriber:
+    arguments:
+      $cache: '@cache.customer'
+
+  # CacheKeyBuilder - auto-registered via App\ namespace
+
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
 
