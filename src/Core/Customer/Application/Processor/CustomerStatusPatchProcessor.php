@@ -52,8 +52,7 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
             $operation
         );
 
-        // Only update if value is explicitly provided and not empty
-        if ($data->value !== null && trim($data->value) !== '') {
+        if (trim($data->value ?? '') !== '') {
             $this->dispatchCommand($customerStatus, $data->value);
         }
 
