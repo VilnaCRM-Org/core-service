@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmitterInterface
 {
     private const NAMESPACE = 'CCore/BusinessMetrics';
 
     public function __construct(
-        private string $output = 'php://stdout'
+        private string $output = 'php://stdout',
+        private ?LoggerInterface $logger = null
     ) {
     }
 
@@ -98,9 +101,27 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     {
         try {
             $json = json_encode($emfLog, JSON_THROW_ON_ERROR);
-            file_put_contents($this->output, $json . "\n", FILE_APPEND);
-        } catch (\JsonException) {
+        } catch (\JsonException $e) {
+            $this->logger?->error('Failed to encode EMF log to JSON', [
+                'exception' => $e->getMessage(),
+            ]);
+
             return;
+        }
+
+        $this->writeToOutput($json);
+    }
+
+    private function writeToOutput(string $json): void
+    {
+        set_error_handler(static function (int $severity, string $message): never {
+            throw new RuntimeException($message);
+        });
+
+        try {
+            file_put_contents($this->output, $json . "\n", FILE_APPEND);
+        } finally {
+            restore_error_handler();
         }
     }
 }

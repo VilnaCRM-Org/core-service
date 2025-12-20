@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
 use App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter;
 use App\Tests\Unit\UnitTestCase;
+use Psr\Log\LoggerInterface;
 
 final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 {
@@ -106,5 +107,101 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
         self::assertIsString($contents);
         self::assertSame('', $contents);
+    }
+
+    public function testThrowsRuntimeExceptionWhenFileWriteFails(): void
+    {
+        // Use a directory path (not a file) to force file_put_contents to fail
+        $invalidPath = sys_get_temp_dir() . '/non_existent_dir_' . uniqid() . '/file.log';
+
+        $emitter = new AwsEmfBusinessMetricsEmitter($invalidPath);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Failed to open stream');
+
+        $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+    }
+
+    public function testLogsErrorWithExceptionDetailsWhenJsonEncodingFails(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'emf_');
+        self::assertIsString($file);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                'Failed to encode EMF log to JSON',
+                self::callback(static function (array $context): bool {
+                    return isset($context['exception'])
+                        && is_string($context['exception'])
+                        && str_contains($context['exception'], 'Malformed UTF-8');
+                })
+            );
+
+        $emitter = new AwsEmfBusinessMetricsEmitter($file, $logger);
+
+        // Invalid UTF-8 triggers JsonException
+        $emitter->emit("\xB1", 1, ['Endpoint' => "\xB1", 'Operation' => 'get']);
+
+        unlink($file);
+    }
+
+    public function testRestoresErrorHandlerAfterSuccessfulWrite(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'emf_');
+        self::assertIsString($file);
+
+        // Set a custom handler BEFORE emit
+        $testHandlerCalled = false;
+        set_error_handler(static function () use (&$testHandlerCalled): bool {
+            $testHandlerCalled = true;
+
+            return true;
+        });
+
+        try {
+            $emitter = new AwsEmfBusinessMetricsEmitter($file);
+            $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+            unlink($file);
+
+            // After emit, trigger a warning - should call our handler, not throw
+            trigger_error('Test warning', E_USER_WARNING);
+        } finally {
+            restore_error_handler();
+        }
+
+        self::assertTrue($testHandlerCalled, 'Original error handler was not restored');
+    }
+
+    public function testRestoresErrorHandlerEvenWhenWriteFails(): void
+    {
+        $invalidPath = sys_get_temp_dir() . '/non_existent_dir_' . uniqid() . '/file.log';
+
+        // Set a custom handler BEFORE emit
+        $testHandlerCalled = false;
+        set_error_handler(static function () use (&$testHandlerCalled): bool {
+            $testHandlerCalled = true;
+
+            return true;
+        });
+
+        try {
+            $emitter = new AwsEmfBusinessMetricsEmitter($invalidPath);
+            try {
+                $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+                self::fail('Expected RuntimeException was not thrown');
+            } catch (\RuntimeException) {
+                // Expected - the emit failed
+            }
+
+            // After emit fails, trigger a warning - should call our handler, not throw
+            trigger_error('Test warning', E_USER_WARNING);
+        } finally {
+            restore_error_handler();
+        }
+
+        self::assertTrue($testHandlerCalled, 'Original error handler was not restored');
     }
 }
