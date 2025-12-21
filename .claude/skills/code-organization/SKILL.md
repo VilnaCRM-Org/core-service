@@ -356,3 +356,5 @@ grep -r "^namespace" src/ --include="*.php" | head -10
 - [examples/refactoring-examples.md](examples/refactoring-examples.md) - Detailed before/after examples
 - [reference/directory-structure.md](reference/directory-structure.md) - Layer-by-layer breakdown
 - [reference/common-patterns.md](reference/common-patterns.md) - Pattern catalog
+- [reference/troubleshooting.md](reference/troubleshooting.md) - Troubleshooting guide for common issues
+- [../.claude/skills/SKILL-DECISION-GUIDE.md](../SKILL-DECISION-GUIDE.md) - When to use which skill

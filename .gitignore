@@ -44,6 +44,7 @@ venv
 
 # Structurizr files
 /.structurizr/
+/workspace.json
 
 # Infection
 infection.log
