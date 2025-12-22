@@ -101,7 +101,7 @@ public function __invoke(PlaceOrderCommand $command): void
 
 ### Format
 
-```
+```text
 {Entity}{Action}   # PascalCase, plural noun, past tense
 ```
 

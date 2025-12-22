@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmitterInterface
 {
-    private const NAMESPACE = 'CCore/BusinessMetrics';
-
     public function __construct(
-        private string $output = 'php://stdout'
+        private string $namespace = 'CCore/BusinessMetrics',
+        private string $output = 'php://stdout',
+        private ?LoggerInterface $logger = null
     ) {
     }
 
@@ -31,7 +33,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                 'Timestamp' => $timestamp,
                 'CloudWatchMetrics' => [
                     [
-                        'Namespace' => self::NAMESPACE,
+                        'Namespace' => $this->namespace,
                         'Dimensions' => [array_keys($dimensions)],
                         'Metrics' => [
                             ['Name' => $metricName, 'Unit' => $unit],
@@ -39,10 +41,9 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                     ],
                 ],
             ],
-            $metricName => $value,
         ];
 
-        $emfLog += $dimensions;
+        $emfLog = array_merge($emfLog, $dimensions, [$metricName => $value]);
 
         $this->write($emfLog);
     }
@@ -54,6 +55,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     public function emitMultiple(array $metrics, array $dimensions = []): void
     {
         $emfLog = $this->createBaseEmfLog($dimensions);
+        $emfLog = array_merge($emfLog, $dimensions);
 
         foreach ($metrics as $name => $config) {
             $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
@@ -62,8 +64,6 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
             ];
             $emfLog[$name] = $config['value'];
         }
-
-        $emfLog += $dimensions;
 
         $this->write($emfLog);
     }
@@ -82,7 +82,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                 'Timestamp' => $timestamp,
                 'CloudWatchMetrics' => [
                     [
-                        'Namespace' => self::NAMESPACE,
+                        'Namespace' => $this->namespace,
                         'Dimensions' => [array_keys($dimensions)],
                         'Metrics' => [],
                     ],
@@ -98,9 +98,27 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     {
         try {
             $json = json_encode($emfLog, JSON_THROW_ON_ERROR);
-            file_put_contents($this->output, $json . "\n", FILE_APPEND);
-        } catch (\JsonException) {
+        } catch (\JsonException $e) {
+            $this->logger?->error('Failed to encode EMF log to JSON', [
+                'exception' => $e->getMessage(),
+            ]);
+
             return;
+        }
+
+        $this->writeToOutput($json);
+    }
+
+    private function writeToOutput(string $json): void
+    {
+        set_error_handler(static function (int $severity, string $message): never {
+            throw new RuntimeException($message);
+        });
+
+        try {
+            file_put_contents($this->output, $json . "\n", FILE_APPEND);
+        } finally {
+            restore_error_handler();
         }
     }
 }
