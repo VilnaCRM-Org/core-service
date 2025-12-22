@@ -23,7 +23,21 @@ App\Core\Customer\Domain\Entity\Customer:
         - customer.mongodb.date
         - customer.mongodb.boolean
         - mongodb.range
-    ApiPlatform\Metadata\Get: ~
+      # HTTP Cache headers for collection (shorter TTL)
+      cacheHeaders:
+        max_age: 300 # 5 minutes client cache
+        shared_max_age: 600 # 10 minutes CDN/proxy cache
+        vary: ['Accept', 'Authorization']
+    ApiPlatform\Metadata\Get:
+      # HTTP Cache headers for single resource
+      cacheHeaders:
+        max_age: 600 # 10 minutes (matches application cache TTL)
+        shared_max_age: 600 # 10 minutes CDN/proxy cache
+        vary: ['Accept', 'Authorization']
+        # Enable ETag for conditional requests (304 Not Modified)
+        etag: true
+        # Use updatedAt field for Last-Modified header
+        last_modified: 'updatedAt'
     ApiPlatform\Metadata\Put:
       input: App\Core\Customer\Application\DTO\CustomerPut
       processor: App\Core\Customer\Application\Processor\CustomerPutProcessor
@@ -34,7 +48,8 @@ App\Core\Customer\Domain\Entity\Customer:
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
-    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Delete:
+      processor: App\Core\Customer\Application\Processor\CustomerDeleteProcessor
     ApiPlatform\Metadata\Post:
       input: App\Core\Customer\Application\DTO\CustomerCreate
       processor: App\Core\Customer\Application\Processor\CreateCustomerProcessor
@@ -73,5 +88,6 @@ App\Core\Customer\Domain\Entity\Customer:
         allow_extra_attributes: false
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
+      processor: App\Core\Customer\Application\Processor\CustomerDeleteProcessor
       normalizationContext:
         groups: ['deleteMutationOutput']

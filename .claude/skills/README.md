@@ -143,7 +143,44 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 6. Database Migrations (`database-migrations/`)
+### 6. Documentation Creation (`documentation-creation/`)
+
+**Purpose**: Create comprehensive project documentation from scratch
+
+**When activated**:
+
+- Setting up INITIAL documentation for a new project
+- Building a complete documentation suite from scratch
+- Project has no existing comprehensive documentation
+
+**Note**: For updating EXISTING documentation when code changes, use `documentation-sync` instead.
+
+**What it does**:
+
+- Analyzes project codebase thoroughly (structure, entities, commands)
+- Creates documentation using established VilnaCRM templates
+- Verifies all references against actual codebase
+- Ensures consistent style and cross-linking
+- Validates VilnaCRM-specific standards (100% coverage, PHPInsights thresholds)
+
+**Key verification steps**:
+
+- Technology stack accuracy (PHP version, framework, database, runtime)
+- Directory structure verification (all mentioned paths exist)
+- Command verification (all make commands exist)
+- Link verification (internal and external links work)
+- CI validation (`make ci` passes)
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and quick start)
+- `reference/doc-templates.md` (Templates for each doc type)
+- `reference/verification-checklist.md` (Detailed verification steps with VilnaCRM-specific checks)
+- `examples/core-service-example.md` (Real-world example)
+
+---
+
+### 7. Database Migrations (`database-migrations/`)
 
 **Purpose**: Create and manage database migrations using Doctrine ODM for MongoDB
 
@@ -174,7 +211,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 7. Load Testing (`load-testing/`)
+### 8. Load Testing (`load-testing/`)
 
 **Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
 
@@ -208,7 +245,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 8. Implementing DDD Architecture (`implementing-ddd-architecture/`)
+### 9. Implementing DDD Architecture (`implementing-ddd-architecture/`)
 
 **Purpose**: Design and implement DDD patterns (entities, value objects, aggregates, CQRS)
 
@@ -247,7 +284,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 9. Deptrac Fixer (`deptrac-fixer/`)
+### 10. Deptrac Fixer (`deptrac-fixer/`)
 
 **Purpose**: Diagnose and fix Deptrac architectural violations automatically
 
@@ -292,7 +329,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 10. Complexity Management (`complexity-management/`)
+### 11. Complexity Management (`complexity-management/`)
 
 **Purpose**: Maintain and improve code quality using PHPInsights without decreasing thresholds
 
@@ -323,7 +360,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 11. Developing OpenAPI Specs (`developing-openapi-specs/`)
+### 12. Developing OpenAPI Specs (`developing-openapi-specs/`)
 
 **Purpose**: Guide for contributing to the OpenAPI layer using processor pattern
 
@@ -345,7 +382,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 12. API Platform CRUD (`api-platform-crud/`)
+### 13. API Platform CRUD (`api-platform-crud/`)
 
 **Purpose**: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns
 
@@ -379,7 +416,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 13. Observability Instrumentation (`observability-instrumentation/`)
+### 14. Observability Instrumentation (`observability-instrumentation/`)
 
 **Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
 
@@ -428,7 +465,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 14. Query Performance Analysis (`query-performance-analysis/`)
+### 15. Query Performance Analysis (`query-performance-analysis/`)
 
 **Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
 
@@ -472,6 +509,131 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 **Integration**: Works alongside database-migrations (index syntax), load-testing (regression tests), and observability-instrumentation (performance metrics)
 
 **Complements**: Use with database-migrations for index creation XML syntax
+
+---
+
+### 16. Cache Management (`cache-management/`)
+
+**Purpose**: Implement production-grade caching with cache keys/TTLs/consistency classes, SWR (stale-while-revalidate), explicit invalidation, and comprehensive testing
+
+**When activated**:
+
+- Adding caching to expensive queries or API endpoints
+- Implementing cache invalidation strategies
+- Defining cache keys, TTLs, and consistency requirements
+- Testing cache behavior (stale reads, cold start warmup)
+- Optimizing read-heavy operations
+- Reducing database load with caching
+- Debugging cache-related issues (stale data, cache misses)
+
+**What it does**:
+
+- Guides cache policy declaration (key pattern, TTL, consistency class)
+- Implements read-through caching with Symfony Cache
+- Provides explicit invalidation strategies (write-through, tag-based, event-driven)
+- Implements stale-while-revalidate (SWR) pattern for high-traffic queries
+- Creates comprehensive test suite (stale reads, cold start, TTL expiration)
+- Ensures cache observability with logging and metrics
+
+**Key features**:
+
+- Declare cache policies (keys, TTLs, consistency classes)
+- Read-through caching with SWR support
+- Tag-based batch invalidation
+- Explicit invalidation on writes (create, update, delete)
+- Cache warmup for cold start scenarios
+- Test patterns for all cache behaviors
+- Integration with hexagonal architecture layers
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and cache management patterns)
+- `examples/cache-implementation.md` (Complete repository with caching)
+- `examples/cache-testing.md` (Full test suite for cache behavior)
+- `reference/cache-policies.md` (TTL selection, consistency classes, policy matrix)
+- `reference/invalidation-strategies.md` (Write-through, tag-based, event-driven patterns)
+- `reference/swr-pattern.md` (Complete SWR implementation guide)
+
+**Integration**: Works alongside query-performance-analysis (identify queries to cache), observability-instrumentation (cache metrics), testing-workflow (cache testing), and implementing-ddd-architecture (cache placement)
+
+**Key commands**: `php bin/console cache:customer warm`, `php bin/console cache:customer invalidate`
+
+---
+
+### 17. Code Organization (`code-organization/`)
+
+**Purpose**: Ensure proper code organization with class names, directories, namespaces, and naming consistency
+
+**When activated**:
+
+- Creating new classes
+- Refactoring existing code
+- Moving classes between directories
+- Code review feedback about organization
+- Renaming classes or methods
+
+**What it does**:
+
+- Enforces the principle "Directory X contains ONLY class type X"
+- Guides proper class placement (Converter/, Transformer/, Validator/, etc.)
+- Ensures namespace matches directory structure
+- Provides refactoring workflow for misplaced classes
+- Documents variable and parameter naming conventions
+
+**Key principle**: Directory X should contain ONLY class type X (e.g., `Converter/` contains only converters)
+
+**Key commands**: `make phpcsfixer`, `make psalm`, `make unit-tests`
+
+**Structure**: Multi-file with guides:
+
+- `SKILL.md` (Core principle and quick reference)
+- `php-best-practices.md` (Complete PHP best practices)
+- `examples/refactoring-examples.md` (Before/after examples)
+- `reference/directory-structure.md` (Layer-by-layer breakdown)
+- `reference/common-patterns.md` (Pattern catalog)
+- `reference/troubleshooting.md` (Troubleshooting common issues)
+
+**Decision Guide**: See [SKILL-DECISION-GUIDE.md](SKILL-DECISION-GUIDE.md) to determine when this skill applies.
+
+---
+
+### 18. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
+
+**Purpose**: Maintain Structurizr C4 architecture diagrams in sync with code changes
+
+**When activated**:
+
+- Adding new components (controllers, handlers, services, repositories)
+- Creating new entities or aggregates
+- Modifying component relationships or dependencies
+- Implementing new architectural patterns (CQRS, events)
+- Adding infrastructure components
+- After fixing Deptrac violations
+- Creating new bounded contexts
+
+**What it does**:
+
+- Keeps `workspace.dsl` synchronized with codebase changes
+- Ensures C4 model diagrams accurately represent current architecture
+- Guides component identification (what to document vs. skip)
+- Provides DSL syntax reference and relationship patterns
+- Aligns with Deptrac layer configuration
+
+**Key files**: `workspace.dsl` (source of truth, committed to repo)
+
+**Note**: `workspace.json` is generated on-demand by Structurizr Lite from `workspace.dsl` and should not be committed.
+
+**Access**: `http://localhost:${STRUCTURIZR_PORT:-8080}`
+
+**Structure**: Multi-file with comprehensive guides:
+
+- `SKILL.md` (Core workflow and 5-step quick start)
+- `reference/c4-model-guide.md` (C4 fundamentals)
+- `reference/dsl-syntax.md` (Complete DSL syntax)
+- `reference/component-identification.md` (What to document)
+- `reference/relationship-patterns.md` (Common patterns)
+- `reference/workspace-template.md` (Full template)
+- `examples/` (CQRS, API endpoint, domain entity examples)
 
 ---
 

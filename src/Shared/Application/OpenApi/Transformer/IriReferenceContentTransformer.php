@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Transformer;
 
 use function array_map;
-use ArrayObject;
 use function is_array;
 
 final class IriReferenceContentTransformer implements IriReferenceContentTransformerInterface
@@ -18,7 +17,7 @@ final class IriReferenceContentTransformer implements IriReferenceContentTransfo
     /**
      * @return array<string, scalar|array<string, scalar|null>>|null
      */
-    public function transform(ArrayObject $content): ?array
+    public function transform(\ArrayObject $content): ?array
     {
         $original = $content->getArrayCopy();
         $transformed = array_map(
