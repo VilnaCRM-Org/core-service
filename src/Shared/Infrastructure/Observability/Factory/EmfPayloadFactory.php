@@ -7,16 +7,16 @@ namespace App\Shared\Infrastructure\Observability\Factory;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
-use App\Shared\Infrastructure\Observability\Emf\EmfAwsMetadata;
-use App\Shared\Infrastructure\Observability\Emf\EmfCloudWatchMetricConfig;
-use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValue;
-use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValueCollection;
-use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinition;
-use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinitionCollection;
-use App\Shared\Infrastructure\Observability\Emf\EmfMetricValue;
-use App\Shared\Infrastructure\Observability\Emf\EmfMetricValueCollection;
-use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
-use App\Shared\Infrastructure\Observability\Emf\EmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
+use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
+use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
+use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfAwsMetadata;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfCloudWatchMetricConfig;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricDefinition;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfPayload;
 use InvalidArgumentException;
 
 /**
