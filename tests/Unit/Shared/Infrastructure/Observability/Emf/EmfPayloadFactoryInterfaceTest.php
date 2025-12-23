@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Observability\Emf;
 
-use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory;
-use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactoryInterface;
+use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
+use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use App\Tests\Unit\UnitTestCase;
 
 final class EmfPayloadFactoryInterfaceTest extends UnitTestCase

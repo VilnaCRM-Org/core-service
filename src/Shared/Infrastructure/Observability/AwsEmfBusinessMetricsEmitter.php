@@ -8,7 +8,7 @@ use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
-use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactoryInterface;
+use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**

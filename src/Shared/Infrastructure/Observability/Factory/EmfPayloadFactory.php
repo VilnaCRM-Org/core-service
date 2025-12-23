@@ -2,11 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Observability\Emf;
+namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use App\Shared\Infrastructure\Observability\Emf\EmfAwsMetadata;
+use App\Shared\Infrastructure\Observability\Emf\EmfCloudWatchMetricConfig;
+use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValue;
+use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValueCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinition;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinitionCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricValue;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricValueCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
+use App\Shared\Infrastructure\Observability\Emf\EmfTimestampProvider;
 use InvalidArgumentException;
 
 /**

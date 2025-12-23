@@ -6,8 +6,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Emf;
 
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory;
 use App\Shared\Infrastructure\Observability\Emf\EmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;

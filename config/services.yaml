@@ -96,7 +96,7 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
 
-  App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory:
+  App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 

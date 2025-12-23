@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Observability\Emf;
+namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
 
 /**
  * Interface for creating EMF payload objects from business metrics
