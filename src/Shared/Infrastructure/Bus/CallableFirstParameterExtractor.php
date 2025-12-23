@@ -4,46 +4,29 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Bus;
 
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use LogicException;
 use ReflectionClass;
 
 final class CallableFirstParameterExtractor
 {
     /**
-     * @param iterable<DomainEventSubscriberInterface> $callables
+     * @param iterable<object> $callables
      *
-     * @return array<int, string|null>
+     * @return array<string, array<object>>
      */
     public static function forCallables(iterable $callables): array
     {
-        $callableArray = iterator_to_array($callables);
+        $extractor = new self();
+        $result = [];
 
-        $keys = array_map(
-            self::classExtractor(new self()),
-            $callableArray
-        );
+        foreach ($callables as $callable) {
+            $messageClass = $extractor->extract($callable);
+            if ($messageClass !== null) {
+                $result[$messageClass][] = $callable;
+            }
+        }
 
-        $values = array_map(
-            self::unflatten(),
-            $callableArray
-        );
-
-        return array_combine($keys, $values);
-    }
-
-    /**
-     * @param iterable<DomainEventSubscriberInterface> $callables
-     *
-     * @return array<int, array<DomainEventSubscriberInterface>>
-     */
-    public static function forPipedCallables(iterable $callables): array
-    {
-        return array_reduce(
-            iterator_to_array($callables),
-            self::pipedCallablesReducer(),
-            []
-        );
+        return $result;
     }
 
     public function extract(object|string $class): ?string
@@ -56,57 +39,6 @@ final class CallableFirstParameterExtractor
         }
 
         return null;
-    }
-
-    private static function classExtractor(self $parameterExtractor): callable
-    {
-        return static fn (
-            callable $handler
-        ): ?string => self::extractHandler(
-            $parameterExtractor,
-            $handler
-        );
-    }
-
-    private static function extractHandler(
-        self $parameterExtractor,
-        callable $handler
-    ): ?string {
-        return $parameterExtractor->extract($handler);
-    }
-
-    private static function pipedCallablesReducer(): callable
-    {
-        return static fn (
-            array $subscribers,
-            DomainEventSubscriberInterface $subscriber
-        ): array => array_reduce(
-            $subscriber->subscribedTo(),
-            static fn (
-                array $carry,
-                string $event
-            ) => self::addSubscriberToEvent($carry, $event, $subscriber),
-            $subscribers
-        );
-    }
-
-    /**
-     * @param array<DomainEventSubscriberInterface> $subscribers
-     *
-     * @return array<int, array<DomainEventSubscriberInterface>>
-     */
-    private static function addSubscriberToEvent(
-        array $subscribers,
-        string $event,
-        DomainEventSubscriberInterface $subscriber
-    ): array {
-        $subscribers[$event][] = $subscriber;
-        return $subscribers;
-    }
-
-    private static function unflatten(): callable
-    {
-        return static fn ($value) => [$value];
     }
 
     private function firstParameterClassFrom(\ReflectionMethod $method): string

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -12,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private BusinessMetricsEmitterInterface $metrics,
+        private BusinessMetricsEmitterInterface $metricsEmitter,
         private ApiEndpointMetricDimensionsResolver $dimensionsResolver
     ) {
     }
@@ -40,10 +41,13 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
             return;
         }
 
-        $this->metrics->emit(
-            'EndpointInvocations',
-            1,
-            $this->dimensionsResolver->dimensions($request)
+        $dimensions = $this->dimensionsResolver->dimensions($request);
+
+        $this->metricsEmitter->emit(
+            new EndpointInvocationsMetric(
+                endpoint: $dimensions['Endpoint'],
+                operation: $dimensions['Operation']
+            )
         );
     }
 }

@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability;
 
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricCollection;
+
 interface BusinessMetricsEmitterInterface
 {
     /**
-     * @param array<string, string> $dimensions
+     * Emit a single business metric
      */
-    public function emit(
-        string $metricName,
-        float|int $value,
-        array $dimensions = [],
-        string $unit = 'Count'
-    ): void;
+    public function emit(BusinessMetric $metric): void;
 
     /**
-     * @param array<string, array{value: float|int, unit?: string}> $metrics
-     * @param array<string, string> $dimensions
+     * Emit multiple business metrics together
      */
-    public function emitMultiple(array $metrics, array $dimensions = []): void;
+    public function emitCollection(MetricCollection $metrics): void;
 }

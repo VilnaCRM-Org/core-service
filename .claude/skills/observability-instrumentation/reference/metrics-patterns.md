@@ -16,6 +16,84 @@ Business metrics track domain events and business value - things that matter to 
 
 ---
 
+## Architecture: Metric Classes + Event Subscribers
+
+Business metrics use **typed classes** (not arrays) and are emitted via **event subscribers** (not hardcoded in handlers).
+
+### Metric Class Pattern
+
+```php
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricUnit;
+
+final readonly class CustomersCreatedMetric extends BusinessMetric
+{
+    public function __construct(float|int $value = 1)
+    {
+        parent::__construct($value, MetricUnit::COUNT);
+    }
+
+    public function name(): string
+    {
+        return 'CustomersCreated';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function dimensions(): array
+    {
+        return [
+            'Endpoint' => 'Customer',
+            'Operation' => 'create',
+        ];
+    }
+}
+```
+
+### Event Subscriber Pattern
+
+```php
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+
+final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private LoggerInterface $logger
+    ) {}
+
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        try {
+            $this->metricsEmitter->emit(new CustomersCreatedMetric());
+
+            $this->logger->debug('Business metric emitted', [
+                'metric' => 'CustomersCreated',
+                'customer_id' => $event->customerId(),
+            ]);
+        } catch (\Throwable $e) {
+            // Metrics are best-effort: don't fail business operations
+            $this->logger->warning('Failed to emit business metric', [
+                'metric' => 'CustomersCreated',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function subscribedTo(): array
+    {
+        return [CustomerCreatedEvent::class];
+    }
+}
+```
+
+---
+
 ## AWS EMF Format
 
 AWS Embedded Metric Format allows logs to be automatically extracted as CloudWatch metrics.
@@ -35,12 +113,12 @@ AWS Embedded Metric Format allows logs to be automatically extracted as CloudWat
     ]
   },
   "Endpoint": "Customer",
-  "Operation": "_api_/customers_post",
+  "Operation": "create",
   "CustomersCreated": 1
 }
 ```
 
-When written to stdout, CloudWatch automatically:
+When written to stdout via Monolog EMF channel, CloudWatch automatically:
 
 1. Extracts `CustomersCreated` as a metric
 2. Associates it with the `CCore/BusinessMetrics` namespace
@@ -50,49 +128,22 @@ When written to stdout, CloudWatch automatically:
 
 ## Using BusinessMetricsEmitterInterface
 
-### Inject the Interface
-
-```php
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-
-final readonly class CreateCustomerCommandHandler
-{
-    public function __construct(
-        private CustomerRepositoryInterface $repository,
-        private BusinessMetricsEmitterInterface $metrics
-    ) {}
-}
-```
-
 ### Emit Single Metric
 
 ```php
-public function __invoke(CreateCustomerCommand $command): void
-{
-    // ... create customer logic
-
-    $this->metrics->emit('CustomersCreated', 1, [
-        'Endpoint' => 'Customer',
-        'Operation' => 'create',
-    ]);
-}
+// In an event subscriber
+$this->metricsEmitter->emit(new CustomersCreatedMetric());
 ```
 
 ### Emit Multiple Metrics
 
 ```php
-public function __invoke(PlaceOrderCommand $command): void
-{
-    // ... place order logic
+use App\Shared\Application\Observability\Metric\MetricCollection;
 
-    $this->metrics->emitMultiple([
-        'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-        'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-    ], [
-        'Endpoint' => 'Order',
-        'PaymentMethod' => $order->paymentMethod(),
-    ]);
-}
+$this->metricsEmitter->emitCollection(new MetricCollection(
+    new OrdersPlacedMetric($paymentMethod),
+    new OrderValueMetric($totalAmount)
+));
 ```
 
 ---
@@ -153,78 +204,49 @@ High-cardinality dimensions create too many unique metric streams and increase C
 ### Customer Domain
 
 ```php
-// Customer registration
-$this->metrics->emit('CustomersCreated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'create',
-]);
+// Customer registration - via event subscriber
+final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        $this->metricsEmitter->emit(new CustomersCreatedMetric());
+    }
+}
 
-// Customer update
-$this->metrics->emit('CustomersUpdated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'update',
-]);
+// Customer update - via event subscriber
+final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(CustomerUpdatedEvent $event): void
+    {
+        $this->metricsEmitter->emit(new CustomersUpdatedMetric());
+    }
+}
 
-// Customer deletion
-$this->metrics->emit('CustomersDeleted', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'delete',
-]);
+// Customer deletion - via event subscriber
+final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(CustomerDeletedEvent $event): void
+    {
+        $this->metricsEmitter->emit(new CustomersDeletedMetric());
+    }
+}
 ```
 
 ### Order Domain
 
 ```php
-// Order placed
-$this->metrics->emitMultiple([
-    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-    'OrderItemCount' => ['value' => $order->itemCount(), 'unit' => 'Count'],
-], [
-    'Endpoint' => 'Order',
-    'PaymentMethod' => $order->paymentMethod(),
-]);
-
-// Order cancelled
-$this->metrics->emit('OrdersCancelled', 1, [
-    'Endpoint' => 'Order',
-    'CancellationReason' => $reason,
-]);
-```
-
-### Payment Domain
-
-```php
-// Payment processed
-$this->metrics->emitMultiple([
-    'PaymentsProcessed' => ['value' => 1, 'unit' => 'Count'],
-    'PaymentAmount' => ['value' => $payment->amount(), 'unit' => 'None'],
-], [
-    'Endpoint' => 'Payment',
-    'PaymentProvider' => $payment->provider(),
-    'PaymentMethod' => $payment->method(),
-]);
-
-// Payment failed
-$this->metrics->emit('PaymentsFailed', 1, [
-    'Endpoint' => 'Payment',
-    'FailureReason' => $failureCategory, // Low cardinality: 'insufficient_funds', 'expired_card', etc.
-]);
-```
-
-### Authentication Domain
-
-```php
-// Login attempt
-$this->metrics->emit('LoginAttempts', 1, [
-    'Endpoint' => 'Auth',
-    'Result' => $success ? 'success' : 'failure',
-]);
-
-// Password reset requested
-$this->metrics->emit('PasswordResetsRequested', 1, [
-    'Endpoint' => 'Auth',
-]);
+// Order placed - multiple metrics
+final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(OrderPlacedEvent $event): void
+    {
+        $this->metricsEmitter->emitCollection(new MetricCollection(
+            new OrdersPlacedMetric($event->paymentMethod()),
+            new OrderValueMetric($event->totalAmount()),
+            new OrderItemCountMetric($event->itemCount())
+        ));
+    }
+}
 ```
 
 ---
@@ -288,14 +310,17 @@ Use the spy in unit tests:
 ```php
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
-final class CreateCustomerCommandHandlerTest extends TestCase
+final class CustomerCreatedMetricsSubscriberTest extends TestCase
 {
     public function testEmitsCustomerCreatedMetric(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
-        $handler = new CreateCustomerCommandHandler($repository, $metricsSpy);
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $handler(new CreateCustomerCommand(/* ... */));
+        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+
+        $event = new CustomerCreatedEvent($customerId, $email);
+        ($subscriber)($event);
 
         $emitted = $metricsSpy->emitted();
         self::assertCount(1, $emitted);
@@ -307,9 +332,12 @@ final class CreateCustomerCommandHandlerTest extends TestCase
     public function testEmitsMetricWithCorrectDimensions(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
-        $handler = new CreateCustomerCommandHandler($repository, $metricsSpy);
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $handler(new CreateCustomerCommand(/* ... */));
+        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+
+        $event = new CustomerCreatedEvent($customerId, $email);
+        ($subscriber)($event);
 
         $metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
             'Endpoint' => 'Customer',
@@ -323,12 +351,13 @@ final class CreateCustomerCommandHandlerTest extends TestCase
 
 ## Success Criteria
 
-- ✅ Business metrics track domain events (not infrastructure)
-- ✅ Metrics use PascalCase naming convention
-- ✅ Dimensions have low cardinality (no IDs, timestamps)
-- ✅ Unit tests verify metric emission
-- ✅ EMF format outputs to stdout for CloudWatch extraction
-- ✅ Namespace is `CCore/BusinessMetrics`
+- Metrics use typed classes extending `BusinessMetric`
+- Metrics are emitted via domain event subscribers (not in handlers)
+- Metric names use PascalCase naming convention
+- Dimensions have low cardinality (no IDs, timestamps)
+- Unit tests verify metric emission
+- EMF format outputs to stdout via Monolog for CloudWatch extraction
+- Namespace is `CCore/BusinessMetrics`
 
 ---
 

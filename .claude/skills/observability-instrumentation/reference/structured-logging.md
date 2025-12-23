@@ -106,13 +106,15 @@ $this->logger->error('Operation failed', [
 
 ## Logging in Command Handlers
 
+Note: Business metrics should NOT be emitted in command handlers. Use domain event subscribers instead (see [Metrics Patterns](metrics-patterns.md)).
+
 ```php
 final readonly class CreateCustomerCommandHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private BusinessMetricsEmitterInterface $metrics,
-        // ... other dependencies
+        private CustomerRepositoryInterface $repository,
+        private EventBusInterface $eventBus
     ) {}
 
     public function __invoke(CreateCustomerCommand $command): void
@@ -125,7 +127,8 @@ final readonly class CreateCustomerCommandHandler
 
         try {
             // Execute operation
-            $customer = $this->execute($command);
+            $customer = $this->createCustomer($command);
+            $this->repository->save($customer);
 
             // Log success
             $this->logger->info('Command processed successfully', [
@@ -133,11 +136,11 @@ final readonly class CreateCustomerCommandHandler
                 'customer_id' => $customer->id(),
             ]);
 
-            // Emit business metric
-            $this->metrics->emit('CustomersCreated', 1, [
-                'Endpoint' => 'Customer',
-                'Operation' => 'create',
-            ]);
+            // Publish domain event - metrics subscriber will emit metrics
+            $this->eventBus->publish(new CustomerCreatedEvent(
+                $customer->id(),
+                $customer->email()
+            ));
 
         } catch (\Throwable $e) {
             // Log error

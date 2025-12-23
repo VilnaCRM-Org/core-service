@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Shared\Application\Observability\Metric;
+
+/**
+ * Base class for business metrics
+ *
+ * Each metric type should extend this class and provide
+ * its own name, dimensions, and default unit.
+ */
+abstract readonly class BusinessMetric
+{
+    public function __construct(
+        private float|int $value,
+        private MetricUnit $unit
+    ) {
+    }
+
+    abstract public function name(): string;
+
+    /**
+     * @return array<string, string>
+     */
+    abstract public function dimensions(): array;
+
+    public function value(): float|int
+    {
+        return $this->value;
+    }
+
+    public function unit(): MetricUnit
+    {
+        return $this->unit;
+    }
+}

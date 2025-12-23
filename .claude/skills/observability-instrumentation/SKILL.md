@@ -11,7 +11,8 @@ Instrument API endpoints with **business metrics** using AWS CloudWatch Embedded
 
 - **Business metrics** - Domain events (customers created, orders placed, payments processed)
 - **AWS EMF format** - Logs that automatically become CloudWatch metrics
-- **Endpoint instrumentation** - Per-endpoint business metric emission
+- **Event subscribers** - Metrics emitted via domain event subscribers (not in handlers)
+- **Type-safe metrics** - Concrete metric classes instead of arrays
 
 ## What This Skill Does NOT Cover
 
@@ -24,45 +25,115 @@ Instrument API endpoints with **business metrics** using AWS CloudWatch Embedded
 Use this skill when:
 
 - Implementing new API endpoints that have business significance
-- Adding command handlers that create/modify business entities
+- Adding domain events that should trigger metric emission
 - Tracking domain events for analytics and business intelligence
 - Building dashboards for business KPIs
 
 ---
 
+## Architecture Overview
+
+Business metrics follow these patterns:
+
+1. **Metric classes** - Each metric type is a concrete class extending `BusinessMetric`
+2. **Event subscribers** - Metrics are emitted via domain event subscribers (not hardcoded in handlers)
+3. **Symfony logger** - EMF output goes through Monolog with a custom EMF formatter
+4. **No arrays** - All metric configuration uses typed objects, not arrays
+
+---
+
 ## Current Implementation
 
-The codebase already has AWS EMF business metrics implemented:
+### Metric Base Class (Application Layer)
 
-### Interface (Application Layer)
+```php
+// src/Shared/Application/Observability/Metric/BusinessMetric.php
+abstract readonly class BusinessMetric
+{
+    public function __construct(
+        private float|int $value,
+        private MetricUnit $unit
+    ) {}
+
+    abstract public function name(): string;
+    abstract public function dimensions(): array;
+
+    public function value(): float|int { return $this->value; }
+    public function unit(): MetricUnit { return $this->unit; }
+}
+```
+
+### Concrete Metric Example
+
+```php
+// src/Core/Customer/Application/Metric/CustomersCreatedMetric.php
+final readonly class CustomersCreatedMetric extends BusinessMetric
+{
+    public function __construct(float|int $value = 1)
+    {
+        parent::__construct($value, MetricUnit::COUNT);
+    }
+
+    public function name(): string
+    {
+        return 'CustomersCreated';
+    }
+
+    public function dimensions(): array
+    {
+        return [
+            'Endpoint' => 'Customer',
+            'Operation' => 'create',
+        ];
+    }
+}
+```
+
+### Emitter Interface (Application Layer)
 
 ```php
 // src/Shared/Application/Observability/BusinessMetricsEmitterInterface.php
 interface BusinessMetricsEmitterInterface
 {
-    public function emit(
-        string $metricName,
-        float|int $value,
-        array $dimensions = [],
-        string $unit = 'Count'
-    ): void;
-
-    public function emitMultiple(array $metrics, array $dimensions = []): void;
+    public function emit(BusinessMetric $metric): void;
+    public function emitCollection(MetricCollection $metrics): void;
 }
 ```
 
-### Implementation (Infrastructure Layer)
+### Metrics Event Subscriber
 
 ```php
-// src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php
-// Outputs AWS EMF JSON format to stdout - CloudWatch extracts metrics automatically
-```
+// src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php
+final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private LoggerInterface $logger
+    ) {}
 
-### Automatic Endpoint Metrics
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        try {
+            $this->metricsEmitter->emit(new CustomersCreatedMetric());
 
-```php
-// src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php
-// Automatically emits 'EndpointInvocations' metric for every /api request
+            $this->logger->debug('Business metric emitted', [
+                'metric' => 'CustomersCreated',
+                'customer_id' => $event->customerId(),
+            ]);
+        } catch (\Throwable $e) {
+            // Metrics are best-effort: don't fail business operations
+            $this->logger->warning('Failed to emit business metric', [
+                'metric' => 'CustomersCreated',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function subscribedTo(): array
+    {
+        return [CustomerCreatedEvent::class];
+    }
+}
 ```
 
 ---
@@ -81,107 +152,102 @@ AWS Embedded Metric Format allows you to embed custom metrics in structured log 
       {
         "Namespace": "CCore/BusinessMetrics",
         "Dimensions": [["Endpoint", "Operation"]],
-        "Metrics": [{ "Name": "EndpointInvocations", "Unit": "Count" }]
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
       }
     ]
   },
   "Endpoint": "Customer",
-  "Operation": "_api_/customers_post",
-  "EndpointInvocations": 1
+  "Operation": "create",
+  "CustomersCreated": 1
 }
 ```
 
-When this log is written to stdout, CloudWatch automatically:
+When this log is written to stdout via the EMF Monolog channel, CloudWatch automatically:
 
-1. Extracts `EndpointInvocations` as a metric
+1. Extracts `CustomersCreated` as a metric
 2. Associates it with the `CCore/BusinessMetrics` namespace
 3. Applies dimensions `Endpoint` and `Operation`
 
 ---
 
-## Using Business Metrics
+## Creating New Business Metrics
 
-### Inject the Interface
+### Step 1: Create the Metric Class
 
 ```php
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+// src/Core/Order/Application/Metric/OrdersPlacedMetric.php
+namespace App\Core\Order\Application\Metric;
 
-final readonly class YourCommandHandler
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricUnit;
+
+final readonly class OrdersPlacedMetric extends BusinessMetric
 {
     public function __construct(
-        private YourRepository $repository,
-        private BusinessMetricsEmitterInterface $metrics
-    ) {}
+        private string $paymentMethod,
+        float|int $value = 1
+    ) {
+        parent::__construct($value, MetricUnit::COUNT);
+    }
+
+    public function name(): string
+    {
+        return 'OrdersPlaced';
+    }
+
+    public function dimensions(): array
+    {
+        return [
+            'Endpoint' => 'Order',
+            'Operation' => 'create',
+            'PaymentMethod' => $this->paymentMethod,
+        ];
+    }
 }
 ```
 
-### Emit Single Metric
+### Step 2: Create the Event Subscriber
 
 ```php
-// When a customer is created
-$this->metrics->emit('CustomersCreated', 1, [
-    'Endpoint' => '/api/customers',
-    'Operation' => 'create',
-]);
+// src/Core/Order/Application/EventSubscriber/OrderPlacedMetricsSubscriber.php
+namespace App\Core\Order\Application\EventSubscriber;
+
+final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private LoggerInterface $logger
+    ) {}
+
+    public function __invoke(OrderPlacedEvent $event): void
+    {
+        try {
+            $this->metricsEmitter->emit(
+                new OrdersPlacedMetric($event->paymentMethod())
+            );
+        } catch (\Throwable $e) {
+            $this->logger->warning('Failed to emit business metric', [
+                'metric' => 'OrdersPlaced',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function subscribedTo(): array
+    {
+        return [OrderPlacedEvent::class];
+    }
+}
 ```
 
-### Emit Multiple Metrics
+### Step 3: For Multiple Metrics - Use MetricCollection
 
 ```php
-// When an order is placed - track count and value
-$this->metrics->emitMultiple([
-    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-], [
-    'Endpoint' => '/api/orders',
-    'PaymentMethod' => $order->paymentMethod(),
-]);
-```
-
----
-
-## Business Metrics by Domain
-
-### Customer Domain
-
-```php
-// Registration
-$this->metrics->emit('CustomersCreated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'create',
-]);
-
-// Profile update
-$this->metrics->emit('CustomersUpdated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'update',
-]);
-```
-
-### Order Domain
-
-```php
-// Order placed
-$this->metrics->emitMultiple([
-    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-], [
-    'Endpoint' => 'Order',
-    'PaymentMethod' => $order->paymentMethod(),
-]);
-```
-
-### Payment Domain
-
-```php
-// Payment processed
-$this->metrics->emitMultiple([
-    'PaymentsProcessed' => ['value' => 1, 'unit' => 'Count'],
-    'PaymentAmount' => ['value' => $payment->amount(), 'unit' => 'None'],
-], [
-    'Endpoint' => 'Payment',
-    'PaymentProvider' => $payment->provider(),
-]);
+// Emit multiple metrics together
+$this->metricsEmitter->emitCollection(new MetricCollection(
+    new OrdersPlacedMetric($event->paymentMethod()),
+    new OrderValueMetric($event->totalAmount())
+));
 ```
 
 ---
@@ -241,14 +307,17 @@ These create too many unique metric streams and increase CloudWatch costs.
 ```php
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
-final class YourCommandHandlerTest extends TestCase
+final class CustomerCreatedMetricsSubscriberTest extends TestCase
 {
-    public function testEmitsBusinessMetric(): void
+    public function testEmitsMetricOnCustomerCreated(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
-        $handler = new YourCommandHandler($repository, $metricsSpy);
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $handler(new YourCommand(/* ... */));
+        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+
+        $event = new CustomerCreatedEvent($customerId, $email);
+        ($subscriber)($event);
 
         $emitted = $metricsSpy->emitted();
         self::assertCount(1, $emitted);
@@ -260,7 +329,7 @@ final class YourCommandHandlerTest extends TestCase
 
 ### Test Service Configuration
 
-In `config/services_test.yaml`, the spy is already configured:
+In `config/services_test.yaml`, the spy is configured:
 
 ```yaml
 App\Shared\Application\Observability\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
@@ -314,34 +383,43 @@ Remember: AWS AppRunner already provides infrastructure metrics.
 
 After implementing business metrics:
 
-- Each API endpoint emits relevant business metrics
-- Metrics follow EMF format for CloudWatch extraction
+- Each domain event that needs tracking has a corresponding metric subscriber
+- Metrics use typed classes (not arrays)
+- Metrics are emitted via event subscribers (not hardcoded in handlers)
 - Dimensions provide meaningful segmentation
 - Unit tests verify metric emission
 - No infrastructure metrics (AppRunner handles those)
-- Metrics focus on business value, not technical performance
 
 ---
 
 ## Files Reference
 
-### Implementation Files
+### Metric Classes
+
+- `src/Shared/Application/Observability/Metric/BusinessMetric.php` - Base class
+- `src/Shared/Application/Observability/Metric/MetricUnit.php` - Unit enum
+- `src/Shared/Application/Observability/Metric/MetricCollection.php` - Collection
+- `src/Shared/Application/Observability/Metric/EndpointInvocationsMetric.php` - Endpoint metric
+- `src/Core/Customer/Application/Metric/CustomersCreatedMetric.php` - Customer create metric
+- `src/Core/Customer/Application/Metric/CustomersUpdatedMetric.php` - Customer update metric
+- `src/Core/Customer/Application/Metric/CustomersDeletedMetric.php` - Customer delete metric
+
+### Infrastructure
 
 - `src/Shared/Application/Observability/BusinessMetricsEmitterInterface.php` - Interface
 - `src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php` - EMF implementation
-- `src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php` - Auto metrics
-- `src/Shared/Infrastructure/Observability/ApiEndpointMetricDimensionsResolver.php` - Dimension resolver
+- `src/Shared/Infrastructure/Observability/EmfLogFormatter.php` - Monolog formatter
 
-### Test Files
+### Event Subscribers
 
-- `tests/Unit/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitterTest.php`
-- `tests/Unit/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriberTest.php`
-- `tests/Unit/Shared/Infrastructure/Observability/ApiEndpointMetricDimensionsResolverTest.php`
-- `tests/Unit/Shared/Infrastructure/Observability/BusinessMetricsEmitterSpy.php`
-- `tests/Integration/ObservabilityBusinessMetricsTest.php`
+- `src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php` - HTTP metrics
+- `src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php`
+- `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedMetricsSubscriber.php`
+- `src/Core/Customer/Application/EventSubscriber/CustomerDeletedMetricsSubscriber.php`
 
 ### Configuration
 
+- `config/packages/monolog.yaml` - EMF channel configuration
 - `config/services.yaml` - Production wiring
 - `config/services_test.yaml` - Test spy wiring
 

@@ -4,243 +4,155 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
+use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
+use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter;
+use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
+use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
+use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;
 use Psr\Log\LoggerInterface;
 
 final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 {
-    private const NAMESPACE = 'CCore/BusinessMetrics';
+    private const string NAMESPACE = 'CCore/BusinessMetrics';
 
-    public function testEmitsValidEmfJsonForSingleMetric(): void
+    /** @var array<string, mixed>|null */
+    private ?array $capturedContext = null;
+
+    public function testEmitsValidEmfPayloadForSingleMetric(): void
     {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
-
         $before = (int) (microtime(true) * 1000);
+        $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
-        $emitter->emit('EndpointInvocations', 1, [
-            'Endpoint' => 'HealthCheck',
-            'Operation' => 'get',
-        ]);
+        $emitter->emit(new EndpointInvocationsMetric('HealthCheck', 'get'));
 
-        $contents = file_get_contents($file);
-        unlink($file);
-
-        self::assertIsString($contents);
-        self::assertTrue(str_starts_with($contents, '{'));
-        self::assertTrue(str_ends_with($contents, "\n"));
-
-        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
-
-        self::assertArrayHasKey('_aws', $payload);
-        self::assertIsInt($payload['_aws']['Timestamp']);
-        self::assertGreaterThanOrEqual($before, $payload['_aws']['Timestamp']);
-        self::assertLessThanOrEqual($before + 10_000, $payload['_aws']['Timestamp']);
-
-        self::assertSame(1, $payload['EndpointInvocations']);
-        self::assertSame('HealthCheck', $payload['Endpoint']);
-        self::assertSame('get', $payload['Operation']);
-
-        self::assertSame('CCore/BusinessMetrics', $payload['_aws']['CloudWatchMetrics'][0]['Namespace']);
-        self::assertSame([['Endpoint', 'Operation']], $payload['_aws']['CloudWatchMetrics'][0]['Dimensions']);
-        self::assertSame('EndpointInvocations', $payload['_aws']['CloudWatchMetrics'][0]['Metrics'][0]['Name']);
-        self::assertSame('Count', $payload['_aws']['CloudWatchMetrics'][0]['Metrics'][0]['Unit']);
+        $this->assertTimestampWithinRange($before);
+        $this->assertSingleMetricValues();
+        $this->assertSingleMetricEmfStructure();
     }
 
-    public function testEmitsValidEmfJsonForMultipleMetrics(): void
+    public function testEmitsValidEmfPayloadForMetricCollection(): void
     {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
-
         $before = (int) (microtime(true) * 1000);
+        $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
-        $emitter->emitMultiple([
-            'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-            'OrderValue' => ['value' => 99.9, 'unit' => 'None'],
-        ], [
-            'Endpoint' => 'Order',
-            'Operation' => 'create',
-        ]);
+        $emitter->emitCollection($this->createOrderMetricCollection());
 
-        $contents = file_get_contents($file);
-        unlink($file);
-
-        self::assertIsString($contents);
-        self::assertTrue(str_starts_with($contents, '{'));
-        self::assertTrue(str_ends_with($contents, "\n"));
-
-        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
-
-        self::assertArrayHasKey('_aws', $payload);
-        self::assertIsInt($payload['_aws']['Timestamp']);
-        self::assertGreaterThanOrEqual($before, $payload['_aws']['Timestamp']);
-        self::assertLessThanOrEqual($before + 10_000, $payload['_aws']['Timestamp']);
-
-        self::assertSame(1, $payload['OrdersPlaced']);
-        self::assertSame(99.9, $payload['OrderValue']);
-        self::assertSame('Order', $payload['Endpoint']);
-        self::assertSame('create', $payload['Operation']);
-
-        $cw = $payload['_aws']['CloudWatchMetrics'][0];
-        self::assertSame('CCore/BusinessMetrics', $cw['Namespace']);
-        self::assertSame([['Endpoint', 'Operation']], $cw['Dimensions']);
-
-        $metrics = $cw['Metrics'];
-        self::assertCount(2, $metrics);
-        self::assertSame(['Name' => 'OrdersPlaced', 'Unit' => 'Count'], $metrics[0]);
-        self::assertSame(['Name' => 'OrderValue', 'Unit' => 'None'], $metrics[1]);
-    }
-
-    public function testMetricValueOverwritesDimensionOnCollision(): void
-    {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
-
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
-        $emitter->emit('Endpoint', 42, ['Endpoint' => 'Customer', 'Operation' => 'create']);
-
-        $contents = file_get_contents($file);
-        unlink($file);
-
-        self::assertIsString($contents);
-        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
-
-        // Metric value should overwrite dimension value when keys collide
-        self::assertSame(42, $payload['Endpoint']);
-        self::assertSame('create', $payload['Operation']);
+        $this->assertTimestampWithinRange($before);
+        $this->assertCollectionMetricValues();
+        $this->assertCollectionEmfStructure();
     }
 
     public function testUsesCustomNamespace(): void
     {
         $customNamespace = 'CustomApp/Metrics';
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
+        $emitter = $this->createEmitterWithContextCapture($customNamespace);
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($customNamespace, $file);
-        $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+        $emitter->emit(new EndpointInvocationsMetric('Test', 'test'));
 
-        $contents = file_get_contents($file);
-        unlink($file);
-
-        self::assertIsString($contents);
-        $payload = json_decode(rtrim($contents, "\n"), true, flags: JSON_THROW_ON_ERROR);
-
-        self::assertSame($customNamespace, $payload['_aws']['CloudWatchMetrics'][0]['Namespace']);
+        $namespace = $this->capturedContext['_aws']['CloudWatchMetrics'][0]['Namespace'];
+        self::assertSame($customNamespace, $namespace);
     }
 
-    public function testDoesNotThrowWhenJsonEncodingFails(): void
+    public function testDoesNotEmitForEmptyCollection(): void
     {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->never())->method('info');
 
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
-
-        // Invalid UTF-8 -> json_encode(JSON_THROW_ON_ERROR) throws, but emitter must swallow it.
-        $emitter->emit("\xB1", 1, ['Endpoint' => "\xB1", 'Operation' => 'get']);
-
-        $contents = file_get_contents($file);
-        unlink($file);
-
-        self::assertIsString($contents);
-        self::assertSame('', $contents);
+        $emitter = new AwsEmfBusinessMetricsEmitter($logger);
+        $emitter->emitCollection(new MetricCollection());
     }
 
-    public function testThrowsRuntimeExceptionWhenFileWriteFails(): void
+    public function testMetricValueIsCorrectlySet(): void
     {
-        // Use a directory path (not a file) to force file_put_contents to fail
-        $invalidPath = sys_get_temp_dir() . '/non_existent_dir_' . uniqid() . '/file.log';
+        $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $invalidPath);
+        $emitter->emit(new EndpointInvocationsMetric('Customer', 'create', 42));
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Failed to open stream');
-
-        $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
+        self::assertSame(42, $this->capturedContext['EndpointInvocations']);
     }
 
-    public function testLogsErrorWithExceptionDetailsWhenJsonEncodingFails(): void
+    public function testCollectionUsesDimensionsFromFirstMetric(): void
     {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
+        $emitter = $this->createEmitterWithContextCapture();
 
+        $collection = new MetricCollection(
+            new TestOrdersPlacedMetric(1),
+            new TestCustomerMetric(1)
+        );
+        $emitter->emitCollection($collection);
+
+        self::assertSame('Order', $this->capturedContext['Endpoint']);
+        self::assertSame('create', $this->capturedContext['Operation']);
+        $dims = $this->capturedContext['_aws']['CloudWatchMetrics'][0]['Dimensions'];
+        self::assertSame([['Endpoint', 'Operation']], $dims);
+    }
+
+    private function createEmitterWithContextCapture(
+        string $namespace = self::NAMESPACE
+    ): AwsEmfBusinessMetricsEmitter {
         $logger = $this->createMock(LoggerInterface::class);
         $logger
-            ->expects(self::once())
-            ->method('error')
-            ->with(
-                'Failed to encode EMF log to JSON',
-                self::callback(static function (array $context): bool {
-                    return isset($context['exception'])
-                        && is_string($context['exception'])
-                        && str_contains($context['exception'], 'Malformed UTF-8');
-                })
-            );
+            ->expects($this->once())
+            ->method('info')
+            ->with('', $this->callback(function (array $context): bool {
+                $this->capturedContext = $context;
 
-        $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file, $logger);
+                return true;
+            }));
 
-        // Invalid UTF-8 triggers JsonException
-        $emitter->emit("\xB1", 1, ['Endpoint' => "\xB1", 'Operation' => 'get']);
-
-        unlink($file);
+        return new AwsEmfBusinessMetricsEmitter($logger, $namespace);
     }
 
-    public function testRestoresErrorHandlerAfterSuccessfulWrite(): void
+    private function createOrderMetricCollection(): MetricCollection
     {
-        $file = tempnam(sys_get_temp_dir(), 'emf_');
-        self::assertIsString($file);
-
-        // Set a custom handler BEFORE emit
-        $testHandlerCalled = false;
-        set_error_handler(static function () use (&$testHandlerCalled): bool {
-            $testHandlerCalled = true;
-
-            return true;
-        });
-
-        try {
-            $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $file);
-            $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
-            unlink($file);
-
-            // After emit, trigger a warning - should call our handler, not throw
-            trigger_error('Test warning', E_USER_WARNING);
-        } finally {
-            restore_error_handler();
-        }
-
-        self::assertTrue($testHandlerCalled, 'Original error handler was not restored');
+        return new MetricCollection(
+            new TestOrdersPlacedMetric(1),
+            new TestOrderValueMetric(99.9)
+        );
     }
 
-    public function testRestoresErrorHandlerEvenWhenWriteFails(): void
+    private function assertTimestampWithinRange(int $before): void
     {
-        $invalidPath = sys_get_temp_dir() . '/non_existent_dir_' . uniqid() . '/file.log';
+        self::assertArrayHasKey('_aws', $this->capturedContext);
+        self::assertIsInt($this->capturedContext['_aws']['Timestamp']);
+        self::assertGreaterThanOrEqual($before, $this->capturedContext['_aws']['Timestamp']);
+        self::assertLessThanOrEqual($before + 10_000, $this->capturedContext['_aws']['Timestamp']);
+    }
 
-        // Set a custom handler BEFORE emit
-        $testHandlerCalled = false;
-        set_error_handler(static function () use (&$testHandlerCalled): bool {
-            $testHandlerCalled = true;
+    private function assertSingleMetricValues(): void
+    {
+        self::assertSame(1, $this->capturedContext['EndpointInvocations']);
+        self::assertSame('HealthCheck', $this->capturedContext['Endpoint']);
+        self::assertSame('get', $this->capturedContext['Operation']);
+    }
 
-            return true;
-        });
+    private function assertSingleMetricEmfStructure(): void
+    {
+        $cw = $this->capturedContext['_aws']['CloudWatchMetrics'][0];
+        self::assertSame(self::NAMESPACE, $cw['Namespace']);
+        self::assertSame([['Endpoint', 'Operation']], $cw['Dimensions']);
+        self::assertSame('EndpointInvocations', $cw['Metrics'][0]['Name']);
+        self::assertSame('Count', $cw['Metrics'][0]['Unit']);
+    }
 
-        try {
-            $emitter = new AwsEmfBusinessMetricsEmitter(self::NAMESPACE, $invalidPath);
-            try {
-                $emitter->emit('TestMetric', 1, ['Endpoint' => 'Test', 'Operation' => 'test']);
-                self::fail('Expected RuntimeException was not thrown');
-            } catch (\RuntimeException) {
-                // Expected - the emit failed
-            }
+    private function assertCollectionMetricValues(): void
+    {
+        self::assertSame(1, $this->capturedContext['OrdersPlaced']);
+        self::assertSame(99.9, $this->capturedContext['OrderValue']);
+        self::assertSame('Order', $this->capturedContext['Endpoint']);
+        self::assertSame('create', $this->capturedContext['Operation']);
+    }
 
-            // After emit fails, trigger a warning - should call our handler, not throw
-            trigger_error('Test warning', E_USER_WARNING);
-        } finally {
-            restore_error_handler();
-        }
-
-        self::assertTrue($testHandlerCalled, 'Original error handler was not restored');
+    private function assertCollectionEmfStructure(): void
+    {
+        $cw = $this->capturedContext['_aws']['CloudWatchMetrics'][0];
+        self::assertSame(self::NAMESPACE, $cw['Namespace']);
+        self::assertSame([['Endpoint', 'Operation']], $cw['Dimensions']);
+        $metrics = $cw['Metrics'];
+        self::assertCount(2, $metrics);
+        self::assertSame(['Name' => 'OrdersPlaced', 'Unit' => 'Count'], $metrics[0]);
+        self::assertSame(['Name' => 'OrderValue', 'Unit' => 'None'], $metrics[1]);
     }
 }

@@ -5,32 +5,91 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricCollection;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
+/**
+ * AWS EMF (Embedded Metric Format) Business Metrics Emitter
+ *
+ * Emits business metrics in AWS EMF format via Symfony logger.
+ * CloudWatch automatically extracts metrics from EMF-formatted logs.
+ */
 final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmitterInterface
 {
+    private const string DEFAULT_NAMESPACE = 'CCore/BusinessMetrics';
+
     public function __construct(
-        private string $namespace = 'CCore/BusinessMetrics',
-        private string $output = 'php://stdout',
-        private ?LoggerInterface $logger = null
+        private LoggerInterface $logger,
+        private string $namespace = self::DEFAULT_NAMESPACE
     ) {
+    }
+
+    public function emit(BusinessMetric $metric): void
+    {
+        $emfLog = $this->buildEmfPayload($metric);
+
+        $this->writeEmfLog($emfLog);
+    }
+
+    public function emitCollection(MetricCollection $metrics): void
+    {
+        if ($metrics->isEmpty()) {
+            return;
+        }
+
+        $allMetrics = $metrics->all();
+        $firstMetric = $allMetrics[0];
+
+        $emfLog = $this->buildEmfPayloadForCollection($allMetrics, $firstMetric->dimensions());
+
+        $this->writeEmfLog($emfLog);
+    }
+
+    /**
+     * @return array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>>
+     */
+    private function buildEmfPayload(BusinessMetric $metric): array
+    {
+        $dimensions = $metric->dimensions();
+
+        $emfLog = $this->createBaseEmfLog($dimensions, $metric->name(), $metric->unit()->value);
+
+        return array_merge($emfLog, $dimensions, [$metric->name() => $metric->value()]);
+    }
+
+    /**
+     * @param array<int, BusinessMetric> $metrics
+     * @param array<string, string> $dimensions
+     *
+     * @return array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>>
+     */
+    private function buildEmfPayloadForCollection(array $metrics, array $dimensions): array
+    {
+        $emfLog = $this->createCollectionBaseEmfLog($dimensions);
+        $emfLog = array_merge($emfLog, $dimensions);
+
+        foreach ($metrics as $metric) {
+            $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
+                'Name' => $metric->name(),
+                'Unit' => $metric->unit()->value,
+            ];
+            $emfLog[$metric->name()] = $metric->value();
+        }
+
+        return $emfLog;
     }
 
     /**
      * @param array<string, string> $dimensions
+     *
+     * @return array<string, int|array<int, array<string, string|array<int, array<int, string>|array<string, string>>>>>
      */
-    public function emit(
-        string $metricName,
-        float|int $value,
-        array $dimensions = [],
-        string $unit = 'Count'
-    ): void {
-        $timestamp = (int) (microtime(true) * 1000);
-
-        $emfLog = [
+    private function createBaseEmfLog(array $dimensions, string $metricName, string $unit): array
+    {
+        return [
             '_aws' => [
-                'Timestamp' => $timestamp,
+                'Timestamp' => $this->currentTimestamp(),
                 'CloudWatchMetrics' => [
                     [
                         'Namespace' => $this->namespace,
@@ -42,44 +101,18 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
                 ],
             ],
         ];
-
-        $emfLog = array_merge($emfLog, $dimensions, [$metricName => $value]);
-
-        $this->write($emfLog);
-    }
-
-    /**
-     * @param array<string, array{value: float|int, unit?: string}> $metrics
-     * @param array<string, string> $dimensions
-     */
-    public function emitMultiple(array $metrics, array $dimensions = []): void
-    {
-        $emfLog = $this->createBaseEmfLog($dimensions);
-        $emfLog = array_merge($emfLog, $dimensions);
-
-        foreach ($metrics as $name => $config) {
-            $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
-                'Name' => $name,
-                'Unit' => $config['unit'] ?? 'Count',
-            ];
-            $emfLog[$name] = $config['value'];
-        }
-
-        $this->write($emfLog);
     }
 
     /**
      * @param array<string, string> $dimensions
      *
-     * @return array<string, bool|int|float|string|array|null>
+     * @return array<string, int|array<int, array<string, string|array<int, array<int, string>|array<int, never>>>>>
      */
-    private function createBaseEmfLog(array $dimensions): array
+    private function createCollectionBaseEmfLog(array $dimensions): array
     {
-        $timestamp = (int) (microtime(true) * 1000);
-
         return [
             '_aws' => [
-                'Timestamp' => $timestamp,
+                'Timestamp' => $this->currentTimestamp(),
                 'CloudWatchMetrics' => [
                     [
                         'Namespace' => $this->namespace,
@@ -92,33 +125,15 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     }
 
     /**
-     * @param array<string, bool|int|float|string|array|null> $emfLog
+     * @param array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>> $emfLog
      */
-    private function write(array $emfLog): void
+    private function writeEmfLog(array $emfLog): void
     {
-        try {
-            $json = json_encode($emfLog, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            $this->logger?->error('Failed to encode EMF log to JSON', [
-                'exception' => $e->getMessage(),
-            ]);
-
-            return;
-        }
-
-        $this->writeToOutput($json);
+        $this->logger->info('', $emfLog);
     }
 
-    private function writeToOutput(string $json): void
+    private function currentTimestamp(): int
     {
-        set_error_handler(static function (int $severity, string $message): never {
-            throw new RuntimeException($message);
-        });
-
-        try {
-            file_put_contents($this->output, $json . "\n", FILE_APPEND);
-        } finally {
-            restore_error_handler();
-        }
+        return (int) (microtime(true) * 1000);
     }
 }

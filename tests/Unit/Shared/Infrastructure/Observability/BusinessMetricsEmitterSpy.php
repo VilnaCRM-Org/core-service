@@ -5,30 +5,36 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricCollection;
 
+/**
+ * @phpstan-type MetricRecord array{
+ *     name: string,
+ *     value: float|int,
+ *     dimensions: array<string, string>,
+ *     unit: string
+ * }
+ */
 final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
 {
-    /** @var array<int, array{name: string, value: float|int, dimensions: array<string, string>, unit: string}> */
+    /** @var array<int, MetricRecord> */
     private array $emitted = [];
 
-    public function emit(
-        string $metricName,
-        float|int $value,
-        array $dimensions = [],
-        string $unit = 'Count'
-    ): void {
+    public function emit(BusinessMetric $metric): void
+    {
         $this->emitted[] = [
-            'name' => $metricName,
-            'value' => $value,
-            'dimensions' => $dimensions,
-            'unit' => $unit,
+            'name' => $metric->name(),
+            'value' => $metric->value(),
+            'dimensions' => $metric->dimensions(),
+            'unit' => $metric->unit()->value,
         ];
     }
 
-    public function emitMultiple(array $metrics, array $dimensions = []): void
+    public function emitCollection(MetricCollection $metrics): void
     {
-        foreach ($metrics as $name => $config) {
-            $this->emit($name, $config['value'], $dimensions, $config['unit'] ?? 'Count');
+        foreach ($metrics as $metric) {
+            $this->emit($metric);
         }
     }
 
@@ -38,13 +44,16 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     }
 
     /**
-     * @return array<int, array{name: string, value: float|int, dimensions: array<string, string>, unit: string}>
+     * @return array<int, MetricRecord>
      */
     public function emitted(): array
     {
         return $this->emitted;
     }
 
+    /**
+     * @param array<string, string> $dimensions
+     */
     public function assertEmittedWithDimensions(string $metricName, array $dimensions): void
     {
         foreach ($this->emitted as $metric) {
@@ -56,6 +65,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
             }
         }
 
-        throw new \AssertionError("Metric '{$metricName}' with specified dimensions was not emitted");
+        $message = "Metric '{$metricName}' with specified dimensions was not emitted";
+        throw new \AssertionError($message);
     }
 }
