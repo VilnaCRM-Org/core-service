@@ -28,7 +28,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $before = (int) (microtime(true) * 1000);
         $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter->emit(new EndpointInvocationsMetric('HealthCheck', 'get'));
+        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'HealthCheck', 'get'));
 
         $this->assertTimestampWithinRange($before);
         $this->assertSingleMetricValues();
@@ -52,7 +52,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $customNamespace = 'CustomApp/Metrics';
         $emitter = $this->createEmitterWithContextCapture($customNamespace);
 
-        $emitter->emit(new EndpointInvocationsMetric('Test', 'test'));
+        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Test', 'test'));
 
         $namespace = $this->capturedContext['_aws']['CloudWatchMetrics'][0]['Namespace'];
         self::assertSame($customNamespace, $namespace);
@@ -106,7 +106,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     {
         $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter->emit(new EndpointInvocationsMetric('Customer', 'create', 42));
+        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create', 42));
 
         self::assertSame(42, $this->capturedContext['EndpointInvocations']);
     }
@@ -115,9 +115,11 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     {
         $emitter = $this->createEmitterWithContextCapture();
 
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         $collection = new MetricCollection(
-            new TestOrdersPlacedMetric(1),
-            new TestCustomerMetric(1)
+            new TestOrdersPlacedMetric($dimensionsFactory, 1),
+            new TestCustomerMetric($dimensionsFactory, 1)
         );
         $emitter->emitCollection($collection);
 
@@ -164,9 +166,11 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
     private function createOrderMetricCollection(): MetricCollection
     {
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         return new MetricCollection(
-            new TestOrdersPlacedMetric(1),
-            new TestOrderValueMetric(99.9)
+            new TestOrdersPlacedMetric($dimensionsFactory, 1),
+            new TestOrderValueMetric($dimensionsFactory, 99.9)
         );
     }
 

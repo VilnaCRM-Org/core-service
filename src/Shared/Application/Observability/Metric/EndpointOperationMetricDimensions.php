@@ -8,7 +8,8 @@ final readonly class EndpointOperationMetricDimensions implements MetricDimensio
 {
     public function __construct(
         private string $endpoint,
-        private string $operation
+        private string $operation,
+        private MetricDimensionsFactoryInterface $dimensionsFactory
     ) {
     }
 
@@ -24,6 +25,6 @@ final readonly class EndpointOperationMetricDimensions implements MetricDimensio
 
     public function values(): MetricDimensions
     {
-        return MetricDimensions::endpointOperation($this->endpoint, $this->operation);
+        return $this->dimensionsFactory->endpointOperation($this->endpoint, $this->operation);
     }
 }

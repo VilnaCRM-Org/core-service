@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
@@ -14,8 +15,10 @@ use App\Shared\Application\Observability\Metric\MetricUnit;
  */
 final readonly class TestOrdersPlacedMetric extends BusinessMetric
 {
-    public function __construct(float|int $value = 1)
-    {
+    public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
         parent::__construct($value, MetricUnit::COUNT);
     }
 
@@ -26,6 +29,10 @@ final readonly class TestOrdersPlacedMetric extends BusinessMetric
 
     public function dimensions(): MetricDimensionsInterface
     {
-        return new EndpointOperationMetricDimensions(endpoint: 'Order', operation: 'create');
+        return new EndpointOperationMetricDimensions(
+            endpoint: 'Order',
+            operation: 'create',
+            dimensionsFactory: $this->dimensionsFactory
+        );
     }
 }

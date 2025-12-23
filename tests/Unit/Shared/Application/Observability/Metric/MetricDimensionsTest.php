@@ -20,10 +20,8 @@ final class MetricDimensionsTest extends UnitTestCase
 
     public function testDimensionsCollectionSupportsCountAndIteration(): void
     {
-        $dimensions = new MetricDimensions(
-            new MetricDimension('Endpoint', 'Customer'),
-            new MetricDimension('Operation', 'create')
-        );
+        $dimensions = (new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory())
+            ->endpointOperation('Customer', 'create');
 
         self::assertCount(2, $dimensions);
 
@@ -56,14 +54,16 @@ final class MetricDimensionsTest extends UnitTestCase
 
     public function testToAssociativeArrayReturnsKeyValueMap(): void
     {
-        $dimensions = new MetricDimensions(
-            new MetricDimension('Endpoint', 'Customer'),
-            new MetricDimension('Operation', 'create')
+        $dimensions = (new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory())->endpointOperationWith(
+            'Customer',
+            'create',
+            new MetricDimension('PaymentMethod', 'card')
         );
 
         self::assertSame([
             'Endpoint' => 'Customer',
             'Operation' => 'create',
+            'PaymentMethod' => 'card',
         ], $dimensions->toAssociativeArray());
     }
 }

@@ -12,14 +12,14 @@ final class CustomersUpdatedMetricTest extends UnitTestCase
 {
     public function testReturnsCorrectMetricName(): void
     {
-        $metric = new CustomersUpdatedMetric();
+        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
 
         self::assertSame('CustomersUpdated', $metric->name());
     }
 
     public function testReturnsCorrectDimensions(): void
     {
-        $metric = new CustomersUpdatedMetric();
+        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
 
         $dimensions = $metric->dimensions()->values();
 
@@ -29,21 +29,21 @@ final class CustomersUpdatedMetricTest extends UnitTestCase
 
     public function testDefaultsToValueOfOne(): void
     {
-        $metric = new CustomersUpdatedMetric();
+        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
 
         self::assertSame(1, $metric->value());
     }
 
     public function testAcceptsCustomValue(): void
     {
-        $metric = new CustomersUpdatedMetric(5);
+        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 5);
 
         self::assertSame(5, $metric->value());
     }
 
     public function testUsesCountUnit(): void
     {
-        $metric = new CustomersUpdatedMetric();
+        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
 
         self::assertSame(MetricUnit::COUNT, $metric->unit());
     }

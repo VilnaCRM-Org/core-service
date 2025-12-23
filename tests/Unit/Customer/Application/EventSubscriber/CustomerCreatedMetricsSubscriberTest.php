@@ -26,6 +26,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsEmitterSpy,
+            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(),
             $this->logger
         );
     }
@@ -102,6 +103,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $subscriber = new CustomerCreatedMetricsSubscriber(
             $failingEmitter,
+            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(),
             $this->logger
         );
 

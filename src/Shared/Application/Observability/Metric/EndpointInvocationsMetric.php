@@ -10,11 +10,12 @@ namespace App\Shared\Application\Observability\Metric;
 final readonly class EndpointInvocationsMetric extends EndpointOperationBusinessMetric
 {
     public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
         private string $endpoint,
         private string $operation,
         float|int $value = 1
     ) {
-        parent::__construct($value, MetricUnit::COUNT);
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
     }
 
     public function name(): string

@@ -20,7 +20,7 @@ final class MetricCollectionTest extends UnitTestCase
 
     public function testCollectionWithMetricsIsNotEmpty(): void
     {
-        $metric = new EndpointInvocationsMetric('Customer', 'create');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
         $collection = new MetricCollection($metric);
 
         self::assertFalse($collection->isEmpty());
@@ -29,8 +29,8 @@ final class MetricCollectionTest extends UnitTestCase
 
     public function testCanIterateOverMetrics(): void
     {
-        $metric1 = new EndpointInvocationsMetric('Customer', 'create');
-        $metric2 = new EndpointInvocationsMetric('Customer', 'update');
+        $metric1 = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
+        $metric2 = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'update');
         $collection = new MetricCollection($metric1, $metric2);
 
         $items = [];
@@ -45,8 +45,8 @@ final class MetricCollectionTest extends UnitTestCase
 
     public function testAllReturnsAllMetrics(): void
     {
-        $metric1 = new EndpointInvocationsMetric('Customer', 'create');
-        $metric2 = new EndpointInvocationsMetric('Customer', 'update');
+        $metric1 = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
+        $metric2 = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'update');
         $collection = new MetricCollection($metric1, $metric2);
 
         $all = $collection->all();

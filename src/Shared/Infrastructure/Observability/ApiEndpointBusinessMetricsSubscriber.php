@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -14,7 +15,8 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private ApiEndpointMetricDimensionsResolver $dimensionsResolver
+        private ApiEndpointMetricDimensionsResolver $dimensionsResolver,
+        private MetricDimensionsFactoryInterface $dimensionsFactory
     ) {
     }
 
@@ -45,6 +47,7 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
 
         $this->metricsEmitter->emit(
             new EndpointInvocationsMetric(
+                dimensionsFactory: $this->dimensionsFactory,
                 endpoint: $dimensions->endpoint(),
                 operation: $dimensions->operation()
             )

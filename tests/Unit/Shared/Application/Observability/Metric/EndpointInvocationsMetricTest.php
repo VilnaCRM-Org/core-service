@@ -12,14 +12,14 @@ final class EndpointInvocationsMetricTest extends UnitTestCase
 {
     public function testReturnsCorrectMetricName(): void
     {
-        $metric = new EndpointInvocationsMetric('Customer', 'create');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
 
         self::assertSame('EndpointInvocations', $metric->name());
     }
 
     public function testReturnsCorrectDimensions(): void
     {
-        $metric = new EndpointInvocationsMetric('Customer', '_api_/customers_post');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', '_api_/customers_post');
 
         $dimensions = $metric->dimensions()->values();
 
@@ -29,21 +29,21 @@ final class EndpointInvocationsMetricTest extends UnitTestCase
 
     public function testDefaultsToValueOfOne(): void
     {
-        $metric = new EndpointInvocationsMetric('HealthCheck', 'get');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'HealthCheck', 'get');
 
         self::assertSame(1, $metric->value());
     }
 
     public function testAcceptsCustomValue(): void
     {
-        $metric = new EndpointInvocationsMetric('Customer', 'create', 42);
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create', 42);
 
         self::assertSame(42, $metric->value());
     }
 
     public function testUsesCountUnit(): void
     {
-        $metric = new EndpointInvocationsMetric('Customer', 'create');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
 
         self::assertSame(MetricUnit::COUNT, $metric->unit());
     }

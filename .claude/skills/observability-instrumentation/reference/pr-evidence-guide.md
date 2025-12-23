@@ -148,20 +148,27 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 ### Low Cardinality Dimensions
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricDimension;
-use App\Shared\Application\Observability\Metric\MetricDimensions;
 
-// Good: Low cardinality
-new MetricDimensions(
-    new MetricDimension('Endpoint', 'Customer'),
-    new MetricDimension('Operation', 'create')
-);
+final readonly class SomeService
+{
+    public function __construct(private MetricDimensionsFactoryInterface $dimensionsFactory) {}
 
-// Bad: High cardinality (IDs)
-new MetricDimensions(
-    new MetricDimension('CustomerId', $customerId),
-    new MetricDimension('Timestamp', (string) time())
-);
+    public function lowCardinality(): void
+    {
+        // Good: Low cardinality
+        $this->dimensionsFactory->endpointOperation('Customer', 'create');
+
+        // Bad: High cardinality (IDs)
+        $this->dimensionsFactory->endpointOperationWith(
+            'Customer',
+            'create',
+            new MetricDimension('CustomerId', $customerId),
+            new MetricDimension('Timestamp', (string) time())
+        );
+    }
+}
 ```
 
 ### Test Coverage
@@ -282,9 +289,9 @@ final readonly class CustomersCreatedMetricDimensions implements MetricDimension
 
     public function values(): MetricDimensions
     {
-        return new MetricDimensions(
-            new MetricDimension('Endpoint', 'Customer'),
-            new MetricDimension('Operation', 'create'),
+        return MetricDimensions::endpointOperationWith(
+            'Customer',
+            'create',
             new MetricDimension('CustomerId', $this->customerId) // Remove this
         );
     }
@@ -295,10 +302,7 @@ final readonly class CustomersCreatedMetricDimensions implements MetricDimension
 {
     public function values(): MetricDimensions
     {
-        return new MetricDimensions(
-            new MetricDimension('Endpoint', 'Customer'),
-            new MetricDimension('Operation', 'create')
-        );
+        return MetricDimensions::endpointOperation('Customer', 'create');
     }
 }
 ```

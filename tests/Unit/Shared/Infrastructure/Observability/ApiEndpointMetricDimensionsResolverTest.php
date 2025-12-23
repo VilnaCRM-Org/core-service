@@ -15,7 +15,9 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->resolver = new ApiEndpointMetricDimensionsResolver();
+        $this->resolver = new ApiEndpointMetricDimensionsResolver(
+            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory()
+        );
     }
 
     public function testDimensionsReturnsEndpointAndOperation(): void

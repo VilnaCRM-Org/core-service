@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Metric;
 
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
 /**
@@ -12,12 +13,14 @@ use App\Shared\Application\Observability\Metric\MetricUnit;
  */
 final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
 {
-    private const string ENDPOINT = 'Customer';
-    private const string OPERATION = 'create';
+    private const ENDPOINT = 'Customer';
+    private const OPERATION = 'create';
 
-    public function __construct(float|int $value = 1)
-    {
-        parent::__construct($value, MetricUnit::COUNT);
+    public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
     }
 
     public function name(): string

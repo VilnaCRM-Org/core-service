@@ -24,14 +24,6 @@ final readonly class MetricDimensions implements IteratorAggregate, Countable
         $this->dimensions = $dimensions;
     }
 
-    public static function endpointOperation(string $endpoint, string $operation): self
-    {
-        return new self(
-            new MetricDimension('Endpoint', $endpoint),
-            new MetricDimension('Operation', $operation)
-        );
-    }
-
     /**
      * @return Traversable<int, MetricDimension>
      */

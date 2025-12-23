@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
 use App\Shared\Infrastructure\Observability\ApiEndpointBusinessMetricsSubscriber;
 use App\Shared\Infrastructure\Observability\ApiEndpointMetricDimensionsResolver;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +26,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testEmitsMetricForApiPlatformRequest(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/api/health', 'GET');
         $request->attributes->set('_api_resource_class', 'App\\Internal\\HealthCheck\\Domain\\ValueObject\\HealthCheck');
@@ -53,7 +58,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testDoesNotEmitMetricForNonApiRequest(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/favicon.ico', 'GET');
 
@@ -72,7 +81,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testEmitsMetricForGraphqlEndpoint(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/api/graphql', 'POST');
 
@@ -97,7 +110,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testEmitsMetricWithoutOperationNameUsesMethod(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/api/something', 'PATCH');
         $request->attributes->set('_api_resource_class', 'App\\Core\\Customer\\Domain\\Entity\\Customer');
@@ -123,7 +140,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testDoesNotEmitMetricOutsideApiPrefixEvenIfApiOperationAttributePresent(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/something', 'GET');
         $request->attributes->set('_api_operation', new \stdClass());
@@ -143,7 +164,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testDoesNotEmitMetricOutsideApiPrefixEvenIfResourceClassPresent(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/something', 'GET');
         $request->attributes->set('_api_resource_class', 'App\\Shared\\Kernel');
@@ -163,7 +188,11 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
     public function testDoesNotEmitMetricForSubRequest(): void
     {
         $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber($spy, new ApiEndpointMetricDimensionsResolver());
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
 
         $request = Request::create('/api/health', 'GET');
 

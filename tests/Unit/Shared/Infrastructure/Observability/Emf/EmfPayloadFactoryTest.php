@@ -20,7 +20,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCreatesPayloadFromSingleMetric(): void
     {
         $factory = $this->createFactory();
-        $metric = new EndpointInvocationsMetric('Customer', 'create');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
 
         $payload = $factory->createFromMetric($metric);
 
@@ -39,9 +39,11 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCreatesPayloadFromMetricCollection(): void
     {
         $factory = $this->createFactory();
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         $collection = new MetricCollection(
-            new TestOrdersPlacedMetric(5),
-            new TestOrderValueMetric(199.99)
+            new TestOrdersPlacedMetric($dimensionsFactory, 5),
+            new TestOrderValueMetric($dimensionsFactory, 199.99)
         );
 
         $payload = $factory->createFromCollection($collection);
@@ -61,7 +63,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     {
         $customNamespace = 'CustomApp/BusinessMetrics';
         $factory = new EmfPayloadFactory($customNamespace, $this->createTimestampProvider());
-        $metric = new EndpointInvocationsMetric('Test', 'test');
+        $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Test', 'test');
 
         $payload = $factory->createFromMetric($metric);
 
@@ -72,9 +74,11 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCollectionUsesDimensionsFromFirstMetric(): void
     {
         $factory = $this->createFactory();
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         $collection = new MetricCollection(
-            new TestOrdersPlacedMetric(1),
-            new TestOrderValueMetric(50.0)
+            new TestOrdersPlacedMetric($dimensionsFactory, 1),
+            new TestOrderValueMetric($dimensionsFactory, 50.0)
         );
 
         $payload = $factory->createFromCollection($collection);

@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class ApiEndpointMetricDimensionsResolver
+final readonly class ApiEndpointMetricDimensionsResolver
 {
+    public function __construct(private MetricDimensionsFactoryInterface $dimensionsFactory)
+    {
+    }
+
     public function dimensions(Request $request): EndpointOperationMetricDimensions
     {
         return new EndpointOperationMetricDimensions(
             endpoint: $this->endpoint($request),
-            operation: $this->operation($request)
+            operation: $this->operation($request),
+            dimensionsFactory: $this->dimensionsFactory
         );
     }
 

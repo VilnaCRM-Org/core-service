@@ -106,9 +106,6 @@ services:
   App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactoryInterface:
     alias: App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory
 
-  App\Shared\Application\Observability\BusinessMetricsEmitterInterface:
-    class: App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter
-
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
     public: true

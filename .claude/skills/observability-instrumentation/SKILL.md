@@ -283,15 +283,21 @@ use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
+use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
+
 final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInterface
 {
-    public function __construct(private string $paymentMethod) {}
+    public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private string $paymentMethod
+    ) {
+    }
 
     public function values(): MetricDimensions
     {
-        return new MetricDimensions(
-            new MetricDimension('Endpoint', 'Order'),
-            new MetricDimension('Operation', 'create'),
+        return $this->dimensionsFactory->endpointOperationWith(
+            'Order',
+            'create',
             new MetricDimension('PaymentMethod', $this->paymentMethod)
         );
     }
@@ -300,6 +306,7 @@ final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInt
 final readonly class OrdersPlacedMetric extends BusinessMetric
 {
     public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
         private string $paymentMethod,
         float|int $value = 1
     ) {
@@ -313,7 +320,10 @@ final readonly class OrdersPlacedMetric extends BusinessMetric
 
     public function dimensions(): MetricDimensionsInterface
     {
-        return new OrdersPlacedMetricDimensions(paymentMethod: $this->paymentMethod);
+        return new OrdersPlacedMetricDimensions(
+            dimensionsFactory: $this->dimensionsFactory,
+            paymentMethod: $this->paymentMethod
+        );
     }
 }
 ```
