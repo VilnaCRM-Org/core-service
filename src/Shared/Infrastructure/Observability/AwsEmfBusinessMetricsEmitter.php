@@ -7,6 +7,7 @@ namespace App\Shared\Infrastructure\Observability;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -21,6 +22,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
 
     public function __construct(
         private LoggerInterface $logger,
+        private EmfLogFormatter $emfLogFormatter,
         private string $namespace = self::DEFAULT_NAMESPACE
     ) {
     }
@@ -51,7 +53,7 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
      */
     private function buildEmfPayload(BusinessMetric $metric): array
     {
-        $dimensions = $metric->dimensions();
+        $dimensions = $metric->dimensions()->toArray();
 
         $emfLog = $this->createBaseEmfLog($dimensions, $metric->name(), $metric->unit()->value);
 
@@ -60,14 +62,17 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
 
     /**
      * @param array<int, BusinessMetric> $metrics
-     * @param array<string, string> $dimensions
      *
      * @return array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>>
      */
-    private function buildEmfPayloadForCollection(array $metrics, array $dimensions): array
-    {
-        $emfLog = $this->createCollectionBaseEmfLog($dimensions);
-        $emfLog = array_merge($emfLog, $dimensions);
+    private function buildEmfPayloadForCollection(
+        array $metrics,
+        MetricDimensionsInterface $dimensions
+    ): array {
+        $dimensionsArray = $dimensions->toArray();
+
+        $emfLog = $this->createCollectionBaseEmfLog($dimensionsArray);
+        $emfLog = array_merge($emfLog, $dimensionsArray);
 
         foreach ($metrics as $metric) {
             $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
@@ -129,7 +134,12 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
      */
     private function writeEmfLog(array $emfLog): void
     {
-        $this->logger->info('', $emfLog);
+        $formatted = $this->emfLogFormatter->format($emfLog);
+        if ($formatted === '') {
+            return;
+        }
+
+        $this->logger->info($formatted);
     }
 
     private function currentTimestamp(): int

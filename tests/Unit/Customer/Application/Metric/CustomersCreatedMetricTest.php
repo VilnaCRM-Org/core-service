@@ -21,7 +21,7 @@ final class CustomersCreatedMetricTest extends UnitTestCase
     {
         $metric = new CustomersCreatedMetric();
 
-        $dimensions = $metric->dimensions();
+        $dimensions = $metric->dimensions()->toArray();
 
         self::assertSame('Customer', $dimensions['Endpoint']);
         self::assertSame('create', $dimensions['Operation']);

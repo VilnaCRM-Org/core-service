@@ -13,6 +13,7 @@ Instrument API endpoints with **business metrics** using AWS CloudWatch Embedded
 - **AWS EMF format** - Logs that automatically become CloudWatch metrics
 - **Event subscribers** - Metrics emitted via domain event subscribers (not in handlers)
 - **Type-safe metrics** - Concrete metric classes instead of arrays
+- **SOLID principles** - Single Responsibility (subscribers) + Open/Closed (new metric classes)
 
 ## What This Skill Does NOT Cover
 
@@ -39,6 +40,98 @@ Business metrics follow these patterns:
 2. **Event subscribers** - Metrics are emitted via domain event subscribers (not hardcoded in handlers)
 3. **Symfony logger** - EMF output goes through Monolog with a custom EMF formatter
 4. **No arrays** - All metric configuration uses typed objects, not arrays
+5. **Collections** - Multiple metrics use `MetricCollection`, not arrays
+
+---
+
+## SOLID Principles in Observability
+
+### Single Responsibility Principle (SRP)
+
+Each class has ONE responsibility:
+
+| Class | Responsibility |
+|-------|----------------|
+| `CustomersCreatedMetric` | Define metric name, value, dimensions |
+| `CustomerCreatedMetricsSubscriber` | Listen to event, emit metric |
+| `AwsEmfBusinessMetricsEmitter` | Format and write EMF logs |
+| `MetricCollection` | Hold multiple metrics for batch emission |
+
+**Anti-pattern**: Metrics emitted directly in command handlers (violates SRP - handler should only handle commands)
+
+### Open/Closed Principle (OCP)
+
+- **Open for extension**: Add new metrics via new classes
+- **Closed for modification**: Don't change existing metric/emitter code
+
+```php
+// ✅ GOOD: Add new metric by creating new class
+final readonly class OrdersPlacedMetric extends EndpointOperationBusinessMetric { ... }
+
+// ❌ BAD: Modify existing emitter to handle new metric type
+```
+
+### Why Event Subscribers (Not Handler Injection)
+
+```php
+// ❌ BAD: Metrics in command handler (violates SRP)
+final class CreateCustomerHandler
+{
+    public function __construct(
+        private CustomerRepository $repository,
+        private BusinessMetricsEmitterInterface $metrics  // Wrong!
+    ) {}
+}
+
+// ✅ GOOD: Metrics in dedicated event subscriber
+final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        $this->metricsEmitter->emit(new CustomersCreatedMetric());
+    }
+}
+```
+
+**Benefits**:
+
+- Handler focuses on domain logic only
+- Metrics emission is decoupled and testable
+- Easy to add/remove metrics without touching business logic
+- Multiple subscribers can react to same event
+
+---
+
+## Type-Safe Metric Class Hierarchy
+
+```
+BusinessMetric (abstract)
+├── EndpointOperationBusinessMetric (abstract) - for metrics with Endpoint/Operation dimensions
+│   ├── CustomersCreatedMetric
+│   ├── CustomersUpdatedMetric
+│   ├── CustomersDeletedMetric
+│   └── EndpointInvocationsMetric
+└── (other base classes for different dimension patterns)
+
+MetricDimensionsInterface
+├── EndpointOperationMetricDimensions - Endpoint + Operation
+└── (custom dimensions for specific metrics)
+
+MetricUnit (enum)
+├── COUNT, NONE, SECONDS, MILLISECONDS, BYTES, PERCENT
+
+MetricCollection - typed collection implementing IteratorAggregate, Countable
+```
+
+**Why no arrays?**
+
+| Arrays | Typed Classes |
+|--------|---------------|
+| No type safety | Full type checking |
+| No IDE autocomplete | IDE support |
+| Runtime errors | Compile-time errors |
+| Hard to refactor | Easy to refactor |
+| No encapsulation | Validation in constructor |
 
 ---
 
@@ -56,7 +149,7 @@ abstract readonly class BusinessMetric
     ) {}
 
     abstract public function name(): string;
-    abstract public function dimensions(): array;
+    abstract public function dimensions(): MetricDimensionsInterface;
 
     public function value(): float|int { return $this->value; }
     public function unit(): MetricUnit { return $this->unit; }
@@ -67,7 +160,7 @@ abstract readonly class BusinessMetric
 
 ```php
 // src/Core/Customer/Application/Metric/CustomersCreatedMetric.php
-final readonly class CustomersCreatedMetric extends BusinessMetric
+final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
 {
     public function __construct(float|int $value = 1)
     {
@@ -79,12 +172,14 @@ final readonly class CustomersCreatedMetric extends BusinessMetric
         return 'CustomersCreated';
     }
 
-    public function dimensions(): array
+    protected function endpoint(): string
     {
-        return [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ];
+        return 'Customer';
+    }
+
+    protected function operation(): string
+    {
+        return 'create';
     }
 }
 ```
@@ -179,7 +274,22 @@ When this log is written to stdout via the EMF Monolog channel, CloudWatch autom
 namespace App\Core\Order\Application\Metric;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
+
+final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInterface
+{
+    public function __construct(private string $paymentMethod) {}
+
+    public function toArray(): array
+    {
+        return [
+            'Endpoint' => 'Order',
+            'Operation' => 'create',
+            'PaymentMethod' => $this->paymentMethod,
+        ];
+    }
+}
 
 final readonly class OrdersPlacedMetric extends BusinessMetric
 {
@@ -195,13 +305,9 @@ final readonly class OrdersPlacedMetric extends BusinessMetric
         return 'OrdersPlaced';
     }
 
-    public function dimensions(): array
+    public function dimensions(): MetricDimensionsInterface
     {
-        return [
-            'Endpoint' => 'Order',
-            'Operation' => 'create',
-            'PaymentMethod' => $this->paymentMethod,
-        ];
+        return new OrdersPlacedMetricDimensions(paymentMethod: $this->paymentMethod);
     }
 }
 ```
@@ -389,6 +495,23 @@ After implementing business metrics:
 - Dimensions provide meaningful segmentation
 - Unit tests verify metric emission
 - No infrastructure metrics (AppRunner handles those)
+
+### SOLID Compliance Checklist
+
+- [ ] **SRP**: Each metric class has single purpose (define one metric type)
+- [ ] **SRP**: Event subscriber only emits metrics (no business logic)
+- [ ] **OCP**: New metrics added via new classes (no modification to emitter)
+- [ ] **OCP**: New event subscribers added without changing existing code
+- [ ] **LSP**: All metrics properly extend `BusinessMetric` base class
+- [ ] **ISP**: `MetricDimensionsInterface` is minimal (only `toArray()`)
+- [ ] **DIP**: Handlers depend on `EventBusInterface`, not concrete metrics
+
+### Type Safety Checklist
+
+- [ ] NO arrays for metric configuration - use typed classes
+- [ ] NO arrays for metric collections - use `MetricCollection`
+- [ ] All dimensions via `MetricDimensionsInterface` implementations
+- [ ] Unit enum `MetricUnit` used for all units
 
 ---
 

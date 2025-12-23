@@ -21,7 +21,7 @@ final class CustomersDeletedMetricTest extends UnitTestCase
     {
         $metric = new CustomersDeletedMetric();
 
-        $dimensions = $metric->dimensions();
+        $dimensions = $metric->dimensions()->toArray();
 
         self::assertSame('Customer', $dimensions['Endpoint']);
         self::assertSame('delete', $dimensions['Operation']);

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Metric;
 
-use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
 /**
  * Metric for tracking customer update events
  */
-final readonly class CustomersUpdatedMetric extends BusinessMetric
+final readonly class CustomersUpdatedMetric extends EndpointOperationBusinessMetric
 {
     private const string ENDPOINT = 'Customer';
     private const string OPERATION = 'update';
@@ -25,14 +25,13 @@ final readonly class CustomersUpdatedMetric extends BusinessMetric
         return 'CustomersUpdated';
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function dimensions(): array
+    protected function endpoint(): string
     {
-        return [
-            'Endpoint' => self::ENDPOINT,
-            'Operation' => self::OPERATION,
-        ];
+        return self::ENDPOINT;
+    }
+
+    protected function operation(): string
+    {
+        return self::OPERATION;
     }
 }

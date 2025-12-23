@@ -23,10 +23,10 @@ Business metrics use **typed classes** (not arrays) and are emitted via **event 
 ### Metric Class Pattern
 
 ```php
-use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
-final readonly class CustomersCreatedMetric extends BusinessMetric
+final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
 {
     public function __construct(float|int $value = 1)
     {
@@ -38,15 +38,14 @@ final readonly class CustomersCreatedMetric extends BusinessMetric
         return 'CustomersCreated';
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function dimensions(): array
+    protected function endpoint(): string
     {
-        return [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ];
+        return 'Customer';
+    }
+
+    protected function operation(): string
+    {
+        return 'create';
     }
 }
 ```

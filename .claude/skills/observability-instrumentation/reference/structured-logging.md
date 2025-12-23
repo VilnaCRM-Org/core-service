@@ -106,7 +106,7 @@ $this->logger->error('Operation failed', [
 
 ## Logging in Command Handlers
 
-Note: Business metrics should NOT be emitted in command handlers. Use domain event subscribers instead (see [Metrics Patterns](metrics-patterns.md)).
+Business metrics should NOT be emitted in command handlers (application layer). Publish domain events from the handler and emit metrics in dedicated event subscribers (see [Metrics Patterns](metrics-patterns.md)).
 
 ```php
 final readonly class CreateCustomerCommandHandler

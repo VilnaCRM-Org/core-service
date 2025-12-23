@@ -45,8 +45,8 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
 
         $this->metricsEmitter->emit(
             new EndpointInvocationsMetric(
-                endpoint: $dimensions['Endpoint'],
-                operation: $dimensions['Operation']
+                endpoint: $dimensions->endpoint(),
+                operation: $dimensions->operation()
             )
         );
     }

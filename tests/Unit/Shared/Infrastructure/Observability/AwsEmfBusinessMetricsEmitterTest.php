@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter;
+use App\Shared\Infrastructure\Observability\EmfLogFormatter;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
@@ -60,8 +61,43 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->never())->method('info');
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($logger);
+        $emitter = new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter());
         $emitter->emitCollection(new MetricCollection());
+    }
+
+    public function testDoesNotEmitWhenEmfPayloadCannotBeEncoded(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->never())->method('info');
+
+        $emitter = new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter());
+
+        $metric = new class() extends \App\Shared\Application\Observability\Metric\BusinessMetric {
+            public function __construct()
+            {
+                parent::__construct(1, \App\Shared\Application\Observability\Metric\MetricUnit::COUNT);
+            }
+
+            public function name(): string
+            {
+                return 'InvalidMetric';
+            }
+
+            public function dimensions(): \App\Shared\Application\Observability\Metric\MetricDimensionsInterface
+            {
+                return new class() implements \App\Shared\Application\Observability\Metric\MetricDimensionsInterface {
+                    public function toArray(): array
+                    {
+                        return [
+                            'Endpoint' => "\xB1", // Invalid UTF-8
+                            'Operation' => 'create',
+                        ];
+                    }
+                };
+            }
+        };
+
+        $emitter->emit($metric);
     }
 
     public function testMetricValueIsCorrectlySet(): void
@@ -96,13 +132,17 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger
             ->expects($this->once())
             ->method('info')
-            ->with('', $this->callback(function (array $context): bool {
-                $this->capturedContext = $context;
+            ->with($this->callback(function (string $message): bool {
+                $decoded = json_decode(rtrim($message, "\n"), true);
+                self::assertIsArray($decoded);
+
+                /** @var array<string, mixed> $decoded */
+                $this->capturedContext = $decoded;
 
                 return true;
             }));
 
-        return new AwsEmfBusinessMetricsEmitter($logger, $namespace);
+        return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter(), $namespace);
     }
 
     private function createOrderMetricCollection(): MetricCollection

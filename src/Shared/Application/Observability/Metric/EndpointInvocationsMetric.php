@@ -7,7 +7,7 @@ namespace App\Shared\Application\Observability\Metric;
 /**
  * Metric for tracking API endpoint invocations
  */
-final readonly class EndpointInvocationsMetric extends BusinessMetric
+final readonly class EndpointInvocationsMetric extends EndpointOperationBusinessMetric
 {
     public function __construct(
         private string $endpoint,
@@ -22,14 +22,13 @@ final readonly class EndpointInvocationsMetric extends BusinessMetric
         return 'EndpointInvocations';
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function dimensions(): array
+    protected function endpoint(): string
     {
-        return [
-            'Endpoint' => $this->endpoint,
-            'Operation' => $this->operation,
-        ];
+        return $this->endpoint;
+    }
+
+    protected function operation(): string
+    {
+        return $this->operation;
     }
 }

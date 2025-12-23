@@ -26,15 +26,13 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerEmail;
 use App\Core\Customer\Domain\ValueObject\CustomerName;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventPublisherInterface;
 
 final readonly class CreateCustomerCommandHandler
 {
     public function __construct(
         private CustomerRepositoryInterface $repository,
-        private DomainEventPublisherInterface $publisher,
-        private BusinessMetricsEmitterInterface $metrics
+        private DomainEventPublisherInterface $publisher
     ) {}
 
     public function __invoke(CreateCustomerCommand $command): void
@@ -53,11 +51,7 @@ final readonly class CreateCustomerCommandHandler
         $events = $customer->pullDomainEvents();
         $this->publisher->publish(...$events);
 
-        // 4. Emit business metric
-        $this->metrics->emit('CustomersCreated', 1, [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ]);
+        // 4. Metrics are emitted in domain event subscribers (best practice)
     }
 }
 ```
@@ -90,49 +84,49 @@ CloudWatch automatically extracts this as a metric in the `CCore/BusinessMetrics
 
 ---
 
-## Unit Test
+## Unit Test for Event Subscriber
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Core\Customer\Application\CommandHandler;
+namespace App\Tests\Unit\Core\Customer\Application\EventSubscriber;
 
-use App\Core\Customer\Application\Command\CreateCustomerCommand;
-use App\Core\Customer\Application\CommandHandler\CreateCustomerCommandHandler;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Shared\Domain\Bus\Event\DomainEventPublisherInterface;
+use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber;
+use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 
-final class CreateCustomerCommandHandlerTest extends UnitTestCase
+final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 {
     private BusinessMetricsEmitterSpy $metricsSpy;
-    private CreateCustomerCommandHandler $handler;
+    private LoggerInterface&MockObject $logger;
+    private CustomerCreatedMetricsSubscriber $subscriber;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->metricsSpy = new BusinessMetricsEmitterSpy();
+        $this->logger = $this->createMock(LoggerInterface::class);
 
-        $this->handler = new CreateCustomerCommandHandler(
-            $this->createMock(CustomerRepositoryInterface::class),
-            $this->createMock(DomainEventPublisherInterface::class),
-            $this->metricsSpy
+        $this->subscriber = new CustomerCreatedMetricsSubscriber(
+            $this->metricsSpy,
+            $this->logger
         );
     }
 
     public function testEmitsCustomerCreatedMetric(): void
     {
-        $command = new CreateCustomerCommand(
-            id: '01JCXYZ1234567890ABCDEFGH',
-            name: 'John Doe',
-            email: 'john.doe@example.com'
+        $event = new CustomerCreatedEvent(
+            customerId: '01JCXYZ1234567890ABCDEFGH',
+            customerEmail: 'john.doe@example.com'
         );
 
-        ($this->handler)($command);
+        ($this->subscriber)($event);
 
         $emitted = $this->metricsSpy->emitted();
 
@@ -144,62 +138,86 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
 
     public function testMetricHasCorrectDimensions(): void
     {
-        $command = new CreateCustomerCommand(
-            id: '01JCXYZ1234567890ABCDEFGH',
-            name: 'John Doe',
-            email: 'john.doe@example.com'
+        $event = new CustomerCreatedEvent(
+            customerId: '01JCXYZ1234567890ABCDEFGH',
+            customerEmail: 'john.doe@example.com'
         );
 
-        ($this->handler)($command);
+        ($this->subscriber)($event);
 
         $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
             'Endpoint' => 'Customer',
             'Operation' => 'create',
         ]);
     }
+
+    public function testSubscribesToCorrectEvent(): void
+    {
+        $subscribedEvents = $this->subscriber->subscribedTo();
+
+        self::assertCount(1, $subscribedEvents);
+        self::assertContains(CustomerCreatedEvent::class, $subscribedEvents);
+    }
 }
 ```
 
 ---
 
-## Example: Multiple Metrics
+## Example: Multiple Metrics via Event Subscriber
 
-For operations that track multiple business values:
+For operations that track multiple business values, use `MetricCollection` in an event subscriber:
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Core\Order\Application\CommandHandler;
+namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Command\PlaceOrderCommand;
-use App\Core\Order\Domain\Entity\Order;
-use App\Core\Order\Domain\Repository\OrderRepositoryInterface;
+use App\Core\Order\Application\Metric\OrdersPlacedMetric;
+use App\Core\Order\Application\Metric\OrderValueMetric;
+use App\Core\Order\Application\Metric\OrderItemCountMetric;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
-final readonly class PlaceOrderCommandHandler
+final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
-        private OrderRepositoryInterface $repository,
-        private BusinessMetricsEmitterInterface $metrics
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private LoggerInterface $logger
     ) {}
 
-    public function __invoke(PlaceOrderCommand $command): void
+    public function __invoke(OrderPlacedEvent $event): void
     {
-        // Create and save order
-        $order = Order::place(/* ... */);
-        $this->repository->save($order);
+        try {
+            // Emit multiple business metrics using MetricCollection
+            $this->metricsEmitter->emitCollection(new MetricCollection(
+                new OrdersPlacedMetric($event->paymentMethod()),
+                new OrderValueMetric($event->totalAmount()),
+                new OrderItemCountMetric($event->itemCount())
+            ));
 
-        // Emit multiple business metrics
-        $this->metrics->emitMultiple([
-            'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-            'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-            'OrderItemCount' => ['value' => $order->itemCount(), 'unit' => 'Count'],
-        ], [
-            'Endpoint' => 'Order',
-            'PaymentMethod' => $order->paymentMethod(),
-        ]);
+            $this->logger->debug('Business metrics emitted', [
+                'metrics' => ['OrdersPlaced', 'OrderValue', 'OrderItemCount'],
+                'order_id' => $event->orderId(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Failed to emit business metrics', [
+                'order_id' => $event->orderId(),
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function subscribedTo(): array
+    {
+        return [OrderPlacedEvent::class];
     }
 }
 ```
@@ -213,7 +231,7 @@ final readonly class PlaceOrderCommandHandler
     "CloudWatchMetrics": [
       {
         "Namespace": "CCore/BusinessMetrics",
-        "Dimensions": [["Endpoint", "PaymentMethod"]],
+        "Dimensions": [["Endpoint", "Operation", "PaymentMethod"]],
         "Metrics": [
           { "Name": "OrdersPlaced", "Unit": "Count" },
           { "Name": "OrderValue", "Unit": "None" },
@@ -223,6 +241,7 @@ final readonly class PlaceOrderCommandHandler
     ]
   },
   "Endpoint": "Order",
+  "Operation": "create",
   "PaymentMethod": "credit_card",
   "OrdersPlaced": 1,
   "OrderValue": 299.99,
@@ -244,13 +263,10 @@ declare(strict_types=1);
 namespace App\Core\Auth\Application\CommandHandler;
 
 use App\Core\Auth\Application\Command\LoginCommand;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-
 final readonly class LoginCommandHandler
 {
     public function __construct(
-        private AuthServiceInterface $authService,
-        private BusinessMetricsEmitterInterface $metrics
+        private AuthServiceInterface $authService
     ) {}
 
     public function __invoke(LoginCommand $command): void
@@ -260,11 +276,7 @@ final readonly class LoginCommandHandler
             $command->password
         );
 
-        // Emit metric based on outcome
-        $this->metrics->emit('LoginAttempts', 1, [
-            'Endpoint' => 'Auth',
-            'Result' => $result->isSuccess() ? 'success' : 'failure',
-        ]);
+        // Publish a domain event and emit metrics in a dedicated subscriber (best practice)
 
         if (!$result->isSuccess()) {
             throw new AuthenticationFailedException();

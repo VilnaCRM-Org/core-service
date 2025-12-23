@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
 /**
@@ -22,11 +24,8 @@ final readonly class TestOrdersPlacedMetric extends BusinessMetric
         return 'OrdersPlaced';
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function dimensions(): array
+    public function dimensions(): MetricDimensionsInterface
     {
-        return ['Endpoint' => 'Order', 'Operation' => 'create'];
+        return new EndpointOperationMetricDimensions(endpoint: 'Order', operation: 'create');
     }
 }

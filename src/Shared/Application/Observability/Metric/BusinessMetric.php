@@ -20,10 +20,7 @@ abstract readonly class BusinessMetric
 
     abstract public function name(): string;
 
-    /**
-     * @return array<string, string>
-     */
-    abstract public function dimensions(): array;
+    abstract public function dimensions(): MetricDimensionsInterface;
 
     public function value(): float|int
     {

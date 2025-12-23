@@ -26,7 +26,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
         $this->emitted[] = [
             'name' => $metric->name(),
             'value' => $metric->value(),
-            'dimensions' => $metric->dimensions(),
+            'dimensions' => $metric->dimensions()->toArray(),
             'unit' => $metric->unit()->value,
         ];
     }

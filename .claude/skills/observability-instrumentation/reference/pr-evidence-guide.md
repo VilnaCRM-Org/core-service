@@ -130,11 +130,19 @@ OK (2 tests, 4 assertions)
 ### Correct Metric Naming
 
 ```php
+use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
+
 // Good: PascalCase, plural, past tense
-$this->metrics->emit('CustomersCreated', 1, ...);
+final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
+{
+    public function name(): string { return 'CustomersCreated'; }
+}
 
 // Bad: snake_case
-$this->metrics->emit('customers_created', 1, ...);
+final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
+{
+    public function name(): string { return 'customers_created'; }
+}
 ````
 
 ### Low Cardinality Dimensions
@@ -247,16 +255,34 @@ $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
 **Fix**: Remove high-cardinality dimensions:
 
 ```php
-// Before: High cardinality
-$this->metrics->emit('CustomersCreated', 1, [
-    'CustomerId' => $customerId,  // Remove this
-]);
+use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+
+// Before: High cardinality (don't do this)
+final readonly class CustomersCreatedMetricDimensions implements MetricDimensionsInterface
+{
+    public function __construct(private string $customerId) {}
+
+    public function toArray(): array
+    {
+        return [
+            'Endpoint' => 'Customer',
+            'Operation' => 'create',
+            'CustomerId' => $this->customerId, // Remove this
+        ];
+    }
+}
 
 // After: Low cardinality only
-$this->metrics->emit('CustomersCreated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'create',
-]);
+final readonly class CustomersCreatedMetricDimensions implements MetricDimensionsInterface
+{
+    public function toArray(): array
+    {
+        return [
+            'Endpoint' => 'Customer',
+            'Operation' => 'create',
+        ];
+    }
+}
 ```
 
 ### Issue: Infrastructure Metric Added
@@ -267,10 +293,10 @@ $this->metrics->emit('CustomersCreated', 1, [
 
 ```php
 // Before: Infrastructure metric (remove this)
-$this->metrics->emit('CustomerCreateLatency', $duration, ...);
+// - customer create latency, error rate, response time, HTTP statuses, etc.
 
 // After: Only business metrics
-$this->metrics->emit('CustomersCreated', 1, ...);
+// - customers created, orders placed, payments processed, etc.
 ```
 
 ---

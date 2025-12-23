@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability;
 
+use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
 use Symfony\Component\HttpFoundation\Request;
 
 final class ApiEndpointMetricDimensionsResolver
 {
-    /**
-     * @return array{Endpoint: string, Operation: string}
-     */
-    public function dimensions(Request $request): array
+    public function dimensions(Request $request): EndpointOperationMetricDimensions
     {
-        return [
-            'Endpoint' => $this->endpoint($request),
-            'Operation' => $this->operation($request),
-        ];
+        return new EndpointOperationMetricDimensions(
+            endpoint: $this->endpoint($request),
+            operation: $this->operation($request)
+        );
     }
 
     private function endpoint(Request $request): string

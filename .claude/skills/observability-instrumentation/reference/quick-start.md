@@ -6,38 +6,31 @@ Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Met
 
 - **Business metrics** - Track domain events (CustomersCreated, OrdersPlaced)
 - **EMF format** - Logs automatically become CloudWatch metrics
-- **Low overhead** - Just inject the interface and emit
+- **Low overhead** - Emit metrics in dedicated domain event subscribers
 
 ## The 3-Step Pattern
 
-### Step 1: Inject the Interface (30 seconds)
+### Step 1: Create a domain event subscriber (30 seconds)
 
 ```php
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 
-final readonly class YourCommandHandler
+final readonly class YourMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
-        private YourRepository $repository,
-        private BusinessMetricsEmitterInterface $metrics  // Add this
+        private BusinessMetricsEmitterInterface $metricsEmitter
     ) {}
 }
 ```
 
-### Step 2: Emit Business Metric (1 minute)
+### Step 2: Emit the metric from the subscriber (1 minute)
 
 ```php
-public function __invoke(YourCommand $command): void
+public function __invoke(YourEntityCreatedEvent $event): void
 {
-    // Your existing business logic
-    $entity = $this->createEntity($command);
-    $this->repository->save($entity);
-
-    // Emit business metric
-    $this->metrics->emit('EntitiesCreated', 1, [
-        'Endpoint' => 'YourEntity',
-        'Operation' => 'create',
-    ]);
+    // Metrics are best-effort: keep business flow resilient
+    $this->metricsEmitter->emit(new EntitiesCreatedMetric());
 }
 ```
 
@@ -49,9 +42,9 @@ use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy
 public function testEmitsBusinessMetric(): void
 {
     $metricsSpy = new BusinessMetricsEmitterSpy();
-    $handler = new YourCommandHandler($repository, $metricsSpy);
+    $subscriber = new YourMetricsSubscriber($metricsSpy);
 
-    $handler(new YourCommand(/* ... */));
+    ($subscriber)(new YourEntityCreatedEvent(/* ... */));
 
     $metricsSpy->assertEmittedWithDimensions('EntitiesCreated', [
         'Endpoint' => 'YourEntity',
@@ -71,30 +64,48 @@ public function testEmitsBusinessMetric(): void
 
 declare(strict_types=1);
 
-namespace App\YourContext\Application\CommandHandler;
+namespace App\YourContext\Application\EventSubscriber;
 
-use App\YourContext\Application\Command\YourCommand;
-use App\YourContext\Domain\Repository\YourRepositoryInterface;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 
-final readonly class YourCommandHandler
+final readonly class EntitiesCreatedMetric extends EndpointOperationBusinessMetric
 {
-    public function __construct(
-        private YourRepositoryInterface $repository,
-        private BusinessMetricsEmitterInterface $metrics
-    ) {}
-
-    public function __invoke(YourCommand $command): void
+    public function __construct(float|int $value = 1)
     {
-        // YOUR BUSINESS LOGIC HERE
-        $entity = YourEntity::create(/* ... */);
-        $this->repository->save($entity);
+        parent::__construct($value, MetricUnit::COUNT);
+    }
 
-        // EMIT BUSINESS METRIC
-        $this->metrics->emit('EntitiesCreated', 1, [
-            'Endpoint' => 'YourEntity',
-            'Operation' => 'create',
-        ]);
+    public function name(): string
+    {
+        return 'EntitiesCreated';
+    }
+
+    protected function endpoint(): string
+    {
+        return 'YourEntity';
+    }
+
+    protected function operation(): string
+    {
+        return 'create';
+    }
+}
+
+final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(private BusinessMetricsEmitterInterface $metricsEmitter) {}
+
+    public function __invoke(YourEntityCreatedEvent $event): void
+    {
+        $this->metricsEmitter->emit(new EntitiesCreatedMetric());
+    }
+
+    public function subscribedTo(): array
+    {
+        return [YourEntityCreatedEvent::class];
     }
 }
 ```
@@ -106,40 +117,30 @@ final readonly class YourCommandHandler
 ### For Create Operations
 
 ```php
-$this->metrics->emit('CustomersCreated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'create',
-]);
+$this->metricsEmitter->emit(new CustomersCreatedMetric());
 ```
 
 ### For Update Operations
 
 ```php
-$this->metrics->emit('CustomersUpdated', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'update',
-]);
+$this->metricsEmitter->emit(new CustomersUpdatedMetric());
 ```
 
 ### For Delete Operations
 
 ```php
-$this->metrics->emit('CustomersDeleted', 1, [
-    'Endpoint' => 'Customer',
-    'Operation' => 'delete',
-]);
+$this->metricsEmitter->emit(new CustomersDeletedMetric());
 ```
 
 ### For Business Values
 
 ```php
-$this->metrics->emitMultiple([
-    'OrdersPlaced' => ['value' => 1, 'unit' => 'Count'],
-    'OrderValue' => ['value' => $order->totalAmount(), 'unit' => 'None'],
-], [
-    'Endpoint' => 'Order',
-    'PaymentMethod' => $order->paymentMethod(),
-]);
+use App\Shared\Application\Observability\Metric\MetricCollection;
+
+$this->metricsEmitter->emitCollection(new MetricCollection(
+    new OrdersPlacedMetric($order->paymentMethod()),
+    new OrderValueMetric($order->totalAmount())
+));
 ```
 
 ---

@@ -26,10 +26,8 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertArrayHasKey('Endpoint', $dimensions);
-        self::assertArrayHasKey('Operation', $dimensions);
-        self::assertSame('Customer', $dimensions['Endpoint']);
-        self::assertSame('_api_/customers_get_collection', $dimensions['Operation']);
+        self::assertSame('Customer', $dimensions->endpoint());
+        self::assertSame('_api_/customers_get_collection', $dimensions->operation());
     }
 
     public function testEndpointExtractsClassNameFromResourceClass(): void
@@ -40,7 +38,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('CustomerType', $dimensions['Endpoint']);
+        self::assertSame('CustomerType', $dimensions->endpoint());
     }
 
     public function testEndpointFallsBackToPathWhenNoResourceClass(): void
@@ -49,7 +47,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('/api/graphql', $dimensions['Endpoint']);
+        self::assertSame('/api/graphql', $dimensions->endpoint());
     }
 
     public function testEndpointFallsBackToPathWhenResourceClassIsEmpty(): void
@@ -59,7 +57,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('/api/health', $dimensions['Endpoint']);
+        self::assertSame('/api/health', $dimensions->endpoint());
     }
 
     public function testOperationUsesOperationNameWhenAvailable(): void
@@ -69,7 +67,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('_api_/customers/{ulid}_get', $dimensions['Operation']);
+        self::assertSame('_api_/customers/{ulid}_get', $dimensions->operation());
     }
 
     public function testOperationFallsBackToHttpMethodWhenNoOperationName(): void
@@ -78,7 +76,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('patch', $dimensions['Operation']);
+        self::assertSame('patch', $dimensions->operation());
     }
 
     public function testOperationFallsBackToHttpMethodWhenOperationNameIsEmpty(): void
@@ -88,7 +86,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('delete', $dimensions['Operation']);
+        self::assertSame('delete', $dimensions->operation());
     }
 
     /**
@@ -100,7 +98,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame($expected, $dimensions['Operation']);
+        self::assertSame($expected, $dimensions->operation());
     }
 
     /**
@@ -123,7 +121,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame('CustomerStatus', $dimensions['Endpoint']);
-        self::assertSame('_api_/customer-statuses_get_collection', $dimensions['Operation']);
+        self::assertSame('CustomerStatus', $dimensions->endpoint());
+        self::assertSame('_api_/customer-statuses_get_collection', $dimensions->operation());
     }
 }
