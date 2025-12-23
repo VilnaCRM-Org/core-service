@@ -168,9 +168,14 @@ abstract readonly class BusinessMetric
 // src/Core/Customer/Application/Metric/CustomersCreatedMetric.php
 final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
 {
-    public function __construct(float|int $value = 1)
-    {
-        parent::__construct($value, MetricUnit::COUNT);
+    private const ENDPOINT = 'Customer';
+    private const OPERATION = 'create';
+
+    public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
     }
 
     public function name(): string
@@ -180,12 +185,12 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 
     protected function endpoint(): string
     {
-        return 'Customer';
+        return self::ENDPOINT;
     }
 
     protected function operation(): string
     {
-        return 'create';
+        return self::OPERATION;
     }
 }
 ```
@@ -209,17 +214,19 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersCreatedMetric());
+            $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',
                 'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
             ]);
         } catch (\Throwable $e) {
             // Metrics are best-effort: don't fail business operations
@@ -280,10 +287,11 @@ When this log is written to stdout via the EMF Monolog channel, CloudWatch autom
 namespace App\Core\Order\Application\Metric;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\MetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
-
-use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 
 final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInterface
 {
@@ -334,10 +342,18 @@ final readonly class OrdersPlacedMetric extends BusinessMetric
 // src/Core/Order/Application/EventSubscriber/OrderPlacedMetricsSubscriber.php
 namespace App\Core\Order\Application\EventSubscriber;
 
+use App\Core\Order\Application\Metric\OrdersPlacedMetric;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
+
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
         private LoggerInterface $logger
     ) {}
 
@@ -345,7 +361,7 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
     {
         try {
             $this->metricsEmitter->emit(
-                new OrdersPlacedMetric($event->paymentMethod())
+                new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod())
             );
         } catch (\Throwable $e) {
             $this->logger->warning('Failed to emit business metric', [
@@ -355,6 +371,9 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
         }
     }
 
+    /**
+     * @return array<class-string>
+     */
     public function subscribedTo(): array
     {
         return [OrderPlacedEvent::class];
@@ -365,10 +384,10 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 ### Step 3: For Multiple Metrics - Use MetricCollection
 
 ```php
-// Emit multiple metrics together
+// Emit multiple metrics together (dimensionsFactory injected via constructor)
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($event->paymentMethod()),
-    new OrderValueMetric($event->totalAmount())
+    new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod()),
+    new OrderValueMetric($this->dimensionsFactory, $event->totalAmount())
 ));
 ```
 
@@ -427,6 +446,8 @@ These create too many unique metric streams and increase CloudWatch costs.
 ### Use the Spy in Tests
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
 final class CustomerCreatedMetricsSubscriberTest extends TestCase
@@ -434,9 +455,14 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
     public function testEmitsMetricOnCustomerCreated(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
+        $dimensionsFactory = new MetricDimensionsFactory();
         $logger = $this->createMock(LoggerInterface::class);
 
-        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+        $subscriber = new CustomerCreatedMetricsSubscriber(
+            $metricsSpy,
+            $dimensionsFactory,
+            $logger
+        );
 
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);
@@ -446,7 +472,16 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
         foreach ($metricsSpy->emitted() as $metric) {
             self::assertSame('CustomersCreated', $metric->name());
             self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('create', $metric->dimensions()->values()->get('Operation'));
         }
+
+        // Or use the assertion helper
+        $metricsSpy->assertEmittedWithDimensions(
+            'CustomersCreated',
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 }
 ```

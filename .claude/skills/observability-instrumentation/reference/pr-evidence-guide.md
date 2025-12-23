@@ -280,16 +280,20 @@ $this->metricsSpy->assertEmittedWithDimensions(
 ```php
 use App\Shared\Application\Observability\Metric\MetricDimension;
 use App\Shared\Application\Observability\Metric\MetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 
 // Before: High cardinality (don't do this)
 final readonly class CustomersCreatedMetricDimensions implements MetricDimensionsInterface
 {
-    public function __construct(private string $customerId) {}
+    public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private string $customerId
+    ) {}
 
     public function values(): MetricDimensions
     {
-        return MetricDimensions::endpointOperationWith(
+        return $this->dimensionsFactory->endpointOperationWith(
             'Customer',
             'create',
             new MetricDimension('CustomerId', $this->customerId) // Remove this
@@ -300,9 +304,13 @@ final readonly class CustomersCreatedMetricDimensions implements MetricDimension
 // After: Low cardinality only
 final readonly class CustomersCreatedMetricDimensions implements MetricDimensionsInterface
 {
+    public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory
+    ) {}
+
     public function values(): MetricDimensions
     {
-        return MetricDimensions::endpointOperation('Customer', 'create');
+        return $this->dimensionsFactory->endpointOperation('Customer', 'create');
     }
 }
 ```

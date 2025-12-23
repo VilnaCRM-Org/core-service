@@ -130,8 +130,8 @@ When written to stdout via Monolog EMF channel, CloudWatch automatically:
 ### Emit Single Metric
 
 ```php
-// In an event subscriber
-$this->metricsEmitter->emit(new CustomersCreatedMetric());
+// In an event subscriber (dimensionsFactory injected via constructor)
+$this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
 ```
 
 ### Emit Multiple Metrics
@@ -140,8 +140,8 @@ $this->metricsEmitter->emit(new CustomersCreatedMetric());
 use App\Shared\Application\Observability\Metric\MetricCollection;
 
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($paymentMethod),
-    new OrderValueMetric($totalAmount)
+    new OrdersPlacedMetric($this->dimensionsFactory, $paymentMethod),
+    new OrderValueMetric($this->dimensionsFactory, $totalAmount)
 ));
 ```
 
@@ -308,6 +308,7 @@ Use the spy in unit tests:
 
 ```php
 use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
 final class CustomerCreatedMetricsSubscriberTest extends TestCase
@@ -315,9 +316,14 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
     public function testEmitsCustomerCreatedMetric(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
+        $dimensionsFactory = new MetricDimensionsFactory();
         $logger = $this->createMock(LoggerInterface::class);
 
-        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+        $subscriber = new CustomerCreatedMetricsSubscriber(
+            $metricsSpy,
+            $dimensionsFactory,
+            $logger
+        );
 
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);
@@ -334,9 +340,14 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
     public function testEmitsMetricWithCorrectDimensions(): void
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
+        $dimensionsFactory = new MetricDimensionsFactory();
         $logger = $this->createMock(LoggerInterface::class);
 
-        $subscriber = new CustomerCreatedMetricsSubscriber($metricsSpy, $logger);
+        $subscriber = new CustomerCreatedMetricsSubscriber(
+            $metricsSpy,
+            $dimensionsFactory,
+            $logger
+        );
 
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);

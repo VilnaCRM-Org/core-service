@@ -95,6 +95,8 @@ namespace App\Tests\Unit\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -115,6 +117,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsSpy,
+            new MetricDimensionsFactory(),
             $this->logger
         );
     }
@@ -128,12 +131,14 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         ($this->subscriber)($event);
 
-        $emitted = $this->metricsSpy->emitted();
+        self::assertSame(1, $this->metricsSpy->count());
 
-        self::assertCount(1, $emitted);
-        self::assertSame('CustomersCreated', $emitted[0]['name']);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('Count', $emitted[0]['unit']);
+        foreach ($this->metricsSpy->emitted() as $metric) {
+            self::assertSame('CustomersCreated', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('create', $metric->dimensions()->values()->get('Operation'));
+        }
     }
 
     public function testMetricHasCorrectDimensions(): void
@@ -145,10 +150,11 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         ($this->subscriber)($event);
 
-        $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ]);
+        $this->metricsSpy->assertEmittedWithDimensions(
+            'CustomersCreated',
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 
     public function testSubscribesToCorrectEvent(): void
@@ -180,6 +186,7 @@ use App\Core\Order\Application\Metric\OrderItemCountMetric;
 use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -187,6 +194,7 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
         private LoggerInterface $logger
     ) {}
 
@@ -195,9 +203,9 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
         try {
             // Emit multiple business metrics using MetricCollection
             $this->metricsEmitter->emitCollection(new MetricCollection(
-                new OrdersPlacedMetric($event->paymentMethod()),
-                new OrderValueMetric($event->totalAmount()),
-                new OrderItemCountMetric($event->itemCount())
+                new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod()),
+                new OrderValueMetric($this->dimensionsFactory, $event->totalAmount()),
+                new OrderItemCountMetric($this->dimensionsFactory, $event->itemCount())
             ));
 
             $this->logger->debug('Business metrics emitted', [

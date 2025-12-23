@@ -37,19 +37,23 @@ public function __invoke(YourEntityCreatedEvent $event): void
 ### Step 3: Add Test (2 minutes)
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
 public function testEmitsBusinessMetric(): void
 {
     $metricsSpy = new BusinessMetricsEmitterSpy();
-    $subscriber = new YourMetricsSubscriber($metricsSpy);
+    $dimensionsFactory = new MetricDimensionsFactory();
+    $subscriber = new YourMetricsSubscriber($metricsSpy, $dimensionsFactory);
 
     ($subscriber)(new YourEntityCreatedEvent(/* ... */));
 
-    $metricsSpy->assertEmittedWithDimensions('EntitiesCreated', [
-        'Endpoint' => 'YourEntity',
-        'Operation' => 'create',
-    ]);
+    $metricsSpy->assertEmittedWithDimensions(
+        'EntitiesCreated',
+        new MetricDimension('Endpoint', 'YourEntity'),
+        new MetricDimension('Operation', 'create')
+    );
 }
 ```
 
@@ -64,18 +68,19 @@ public function testEmitsBusinessMetric(): void
 
 declare(strict_types=1);
 
-namespace App\YourContext\Application\EventSubscriber;
+namespace App\YourContext\Application\Metric;
 
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 
 final readonly class EntitiesCreatedMetric extends EndpointOperationBusinessMetric
 {
-    public function __construct(float|int $value = 1)
-    {
-        parent::__construct($value, MetricUnit::COUNT);
+    public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
     }
 
     public function name(): string
@@ -93,16 +98,51 @@ final readonly class EntitiesCreatedMetric extends EndpointOperationBusinessMetr
         return 'create';
     }
 }
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\YourContext\Application\EventSubscriber;
+
+use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\YourContext\Application\Metric\EntitiesCreatedMetric;
+use App\YourContext\Domain\Event\YourEntityCreatedEvent;
+use Psr\Log\LoggerInterface;
 
 final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
-    public function __construct(private BusinessMetricsEmitterInterface $metricsEmitter) {}
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private LoggerInterface $logger
+    ) {}
 
     public function __invoke(YourEntityCreatedEvent $event): void
     {
-        $this->metricsEmitter->emit(new EntitiesCreatedMetric());
+        try {
+            $this->metricsEmitter->emit(new EntitiesCreatedMetric($this->dimensionsFactory));
+
+            $this->logger->debug('Business metric emitted', [
+                'metric' => 'EntitiesCreated',
+                'entity_id' => $event->entityId(),
+            ]);
+        } catch (\Throwable $e) {
+            // Metrics are best-effort: don't fail business operations
+            $this->logger->warning('Failed to emit business metric', [
+                'metric' => 'EntitiesCreated',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
+    /**
+     * @return array<class-string>
+     */
     public function subscribedTo(): array
     {
         return [YourEntityCreatedEvent::class];
@@ -117,19 +157,19 @@ final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSu
 ### For Create Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersCreatedMetric());
+$this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
 ```
 
 ### For Update Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersUpdatedMetric());
+$this->metricsEmitter->emit(new CustomersUpdatedMetric($this->dimensionsFactory));
 ```
 
 ### For Delete Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersDeletedMetric());
+$this->metricsEmitter->emit(new CustomersDeletedMetric($this->dimensionsFactory));
 ```
 
 ### For Business Values
@@ -138,8 +178,8 @@ $this->metricsEmitter->emit(new CustomersDeletedMetric());
 use App\Shared\Application\Observability\Metric\MetricCollection;
 
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($order->paymentMethod()),
-    new OrderValueMetric($order->totalAmount())
+    new OrdersPlacedMetric($this->dimensionsFactory, $order->paymentMethod()),
+    new OrderValueMetric($this->dimensionsFactory, $order->totalAmount())
 ));
 ```
 
@@ -181,36 +221,50 @@ Your job is to add **domain-specific business metrics** that track business even
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\YourContext\Application\CommandHandler;
+namespace App\Tests\Unit\YourContext\Application\EventSubscriber;
 
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
-use App\YourContext\Application\CommandHandler\YourCommandHandler;
-use App\YourContext\Application\Command\YourCommand;
+use App\YourContext\Application\EventSubscriber\YourEntityCreatedMetricsSubscriber;
+use App\YourContext\Domain\Event\YourEntityCreatedEvent;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 
-final class YourCommandHandlerTest extends UnitTestCase
+final class YourEntityCreatedMetricsSubscriberTest extends UnitTestCase
 {
     private BusinessMetricsEmitterSpy $metricsSpy;
-    private YourCommandHandler $handler;
+    private LoggerInterface&MockObject $logger;
+    private YourEntityCreatedMetricsSubscriber $subscriber;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->metricsSpy = new BusinessMetricsEmitterSpy();
-        $this->handler = new YourCommandHandler(
-            $this->createMock(YourRepositoryInterface::class),
-            $this->metricsSpy
+        $this->logger = $this->createMock(LoggerInterface::class);
+
+        $this->subscriber = new YourEntityCreatedMetricsSubscriber(
+            $this->metricsSpy,
+            new MetricDimensionsFactory(),
+            $this->logger
         );
     }
 
     public function testEmitsBusinessMetricOnSuccess(): void
     {
-        ($this->handler)(new YourCommand(/* ... */));
+        $event = new YourEntityCreatedEvent(/* ... */);
 
-        $this->metricsSpy->assertEmittedWithDimensions('EntitiesCreated', [
-            'Endpoint' => 'YourEntity',
-            'Operation' => 'create',
-        ]);
+        ($this->subscriber)($event);
+
+        self::assertSame(1, $this->metricsSpy->count());
+
+        $this->metricsSpy->assertEmittedWithDimensions(
+            'EntitiesCreated',
+            new MetricDimension('Endpoint', 'YourEntity'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 }
 ```
