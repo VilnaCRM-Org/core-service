@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Observability\Metric;
+namespace App\Shared\Infrastructure\Observability\Factory;
+
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\MetricDimensions;
 
 interface MetricDimensionsFactoryInterface
 {

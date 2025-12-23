@@ -14,6 +14,8 @@ use Traversable;
  *
  * Maps to the Dimensions array in CloudWatch:
  * [["Endpoint", "Operation"]]
+ *
+ * @implements IteratorAggregate<int, string>
  */
 final readonly class EmfDimensionKeys implements IteratorAggregate, Countable, \JsonSerializable
 {

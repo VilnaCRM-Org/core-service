@@ -6,9 +6,9 @@ namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 
 /**
  * Test metric for OrdersPlaced

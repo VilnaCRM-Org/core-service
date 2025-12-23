@@ -6,7 +6,6 @@ namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\MetricDimension;
 use App\Shared\Application\Observability\Metric\MetricDimensions;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 
 final class MetricDimensionsFactory implements MetricDimensionsFactoryInterface
 {

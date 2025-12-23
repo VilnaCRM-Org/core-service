@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Metric;
 
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 
 /**
  * Metric for tracking customer creation events

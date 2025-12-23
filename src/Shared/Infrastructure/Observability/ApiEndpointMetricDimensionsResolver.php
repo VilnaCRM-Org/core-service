@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 final readonly class ApiEndpointMetricDimensionsResolver

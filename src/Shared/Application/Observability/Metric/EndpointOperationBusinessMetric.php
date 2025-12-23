@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric;
 
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
+
 abstract readonly class EndpointOperationBusinessMetric extends BusinessMetric
 {
     public function __construct(

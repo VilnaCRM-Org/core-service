@@ -6,7 +6,7 @@ namespace App\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;

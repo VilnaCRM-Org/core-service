@@ -11,6 +11,7 @@ use App\Shared\Infrastructure\Observability\Emf\SystemEmfTimestampProvider;
 use App\Shared\Infrastructure\Observability\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
+use App\Tests\Unit\Shared\Application\Observability\Metric\TestInvalidUtf8Metric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;
@@ -74,32 +75,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
         $emitter = $this->createEmitterWithLogger($logger);
 
-        $metric = new class() extends \App\Shared\Application\Observability\Metric\BusinessMetric {
-            public function __construct()
-            {
-                parent::__construct(1, \App\Shared\Application\Observability\Metric\MetricUnit::COUNT);
-            }
-
-            public function name(): string
-            {
-                return 'InvalidMetric';
-            }
-
-            public function dimensions(): \App\Shared\Application\Observability\Metric\MetricDimensionsInterface
-            {
-                return new class() implements \App\Shared\Application\Observability\Metric\MetricDimensionsInterface {
-                    public function values(): \App\Shared\Application\Observability\Metric\MetricDimensions
-                    {
-                        return new \App\Shared\Application\Observability\Metric\MetricDimensions(
-                            new \App\Shared\Application\Observability\Metric\MetricDimension('Endpoint', "\xB1"), // Invalid UTF-8
-                            new \App\Shared\Application\Observability\Metric\MetricDimension('Operation', 'create')
-                        );
-                    }
-                };
-            }
-        };
-
-        $emitter->emit($metric);
+        $emitter->emit(new TestInvalidUtf8Metric());
     }
 
     public function testMetricValueIsCorrectlySet(): void
