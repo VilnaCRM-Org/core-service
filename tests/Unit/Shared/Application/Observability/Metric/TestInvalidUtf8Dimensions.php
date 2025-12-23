@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
-use App\Shared\Application\Observability\Metric\MetricDimension;
-use App\Shared\Application\Observability\Metric\MetricDimensions;
-use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
 
 /**
  * Test dimensions that produce invalid UTF-8 for JSON encoding failure tests

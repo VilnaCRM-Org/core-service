@@ -6,7 +6,7 @@ namespace App\Shared\Infrastructure\Observability\Emitter;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfPayload;

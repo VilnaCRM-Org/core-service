@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
 final class ObservabilityBusinessMetricsTest extends BaseTest

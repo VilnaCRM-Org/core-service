@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
-use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 use App\Tests\Unit\UnitTestCase;
 
 final class EndpointInvocationsMetricTest extends UnitTestCase
@@ -45,6 +45,6 @@ final class EndpointInvocationsMetricTest extends UnitTestCase
     {
         $metric = new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create');
 
-        self::assertSame(MetricUnit::COUNT, $metric->unit());
+        self::assertSame(MetricUnit::COUNT, $metric->unit()->value());
     }
 }

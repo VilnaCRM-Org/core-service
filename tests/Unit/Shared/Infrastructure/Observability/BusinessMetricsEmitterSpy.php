@@ -6,8 +6,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 
 final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
 {

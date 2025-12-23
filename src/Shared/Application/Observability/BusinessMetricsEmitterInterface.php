@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\Observability;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 
 interface BusinessMetricsEmitterInterface
 {

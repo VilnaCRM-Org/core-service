@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\Metric;
 
 use App\Core\Customer\Application\Metric\CustomersDeletedMetric;
-use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomersDeletedMetricTest extends UnitTestCase
@@ -45,6 +45,6 @@ final class CustomersDeletedMetricTest extends UnitTestCase
     {
         $metric = new CustomersDeletedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
 
-        self::assertSame(MetricUnit::COUNT, $metric->unit());
+        self::assertSame(MetricUnit::COUNT, $metric->unit()->value());
     }
 }

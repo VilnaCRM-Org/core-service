@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Metric;
 
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricUnit;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 
 /**
@@ -20,7 +20,7 @@ final readonly class CustomersDeletedMetric extends EndpointOperationBusinessMet
         MetricDimensionsFactoryInterface $dimensionsFactory,
         float|int $value = 1
     ) {
-        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
+        parent::__construct($dimensionsFactory, $value, new MetricUnit(MetricUnit::COUNT));
     }
 
     public function name(): string

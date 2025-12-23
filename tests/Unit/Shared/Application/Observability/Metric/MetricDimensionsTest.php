@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
-use App\Shared\Application\Observability\Metric\MetricDimension;
-use App\Shared\Application\Observability\Metric\MetricDimensions;
+use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Tests\Unit\UnitTestCase;
 
 final class MetricDimensionsTest extends UnitTestCase

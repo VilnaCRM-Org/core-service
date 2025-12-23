@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Factory;
 
-use App\Shared\Application\Observability\Metric\MetricDimension;
-use App\Shared\Application\Observability\Metric\MetricDimensions;
+use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 
 final class MetricDimensionsFactory implements MetricDimensionsFactoryInterface
 {

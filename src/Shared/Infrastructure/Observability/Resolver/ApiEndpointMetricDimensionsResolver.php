@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Resolver;
 
-use App\Shared\Application\Observability\Metric\EndpointOperationMetricDimensions;
+use App\Shared\Application\Observability\Metric\ValueObject\EndpointOperationMetricDimensions;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 

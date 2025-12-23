@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric;
 
+use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 
 /**
@@ -17,7 +18,7 @@ final readonly class EndpointInvocationsMetric extends EndpointOperationBusiness
         private string $operation,
         float|int $value = 1
     ) {
-        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
+        parent::__construct($dimensionsFactory, $value, new MetricUnit(MetricUnit::COUNT));
     }
 
     public function name(): string

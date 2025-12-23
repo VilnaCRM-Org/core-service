@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
-use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
@@ -88,7 +88,7 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
 
     private function createMetricDefinition(BusinessMetric $metric): EmfMetricDefinition
     {
-        return new EmfMetricDefinition($metric->name(), $metric->unit()->value);
+        return new EmfMetricDefinition($metric->name(), $metric->unit()->value());
     }
 
     private function createMetricValue(BusinessMetric $metric): EmfMetricValue

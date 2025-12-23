@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Observability\Metric;
+namespace App\Shared\Application\Observability\Metric\ValueObject;
 
 /**
  * Represents a single metric dimension key-value pair.

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric;
 
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
+
 /**
  * Base class for business metrics
  *

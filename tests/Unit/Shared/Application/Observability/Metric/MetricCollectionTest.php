@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
-use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Tests\Unit\UnitTestCase;
 
 final class MetricCollectionTest extends UnitTestCase

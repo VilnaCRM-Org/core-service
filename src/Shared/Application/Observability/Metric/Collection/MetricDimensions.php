@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Observability\Metric;
+namespace App\Shared\Application\Observability\Metric\Collection;
 
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
