@@ -91,7 +91,7 @@ CloudWatch automatically extracts this as a metric in the `CCore/BusinessMetrics
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Core\Customer\Application\EventSubscriber;
+namespace App\Tests\Unit\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;

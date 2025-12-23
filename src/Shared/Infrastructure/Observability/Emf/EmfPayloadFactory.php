@@ -7,6 +7,7 @@ namespace App\Shared\Infrastructure\Observability\Emf;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use InvalidArgumentException;
 
 /**
  * Factory for creating EMF payload objects from business metrics
@@ -34,6 +35,10 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
 
     public function createFromCollection(MetricCollection $metrics): EmfPayload
     {
+        if ($metrics->isEmpty()) {
+            throw new InvalidArgumentException('Cannot create EMF payload from empty metric collection');
+        }
+
         $allMetrics = $metrics->all();
         $dimensions = $this->createDimensionValueCollection($allMetrics[0]->dimensions());
         $payload = $this->createEmptyPayload($dimensions);

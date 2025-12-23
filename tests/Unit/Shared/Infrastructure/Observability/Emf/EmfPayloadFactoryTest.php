@@ -88,6 +88,17 @@ final class EmfPayloadFactoryTest extends UnitTestCase
         self::assertSame('create', $json['Operation']);
     }
 
+    public function testThrowsExceptionForEmptyCollection(): void
+    {
+        $factory = $this->createFactory();
+        $emptyCollection = new MetricCollection();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot create EMF payload from empty metric collection');
+
+        $factory->createFromCollection($emptyCollection);
+    }
+
     private function createFactory(): EmfPayloadFactory
     {
         return new EmfPayloadFactory(self::NAMESPACE, $this->createTimestampProvider());

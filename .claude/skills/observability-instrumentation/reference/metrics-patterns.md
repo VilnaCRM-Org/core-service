@@ -24,13 +24,16 @@ Business metrics use **typed classes** (not arrays) and are emitted via **event 
 
 ```php
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\MetricUnit;
 
 final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
 {
-    public function __construct(float|int $value = 1)
-    {
-        parent::__construct($value, MetricUnit::COUNT);
+    public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
     }
 
     public function name(): string
@@ -54,28 +57,32 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 
 ```php
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersCreatedMetric());
+            $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',
-                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
             ]);
         } catch (\Throwable $e) {
             // Metrics are best-effort: don't fail business operations
             $this->logger->warning('Failed to emit business metric', [
                 'metric' => 'CustomersCreated',
+                'event_id' => $event->eventId(),
                 'error' => $e->getMessage(),
             ]);
         }

@@ -160,8 +160,9 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     ): AwsEmfBusinessMetricsEmitter {
         $timestampProvider = new SystemEmfTimestampProvider();
         $payloadFactory = new EmfPayloadFactory($namespace, $timestampProvider);
+        $formatterLogger = $this->createMock(LoggerInterface::class);
 
-        return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter(), $payloadFactory);
+        return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter($formatterLogger), $payloadFactory);
     }
 
     private function createOrderMetricCollection(): MetricCollection

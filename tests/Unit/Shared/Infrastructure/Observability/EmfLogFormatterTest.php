@@ -16,16 +16,20 @@ use App\Shared\Infrastructure\Observability\Emf\EmfMetricValueCollection;
 use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
 use App\Shared\Infrastructure\Observability\EmfLogFormatter;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 
 final class EmfLogFormatterTest extends UnitTestCase
 {
+    private LoggerInterface&MockObject $logger;
     private EmfLogFormatter $formatter;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->formatter = new EmfLogFormatter();
+        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->formatter = new EmfLogFormatter($this->logger);
     }
 
     public function testFormatsPayloadAsJson(): void

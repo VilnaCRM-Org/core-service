@@ -120,9 +120,6 @@ MetricDimensionsInterface
 MetricDimensions - typed collection of MetricDimension objects
 MetricDimension - key/value pair
 
-MetricDimensions - typed collection of MetricDimension objects
-MetricDimension - key/value pair
-
 MetricUnit (enum)
 ├── COUNT, NONE, SECONDS, MILLISECONDS, BYTES, PERCENT
 

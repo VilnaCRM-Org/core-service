@@ -33,14 +33,13 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',
-                'customer_id' => $event->customerId(),
                 'event_id' => $event->eventId(),
             ]);
         } catch (\Throwable $e) {
             // Metrics emission is best-effort: don't fail the business operation
             $this->logger->warning('Failed to emit business metric', [
                 'metric' => 'CustomersCreated',
-                'customer_id' => $event->customerId(),
+                'event_id' => $event->eventId(),
                 'error' => $e->getMessage(),
             ]);
         }

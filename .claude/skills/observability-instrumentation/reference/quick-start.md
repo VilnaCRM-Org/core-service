@@ -14,12 +14,16 @@ Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Met
 
 ```php
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class YourMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
-        private BusinessMetricsEmitterInterface $metricsEmitter
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private LoggerInterface $logger
     ) {}
 }
 ```
@@ -30,7 +34,7 @@ final readonly class YourMetricsSubscriber implements DomainEventSubscriberInter
 public function __invoke(YourEntityCreatedEvent $event): void
 {
     // Metrics are best-effort: keep business flow resilient
-    $this->metricsEmitter->emit(new EntitiesCreatedMetric());
+    $this->metricsEmitter->emit(new EntitiesCreatedMetric($this->dimensionsFactory));
 }
 ```
 

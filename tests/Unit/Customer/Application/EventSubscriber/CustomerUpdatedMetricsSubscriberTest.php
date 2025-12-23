@@ -76,10 +76,10 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
             ->method('debug')
             ->with(
                 'Business metric emitted',
-                $this->callback(static function ($context) use ($customerId) {
+                $this->callback(static function ($context) {
                     return $context['metric'] === 'CustomersUpdated'
-                        && $context['customer_id'] === $customerId
-                        && isset($context['event_id']);
+                        && isset($context['event_id'])
+                        && !isset($context['customer_id']); // PII should not be logged
                 })
             );
 
@@ -116,10 +116,11 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Failed to emit business metric',
-                $this->callback(static function ($context) use ($customerId) {
+                $this->callback(static function ($context) {
                     return $context['metric'] === 'CustomersUpdated'
-                        && $context['customer_id'] === $customerId
-                        && $context['error'] === 'Connection failed';
+                        && isset($context['event_id'])
+                        && $context['error'] === 'Connection failed'
+                        && !isset($context['customer_id']); // PII should not be logged
                 })
             );
 
