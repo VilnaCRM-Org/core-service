@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\EventSubscriber;
 
-use App\Core\Customer\Application\Metric\CustomersCreatedMetric;
+use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactoryInterface;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +20,7 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private CustomersCreatedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {
     }
@@ -29,7 +28,7 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
     public function __invoke(CustomerCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
+            $this->metricsEmitter->emit($this->metricFactory->create());
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',

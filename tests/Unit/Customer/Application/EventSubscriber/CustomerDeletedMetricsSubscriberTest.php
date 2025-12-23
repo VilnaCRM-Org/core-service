@@ -24,9 +24,11 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
         $this->logger = $this->createMock(LoggerInterface::class);
 
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         $this->subscriber = new CustomerDeletedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(),
+            new \App\Core\Customer\Application\Factory\CustomersDeletedMetricFactory($dimensionsFactory),
             $this->logger
         );
     }
@@ -101,9 +103,11 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));
 
+        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+
         $subscriber = new CustomerDeletedMetricsSubscriber(
             $failingEmitter,
-            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(),
+            new \App\Core\Customer\Application\Factory\CustomersDeletedMetricFactory($dimensionsFactory),
             $this->logger
         );
 

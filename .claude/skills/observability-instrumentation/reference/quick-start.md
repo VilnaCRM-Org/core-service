@@ -13,8 +13,8 @@ Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Met
 ### Step 1: Create a domain event subscriber (30 seconds)
 
 ```php
+use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -22,7 +22,7 @@ final readonly class YourMetricsSubscriber implements DomainEventSubscriberInter
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private EntitiesCreatedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {}
 }
@@ -34,7 +34,7 @@ final readonly class YourMetricsSubscriber implements DomainEventSubscriberInter
 public function __invoke(YourEntityCreatedEvent $event): void
 {
     // Metrics are best-effort: keep business flow resilient
-    $this->metricsEmitter->emit(new EntitiesCreatedMetric($this->dimensionsFactory));
+    $this->metricsEmitter->emit($this->metricFactory->create());
 }
 ```
 
@@ -49,7 +49,8 @@ public function testEmitsBusinessMetric(): void
 {
     $metricsSpy = new BusinessMetricsEmitterSpy();
     $dimensionsFactory = new MetricDimensionsFactory();
-    $subscriber = new YourMetricsSubscriber($metricsSpy, $dimensionsFactory);
+    $metricFactory = new EntitiesCreatedMetricFactory($dimensionsFactory);
+    $subscriber = new YourMetricsSubscriber($metricsSpy, $metricFactory);
 
     ($subscriber)(new YourEntityCreatedEvent(/* ... */));
 
@@ -112,9 +113,8 @@ declare(strict_types=1);
 namespace App\YourContext\Application\EventSubscriber;
 
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use App\YourContext\Application\Metric\EntitiesCreatedMetric;
+use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
 use App\YourContext\Domain\Event\YourEntityCreatedEvent;
 use Psr\Log\LoggerInterface;
 
@@ -122,14 +122,14 @@ final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSu
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private EntitiesCreatedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(YourEntityCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new EntitiesCreatedMetric($this->dimensionsFactory));
+            $this->metricsEmitter->emit($this->metricFactory->create());
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'EntitiesCreated',
@@ -161,19 +161,19 @@ final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSu
 ### For Create Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
+$this->metricsEmitter->emit($this->customersCreatedMetricFactory->create());
 ```
 
 ### For Update Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersUpdatedMetric($this->dimensionsFactory));
+$this->metricsEmitter->emit($this->customersUpdatedMetricFactory->create());
 ```
 
 ### For Delete Operations
 
 ```php
-$this->metricsEmitter->emit(new CustomersDeletedMetric($this->dimensionsFactory));
+$this->metricsEmitter->emit($this->customersDeletedMetricFactory->create());
 ```
 
 ### For Business Values
@@ -182,8 +182,8 @@ $this->metricsEmitter->emit(new CustomersDeletedMetric($this->dimensionsFactory)
 use App\Shared\Application\Observability\Metric\MetricCollection;
 
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($this->dimensionsFactory, $order->paymentMethod()),
-    new OrderValueMetric($this->dimensionsFactory, $order->totalAmount())
+    $this->ordersPlacedMetricFactory->create($order->paymentMethod()),
+    $this->orderValueMetricFactory->create($order->totalAmount())
 ));
 ```
 

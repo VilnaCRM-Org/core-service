@@ -88,7 +88,7 @@ final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInt
 {
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        $this->metricsEmitter->emit(new CustomersCreatedMetric());
+        $this->metricsEmitter->emit($this->metricFactory->create());
     }
 }
 ```
@@ -211,14 +211,14 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private CustomersCreatedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
+            $this->metricsEmitter->emit($this->metricFactory->create());
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',
@@ -339,10 +339,9 @@ final readonly class OrdersPlacedMetric extends BusinessMetric
 // src/Core/Order/Application/EventSubscriber/OrderPlacedMetricsSubscriber.php
 namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Metric\OrdersPlacedMetric;
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
 use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -350,16 +349,14 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private OrdersPlacedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(OrderPlacedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(
-                new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod())
-            );
+            $this->metricsEmitter->emit($this->metricFactory->create($event->paymentMethod()));
         } catch (\Throwable $e) {
             $this->logger->warning('Failed to emit business metric', [
                 'metric' => 'OrdersPlaced',
@@ -383,8 +380,8 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 ```php
 // Emit multiple metrics together (dimensionsFactory injected via constructor)
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod()),
-    new OrderValueMetric($this->dimensionsFactory, $event->totalAmount())
+    $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
+    $this->orderValueMetricFactory->create($event->totalAmount())
 ));
 ```
 
@@ -453,11 +450,12 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
     {
         $metricsSpy = new BusinessMetricsEmitterSpy();
         $dimensionsFactory = new MetricDimensionsFactory();
+        $metricFactory = new CustomersCreatedMetricFactory($dimensionsFactory);
         $logger = $this->createMock(LoggerInterface::class);
 
         $subscriber = new CustomerCreatedMetricsSubscriber(
             $metricsSpy,
-            $dimensionsFactory,
+            $metricFactory,
             $logger
         );
 

@@ -56,8 +56,8 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 ### Event Subscriber Pattern
 
 ```php
+use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactoryInterface;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -65,14 +65,14 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private CustomersCreatedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {}
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
+            $this->metricsEmitter->emit($this->metricFactory->create());
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersCreated',
@@ -137,8 +137,8 @@ When written to stdout via Monolog EMF channel, CloudWatch automatically:
 ### Emit Single Metric
 
 ```php
-// In an event subscriber (dimensionsFactory injected via constructor)
-$this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory));
+// In an event subscriber (metric factory injected via constructor)
+$this->metricsEmitter->emit($this->customersCreatedMetricFactory->create());
 ```
 
 ### Emit Multiple Metrics
@@ -147,8 +147,8 @@ $this->metricsEmitter->emit(new CustomersCreatedMetric($this->dimensionsFactory)
 use App\Shared\Application\Observability\Metric\MetricCollection;
 
 $this->metricsEmitter->emitCollection(new MetricCollection(
-    new OrdersPlacedMetric($this->dimensionsFactory, $paymentMethod),
-    new OrderValueMetric($this->dimensionsFactory, $totalAmount)
+    $this->ordersPlacedMetricFactory->create($paymentMethod),
+    $this->orderValueMetricFactory->create($totalAmount)
 ));
 ```
 
@@ -215,7 +215,7 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
 {
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        $this->metricsEmitter->emit(new CustomersCreatedMetric());
+        $this->metricsEmitter->emit($this->customersCreatedMetricFactory->create());
     }
 }
 
@@ -224,7 +224,7 @@ final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubs
 {
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        $this->metricsEmitter->emit(new CustomersUpdatedMetric());
+        $this->metricsEmitter->emit($this->customersUpdatedMetricFactory->create());
     }
 }
 
@@ -233,7 +233,7 @@ final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubs
 {
     public function __invoke(CustomerDeletedEvent $event): void
     {
-        $this->metricsEmitter->emit(new CustomersDeletedMetric());
+        $this->metricsEmitter->emit($this->customersDeletedMetricFactory->create());
     }
 }
 ```

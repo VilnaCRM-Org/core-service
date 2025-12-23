@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\EventSubscriber;
 
-use App\Core\Customer\Application\Metric\CustomersDeletedMetric;
+use App\Core\Customer\Application\Factory\CustomersDeletedMetricFactoryInterface;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +20,7 @@ final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubs
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private CustomersDeletedMetricFactoryInterface $metricFactory,
         private LoggerInterface $logger
     ) {
     }
@@ -29,7 +28,7 @@ final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubs
     public function __invoke(CustomerDeletedEvent $event): void
     {
         try {
-            $this->metricsEmitter->emit(new CustomersDeletedMetric($this->dimensionsFactory));
+            $this->metricsEmitter->emit($this->metricFactory->create());
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'CustomersDeleted',

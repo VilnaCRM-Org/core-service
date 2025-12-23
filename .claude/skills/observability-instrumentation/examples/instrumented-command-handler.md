@@ -115,9 +115,12 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
         $this->metricsSpy = new BusinessMetricsEmitterSpy();
         $this->logger = $this->createMock(LoggerInterface::class);
 
+        $dimensionsFactory = new MetricDimensionsFactory();
+        $metricFactory = new \App\Core\Customer\Application\Factory\CustomersCreatedMetricFactory($dimensionsFactory);
+
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsSpy,
-            new MetricDimensionsFactory(),
+            $metricFactory,
             $this->logger
         );
     }
@@ -180,13 +183,12 @@ declare(strict_types=1);
 
 namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Metric\OrdersPlacedMetric;
-use App\Core\Order\Application\Metric\OrderValueMetric;
-use App\Core\Order\Application\Metric\OrderItemCountMetric;
+use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
 use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 
@@ -194,7 +196,9 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private OrdersPlacedMetricFactoryInterface $ordersPlacedMetricFactory,
+        private OrderValueMetricFactoryInterface $orderValueMetricFactory,
+        private OrderItemCountMetricFactoryInterface $orderItemCountMetricFactory,
         private LoggerInterface $logger
     ) {}
 
@@ -203,9 +207,9 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
         try {
             // Emit multiple business metrics using MetricCollection
             $this->metricsEmitter->emitCollection(new MetricCollection(
-                new OrdersPlacedMetric($this->dimensionsFactory, $event->paymentMethod()),
-                new OrderValueMetric($this->dimensionsFactory, $event->totalAmount()),
-                new OrderItemCountMetric($this->dimensionsFactory, $event->itemCount())
+                $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
+                $this->orderValueMetricFactory->create($event->totalAmount()),
+                $this->orderItemCountMetricFactory->create($event->itemCount())
             ));
 
             $this->logger->debug('Business metrics emitted', [
