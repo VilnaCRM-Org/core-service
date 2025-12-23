@@ -22,14 +22,8 @@ final readonly class EndpointOperationMetricDimensions implements MetricDimensio
         return $this->operation;
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function toArray(): array
+    public function values(): MetricDimensions
     {
-        return [
-            'Endpoint' => $this->endpoint,
-            'Operation' => $this->operation,
-        ];
+        return MetricDimensions::endpointOperation($this->endpoint, $this->operation);
     }
 }

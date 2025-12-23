@@ -96,8 +96,8 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
         MetricDimensionsInterface $dimensions
     ): EmfDimensionValueCollection {
         $dimensionValues = [];
-        foreach ($dimensions->toArray() as $key => $value) {
-            $dimensionValues[] = new EmfDimensionValue($key, $value);
+        foreach ($dimensions->values() as $dimension) {
+            $dimensionValues[] = new EmfDimensionValue($dimension->key(), $dimension->value());
         }
 
         return new EmfDimensionValueCollection(...$dimensionValues);

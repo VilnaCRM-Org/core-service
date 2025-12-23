@@ -6,8 +6,5 @@ namespace App\Shared\Application\Observability\Metric;
 
 interface MetricDimensionsInterface
 {
-    /**
-     * @return array<string, string>
-     */
-    public function toArray(): array;
+    public function values(): MetricDimensions;
 }

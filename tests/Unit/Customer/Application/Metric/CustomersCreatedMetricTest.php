@@ -21,10 +21,10 @@ final class CustomersCreatedMetricTest extends UnitTestCase
     {
         $metric = new CustomersCreatedMetric();
 
-        $dimensions = $metric->dimensions()->toArray();
+        $dimensions = $metric->dimensions()->values();
 
-        self::assertSame('Customer', $dimensions['Endpoint']);
-        self::assertSame('create', $dimensions['Operation']);
+        self::assertSame('Customer', $dimensions->get('Endpoint'));
+        self::assertSame('create', $dimensions->get('Operation'));
     }
 
     public function testDefaultsToValueOfOne(): void

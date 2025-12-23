@@ -11,7 +11,9 @@ Guide to implementing structured logging for debugging and correlation. This com
 $logger->info("Creating customer " . $customerId . " with email " . $email);
 ```
 
-**Structured logging** (arrays):
+**Structured logging** (PSR-3 context array):
+
+> Arrays are fine here because PSR-3 requires `array $context`; for business metrics use typed metric/dimension objects and emit them from event subscribers.
 
 ```php
 // Good - Structured, searchable, parseable

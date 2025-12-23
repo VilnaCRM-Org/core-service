@@ -40,12 +40,14 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        $emitted = $spy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame('EndpointInvocations', $emitted[0]['name']);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('HealthCheck', $emitted[0]['dimensions']['Endpoint']);
-        self::assertSame('_api_/health_get', $emitted[0]['dimensions']['Operation']);
+        self::assertSame(1, $spy->count());
+
+        foreach ($spy->emitted() as $metric) {
+            self::assertSame('EndpointInvocations', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('HealthCheck', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('_api_/health_get', $metric->dimensions()->values()->get('Operation'));
+        }
     }
 
     public function testDoesNotEmitMetricForNonApiRequest(): void
@@ -64,7 +66,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        self::assertSame([], $spy->emitted());
+        self::assertSame(0, $spy->count());
     }
 
     public function testEmitsMetricForGraphqlEndpoint(): void
@@ -83,11 +85,13 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        $emitted = $spy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('/api/graphql', $emitted[0]['dimensions']['Endpoint']);
-        self::assertSame('post', $emitted[0]['dimensions']['Operation']);
+        self::assertSame(1, $spy->count());
+
+        foreach ($spy->emitted() as $metric) {
+            self::assertSame(1, $metric->value());
+            self::assertSame('/api/graphql', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('post', $metric->dimensions()->values()->get('Operation'));
+        }
     }
 
     public function testEmitsMetricWithoutOperationNameUsesMethod(): void
@@ -107,11 +111,13 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        $emitted = $spy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('Customer', $emitted[0]['dimensions']['Endpoint']);
-        self::assertSame('patch', $emitted[0]['dimensions']['Operation']);
+        self::assertSame(1, $spy->count());
+
+        foreach ($spy->emitted() as $metric) {
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('patch', $metric->dimensions()->values()->get('Operation'));
+        }
     }
 
     public function testDoesNotEmitMetricOutsideApiPrefixEvenIfApiOperationAttributePresent(): void
@@ -131,7 +137,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        self::assertSame([], $spy->emitted());
+        self::assertSame(0, $spy->count());
     }
 
     public function testDoesNotEmitMetricOutsideApiPrefixEvenIfResourceClassPresent(): void
@@ -151,7 +157,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        self::assertSame([], $spy->emitted());
+        self::assertSame(0, $spy->count());
     }
 
     public function testDoesNotEmitMetricForSubRequest(): void
@@ -170,6 +176,6 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        self::assertSame([], $spy->emitted());
+        self::assertSame(0, $spy->count());
     }
 }

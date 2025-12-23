@@ -21,10 +21,10 @@ final class EndpointInvocationsMetricTest extends UnitTestCase
     {
         $metric = new EndpointInvocationsMetric('Customer', '_api_/customers_post');
 
-        $dimensions = $metric->dimensions()->toArray();
+        $dimensions = $metric->dimensions()->values();
 
-        self::assertSame('Customer', $dimensions['Endpoint']);
-        self::assertSame('_api_/customers_post', $dimensions['Operation']);
+        self::assertSame('Customer', $dimensions->get('Endpoint'));
+        self::assertSame('_api_/customers_post', $dimensions->get('Operation'));
     }
 
     public function testDefaultsToValueOfOne(): void

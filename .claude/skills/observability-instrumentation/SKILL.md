@@ -117,6 +117,12 @@ MetricDimensionsInterface
 ├── EndpointOperationMetricDimensions - Endpoint + Operation
 └── (custom dimensions for specific metrics)
 
+MetricDimensions - typed collection of MetricDimension objects
+MetricDimension - key/value pair
+
+MetricDimensions - typed collection of MetricDimension objects
+MetricDimension - key/value pair
+
 MetricUnit (enum)
 ├── COUNT, NONE, SECONDS, MILLISECONDS, BYTES, PERCENT
 
@@ -281,13 +287,13 @@ final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInt
 {
     public function __construct(private string $paymentMethod) {}
 
-    public function toArray(): array
+    public function values(): MetricDimensions
     {
-        return [
-            'Endpoint' => 'Order',
-            'Operation' => 'create',
-            'PaymentMethod' => $this->paymentMethod,
-        ];
+        return new MetricDimensions(
+            new MetricDimension('Endpoint', 'Order'),
+            new MetricDimension('Operation', 'create'),
+            new MetricDimension('PaymentMethod', $this->paymentMethod)
+        );
     }
 }
 
@@ -425,10 +431,12 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);
 
-        $emitted = $metricsSpy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame('CustomersCreated', $emitted[0]['name']);
-        self::assertSame(1, $emitted[0]['value']);
+        self::assertSame(1, $metricsSpy->count());
+
+        foreach ($metricsSpy->emitted() as $metric) {
+            self::assertSame('CustomersCreated', $metric->name());
+            self::assertSame(1, $metric->value());
+        }
     }
 }
 ```
@@ -503,7 +511,7 @@ After implementing business metrics:
 - [ ] **OCP**: New metrics added via new classes (no modification to emitter)
 - [ ] **OCP**: New event subscribers added without changing existing code
 - [ ] **LSP**: All metrics properly extend `BusinessMetric` base class
-- [ ] **ISP**: `MetricDimensionsInterface` is minimal (only `toArray()`)
+- [ ] **ISP**: `MetricDimensionsInterface` is minimal (only `values()`)
 - [ ] **DIP**: Handlers depend on `EventBusInterface`, not concrete metrics
 
 ### Type Safety Checklist
@@ -511,6 +519,7 @@ After implementing business metrics:
 - [ ] NO arrays for metric configuration - use typed classes
 - [ ] NO arrays for metric collections - use `MetricCollection`
 - [ ] All dimensions via `MetricDimensionsInterface` implementations
+- [ ] Arrays are allowed only at infrastructure boundaries (JSON serialization, PSR-3 log context)
 - [ ] Unit enum `MetricUnit` used for all units
 
 ---
@@ -521,7 +530,9 @@ After implementing business metrics:
 
 - `src/Shared/Application/Observability/Metric/BusinessMetric.php` - Base class
 - `src/Shared/Application/Observability/Metric/MetricUnit.php` - Unit enum
-- `src/Shared/Application/Observability/Metric/MetricCollection.php` - Collection
+- `src/Shared/Application/Observability/Metric/MetricDimension.php` - Dimension key/value
+- `src/Shared/Application/Observability/Metric/MetricDimensions.php` - Dimension collection
+- `src/Shared/Application/Observability/Metric/MetricCollection.php` - Metrics collection
 - `src/Shared/Application/Observability/Metric/EndpointInvocationsMetric.php` - Endpoint metric
 - `src/Core/Customer/Application/Metric/CustomersCreatedMetric.php` - Customer create metric
 - `src/Core/Customer/Application/Metric/CustomersUpdatedMetric.php` - Customer update metric

@@ -148,11 +148,20 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 ### Low Cardinality Dimensions
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\MetricDimensions;
+
 // Good: Low cardinality
-['Endpoint' => 'Customer', 'Operation' => 'create']
+new MetricDimensions(
+    new MetricDimension('Endpoint', 'Customer'),
+    new MetricDimension('Operation', 'create')
+);
 
 // Bad: High cardinality (IDs)
-['CustomerId' => $customerId, 'Timestamp' => time()]
+new MetricDimensions(
+    new MetricDimension('CustomerId', $customerId),
+    new MetricDimension('Timestamp', (string) time())
+);
 ```
 
 ### Test Coverage
@@ -163,10 +172,11 @@ public function testEmitsBusinessMetric(): void
 {
     ($this->handler)($command);
 
-    $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
-        'Endpoint' => 'Customer',
-        'Operation' => 'create',
-    ]);
+    $this->metricsSpy->assertEmittedWithDimensions(
+        'CustomersCreated',
+        new MetricDimension('Endpoint', 'Customer'),
+        new MetricDimension('Operation', 'create')
+    );
 }
 ```
 
@@ -211,10 +221,11 @@ Add this to your PR checklist:
 > Added! The test now uses `assertEmittedWithDimensions`:
 >
 > ```php
-> $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
->     'Endpoint' => 'Customer',
->     'Operation' => 'create',
-> ]);
+> $this->metricsSpy->assertEmittedWithDimensions(
+>     'CustomersCreated',
+>     new MetricDimension('Endpoint', 'Customer'),
+>     new MetricDimension('Operation', 'create')
+> );
 > ```
 
 ---
@@ -238,14 +249,19 @@ Add this to your PR checklist:
 **Fix**: Use `assertEmittedWithDimensions`:
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
+
 // Before: Only checks name
-self::assertSame('CustomersCreated', $emitted[0]['name']);
+foreach ($this->metricsSpy->emitted() as $metric) {
+    self::assertSame('CustomersCreated', $metric->name());
+}
 
 // After: Checks name AND dimensions
-$this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
-    'Endpoint' => 'Customer',
-    'Operation' => 'create',
-]);
+$this->metricsSpy->assertEmittedWithDimensions(
+    'CustomersCreated',
+    new MetricDimension('Endpoint', 'Customer'),
+    new MetricDimension('Operation', 'create')
+);
 ```
 
 ### Issue: High-Cardinality Dimension
@@ -255,6 +271,8 @@ $this->metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
 **Fix**: Remove high-cardinality dimensions:
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\MetricDimensions;
 use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
 
 // Before: High cardinality (don't do this)
@@ -262,25 +280,25 @@ final readonly class CustomersCreatedMetricDimensions implements MetricDimension
 {
     public function __construct(private string $customerId) {}
 
-    public function toArray(): array
+    public function values(): MetricDimensions
     {
-        return [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-            'CustomerId' => $this->customerId, // Remove this
-        ];
+        return new MetricDimensions(
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create'),
+            new MetricDimension('CustomerId', $this->customerId) // Remove this
+        );
     }
 }
 
 // After: Low cardinality only
 final readonly class CustomersCreatedMetricDimensions implements MetricDimensionsInterface
 {
-    public function toArray(): array
+    public function values(): MetricDimensions
     {
-        return [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ];
+        return new MetricDimensions(
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 }
 ```

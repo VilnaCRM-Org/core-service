@@ -307,6 +307,7 @@ Focus ONLY on business events and values.
 Use the spy in unit tests:
 
 ```php
+use App\Shared\Application\Observability\Metric\MetricDimension;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
 final class CustomerCreatedMetricsSubscriberTest extends TestCase
@@ -321,11 +322,13 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);
 
-        $emitted = $metricsSpy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame('CustomersCreated', $emitted[0]['name']);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('Customer', $emitted[0]['dimensions']['Endpoint']);
+        self::assertSame(1, $metricsSpy->count());
+
+        foreach ($metricsSpy->emitted() as $metric) {
+            self::assertSame('CustomersCreated', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+        }
     }
 
     public function testEmitsMetricWithCorrectDimensions(): void
@@ -338,10 +341,11 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
         $event = new CustomerCreatedEvent($customerId, $email);
         ($subscriber)($event);
 
-        $metricsSpy->assertEmittedWithDimensions('CustomersCreated', [
-            'Endpoint' => 'Customer',
-            'Operation' => 'create',
-        ]);
+        $metricsSpy->assertEmittedWithDimensions(
+            'CustomersCreated',
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 }
 ```

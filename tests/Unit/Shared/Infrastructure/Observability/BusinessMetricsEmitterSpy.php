@@ -7,28 +7,16 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\MetricDimension;
 
-/**
- * @phpstan-type MetricRecord array{
- *     name: string,
- *     value: float|int,
- *     dimensions: array<string, string>,
- *     unit: string
- * }
- */
 final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
 {
-    /** @var array<int, MetricRecord> */
+    /** @var array<int, BusinessMetric> */
     private array $emitted = [];
 
     public function emit(BusinessMetric $metric): void
     {
-        $this->emitted[] = [
-            'name' => $metric->name(),
-            'value' => $metric->value(),
-            'dimensions' => $metric->dimensions()->toArray(),
-            'unit' => $metric->unit()->value,
-        ];
+        $this->emitted[] = $metric;
     }
 
     public function emitCollection(MetricCollection $metrics): void
@@ -43,26 +31,31 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
         $this->emitted = [];
     }
 
-    /**
-     * @return array<int, MetricRecord>
-     */
-    public function emitted(): array
+    public function count(): int
     {
-        return $this->emitted;
+        return count($this->emitted);
     }
 
-    /**
-     * @param array<string, string> $dimensions
-     */
-    public function assertEmittedWithDimensions(string $metricName, array $dimensions): void
+    public function emitted(): MetricCollection
+    {
+        return new MetricCollection(...$this->emitted);
+    }
+
+    public function assertEmittedWithDimensions(string $metricName, MetricDimension ...$dimensions): void
     {
         foreach ($this->emitted as $metric) {
-            if (
-                $metric['name'] === $metricName
-                && array_intersect_assoc($metric['dimensions'], $dimensions) === $dimensions
-            ) {
-                return;
+            if ($metric->name() !== $metricName) {
+                continue;
             }
+
+            foreach ($dimensions as $expected) {
+                $actual = $metric->dimensions()->values()->get($expected->key());
+                if ($actual !== $expected->value()) {
+                    continue 2;
+                }
+            }
+
+            return;
         }
 
         $message = "Metric '{$metricName}' with specified dimensions was not emitted";

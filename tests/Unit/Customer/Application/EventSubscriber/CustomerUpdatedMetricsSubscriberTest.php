@@ -50,12 +50,14 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
 
         ($this->subscriber)($event);
 
-        $emitted = $this->metricsEmitterSpy->emitted();
-        self::assertCount(1, $emitted);
-        self::assertSame('CustomersUpdated', $emitted[0]['name']);
-        self::assertSame(1, $emitted[0]['value']);
-        self::assertSame('Customer', $emitted[0]['dimensions']['Endpoint']);
-        self::assertSame('update', $emitted[0]['dimensions']['Operation']);
+        self::assertSame(1, $this->metricsEmitterSpy->count());
+
+        foreach ($this->metricsEmitterSpy->emitted() as $metric) {
+            self::assertSame('CustomersUpdated', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('update', $metric->dimensions()->values()->get('Operation'));
+        }
     }
 
     public function testInvokeLogsDebugMessageOnSuccess(): void

@@ -88,12 +88,12 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
             public function dimensions(): \App\Shared\Application\Observability\Metric\MetricDimensionsInterface
             {
                 return new class() implements \App\Shared\Application\Observability\Metric\MetricDimensionsInterface {
-                    public function toArray(): array
+                    public function values(): \App\Shared\Application\Observability\Metric\MetricDimensions
                     {
-                        return [
-                            'Endpoint' => "\xB1", // Invalid UTF-8
-                            'Operation' => 'create',
-                        ];
+                        return new \App\Shared\Application\Observability\Metric\MetricDimensions(
+                            new \App\Shared\Application\Observability\Metric\MetricDimension('Endpoint', "\xB1"), // Invalid UTF-8
+                            new \App\Shared\Application\Observability\Metric\MetricDimension('Operation', 'create')
+                        );
                     }
                 };
             }
