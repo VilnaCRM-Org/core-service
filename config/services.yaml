@@ -96,6 +96,16 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
 
+  App\Shared\Infrastructure\Observability\Emf\EmfTimestampProvider:
+    class: App\Shared\Infrastructure\Observability\Emf\SystemEmfTimestampProvider
+
+  App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory:
+    arguments:
+      $namespace: '%env(AWS_EMF_NAMESPACE)%'
+
+  App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactoryInterface:
+    alias: App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory
+
   App\Shared\Application\Observability\BusinessMetricsEmitterInterface:
     class: App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter
 

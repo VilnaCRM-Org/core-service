@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
 use App\Shared\Infrastructure\Observability\AwsEmfBusinessMetricsEmitter;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactory;
+use App\Shared\Infrastructure\Observability\Emf\SystemEmfTimestampProvider;
 use App\Shared\Infrastructure\Observability\EmfLogFormatter;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
@@ -61,7 +63,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->never())->method('info');
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter());
+        $emitter = $this->createEmitterWithLogger($logger);
         $emitter->emitCollection(new MetricCollection());
     }
 
@@ -70,7 +72,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->never())->method('info');
 
-        $emitter = new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter());
+        $emitter = $this->createEmitterWithLogger($logger);
 
         $metric = new class() extends \App\Shared\Application\Observability\Metric\BusinessMetric {
             public function __construct()
@@ -142,7 +144,22 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
                 return true;
             }));
 
-        return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter(), $namespace);
+        return $this->createEmitterWithLoggerAndNamespace($logger, $namespace);
+    }
+
+    private function createEmitterWithLogger(LoggerInterface $logger): AwsEmfBusinessMetricsEmitter
+    {
+        return $this->createEmitterWithLoggerAndNamespace($logger, self::NAMESPACE);
+    }
+
+    private function createEmitterWithLoggerAndNamespace(
+        LoggerInterface $logger,
+        string $namespace
+    ): AwsEmfBusinessMetricsEmitter {
+        $timestampProvider = new SystemEmfTimestampProvider();
+        $payloadFactory = new EmfPayloadFactory($namespace, $timestampProvider);
+
+        return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter(), $payloadFactory);
     }
 
     private function createOrderMetricCollection(): MetricCollection

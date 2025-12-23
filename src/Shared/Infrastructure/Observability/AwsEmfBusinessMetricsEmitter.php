@@ -7,7 +7,8 @@ namespace App\Shared\Infrastructure\Observability;
 use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayloadFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,20 +19,18 @@ use Psr\Log\LoggerInterface;
  */
 final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmitterInterface
 {
-    private const string DEFAULT_NAMESPACE = 'CCore/BusinessMetrics';
-
     public function __construct(
         private LoggerInterface $logger,
         private EmfLogFormatter $emfLogFormatter,
-        private string $namespace = self::DEFAULT_NAMESPACE
+        private EmfPayloadFactoryInterface $payloadFactory
     ) {
     }
 
     public function emit(BusinessMetric $metric): void
     {
-        $emfLog = $this->buildEmfPayload($metric);
+        $payload = $this->payloadFactory->createFromMetric($metric);
 
-        $this->writeEmfLog($emfLog);
+        $this->writeEmfLog($payload);
     }
 
     public function emitCollection(MetricCollection $metrics): void
@@ -40,110 +39,18 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
             return;
         }
 
-        $allMetrics = $metrics->all();
-        $firstMetric = $allMetrics[0];
+        $payload = $this->payloadFactory->createFromCollection($metrics);
 
-        $emfLog = $this->buildEmfPayloadForCollection($allMetrics, $firstMetric->dimensions());
-
-        $this->writeEmfLog($emfLog);
+        $this->writeEmfLog($payload);
     }
 
-    /**
-     * @return array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>>
-     */
-    private function buildEmfPayload(BusinessMetric $metric): array
+    private function writeEmfLog(EmfPayload $payload): void
     {
-        $dimensions = $metric->dimensions()->toArray();
-
-        $emfLog = $this->createBaseEmfLog($dimensions, $metric->name(), $metric->unit()->value);
-
-        return array_merge($emfLog, $dimensions, [$metric->name() => $metric->value()]);
-    }
-
-    /**
-     * @param array<int, BusinessMetric> $metrics
-     *
-     * @return array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>>
-     */
-    private function buildEmfPayloadForCollection(
-        array $metrics,
-        MetricDimensionsInterface $dimensions
-    ): array {
-        $dimensionsArray = $dimensions->toArray();
-
-        $emfLog = $this->createCollectionBaseEmfLog($dimensionsArray);
-        $emfLog = array_merge($emfLog, $dimensionsArray);
-
-        foreach ($metrics as $metric) {
-            $emfLog['_aws']['CloudWatchMetrics'][0]['Metrics'][] = [
-                'Name' => $metric->name(),
-                'Unit' => $metric->unit()->value,
-            ];
-            $emfLog[$metric->name()] = $metric->value();
-        }
-
-        return $emfLog;
-    }
-
-    /**
-     * @param array<string, string> $dimensions
-     *
-     * @return array<string, int|array<int, array<string, string|array<int, array<int, string>|array<string, string>>>>>
-     */
-    private function createBaseEmfLog(array $dimensions, string $metricName, string $unit): array
-    {
-        return [
-            '_aws' => [
-                'Timestamp' => $this->currentTimestamp(),
-                'CloudWatchMetrics' => [
-                    [
-                        'Namespace' => $this->namespace,
-                        'Dimensions' => [array_keys($dimensions)],
-                        'Metrics' => [
-                            ['Name' => $metricName, 'Unit' => $unit],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @param array<string, string> $dimensions
-     *
-     * @return array<string, int|array<int, array<string, string|array<int, array<int, string>|array<int, never>>>>>
-     */
-    private function createCollectionBaseEmfLog(array $dimensions): array
-    {
-        return [
-            '_aws' => [
-                'Timestamp' => $this->currentTimestamp(),
-                'CloudWatchMetrics' => [
-                    [
-                        'Namespace' => $this->namespace,
-                        'Dimensions' => [array_keys($dimensions)],
-                        'Metrics' => [],
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @param array<string, int|float|string|array<string, int|float|string|array<int|string, int|float|string|array<int|string, int|float|string|array<string, string>>>>> $emfLog
-     */
-    private function writeEmfLog(array $emfLog): void
-    {
-        $formatted = $this->emfLogFormatter->format($emfLog);
+        $formatted = $this->emfLogFormatter->format($payload);
         if ($formatted === '') {
             return;
         }
 
         $this->logger->info($formatted);
-    }
-
-    private function currentTimestamp(): int
-    {
-        return (int) (microtime(true) * 1000);
     }
 }

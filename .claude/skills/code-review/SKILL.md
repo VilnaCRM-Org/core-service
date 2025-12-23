@@ -141,7 +141,69 @@ namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 - ✅ Use `final` for classes that shouldn't be extended
 - ❌ NO "Helper" or "Util" classes (code smell - extract specific responsibilities)
 
-**E. Classes Over Arrays (Type Safety)**:
+**E. Factory Pattern (Maintainability & Flexibility)**:
+
+> **Use factories when creating typed classes with dependencies or configuration**
+
+Factories provide maintainability, flexibility, and testability for object creation:
+
+| Scenario                         | Direct Instantiation | Factory              |
+| -------------------------------- | -------------------- | -------------------- |
+| Simple value objects             | ✅ Acceptable        | Optional             |
+| Objects with config/dependencies | ❌ Avoid             | ✅ Required          |
+| Objects created in production    | ❌ Avoid             | ✅ Required          |
+| Objects created in tests         | ✅ Acceptable        | Optional (for speed) |
+
+**Benefits of factories**:
+
+- ✅ Centralized object creation logic
+- ✅ Easy to inject different implementations (testing, staging, prod)
+- ✅ Configuration changes don't affect consumers
+- ✅ Single place to add validation/transformation
+- ✅ Enables dependency injection for complex objects
+
+**Example**:
+
+```php
+// ❌ BAD: Direct instantiation with configuration
+public function emit(BusinessMetric $metric): void
+{
+    $timestamp = (int)(microtime(true) * 1000);
+    $payload = new EmfPayload(
+        new EmfAwsMetadata($timestamp, new EmfCloudWatchMetricConfig(...)),
+        new EmfDimensionValueCollection(...),
+        new EmfMetricValueCollection(...)
+    );
+    $this->logger->info($payload);
+}
+
+// ✅ GOOD: Factory handles complexity
+public function emit(BusinessMetric $metric): void
+{
+    $payload = $this->payloadFactory->createFromMetric($metric);
+    $this->logger->info($payload);
+}
+```
+
+**Factory naming convention**:
+
+- `{ObjectName}Factory` - creates `{ObjectName}` instances
+- Location: Same namespace as the object being created
+- Example: `EmfPayloadFactory` creates `EmfPayload`
+
+**When factories are REQUIRED** (in production code):
+
+1. Objects with injected dependencies (timestamp providers, config, etc.)
+2. Objects that require complex construction logic
+3. Objects that might need different implementations per environment
+4. Objects created from external input (DTOs, metrics, etc.)
+
+**When factories are OPTIONAL** (in tests):
+
+- Tests can instantiate objects directly for simplicity
+- Test-specific factories can be created for reusable test fixtures
+
+**F. Classes Over Arrays (Type Safety)**:
 
 > **Prefer typed classes and collections over arrays for structured data**
 
@@ -316,6 +378,7 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Finish task before `make ci` shows success message
 - Use arrays for structured data when typed classes would be more appropriate
 - Inject cross-cutting concerns (metrics, logging) directly into command handlers - use event subscribers instead
+- Create complex objects directly without factories in production code (use factories for maintainability)
 
 **ALWAYS**:
 
@@ -337,6 +400,7 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Prefer typed classes over arrays for structured data (configuration, DTOs, events)
 - Use collections (`MetricCollection`, `EntityCollection`) instead of arrays of objects
 - Add new features via new classes following Open/Closed principle (don't modify existing classes)
+- Use factories for creating objects with dependencies or complex construction (required in production, optional in tests)
 
 ## Format (Output)
 
@@ -385,6 +449,7 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
   - [ ] Collections used instead of arrays of objects
   - [ ] New features added via new classes (Open/Closed principle)
   - [ ] Cross-cutting concerns (metrics) in event subscribers, not handlers
+  - [ ] Factories used for complex object creation (required in production, optional in tests)
 - [ ] Committable suggestions applied and committed separately
 - [ ] LLM prompts executed and implemented
 - [ ] Questions answered (code or reply)
@@ -490,7 +555,48 @@ public function emit(MetricCollection $metrics): void
 }
 ```
 
-### Issue 6: Cross-Cutting Concerns in Handlers
+### Issue 6: Missing Factory for Complex Object Creation
+
+**Scenario**: Complex objects created directly in production code
+
+```php
+❌ WRONG: Direct instantiation with configuration
+final class AwsEmfBusinessMetricsEmitter
+{
+    public function emit(BusinessMetric $metric): void
+    {
+        $timestamp = (int)(microtime(true) * 1000);
+        $dimensionValues = [];
+        foreach ($metric->dimensions()->toArray() as $key => $value) {
+            $dimensionValues[] = new EmfDimensionValue($key, $value);
+        }
+        $payload = new EmfPayload(
+            new EmfAwsMetadata($timestamp, new EmfCloudWatchMetricConfig(...)),
+            new EmfDimensionValueCollection(...$dimensionValues),
+            new EmfMetricValueCollection(new EmfMetricValue($metric->name(), $metric->value()))
+        );
+        // Complex construction logic mixed with business logic
+    }
+}
+
+✅ CORRECT: Factory encapsulates complexity
+final class AwsEmfBusinessMetricsEmitter
+{
+    public function __construct(
+        private EmfPayloadFactory $payloadFactory  // Factory injected
+    ) {}
+
+    public function emit(BusinessMetric $metric): void
+    {
+        $payload = $this->payloadFactory->createFromMetric($metric);
+        // Clean separation - emitter only handles emission
+    }
+}
+```
+
+**Note**: In tests, direct instantiation is acceptable for simplicity and speed.
+
+### Issue 7: Cross-Cutting Concerns in Handlers
 
 **Scenario**: Metrics/logging injected directly into command handlers
 

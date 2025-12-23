@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Observability;
 
+use App\Shared\Infrastructure\Observability\Emf\EmfAwsMetadata;
+use App\Shared\Infrastructure\Observability\Emf\EmfCloudWatchMetricConfig;
+use App\Shared\Infrastructure\Observability\Emf\EmfDimensionKeys;
+use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValue;
+use App\Shared\Infrastructure\Observability\Emf\EmfDimensionValueCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinition;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricDefinitionCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricValue;
+use App\Shared\Infrastructure\Observability\Emf\EmfMetricValueCollection;
+use App\Shared\Infrastructure\Observability\Emf\EmfPayload;
 use App\Shared\Infrastructure\Observability\EmfLogFormatter;
 use App\Tests\Unit\UnitTestCase;
 
@@ -18,9 +28,17 @@ final class EmfLogFormatterTest extends UnitTestCase
         $this->formatter = new EmfLogFormatter();
     }
 
-    public function testFormatsContextAsJson(): void
+    public function testFormatsPayloadAsJson(): void
     {
-        $context = [
+        $payload = $this->createTestPayload();
+
+        $formatted = $this->formatter->format($payload);
+
+        self::assertStringStartsWith('{', $formatted);
+        self::assertStringEndsWith("}\n", $formatted);
+
+        $decoded = json_decode(rtrim($formatted, "\n"), true);
+        $expected = [
             '_aws' => [
                 'Timestamp' => 1702425600000,
                 'CloudWatchMetrics' => [
@@ -35,27 +53,44 @@ final class EmfLogFormatterTest extends UnitTestCase
             'Operation' => 'create',
             'CustomersCreated' => 1,
         ];
+        self::assertSame($expected, $decoded);
+    }
 
-        $formatted = $this->formatter->format($context);
+    public function testFormatsPayloadWithProperStructure(): void
+    {
+        $payload = $this->createTestPayload();
 
-        self::assertStringStartsWith('{', $formatted);
-        self::assertStringEndsWith("}\n", $formatted);
-
+        $formatted = $this->formatter->format($payload);
         $decoded = json_decode(rtrim($formatted, "\n"), true);
-        self::assertSame($context, $decoded);
+
+        self::assertArrayHasKey('_aws', $decoded);
+        self::assertArrayHasKey('Timestamp', $decoded['_aws']);
+        self::assertArrayHasKey('CloudWatchMetrics', $decoded['_aws']);
+        self::assertArrayHasKey('Endpoint', $decoded);
+        self::assertArrayHasKey('Operation', $decoded);
+        self::assertArrayHasKey('CustomersCreated', $decoded);
     }
 
-    public function testReturnsEmptyStringForEmptyContext(): void
+    private function createTestPayload(): EmfPayload
     {
-        $formatted = $this->formatter->format([]);
+        $metricDefinition = new EmfMetricDefinition('CustomersCreated', 'Count');
+        $dimensionKeys = new EmfDimensionKeys('Endpoint', 'Operation');
+        $cloudWatchConfig = new EmfCloudWatchMetricConfig(
+            'CCore/BusinessMetrics',
+            $dimensionKeys,
+            new EmfMetricDefinitionCollection($metricDefinition)
+        );
+        $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        self::assertSame('', $formatted);
-    }
+        $dimensionValues = new EmfDimensionValueCollection(
+            new EmfDimensionValue('Endpoint', 'Customer'),
+            new EmfDimensionValue('Operation', 'create')
+        );
 
-    public function testReturnsEmptyStringForInvalidJson(): void
-    {
-        $formatted = $this->formatter->format(['invalid' => "\xB1"]); // Invalid UTF-8
+        $metricValues = new EmfMetricValueCollection(
+            new EmfMetricValue('CustomersCreated', 1)
+        );
 
-        self::assertSame('', $formatted);
+        return new EmfPayload($awsMetadata, $dimensionValues, $metricValues);
     }
 }
