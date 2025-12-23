@@ -147,12 +147,12 @@ namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 
 Arrays lack type safety and self-documentation. Use concrete classes instead:
 
-| Pattern | Bad (Array) | Good (Class) |
-|---------|-------------|--------------|
+| Pattern       | Bad (Array)                               | Good (Class)                                |
+| ------------- | ----------------------------------------- | ------------------------------------------- |
 | Configuration | `['endpoint' => 'X', 'operation' => 'Y']` | `new EndpointOperationDimensions('X', 'Y')` |
-| Return data | `return ['name' => $n, 'value' => $v]` | `return new MetricData($n, $v)` |
-| Method params | `function emit(array $metrics)` | `function emit(MetricCollection $metrics)` |
-| Events data | `['type' => 'created', 'id' => $id]` | `new CustomerCreatedEvent($id)` |
+| Return data   | `return ['name' => $n, 'value' => $v]`    | `return new MetricData($n, $v)`             |
+| Method params | `function emit(array $metrics)`           | `function emit(MetricCollection $metrics)`  |
+| Events data   | `['type' => 'created', 'id' => $id]`      | `new CustomerCreatedEvent($id)`             |
 
 **Benefits of typed classes**:
 

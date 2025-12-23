@@ -50,12 +50,12 @@ Business metrics follow these patterns:
 
 Each class has ONE responsibility:
 
-| Class | Responsibility |
-|-------|----------------|
-| `CustomersCreatedMetric` | Define metric name, value, dimensions |
-| `CustomerCreatedMetricsSubscriber` | Listen to event, emit metric |
-| `AwsEmfBusinessMetricsEmitter` | Format and write EMF logs |
-| `MetricCollection` | Hold multiple metrics for batch emission |
+| Class                              | Responsibility                           |
+| ---------------------------------- | ---------------------------------------- |
+| `CustomersCreatedMetric`           | Define metric name, value, dimensions    |
+| `CustomerCreatedMetricsSubscriber` | Listen to event, emit metric             |
+| `AwsEmfBusinessMetricsEmitter`     | Format and write EMF logs                |
+| `MetricCollection`                 | Hold multiple metrics for batch emission |
 
 **Anti-pattern**: Metrics emitted directly in command handlers (violates SRP - handler should only handle commands)
 
@@ -125,13 +125,13 @@ MetricCollection - typed collection implementing IteratorAggregate, Countable
 
 **Why no arrays?**
 
-| Arrays | Typed Classes |
-|--------|---------------|
-| No type safety | Full type checking |
-| No IDE autocomplete | IDE support |
-| Runtime errors | Compile-time errors |
-| Hard to refactor | Easy to refactor |
-| No encapsulation | Validation in constructor |
+| Arrays              | Typed Classes             |
+| ------------------- | ------------------------- |
+| No type safety      | Full type checking        |
+| No IDE autocomplete | IDE support               |
+| Runtime errors      | Compile-time errors       |
+| Hard to refactor    | Easy to refactor          |
+| No encapsulation    | Validation in constructor |
 
 ---
 
