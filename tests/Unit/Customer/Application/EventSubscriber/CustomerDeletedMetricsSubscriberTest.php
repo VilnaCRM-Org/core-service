@@ -79,7 +79,7 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
                 $this->callback(static function ($context) {
                     return $context['metric'] === 'CustomersDeleted'
                         && isset($context['event_id'])
-                        && !isset($context['customer_id']); // PII should not be logged
+                        && ! isset($context['customer_id']); // PII should not be logged
                 })
             );
 
@@ -120,7 +120,7 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
                     return $context['metric'] === 'CustomersDeleted'
                         && isset($context['event_id'])
                         && $context['error'] === 'Connection failed'
-                        && !isset($context['customer_id']); // PII should not be logged
+                        && ! isset($context['customer_id']); // PII should not be logged
                 })
             );
 

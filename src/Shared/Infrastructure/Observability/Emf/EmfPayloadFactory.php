@@ -36,7 +36,9 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
     public function createFromCollection(MetricCollection $metrics): EmfPayload
     {
         if ($metrics->isEmpty()) {
-            throw new InvalidArgumentException('Cannot create EMF payload from empty metric collection');
+            throw new InvalidArgumentException(
+                'Cannot create EMF payload from empty metric collection'
+            );
         }
 
         $allMetrics = $metrics->all();

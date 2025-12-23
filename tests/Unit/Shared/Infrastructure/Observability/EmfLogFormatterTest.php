@@ -75,6 +75,27 @@ final class EmfLogFormatterTest extends UnitTestCase
         self::assertArrayHasKey('CustomersCreated', $decoded);
     }
 
+    public function testLogsErrorAndReturnsEmptyStringOnJsonEncodingFailure(): void
+    {
+        $payload = $this->createMock(EmfPayload::class);
+        $payload->method('jsonSerialize')
+            ->willThrowException(new \JsonException('Encoding failed'));
+
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                'Failed to encode EMF payload',
+                $this->callback(static function (array $context): bool {
+                    return isset($context['exception'])
+                        && $context['exception'] === 'Encoding failed';
+                })
+            );
+
+        $formatted = $this->formatter->format($payload);
+
+        self::assertSame('', $formatted);
+    }
+
     private function createTestPayload(): EmfPayload
     {
         $metricDefinition = new EmfMetricDefinition('CustomersCreated', 'Count');

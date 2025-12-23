@@ -19,6 +19,8 @@ interface EmfPayloadFactoryInterface
 
     /**
      * Creates an EMF payload from a collection of business metrics
+     *
+     * @throws \InvalidArgumentException if the collection is empty
      */
     public function createFromCollection(MetricCollection $metrics): EmfPayload;
 }
