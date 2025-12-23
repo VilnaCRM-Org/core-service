@@ -183,14 +183,7 @@ declare(strict_types=1);
 
 namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;
-use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;
-use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
-use App\Core\Order\Domain\Event\OrderPlacedEvent;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricCollection;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
+use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;use App\Core\Order\Domain\Event\OrderPlacedEvent;use App\Shared\Application\Observability\Metric\MetricCollection;use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use Psr\Log\LoggerInterface;
 
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {

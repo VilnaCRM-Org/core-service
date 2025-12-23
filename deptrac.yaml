@@ -18,7 +18,7 @@ parameters:
         - type: className
           regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)'
         - type: className
-          regex: '.*\\Shared\\Application\\Observability\\(BusinessMetricsEmitterInterface|Metric).*'
+          regex: '.*\\Shared\\Application\\Observability\\Metric'
 
     - name: Domain
       collectors:

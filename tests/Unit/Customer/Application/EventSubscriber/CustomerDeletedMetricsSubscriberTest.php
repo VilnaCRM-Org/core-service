@@ -98,7 +98,7 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
             customerEmail: $customerEmail
         );
 
-        $failingEmitter = $this->createMock(\App\Shared\Application\Observability\BusinessMetricsEmitterInterface::class);
+        $failingEmitter = $this->createMock(\App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface::class);
         $failingEmitter
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));

@@ -6,8 +6,8 @@ namespace App\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactoryInterface;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;
 use Psr\Log\LoggerInterface;
 
 /**

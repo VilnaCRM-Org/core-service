@@ -6,8 +6,8 @@ namespace App\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\Factory\CustomersDeletedMetricFactoryInterface;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;
 use Psr\Log\LoggerInterface;
 
 /**

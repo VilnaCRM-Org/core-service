@@ -13,10 +13,7 @@ Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Met
 ### Step 1: Create a domain event subscriber (30 seconds)
 
 ```php
-use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;use Psr\Log\LoggerInterface;
 
 final readonly class YourMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -112,11 +109,7 @@ declare(strict_types=1);
 
 namespace App\YourContext\Application\EventSubscriber;
 
-use App\Shared\Application\Observability\BusinessMetricsEmitterInterface;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
-use App\YourContext\Domain\Event\YourEntityCreatedEvent;
-use Psr\Log\LoggerInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;use App\YourContext\Domain\Event\YourEntityCreatedEvent;use Psr\Log\LoggerInterface;
 
 final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
