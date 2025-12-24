@@ -48,7 +48,7 @@ final readonly class UpdateCustomerCommandHandler implements
         // Publish domain event for cache invalidation
         $this->eventBus->publish(
             new CustomerUpdatedEvent(
-                customerId: (string) $customer->getUlid(),
+                customerId: $customer->getUlid(),
                 currentEmail: $currentEmail,
                 previousEmail: $emailChanged ? $previousEmail : null
             )

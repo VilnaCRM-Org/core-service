@@ -104,7 +104,7 @@ final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInt
 
 ## Type-Safe Metric Class Hierarchy
 
-```
+```text
 BusinessMetric (abstract)
 ├── EndpointOperationBusinessMetric (abstract) - for metrics with Endpoint/Operation dimensions
 │   ├── CustomersCreatedMetric

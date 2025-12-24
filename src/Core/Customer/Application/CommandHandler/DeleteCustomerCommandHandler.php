@@ -28,7 +28,7 @@ final readonly class DeleteCustomerCommandHandler implements CommandHandlerInter
     public function __invoke(DeleteCustomerCommand $command): void
     {
         $customer = $command->customer;
-        $customerId = (string) $customer->getUlid();
+        $customerId = $customer->getUlid();
         $customerEmail = $customer->getEmail();
 
         $this->repository->delete($customer);
