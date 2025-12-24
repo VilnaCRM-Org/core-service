@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Metric;
 
+use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\EndpointOperationBusinessMetric;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 
 /**
  * Metric for tracking customer deletion events

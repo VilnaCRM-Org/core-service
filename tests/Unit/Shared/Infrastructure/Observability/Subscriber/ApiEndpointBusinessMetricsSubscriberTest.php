@@ -33,6 +33,38 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
             new MetricDimensionsFactory()
         );
 
+        $request = Request::create('/api/customers', 'GET');
+        $request->attributes->set('_api_resource_class', 'App\\Core\\Customer\\Domain\\Entity\\Customer');
+        $request->attributes->set('_api_operation_name', '_api_/customers_get_collection');
+
+        $event = new ResponseEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            new Response('', 200)
+        );
+
+        $subscriber->onResponse($event);
+
+        self::assertSame(1, $spy->count());
+
+        foreach ($spy->emitted() as $metric) {
+            self::assertSame('EndpointInvocations', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('_api_/customers_get_collection', $metric->dimensions()->values()->get('Operation'));
+        }
+    }
+
+    public function testDoesNotEmitMetricForHealthCheckEndpoint(): void
+    {
+        $spy = new BusinessMetricsEmitterSpy();
+        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
+            $spy,
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
+            new MetricDimensionsFactory()
+        );
+
         $request = Request::create('/api/health', 'GET');
         $request->attributes->set('_api_resource_class', 'App\\Internal\\HealthCheck\\Domain\\ValueObject\\HealthCheck');
         $request->attributes->set('_api_operation_name', '_api_/health_get');
@@ -46,14 +78,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 
         $subscriber->onResponse($event);
 
-        self::assertSame(1, $spy->count());
-
-        foreach ($spy->emitted() as $metric) {
-            self::assertSame('EndpointInvocations', $metric->name());
-            self::assertSame(1, $metric->value());
-            self::assertSame('HealthCheck', $metric->dimensions()->values()->get('Endpoint'));
-            self::assertSame('_api_/health_get', $metric->dimensions()->values()->get('Operation'));
-        }
+        self::assertSame(0, $spy->count());
     }
 
     public function testDoesNotEmitMetricForNonApiRequest(): void

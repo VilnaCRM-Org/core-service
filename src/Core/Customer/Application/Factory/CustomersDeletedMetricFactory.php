@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Factory;
 
 use App\Core\Customer\Application\Metric\CustomersDeletedMetric;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
+use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 
 final readonly class CustomersDeletedMetricFactory implements CustomersDeletedMetricFactoryInterface
 {

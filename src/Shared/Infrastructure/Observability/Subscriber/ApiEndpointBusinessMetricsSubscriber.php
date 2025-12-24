@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability\Subscriber;
 
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -41,6 +41,12 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
         $path = $request->getPathInfo();
 
         if (!str_starts_with($path, '/api')) {
+            return;
+        }
+
+        // Exclude health check endpoints from business metrics
+        // (high frequency, infrastructure concern - not business metrics)
+        if (str_starts_with($path, '/api/health')) {
             return;
         }
 

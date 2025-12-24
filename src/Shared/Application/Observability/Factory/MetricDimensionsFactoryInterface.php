@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Observability\Factory;
+namespace App\Shared\Application\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
