@@ -8,16 +8,16 @@ use App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscrib
 use App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Infrastructure\Bus\MessageBusFactory;
+use App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 
 final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
 {
     private BusinessMetricsEmitterSpy $metricsEmitterSpy;
-    private LoggerInterface&MockObject $logger;
     private CustomerUpdatedMetricsSubscriber $subscriber;
 
     protected function setUp(): void
@@ -25,14 +25,12 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
         parent::setUp();
 
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
-        $this->logger = $this->createMock(LoggerInterface::class);
 
         $dimensionsFactory = new MetricDimensionsFactory();
 
         $this->subscriber = new CustomerUpdatedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new CustomersUpdatedMetricFactory($dimensionsFactory),
-            $this->logger
+            new CustomersUpdatedMetricFactory($dimensionsFactory)
         );
     }
 
@@ -66,32 +64,7 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
         }
     }
 
-    public function testInvokeLogsDebugMessageOnSuccess(): void
-    {
-        $customerId = (string) $this->faker->ulid();
-        $currentEmail = 'test@example.com';
-
-        $event = new CustomerUpdatedEvent(
-            customerId: $customerId,
-            currentEmail: $currentEmail
-        );
-
-        $this->logger
-            ->expects($this->once())
-            ->method('debug')
-            ->with(
-                'Business metric emitted',
-                $this->callback(static function ($context) {
-                    return $context['metric'] === 'CustomersUpdated'
-                        && isset($context['event_id'])
-                        && ! isset($context['customer_id']); // PII should not be logged
-                })
-            );
-
-        ($this->subscriber)($event);
-    }
-
-    public function testInvokeLogsWarningOnEmitterFailure(): void
+    public function testDoesNotThrowWhenEmitterFailsThroughEventBus(): void
     {
         $customerId = (string) $this->faker->ulid();
         $currentEmail = 'test@example.com';
@@ -110,28 +83,28 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
 
         $subscriber = new CustomerUpdatedMetricsSubscriber(
             $failingEmitter,
-            new CustomersUpdatedMetricFactory($dimensionsFactory),
-            $this->logger
+            new CustomersUpdatedMetricFactory($dimensionsFactory)
         );
 
-        $this->logger
-            ->expects($this->never())
-            ->method('debug');
-
-        $this->logger
-            ->expects($this->once())
-            ->method('warning')
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())
+            ->method('error')
             ->with(
-                'Failed to emit business metric',
-                $this->callback(static function ($context) {
-                    return $context['metric'] === 'CustomersUpdated'
-                        && isset($context['event_id'])
-                        && $context['error'] === 'Connection failed'
-                        && ! isset($context['customer_id']); // PII should not be logged
+                'Event subscriber execution failed',
+                self::callback(static function (array $context): bool {
+                    return ($context['message_class'] ?? null) === CustomerUpdatedEvent::class
+                        && isset($context['error'])
+                        && str_contains((string) $context['error'], 'Connection failed')
+                        && ($context['exception_class'] ?? null) === \Symfony\Component\Messenger\Exception\HandlerFailedException::class;
                 })
             );
 
-        // Should not throw exception - metrics are best-effort
-        ($subscriber)($event);
+        $bus = (new MessageBusFactory([
+            new ResilientHandlerMiddleware($logger),
+        ]))->create([$subscriber]);
+
+        $bus->dispatch($event);
+
+        self::assertTrue(true);
     }
 }

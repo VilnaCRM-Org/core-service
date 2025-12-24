@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Collection;
 
+use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use ArrayIterator;
 use Countable;
@@ -22,6 +23,8 @@ final readonly class EmfDimensionValueCollection implements IteratorAggregate, C
 
     public function __construct(EmfDimensionValue ...$dimensions)
     {
+        $this->assertUniqueKeys(...$dimensions);
+
         $this->dimensions = $dimensions;
     }
 
@@ -67,5 +70,23 @@ final readonly class EmfDimensionValueCollection implements IteratorAggregate, C
         );
 
         return new EmfDimensionKeys(...$keys);
+    }
+
+    private function assertUniqueKeys(EmfDimensionValue ...$dimensions): void
+    {
+        $keys = array_map(
+            static fn (EmfDimensionValue $dimension): string => $dimension->key(),
+            $dimensions
+        );
+
+        /** @var array<int, string> $duplicates */
+        $duplicates = array_keys(array_filter(
+            array_count_values($keys),
+            static fn (int $count): bool => $count > 1
+        ));
+
+        if ($duplicates !== []) {
+            throw EmfKeyCollisionException::duplicateDimensionKeys($duplicates);
+        }
     }
 }

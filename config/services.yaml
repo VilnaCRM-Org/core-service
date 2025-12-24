@@ -100,6 +100,14 @@ services:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
+  App\Shared\Infrastructure\Observability\Subscriber\ResilientApiEndpointBusinessMetricsSubscriber:
+    decorates: App\Shared\Infrastructure\Observability\Subscriber\ApiEndpointBusinessMetricsSubscriber
+    arguments:
+      $decorated: '@App\Shared\Infrastructure\Observability\Subscriber\ResilientApiEndpointBusinessMetricsSubscriber.inner'
+      $logger: '@logger'
+    tags: ['kernel.event_subscriber']
+    autoconfigure: false
+
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
     public: true
@@ -140,6 +148,15 @@ services:
       tags: ['app.command_handler']
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
+
+  App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware:
+    arguments:
+      $logger: '@logger'
+
+  App\Shared\Infrastructure\Bus\MessageBusFactory:
+    arguments:
+      $middlewares:
+        - '@App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware'
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]

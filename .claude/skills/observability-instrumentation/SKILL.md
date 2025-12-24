@@ -207,31 +207,21 @@ interface BusinessMetricsEmitterInterface
 
 ```php
 // src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php
+/**
+ * Error handling is applied via a bus-level decorator (ResilientHandlerMiddleware),
+ * so subscribers stay clean and observability never breaks the main request.
+ */
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private CustomersCreatedMetricFactoryInterface $metricFactory,
-        private LoggerInterface $logger
-    ) {}
+        private CustomersCreatedMetricFactoryInterface $metricFactory
+    ) {
+    }
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        try {
-            $this->metricsEmitter->emit($this->metricFactory->create());
-
-            $this->logger->debug('Business metric emitted', [
-                'metric' => 'CustomersCreated',
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-            ]);
-        } catch (\Throwable $e) {
-            // Metrics are best-effort: don't fail business operations
-            $this->logger->warning('Failed to emit business metric', [
-                'metric' => 'CustomersCreated',
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->metricsEmitter->emit($this->metricFactory->create());
     }
 
     public function subscribedTo(): array

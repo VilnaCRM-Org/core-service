@@ -29,9 +29,16 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
 
     public function emit(BusinessMetric $metric): void
     {
-        $payload = $this->payloadFactory->createFromMetric($metric);
-
-        $this->writeEmfLog($payload);
+        try {
+            $payload = $this->payloadFactory->createFromMetric($metric);
+            $this->writeEmfLog($payload);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Failed to emit EMF metric', [
+                'metric' => $metric->name(),
+                'error' => $exception->getMessage(),
+                'exception_class' => $exception::class,
+            ]);
+        }
     }
 
     public function emitCollection(MetricCollection $metrics): void
@@ -40,9 +47,16 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
             return;
         }
 
-        $payload = $this->payloadFactory->createFromCollection($metrics);
-
-        $this->writeEmfLog($payload);
+        try {
+            $payload = $this->payloadFactory->createFromCollection($metrics);
+            $this->writeEmfLog($payload);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Failed to emit EMF metric collection', [
+                'metrics_count' => count($metrics),
+                'error' => $exception->getMessage(),
+                'exception_class' => $exception::class,
+            ]);
+        }
     }
 
     private function writeEmfLog(EmfPayload $payload): void

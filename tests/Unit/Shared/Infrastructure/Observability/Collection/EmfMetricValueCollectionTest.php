@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Observability\Collection;
 
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
+use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
 use App\Tests\Unit\UnitTestCase;
 
@@ -79,5 +80,16 @@ final class EmfMetricValueCollectionTest extends UnitTestCase
 
         self::assertCount(1, $items);
         self::assertInstanceOf(EmfMetricValue::class, $items[0]);
+    }
+
+    public function testThrowsExceptionOnDuplicateNames(): void
+    {
+        $this->expectException(EmfKeyCollisionException::class);
+        $this->expectExceptionMessage('Duplicate metric names detected');
+
+        new EmfMetricValueCollection(
+            new EmfMetricValue('Metric1', 10),
+            new EmfMetricValue('Metric1', 20)
+        );
     }
 }

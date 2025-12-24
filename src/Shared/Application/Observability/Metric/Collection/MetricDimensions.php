@@ -7,6 +7,7 @@ namespace App\Shared\Application\Observability\Metric\Collection;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use ArrayIterator;
 use Countable;
+use InvalidArgumentException;
 use IteratorAggregate;
 use Traversable;
 
@@ -22,6 +23,8 @@ final readonly class MetricDimensions implements IteratorAggregate, Countable
 
     public function __construct(MetricDimension ...$dimensions)
     {
+        $this->assertUniqueKeys(...$dimensions);
+
         $this->dimensions = $dimensions;
     }
 
@@ -67,5 +70,25 @@ final readonly class MetricDimensions implements IteratorAggregate, Countable
         }
 
         return $result;
+    }
+
+    private function assertUniqueKeys(MetricDimension ...$dimensions): void
+    {
+        $keys = array_map(
+            static fn (MetricDimension $dimension): string => $dimension->key(),
+            $dimensions
+        );
+
+        $duplicates = array_keys(array_filter(
+            array_count_values($keys),
+            static fn (int $count): bool => $count > 1
+        ));
+
+        if ($duplicates !== []) {
+            throw new InvalidArgumentException(sprintf(
+                'Duplicate metric dimension keys detected: %s',
+                implode(', ', $duplicates)
+            ));
+        }
     }
 }

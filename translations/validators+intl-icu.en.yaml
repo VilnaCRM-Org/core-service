@@ -7,3 +7,15 @@ email:
 initials:
   spaces: 'Initials can not consist only of spaces'
   invalid: 'Initials must contain only uppercase letters (A-Z), optionally separated by dots'
+emf:
+  key:
+    empty: 'EMF dimension key must contain at least one non-whitespace character'
+    too_long: 'EMF dimension key must not exceed 255 characters'
+    non_ascii: 'EMF dimension key must contain only ASCII characters'
+    control_chars: 'EMF dimension key must not contain ASCII control characters'
+    starts_with_colon: 'EMF dimension key must not start with colon (:)'
+  value:
+    empty: 'EMF dimension value must contain at least one non-whitespace character'
+    too_long: 'EMF dimension value must not exceed 1024 characters'
+    non_ascii: 'EMF dimension value must contain only ASCII characters'
+    control_chars: 'EMF dimension value must not contain ASCII control characters'

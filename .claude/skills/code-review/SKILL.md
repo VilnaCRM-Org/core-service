@@ -638,6 +638,7 @@ final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInt
 {
     public function __invoke(CustomerCreatedEvent $event): void
     {
+        // Error handling/logging is applied by a bus-level decorator (ResilientHandlerMiddleware).
         $this->metricsEmitter->emit(new CustomersCreatedMetric());
     }
 }

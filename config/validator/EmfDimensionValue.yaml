@@ -1,0 +1,6 @@
+App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue:
+  properties:
+    key:
+      - App\Shared\Application\Validator\EmfKey: ~
+    value:
+      - App\Shared\Application\Validator\EmfValue: ~

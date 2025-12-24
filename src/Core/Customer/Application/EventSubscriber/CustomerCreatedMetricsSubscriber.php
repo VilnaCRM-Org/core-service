@@ -8,40 +8,26 @@ use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactoryInterface
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Emits business metrics when a customer is created
  *
  * This subscriber listens to CustomerCreatedEvent and emits
  * the CustomersCreated metric for CloudWatch dashboards.
+ *
+ * Error handling is provided by ResilientHandlerMiddleware.
  */
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private CustomersCreatedMetricFactoryInterface $metricFactory,
-        private LoggerInterface $logger
+        private CustomersCreatedMetricFactoryInterface $metricFactory
     ) {
     }
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        try {
-            $this->metricsEmitter->emit($this->metricFactory->create());
-
-            $this->logger->debug('Business metric emitted', [
-                'metric' => 'CustomersCreated',
-                'event_id' => $event->eventId(),
-            ]);
-        } catch (\Throwable $e) {
-            // Metrics emission is best-effort: don't fail the business operation
-            $this->logger->warning('Failed to emit business metric', [
-                'metric' => 'CustomersCreated',
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->metricsEmitter->emit($this->metricFactory->create());
     }
 
     /**

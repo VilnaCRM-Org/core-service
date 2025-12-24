@@ -7,19 +7,28 @@ namespace App\Shared\Infrastructure\Bus;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 
 final class MessageBusFactory
 {
+    /**
+     * @param iterable<MiddlewareInterface> $middlewares
+     */
+    public function __construct(private iterable $middlewares = [])
+    {
+    }
+
     /**
      * @param iterable<object> $handlers
      */
     public function create(iterable $handlers): MessageBus
     {
-        return new MessageBus([
-            new HandleMessageMiddleware(
-                new HandlersLocator($this->buildHandlersMap($handlers))
-            ),
-        ]);
+        $middlewareStack = [...$this->middlewares];
+        $middlewareStack[] = new HandleMessageMiddleware(
+            new HandlersLocator($this->buildHandlersMap($handlers))
+        );
+
+        return new MessageBus($middlewareStack);
     }
 
     /**

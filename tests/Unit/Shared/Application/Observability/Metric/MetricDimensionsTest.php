@@ -67,4 +67,15 @@ final class MetricDimensionsTest extends UnitTestCase
             'PaymentMethod' => 'card',
         ], $dimensions->toAssociativeArray());
     }
+
+    public function testThrowsExceptionOnDuplicateKeys(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Duplicate metric dimension keys detected');
+
+        new MetricDimensions(
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Endpoint', 'Order')
+        );
+    }
 }

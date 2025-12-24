@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Observability\Collection;
 
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
+use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Tests\Unit\UnitTestCase;
 
@@ -71,5 +72,16 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
         self::assertCount(2, $all);
         self::assertInstanceOf(EmfDimensionValue::class, $all[0]);
         self::assertInstanceOf(EmfDimensionValue::class, $all[1]);
+    }
+
+    public function testThrowsExceptionOnDuplicateKeys(): void
+    {
+        $this->expectException(EmfKeyCollisionException::class);
+        $this->expectExceptionMessage('Duplicate dimension keys detected');
+
+        new EmfDimensionValueCollection(
+            new EmfDimensionValue('Endpoint', 'Customer'),
+            new EmfDimensionValue('Endpoint', 'Order')
+        );
     }
 }

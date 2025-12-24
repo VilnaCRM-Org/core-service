@@ -8,40 +8,26 @@ use App\Core\Customer\Application\Factory\CustomersDeletedMetricFactoryInterface
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Emits business metrics when a customer is deleted
  *
  * This subscriber listens to CustomerDeletedEvent and emits
  * the CustomersDeleted metric for CloudWatch dashboards.
+ *
+ * Error handling is provided by ResilientHandlerMiddleware.
  */
 final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private CustomersDeletedMetricFactoryInterface $metricFactory,
-        private LoggerInterface $logger
+        private CustomersDeletedMetricFactoryInterface $metricFactory
     ) {
     }
 
     public function __invoke(CustomerDeletedEvent $event): void
     {
-        try {
-            $this->metricsEmitter->emit($this->metricFactory->create());
-
-            $this->logger->debug('Business metric emitted', [
-                'metric' => 'CustomersDeleted',
-                'event_id' => $event->eventId(),
-            ]);
-        } catch (\Throwable $e) {
-            // Metrics emission is best-effort: don't fail the business operation
-            $this->logger->warning('Failed to emit business metric', [
-                'metric' => 'CustomersDeleted',
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->metricsEmitter->emit($this->metricFactory->create());
     }
 
     /**

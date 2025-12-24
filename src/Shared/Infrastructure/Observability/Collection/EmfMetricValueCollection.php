@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Collection;
 
+use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
 use ArrayIterator;
 use Countable;
@@ -22,6 +23,8 @@ final readonly class EmfMetricValueCollection implements IteratorAggregate, Coun
 
     public function __construct(EmfMetricValue ...$values)
     {
+        $this->assertUniqueNames(...$values);
+
         $this->values = $values;
     }
 
@@ -67,5 +70,23 @@ final readonly class EmfMetricValueCollection implements IteratorAggregate, Coun
         }
 
         return $result;
+    }
+
+    private function assertUniqueNames(EmfMetricValue ...$values): void
+    {
+        $names = array_map(
+            static fn (EmfMetricValue $value): string => $value->name(),
+            $values
+        );
+
+        /** @var array<int, string> $duplicates */
+        $duplicates = array_keys(array_filter(
+            array_count_values($names),
+            static fn (int $count): bool => $count > 1
+        ));
+
+        if ($duplicates !== []) {
+            throw EmfKeyCollisionException::duplicateMetricNames($duplicates);
+        }
     }
 }

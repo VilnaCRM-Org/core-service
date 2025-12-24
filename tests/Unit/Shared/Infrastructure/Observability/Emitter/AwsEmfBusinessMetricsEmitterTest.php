@@ -8,6 +8,7 @@ use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\Observability\Emitter\AwsEmfBusinessMetricsEmitter;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
+use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\Provider\SystemEmfTimestampProvider;
@@ -69,10 +70,20 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $emitter->emitCollection(new MetricCollection());
     }
 
-    public function testDoesNotEmitWhenEmfPayloadCannotBeEncoded(): void
+    public function testLogsErrorWhenMetricHasInvalidDimensions(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->never())->method('info');
+        $logger->expects(self::never())->method('info');
+        $logger->expects(self::once())
+            ->method('error')
+            ->with(
+                'Failed to emit EMF metric',
+                self::callback(static function (array $context): bool {
+                    return ($context['metric'] ?? null) === 'InvalidMetric'
+                        && isset($context['error'])
+                        && ($context['exception_class'] ?? null) !== null;
+                })
+            );
 
         $emitter = $this->createEmitterWithLogger($logger);
 
@@ -104,6 +115,85 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         self::assertSame('create', $this->capturedContext['Operation']);
         $dims = $this->capturedContext['_aws']['CloudWatchMetrics'][0]['Dimensions'];
         self::assertSame([['Endpoint', 'Operation']], $dims);
+    }
+
+    public function testLogsErrorWhenEmitFails(): void
+    {
+        $payloadFactory = $this->createMock(EmfPayloadFactoryInterface::class);
+        $payloadFactory->expects(self::once())
+            ->method('createFromMetric')
+            ->willThrowException(new \RuntimeException('Factory failed'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())
+            ->method('error')
+            ->with(
+                'Failed to emit EMF metric',
+                self::callback(static function (array $context): bool {
+                    return ($context['metric'] ?? null) === 'EndpointInvocations'
+                        && ($context['error'] ?? null) === 'Factory failed'
+                        && ($context['exception_class'] ?? null) === \RuntimeException::class;
+                })
+            );
+        $logger->expects(self::never())->method('info');
+
+        $formatterLogger = $this->createMock(LoggerInterface::class);
+        $emitter = new AwsEmfBusinessMetricsEmitter(
+            $logger,
+            new EmfLogFormatter($formatterLogger),
+            $payloadFactory
+        );
+
+        $emitter->emit(new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Test', 'test'));
+    }
+
+    public function testLogsErrorWhenEmitCollectionFails(): void
+    {
+        $payloadFactory = $this->createMock(EmfPayloadFactoryInterface::class);
+        $payloadFactory->expects(self::once())
+            ->method('createFromCollection')
+            ->willThrowException(new \InvalidArgumentException('Collection error'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())
+            ->method('error')
+            ->with(
+                'Failed to emit EMF metric collection',
+                self::callback(static function (array $context): bool {
+                    return ($context['metrics_count'] ?? null) === 2
+                        && ($context['error'] ?? null) === 'Collection error'
+                        && ($context['exception_class'] ?? null) === \InvalidArgumentException::class;
+                })
+            );
+        $logger->expects(self::never())->method('info');
+
+        $formatterLogger = $this->createMock(LoggerInterface::class);
+        $emitter = new AwsEmfBusinessMetricsEmitter(
+            $logger,
+            new EmfLogFormatter($formatterLogger),
+            $payloadFactory
+        );
+
+        $emitter->emitCollection($this->createOrderMetricCollection());
+    }
+
+    public function testSkipsLoggingWhenFormatterReturnsEmptyString(): void
+    {
+        $formatter = $this->createMock(EmfLogFormatter::class);
+        $formatter->expects(self::once())
+            ->method('format')
+            ->willReturn('');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::never())->method('info');
+        $logger->expects(self::never())->method('error');
+
+        $timestampProvider = new SystemEmfTimestampProvider();
+        $payloadFactory = new EmfPayloadFactory(self::NAMESPACE, $timestampProvider);
+
+        $emitter = new AwsEmfBusinessMetricsEmitter($logger, $formatter, $payloadFactory);
+
+        $emitter->emit(new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Test', 'test'));
     }
 
     private function createEmitterWithContextCapture(
