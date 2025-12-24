@@ -11,22 +11,37 @@ use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
 final class MessageBusFactory
 {
     /**
-     * @param iterable<object> $callables
+     * @param iterable<object> $handlers
      */
-    public function create(iterable $callables): MessageBus
+    public function create(iterable $handlers): MessageBus
     {
-        return new MessageBus([$this->getMiddleWare($callables)]);
+        return new MessageBus([
+            new HandleMessageMiddleware(
+                new HandlersLocator($this->buildHandlersMap($handlers))
+            ),
+        ]);
     }
 
     /**
-     * @param iterable<object> $callables
+     * @param iterable<object> $handlers
+     *
+     * @return array<string, array<object>>
      */
-    private function getMiddleWare(iterable $callables): HandleMessageMiddleware
+    private function buildHandlersMap(iterable $handlers): array
     {
-        return new HandleMessageMiddleware(
-            new HandlersLocator(
-                HandlersLocatorMapBuilder::fromHandlers($callables)
-            )
+        $extractor = new CallableFirstParameterExtractor();
+
+        return array_reduce(
+            iterator_to_array($handlers),
+            static function (array $map, object $handler) use ($extractor): array {
+                $messageClass = $extractor->extract($handler);
+                if ($messageClass !== null) {
+                    $map[$messageClass][] = $handler;
+                }
+
+                return $map;
+            },
+            []
         );
     }
 }
