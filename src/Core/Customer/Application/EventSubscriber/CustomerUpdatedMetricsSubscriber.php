@@ -15,7 +15,7 @@ use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
  * This subscriber listens to CustomerUpdatedEvent and emits
  * the CustomersUpdated metric for CloudWatch dashboards.
  *
- * Error handling is provided by EventBus middleware.
+ * Error handling is provided by a resilient service decorator (non-critical subscriber).
  */
 final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
