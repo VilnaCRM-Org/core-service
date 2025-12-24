@@ -9,68 +9,56 @@ use ReflectionClass;
 
 final class CallableFirstParameterExtractor
 {
-    /**
-     * @param iterable<object> $callables
-     *
-     * @return array<string, array<object>>
-     */
-    public static function forCallables(iterable $callables): array
+    public function extract(object|string $class): ?string
     {
-        $extractor = new self();
-        $result = [];
+        $method = $this->invokeMethod($class);
 
-        foreach ($callables as $callable) {
-            $messageClass = $extractor->extract($callable);
-            if ($messageClass !== null) {
-                $result[$messageClass][] = $callable;
-            }
+        if ($method->getNumberOfParameters() !== 1) {
+            return null;
         }
 
-        return $result;
+        $type = $this->firstParameterType($method);
+
+        return $type->getName();
     }
 
-    public function extract(object|string $class): ?string
+    private function invokeMethod(object|string $class): \ReflectionMethod
     {
         $reflector = new ReflectionClass($class);
 
         try {
-            $method = $reflector->getMethod('__invoke');
+            return $reflector->getMethod('__invoke');
         } catch (\ReflectionException $exception) {
             throw new LogicException(
-                sprintf('Handler "%s" must declare an __invoke method.', $reflector->getName()),
+                sprintf(
+                    'Handler "%s" must declare an __invoke method.',
+                    $reflector->getName()
+                ),
                 previous: $exception
             );
         }
-
-        if ($this->hasOnlyOneParameter($method)) {
-            return $this->firstParameterClassFrom($method);
-        }
-
-        return null;
     }
 
-    private function firstParameterClassFrom(\ReflectionMethod $method): string
+    private function firstParameterType(\ReflectionMethod $method): \ReflectionNamedType
     {
         $type = $method->getParameters()[0]->getType();
 
+        if ($type === null) {
+            throw new LogicException(
+                'Missing type hint for the first parameter of __invoke.'
+            );
+        }
+
         if (!$type instanceof \ReflectionNamedType) {
-            throw new LogicException('First parameter of __invoke must be a single named (non-union) class type.');
+            throw new LogicException(
+                'First parameter of __invoke must be a single named (non-union) class type.'
+            );
         }
 
         if ($type->isBuiltin()) {
-            throw new LogicException('First parameter of __invoke must be a class type, builtin types are not supported.');
+            throw new LogicException('First parameter of __invoke must be a class type.');
         }
 
-        $name = $type->getName();
-        if (in_array($name, ['self', 'static', 'parent'], true)) {
-            throw new LogicException('First parameter of __invoke must be a concrete class name.');
-        }
-
-        return $name;
-    }
-
-    private function hasOnlyOneParameter(\ReflectionMethod $method): bool
-    {
-        return $method->getNumberOfParameters() === 1;
+        return $type;
     }
 }

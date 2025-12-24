@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Observability\Resolver;
 
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
     {
         parent::setUp();
         $this->resolver = new ApiEndpointMetricDimensionsResolver(
-            new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory()
+            new MetricDimensionsFactory()
         );
     }
 

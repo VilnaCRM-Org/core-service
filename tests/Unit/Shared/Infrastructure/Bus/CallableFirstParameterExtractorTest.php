@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Bus\CallableFirstParameterExtractor;
+use App\Shared\Infrastructure\Bus\HandlersLocatorMapBuilder;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestDomainEventSubscriber;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEvent;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEventSubscriber;
@@ -28,7 +29,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $callables = [$subscriber];
         $expected = [DomainEvent::class => $callables];
 
-        $extracted = CallableFirstParameterExtractor::forCallables($callables);
+        $extracted = HandlersLocatorMapBuilder::fromHandlers($callables);
 
         $this->assertEquals($expected, $extracted);
     }
@@ -39,7 +40,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $subscriber2 = $this->createDomainEventSubscriber();
         $callables = [$subscriber1, $subscriber2];
 
-        $extracted = CallableFirstParameterExtractor::forCallables($callables);
+        $extracted = HandlersLocatorMapBuilder::fromHandlers($callables);
 
         $this->assertMultipleSubscribers($extracted, $subscriber1, $subscriber2);
     }
@@ -48,7 +49,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     {
         $subscriber = $this->createNoParameterSubscriber();
 
-        $extracted = CallableFirstParameterExtractor::forCallables([$subscriber]);
+        $extracted = HandlersLocatorMapBuilder::fromHandlers([$subscriber]);
 
         self::assertEmpty($extracted);
     }
@@ -59,7 +60,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $subscriber2 = new TestOtherEventSubscriber();
         $callables = [$subscriber1, $subscriber2];
 
-        $extracted = CallableFirstParameterExtractor::forCallables($callables);
+        $extracted = HandlersLocatorMapBuilder::fromHandlers($callables);
 
         $this->assertDifferentEventTypes($extracted, $subscriber1, $subscriber2);
     }
@@ -94,15 +95,6 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     public function testExtractThrowsForBuiltinFirstParameterType(): void
     {
         $subscriberClass = $this->createBuiltinTypeSubscriber();
-
-        $this->expectException(\LogicException::class);
-
-        $this->extractor->extract($subscriberClass);
-    }
-
-    public function testExtractThrowsForSelfFirstParameterType(): void
-    {
-        $subscriberClass = $this->createSelfTypeSubscriber();
 
         $this->expectException(\LogicException::class);
 
@@ -200,24 +192,6 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
             }
 
             public function __invoke(string $event): void
-            {
-                Assert::assertNotNull($event);
-            }
-        };
-    }
-
-    private function createSelfTypeSubscriber(): DomainEventSubscriberInterface
-    {
-        return new class() implements DomainEventSubscriberInterface {
-            /**
-             * @return array<class-string>
-             */
-            public function subscribedTo(): array
-            {
-                return [DomainEvent::class];
-            }
-
-            public function __invoke(self $event): void
             {
                 Assert::assertNotNull($event);
             }

@@ -6,20 +6,21 @@ namespace App\Tests\Unit\Customer\Application\Metric;
 
 use App\Core\Customer\Application\Metric\CustomersUpdatedMetric;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class CustomersUpdatedMetricTest extends UnitTestCase
 {
     public function testReturnsCorrectMetricName(): void
     {
-        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
+        $metric = new CustomersUpdatedMetric(new MetricDimensionsFactory());
 
         self::assertSame('CustomersUpdated', $metric->name());
     }
 
     public function testReturnsCorrectDimensions(): void
     {
-        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
+        $metric = new CustomersUpdatedMetric(new MetricDimensionsFactory());
 
         $dimensions = $metric->dimensions()->values();
 
@@ -29,21 +30,21 @@ final class CustomersUpdatedMetricTest extends UnitTestCase
 
     public function testDefaultsToValueOfOne(): void
     {
-        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
+        $metric = new CustomersUpdatedMetric(new MetricDimensionsFactory());
 
         self::assertSame(1, $metric->value());
     }
 
     public function testAcceptsCustomValue(): void
     {
-        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 5);
+        $metric = new CustomersUpdatedMetric(new MetricDimensionsFactory(), 5);
 
         self::assertSame(5, $metric->value());
     }
 
     public function testUsesCountUnit(): void
     {
-        $metric = new CustomersUpdatedMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory());
+        $metric = new CustomersUpdatedMetric(new MetricDimensionsFactory());
 
         self::assertSame(MetricUnit::COUNT, $metric->unit()->value());
     }

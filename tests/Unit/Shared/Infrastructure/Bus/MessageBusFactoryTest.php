@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 
-use App\Shared\Infrastructure\Bus\CallableFirstParameterExtractor;
+use App\Shared\Infrastructure\Bus\HandlersLocatorMapBuilder;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
@@ -24,7 +24,7 @@ final class MessageBusFactoryTest extends UnitTestCase
             [
                 new HandleMessageMiddleware(
                     new HandlersLocator(
-                        CallableFirstParameterExtractor::forCallables(
+                        HandlersLocatorMapBuilder::fromHandlers(
                             $commandHandlers
                         )
                     )

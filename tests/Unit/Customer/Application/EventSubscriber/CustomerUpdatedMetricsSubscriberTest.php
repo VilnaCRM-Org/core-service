@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscriber;
+use App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -24,11 +27,11 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
         $this->logger = $this->createMock(LoggerInterface::class);
 
-        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+        $dimensionsFactory = new MetricDimensionsFactory();
 
         $this->subscriber = new CustomerUpdatedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new \App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory($dimensionsFactory),
+            new CustomersUpdatedMetricFactory($dimensionsFactory),
             $this->logger
         );
     }
@@ -98,16 +101,16 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
             currentEmail: $currentEmail
         );
 
-        $failingEmitter = $this->createMock(\App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface::class);
+        $failingEmitter = $this->createMock(BusinessMetricsEmitterInterface::class);
         $failingEmitter
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));
 
-        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+        $dimensionsFactory = new MetricDimensionsFactory();
 
         $subscriber = new CustomerUpdatedMetricsSubscriber(
             $failingEmitter,
-            new \App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory($dimensionsFactory),
+            new CustomersUpdatedMetricFactory($dimensionsFactory),
             $this->logger
         );
 

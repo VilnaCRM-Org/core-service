@@ -8,6 +8,7 @@ use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\Observability\Emitter\AwsEmfBusinessMetricsEmitter;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\Provider\SystemEmfTimestampProvider;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
@@ -29,7 +30,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $before = (int) (microtime(true) * 1000);
         $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'HealthCheck', 'get'));
+        $emitter->emit(new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'HealthCheck', 'get'));
 
         $this->assertTimestampWithinRange($before);
         $this->assertSingleMetricValues();
@@ -53,7 +54,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $customNamespace = 'CustomApp/Metrics';
         $emitter = $this->createEmitterWithContextCapture($customNamespace);
 
-        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Test', 'test'));
+        $emitter->emit(new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Test', 'test'));
 
         $namespace = $this->capturedContext['_aws']['CloudWatchMetrics'][0]['Namespace'];
         self::assertSame($customNamespace, $namespace);
@@ -82,7 +83,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     {
         $emitter = $this->createEmitterWithContextCapture();
 
-        $emitter->emit(new EndpointInvocationsMetric(new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory(), 'Customer', 'create', 42));
+        $emitter->emit(new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Customer', 'create', 42));
 
         self::assertSame(42, $this->capturedContext['EndpointInvocations']);
     }
@@ -91,7 +92,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     {
         $emitter = $this->createEmitterWithContextCapture();
 
-        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+        $dimensionsFactory = new MetricDimensionsFactory();
 
         $collection = new MetricCollection(
             new TestOrdersPlacedMetric($dimensionsFactory, 1),
@@ -143,7 +144,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
     private function createOrderMetricCollection(): MetricCollection
     {
-        $dimensionsFactory = new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory();
+        $dimensionsFactory = new MetricDimensionsFactory();
 
         return new MetricCollection(
             new TestOrdersPlacedMetric($dimensionsFactory, 1),

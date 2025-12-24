@@ -25,7 +25,7 @@ final class MessageBusFactory
     {
         return new HandleMessageMiddleware(
             new HandlersLocator(
-                CallableFirstParameterExtractor::forCallables($callables)
+                HandlersLocatorMapBuilder::fromHandlers($callables)
             )
         );
     }

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\Observability\Metric;
 
 use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class MetricDimensionsTest extends UnitTestCase
@@ -20,7 +21,7 @@ final class MetricDimensionsTest extends UnitTestCase
 
     public function testDimensionsCollectionSupportsCountAndIteration(): void
     {
-        $dimensions = (new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory())
+        $dimensions = (new MetricDimensionsFactory())
             ->endpointOperation('Customer', 'create');
 
         self::assertCount(2, $dimensions);
@@ -54,7 +55,7 @@ final class MetricDimensionsTest extends UnitTestCase
 
     public function testToAssociativeArrayReturnsKeyValueMap(): void
     {
-        $dimensions = (new \App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory())->endpointOperationWith(
+        $dimensions = (new MetricDimensionsFactory())->endpointOperationWith(
             'Customer',
             'create',
             new MetricDimension('PaymentMethod', 'card')
