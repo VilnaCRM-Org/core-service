@@ -15,6 +15,11 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  *
  * Invalidates cache when a customer is updated
  * Handles email change edge case (both old and new email caches)
+ *
+ * ARCHITECTURAL DECISION: NOT wrapped with ResilientDomainEventSubscriberDecorator
+ * Cache invalidation is critical for data consistency. If invalidation fails,
+ * the request MUST fail to prevent serving stale data. Unlike metrics (observability),
+ * cache failures directly impact correctness and user experience.
  */
 final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     DomainEventSubscriberInterface

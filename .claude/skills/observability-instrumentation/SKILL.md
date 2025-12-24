@@ -208,7 +208,7 @@ interface BusinessMetricsEmitterInterface
 ```php
 // src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php
 /**
- * Error handling is applied via a bus-level decorator (ResilientHandlerMiddleware),
+ * Error handling is applied via ResilientDomainEventSubscriberDecorator,
  * so subscribers stay clean and observability never breaks the main request.
  */
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
@@ -333,26 +333,17 @@ use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
 use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private OrdersPlacedMetricFactoryInterface $metricFactory,
-        private LoggerInterface $logger
+        private OrdersPlacedMetricFactoryInterface $metricFactory
     ) {}
 
     public function __invoke(OrderPlacedEvent $event): void
     {
-        try {
-            $this->metricsEmitter->emit($this->metricFactory->create($event->paymentMethod()));
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to emit business metric', [
-                'metric' => 'OrdersPlaced',
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->metricsEmitter->emit($this->metricFactory->create($event->paymentMethod()));
     }
 
     /**
@@ -405,7 +396,7 @@ These create too many unique metric streams and increase CloudWatch costs.
 
 ### Format
 
-```
+```text
 {Entity}{Action}   # PascalCase
 ```
 
