@@ -96,6 +96,7 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
       - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
+      - '../src/Shared/Infrastructure/Bus/Event/ResilientDomainEventSubscriberDecorator.php'
 
   App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory:
     arguments:
@@ -154,12 +155,26 @@ services:
   # Command bus MUST propagate exceptions (business logic)
   App\Shared\Infrastructure\Bus\MessageBusFactory: ~
 
-  # Event bus MUST NOT break the main request: swallow/log subscriber errors
+  # Event bus without middleware - resilience handled via decorators for non-critical subscribers
   app.event_message_bus_factory:
     class: App\Shared\Infrastructure\Bus\MessageBusFactory
     arguments:
-      $middlewares:
-        - '@App\Shared\Infrastructure\Bus\Middleware\ResilientMessageHandlingMiddleware'
+      $middlewares: []
+
+  # Resilient decorators for non-critical metrics subscribers
+  # Cache invalidation subscribers are NOT decorated - they must propagate errors for data consistency
+  # Symfony 7.1 auto-injects decorated service via $inner parameter (typed DomainEventSubscriberInterface)
+  app.customer_created_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber
+    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
+
+  app.customer_updated_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscriber
+    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
+
+  app.customer_deleted_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerDeletedMetricsSubscriber
+    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]

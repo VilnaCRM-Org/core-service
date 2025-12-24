@@ -85,7 +85,7 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
         ($this->subscriber)($event);
     }
 
-    public function testInvokeLogsErrorWhenCacheInvalidationFails(): void
+    public function testInvokeThrowsExceptionWhenCacheInvalidationFails(): void
     {
         $customerId = (string) $this->faker->ulid();
         $customerEmail = 'test@example.com';
@@ -108,7 +108,7 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('invalidateTags')
             ->willThrowException(new \RuntimeException('Redis connection failed'));
 
-        // Should log error, not info
+        // Exception should propagate - cache invalidation is critical for data consistency
         $this->logger
             ->expects($this->never())
             ->method('info');
