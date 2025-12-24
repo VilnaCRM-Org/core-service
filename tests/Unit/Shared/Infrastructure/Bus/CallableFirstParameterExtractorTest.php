@@ -28,7 +28,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $callables = [$subscriber];
         $expected = [DomainEvent::class => $callables];
 
-        $extracted = $this->extractor->forCallables($callables);
+        $extracted = CallableFirstParameterExtractor::forCallables($callables);
 
         $this->assertEquals($expected, $extracted);
     }
@@ -39,7 +39,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $subscriber2 = $this->createDomainEventSubscriber();
         $callables = [$subscriber1, $subscriber2];
 
-        $extracted = $this->extractor->forCallables($callables);
+        $extracted = CallableFirstParameterExtractor::forCallables($callables);
 
         $this->assertMultipleSubscribers($extracted, $subscriber1, $subscriber2);
     }
@@ -48,7 +48,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     {
         $subscriber = $this->createNoParameterSubscriber();
 
-        $extracted = $this->extractor->forCallables([$subscriber]);
+        $extracted = CallableFirstParameterExtractor::forCallables([$subscriber]);
 
         self::assertEmpty($extracted);
     }
@@ -76,6 +76,42 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     public function testExtractWithError(): void
     {
         $subscriberClass = $this->createUntypedParameterSubscriber();
+
+        $this->expectException(\LogicException::class);
+
+        $this->extractor->extract($subscriberClass);
+    }
+
+    public function testExtractThrowsWhenCallableHasNoInvokeMethod(): void
+    {
+        $subscriberClass = $this->createNonInvokableSubscriber();
+
+        $this->expectException(\LogicException::class);
+
+        $this->extractor->extract($subscriberClass);
+    }
+
+    public function testExtractThrowsForBuiltinFirstParameterType(): void
+    {
+        $subscriberClass = $this->createBuiltinTypeSubscriber();
+
+        $this->expectException(\LogicException::class);
+
+        $this->extractor->extract($subscriberClass);
+    }
+
+    public function testExtractThrowsForSelfFirstParameterType(): void
+    {
+        $subscriberClass = $this->createSelfTypeSubscriber();
+
+        $this->expectException(\LogicException::class);
+
+        $this->extractor->extract($subscriberClass);
+    }
+
+    public function testExtractThrowsForUnionFirstParameterType(): void
+    {
+        $subscriberClass = $this->createUnionTypeSubscriber();
 
         $this->expectException(\LogicException::class);
 
@@ -135,6 +171,73 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
             public function __invoke($someClass): void
             {
                 Assert::assertNotNull($someClass);
+            }
+        };
+    }
+
+    private function createNonInvokableSubscriber(): DomainEventSubscriberInterface
+    {
+        return new class() implements DomainEventSubscriberInterface {
+            /**
+             * @return array<class-string>
+             */
+            public function subscribedTo(): array
+            {
+                return [DomainEvent::class];
+            }
+        };
+    }
+
+    private function createBuiltinTypeSubscriber(): DomainEventSubscriberInterface
+    {
+        return new class() implements DomainEventSubscriberInterface {
+            /**
+             * @return array<class-string>
+             */
+            public function subscribedTo(): array
+            {
+                return [DomainEvent::class];
+            }
+
+            public function __invoke(string $event): void
+            {
+                Assert::assertNotNull($event);
+            }
+        };
+    }
+
+    private function createSelfTypeSubscriber(): DomainEventSubscriberInterface
+    {
+        return new class() implements DomainEventSubscriberInterface {
+            /**
+             * @return array<class-string>
+             */
+            public function subscribedTo(): array
+            {
+                return [DomainEvent::class];
+            }
+
+            public function __invoke(self $event): void
+            {
+                Assert::assertNotNull($event);
+            }
+        };
+    }
+
+    private function createUnionTypeSubscriber(): DomainEventSubscriberInterface
+    {
+        return new class() implements DomainEventSubscriberInterface {
+            /**
+             * @return array<class-string>
+             */
+            public function subscribedTo(): array
+            {
+                return [DomainEvent::class];
+            }
+
+            public function __invoke(DomainEvent|TestOtherEvent $event): void
+            {
+                Assert::assertNotNull($event);
             }
         };
     }

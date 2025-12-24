@@ -113,7 +113,7 @@ workspace {
                     tags "Database"
                 }
                 cloudWatch = component "CloudWatch" "AWS CloudWatch for metrics and monitoring" "AWS CloudWatch" {
-                    tags "Database"
+                    tags "ExternalService"
                 }
 
                 createCustomerProcessor -> createCustomerCommandHandler "dispatches CreateCustomerCommand"
@@ -174,6 +174,11 @@ workspace {
                 color white
                 shape cylinder
                 background #34abeb
+            }
+            element "ExternalService" {
+                color white
+                shape component
+                background #f5a623
             }
         }
     }

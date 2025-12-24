@@ -32,7 +32,15 @@ final class CallableFirstParameterExtractor
     public function extract(object|string $class): ?string
     {
         $reflector = new ReflectionClass($class);
-        $method = $reflector->getMethod('__invoke');
+
+        try {
+            $method = $reflector->getMethod('__invoke');
+        } catch (\ReflectionException $exception) {
+            throw new LogicException(
+                sprintf('Handler "%s" must declare an __invoke method.', $reflector->getName()),
+                previous: $exception
+            );
+        }
 
         if ($this->hasOnlyOneParameter($method)) {
             return $this->firstParameterClassFrom($method);
@@ -43,16 +51,22 @@ final class CallableFirstParameterExtractor
 
     private function firstParameterClassFrom(\ReflectionMethod $method): string
     {
-        /** @var \ReflectionNamedType $firstParameterType */
-        $firstParameterType = $method->getParameters()[0]->getType();
+        $type = $method->getParameters()[0]->getType();
 
-        if ($firstParameterType === null) {
-            throw new LogicException(
-                'Missing type hint for the first parameter of __invoke'
-            );
+        if (!$type instanceof \ReflectionNamedType) {
+            throw new LogicException('First parameter of __invoke must be a single named (non-union) class type.');
         }
 
-        return $firstParameterType->getName();
+        if ($type->isBuiltin()) {
+            throw new LogicException('First parameter of __invoke must be a class type, builtin types are not supported.');
+        }
+
+        $name = $type->getName();
+        if (in_array($name, ['self', 'static', 'parent'], true)) {
+            throw new LogicException('First parameter of __invoke must be a concrete class name.');
+        }
+
+        return $name;
     }
 
     private function hasOnlyOneParameter(\ReflectionMethod $method): bool
