@@ -7,18 +7,27 @@ namespace App\Shared\Infrastructure\Observability\Subscriber;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
+use App\Shared\Infrastructure\EventDispatcher\ResilientEventSubscriber;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscriberInterface
+/**
+ * Emits endpoint invocation metrics.
+ *
+ * IMPORTANT: Listener failures must not break the main HTTP response.
+ * This is enforced by ResilientEventSubscriber with automatic error handling.
+ */
+final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEventSubscriber
 {
     public function __construct(
+        LoggerInterface $logger,
         private BusinessMetricsEmitterInterface $metricsEmitter,
         private ApiEndpointMetricDimensionsResolver $dimensionsResolver,
         private MetricDimensionsFactoryInterface $dimensionsFactory
     ) {
+        parent::__construct($logger);
     }
 
     /**
@@ -33,23 +42,34 @@ final readonly class ApiEndpointBusinessMetricsSubscriber implements EventSubscr
 
     public function onResponse(ResponseEvent $event): void
     {
-        if (!$event->isMainRequest()) {
+        if (!$this->shouldEmitMetric($event)) {
             return;
         }
 
-        $request = $event->getRequest();
-        $path = $request->getPathInfo();
+        $this->safeExecute(function () use ($event): void {
+            $this->emitEndpointMetric($event);
+        }, KernelEvents::RESPONSE);
+    }
+
+    private function shouldEmitMetric(ResponseEvent $event): bool
+    {
+        if (!$event->isMainRequest()) {
+            return false;
+        }
+
+        $path = $event->getRequest()->getPathInfo();
 
         if (!str_starts_with($path, '/api')) {
-            return;
+            return false;
         }
 
         // Exclude health check endpoints from business metrics
-        // (high frequency, infrastructure concern - not business metrics)
-        if (str_starts_with($path, '/api/health')) {
-            return;
-        }
+        return !str_starts_with($path, '/api/health');
+    }
 
+    private function emitEndpointMetric(ResponseEvent $event): void
+    {
+        $request = $event->getRequest();
         $dimensions = $this->dimensionsResolver->dimensions($request);
 
         $this->metricsEmitter->emit(

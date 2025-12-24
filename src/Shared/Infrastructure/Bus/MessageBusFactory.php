@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Bus;
 
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Symfony\Component\Messenger\Handler\HandlerDescriptor;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
 use Symfony\Component\Messenger\MessageBus;
 use Symfony\Component\Messenger\Middleware\HandleMessageMiddleware;
@@ -34,7 +36,7 @@ final class MessageBusFactory
     /**
      * @param iterable<object> $handlers
      *
-     * @return array<string, array<object>>
+     * @return array<string, array<HandlerDescriptor>>
      */
     private function buildHandlersMap(iterable $handlers): array
     {
@@ -42,15 +44,42 @@ final class MessageBusFactory
 
         return array_reduce(
             iterator_to_array($handlers),
-            static function (array $map, object $handler) use ($extractor): array {
-                $messageClass = $extractor->extract($handler);
-                if ($messageClass !== null) {
-                    $map[$messageClass][] = $handler;
-                }
-
-                return $map;
-            },
+            fn (array $map, object $handler): array => $this->mapHandler(
+                $map,
+                $handler,
+                $extractor
+            ),
             []
         );
+    }
+
+    /**
+     * @param array<string, array<HandlerDescriptor>> $map
+     *
+     * @return array<string, array<HandlerDescriptor>>
+     */
+    private function mapHandler(
+        array $map,
+        object $handler,
+        CallableFirstParameterExtractor $extractor
+    ): array {
+        $descriptor = new HandlerDescriptor($handler, [
+            'alias' => sprintf('%d', spl_object_id($handler)),
+        ]);
+
+        if ($handler instanceof DomainEventSubscriberInterface) {
+            foreach ($handler->subscribedTo() as $messageClass) {
+                $map[$messageClass][] = $descriptor;
+            }
+
+            return $map;
+        }
+
+        $messageClass = $extractor->extract($handler);
+        if ($messageClass !== null) {
+            $map[$messageClass][] = $descriptor;
+        }
+
+        return $map;
     }
 }

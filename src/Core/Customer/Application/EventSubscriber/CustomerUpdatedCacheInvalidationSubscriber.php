@@ -28,14 +28,9 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $tagsToInvalidate = $this->buildTagsToInvalidate($event);
-            $this->cache->invalidateTags($tagsToInvalidate);
-            $this->logSuccess($event);
-        } catch (\Throwable $e) {
-            $this->logError($event, $e);
-        }
+        $tagsToInvalidate = $this->buildTagsToInvalidate($event);
+        $this->cache->invalidateTags($tagsToInvalidate);
+        $this->logSuccess($event);
     }
 
     /**
@@ -74,16 +69,6 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
             'event_id' => $event->eventId(),
             'operation' => 'cache.invalidation',
             'reason' => 'customer_updated',
-        ]);
-    }
-
-    private function logError(CustomerUpdatedEvent $event, \Throwable $e): void
-    {
-        $this->logger->error('Cache invalidation failed after customer update', [
-            'customer_id' => $event->customerId(),
-            'event_id' => $event->eventId(),
-            'error' => $e->getMessage(),
-            'operation' => 'cache.invalidation.error',
         ]);
     }
 }

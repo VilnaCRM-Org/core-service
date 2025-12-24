@@ -12,14 +12,14 @@ use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Application\Transformer\IriTransformerInterface;
-use App\Shared\Application\Validator\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidatorInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 final readonly class UpdateCustomerMutationResolver implements MutationResolver
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private MutationInputValidator $validator,
+        private MutationInputValidatorInterface $validator,
         private UpdateCustomerMutationInputTransformer $inputTransformer,
         private UpdateCustomerCommandFactoryInterface $commandFactory,
         private CustomerUpdateFactoryInterface $updateFactory,

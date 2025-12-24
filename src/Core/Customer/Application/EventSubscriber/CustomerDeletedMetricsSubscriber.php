@@ -15,7 +15,7 @@ use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
  * This subscriber listens to CustomerDeletedEvent and emits
  * the CustomersDeleted metric for CloudWatch dashboards.
  *
- * Error handling is provided by ResilientHandlerMiddleware.
+ * Error handling is provided by EventBus middleware.
  */
 final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubscriberInterface
 {

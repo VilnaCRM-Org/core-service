@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Shared\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Constraints\Compound;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Validates AWS CloudWatch EMF dimension values.
@@ -15,20 +19,35 @@ use Symfony\Component\Validator\Constraint;
  * - No ASCII control characters
  * - Must contain at least one non-whitespace character
  */
-#[\Attribute]
-final class EmfValue extends Constraint
+final class EmfValue extends Compound
 {
     public const int MAX_LENGTH = 1024;
 
-    public string $emptyMessage = 'emf.value.empty';
-    public string $tooLongMessage = 'emf.value.too_long';
-    public string $nonAsciiMessage = 'emf.value.non_ascii';
-    public string $controlCharsMessage = 'emf.value.control_chars';
+    public const string EMPTY_MESSAGE =
+        'EMF dimension value must contain at least one non-whitespace character';
+    public const string TOO_LONG_MESSAGE =
+        'EMF dimension value must not exceed 1024 characters';
+    public const string NON_ASCII_MESSAGE =
+        'EMF dimension value must contain only ASCII characters';
+    public const string CONTROL_CHARS_MESSAGE =
+        'EMF dimension value must not contain ASCII control characters';
 
-    public function __construct(
-        ?array $groups = null,
-        mixed $payload = null,
-    ) {
-        parent::__construct([], $groups, $payload);
+    /**
+     * @param array<string, scalar|array|null> $options
+     *
+     * @return array<Constraint>
+     */
+    protected function getConstraints(array $options): array
+    {
+        return [
+            new NotBlank(message: self::EMPTY_MESSAGE, normalizer: 'trim'),
+            new Length(max: self::MAX_LENGTH, maxMessage: self::TOO_LONG_MESSAGE),
+            new Regex(pattern: '/^[\x00-\x7F]+$/', message: self::NON_ASCII_MESSAGE),
+            new Regex(
+                pattern: '/[\x00-\x1F\x7F]/',
+                match: false,
+                message: self::CONTROL_CHARS_MESSAGE
+            ),
+        ];
     }
 }

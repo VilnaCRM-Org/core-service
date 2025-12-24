@@ -95,18 +95,22 @@ services:
     resource: '../src/'
     exclude:
       - '../src/Shared/Kernel.php'
+      - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
 
   App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
-  App\Shared\Infrastructure\Observability\Subscriber\ResilientApiEndpointBusinessMetricsSubscriber:
-    decorates: App\Shared\Infrastructure\Observability\Subscriber\ApiEndpointBusinessMetricsSubscriber
+
+  App\Shared\Application\Validator\MutationInputValidatorInterface:
+    alias: App\Shared\Application\Validator\MutationInputValidator
+
+  App\Shared\Application\Validator\LoggingMutationInputValidator:
+    decorates: App\Shared\Application\Validator\MutationInputValidator
     arguments:
-      $decorated: '@App\Shared\Infrastructure\Observability\Subscriber\ResilientApiEndpointBusinessMetricsSubscriber.inner'
+      $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
       $logger: '@logger'
-    tags: ['kernel.event_subscriber']
-    autoconfigure: false
+
 
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
@@ -149,21 +153,24 @@ services:
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
 
-  App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware:
-    arguments:
-      $logger: '@logger'
+  # Command bus MUST propagate exceptions (business logic)
+  App\Shared\Infrastructure\Bus\MessageBusFactory: ~
 
-  App\Shared\Infrastructure\Bus\MessageBusFactory:
+  # Event bus MUST NOT break the main request: swallow/log subscriber errors
+  app.event_message_bus_factory:
+    class: App\Shared\Infrastructure\Bus\MessageBusFactory
     arguments:
       $middlewares:
-        - '@App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware'
+        - '@App\Shared\Infrastructure\Bus\Middleware\ResilientMessageHandlingMiddleware'
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.event_subscriber]
+    arguments:
+      $busFactory: '@app.event_message_bus_factory'
+      $subscribers: !tagged app.event_subscriber
     lazy: true
 
   Aws\Sqs\SqsClient:

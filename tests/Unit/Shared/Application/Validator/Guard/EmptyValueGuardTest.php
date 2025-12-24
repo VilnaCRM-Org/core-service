@@ -47,4 +47,19 @@ final class EmptyValueGuardTest extends UnitTestCase
         $constraint = new Initials();
         $this->assertFalse($this->checker->shouldSkip(123, $constraint));
     }
+
+    public function testIsEmptyReturnsTrueForNull(): void
+    {
+        self::assertTrue(EmptyValueGuard::isEmpty(null));
+    }
+
+    public function testIsEmptyReturnsTrueForEmptyString(): void
+    {
+        self::assertTrue(EmptyValueGuard::isEmpty(''));
+    }
+
+    public function testIsEmptyReturnsFalseForNonEmptyString(): void
+    {
+        self::assertFalse(EmptyValueGuard::isEmpty('a'));
+    }
 }

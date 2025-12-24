@@ -29,41 +29,32 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $this->assertEquals(DomainEvent::class, $extracted);
     }
 
-    public function testExtractThrowsForMissingTypeHint(): void
+    public function testExtractReturnsNullForMissingTypeHint(): void
     {
         $subscriberClass = $this->createUntypedParameterSubscriber();
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Missing type hint for the first parameter of __invoke.');
-
-        $this->extractor->extract($subscriberClass);
+        self::assertNull($this->extractor->extract($subscriberClass));
     }
 
-    public function testExtractThrowsWhenCallableHasNoInvokeMethod(): void
+    public function testExtractReturnsNullWhenCallableHasNoInvokeMethod(): void
     {
         $subscriberClass = $this->createNonInvokableSubscriber();
 
-        $this->expectException(\LogicException::class);
-
-        $this->extractor->extract($subscriberClass);
+        self::assertNull($this->extractor->extract($subscriberClass));
     }
 
-    public function testExtractThrowsForBuiltinFirstParameterType(): void
+    public function testExtractReturnsNullForBuiltinFirstParameterType(): void
     {
         $subscriberClass = $this->createBuiltinTypeSubscriber();
 
-        $this->expectException(\LogicException::class);
-
-        $this->extractor->extract($subscriberClass);
+        self::assertNull($this->extractor->extract($subscriberClass));
     }
 
-    public function testExtractThrowsForUnionFirstParameterType(): void
+    public function testExtractReturnsNullForUnionFirstParameterType(): void
     {
         $subscriberClass = $this->createUnionTypeSubscriber();
 
-        $this->expectException(\LogicException::class);
-
-        $this->extractor->extract($subscriberClass);
+        self::assertNull($this->extractor->extract($subscriberClass));
     }
 
     private function createDomainEventSubscriber(): DomainEventSubscriberInterface

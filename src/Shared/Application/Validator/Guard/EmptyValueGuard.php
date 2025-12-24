@@ -8,6 +8,11 @@ use Symfony\Component\Validator\Constraint;
 
 final class EmptyValueGuard
 {
+    public static function isEmpty(mixed $value): bool
+    {
+        return $value === null || $value === '';
+    }
+
     public function shouldSkip(
         array|string|int|float|bool|null $value,
         Constraint $constraint

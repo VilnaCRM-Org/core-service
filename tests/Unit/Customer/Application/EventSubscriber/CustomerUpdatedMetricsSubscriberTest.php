@@ -8,12 +8,9 @@ use App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscrib
 use App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Infrastructure\Bus\MessageBusFactory;
-use App\Shared\Infrastructure\Bus\Middleware\ResilientHandlerMiddleware;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
-use Psr\Log\LoggerInterface;
 
 final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
 {
@@ -64,7 +61,7 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
         }
     }
 
-    public function testDoesNotThrowWhenEmitterFailsThroughEventBus(): void
+    public function testThrowsWhenEmitterFailsWithoutEventBusMiddleware(): void
     {
         $customerId = (string) $this->faker->ulid();
         $currentEmail = 'test@example.com';
@@ -86,25 +83,9 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
             new CustomersUpdatedMetricFactory($dimensionsFactory)
         );
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())
-            ->method('error')
-            ->with(
-                'Event subscriber execution failed',
-                self::callback(static function (array $context): bool {
-                    return ($context['message_class'] ?? null) === CustomerUpdatedEvent::class
-                        && isset($context['error'])
-                        && str_contains((string) $context['error'], 'Connection failed')
-                        && ($context['exception_class'] ?? null) === \Symfony\Component\Messenger\Exception\HandlerFailedException::class;
-                })
-            );
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Connection failed');
 
-        $bus = (new MessageBusFactory([
-            new ResilientHandlerMiddleware($logger),
-        ]))->create([$subscriber]);
-
-        $bus->dispatch($event);
-
-        self::assertTrue(true);
+        ($subscriber)($event);
     }
 }

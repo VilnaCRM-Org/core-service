@@ -27,29 +27,18 @@ final readonly class CustomerCreatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $this->cache->invalidateTags([
-                'customer.' . $event->customerId(),
-                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
-                'customer.collection',
-            ]);
+        $this->cache->invalidateTags([
+            'customer.' . $event->customerId(),
+            'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+            'customer.collection',
+        ]);
 
-            $this->logger->info('Cache invalidated after customer creation', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'operation' => 'cache.invalidation',
-                'reason' => 'customer_created',
-            ]);
-        } catch (\Throwable $e) {
-            // Log cache error but allow the business operation to succeed
-            $this->logger->error('Cache invalidation failed after customer creation', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-                'operation' => 'cache.invalidation.error',
-            ]);
-        }
+        $this->logger->info('Cache invalidated after customer creation', [
+            'customer_id' => $event->customerId(),
+            'event_id' => $event->eventId(),
+            'operation' => 'cache.invalidation',
+            'reason' => 'customer_created',
+        ]);
     }
 
     /**

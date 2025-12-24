@@ -25,7 +25,7 @@ final class EmfDimensionValueValidator
         $violations = self::getValidator()->validate($key, new EmfKey());
 
         if ($violations->count() > 0) {
-            throw new InvalidEmfDimensionKeyException((string) $violations->get(0)->getMessage());
+            throw new InvalidEmfDimensionKeyException($violations->get(0)->getMessage());
         }
     }
 
@@ -34,7 +34,7 @@ final class EmfDimensionValueValidator
         $violations = self::getValidator()->validate($value, new EmfValue());
 
         if ($violations->count() > 0) {
-            throw new InvalidEmfDimensionValueException((string) $violations->get(0)->getMessage());
+            throw new InvalidEmfDimensionValueException($violations->get(0)->getMessage());
         }
     }
 
