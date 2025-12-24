@@ -29,11 +29,12 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         $this->assertEquals(DomainEvent::class, $extracted);
     }
 
-    public function testExtractWithError(): void
+    public function testExtractThrowsForMissingTypeHint(): void
     {
         $subscriberClass = $this->createUntypedParameterSubscriber();
 
         $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Missing type hint for the first parameter of __invoke.');
 
         $this->extractor->extract($subscriberClass);
     }

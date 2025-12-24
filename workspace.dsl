@@ -77,6 +77,15 @@ workspace {
                     healthCheckEvent = component "HealthCheckEvent" "Represents a health check event" "DomainEvent" {
                         tags "Item"
                     }
+                    customerCreatedEvent = component "CustomerCreatedEvent" "Emitted when a customer is created" "DomainEvent" {
+                        tags "Item"
+                    }
+                    customerUpdatedEvent = component "CustomerUpdatedEvent" "Emitted when a customer is updated" "DomainEvent" {
+                        tags "Item"
+                    }
+                    customerDeletedEvent = component "CustomerDeletedEvent" "Emitted when a customer is deleted" "DomainEvent" {
+                        tags "Item"
+                    }
                 }
 
                 group "Infrastructure" {
@@ -99,6 +108,9 @@ workspace {
                         tags "Item"
                     }
                     emfPayloadFactory = component "EmfPayloadFactory" "Creates EMF payload objects" "Factory" {
+                        tags "Item"
+                    }
+                    kernelTerminateEvent = component "KernelTerminateEvent" "Symfony kernel event fired after response is sent" "FrameworkEvent" {
                         tags "Item"
                     }
                 }
@@ -148,6 +160,15 @@ workspace {
 
                 healthCheckController -> eventBus "publishes via"
                 eventBus -> healthCheckEvent "dispatches"
+
+                createCustomerCommandHandler -> customerCreatedEvent "publishes"
+                updateCustomerCommandHandler -> customerUpdatedEvent "publishes"
+                updateCustomerCommandHandler -> customerDeletedEvent "publishes on delete"
+                customerCreatedEvent -> customerCreatedMetricsSubscriber "triggers"
+                customerUpdatedEvent -> customerUpdatedMetricsSubscriber "triggers"
+                customerDeletedEvent -> customerDeletedMetricsSubscriber "triggers"
+
+                kernelTerminateEvent -> apiEndpointMetricsSubscriber "triggers"
 
                 customerCreatedMetricsSubscriber -> businessMetricsEmitterInterface "emits via"
                 customerUpdatedMetricsSubscriber -> businessMetricsEmitterInterface "emits via"

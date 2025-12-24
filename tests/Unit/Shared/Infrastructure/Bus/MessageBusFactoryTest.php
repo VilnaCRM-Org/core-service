@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 
-use App\Shared\Domain\Bus\Event\DomainEvent;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
-use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestDomainEventSubscriber;
-use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEventSubscriber;
+use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEvent;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\Assert;
 use Symfony\Component\Messenger\MessageBus;
 
 final class MessageBusFactoryTest extends UnitTestCase
@@ -29,77 +25,113 @@ final class MessageBusFactoryTest extends UnitTestCase
         self::assertInstanceOf(MessageBus::class, $messageBus);
     }
 
-    public function testCreateWithSingleHandler(): void
+    public function testDispatchInvokesHandler(): void
     {
-        $subscriber = $this->createDomainEventSubscriber();
+        $handler = new TestMessageHandler();
 
-        $messageBus = $this->factory->create([$subscriber]);
+        $messageBus = $this->factory->create([$handler]);
+        $messageBus->dispatch(new TestMessage());
 
-        self::assertInstanceOf(MessageBus::class, $messageBus);
+        self::assertTrue($handler->wasCalled());
     }
 
-    public function testCreateWithMultipleHandlersForSameEvent(): void
+    public function testDispatchWithMultipleHandlersForSameEvent(): void
     {
-        $subscriber1 = $this->createDomainEventSubscriber();
-        $subscriber2 = $this->createDomainEventSubscriber();
+        $handler1 = new TestMessageHandler();
+        $handler2 = new AnotherTestMessageHandler();
 
-        $messageBus = $this->factory->create([$subscriber1, $subscriber2]);
+        $messageBus = $this->factory->create([$handler1, $handler2]);
+        $messageBus->dispatch(new TestMessage());
 
-        self::assertInstanceOf(MessageBus::class, $messageBus);
+        self::assertTrue($handler1->wasCalled());
+        self::assertTrue($handler2->wasCalled());
     }
 
-    public function testCreateSkipsHandlersWithoutTypedParameter(): void
+    public function testDispatchRoutesToCorrectHandler(): void
     {
-        $subscriber = $this->createNoParameterSubscriber();
+        $testMessageHandler = new TestMessageHandler();
+        $otherEventHandler = new TestOtherEventHandler();
 
-        $messageBus = $this->factory->create([$subscriber]);
+        $messageBus = $this->factory->create([$testMessageHandler, $otherEventHandler]);
+        $messageBus->dispatch(new TestOtherEvent());
 
-        self::assertInstanceOf(MessageBus::class, $messageBus);
+        self::assertFalse($testMessageHandler->wasCalled());
+        self::assertTrue($otherEventHandler->wasCalled());
     }
 
-    public function testCreateWithMultipleDifferentEventTypes(): void
+    public function testHandlerWithoutTypedParameterIsNotMapped(): void
     {
-        $subscriber1 = new TestDomainEventSubscriber();
-        $subscriber2 = new TestOtherEventSubscriber();
+        $noParamHandler = new NoParameterHandler();
+        $testMessageHandler = new TestMessageHandler();
 
-        $messageBus = $this->factory->create([$subscriber1, $subscriber2]);
+        $messageBus = $this->factory->create([$noParamHandler, $testMessageHandler]);
+        $messageBus->dispatch(new TestMessage());
 
-        self::assertInstanceOf(MessageBus::class, $messageBus);
+        self::assertFalse($noParamHandler->wasCalled());
+        self::assertTrue($testMessageHandler->wasCalled());
+    }
+}
+
+final class TestMessage
+{
+}
+
+final class TestMessageHandler
+{
+    private bool $called = false;
+
+    public function __invoke(TestMessage $message): void
+    {
+        $this->called = true;
     }
 
-    private function createDomainEventSubscriber(): DomainEventSubscriberInterface
+    public function wasCalled(): bool
     {
-        return new class() implements DomainEventSubscriberInterface {
-            /**
-             * @return array<class-string>
-             */
-            public function subscribedTo(): array
-            {
-                return [DomainEvent::class];
-            }
+        return $this->called;
+    }
+}
 
-            public function __invoke(DomainEvent $event): void
-            {
-                Assert::assertNotNull($event);
-            }
-        };
+final class AnotherTestMessageHandler
+{
+    private bool $called = false;
+
+    public function __invoke(TestMessage $message): void
+    {
+        $this->called = true;
     }
 
-    private function createNoParameterSubscriber(): DomainEventSubscriberInterface
+    public function wasCalled(): bool
     {
-        return new class() implements DomainEventSubscriberInterface {
-            /**
-             * @return array<class-string>
-             */
-            public function subscribedTo(): array
-            {
-                return [DomainEvent::class];
-            }
+        return $this->called;
+    }
+}
 
-            public function __invoke(): void
-            {
-                Assert::assertTrue(true);
-            }
-        };
+final class TestOtherEventHandler
+{
+    private bool $called = false;
+
+    public function __invoke(TestOtherEvent $event): void
+    {
+        $this->called = true;
+    }
+
+    public function wasCalled(): bool
+    {
+        return $this->called;
+    }
+}
+
+final class NoParameterHandler
+{
+    private bool $called = false;
+
+    public function __invoke(): void
+    {
+        $this->called = true;
+    }
+
+    public function wasCalled(): bool
+    {
+        return $this->called;
     }
 }
