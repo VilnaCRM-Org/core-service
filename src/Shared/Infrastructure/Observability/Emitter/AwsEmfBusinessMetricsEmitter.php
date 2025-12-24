@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Emitter;
 
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;

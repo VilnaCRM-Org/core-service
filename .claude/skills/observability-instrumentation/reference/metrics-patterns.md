@@ -56,7 +56,10 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 ### Event Subscriber Pattern
 
 ```php
-use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactoryInterface;use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use Psr\Log\LoggerInterface;
+use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactoryInterface;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {

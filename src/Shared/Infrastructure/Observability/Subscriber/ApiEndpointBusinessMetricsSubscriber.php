@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Subscriber;
 
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
-use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

@@ -13,7 +13,10 @@ Add business metrics to your code in 5 minutes using AWS CloudWatch Embedded Met
 ### Step 1: Create a domain event subscriber (30 seconds)
 
 ```php
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;use Psr\Log\LoggerInterface;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class YourMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -109,7 +112,11 @@ declare(strict_types=1);
 
 namespace App\YourContext\Application\EventSubscriber;
 
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;use App\YourContext\Domain\Event\YourEntityCreatedEvent;use Psr\Log\LoggerInterface;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\YourContext\Application\Factory\EntitiesCreatedMetricFactoryInterface;
+use App\YourContext\Domain\Event\YourEntityCreatedEvent;
+use Psr\Log\LoggerInterface;
 
 final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -126,7 +133,7 @@ final readonly class YourEntityCreatedMetricsSubscriber implements DomainEventSu
 
             $this->logger->debug('Business metric emitted', [
                 'metric' => 'EntitiesCreated',
-                'entity_id' => $event->entityId(),
+                'event_id' => $event->eventId(),
             ]);
         } catch (\Throwable $e) {
             // Metrics are best-effort: don't fail business operations

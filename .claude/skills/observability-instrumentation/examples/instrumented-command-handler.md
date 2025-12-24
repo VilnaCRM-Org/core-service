@@ -183,7 +183,14 @@ declare(strict_types=1);
 
 namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;use App\Core\Order\Domain\Event\OrderPlacedEvent;use App\Shared\Application\Observability\Metric\MetricCollection;use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use Psr\Log\LoggerInterface;
+use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -344,7 +351,7 @@ These are infrastructure concerns handled by AWS AppRunner automatically.
 
 ## Files Reference
 
-- Interface: `src/Shared/Application/Observability/BusinessMetricsEmitterInterface.php`
+- Interface: `src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php`
 - Implementation: `src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php`
 - Test spy: `tests/Unit/Shared/Infrastructure/Observability/BusinessMetricsEmitterSpy.php`
 - Auto metrics: `src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php`

@@ -195,7 +195,7 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
 ### Emitter Interface (Application Layer)
 
 ```php
-// src/Shared/Application/Observability/BusinessMetricsEmitterInterface.php
+// src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php
 interface BusinessMetricsEmitterInterface
 {
     public function emit(BusinessMetric $metric): void;
@@ -339,7 +339,11 @@ final readonly class OrdersPlacedMetric extends BusinessMetric
 // src/Core/Order/Application/EventSubscriber/OrderPlacedMetricsSubscriber.php
 namespace App\Core\Order\Application\EventSubscriber;
 
-use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;use App\Core\Order\Domain\Event\OrderPlacedEvent;use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;use App\Shared\Infrastructure\Observability\Emitter\BusinessMetricsEmitterInterface;use Psr\Log\LoggerInterface;
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use Psr\Log\LoggerInterface;
 
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -482,7 +486,7 @@ final class CustomerCreatedMetricsSubscriberTest extends TestCase
 In `config/services_test.yaml`, the spy is configured:
 
 ```yaml
-App\Shared\Application\Observability\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
+App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
 
 App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
   public: true
@@ -576,7 +580,7 @@ After implementing business metrics:
 
 ### Infrastructure
 
-- `src/Shared/Application/Observability/BusinessMetricsEmitterInterface.php` - Interface
+- `src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php` - Interface
 - `src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php` - EMF implementation
 - `src/Shared/Infrastructure/Observability/EmfLogFormatter.php` - Monolog formatter
 
