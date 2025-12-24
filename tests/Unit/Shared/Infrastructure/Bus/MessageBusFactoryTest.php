@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
+use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestMessage;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEvent;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Messenger\MessageBus;
@@ -27,7 +28,19 @@ final class MessageBusFactoryTest extends UnitTestCase
 
     public function testDispatchInvokesHandler(): void
     {
-        $handler = new TestMessageHandler();
+        $handler = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestMessage $message): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
 
         $messageBus = $this->factory->create([$handler]);
         $messageBus->dispatch(new TestMessage());
@@ -37,8 +50,33 @@ final class MessageBusFactoryTest extends UnitTestCase
 
     public function testDispatchWithMultipleHandlersForSameEvent(): void
     {
-        $handler1 = new TestMessageHandler();
-        $handler2 = new AnotherTestMessageHandler();
+        $handler1 = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestMessage $message): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
+
+        $handler2 = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestMessage $message): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
 
         $messageBus = $this->factory->create([$handler1, $handler2]);
         $messageBus->dispatch(new TestMessage());
@@ -49,11 +87,36 @@ final class MessageBusFactoryTest extends UnitTestCase
 
     public function testDispatchRoutesToCorrectHandler(): void
     {
-        $testMessageHandler = new TestMessageHandler();
-        $otherEventHandler = new TestOtherEventHandler();
+        $testMessageHandler = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestMessage $message): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
+
+        $otherEventHandler = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestOtherEvent $event): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
 
         $messageBus = $this->factory->create([$testMessageHandler, $otherEventHandler]);
-        $messageBus->dispatch(new TestOtherEvent());
+        $messageBus->dispatch(new TestOtherEvent('event-id', null));
 
         self::assertFalse($testMessageHandler->wasCalled());
         self::assertTrue($otherEventHandler->wasCalled());
@@ -61,77 +124,38 @@ final class MessageBusFactoryTest extends UnitTestCase
 
     public function testHandlerWithoutTypedParameterIsNotMapped(): void
     {
-        $noParamHandler = new NoParameterHandler();
-        $testMessageHandler = new TestMessageHandler();
+        $noParamHandler = new class() {
+            private bool $called = false;
+
+            public function __invoke(): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
+
+        $testMessageHandler = new class() {
+            private bool $called = false;
+
+            public function __invoke(TestMessage $message): void
+            {
+                $this->called = true;
+            }
+
+            public function wasCalled(): bool
+            {
+                return $this->called;
+            }
+        };
 
         $messageBus = $this->factory->create([$noParamHandler, $testMessageHandler]);
         $messageBus->dispatch(new TestMessage());
 
         self::assertFalse($noParamHandler->wasCalled());
         self::assertTrue($testMessageHandler->wasCalled());
-    }
-}
-
-final class TestMessage
-{
-}
-
-final class TestMessageHandler
-{
-    private bool $called = false;
-
-    public function __invoke(TestMessage $message): void
-    {
-        $this->called = true;
-    }
-
-    public function wasCalled(): bool
-    {
-        return $this->called;
-    }
-}
-
-final class AnotherTestMessageHandler
-{
-    private bool $called = false;
-
-    public function __invoke(TestMessage $message): void
-    {
-        $this->called = true;
-    }
-
-    public function wasCalled(): bool
-    {
-        return $this->called;
-    }
-}
-
-final class TestOtherEventHandler
-{
-    private bool $called = false;
-
-    public function __invoke(TestOtherEvent $event): void
-    {
-        $this->called = true;
-    }
-
-    public function wasCalled(): bool
-    {
-        return $this->called;
-    }
-}
-
-final class NoParameterHandler
-{
-    private bool $called = false;
-
-    public function __invoke(): void
-    {
-        $this->called = true;
-    }
-
-    public function wasCalled(): bool
-    {
-        return $this->called;
     }
 }

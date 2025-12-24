@@ -8,13 +8,6 @@ use App\Shared\Domain\Bus\Event\DomainEvent;
 
 final class TestOtherEvent extends DomainEvent
 {
-    public function __construct(
-        string $eventId = '',
-        ?string $occurredOn = null
-    ) {
-        parent::__construct($eventId, $occurredOn);
-    }
-
     /**
      * @param array<string, string|object> $body
      */
