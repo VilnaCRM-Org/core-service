@@ -101,7 +101,6 @@ services:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
-
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
@@ -110,7 +109,6 @@ services:
     arguments:
       $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
       $logger: '@logger'
-
 
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:

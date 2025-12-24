@@ -77,4 +77,3 @@ App\Core\Customer\Application\DTO\CustomerPut:
       - Type:
           type: 'bool'
           message: 'This value should be a boolean.'
-
