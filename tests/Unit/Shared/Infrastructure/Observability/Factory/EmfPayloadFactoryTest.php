@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Factory;
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfNamespaceException;
+use App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
@@ -150,13 +151,14 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     private function createFactoryWithNamespace(string $namespace): EmfPayloadFactory
     {
         $validator = Validation::createValidator();
-
-        return new EmfPayloadFactory(
+        $timestampProvider = $this->createTimestampProvider();
+        $metadataFactory = new EmfAwsMetadataFactory(
             $namespace,
-            $this->createTimestampProvider(),
-            new EmfNamespaceValidatorService($validator),
-            new EmfDimensionValueValidatorService($validator)
+            $timestampProvider,
+            new EmfNamespaceValidatorService($validator)
         );
+
+        return new EmfPayloadFactory($metadataFactory, new EmfDimensionValueValidatorService($validator));
     }
 
     private function createTimestampProvider(): EmfTimestampProvider
