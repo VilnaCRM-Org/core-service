@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Shared\Infrastructure\Bus\Event;
+namespace App\Tests\Unit\Shared\Infrastructure\Decorator;
 
-use App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator;
+use App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Event\Stub\TestDomainEvent;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Event\Stub\TestDomainEventSubscriber;
 use App\Tests\Unit\UnitTestCase;

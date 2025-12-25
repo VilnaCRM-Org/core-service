@@ -96,7 +96,7 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
       - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
-      - '../src/Shared/Infrastructure/Bus/Event/ResilientDomainEventSubscriberDecorator.php'
+      - '../src/Shared/Infrastructure/Decorator/ResilientDomainEventSubscriberDecorator.php'
 
   App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory:
     arguments:
@@ -166,15 +166,15 @@ services:
   # Symfony 7.1 auto-injects decorated service via $inner parameter (typed DomainEventSubscriberInterface)
   app.customer_created_metrics_subscriber.resilient:
     decorates: App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber
-    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
 
   app.customer_updated_metrics_subscriber.resilient:
     decorates: App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscriber
-    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
 
   app.customer_deleted_metrics_subscriber.resilient:
     decorates: App\Core\Customer\Application\EventSubscriber\CustomerDeletedMetricsSubscriber
-    class: App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
 
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
