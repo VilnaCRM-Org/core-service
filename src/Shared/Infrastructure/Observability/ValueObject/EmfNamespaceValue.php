@@ -12,7 +12,7 @@ namespace App\Shared\Infrastructure\Observability\ValueObject;
  * - Only ASCII alphanumeric and these characters: . - _ / # :
  * - Must contain at least one non-whitespace character
  *
- * Validation is performed by EmfNamespaceValidatorService using compound constraints.
+ * Validation is performed by EmfNamespaceValidator using compound constraints.
  */
 final readonly class EmfNamespaceValue
 {

@@ -6,22 +6,22 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Validator;
 
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionKeyException;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionValueException;
-use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * Tests EmfDimensionValueValidatorService implementation
+ * Tests EmfDimensionValueValidator implementation
  *
  * Following SOLID:
  * - Tests the service that knows about EmfDimensionValue internal structure
  * - Verifies proper exception translation from validation violations
  */
-final class EmfDimensionValueValidatorServiceTest extends UnitTestCase
+final class EmfDimensionValueValidatorTest extends UnitTestCase
 {
-    private EmfDimensionValueValidatorService $service;
+    private EmfDimensionValueValidator $service;
     private ValidatorInterface $validator;
 
     protected function setUp(): void
@@ -29,7 +29,7 @@ final class EmfDimensionValueValidatorServiceTest extends UnitTestCase
         parent::setUp();
 
         $this->validator = Validation::createValidator();
-        $this->service = new EmfDimensionValueValidatorService($this->validator);
+        $this->service = new EmfDimensionValueValidator($this->validator);
     }
 
     public function testValidatesValidDimensionWithoutException(): void

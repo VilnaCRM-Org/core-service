@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * - Dependency Inversion: Depends on ValidatorInterface abstraction
  * - Self-contained: Uses compound constraint directly, no external YAML config needed
  */
-final readonly class EmfNamespaceValidatorService implements EmfNamespaceValidatorInterface
+final readonly class EmfNamespaceValidator implements EmfNamespaceValidatorInterface
 {
     public function __construct(
         private ValidatorInterface $validator

@@ -8,9 +8,8 @@ use App\Shared\Infrastructure\Observability\Collection\EmfDimensionKeys;
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
-use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
 use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
-use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfAwsMetadata;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfCloudWatchMetricConfig;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
@@ -28,7 +27,7 @@ final class EmfPayloadTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->dimensionValidator = new EmfDimensionValueValidatorService(Validation::createValidator());
+        $this->dimensionValidator = new EmfDimensionValueValidator(Validation::createValidator());
     }
 
     public function testSerializesToCompleteEmfStructure(): void
@@ -114,84 +113,6 @@ final class EmfPayloadTest extends UnitTestCase
         $metrics = $payload->metricValues();
 
         self::assertCount(1, $metrics);
-    }
-
-    public function testThrowsExceptionWhenDimensionKeyMatchesMetricName(): void
-    {
-        $this->expectException(EmfKeyCollisionException::class);
-        $this->expectExceptionMessage('Key collision detected');
-
-        $metricDefinition = new EmfMetricDefinition('Endpoint', 'Count');
-        $dimensionKeys = new EmfDimensionKeys('Endpoint');
-        $cloudWatchConfig = new EmfCloudWatchMetricConfig(
-            'TestApp/Metrics',
-            $dimensionKeys,
-            new EmfMetricDefinitionCollection($metricDefinition)
-        );
-        $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
-
-        $dimensionValues = new EmfDimensionValueCollection(
-            $this->dimensionValidator,
-            new EmfDimensionValue('Endpoint', 'Customer')
-        );
-
-        $metricValues = new EmfMetricValueCollection(
-            new EmfMetricValue('Endpoint', 1)
-        );
-
-        new EmfPayload($awsMetadata, $dimensionValues, $metricValues);
-    }
-
-    public function testThrowsExceptionWhenReservedAwsKeyIsUsedAsDimension(): void
-    {
-        $this->expectException(EmfKeyCollisionException::class);
-        $this->expectExceptionMessage('reserved for metadata');
-
-        $metricDefinition = new EmfMetricDefinition('CustomersCreated', 'Count');
-        $dimensionKeys = new EmfDimensionKeys('_aws');
-        $cloudWatchConfig = new EmfCloudWatchMetricConfig(
-            'TestApp/Metrics',
-            $dimensionKeys,
-            new EmfMetricDefinitionCollection($metricDefinition)
-        );
-        $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
-
-        $dimensionValues = new EmfDimensionValueCollection(
-            $this->dimensionValidator,
-            new EmfDimensionValue('_aws', 'invalid')
-        );
-
-        $metricValues = new EmfMetricValueCollection(
-            new EmfMetricValue('CustomersCreated', 1)
-        );
-
-        new EmfPayload($awsMetadata, $dimensionValues, $metricValues);
-    }
-
-    public function testThrowsExceptionWhenReservedAwsKeyIsUsedAsMetric(): void
-    {
-        $this->expectException(EmfKeyCollisionException::class);
-        $this->expectExceptionMessage('reserved for metadata');
-
-        $metricDefinition = new EmfMetricDefinition('_aws', 'Count');
-        $dimensionKeys = new EmfDimensionKeys('Endpoint');
-        $cloudWatchConfig = new EmfCloudWatchMetricConfig(
-            'TestApp/Metrics',
-            $dimensionKeys,
-            new EmfMetricDefinitionCollection($metricDefinition)
-        );
-        $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
-
-        $dimensionValues = new EmfDimensionValueCollection(
-            $this->dimensionValidator,
-            new EmfDimensionValue('Endpoint', 'Customer')
-        );
-
-        $metricValues = new EmfMetricValueCollection(
-            new EmfMetricValue('_aws', 1)
-        );
-
-        new EmfPayload($awsMetadata, $dimensionValues, $metricValues);
     }
 
     private function createPayload(): EmfPayload

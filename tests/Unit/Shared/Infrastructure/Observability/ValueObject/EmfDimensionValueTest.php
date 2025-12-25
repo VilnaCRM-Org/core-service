@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * Tests EmfDimensionValue value object and validation using compound constraints.
  *
  * Validation uses EmfKey and EmfValue compound constraints directly,
- * matching how EmfDimensionValueValidatorService validates.
+ * matching how EmfDimensionValueValidator validates.
  */
 final class EmfDimensionValueTest extends UnitTestCase
 {

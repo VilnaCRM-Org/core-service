@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Observability\Validator;
 
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfNamespaceException;
-use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidator;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Validation;
 
 /**
- * Tests EmfNamespaceValidatorService implementation
+ * Tests EmfNamespaceValidator implementation
  *
  * Following SOLID:
  * - Tests the service that validates EmfNamespaceValue
  * - Verifies proper exception translation from validation violations
  */
-final class EmfNamespaceValidatorServiceTest extends UnitTestCase
+final class EmfNamespaceValidatorTest extends UnitTestCase
 {
-    private EmfNamespaceValidatorService $service;
+    private EmfNamespaceValidator $service;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = new EmfNamespaceValidatorService(Validation::createValidator());
+        $this->service = new EmfNamespaceValidator(Validation::createValidator());
     }
 
     public function testValidatesValidNamespaceWithoutException(): void

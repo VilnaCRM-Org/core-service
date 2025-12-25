@@ -19,8 +19,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * - Dependency Inversion: Depends on ValidatorInterface abstraction
  * - Self-contained: Uses compound constraints directly, no external YAML config needed
  */
-final readonly class EmfDimensionValueValidatorService implements
-    EmfDimensionValueValidatorInterface
+final readonly class EmfDimensionValueValidator implements EmfDimensionValueValidatorInterface
 {
     public function __construct(
         private ValidatorInterface $validator

@@ -11,8 +11,9 @@ use App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
-use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
-use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidator;
+use App\Shared\Infrastructure\Observability\Validator\EmfPayloadValidator;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;
@@ -155,10 +156,14 @@ final class EmfPayloadFactoryTest extends UnitTestCase
         $metadataFactory = new EmfAwsMetadataFactory(
             $namespace,
             $timestampProvider,
-            new EmfNamespaceValidatorService($validator)
+            new EmfNamespaceValidator($validator)
         );
 
-        return new EmfPayloadFactory($metadataFactory, new EmfDimensionValueValidatorService($validator));
+        return new EmfPayloadFactory(
+            $metadataFactory,
+            new EmfDimensionValueValidator($validator),
+            new EmfPayloadValidator()
+        );
     }
 
     private function createTimestampProvider(): EmfTimestampProvider

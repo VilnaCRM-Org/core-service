@@ -10,6 +10,7 @@ use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInte
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
 use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
+use App\Shared\Infrastructure\Observability\Validator\EmfPayloadValidatorInterface;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricDefinition;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
@@ -27,7 +28,8 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
 {
     public function __construct(
         private EmfAwsMetadataFactoryInterface $metadataFactory,
-        private EmfDimensionValueValidatorInterface $dimensionValidator
+        private EmfDimensionValueValidatorInterface $dimensionValidator,
+        private EmfPayloadValidatorInterface $payloadValidator
     ) {
     }
 
@@ -40,11 +42,15 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
             $metricDefinition
         );
 
-        return new EmfPayload(
+        $payload = new EmfPayload(
             $awsMetadata,
             $dimensionValueCollection,
             new EmfMetricValueCollection($this->createMetricValue($metric))
         );
+
+        $this->payloadValidator->validate($payload);
+
+        return $payload;
     }
 
     public function createFromCollection(MetricCollection $metrics): EmfPayload
@@ -59,8 +65,11 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
         $dimensions = $this->createDimensionValueCollection($allMetrics[0]->dimensions());
         $awsMetadata = $this->metadataFactory->createEmpty($dimensions->keys());
         $payload = new EmfPayload($awsMetadata, $dimensions, new EmfMetricValueCollection());
+        $payload = $this->addMetricsToPayload($payload, $allMetrics);
 
-        return $this->addMetricsToPayload($payload, $allMetrics);
+        $this->payloadValidator->validate($payload);
+
+        return $payload;
     }
 
     /**

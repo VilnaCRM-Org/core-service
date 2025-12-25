@@ -13,8 +13,9 @@ use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\Provider\SystemEmfTimestampProvider;
-use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
-use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidator;
+use App\Shared\Infrastructure\Observability\Validator\EmfPayloadValidator;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestInvalidUtf8Metric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
@@ -194,10 +195,11 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 
         $timestampProvider = new SystemEmfTimestampProvider();
         $validator = Validation::createValidator();
-        $namespaceValidator = new EmfNamespaceValidatorService($validator);
+        $namespaceValidator = new EmfNamespaceValidator($validator);
         $metadataFactory = new EmfAwsMetadataFactory(self::NAMESPACE, $timestampProvider, $namespaceValidator);
-        $dimensionValidator = new EmfDimensionValueValidatorService($validator);
-        $payloadFactory = new EmfPayloadFactory($metadataFactory, $dimensionValidator);
+        $dimensionValidator = new EmfDimensionValueValidator($validator);
+        $payloadValidator = new EmfPayloadValidator();
+        $payloadFactory = new EmfPayloadFactory($metadataFactory, $dimensionValidator, $payloadValidator);
 
         $emitter = new AwsEmfBusinessMetricsEmitter($logger, $formatter, $payloadFactory);
 
@@ -235,10 +237,11 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
     ): AwsEmfBusinessMetricsEmitter {
         $timestampProvider = new SystemEmfTimestampProvider();
         $validator = Validation::createValidator();
-        $namespaceValidator = new EmfNamespaceValidatorService($validator);
+        $namespaceValidator = new EmfNamespaceValidator($validator);
         $metadataFactory = new EmfAwsMetadataFactory($namespace, $timestampProvider, $namespaceValidator);
-        $dimensionValidator = new EmfDimensionValueValidatorService($validator);
-        $payloadFactory = new EmfPayloadFactory($metadataFactory, $dimensionValidator);
+        $dimensionValidator = new EmfDimensionValueValidator($validator);
+        $payloadValidator = new EmfPayloadValidator();
+        $payloadFactory = new EmfPayloadFactory($metadataFactory, $dimensionValidator, $payloadValidator);
         $formatterLogger = $this->createMock(LoggerInterface::class);
 
         return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter($formatterLogger), $payloadFactory);

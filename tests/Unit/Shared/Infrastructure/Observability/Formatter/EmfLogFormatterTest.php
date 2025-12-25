@@ -9,8 +9,8 @@ use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollecti
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
 use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
-use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfAwsMetadata;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfCloudWatchMetricConfig;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
@@ -34,7 +34,7 @@ final class EmfLogFormatterTest extends UnitTestCase
 
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->formatter = new EmfLogFormatter($this->logger);
-        $this->dimensionValidator = new EmfDimensionValueValidatorService(Validation::createValidator());
+        $this->dimensionValidator = new EmfDimensionValueValidator(Validation::createValidator());
     }
 
     public function testFormatsPayloadAsJson(): void

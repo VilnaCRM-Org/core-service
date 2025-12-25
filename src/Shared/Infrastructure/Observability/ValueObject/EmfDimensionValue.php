@@ -12,7 +12,7 @@ namespace App\Shared\Infrastructure\Observability\ValueObject;
  * - Values: 1-1024 chars, ASCII only, at least one non-whitespace
  * - No ASCII control characters allowed in either
  *
- * Validation is performed by EmfDimensionValueValidatorService using compound constraints.
+ * Validation is performed by EmfDimensionValueValidator using compound constraints.
  */
 final readonly class EmfDimensionValue
 {
