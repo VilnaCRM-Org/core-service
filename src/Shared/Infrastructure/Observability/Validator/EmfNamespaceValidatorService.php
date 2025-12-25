@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Validator;
 
+use App\Shared\Application\Validator\EmfNamespace;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfNamespaceException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * Validates EMF namespace values using Symfony Validator.
+ * Validates EMF namespace values using Symfony Validator with compound constraints.
  *
  * Following SOLID:
  * - Single Responsibility: Only validates EmfNamespaceValue and translates violations
  * - Dependency Inversion: Depends on ValidatorInterface abstraction
- * - Open/Closed: Validation rules in YAML, can extend without modification
+ * - Self-contained: Uses compound constraint directly, no external YAML config needed
  */
 final readonly class EmfNamespaceValidatorService implements EmfNamespaceValidatorInterface
 {
@@ -25,12 +26,10 @@ final readonly class EmfNamespaceValidatorService implements EmfNamespaceValidat
 
     public function validate(EmfNamespaceValue $namespace): void
     {
-        $violations = $this->validator->validate($namespace);
+        $violations = $this->validator->validate($namespace->value(), new EmfNamespace());
 
-        if ($violations->count() === 0) {
-            return;
+        if ($violations->count() > 0) {
+            throw new InvalidEmfNamespaceException($violations->get(0)->getMessage());
         }
-
-        throw new InvalidEmfNamespaceException($violations->get(0)->getMessage());
     }
 }

@@ -28,10 +28,7 @@ final class EmfDimensionValueValidatorServiceTest extends UnitTestCase
     {
         parent::setUp();
 
-        $this->validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->getValidator();
-
+        $this->validator = Validation::createValidator();
         $this->service = new EmfDimensionValueValidatorService($this->validator);
     }
 

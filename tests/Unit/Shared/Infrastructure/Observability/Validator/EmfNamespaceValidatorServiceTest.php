@@ -9,7 +9,6 @@ use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorServi
 use App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Tests EmfNamespaceValidatorService implementation
@@ -26,11 +25,7 @@ final class EmfNamespaceValidatorServiceTest extends UnitTestCase
     {
         parent::setUp();
 
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
-            ->getValidator();
-
-        $this->service = new EmfNamespaceValidatorService($validator);
+        $this->service = new EmfNamespaceValidatorService(Validation::createValidator());
     }
 
     public function testValidatesValidNamespaceWithoutException(): void

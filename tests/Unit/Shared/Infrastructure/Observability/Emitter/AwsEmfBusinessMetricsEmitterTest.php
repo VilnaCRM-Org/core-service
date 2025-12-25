@@ -192,10 +192,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger->expects(self::never())->method('error');
 
         $timestampProvider = new SystemEmfTimestampProvider();
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
-            ->getValidator();
+        $validator = Validation::createValidator();
         $namespaceValidator = new EmfNamespaceValidatorService($validator);
         $dimensionValidator = new EmfDimensionValueValidatorService($validator);
         $payloadFactory = new EmfPayloadFactory(self::NAMESPACE, $timestampProvider, $namespaceValidator, $dimensionValidator);
@@ -235,10 +232,7 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         string $namespace
     ): AwsEmfBusinessMetricsEmitter {
         $timestampProvider = new SystemEmfTimestampProvider();
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
-            ->getValidator();
+        $validator = Validation::createValidator();
         $namespaceValidator = new EmfNamespaceValidatorService($validator);
         $dimensionValidator = new EmfDimensionValueValidatorService($validator);
         $payloadFactory = new EmfPayloadFactory($namespace, $timestampProvider, $namespaceValidator, $dimensionValidator);

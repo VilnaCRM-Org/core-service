@@ -20,11 +20,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
     {
         parent::setUp();
 
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->getValidator();
-
-        $this->dimensionValidator = new EmfDimensionValueValidatorService($validator);
+        $this->dimensionValidator = new EmfDimensionValueValidatorService(Validation::createValidator());
     }
 
     public function testCreatesCollectionWithDimensions(): void

@@ -7,12 +7,12 @@ namespace App\Shared\Infrastructure\Observability\ValueObject;
 /**
  * Represents a single dimension key-value pair in EMF format
  *
- * AWS CloudWatch EMF constraints (validated via Symfony Validator in YAML config):
+ * AWS CloudWatch EMF constraints:
  * - Keys: 1-255 chars, ASCII only, at least one non-whitespace, cannot start with ':'
  * - Values: 1-1024 chars, ASCII only, at least one non-whitespace
  * - No ASCII control characters allowed in either
  *
- * Validation is performed by the factory using Symfony's ValidatorInterface.
+ * Validation is performed by EmfDimensionValueValidatorService using compound constraints.
  */
 final readonly class EmfDimensionValue
 {

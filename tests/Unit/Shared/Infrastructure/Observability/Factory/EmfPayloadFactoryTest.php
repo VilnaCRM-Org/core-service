@@ -149,10 +149,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
 
     private function createFactoryWithNamespace(string $namespace): EmfPayloadFactory
     {
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
-            ->getValidator();
+        $validator = Validation::createValidator();
 
         return new EmfPayloadFactory(
             $namespace,

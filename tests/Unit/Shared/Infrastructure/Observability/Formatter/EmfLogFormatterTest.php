@@ -34,12 +34,7 @@ final class EmfLogFormatterTest extends UnitTestCase
 
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->formatter = new EmfLogFormatter($this->logger);
-
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->getValidator();
-
-        $this->dimensionValidator = new EmfDimensionValueValidatorService($validator);
+        $this->dimensionValidator = new EmfDimensionValueValidatorService(Validation::createValidator());
     }
 
     public function testFormatsPayloadAsJson(): void
@@ -117,7 +112,8 @@ final class EmfLogFormatterTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator,
+        $dimensionValues = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );

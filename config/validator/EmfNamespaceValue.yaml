@@ -1,4 +1,0 @@
-App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue:
-  properties:
-    value:
-      - App\Shared\Application\Validator\EmfNamespace: ~

@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Observability\Validator;
 
+use App\Shared\Application\Validator\EmfKey;
+use App\Shared\Application\Validator\EmfValue;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionKeyException;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionValueException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * Validates EMF dimension values using Symfony Validator.
+ * Validates EMF dimension values using Symfony Validator with compound constraints.
  *
  * Following SOLID:
  * - Single Responsibility: Only validates EmfDimensionValue and translates violations
  * - Dependency Inversion: Depends on ValidatorInterface abstraction
- * - Open/Closed: Validation rules in YAML, can extend without modification
+ * - Self-contained: Uses compound constraints directly, no external YAML config needed
  */
 final readonly class EmfDimensionValueValidatorService implements EmfDimensionValueValidatorInterface
 {
-    private const string PROPERTY_KEY = 'key';
-
     public function __construct(
         private ValidatorInterface $validator
     ) {
@@ -28,20 +28,25 @@ final readonly class EmfDimensionValueValidatorService implements EmfDimensionVa
 
     public function validate(EmfDimensionValue $dimensionValue): void
     {
-        $violations = $this->validator->validate($dimensionValue);
+        $this->validateKey($dimensionValue->key());
+        $this->validateValue($dimensionValue->value());
+    }
 
-        if ($violations->count() === 0) {
-            return;
+    private function validateKey(string $key): void
+    {
+        $violations = $this->validator->validate($key, new EmfKey());
+
+        if ($violations->count() > 0) {
+            throw new InvalidEmfDimensionKeyException($violations->get(0)->getMessage());
         }
+    }
 
-        $firstViolation = $violations->get(0);
-        $propertyPath = $firstViolation->getPropertyPath();
-        $message = $firstViolation->getMessage();
+    private function validateValue(string $value): void
+    {
+        $violations = $this->validator->validate($value, new EmfValue());
 
-        if ($propertyPath === self::PROPERTY_KEY) {
-            throw new InvalidEmfDimensionKeyException($message);
+        if ($violations->count() > 0) {
+            throw new InvalidEmfDimensionValueException($violations->get(0)->getMessage());
         }
-
-        throw new InvalidEmfDimensionValueException($message);
     }
 }

@@ -28,11 +28,7 @@ final class EmfPayloadTest extends UnitTestCase
     {
         parent::setUp();
 
-        $validator = Validation::createValidatorBuilder()
-            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
-            ->getValidator();
-
-        $this->dimensionValidator = new EmfDimensionValueValidatorService($validator);
+        $this->dimensionValidator = new EmfDimensionValueValidatorService(Validation::createValidator());
     }
 
     public function testSerializesToCompleteEmfStructure(): void
@@ -134,7 +130,8 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
+        $dimensionValues = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer')
         );
 
@@ -159,7 +156,8 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
+        $dimensionValues = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('_aws', 'invalid')
         );
 
@@ -184,7 +182,8 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
+        $dimensionValues = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer')
         );
 
@@ -206,7 +205,8 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
+        $dimensionValues = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );

@@ -7,12 +7,12 @@ namespace App\Shared\Infrastructure\Observability\ValueObject;
 /**
  * Represents an AWS CloudWatch EMF namespace
  *
- * AWS CloudWatch namespace constraints (validated via Symfony Validator in YAML config):
+ * AWS CloudWatch namespace constraints:
  * - 1-256 characters
  * - Only ASCII alphanumeric and these characters: . - _ / # :
  * - Must contain at least one non-whitespace character
  *
- * Validation is performed by EmfNamespaceValidatorService using Symfony's ValidatorInterface.
+ * Validation is performed by EmfNamespaceValidatorService using compound constraints.
  */
 final readonly class EmfNamespaceValue
 {
