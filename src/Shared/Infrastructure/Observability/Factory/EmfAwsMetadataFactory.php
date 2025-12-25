@@ -22,16 +22,12 @@ use App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue;
  */
 final readonly class EmfAwsMetadataFactory implements EmfAwsMetadataFactoryInterface
 {
-    private string $namespace;
-
     public function __construct(
-        string $namespace,
+        private string $namespace,
         private EmfTimestampProvider $timestampProvider,
         EmfNamespaceValidatorInterface $namespaceValidator
     ) {
-        $namespaceValue = new EmfNamespaceValue($namespace);
-        $namespaceValidator->validate($namespaceValue);
-        $this->namespace = $namespace;
+        $namespaceValidator->validate(new EmfNamespaceValue($namespace));
     }
 
     public function createWithMetric(
