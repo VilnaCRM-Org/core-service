@@ -102,9 +102,6 @@ services:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
-  App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactoryInterface:
-    alias: App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory
-
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
