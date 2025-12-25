@@ -9,6 +9,8 @@ use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollecti
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
 use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfAwsMetadata;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfCloudWatchMetricConfig;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
@@ -16,9 +18,23 @@ use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricDefinition;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfPayload;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Validator\Validation;
 
 final class EmfPayloadTest extends UnitTestCase
 {
+    private EmfDimensionValueValidatorInterface $dimensionValidator;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->getValidator();
+
+        $this->dimensionValidator = new EmfDimensionValueValidatorService($validator);
+    }
+
     public function testSerializesToCompleteEmfStructure(): void
     {
         $payload = $this->createPayload();
@@ -118,7 +134,7 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection(
+        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
             new EmfDimensionValue('Endpoint', 'Customer')
         );
 
@@ -143,7 +159,7 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection(
+        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
             new EmfDimensionValue('_aws', 'invalid')
         );
 
@@ -168,7 +184,7 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection(
+        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
             new EmfDimensionValue('Endpoint', 'Customer')
         );
 
@@ -190,7 +206,7 @@ final class EmfPayloadTest extends UnitTestCase
         );
         $awsMetadata = new EmfAwsMetadata(1702425600000, $cloudWatchConfig);
 
-        $dimensionValues = new EmfDimensionValueCollection(
+        $dimensionValues = new EmfDimensionValueCollection($this->dimensionValidator, 
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability\Collection;
 
 use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use ArrayIterator;
 use Countable;
@@ -14,6 +15,11 @@ use Traversable;
 /**
  * Collection of EMF dimension values
  *
+ * Following SOLID:
+ * - Single Responsibility: Collection manages its own invariants (uniqueness)
+ * - Dependency Inversion: Depends on EmfDimensionValueValidatorInterface abstraction
+ * - Open/Closed: Validation logic can be extended without modifying collection
+ *
  * @implements IteratorAggregate<int, EmfDimensionValue>
  */
 final readonly class EmfDimensionValueCollection implements IteratorAggregate, Countable
@@ -21,9 +27,12 @@ final readonly class EmfDimensionValueCollection implements IteratorAggregate, C
     /** @var array<int, EmfDimensionValue> */
     private array $dimensions;
 
-    public function __construct(EmfDimensionValue ...$dimensions)
-    {
+    public function __construct(
+        private EmfDimensionValueValidatorInterface $validator,
+        EmfDimensionValue ...$dimensions
+    ) {
         $this->assertUniqueKeys(...$dimensions);
+        $this->assertAllValid(...$dimensions);
 
         $this->dimensions = $dimensions;
     }
@@ -87,6 +96,13 @@ final readonly class EmfDimensionValueCollection implements IteratorAggregate, C
 
         if ($duplicates !== []) {
             throw EmfKeyCollisionException::duplicateDimensionKeys($duplicates);
+        }
+    }
+
+    private function assertAllValid(EmfDimensionValue ...$dimensions): void
+    {
+        foreach ($dimensions as $dimension) {
+            $this->validator->validate($dimension);
         }
     }
 }

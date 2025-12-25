@@ -6,14 +6,31 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Collection;
 
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Exception\EmfKeyCollisionException;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Validator\Validation;
 
 final class EmfDimensionValueCollectionTest extends UnitTestCase
 {
+    private EmfDimensionValueValidatorInterface $dimensionValidator;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->getValidator();
+
+        $this->dimensionValidator = new EmfDimensionValueValidatorService($validator);
+    }
+
     public function testCreatesCollectionWithDimensions(): void
     {
         $collection = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );
@@ -24,6 +41,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
     public function testConvertsToAssociativeArray(): void
     {
         $collection = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );
@@ -36,6 +54,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
     public function testExtractsDimensionKeys(): void
     {
         $collection = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );
@@ -48,6 +67,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
     public function testIsIterable(): void
     {
         $collection = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer')
         );
 
@@ -63,6 +83,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
     public function testAllReturnsAllDimensions(): void
     {
         $collection = new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Operation', 'create')
         );
@@ -80,6 +101,7 @@ final class EmfDimensionValueCollectionTest extends UnitTestCase
         $this->expectExceptionMessage('Duplicate dimension keys detected');
 
         new EmfDimensionValueCollection(
+            $this->dimensionValidator,
             new EmfDimensionValue('Endpoint', 'Customer'),
             new EmfDimensionValue('Endpoint', 'Order')
         );

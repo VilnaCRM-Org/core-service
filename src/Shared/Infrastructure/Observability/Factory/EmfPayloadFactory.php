@@ -11,23 +11,37 @@ use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollecti
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricDefinitionCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
 use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorInterface;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorInterface;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfAwsMetadata;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfCloudWatchMetricConfig;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricDefinition;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfMetricValue;
+use App\Shared\Infrastructure\Observability\ValueObject\EmfNamespaceValue;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfPayload;
 use InvalidArgumentException;
 
 /**
  * Factory for creating EMF payload objects from business metrics
+ *
+ * Follows SOLID principles:
+ * - Single Responsibility: Factory only creates objects, validation delegated to services
+ * - Dependency Inversion: Depends on abstractions (EmfNamespaceValidatorInterface, EmfDimensionValueValidatorInterface)
+ * - Defensive Programming: Validates namespace at construction time (fail fast)
  */
 final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
 {
+    private EmfNamespaceValue $namespace;
+
     public function __construct(
-        private string $namespace,
-        private EmfTimestampProvider $timestampProvider
+        string $namespace,
+        private EmfTimestampProvider $timestampProvider,
+        private EmfNamespaceValidatorInterface $namespaceValidator,
+        private EmfDimensionValueValidatorInterface $dimensionValidator
     ) {
+        $this->namespace = new EmfNamespaceValue($namespace);
+        $this->namespaceValidator->validate($this->namespace);
     }
 
     public function createFromMetric(BusinessMetric $metric): EmfPayload
@@ -61,7 +75,7 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
     private function createEmptyPayload(EmfDimensionValueCollection $dimensions): EmfPayload
     {
         $cloudWatchConfig = new EmfCloudWatchMetricConfig(
-            $this->namespace,
+            $this->namespace->value(),
             $dimensions->keys(),
             new EmfMetricDefinitionCollection()
         );
@@ -101,7 +115,7 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
         EmfMetricDefinition $definition
     ): EmfAwsMetadata {
         $cloudWatchConfig = new EmfCloudWatchMetricConfig(
-            $this->namespace,
+            $this->namespace->value(),
             $dimensions->keys(),
             new EmfMetricDefinitionCollection($definition)
         );
@@ -117,6 +131,6 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
             $dimensionValues[] = new EmfDimensionValue($dimension->key(), $dimension->value());
         }
 
-        return new EmfDimensionValueCollection(...$dimensionValues);
+        return new EmfDimensionValueCollection($this->dimensionValidator, ...$dimensionValues);
     }
 }

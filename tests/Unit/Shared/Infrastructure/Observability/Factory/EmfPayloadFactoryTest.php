@@ -6,12 +6,16 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
+use App\Shared\Infrastructure\Observability\Exception\InvalidEmfNamespaceException;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorService;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Validator\Validation;
 
 final class EmfPayloadFactoryTest extends UnitTestCase
 {
@@ -63,7 +67,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testUsesProvidedNamespace(): void
     {
         $customNamespace = 'CustomApp/BusinessMetrics';
-        $factory = new EmfPayloadFactory($customNamespace, $this->createTimestampProvider());
+        $factory = $this->createFactoryWithNamespace($customNamespace);
         $metric = new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Test', 'test');
 
         $payload = $factory->createFromMetric($metric);
@@ -100,9 +104,62 @@ final class EmfPayloadFactoryTest extends UnitTestCase
         $factory->createFromCollection($emptyCollection);
     }
 
+    public function testThrowsExceptionForInvalidNamespaceWithSpecialCharacters(): void
+    {
+        $this->expectException(InvalidEmfNamespaceException::class);
+        $this->expectExceptionMessage('alphanumeric characters');
+
+        $this->createFactoryWithNamespace('MyApp@Metrics');
+    }
+
+    public function testThrowsExceptionForEmptyNamespace(): void
+    {
+        $this->expectException(InvalidEmfNamespaceException::class);
+        $this->expectExceptionMessage('non-whitespace character');
+
+        $this->createFactoryWithNamespace('');
+    }
+
+    public function testThrowsExceptionForNamespaceTooLong(): void
+    {
+        $this->expectException(InvalidEmfNamespaceException::class);
+        $this->expectExceptionMessage('must not exceed 256 characters');
+
+        $this->createFactoryWithNamespace(str_repeat('a', 257));
+    }
+
+    public function testAcceptsValidNamespaceWithSlashes(): void
+    {
+        $factory = $this->createFactoryWithNamespace('MyApp/BusinessMetrics');
+
+        self::assertInstanceOf(EmfPayloadFactory::class, $factory);
+    }
+
+    public function testAcceptsValidNamespaceWithAllAllowedCharacters(): void
+    {
+        $factory = $this->createFactoryWithNamespace('ABC-123.abc_xyz/test#v1:prod');
+
+        self::assertInstanceOf(EmfPayloadFactory::class, $factory);
+    }
+
     private function createFactory(): EmfPayloadFactory
     {
-        return new EmfPayloadFactory(self::NAMESPACE, $this->createTimestampProvider());
+        return $this->createFactoryWithNamespace(self::NAMESPACE);
+    }
+
+    private function createFactoryWithNamespace(string $namespace): EmfPayloadFactory
+    {
+        $validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
+            ->getValidator();
+
+        return new EmfPayloadFactory(
+            $namespace,
+            $this->createTimestampProvider(),
+            new EmfNamespaceValidatorService($validator),
+            new EmfDimensionValueValidatorService($validator)
+        );
     }
 
     private function createTimestampProvider(): EmfTimestampProvider

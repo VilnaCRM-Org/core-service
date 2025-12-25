@@ -8,9 +8,28 @@ use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionKeyExce
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfDimensionValueException;
 use App\Shared\Infrastructure\Observability\ValueObject\EmfDimensionValue;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * Tests EmfDimensionValue validation through Symfony Validator
+ *
+ * Validation is performed by factories using injected ValidatorInterface,
+ * following SOLID principles (Dependency Inversion).
+ */
 final class EmfDimensionValueTest extends UnitTestCase
 {
+    private ValidatorInterface $validator;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->getValidator();
+    }
+
     public function testCreatesWithKeyAndValue(): void
     {
         $dimension = new EmfDimensionValue('Endpoint', 'Customer');
@@ -19,92 +38,105 @@ final class EmfDimensionValueTest extends UnitTestCase
         self::assertSame('Customer', $dimension->value());
     }
 
-    public function testThrowsExceptionForEmptyKey(): void
+    public function testValidatesEmptyKey(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('non-whitespace character');
+        $dimension = new EmfDimensionValue('', 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('', 'value');
+        self::assertCount(1, $violations);
+        self::assertStringContainsString('non-whitespace character', $violations->get(0)->getMessage());
+        self::assertSame('key', $violations->get(0)->getPropertyPath());
     }
 
-    public function testThrowsExceptionForWhitespaceOnlyKey(): void
+    public function testValidatesWhitespaceOnlyKey(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('non-whitespace character');
+        $dimension = new EmfDimensionValue('   ', 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('   ', 'value');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('non-whitespace character', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForKeyExceeding255Characters(): void
+    public function testValidatesKeyExceeding255Characters(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('must not exceed 255 characters');
+        $dimension = new EmfDimensionValue(str_repeat('a', 256), 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue(str_repeat('a', 256), 'value');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('must not exceed 255 characters', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForNonAsciiKey(): void
+    public function testValidatesNonAsciiKey(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('ASCII characters');
+        $dimension = new EmfDimensionValue('Ключ', 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Ключ', 'value');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('ASCII characters', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForKeyWithControlCharacters(): void
+    public function testValidatesKeyWithControlCharacters(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('control characters');
+        $dimension = new EmfDimensionValue("Key\x00", 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue("Key\x00", 'value');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('control characters', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForKeyStartingWithColon(): void
+    public function testValidatesKeyStartingWithColon(): void
     {
-        $this->expectException(InvalidEmfDimensionKeyException::class);
-        $this->expectExceptionMessage('start with colon');
+        $dimension = new EmfDimensionValue(':InvalidKey', 'value');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue(':InvalidKey', 'value');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('start with colon', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForEmptyValue(): void
+    public function testValidatesEmptyValue(): void
     {
-        $this->expectException(InvalidEmfDimensionValueException::class);
-        $this->expectExceptionMessage('non-whitespace character');
+        $dimension = new EmfDimensionValue('Key', '');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Key', '');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('non-whitespace character', $violations->get(0)->getMessage());
+        self::assertSame('value', $violations->get(0)->getPropertyPath());
     }
 
-    public function testThrowsExceptionForWhitespaceOnlyValue(): void
+    public function testValidatesWhitespaceOnlyValue(): void
     {
-        $this->expectException(InvalidEmfDimensionValueException::class);
-        $this->expectExceptionMessage('non-whitespace character');
+        $dimension = new EmfDimensionValue('Key', '   ');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Key', '   ');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('non-whitespace character', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForValueExceeding1024Characters(): void
+    public function testValidatesValueExceeding1024Characters(): void
     {
-        $this->expectException(InvalidEmfDimensionValueException::class);
-        $this->expectExceptionMessage('must not exceed 1024 characters');
+        $dimension = new EmfDimensionValue('Key', str_repeat('a', 1025));
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Key', str_repeat('a', 1025));
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('must not exceed 1024 characters', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForNonAsciiValue(): void
+    public function testValidatesNonAsciiValue(): void
     {
-        $this->expectException(InvalidEmfDimensionValueException::class);
-        $this->expectExceptionMessage('ASCII characters');
+        $dimension = new EmfDimensionValue('Key', 'Значение');
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Key', 'Значение');
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('ASCII characters', $violations->get(0)->getMessage());
     }
 
-    public function testThrowsExceptionForValueWithControlCharacters(): void
+    public function testValidatesValueWithControlCharacters(): void
     {
-        $this->expectException(InvalidEmfDimensionValueException::class);
-        $this->expectExceptionMessage('control characters');
+        $dimension = new EmfDimensionValue('Key', "Value\x1F");
+        $violations = $this->validator->validate($dimension);
 
-        new EmfDimensionValue('Key', "Value\x1F");
+        self::assertGreaterThan(0, $violations->count());
+        self::assertStringContainsString('control characters', $violations->get(0)->getMessage());
     }
 
     public function testAcceptsMaxLengthKey(): void
@@ -112,6 +144,8 @@ final class EmfDimensionValueTest extends UnitTestCase
         $key = str_repeat('a', 255);
         $dimension = new EmfDimensionValue($key, 'value');
 
+        $violations = $this->validator->validate($dimension);
+        self::assertCount(0, $violations);
         self::assertSame($key, $dimension->key());
     }
 
@@ -120,6 +154,8 @@ final class EmfDimensionValueTest extends UnitTestCase
         $value = str_repeat('a', 1024);
         $dimension = new EmfDimensionValue('Key', $value);
 
+        $violations = $this->validator->validate($dimension);
+        self::assertCount(0, $violations);
         self::assertSame($value, $dimension->value());
     }
 
@@ -127,6 +163,8 @@ final class EmfDimensionValueTest extends UnitTestCase
     {
         $dimension = new EmfDimensionValue('Key:Name', 'value');
 
+        $violations = $this->validator->validate($dimension);
+        self::assertCount(0, $violations);
         self::assertSame('Key:Name', $dimension->key());
     }
 }

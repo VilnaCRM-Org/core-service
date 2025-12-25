@@ -12,12 +12,15 @@ use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactoryInterface;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Formatter\EmfLogFormatter;
 use App\Shared\Infrastructure\Observability\Provider\SystemEmfTimestampProvider;
+use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidatorService;
+use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidatorService;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestCustomerMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestInvalidUtf8Metric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrdersPlacedMetric;
 use App\Tests\Unit\Shared\Application\Observability\Metric\TestOrderValueMetric;
 use App\Tests\Unit\UnitTestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Validator\Validation;
 
 final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 {
@@ -189,7 +192,13 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         $logger->expects(self::never())->method('error');
 
         $timestampProvider = new SystemEmfTimestampProvider();
-        $payloadFactory = new EmfPayloadFactory(self::NAMESPACE, $timestampProvider);
+        $validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
+            ->getValidator();
+        $namespaceValidator = new EmfNamespaceValidatorService($validator);
+        $dimensionValidator = new EmfDimensionValueValidatorService($validator);
+        $payloadFactory = new EmfPayloadFactory(self::NAMESPACE, $timestampProvider, $namespaceValidator, $dimensionValidator);
 
         $emitter = new AwsEmfBusinessMetricsEmitter($logger, $formatter, $payloadFactory);
 
@@ -226,7 +235,13 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
         string $namespace
     ): AwsEmfBusinessMetricsEmitter {
         $timestampProvider = new SystemEmfTimestampProvider();
-        $payloadFactory = new EmfPayloadFactory($namespace, $timestampProvider);
+        $validator = Validation::createValidatorBuilder()
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfDimensionValue.yaml')
+            ->addYamlMapping(__DIR__ . '/../../../../../../config/validator/EmfNamespaceValue.yaml')
+            ->getValidator();
+        $namespaceValidator = new EmfNamespaceValidatorService($validator);
+        $dimensionValidator = new EmfDimensionValueValidatorService($validator);
+        $payloadFactory = new EmfPayloadFactory($namespace, $timestampProvider, $namespaceValidator, $dimensionValidator);
         $formatterLogger = $this->createMock(LoggerInterface::class);
 
         return new AwsEmfBusinessMetricsEmitter($logger, new EmfLogFormatter($formatterLogger), $payloadFactory);
