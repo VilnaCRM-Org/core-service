@@ -15,6 +15,11 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  *
  * Invalidates cache when a customer is updated
  * Handles email change edge case (both old and new email caches)
+ *
+ * ARCHITECTURAL DECISION: NOT wrapped with ResilientDomainEventSubscriberDecorator
+ * Cache invalidation is critical for data consistency. If invalidation fails,
+ * the request MUST fail to prevent serving stale data. Unlike metrics (observability),
+ * cache failures directly impact correctness and user experience.
  */
 final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     DomainEventSubscriberInterface
@@ -28,14 +33,9 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $tagsToInvalidate = $this->buildTagsToInvalidate($event);
-            $this->cache->invalidateTags($tagsToInvalidate);
-            $this->logSuccess($event);
-        } catch (\Throwable $e) {
-            $this->logError($event, $e);
-        }
+        $tagsToInvalidate = $this->buildTagsToInvalidate($event);
+        $this->cache->invalidateTags($tagsToInvalidate);
+        $this->logSuccess($event);
     }
 
     /**
@@ -74,16 +74,6 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
             'event_id' => $event->eventId(),
             'operation' => 'cache.invalidation',
             'reason' => 'customer_updated',
-        ]);
-    }
-
-    private function logError(CustomerUpdatedEvent $event, \Throwable $e): void
-    {
-        $this->logger->error('Cache invalidation failed after customer update', [
-            'customer_id' => $event->customerId(),
-            'event_id' => $event->eventId(),
-            'error' => $e->getMessage(),
-            'operation' => 'cache.invalidation.error',
         ]);
     }
 }

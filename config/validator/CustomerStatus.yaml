@@ -17,3 +17,17 @@ App\Core\Customer\Application\DTO\StatusPut:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
+
+App\Core\Customer\Application\MutationInput\CreateStatusMutationInput:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Core\Customer\Application\MutationInput\UpdateStatusMutationInput:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255

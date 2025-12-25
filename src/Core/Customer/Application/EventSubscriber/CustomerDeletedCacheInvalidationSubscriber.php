@@ -14,6 +14,11 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  * Customer Deleted Event Cache Invalidation Subscriber
  *
  * Invalidates cache when a customer is deleted
+ *
+ * ARCHITECTURAL DECISION: NOT wrapped with ResilientDomainEventSubscriberDecorator
+ * Cache invalidation is critical for data consistency. If invalidation fails,
+ * the request MUST fail to prevent serving stale data. Unlike metrics (observability),
+ * cache failures directly impact correctness and user experience.
  */
 final readonly class CustomerDeletedCacheInvalidationSubscriber implements
     DomainEventSubscriberInterface
@@ -27,29 +32,18 @@ final readonly class CustomerDeletedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerDeletedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $this->cache->invalidateTags([
-                'customer.' . $event->customerId(),
-                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
-                'customer.collection',
-            ]);
+        $this->cache->invalidateTags([
+            'customer.' . $event->customerId(),
+            'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+            'customer.collection',
+        ]);
 
-            $this->logger->info('Cache invalidated after customer deletion', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'operation' => 'cache.invalidation',
-                'reason' => 'customer_deleted',
-            ]);
-        } catch (\Throwable $e) {
-            // Log cache error but allow the business operation to succeed
-            $this->logger->error('Cache invalidation failed after customer deletion', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-                'operation' => 'cache.invalidation.error',
-            ]);
-        }
+        $this->logger->info('Cache invalidated after customer deletion', [
+            'customer_id' => $event->customerId(),
+            'event_id' => $event->eventId(),
+            'operation' => 'cache.invalidation',
+            'reason' => 'customer_deleted',
+        ]);
     }
 
     /**

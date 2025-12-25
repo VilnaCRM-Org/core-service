@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,7 +18,7 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
     private TagAwareCacheInterface&MockObject $cache;
     private CacheKeyBuilder&MockObject $cacheKeyBuilder;
     private LoggerInterface&MockObject $logger;
-    private CustomerUpdatedCacheInvalidationSubscriber $subscriber;
+    private DomainEventSubscriberInterface $subscriber;
 
     protected function setUp(): void
     {
@@ -164,20 +165,9 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->expects($this->never())
             ->method('info');
 
-        $this->logger
-            ->expects($this->once())
-            ->method('error')
-            ->with(
-                'Cache invalidation failed after customer update',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['error'] === 'Redis connection failed'
-                        && $context['operation'] === 'cache.invalidation.error'
-                        && isset($context['event_id']);
-                })
-            );
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Redis connection failed');
 
-        // Should not throw exception
         ($this->subscriber)($event);
     }
 }

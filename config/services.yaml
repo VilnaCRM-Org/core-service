@@ -95,6 +95,21 @@ services:
     resource: '../src/'
     exclude:
       - '../src/Shared/Kernel.php'
+      - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
+      - '../src/Shared/Infrastructure/Decorator/ResilientDomainEventSubscriberDecorator.php'
+
+  App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory:
+    arguments:
+      $namespace: '%env(AWS_EMF_NAMESPACE)%'
+
+  App\Shared\Application\Validator\MutationInputValidatorInterface:
+    alias: App\Shared\Application\Validator\MutationInputValidator
+
+  App\Shared\Application\Validator\LoggingMutationInputValidator:
+    decorates: App\Shared\Application\Validator\MutationInputValidator
+    arguments:
+      $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
+      $logger: '@logger'
 
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
@@ -137,12 +152,38 @@ services:
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
 
+  # Command bus MUST propagate exceptions (business logic)
+  App\Shared\Infrastructure\Bus\MessageBusFactory: ~
+
+  # Event bus without middleware - resilience handled via decorators for non-critical subscribers
+  app.event_message_bus_factory:
+    class: App\Shared\Infrastructure\Bus\MessageBusFactory
+    arguments:
+      $middlewares: []
+
+  # Resilient decorators for non-critical metrics subscribers
+  # Cache invalidation subscribers are NOT decorated - they must propagate errors for data consistency
+  # Symfony 7.1 auto-injects decorated service via $inner parameter (typed DomainEventSubscriberInterface)
+  app.customer_created_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
+
+  app.customer_updated_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscriber
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
+
+  app.customer_deleted_metrics_subscriber.resilient:
+    decorates: App\Core\Customer\Application\EventSubscriber\CustomerDeletedMetricsSubscriber
+    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
+
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
     arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.event_subscriber]
+    arguments:
+      $busFactory: '@app.event_message_bus_factory'
+      $subscribers: !tagged app.event_subscriber
     lazy: true
 
   Aws\Sqs\SqsClient:

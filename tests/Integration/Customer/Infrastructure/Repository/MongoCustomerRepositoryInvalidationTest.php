@@ -67,7 +67,7 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         // Event-driven cache invalidation
         $this->eventBus->publish(
             new CustomerUpdatedEvent(
-                customerId: $customerId,
+                customerId: (string) $customerId,
                 currentEmail: $customer->getEmail(),
                 previousEmail: null // Email didn't change
             )
@@ -96,7 +96,7 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         // Event-driven cache invalidation
         $this->eventBus->publish(
             new CustomerDeletedEvent(
-                customerId: $customerId,
+                customerId: (string) $customerId,
                 customerEmail: $customerEmail
             )
         );
@@ -123,7 +123,7 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         // This tests the edge case where both old and new email caches are invalidated
         $this->eventBus->publish(
             new CustomerUpdatedEvent(
-                customerId: $customer->getUlid(),
+                customerId: (string) $customer->getUlid(),
                 currentEmail: $newEmail,
                 previousEmail: $oldEmail // Email changed, so previousEmail is set
             )

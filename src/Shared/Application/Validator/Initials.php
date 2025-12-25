@@ -6,7 +6,6 @@ namespace App\Shared\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
 
-#[\Attribute]
 final class Initials extends Constraint
 {
     public function __construct(

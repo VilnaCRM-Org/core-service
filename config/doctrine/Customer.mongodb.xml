@@ -29,8 +29,56 @@
     />
 
         <indexes>
+            <!--
+                Indexing Strategy:
+                1. Email: unique single-field index for uniqueness constraint (not for pagination)
+                2. Search filters (initials, email, phone, leadSource): compound with ulid for cursor pagination
+                3. Date filters (createdAt, updatedAt): compound with ulid for date range + pagination
+                4. Boolean filter (confirmed): compound with ulid for filtering + pagination
+                5. Reference filters (type, status): compound with ulid - references stored as IDs via store-as="id"
+                   (API Platform filters use type.value/status.value to traverse to referenced document)
+            -->
             <index unique="true">
                 <key name="email" />
+            </index>
+
+            <!-- Search filters + cursor pagination (config/services.yaml: customer.mongodb.search) -->
+            <index>
+                <key name="initials" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="phone" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="leadSource" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <!-- Date filters + cursor pagination (config/services.yaml: customer.mongodb.date) -->
+            <index>
+                <key name="createdAt" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="updatedAt" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+
+            <!-- Boolean filter + cursor pagination (config/services.yaml: customer.mongodb.boolean) -->
+            <index>
+                <key name="confirmed" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+
+            <!-- Reference filters (store-as="id" stores ObjectId; type.value/status.value traverse to document) -->
+            <index>
+                <key name="status" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="type" order="asc" />
+                <key name="ulid" order="asc" />
             </index>
         </indexes>
     </document>
