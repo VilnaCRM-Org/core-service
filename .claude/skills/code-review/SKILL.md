@@ -638,9 +638,9 @@ final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInt
 {
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        // Error handling/logging is applied via Symfony service decoration using:
-        // App\Shared\Infrastructure\Bus\Event\ResilientDomainEventSubscriberDecorator
-        // (configured in config/services.yaml for non-critical subscribers like metrics).
+        // Error handling is automatic via DomainEventMessageHandler.
+        // Subscribers are executed in async workers - failures are logged + emit metrics.
+        // This ensures observability never breaks the main request (AP from CAP).
         $this->metricsEmitter->emit($this->metricFactory->create());
     }
 }

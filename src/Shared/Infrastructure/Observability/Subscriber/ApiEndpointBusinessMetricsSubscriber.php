@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\Observability\Subscriber;
 
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\EventDispatcher\ResilientEventSubscriber;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
@@ -24,8 +23,7 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
     public function __construct(
         LoggerInterface $logger,
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private ApiEndpointMetricDimensionsResolver $dimensionsResolver,
-        private MetricDimensionsFactoryInterface $dimensionsFactory
+        private ApiEndpointMetricDimensionsResolver $dimensionsResolver
     ) {
         parent::__construct($logger);
     }
@@ -74,7 +72,6 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
 
         $this->metricsEmitter->emit(
             new EndpointInvocationsMetric(
-                dimensionsFactory: $this->dimensionsFactory,
                 endpoint: $dimensions->endpoint(),
                 operation: $dimensions->operation()
             )

@@ -96,7 +96,6 @@ services:
     exclude:
       - '../src/Shared/Kernel.php'
       - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
-      - '../src/Shared/Infrastructure/Decorator/ResilientDomainEventSubscriberDecorator.php'
 
   App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory:
     arguments:
@@ -152,39 +151,44 @@ services:
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
 
-  # Command bus MUST propagate exceptions (business logic)
+  # ===========================================
+  # BUS CONFIGURATION (following user-service patterns)
+  # ===========================================
+
   App\Shared\Infrastructure\Bus\MessageBusFactory: ~
 
-  # Event bus without middleware - resilience handled via decorators for non-critical subscribers
-  app.event_message_bus_factory:
-    class: App\Shared\Infrastructure\Bus\MessageBusFactory
-    arguments:
-      $middlewares: []
-
-  # Resilient decorators for non-critical metrics subscribers
-  # Cache invalidation subscribers are NOT decorated - they must propagate errors for data consistency
-  # Symfony 7.1 auto-injects decorated service via $inner parameter (typed DomainEventSubscriberInterface)
-  app.customer_created_metrics_subscriber.resilient:
-    decorates: App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber
-    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
-
-  app.customer_updated_metrics_subscriber.resilient:
-    decorates: App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscriber
-    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
-
-  app.customer_deleted_metrics_subscriber.resilient:
-    decorates: App\Core\Customer\Application\EventSubscriber\CustomerDeletedMetricsSubscriber
-    class: App\Shared\Infrastructure\Decorator\ResilientDomainEventSubscriberDecorator
-
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
+    arguments:
+      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
+      - !tagged_iterator 'app.command_handler'
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
     arguments:
-      $busFactory: '@app.event_message_bus_factory'
-      $subscribers: !tagged app.event_subscriber
+      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
+      - !tagged_iterator 'app.event_subscriber'
     lazy: true
+
+  # ===========================================
+  # RESILIENT ASYNC EVENT BUS (AP from CAP)
+  # ===========================================
+  # For resilient async event processing via SQS:
+  # - Layer 1: ResilientAsyncEventDispatcher catches SQS failures
+  # - Layer 2: DomainEventMessageHandler catches subscriber failures
+  # All failures are logged + emit metrics (self-healing pipeline)
+
+  App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventDispatcher:
+    arguments:
+      $messageBus: '@messenger.bus.default'
+
+  App\Shared\Infrastructure\Bus\Event\Async\DomainEventMessageHandler:
+    arguments:
+      $subscribers: !tagged_iterator 'app.event_subscriber'
+
+  # Default: Use resilient async event bus (AP from CAP theorem)
+  # Switch to InMemorySymfonyEventBus for sync processing if needed
+  App\Shared\Domain\Bus\Event\EventBusInterface:
+    alias: App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventBus
 
   Aws\Sqs\SqsClient:
     arguments:

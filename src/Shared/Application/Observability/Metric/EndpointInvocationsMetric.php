@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric;
 
-use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 
 /**
- * Metric for tracking API endpoint invocations
+ * Metric for tracking API endpoint invocations.
+ *
+ * Uses pure Value Objects without service dependencies (DDD compliant).
  */
 final readonly class EndpointInvocationsMetric extends EndpointOperationBusinessMetric
 {
     public function __construct(
-        MetricDimensionsFactoryInterface $dimensionsFactory,
         private string $endpoint,
         private string $operation,
         float|int $value = 1
     ) {
-        parent::__construct($dimensionsFactory, $value, new MetricUnit(MetricUnit::COUNT));
+        parent::__construct($value, new MetricUnit(MetricUnit::COUNT));
     }
 
     public function name(): string

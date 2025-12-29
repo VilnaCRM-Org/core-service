@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric\ValueObject;
 
-use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\Collection\MetricDimensions;
 
+/**
+ * Pure Value Object for endpoint operation dimensions.
+ *
+ * Contains only data - no service dependencies (DDD compliant).
+ */
 final readonly class EndpointOperationMetricDimensions implements MetricDimensionsInterface
 {
     public function __construct(
         private string $endpoint,
-        private string $operation,
-        private MetricDimensionsFactoryInterface $dimensionsFactory
+        private string $operation
     ) {
     }
 
@@ -28,6 +31,9 @@ final readonly class EndpointOperationMetricDimensions implements MetricDimensio
 
     public function values(): MetricDimensions
     {
-        return $this->dimensionsFactory->endpointOperation($this->endpoint, $this->operation);
+        return new MetricDimensions(
+            new MetricDimension('Endpoint', $this->endpoint),
+            new MetricDimension('Operation', $this->operation)
+        );
     }
 }

@@ -4,27 +4,21 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\Observability\Metric;
 
-use App\Shared\Application\Observability\Factory\MetricDimensionsFactoryInterface;
 use App\Shared\Application\Observability\Metric\ValueObject\EndpointOperationMetricDimensions;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
-use App\Shared\Application\Observability\Metric\ValueObject\MetricUnit;
 
+/**
+ * Base class for business metrics with endpoint/operation dimensions.
+ *
+ * Creates pure Value Objects without service dependencies (DDD compliant).
+ */
 abstract readonly class EndpointOperationBusinessMetric extends BusinessMetric
 {
-    public function __construct(
-        private MetricDimensionsFactoryInterface $dimensionsFactory,
-        float|int $value,
-        MetricUnit $unit
-    ) {
-        parent::__construct($value, $unit);
-    }
-
     final public function dimensions(): MetricDimensionsInterface
     {
         return new EndpointOperationMetricDimensions(
             endpoint: $this->endpoint(),
-            operation: $this->operation(),
-            dimensionsFactory: $this->dimensionsFactory
+            operation: $this->operation()
         );
     }
 

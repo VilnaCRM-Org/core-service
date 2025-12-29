@@ -12,7 +12,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*'
         - type: className
-          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor).*'
+          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor|Bus).*'
         - type: className
           regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject).*'
         - type: className
@@ -34,7 +34,7 @@ parameters:
         - type: className
           regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
         - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher).*'
+          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor|InvokeParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher|RetryStrategy).*'
 
     - name: Symfony
       collectors:

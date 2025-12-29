@@ -13,10 +13,20 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
 {
     /** @var array<int, BusinessMetric> */
     private array $emitted = [];
+    private bool $shouldFail = false;
 
     public function emit(BusinessMetric $metric): void
     {
+        if ($this->shouldFail) {
+            $this->shouldFail = false;
+            throw new \RuntimeException('Metric emission failed');
+        }
         $this->emitted[] = $metric;
+    }
+
+    public function failOnNextCall(): void
+    {
+        $this->shouldFail = true;
     }
 
     public function emitCollection(MetricCollection $metrics): void

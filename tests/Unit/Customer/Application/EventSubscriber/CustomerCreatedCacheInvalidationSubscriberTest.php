@@ -74,9 +74,9 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('info')
             ->with(
                 'Cache invalidated after customer creation',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['operation'] === 'cache.invalidation'
+                $this->callback(static function ($context) {
+                    // Note: customer_id removed from logs for PII compliance
+                    return $context['operation'] === 'cache.invalidation'
                         && $context['reason'] === 'customer_created'
                         && isset($context['event_id']);
                 })

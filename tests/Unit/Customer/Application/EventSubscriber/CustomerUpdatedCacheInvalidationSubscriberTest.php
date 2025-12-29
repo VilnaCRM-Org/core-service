@@ -75,11 +75,12 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('info')
             ->with(
                 'Cache invalidated after customer update',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['email_changed'] === false
+                $this->callback(static function ($context) {
+                    // Note: customer_id removed from logs for PII compliance
+                    return $context['email_changed'] === false
                         && $context['operation'] === 'cache.invalidation'
-                        && $context['reason'] === 'customer_updated';
+                        && $context['reason'] === 'customer_updated'
+                        && isset($context['event_id']);
                 })
             );
 
@@ -125,11 +126,12 @@ final class CustomerUpdatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('info')
             ->with(
                 'Cache invalidated after customer update',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['email_changed'] === true
+                $this->callback(static function ($context) {
+                    // Note: customer_id removed from logs for PII compliance
+                    return $context['email_changed'] === true
                         && $context['operation'] === 'cache.invalidation'
-                        && $context['reason'] === 'customer_updated';
+                        && $context['reason'] === 'customer_updated'
+                        && isset($context['event_id']);
                 })
             );
 

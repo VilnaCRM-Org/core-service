@@ -14,3 +14,7 @@ services:
 
   App\Tests\Behat\:
     resource: '../tests/Behat/*'
+
+  # Use sync event bus for integration tests (not async via SQS)
+  App\Shared\Domain\Bus\Event\EventBusInterface:
+    alias: App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus

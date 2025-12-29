@@ -214,11 +214,11 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 
             $this->logger->debug('Business metrics emitted', [
                 'metrics' => ['OrdersPlaced', 'OrderValue', 'OrderItemCount'],
-                'order_id' => $event->orderId(),
+                'event_id' => $event->eventId(),
             ]);
         } catch (\Throwable $e) {
             $this->logger->warning('Failed to emit business metrics', [
-                'order_id' => $event->orderId(),
+                'event_id' => $event->eventId(),
                 'error' => $e->getMessage(),
             ]);
         }

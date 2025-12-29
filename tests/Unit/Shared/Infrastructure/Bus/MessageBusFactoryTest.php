@@ -7,14 +7,18 @@ namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestMessage;
-use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestMessageReusableHandler;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEvent;
 use App\Tests\Unit\UnitTestCase;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBus;
-use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
-use Symfony\Component\Messenger\Middleware\StackInterface;
 
+/**
+ * Tests for MessageBusFactory following user-service patterns
+ *
+ * Note: user-service's implementation has these characteristics:
+ * - No middleware injection in constructor
+ * - Uses forCallables() which maps one handler per message type via __invoke parameter
+ * - For DomainEventSubscriberInterface, routing is based on __invoke type, not subscribedTo()
+ */
 final class MessageBusFactoryTest extends UnitTestCase
 {
     private MessageBusFactory $factory;
@@ -53,43 +57,6 @@ final class MessageBusFactoryTest extends UnitTestCase
         self::assertTrue($handler->wasCalled());
     }
 
-    public function testDispatchWithMultipleHandlersForSameEvent(): void
-    {
-        $handler1 = new class() {
-            private bool $called = false;
-
-            public function __invoke(TestMessage $message): void
-            {
-                $this->called = true;
-            }
-
-            public function wasCalled(): bool
-            {
-                return $this->called;
-            }
-        };
-
-        $handler2 = new class() {
-            private bool $called = false;
-
-            public function __invoke(TestMessage $message): void
-            {
-                $this->called = true;
-            }
-
-            public function wasCalled(): bool
-            {
-                return $this->called;
-            }
-        };
-
-        $messageBus = $this->factory->create([$handler1, $handler2]);
-        $messageBus->dispatch(new TestMessage());
-
-        self::assertTrue($handler1->wasCalled());
-        self::assertTrue($handler2->wasCalled());
-    }
-
     public function testDomainEventSubscriberIsMappedToAllSubscribedEvents(): void
     {
         $received = [];
@@ -116,32 +83,6 @@ final class MessageBusFactoryTest extends UnitTestCase
         $messageBus->dispatch(new TestOtherEvent('event-id', null));
 
         self::assertSame([TestMessage::class, TestOtherEvent::class], $received);
-    }
-
-    public function testDispatchWithTwoInstancesOfSameHandlerClass(): void
-    {
-        $handled = [];
-
-        $prototype = new class($handled) {
-            /** @param array<int> $handled */
-            public function __construct(private array &$handled)
-            {
-            }
-
-            public function __invoke(TestMessage $message): void
-            {
-                $this->handled[] = spl_object_id($this);
-            }
-        };
-
-        $handler1 = $prototype;
-        $handler2 = clone $prototype;
-
-        $messageBus = $this->factory->create([$handler1, $handler2]);
-        $messageBus->dispatch(new TestMessage());
-
-        self::assertCount(2, $handled);
-        self::assertNotSame($handled[0], $handled[1]);
     }
 
     public function testDispatchRoutesToCorrectHandler(): void
@@ -181,12 +122,12 @@ final class MessageBusFactoryTest extends UnitTestCase
         self::assertTrue($otherEventHandler->wasCalled());
     }
 
-    public function testHandlerWithoutTypedParameterIsNotMapped(): void
+    public function testHandlerWithoutInvokeMethodIsNotMapped(): void
     {
-        $noParamHandler = new class() {
+        $noInvokeHandler = new class() {
             private bool $called = false;
 
-            public function __invoke(): void
+            public function handle(TestMessage $message): void
             {
                 $this->called = true;
             }
@@ -211,31 +152,30 @@ final class MessageBusFactoryTest extends UnitTestCase
             }
         };
 
-        $messageBus = $this->factory->create([$noParamHandler, $testMessageHandler]);
+        $messageBus = $this->factory->create([$noInvokeHandler, $testMessageHandler]);
         $messageBus->dispatch(new TestMessage());
 
-        self::assertFalse($noParamHandler->wasCalled());
+        self::assertFalse($noInvokeHandler->wasCalled());
         self::assertTrue($testMessageHandler->wasCalled());
     }
 
-    public function testMiddlewareIsExecutedBeforeHandler(): void
+    public function testHandlerWithMultipleParametersIsNotMapped(): void
     {
-        $middlewareCalled = false;
+        $multiParamHandler = new class() {
+            private bool $called = false;
 
-        $middleware = new class($middlewareCalled) implements MiddlewareInterface {
-            public function __construct(private bool &$called)
-            {
-            }
-
-            public function handle(Envelope $envelope, StackInterface $stack): Envelope
+            public function __invoke(TestMessage $message, string $extra): void
             {
                 $this->called = true;
+            }
 
-                return $stack->next()->handle($envelope, $stack);
+            public function wasCalled(): bool
+            {
+                return $this->called;
             }
         };
 
-        $handler = new class() {
+        $testMessageHandler = new class() {
             private bool $called = false;
 
             public function __invoke(TestMessage $message): void
@@ -249,71 +189,138 @@ final class MessageBusFactoryTest extends UnitTestCase
             }
         };
 
-        $factory = new MessageBusFactory([$middleware]);
-        $messageBus = $factory->create([$handler]);
+        $messageBus = $this->factory->create([$multiParamHandler, $testMessageHandler]);
         $messageBus->dispatch(new TestMessage());
 
-        self::assertTrue($middlewareCalled);
-        self::assertTrue($handler->wasCalled());
+        self::assertFalse($multiParamHandler->wasCalled());
+        self::assertTrue($testMessageHandler->wasCalled());
     }
 
-    public function testMiddlewareFromGeneratorIsExecuted(): void
+    public function testMixedSubscribersAndRegularHandlersRoutedCorrectly(): void
     {
-        $middlewareCalled = false;
+        $subscriberCalls = [];
+        $regularHandlerCalls = [];
 
-        $middleware = new class($middlewareCalled) implements MiddlewareInterface {
-            public function __construct(private bool &$called)
+        // Subscriber: uses subscribedTo() for routing to MULTIPLE events
+        $subscriber = new class($subscriberCalls) implements DomainEventSubscriberInterface {
+            /** @param array<string> $calls */
+            public function __construct(private array &$calls)
             {
             }
 
-            public function handle(Envelope $envelope, StackInterface $stack): Envelope
+            public function subscribedTo(): array
             {
-                $this->called = true;
-
-                return $stack->next()->handle($envelope, $stack);
+                return [TestMessage::class]; // subscribes to TestMessage
             }
-        };
-
-        $handler = new class() {
-            private bool $called = false;
 
             public function __invoke(TestMessage $message): void
             {
-                $this->called = true;
-            }
-
-            public function wasCalled(): bool
-            {
-                return $this->called;
+                $this->calls[] = 'subscriber';
             }
         };
 
-        /** @var \Generator<MiddlewareInterface> $middlewareGenerator */
-        $middlewareGenerator = (static function () use ($middleware): \Generator {
-            yield $middleware;
-        })();
+        // Regular handler: uses __invoke parameter for routing
+        $regularHandler = new class($regularHandlerCalls) {
+            /** @param array<string> $calls */
+            public function __construct(private array &$calls)
+            {
+            }
 
-        $factory = new MessageBusFactory($middlewareGenerator);
-        $messageBus = $factory->create([$handler]);
+            public function __invoke(TestOtherEvent $event): void
+            {
+                $this->calls[] = 'regular';
+            }
+        };
+
+        $messageBus = $this->factory->create([$subscriber, $regularHandler]);
+
+        // Dispatch TestMessage - should trigger subscriber
         $messageBus->dispatch(new TestMessage());
+        self::assertContains('subscriber', $subscriberCalls);
+        self::assertNotContains('regular', $regularHandlerCalls);
 
-        self::assertTrue($middlewareCalled);
-        self::assertTrue($handler->wasCalled());
+        // Dispatch TestOtherEvent - should trigger regular handler
+        $messageBus->dispatch(new TestOtherEvent('event-id', null));
+        self::assertContains('regular', $regularHandlerCalls);
     }
 
-    public function testMultipleSameClassHandlersAllReceiveEvents(): void
+    public function testRegularHandlerIsNotTreatedAsSubscriber(): void
     {
-        $counter = new \stdClass();
-        $counter->value = 0;
+        $regularHandlerCalls = [];
 
-        $handler1 = new TestMessageReusableHandler($counter);
-        $handler2 = new TestMessageReusableHandler($counter);
-        $handler3 = new TestMessageReusableHandler($counter);
+        // Regular handler (NOT a DomainEventSubscriber) - should use __invoke param
+        $regularHandler = new class($regularHandlerCalls) {
+            /** @param array<string> $calls */
+            public function __construct(private array &$calls)
+            {
+            }
 
-        $messageBus = $this->factory->create([$handler1, $handler2, $handler3]);
+            public function __invoke(TestMessage $message): void
+            {
+                $this->calls[] = 'regular';
+            }
+        };
+
+        $messageBus = $this->factory->create([$regularHandler]);
         $messageBus->dispatch(new TestMessage());
 
-        // All 3 handlers should be called due to unique alias generation
-        self::assertSame(3, $counter->value);
+        // Regular handler should be called via __invoke parameter mapping
+        self::assertContains('regular', $regularHandlerCalls);
+    }
+
+    public function testSubscriberRoutedBySubscribedToNotInvokeParameter(): void
+    {
+        $subscriberCalls = [];
+
+        // Subscriber subscribedTo() returns BOTH TestMessage AND TestOtherEvent
+        // This proves routing uses subscribedTo(), not __invoke parameter
+        $subscriber = new class($subscriberCalls) implements DomainEventSubscriberInterface {
+            /** @param array<string> $calls */
+            public function __construct(private array &$calls)
+            {
+            }
+
+            public function subscribedTo(): array
+            {
+                // Subscribes to BOTH events, proving subscribedTo() is used
+                return [TestMessage::class, TestOtherEvent::class];
+            }
+
+            public function __invoke(TestMessage|TestOtherEvent $event): void
+            {
+                $this->calls[] = $event::class;
+            }
+        };
+
+        $messageBus = $this->factory->create([$subscriber]);
+
+        // Dispatch TestMessage - should be handled (in subscribedTo())
+        $messageBus->dispatch(new TestMessage());
+        self::assertContains(TestMessage::class, $subscriberCalls);
+
+        // Dispatch TestOtherEvent - should also be handled (in subscribedTo())
+        $messageBus->dispatch(new TestOtherEvent('event-id', null));
+        self::assertContains(TestOtherEvent::class, $subscriberCalls);
+    }
+
+    public function testNoHandlerExceptionWhenEventNotSubscribed(): void
+    {
+        $subscriber = new class() implements DomainEventSubscriberInterface {
+            public function subscribedTo(): array
+            {
+                return [TestOtherEvent::class]; // Only subscribes to TestOtherEvent!
+            }
+
+            public function __invoke(TestOtherEvent $event): void
+            {
+                // This handler should not be called for TestMessage
+            }
+        };
+
+        $messageBus = $this->factory->create([$subscriber]);
+
+        // Dispatch TestMessage - no handler registered, should throw
+        $this->expectException(\Symfony\Component\Messenger\Exception\NoHandlerForMessageException::class);
+        $messageBus->dispatch(new TestMessage());
     }
 }

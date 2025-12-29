@@ -10,6 +10,24 @@
     "summary": "summary.log",
   },
   "mutators": {
-    "@default": true
+    "@default": true,
+    "UnwrapArrayFilter": {
+      "ignoreSourceCodeByRegex": [
+        // MessageBusFactory: Filtering regular handlers from subscribers is an optimization.
+        // Both routing paths work correctly even if subscribers are included in both maps
+        // (array_merge_recursive combines them). The null key filter is also defensive -
+        // Symfony's HandlersLocator handles null keys gracefully.
+        ".*regularHandlers = array_filter.*",
+        ".*handlerMap = array_filter.*"
+      ]
+    },
+    "InstanceOf_": {
+      "ignoreSourceCodeByRegex": [
+        // MessageBusFactory: The instanceof check separates subscribers from regular handlers.
+        // If this check becomes always-true, subscribers go to both maps, but routing still
+        // works correctly due to subscribedTo() taking precedence.
+        ".*!\\$handler instanceof DomainEventSubscriberInterface.*"
+      ]
+    }
   }
 }

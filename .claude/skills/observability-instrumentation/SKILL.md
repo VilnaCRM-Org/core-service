@@ -208,8 +208,9 @@ interface BusinessMetricsEmitterInterface
 ```php
 // src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php
 /**
- * Error handling is applied via ResilientDomainEventSubscriberDecorator,
- * so subscribers stay clean and observability never breaks the main request.
+ * Error handling is automatic via DomainEventMessageHandler in async workers.
+ * Subscribers stay clean - failures are logged + emit metrics automatically.
+ * This ensures observability never breaks the main request (AP from CAP theorem).
  */
 final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {

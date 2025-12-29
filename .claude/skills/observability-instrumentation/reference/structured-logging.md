@@ -7,7 +7,7 @@ Guide to implementing structured logging for debugging and correlation. This com
 **Traditional logging** (string concatenation):
 
 ```php
-// Bad - Unstructured, hard to parse
+// Bad - Unstructured, hard to parse, and may expose PII
 $logger->info("Creating customer " . $customerId . " with email " . $email);
 ```
 
@@ -16,10 +16,10 @@ $logger->info("Creating customer " . $customerId . " with email " . $email);
 > Arrays are fine here because PSR-3 requires `array $context`; for business metrics use typed metric/dimension objects and emit them from event subscribers.
 
 ```php
-// Good - Structured, searchable, parseable
+// Good - Structured, searchable, PII-free
 $logger->info('Creating customer', [
-    'customer_id' => $customerId,
-    'email' => $email,
+    'event_id' => $eventId,          // Non-PII correlation ID
+    'operation' => 'customer.create', // Operation type
 ]);
 ```
 
@@ -46,16 +46,16 @@ Use appropriate log levels following PSR-3:
 ### Examples
 
 ```php
-// DEBUG: Detailed execution flow
+// DEBUG: Detailed execution flow (avoid PII in debug logs too)
 $this->logger->debug('Entering method', [
     'method' => __METHOD__,
-    'arguments' => compact('customerId', 'email'),
+    'has_id' => isset($customerId),  // Boolean flag, not actual ID
 ]);
 
-// INFO: Business event
+// INFO: Business event (PII-free)
 $this->logger->info('Customer created', [
-    'customer_id' => $customer->id(),
-    'event' => 'customer.created',
+    'event_id' => $event->eventId(),   // Correlation ID (non-PII)
+    'event_type' => 'customer.created',
 ]);
 
 // WARNING: Recoverable issue
@@ -74,12 +74,14 @@ $this->logger->error('Database connection failed', [
 
 ## Essential Context Fields
 
-### Entity Identifiers
+### Event Correlation (PII-Free)
 
 ```php
-$this->logger->info('Processing entity', [
-    'customer_id' => $customerId,      // Primary entity
-    'order_id' => $orderId,            // Related entities
+// IMPORTANT: Do NOT log entity IDs (customer_id, order_id) - they are PII
+// Use event_id for correlation instead (GDPR/SOC2 compliant)
+$this->logger->info('Processing event', [
+    'event_id' => $event->eventId(),   // Correlation identifier (non-PII)
+    'event_type' => $event::class,     // Event class for filtering
 ]);
 ```
 
@@ -121,10 +123,10 @@ final readonly class CreateCustomerCommandHandler
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        // Log command start
+        // Log command start (PII-free - no customer_id)
         $this->logger->info('Processing command', [
             'command' => get_class($command),
-            'customer_id' => $command->id,
+            'operation' => 'customer.create',
         ]);
 
         try {
@@ -132,10 +134,10 @@ final readonly class CreateCustomerCommandHandler
             $customer = $this->createCustomer($command);
             $this->repository->save($customer);
 
-            // Log success
+            // Log success (PII-free)
             $this->logger->info('Command processed successfully', [
                 'command' => get_class($command),
-                'customer_id' => $customer->id(),
+                'operation' => 'customer.create',
             ]);
 
             // Publish domain event - metrics subscriber will emit metrics
@@ -190,14 +192,17 @@ $this->logger->info('Payment processed', [
 
 ### Sensitive Data Types to Avoid
 
-| Type           | Examples             | Safe Alternative           |
-| -------------- | -------------------- | -------------------------- |
-| Passwords      | Plain text passwords | Password length, hash type |
-| Tokens         | API keys, JWT tokens | Token prefix, expiry time  |
-| Credit Cards   | Full card numbers    | Last 4 digits              |
-| SSN/Tax IDs    | Full identifiers     | Last 4 digits              |
-| API Keys       | Secret keys          | Key ID, key type           |
-| Personal Email | Full addresses       | Email domain               |
+| Type            | Examples              | Safe Alternative            |
+| --------------- | --------------------- | --------------------------- |
+| **Entity IDs**  | customer_id, order_id | event_id (correlation ID)   |
+| Passwords       | Plain text passwords  | Password length, hash type  |
+| Tokens          | API keys, JWT tokens  | Token prefix, expiry time   |
+| Credit Cards    | Full card numbers     | Last 4 digits               |
+| SSN/Tax IDs     | Full identifiers      | Last 4 digits               |
+| API Keys        | Secret keys           | Key ID, key type            |
+| Personal Email  | Full addresses        | Email domain                |
+
+> **IMPORTANT**: Entity IDs (customer_id, order_id, user_id) are PII under GDPR/SOC2. Always use event_id for log correlation instead.
 
 ---
 
@@ -239,12 +244,12 @@ monolog:
 $this->logger->info("Customer $customerId created with email $email");
 ```
 
-### Do: Structured Context
+### Do: Structured Context (PII-Free)
 
 ```php
 $this->logger->info('Customer created', [
-    'customer_id' => $customerId,
-    'email' => $email,
+    'event_id' => $eventId,           // Correlation ID (non-PII)
+    'operation' => 'customer.create', // Operation type
 ]);
 ```
 
@@ -291,9 +296,9 @@ Both complement each other:
 
 - ✅ All logs use structured arrays (not strings)
 - ✅ Appropriate log levels used (debug, info, warning, error)
-- ✅ No sensitive data logged
+- ✅ **No PII logged** (no customer_id, order_id, user_id, email)
+- ✅ Use event_id for correlation (not entity IDs)
 - ✅ Errors include full context and stack trace
-- ✅ Entity identifiers included
 - ✅ Operation type clearly identified
 
 ---

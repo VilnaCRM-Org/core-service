@@ -9,7 +9,6 @@ use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\Observability\Exception\InvalidEmfNamespaceException;
 use App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory;
 use App\Shared\Infrastructure\Observability\Factory\EmfPayloadFactory;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Provider\EmfTimestampProvider;
 use App\Shared\Infrastructure\Observability\Validator\EmfDimensionValueValidator;
 use App\Shared\Infrastructure\Observability\Validator\EmfNamespaceValidator;
@@ -27,7 +26,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCreatesPayloadFromSingleMetric(): void
     {
         $factory = $this->createFactory();
-        $metric = new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Customer', 'create');
+        $metric = new EndpointInvocationsMetric('Customer', 'create');
 
         $payload = $factory->createFromMetric($metric);
 
@@ -46,11 +45,10 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCreatesPayloadFromMetricCollection(): void
     {
         $factory = $this->createFactory();
-        $dimensionsFactory = new MetricDimensionsFactory();
 
         $collection = new MetricCollection(
-            new TestOrdersPlacedMetric($dimensionsFactory, 5),
-            new TestOrderValueMetric($dimensionsFactory, 199.99)
+            new TestOrdersPlacedMetric(5),
+            new TestOrderValueMetric(199.99)
         );
 
         $payload = $factory->createFromCollection($collection);
@@ -70,7 +68,7 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     {
         $customNamespace = 'CustomApp/BusinessMetrics';
         $factory = $this->createFactoryWithNamespace($customNamespace);
-        $metric = new EndpointInvocationsMetric(new MetricDimensionsFactory(), 'Test', 'test');
+        $metric = new EndpointInvocationsMetric('Test', 'test');
 
         $payload = $factory->createFromMetric($metric);
 
@@ -81,11 +79,10 @@ final class EmfPayloadFactoryTest extends UnitTestCase
     public function testCollectionUsesDimensionsFromFirstMetric(): void
     {
         $factory = $this->createFactory();
-        $dimensionsFactory = new MetricDimensionsFactory();
 
         $collection = new MetricCollection(
-            new TestOrdersPlacedMetric($dimensionsFactory, 1),
-            new TestOrderValueMetric($dimensionsFactory, 50.0)
+            new TestOrdersPlacedMetric(1),
+            new TestOrderValueMetric(50.0)
         );
 
         $payload = $factory->createFromCollection($collection);

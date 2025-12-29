@@ -13,12 +13,12 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 /**
  * Customer Deleted Event Cache Invalidation Subscriber
  *
- * Invalidates cache when a customer is deleted
+ * Invalidates cache when a customer is deleted.
  *
- * ARCHITECTURAL DECISION: NOT wrapped with ResilientDomainEventSubscriberDecorator
- * Cache invalidation is critical for data consistency. If invalidation fails,
- * the request MUST fail to prevent serving stale data. Unlike metrics (observability),
- * cache failures directly impact correctness and user experience.
+ * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
+ * This subscriber runs in Symfony Messenger workers, wrapped with Layer 2 resilience.
+ * Any failures are caught, logged, and emit metrics - never thrown.
+ * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerDeletedCacheInvalidationSubscriber implements
     DomainEventSubscriberInterface
@@ -39,7 +39,6 @@ final readonly class CustomerDeletedCacheInvalidationSubscriber implements
         ]);
 
         $this->logger->info('Cache invalidated after customer deletion', [
-            'customer_id' => $event->customerId(),
             'event_id' => $event->eventId(),
             'operation' => 'cache.invalidation',
             'reason' => 'customer_deleted',

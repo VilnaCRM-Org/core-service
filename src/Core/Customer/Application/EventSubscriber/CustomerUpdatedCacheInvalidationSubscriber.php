@@ -13,13 +13,13 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 /**
  * Customer Updated Event Cache Invalidation Subscriber
  *
- * Invalidates cache when a customer is updated
- * Handles email change edge case (both old and new email caches)
+ * Invalidates cache when a customer is updated.
+ * Handles email change edge case (both old and new email caches).
  *
- * ARCHITECTURAL DECISION: NOT wrapped with ResilientDomainEventSubscriberDecorator
- * Cache invalidation is critical for data consistency. If invalidation fails,
- * the request MUST fail to prevent serving stale data. Unlike metrics (observability),
- * cache failures directly impact correctness and user experience.
+ * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
+ * This subscriber runs in Symfony Messenger workers, wrapped with Layer 2 resilience.
+ * Any failures are caught, logged, and emit metrics - never thrown.
+ * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     DomainEventSubscriberInterface
@@ -69,9 +69,8 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     private function logSuccess(CustomerUpdatedEvent $event): void
     {
         $this->logger->info('Cache invalidated after customer update', [
-            'customer_id' => $event->customerId(),
-            'email_changed' => $event->emailChanged(),
             'event_id' => $event->eventId(),
+            'email_changed' => $event->emailChanged(),
             'operation' => 'cache.invalidation',
             'reason' => 'customer_updated',
         ]);
