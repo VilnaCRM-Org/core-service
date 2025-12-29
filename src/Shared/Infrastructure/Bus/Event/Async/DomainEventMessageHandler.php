@@ -9,7 +9,6 @@ use App\Shared\Application\Observability\Factory\EventSubscriberFailureMetricFac
 use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Handles domain events from async queue
@@ -17,7 +16,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Layer 2 Resilience: If any subscriber fails, log + emit metric, continue with others.
  * Message is acknowledged after processing all subscribers (no retry to avoid loops).
  */
-#[AsMessageHandler]
 final readonly class DomainEventMessageHandler
 {
     /**

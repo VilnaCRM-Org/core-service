@@ -204,24 +204,14 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
 
     public function __invoke(OrderPlacedEvent $event): void
     {
-        try {
-            // Emit multiple business metrics using MetricCollection
-            $this->metricsEmitter->emitCollection(new MetricCollection(
-                $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
-                $this->orderValueMetricFactory->create($event->totalAmount()),
-                $this->orderItemCountMetricFactory->create($event->itemCount())
-            ));
-
-            $this->logger->debug('Business metrics emitted', [
-                'metrics' => ['OrdersPlaced', 'OrderValue', 'OrderItemCount'],
-                'event_id' => $event->eventId(),
-            ]);
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to emit business metrics', [
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-            ]);
-        }
+        // Error handling is automatic via DomainEventMessageHandler.
+        // Subscribers are executed in async workers - failures are logged + emit metrics.
+        // This ensures observability never breaks the main request (AP from CAP).
+        $this->metricsEmitter->emitCollection(new MetricCollection(
+            $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
+            $this->orderValueMetricFactory->create($event->totalAmount()),
+            $this->orderItemCountMetricFactory->create($event->itemCount())
+        ));
     }
 
     /**

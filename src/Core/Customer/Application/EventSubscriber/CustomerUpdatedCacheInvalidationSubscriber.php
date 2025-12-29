@@ -16,8 +16,8 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  * Handles email change edge case (both old and new email caches).
  *
  * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
- * This subscriber runs in Symfony Messenger workers, wrapped with Layer 2 resilience.
- * Any failures are caught, logged, and emit metrics - never thrown.
+ * This subscriber runs in Symfony Messenger workers. Exceptions propagate to
+ * DomainEventMessageHandler which catches, logs, and emits failure metrics.
  * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerUpdatedCacheInvalidationSubscriber implements

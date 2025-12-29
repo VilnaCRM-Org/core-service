@@ -323,4 +323,51 @@ final class MessageBusFactoryTest extends UnitTestCase
         $this->expectException(\Symfony\Component\Messenger\Exception\NoHandlerForMessageException::class);
         $messageBus->dispatch(new TestMessage());
     }
+
+    /**
+     * Verifies that subscribers are NOT incorrectly mapped as regular handlers.
+     *
+     * This test creates a subscriber that:
+     * - subscribedTo() returns TestMessage (should be mapped to TestMessage)
+     * - __invoke takes TestOtherEvent (would map to TestOtherEvent if treated as regular handler)
+     *
+     * With correct filtering: subscriber is ONLY in subscriber map (maps to TestMessage)
+     * With mutation: subscriber is ALSO in regular handler map (maps to TestOtherEvent)
+     *
+     * So dispatching TestOtherEvent should NOT call the subscriber (it only subscribes to TestMessage).
+     * But if the mutation occurs, the subscriber would be mapped to TestOtherEvent via __invoke.
+     */
+    public function testSubscriberNotMappedAsRegularHandlerByInvokeParam(): void
+    {
+        $subscriberCalled = false;
+
+        // Subscriber: subscribedTo() returns TestMessage, but __invoke takes TestOtherEvent
+        // This means routing MUST use subscribedTo(), not __invoke parameter
+        $subscriber = new class($subscriberCalled) implements DomainEventSubscriberInterface {
+            public function __construct(private bool &$called)
+            {
+            }
+
+            public function subscribedTo(): array
+            {
+                return [TestMessage::class]; // Subscribes to TestMessage ONLY
+            }
+
+            public function __invoke(TestOtherEvent $event): void
+            {
+                // __invoke takes TestOtherEvent - NOT what we subscribe to
+                // If incorrectly mapped as regular handler, this would be called for TestOtherEvent
+                $this->called = true;
+            }
+        };
+
+        $messageBus = $this->factory->create([$subscriber]);
+
+        // Dispatch TestOtherEvent - subscriber should NOT handle this
+        // (it subscribes to TestMessage, not TestOtherEvent)
+        // But if mutation makes subscriber also go through forCallables(),
+        // it would be mapped to TestOtherEvent via __invoke param type
+        $this->expectException(\Symfony\Component\Messenger\Exception\NoHandlerForMessageException::class);
+        $messageBus->dispatch(new TestOtherEvent('test-id', null));
+    }
 }

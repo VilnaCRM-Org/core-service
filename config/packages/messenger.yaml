@@ -23,12 +23,9 @@ framework:
 
         failure_transport: failed-domain-events
 
-      # Dead letter queue for failed domain events (infinite retry for self-healing)
+      # Dead letter queue for failed domain events (manual inspection/replay)
       failed-domain-events:
         dsn: '%env(FAILED_DOMAIN_EVENTS_TRANSPORT_DSN)%'
-
-        retry_strategy:
-          service: 'App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy'
 
     routing:
       # Route domain event envelopes to async transport

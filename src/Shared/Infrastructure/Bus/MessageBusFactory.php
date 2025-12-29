@@ -54,14 +54,9 @@ final class MessageBusFactory
         $subscriberMap = CallableFirstParameterExtractor::forPipedCallables($subscribers);
 
         // Regular handlers use __invoke parameter type for routing
+        // Note: Unmappable handlers get null keys, but Symfony's HandlersLocator
+        // never looks up by null, so they're effectively ignored
         $handlerMap = CallableFirstParameterExtractor::forCallables($regularHandlers);
-
-        // Filter out null keys (handlers that couldn't be mapped)
-        $handlerMap = array_filter(
-            $handlerMap,
-            static fn (?string $key): bool => $key !== null,
-            ARRAY_FILTER_USE_KEY
-        );
 
         return array_merge_recursive($subscriberMap, $handlerMap);
     }

@@ -175,6 +175,7 @@ services:
       $messageBus: '@messenger.bus.default'
 
   App\Shared\Infrastructure\Bus\Event\Async\DomainEventMessageHandler:
+    tags: ['messenger.message_handler']
     arguments:
       $subscribers: !tagged_iterator 'app.event_subscriber'
 
@@ -234,3 +235,4 @@ services:
     decoration_priority: 5
     arguments:
       $decorated: '@App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer.inner'
+

@@ -15,7 +15,10 @@ use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
  * This subscriber listens to CustomerDeletedEvent and emits
  * the CustomersDeleted metric for CloudWatch dashboards.
  *
- * Error handling is provided by a resilient service decorator (non-critical subscriber).
+ * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
+ * This subscriber runs in Symfony Messenger workers, wrapped with Layer 2 resilience.
+ * DomainEventMessageHandler catches all failures, logs them, and emits metrics.
+ * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubscriberInterface
 {
