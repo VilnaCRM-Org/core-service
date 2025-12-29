@@ -235,4 +235,3 @@ services:
     decoration_priority: 5
     arguments:
       $decorated: '@App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer.inner'
-
