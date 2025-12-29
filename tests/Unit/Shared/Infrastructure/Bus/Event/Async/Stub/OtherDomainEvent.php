@@ -27,6 +27,12 @@ final class OtherDomainEvent extends DomainEvent
         string $eventId,
         string $occurredOn
     ): self {
+        if (! isset($body['data']) || ! is_scalar($body['data'])) {
+            throw new \InvalidArgumentException(
+                'Missing or invalid "data" field in event body'
+            );
+        }
+
         return new self(
             data: (string) $body['data'],
             eventId: $eventId,

@@ -95,17 +95,14 @@ namespace App\Tests\Unit\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
-use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 
 final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 {
     private BusinessMetricsEmitterSpy $metricsSpy;
-    private LoggerInterface&MockObject $logger;
     private CustomerCreatedMetricsSubscriber $subscriber;
 
     protected function setUp(): void
@@ -113,15 +110,13 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
         parent::setUp();
 
         $this->metricsSpy = new BusinessMetricsEmitterSpy();
-        $this->logger = $this->createMock(LoggerInterface::class);
 
         $dimensionsFactory = new MetricDimensionsFactory();
         $metricFactory = new \App\Core\Customer\Application\Factory\CustomersCreatedMetricFactory($dimensionsFactory);
 
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsSpy,
-            $metricFactory,
-            $this->logger
+            $metricFactory
         );
     }
 
@@ -188,9 +183,8 @@ use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
 use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;
 use App\Core\Order\Domain\Event\OrderPlacedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\MetricCollection;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 
 final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
 {
@@ -198,8 +192,7 @@ final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscrib
         private BusinessMetricsEmitterInterface $metricsEmitter,
         private OrdersPlacedMetricFactoryInterface $ordersPlacedMetricFactory,
         private OrderValueMetricFactoryInterface $orderValueMetricFactory,
-        private OrderItemCountMetricFactoryInterface $orderItemCountMetricFactory,
-        private LoggerInterface $logger
+        private OrderItemCountMetricFactoryInterface $orderItemCountMetricFactory
     ) {}
 
     public function __invoke(OrderPlacedEvent $event): void
