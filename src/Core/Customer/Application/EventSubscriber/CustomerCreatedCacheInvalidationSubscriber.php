@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -21,7 +20,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerCreatedCacheInvalidationSubscriber implements
-    DomainEventSubscriberInterface
+    CustomerCacheInvalidationSubscriberInterface
 {
     public function __construct(
         private TagAwareCacheInterface $cache,

@@ -125,18 +125,7 @@ services:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
     public: true
 
-  # Cache invalidation event subscribers - explicitly inject cache.customer
-  App\Core\Customer\Application\EventSubscriber\CustomerCreatedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
-
-  App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
-
-  App\Core\Customer\Application\EventSubscriber\CustomerDeletedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
+  # Cache invalidation event subscribers - auto-bind cache.customer
 
   # CacheKeyBuilder - auto-registered via App\ namespace
 
@@ -144,6 +133,10 @@ services:
   # please note that last definitions always *replace* previous ones
 
   _instanceof:
+    App\Core\Customer\Application\EventSubscriber\CustomerCacheInvalidationSubscriberInterface:
+      bind:
+        $cache: '@cache.customer'
+
     App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface:
       tags: ['app.event_subscriber']
     App\Shared\Domain\Bus\Command\CommandHandlerInterface:
