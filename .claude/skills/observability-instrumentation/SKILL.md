@@ -1,593 +1,587 @@
 ---
 name: observability-instrumentation
-description: Add comprehensive observability to new code with structured logs (correlation ID), metrics (latency, errors, RPS), and traces around DB/HTTP calls. Use when implementing new features, adding command handlers, creating API endpoints, or instrumenting existing code for production monitoring. Automatically attaches evidence to PRs.
+description: Add business metrics using AWS EMF (Embedded Metric Format) to API endpoints. Focus on domain-specific metrics only - AWS AppRunner provides default SLO/SLA metrics. Use when implementing new endpoints, adding command handlers, or instrumenting business events.
 ---
 
-# Observability Instrumentation Skill
+# Business Metrics with AWS EMF
 
-Instrument new code with production-grade observability following the Three Pillars: **Logs, Metrics, and Traces**. This skill ensures all new code is observable, debuggable, and production-ready.
+Instrument API endpoints with **business metrics** using AWS CloudWatch Embedded Metric Format (EMF). This skill focuses exclusively on domain-specific metrics - AWS AppRunner already provides infrastructure SLO/SLA metrics automatically.
+
+## What This Skill Covers
+
+- **Business metrics** - Domain events (customers created, orders placed, payments processed)
+- **AWS EMF format** - Logs that automatically become CloudWatch metrics
+- **Event subscribers** - Metrics emitted via domain event subscribers (not in handlers)
+- **Type-safe metrics** - Concrete metric classes instead of arrays
+- **SOLID principles** - Single Responsibility (subscribers) + Open/Closed (new metric classes)
+
+## What This Skill Does NOT Cover
+
+- **Infrastructure metrics** - Latency, error rates, RPS (AWS AppRunner provides these)
+- **SLO/SLA metrics** - Availability, response times (AWS AppRunner provides these)
+- **Distributed tracing** - Use AWS X-Ray integration instead
 
 ## When to Use This Skill
 
 Use this skill when:
 
-- Implementing new features or command handlers
-- Creating new API endpoints (REST/GraphQL)
-- Adding database operations or external HTTP calls
-- Refactoring existing code that lacks observability
-- Preparing code for production deployment
-- Debugging performance or reliability issues
-- Before creating pull requests (attach observability evidence)
-
-## ⚡ Quick Start
-
-**New to observability?** Follow the three-step pattern:
-
-1. **Logs**: Add structured logging with correlation ID
-2. **Metrics**: Instrument latency, errors, and throughput
-3. **Traces**: Wrap DB/HTTP calls with timing and context
-
-## The Three Pillars of Observability
-
-### 1. Structured Logging (Context + Correlation)
-
-**Purpose**: Understand what happened and trace requests across services
-
-**Requirements**:
-
-- Use PSR-3 LoggerInterface (Symfony/Monolog)
-- Include correlation ID in all log entries
-- Log structured data (arrays, not strings)
-- Log at appropriate levels (debug, info, warning, error)
-
-### 2. Metrics (Measure Performance)
-
-**Purpose**: Quantify system behavior and detect anomalies
-
-**Key Metrics**:
-
-- **Latency**: Response/operation duration
-- **Errors**: Failure counts and error rates
-- **Throughput**: Requests per second (RPS)
-
-### 3. Traces (Track Flow)
-
-**Purpose**: Track request flow through the system
-
-**What to Trace**:
-
-- Database operations (MongoDB queries)
-- HTTP calls to external services
-- Command/Query handler execution
-- Critical business logic paths
+- Implementing new API endpoints that have business significance
+- Adding domain events that should trigger metric emission
+- Tracking domain events for analytics and business intelligence
+- Building dashboards for business KPIs
 
 ---
 
-## Core Workflow
+## Architecture Overview
 
-### Step 1: Add Structured Logging
+Business metrics follow these patterns:
 
-**Inject LoggerInterface**:
+1. **Metric classes** - Each metric type is a concrete class extending `BusinessMetric`
+2. **Event subscribers** - Metrics are emitted via domain event subscribers (not hardcoded in handlers)
+3. **Symfony logger** - EMF output goes through Monolog with a custom EMF formatter
+4. **No arrays** - All metric configuration uses typed objects, not arrays
+5. **Collections** - Multiple metrics use `MetricCollection`, not arrays
+
+---
+
+## SOLID Principles in Observability
+
+### Single Responsibility Principle (SRP)
+
+Each class has ONE responsibility:
+
+| Class                              | Responsibility                           |
+| ---------------------------------- | ---------------------------------------- |
+| `CustomersCreatedMetric`           | Define metric name, value, dimensions    |
+| `CustomerCreatedMetricsSubscriber` | Listen to event, emit metric             |
+| `AwsEmfBusinessMetricsEmitter`     | Format and write EMF logs                |
+| `MetricCollection`                 | Hold multiple metrics for batch emission |
+
+**Anti-pattern**: Metrics emitted directly in command handlers (violates SRP - handler should only handle commands)
+
+### Open/Closed Principle (OCP)
+
+- **Open for extension**: Add new metrics via new classes
+- **Closed for modification**: Don't change existing metric/emitter code
 
 ```php
-use Psr\Log\LoggerInterface;
+// ✅ GOOD: Add new metric by creating new class
+final readonly class OrdersPlacedMetric extends EndpointOperationBusinessMetric { ... }
 
-final readonly class CreateCustomerCommandHandler
+// ❌ BAD: Modify existing emitter to handle new metric type
+```
+
+### Why Event Subscribers (Not Handler Injection)
+
+```php
+// ❌ BAD: Metrics in command handler (violates SRP)
+final class CreateCustomerHandler
 {
     public function __construct(
-        private LoggerInterface $logger,
-        private CustomerRepository $repository
+        private CustomerRepository $repository,
+        private BusinessMetricsEmitterInterface $metrics  // Wrong!
     ) {}
 }
-```
 
-**Log with correlation ID and context**:
-
-```php
-public function __invoke(CreateCustomerCommand $command): void
+// ✅ GOOD: Metrics in dedicated event subscriber
+final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
 {
-    $correlationId = $this->generateCorrelationId();
-
-    $this->logger->info('Creating customer', [
-        'correlation_id' => $correlationId,
-        'customer_id' => $command->id,
-        'customer_email' => $command->email,
-        'timestamp' => time(),
-    ]);
-
-    try {
-        $customer = Customer::create(/* ... */);
-
-        $this->logger->info('Customer created successfully', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id(),
-        ]);
-    } catch (\Throwable $e) {
-        $this->logger->error('Failed to create customer', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $command->id,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-
-        throw $e;
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        $this->metricsEmitter->emit($this->metricFactory->create());
     }
 }
 ```
 
-**See**: [structured-logging.md](reference/structured-logging.md) for complete patterns
+**Benefits**:
 
-### Step 2: Add Metrics
+- Handler focuses on domain logic only
+- Metrics emission is decoupled and testable
+- Easy to add/remove metrics without touching business logic
+- Multiple subscribers can react to same event
 
-**Track operation latency**:
+---
+
+## Type-Safe Metric Class Hierarchy
+
+```text
+BusinessMetric (abstract)
+├── EndpointOperationBusinessMetric (abstract) - for metrics with Endpoint/Operation dimensions
+│   ├── CustomersCreatedMetric
+│   ├── CustomersUpdatedMetric
+│   ├── CustomersDeletedMetric
+│   └── EndpointInvocationsMetric
+└── (other base classes for different dimension patterns)
+
+MetricDimensionsInterface
+├── EndpointOperationMetricDimensions - Endpoint + Operation
+└── (custom dimensions for specific metrics)
+
+MetricDimensions - typed collection of MetricDimension objects
+MetricDimension - key/value pair
+
+MetricUnit (enum)
+├── COUNT, NONE, SECONDS, MILLISECONDS, BYTES, PERCENT
+
+MetricCollection - typed collection implementing IteratorAggregate, Countable
+```
+
+**Why no arrays?**
+
+| Arrays              | Typed Classes             |
+| ------------------- | ------------------------- |
+| No type safety      | Full type checking        |
+| No IDE autocomplete | IDE support               |
+| Runtime errors      | Compile-time errors       |
+| Hard to refactor    | Easy to refactor          |
+| No encapsulation    | Validation in constructor |
+
+---
+
+## Current Implementation
+
+### Metric Base Class (Application Layer)
 
 ```php
-public function __invoke(CreateCustomerCommand $command): void
+// src/Shared/Application/Observability/Metric/BusinessMetric.php
+abstract readonly class BusinessMetric
 {
-    $startTime = microtime(true);
+    public function __construct(
+        private float|int $value,
+        private MetricUnit $unit
+    ) {}
 
-    try {
-        // Execute operation
-        $customer = Customer::create(/* ... */);
-        $this->repository->save($customer);
+    abstract public function name(): string;
+    abstract public function dimensions(): MetricDimensionsInterface;
 
-        // Record success metric
-        $duration = (microtime(true) - $startTime) * 1000; // ms
-        $this->recordMetric('customer.create.duration', $duration, [
-            'status' => 'success',
-        ]);
+    public function value(): float|int { return $this->value; }
+    public function unit(): MetricUnit { return $this->unit; }
+}
+```
 
-    } catch (\Throwable $e) {
-        // Record error metric
-        $duration = (microtime(true) - $startTime) * 1000;
-        $this->recordMetric('customer.create.duration', $duration, [
-            'status' => 'error',
-            'error_type' => get_class($e),
-        ]);
+### Concrete Metric Example
 
-        $this->incrementCounter('customer.create.errors');
+```php
+// src/Core/Customer/Application/Metric/CustomersCreatedMetric.php
+final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMetric
+{
+    private const ENDPOINT = 'Customer';
+    private const OPERATION = 'create';
 
-        throw $e;
+    public function __construct(
+        MetricDimensionsFactoryInterface $dimensionsFactory,
+        float|int $value = 1
+    ) {
+        parent::__construct($dimensionsFactory, $value, MetricUnit::COUNT);
+    }
+
+    public function name(): string
+    {
+        return 'CustomersCreated';
+    }
+
+    protected function endpoint(): string
+    {
+        return self::ENDPOINT;
+    }
+
+    protected function operation(): string
+    {
+        return self::OPERATION;
     }
 }
 ```
 
-**Key metrics to track**:
-
-| Metric Type     | Example                         | When to Use         |
-| --------------- | ------------------------------- | ------------------- |
-| Duration        | `handler.execution.duration_ms` | Every operation     |
-| Counter         | `handler.execution.total`       | Throughput tracking |
-| Error Rate      | `handler.execution.errors`      | Failure detection   |
-| Business Metric | `customer.created.total`        | Domain events       |
-
-**See**: [metrics-patterns.md](reference/metrics-patterns.md) for complete guide
-
-### Step 3: Add Tracing for DB/HTTP Calls
-
-**Wrap database operations**:
+### Emitter Interface (Application Layer)
 
 ```php
-private function saveWithTrace(Customer $customer, string $correlationId): void
+// src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php
+interface BusinessMetricsEmitterInterface
 {
-    $startTime = microtime(true);
+    public function emit(BusinessMetric $metric): void;
+    public function emitCollection(MetricCollection $metrics): void;
+}
+```
 
-    $this->logger->debug('Saving customer to database', [
-        'correlation_id' => $correlationId,
-        'customer_id' => $customer->id(),
-        'operation' => 'mongodb.save',
-    ]);
+### Metrics Event Subscriber
 
-    try {
-        $this->repository->save($customer);
+```php
+// src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php
+/**
+ * Error handling is automatic via DomainEventMessageHandler in async workers.
+ * Subscribers stay clean - failures are logged + emit metrics automatically.
+ * This ensures observability never breaks the main request (AP from CAP theorem).
+ */
+final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private CustomersCreatedMetricFactoryInterface $metricFactory
+    ) {
+    }
 
-        $duration = (microtime(true) - $startTime) * 1000;
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        $this->metricsEmitter->emit($this->metricFactory->create());
+    }
 
-        $this->logger->info('Customer saved to database', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id(),
-            'duration_ms' => $duration,
-            'operation' => 'mongodb.save',
-        ]);
-
-        $this->recordMetric('mongodb.save.duration', $duration);
-
-    } catch (\Throwable $e) {
-        $this->logger->error('Database save failed', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id(),
-            'error' => $e->getMessage(),
-            'operation' => 'mongodb.save',
-        ]);
-
-        throw $e;
+    public function subscribedTo(): array
+    {
+        return [CustomerCreatedEvent::class];
     }
 }
 ```
 
-**Wrap HTTP calls**:
+---
 
-```php
-private function callExternalApiWithTrace(string $url, string $correlationId): array
-{
-    $startTime = microtime(true);
+## AWS EMF Format
 
-    $this->logger->info('Calling external API', [
-        'correlation_id' => $correlationId,
-        'url' => $url,
-        'method' => 'POST',
-    ]);
+AWS Embedded Metric Format allows you to embed custom metrics in structured log events. CloudWatch automatically extracts metrics from EMF-formatted logs.
 
-    try {
-        $response = $this->httpClient->post($url, [/* ... */]);
-
-        $duration = (microtime(true) - $startTime) * 1000;
-
-        $this->logger->info('External API call completed', [
-            'correlation_id' => $correlationId,
-            'url' => $url,
-            'status_code' => $response->getStatusCode(),
-            'duration_ms' => $duration,
-        ]);
-
-        $this->recordMetric('http.call.duration', $duration, [
-            'endpoint' => $url,
-            'status' => $response->getStatusCode(),
-        ]);
-
-        return $response->toArray();
-
-    } catch (\Throwable $e) {
-        $duration = (microtime(true) - $startTime) * 1000;
-
-        $this->logger->error('External API call failed', [
-            'correlation_id' => $correlationId,
-            'url' => $url,
-            'duration_ms' => $duration,
-            'error' => $e->getMessage(),
-        ]);
-
-        $this->incrementCounter('http.call.errors', [
-            'endpoint' => $url,
-        ]);
-
-        throw $e;
-    }
-}
-```
-
-**See complete example**: [instrumented-command-handler.md](examples/instrumented-command-handler.md) shows full DB and HTTP tracing
-
-### Step 4: Attach Evidence to Pull Requests
-
-**After implementing observability, collect evidence**:
-
-1. **Run the code** and capture log output:
-
-```bash
-# Tail logs while testing
-make sh
-tail -f var/log/dev.log | grep correlation_id
-```
-
-2. **Extract observability evidence**:
-
-- Correlation ID tracking across operations
-- Structured log entries with context
-- Metric recordings (duration, errors)
-- Trace information for DB/HTTP calls
-
-3. **Add to PR description**:
-
-````markdown
-## Observability Evidence
-
-### Structured Logs
+### EMF Log Structure
 
 ```json
 {
-  "level": "info",
-  "message": "Creating customer",
-  "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-  "customer_id": "01JCXYZ...",
-  "timestamp": 1702425600
+  "_aws": {
+    "Timestamp": 1702425600000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "CCore/BusinessMetrics",
+        "Dimensions": [["Endpoint", "Operation"]],
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
+      }
+    ]
+  },
+  "Endpoint": "Customer",
+  "Operation": "create",
+  "CustomersCreated": 1
 }
 ```
-````
 
-### Metrics Recorded
+When this log is written to stdout via the EMF Monolog channel, CloudWatch automatically:
 
-- `customer.create.duration`: 45ms (success)
-- `mongodb.save.duration`: 12ms
-- `customer.create.errors`: 0
-
-### Traces
-
-- DB operation: 12ms (mongodb.save)
-- Total handler execution: 45ms
-
-````
-
-**See**: [pr-evidence-guide.md](reference/pr-evidence-guide.md) for templates
+1. Extracts `CustomersCreated` as a metric
+2. Associates it with the `CCore/BusinessMetrics` namespace
+3. Applies dimensions `Endpoint` and `Operation`
 
 ---
 
-## Correlation ID Management
+## Creating New Business Metrics
 
-**Generate correlation ID**:
-
-```php
-private function generateCorrelationId(): string
-{
-    // Generate new UUID v4
-    return Uuid::v4()->toString();
-
-    // Alternative: Use Symfony ULID
-    // return (string) new Ulid();
-}
-````
-
-**Extract from request headers** (if available via API Gateway/HTTP layer):
+### Step 1: Create the Metric Class
 
 ```php
-// In a controller or HTTP middleware where Request is available
-private function getOrGenerateCorrelationId(Request $request): string
-{
-    return $request->headers->get('X-Correlation-ID')
-        ?? Uuid::v4()->toString();
-}
-```
+// src/Core/Order/Application/Metric/OrdersPlacedMetric.php
+namespace App\Core\Order\Application\Metric;
 
-**Store in request context** (Application layer):
+use App\Shared\Application\Observability\Metric\BusinessMetric;
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Application\Observability\Metric\MetricDimensions;
+use App\Shared\Application\Observability\Metric\MetricDimensionsFactoryInterface;
+use App\Shared\Application\Observability\Metric\MetricDimensionsInterface;
+use App\Shared\Application\Observability\Metric\MetricUnit;
 
-```php
-final class RequestCorrelationIdMiddleware
+final readonly class OrdersPlacedMetricDimensions implements MetricDimensionsInterface
 {
     public function __construct(
-        private RequestStack $requestStack
-    ) {}
-
-    public function setCorrelationId(string $correlationId): void
-    {
-        $request = $this->requestStack->getCurrentRequest();
-        $request?->attributes->set('correlation_id', $correlationId);
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private string $paymentMethod
+    ) {
     }
 
-    public function getCorrelationId(): ?string
+    public function values(): MetricDimensions
     {
-        return $this->requestStack
-            ->getCurrentRequest()
-            ?->attributes
-            ->get('correlation_id');
+        return $this->dimensionsFactory->endpointOperationWith(
+            'Order',
+            'create',
+            new MetricDimension('PaymentMethod', $this->paymentMethod)
+        );
+    }
+}
+
+final readonly class OrdersPlacedMetric extends BusinessMetric
+{
+    public function __construct(
+        private MetricDimensionsFactoryInterface $dimensionsFactory,
+        private string $paymentMethod,
+        float|int $value = 1
+    ) {
+        parent::__construct($value, MetricUnit::COUNT);
+    }
+
+    public function name(): string
+    {
+        return 'OrdersPlaced';
+    }
+
+    public function dimensions(): MetricDimensionsInterface
+    {
+        return new OrdersPlacedMetricDimensions(
+            dimensionsFactory: $this->dimensionsFactory,
+            paymentMethod: $this->paymentMethod
+        );
     }
 }
 ```
 
-**Note**: The middleware example above shows advanced usage. For most command handlers, simply generating a new UUID at the start of execution is sufficient.
+### Step 2: Create the Event Subscriber
+
+```php
+// src/Core/Order/Application/EventSubscriber/OrderPlacedMetricsSubscriber.php
+namespace App\Core\Order\Application\EventSubscriber;
+
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+
+final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private OrdersPlacedMetricFactoryInterface $metricFactory
+    ) {}
+
+    public function __invoke(OrderPlacedEvent $event): void
+    {
+        $this->metricsEmitter->emit($this->metricFactory->create($event->paymentMethod()));
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function subscribedTo(): array
+    {
+        return [OrderPlacedEvent::class];
+    }
+}
+```
+
+### Step 3: For Multiple Metrics - Use MetricCollection
+
+```php
+// Emit multiple metrics together (dimensionsFactory injected via constructor)
+$this->metricsEmitter->emitCollection(new MetricCollection(
+    $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
+    $this->orderValueMetricFactory->create($event->totalAmount())
+));
+```
 
 ---
 
-## Logging Best Practices
+## Dimension Best Practices
 
-### ✅ DO
+### Recommended Dimensions
 
-- **Use structured arrays**, not concatenated strings
-- **Include correlation ID** in every log entry
-- **Log before and after** critical operations
-- **Log errors with full context** (stack trace, input data)
-- **Use appropriate log levels** (debug, info, warning, error)
-- **Log business events** (customer created, order placed)
-- **Include timestamps** for time-sensitive operations
-- **Sanitize sensitive data** (passwords, tokens, PII)
+| Dimension       | Description       | Cardinality |
+| --------------- | ----------------- | ----------- |
+| `Endpoint`      | API resource name | Low         |
+| `Operation`     | CRUD action       | Very Low    |
+| `PaymentMethod` | Payment type      | Low         |
+| `CustomerType`  | Customer segment  | Low         |
 
-### ❌ DON'T
+### Avoid High-Cardinality Dimensions
 
-- Don't log sensitive data (passwords, credit cards, tokens)
-- Don't use string concatenation in logs
-- Don't log inside tight loops (performance impact)
-- Don't swallow exceptions without logging
-- Don't log at wrong levels (error for info, debug for errors)
-- Don't create unstructured log messages
+**Don't use:**
+
+- Customer IDs
+- Order IDs
+- Session IDs
+- Timestamps
+
+These create too many unique metric streams and increase CloudWatch costs.
 
 ---
 
 ## Metric Naming Conventions
 
-**Format**: `{component}.{operation}.{metric_type}`
+### Format
 
-**Examples**:
-
-```
-# Command handlers
-customer.create.duration_ms
-customer.create.errors
-customer.update.total
-
-# Repository operations
-mongodb.save.duration_ms
-mongodb.find.duration_ms
-mongodb.query.errors
-
-# HTTP operations
-http.call.duration_ms
-http.call.errors
-http.call.total
-
-# Business metrics
-order.placed.total
-payment.processed.total
-email.sent.total
+```text
+{Entity}{Action}   # PascalCase
 ```
 
-**See**: [metrics-patterns.md](reference/metrics-patterns.md)
+### Examples
+
+| Good                | Bad                   |
+| ------------------- | --------------------- |
+| `CustomersCreated`  | `customer_created`    |
+| `OrdersPlaced`      | `orders.placed.count` |
+| `PaymentsProcessed` | `payment-processed`   |
+
+### Guidelines
+
+- Use PascalCase for metric names
+- Use plural nouns for counters (CustomersCreated not CustomerCreated)
+- Use past tense for completed actions
 
 ---
 
-## Architecture Integration
+## Testing Business Metrics
 
-### Layer-Specific Guidance
-
-**Domain Layer**:
-
-- ❌ NO direct logging (pure domain logic)
-- ✅ Emit Domain Events for observability
-- ✅ Use exceptions to signal errors
-
-**Application Layer** (Command Handlers):
-
-- ✅ Inject LoggerInterface
-- ✅ Log command execution start/end
-- ✅ Track handler duration metrics
-- ✅ Manage correlation ID
-- ✅ Log domain events being published
-
-**Infrastructure Layer** (Repositories, HTTP clients):
-
-- ✅ Inject LoggerInterface
-- ✅ Log database operations (query, save, delete)
-- ✅ Log external HTTP calls
-- ✅ Track operation-specific metrics
-
-**See complete examples** in [instrumented-command-handler.md](examples/instrumented-command-handler.md) and [structured-logging.md](reference/structured-logging.md)
-
----
-
-## Example: Fully Instrumented Command Handler
-
-See complete example: [instrumented-command-handler.md](examples/instrumented-command-handler.md)
-
-**Quick preview**:
+### Use the Spy in Tests
 
 ```php
-final readonly class CreateCustomerCommandHandler implements CommandHandlerInterface
+use App\Shared\Application\Observability\Metric\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
+use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
+
+final class CustomerCreatedMetricsSubscriberTest extends TestCase
 {
-    public function __construct(
-        private CustomerRepository $repository,
-        private DomainEventPublisher $publisher,
-        private LoggerInterface $logger,
-        private MetricsCollector $metrics
-    ) {}
-
-    public function __invoke(CreateCustomerCommand $command): void
+    public function testEmitsMetricOnCustomerCreated(): void
     {
-        $correlationId = $this->generateCorrelationId();
-        $startTime = microtime(true);
+        $metricsSpy = new BusinessMetricsEmitterSpy();
+        $dimensionsFactory = new MetricDimensionsFactory();
+        $metricFactory = new CustomersCreatedMetricFactory($dimensionsFactory);
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $this->logger->info('Processing CreateCustomerCommand', [
-            'correlation_id' => $correlationId,
-            'command' => get_class($command),
-            'customer_id' => $command->id,
-        ]);
+        $subscriber = new CustomerCreatedMetricsSubscriber(
+            $metricsSpy,
+            $metricFactory,
+            $logger
+        );
 
-        try {
-            // Domain logic
-            $customer = Customer::create($command->id, $command->name, $command->email);
+        $event = new CustomerCreatedEvent($customerId, $email);
+        ($subscriber)($event);
 
-            // Persist with tracing
-            $this->saveWithTrace($customer, $correlationId);
+        self::assertSame(1, $metricsSpy->count());
 
-            // Publish events
-            $events = $customer->pullDomainEvents();
-            $this->publisher->publish(...$events);
-
-            // Success metrics
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('customer.create.duration', $duration, ['status' => 'success']);
-            $this->metrics->increment('customer.create.total');
-
-            $this->logger->info('Customer created successfully', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id(),
-                'duration_ms' => $duration,
-            ]);
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->error('Failed to create customer', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $command->id,
-                'duration_ms' => $duration,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            $this->metrics->record('customer.create.duration', $duration, ['status' => 'error']);
-            $this->metrics->increment('customer.create.errors', ['error_type' => get_class($e)]);
-
-            throw $e;
+        foreach ($metricsSpy->emitted() as $metric) {
+            self::assertSame('CustomersCreated', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('create', $metric->dimensions()->values()->get('Operation'));
         }
+
+        // Or use the assertion helper
+        $metricsSpy->assertEmittedWithDimensions(
+            'CustomersCreated',
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
     }
 }
 ```
 
+### Test Service Configuration
+
+In `config/services_test.yaml`, the spy is configured:
+
+```yaml
+App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
+
+App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
+  public: true
+```
+
 ---
 
-## Integration with CI Workflow
+## CloudWatch Queries
 
-Before creating a PR, ensure:
+After deploying, query your business metrics:
 
-1. **Run the code** and verify logs are generated
-2. **Check log format** (structured, includes correlation ID)
-3. **Capture evidence** (logs, metrics, traces)
-4. **Add to PR description** using evidence template
-5. **Run CI checks**: `make ci`
+```sql
+-- Total endpoint invocations by resource
+SELECT SUM(EndpointInvocations)
+FROM "CCore/BusinessMetrics"
+GROUP BY Endpoint
 
-**See**: [pr-evidence-guide.md](reference/pr-evidence-guide.md)
+-- Customers created over time
+SELECT SUM(CustomersCreated)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Customer'
+```
+
+---
+
+## What NOT to Track
+
+Remember: AWS AppRunner already provides infrastructure metrics.
+
+**Don't track:**
+
+- Request latency
+- Error rates
+- Response times
+- HTTP status codes
+- Memory usage
+- CPU usage
+
+**Do track:**
+
+- Business events (orders placed, customers created)
+- Business values (order amounts, payment totals)
+- Domain-specific actions (logins, uploads, exports)
 
 ---
 
 ## Success Criteria
 
-After instrumenting code, verify:
+After implementing business metrics:
 
-- ✅ All operations log with correlation ID
-- ✅ Structured logging (arrays, not strings)
-- ✅ Metrics tracked (duration, errors, throughput)
-- ✅ DB operations traced with timing
-- ✅ HTTP calls traced with timing
-- ✅ Error cases logged with full context
-- ✅ No sensitive data in logs
-- ✅ Evidence attached to PR
-- ✅ CI checks pass: `make ci`
+- Each domain event that needs tracking has a corresponding metric subscriber
+- Metrics use typed classes (not arrays)
+- Metrics are emitted via event subscribers (not hardcoded in handlers)
+- Dimensions provide meaningful segmentation
+- Unit tests verify metric emission
+- No infrastructure metrics (AppRunner handles those)
 
----
+### SOLID Compliance Checklist
 
-## Additional Resources
+- [ ] **SRP**: Each metric class has single purpose (define one metric type)
+- [ ] **SRP**: Event subscriber only emits metrics (no business logic)
+- [ ] **OCP**: New metrics added via new classes (no modification to emitter)
+- [ ] **OCP**: New event subscribers added without changing existing code
+- [ ] **LSP**: All metrics properly extend `BusinessMetric` base class
+- [ ] **ISP**: `MetricDimensionsInterface` is minimal (only `values()`)
+- [ ] **DIP**: Handlers depend on `EventBusInterface`, not concrete metrics
 
-### Quick References
+### Type Safety Checklist
 
-- **[Quick Start Guide](reference/quick-start.md)** - Fast-track instrumentation workflow (10 minutes)
-- **[Structured Logging](reference/structured-logging.md)** - Complete logging patterns with examples
-- **[Metrics Patterns](reference/metrics-patterns.md)** - Metric types, naming conventions, and collection
-- **[PR Evidence Guide](reference/pr-evidence-guide.md)** - Evidence collection templates for PRs
-
-### Complete Examples
-
-- **[Instrumented Command Handler](examples/instrumented-command-handler.md)** - Full working example with logs, metrics, and traces
-
-### Integration with Other Skills
-
-- **CI Workflow** skill: Run `make ci` to validate instrumented code before committing
-- **Testing Workflow** skill: Test observability in unit/integration tests
-- **Code Review** skill: Review observability evidence in PRs
-- **Implementing DDD Architecture** skill: Layer-specific instrumentation guidance
-- **API Platform CRUD** skill: Add observability to API endpoints
-- **Database Migrations** skill: Instrument repository operations
+- [ ] NO arrays for metric configuration - use typed classes
+- [ ] NO arrays for metric collections - use `MetricCollection`
+- [ ] All dimensions via `MetricDimensionsInterface` implementations
+- [ ] Arrays are allowed only at infrastructure boundaries (JSON serialization, PSR-3 log context)
+- [ ] Unit enum `MetricUnit` used for all units
 
 ---
 
-## Common Patterns Summary
+## Files Reference
 
-| Pattern             | When                    | Example                                           |
-| ------------------- | ----------------------- | ------------------------------------------------- |
-| **Structured Log**  | Every operation         | `$logger->info('msg', ['correlation_id' => $id])` |
-| **Duration Metric** | Every handler/operation | `$metrics->record('op.duration', $ms)`            |
-| **Error Counter**   | Catch blocks            | `$metrics->increment('op.errors')`                |
-| **DB Trace**        | Repository methods      | Log before/after with timing                      |
-| **HTTP Trace**      | External calls          | Log request/response with timing                  |
-| **Correlation ID**  | Start of request        | Generate/extract from headers                     |
+### Metric Classes
+
+- `src/Shared/Application/Observability/Metric/BusinessMetric.php` - Base class
+- `src/Shared/Application/Observability/Metric/MetricUnit.php` - Unit enum
+- `src/Shared/Application/Observability/Metric/MetricDimension.php` - Dimension key/value
+- `src/Shared/Application/Observability/Metric/MetricDimensions.php` - Dimension collection
+- `src/Shared/Application/Observability/Metric/MetricCollection.php` - Metrics collection
+- `src/Shared/Application/Observability/Metric/EndpointInvocationsMetric.php` - Endpoint metric
+- `src/Core/Customer/Application/Metric/CustomersCreatedMetric.php` - Customer create metric
+- `src/Core/Customer/Application/Metric/CustomersUpdatedMetric.php` - Customer update metric
+- `src/Core/Customer/Application/Metric/CustomersDeletedMetric.php` - Customer delete metric
+
+### Infrastructure
+
+- `src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php` - Interface
+- `src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php` - EMF implementation
+- `src/Shared/Infrastructure/Observability/EmfLogFormatter.php` - Monolog formatter
+
+### Event Subscribers
+
+- `src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php` - HTTP metrics
+- `src/Core/Customer/Application/EventSubscriber/CustomerCreatedMetricsSubscriber.php`
+- `src/Core/Customer/Application/EventSubscriber/CustomerUpdatedMetricsSubscriber.php`
+- `src/Core/Customer/Application/EventSubscriber/CustomerDeletedMetricsSubscriber.php`
+
+### Configuration
+
+- `config/packages/monolog.yaml` - EMF channel configuration
+- `config/services.yaml` - Production wiring
+- `config/services_test.yaml` - Test spy wiring
 
 ---
 
-**For detailed implementation patterns, troubleshooting, and complete examples → See supporting files in `reference/` and `examples/` directories.**
+## AWS Documentation
+
+- [CloudWatch Embedded Metric Format](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html)
+- [AWS App Runner Metrics](https://docs.aws.amazon.com/apprunner/latest/dg/monitor-cw.html)

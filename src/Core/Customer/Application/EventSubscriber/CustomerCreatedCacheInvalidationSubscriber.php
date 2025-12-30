@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -13,10 +12,15 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 /**
  * Customer Created Event Cache Invalidation Subscriber
  *
- * Invalidates cache when a customer is created
+ * Invalidates cache when a customer is created.
+ *
+ * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
+ * This subscriber runs in Symfony Messenger workers. Exceptions propagate to
+ * DomainEventMessageHandler which catches, logs, and emits failure metrics.
+ * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerCreatedCacheInvalidationSubscriber implements
-    DomainEventSubscriberInterface
+    CustomerCacheInvalidationSubscriberInterface
 {
     public function __construct(
         private TagAwareCacheInterface $cache,
@@ -27,29 +31,17 @@ final readonly class CustomerCreatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerCreatedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $this->cache->invalidateTags([
-                'customer.' . $event->customerId(),
-                'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
-                'customer.collection',
-            ]);
+        $this->cache->invalidateTags([
+            'customer.' . $event->customerId(),
+            'customer.email.' . $this->cacheKeyBuilder->hashEmail($event->customerEmail()),
+            'customer.collection',
+        ]);
 
-            $this->logger->info('Cache invalidated after customer creation', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'operation' => 'cache.invalidation',
-                'reason' => 'customer_created',
-            ]);
-        } catch (\Throwable $e) {
-            // Log cache error but allow the business operation to succeed
-            $this->logger->error('Cache invalidation failed after customer creation', [
-                'customer_id' => $event->customerId(),
-                'event_id' => $event->eventId(),
-                'error' => $e->getMessage(),
-                'operation' => 'cache.invalidation.error',
-            ]);
-        }
+        $this->logger->info('Cache invalidated after customer creation', [
+            'event_id' => $event->eventId(),
+            'operation' => 'cache.invalidation',
+            'reason' => 'customer_created',
+        ]);
     }
 
     /**

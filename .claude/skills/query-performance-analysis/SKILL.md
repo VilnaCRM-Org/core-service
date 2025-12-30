@@ -186,6 +186,28 @@ docker compose exec php bin/console doctrine:mongodb:schema:update
 
 ### Issue 3: Missing Indexes on Filtered Fields
 
+#### Cursor pagination + ULID (\_id) index strategy (this repo)
+
+This service uses **cursor pagination** on `ulid` via API Platform, and Doctrine ODM maps `ulid` as the MongoDB document identifier (`_id`) via:
+
+```xml
+<id field-name="ulid" type="ulid" strategy="NONE" />
+```
+
+**Best practice** for cursor pagination with filters is a **compound index** that starts with the filter field(s) and ends with the cursor field:
+
+- `{ phone: 1, _id: 1 }` (API Platform filter by `phone`, cursor by `ulid/_id`)
+- `{ createdAt: 1, _id: 1 }` (date filter + cursor)
+
+In XML mappings, you should still declare the cursor part as `ulid` (Doctrine will materialize it as `_id` in Mongo):
+
+```xml
+<index>
+  <key name="phone" order="asc" />
+  <key name="ulid" order="asc" />
+</index>
+```
+
 **Detection**: Queries filter/sort on fields without indexes
 
 **Common patterns needing indexes**:

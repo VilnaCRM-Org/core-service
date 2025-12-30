@@ -1,15 +1,14 @@
-# Complete Example: Instrumented Command Handler
+# Complete Example: Command Handler with Business Metrics
 
-This example demonstrates a fully instrumented command handler with all three pillars of observability: **Logs, Metrics, and Traces**.
+This example demonstrates a fully instrumented command handler with AWS EMF business metrics.
 
 ## Scenario
 
 Creating a new customer with:
 
-- Structured logging with correlation ID
-- Latency and error metrics
-- Database operation tracing
-- Email service HTTP call tracing
+- Business metric emission via AWS EMF
+- Proper dimension usage
+- Unit test coverage
 
 ---
 
@@ -20,425 +19,322 @@ Creating a new customer with:
 
 declare(strict_types=1);
 
-namespace App\Customer\Application\CommandHandler;
+namespace App\Core\Customer\Application\CommandHandler;
 
-use App\Customer\Application\Command\CreateCustomerCommand;
-use App\Customer\Domain\Entity\Customer;
-use App\Customer\Domain\Repository\CustomerRepositoryInterface;
-use App\Customer\Domain\ValueObject\CustomerEmail;
-use App\Customer\Domain\ValueObject\CustomerName;
-use App\Shared\Application\Service\MetricsCollector;
+use App\Core\Customer\Application\Command\CreateCustomerCommand;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\ValueObject\CustomerEmail;
+use App\Core\Customer\Domain\ValueObject\CustomerName;
 use App\Shared\Domain\Bus\Event\DomainEventPublisherInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Uid\Uuid;
 
-final readonly class CreateCustomerCommandHandler implements CommandHandlerInterface
+final readonly class CreateCustomerCommandHandler
 {
     public function __construct(
         private CustomerRepositoryInterface $repository,
-        private DomainEventPublisherInterface $publisher,
-        private LoggerInterface $logger,
-        private MetricsCollector $metrics,
-        private EmailService $emailService
+        private DomainEventPublisherInterface $publisher
     ) {}
 
     public function __invoke(CreateCustomerCommand $command): void
     {
-        $correlationId = $this->generateCorrelationId();
-        $startTime = microtime(true);
-
-        // 1. LOG: Start of operation
-        $this->logger->info('Processing CreateCustomerCommand', [
-            'correlation_id' => $correlationId,
-            'command' => CreateCustomerCommand::class,
-            'customer_id' => $command->id,
-            'customer_email' => $command->email,
-            'timestamp' => time(),
-        ]);
-
-        try {
-            // 2. Domain logic
-            $customer = $this->createCustomerWithTrace($command, $correlationId);
-
-            // 3. TRACE: Database operation
-            $this->saveCustomerWithTrace($customer, $correlationId);
-
-            // 4. TRACE: External service call
-            $this->sendWelcomeEmailWithTrace($customer, $correlationId);
-
-            // 5. Publish domain events
-            $events = $customer->pullDomainEvents();
-            $this->publishEventsWithTrace($events, $correlationId);
-
-            // 6. METRICS: Success metrics
-            $duration = (microtime(true) - $startTime) * 1000;
-            $this->metrics->record('customer.create.duration', $duration, [
-                'status' => 'success',
-            ]);
-            $this->metrics->increment('customer.create.total');
-
-            // 7. LOG: Success
-            $this->logger->info('Customer created successfully', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id()->value(),
-                'duration_ms' => round($duration, 2),
-            ]);
-
-        } catch (\Throwable $e) {
-            // 8. Handle errors with full observability
-            $this->handleErrorWithTrace($e, $command, $correlationId, $startTime);
-
-            throw $e;
-        }
-    }
-
-    private function createCustomerWithTrace(
-        CreateCustomerCommand $command,
-        string $correlationId
-    ): Customer {
-        $this->logger->debug('Creating customer domain entity', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $command->id,
-        ]);
-
+        // 1. Create domain entity
         $customer = Customer::create(
             id: $command->id,
             name: CustomerName::fromString($command->name),
             email: CustomerEmail::fromString($command->email)
         );
 
-        $this->logger->debug('Customer domain entity created', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id()->value(),
-        ]);
+        // 2. Persist to repository
+        $this->repository->save($customer);
 
-        return $customer;
-    }
-
-    private function saveCustomerWithTrace(Customer $customer, string $correlationId): void
-    {
-        $startTime = microtime(true);
-
-        $this->logger->debug('Saving customer to MongoDB', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id()->value(),
-            'operation' => 'mongodb.save',
-        ]);
-
-        try {
-            $this->repository->save($customer);
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            // METRICS: Database operation timing
-            $this->metrics->record('mongodb.customer.save.duration', $duration);
-
-            $this->logger->info('Customer saved to MongoDB', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id()->value(),
-                'operation' => 'mongodb.save',
-                'duration_ms' => round($duration, 2),
-            ]);
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->error('Failed to save customer to MongoDB', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id()->value(),
-                'operation' => 'mongodb.save',
-                'duration_ms' => round($duration, 2),
-                'error' => $e->getMessage(),
-            ]);
-
-            // METRICS: Database error
-            $this->metrics->increment('mongodb.customer.save.errors', [
-                'error_type' => get_class($e),
-            ]);
-
-            throw $e;
-        }
-    }
-
-    private function sendWelcomeEmailWithTrace(Customer $customer, string $correlationId): void
-    {
-        $startTime = microtime(true);
-
-        $this->logger->info('Sending welcome email', [
-            'correlation_id' => $correlationId,
-            'customer_id' => $customer->id()->value(),
-            'customer_email' => $customer->email()->value(),
-            'operation' => 'http.email.send',
-        ]);
-
-        try {
-            $this->emailService->sendWelcomeEmail(
-                email: $customer->email()->value(),
-                name: $customer->name()->value()
-            );
-
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            // METRICS: Email service timing
-            $this->metrics->record('email.send.duration', $duration, [
-                'email_type' => 'welcome',
-            ]);
-            $this->metrics->increment('email.sent.total', [
-                'email_type' => 'welcome',
-            ]);
-
-            $this->logger->info('Welcome email sent successfully', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id()->value(),
-                'operation' => 'http.email.send',
-                'duration_ms' => round($duration, 2),
-            ]);
-
-        } catch (\Throwable $e) {
-            $duration = (microtime(true) - $startTime) * 1000;
-
-            $this->logger->warning('Failed to send welcome email (non-critical)', [
-                'correlation_id' => $correlationId,
-                'customer_id' => $customer->id()->value(),
-                'operation' => 'http.email.send',
-                'duration_ms' => round($duration, 2),
-                'error' => $e->getMessage(),
-            ]);
-
-            // METRICS: Email error (non-critical, don't rethrow)
-            $this->metrics->increment('email.send.errors', [
-                'email_type' => 'welcome',
-                'error_type' => get_class($e),
-            ]);
-
-            // Don't throw - email failure shouldn't block customer creation
-        }
-    }
-
-    private function publishEventsWithTrace(array $events, string $correlationId): void
-    {
-        $eventCount = count($events);
-
-        $this->logger->debug('Publishing domain events', [
-            'correlation_id' => $correlationId,
-            'event_count' => $eventCount,
-        ]);
-
+        // 3. Publish domain events
+        $events = $customer->pullDomainEvents();
         $this->publisher->publish(...$events);
 
-        $this->logger->debug('Domain events published', [
-            'correlation_id' => $correlationId,
-            'event_count' => $eventCount,
-        ]);
-
-        // METRICS: Event publishing
-        $this->metrics->increment('domain.events.published', [
-            'event_type' => 'customer',
-        ], $eventCount);
+        // 4. Metrics are emitted in domain event subscribers (best practice)
     }
+}
+```
 
-    private function handleErrorWithTrace(
-        \Throwable $e,
-        CreateCustomerCommand $command,
-        string $correlationId,
-        float $startTime
-    ): void {
-        $duration = (microtime(true) - $startTime) * 1000;
+---
 
-        // LOG: Comprehensive error logging
-        $this->logger->error('Failed to create customer', [
-            'correlation_id' => $correlationId,
-            'command' => CreateCustomerCommand::class,
-            'customer_id' => $command->id,
-            'customer_email' => $command->email,
-            'duration_ms' => round($duration, 2),
-            'error_type' => get_class($e),
-            'error_message' => $e->getMessage(),
-            'error_file' => $e->getFile(),
-            'error_line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
-        ]);
+## EMF Output
 
-        // METRICS: Error tracking
-        $this->metrics->record('customer.create.duration', $duration, [
-            'status' => 'error',
-        ]);
-        $this->metrics->increment('customer.create.errors', [
-            'error_type' => get_class($e),
-        ]);
-    }
+When this handler executes, the following EMF log is written to stdout:
 
-    private function generateCorrelationId(): string
+```json
+{
+  "_aws": {
+    "Timestamp": 1702425600000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "CCore/BusinessMetrics",
+        "Dimensions": [["Endpoint", "Operation"]],
+        "Metrics": [{ "Name": "CustomersCreated", "Unit": "Count" }]
+      }
+    ]
+  },
+  "Endpoint": "Customer",
+  "Operation": "create",
+  "CustomersCreated": 1
+}
+```
+
+CloudWatch automatically extracts this as a metric in the `CCore/BusinessMetrics` namespace.
+
+---
+
+## Unit Test for Event Subscriber
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Customer\Application\EventSubscriber;
+
+use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscriber;
+use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
+use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
+use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
+use App\Tests\Unit\UnitTestCase;
+
+final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
+{
+    private BusinessMetricsEmitterSpy $metricsSpy;
+    private CustomerCreatedMetricsSubscriber $subscriber;
+
+    protected function setUp(): void
     {
-        // In production, extract from request headers if available
-        // For now, generate a new UUID v4
-        return Uuid::v4()->toString();
+        parent::setUp();
+
+        $this->metricsSpy = new BusinessMetricsEmitterSpy();
+
+        $dimensionsFactory = new MetricDimensionsFactory();
+        $metricFactory = new \App\Core\Customer\Application\Factory\CustomersCreatedMetricFactory($dimensionsFactory);
+
+        $this->subscriber = new CustomerCreatedMetricsSubscriber(
+            $this->metricsSpy,
+            $metricFactory
+        );
+    }
+
+    public function testEmitsCustomerCreatedMetric(): void
+    {
+        $event = new CustomerCreatedEvent(
+            customerId: '01JCXYZ1234567890ABCDEFGH',
+            customerEmail: 'john.doe@example.com'
+        );
+
+        ($this->subscriber)($event);
+
+        self::assertSame(1, $this->metricsSpy->count());
+
+        foreach ($this->metricsSpy->emitted() as $metric) {
+            self::assertSame('CustomersCreated', $metric->name());
+            self::assertSame(1, $metric->value());
+            self::assertSame('Customer', $metric->dimensions()->values()->get('Endpoint'));
+            self::assertSame('create', $metric->dimensions()->values()->get('Operation'));
+        }
+    }
+
+    public function testMetricHasCorrectDimensions(): void
+    {
+        $event = new CustomerCreatedEvent(
+            customerId: '01JCXYZ1234567890ABCDEFGH',
+            customerEmail: 'john.doe@example.com'
+        );
+
+        ($this->subscriber)($event);
+
+        $this->metricsSpy->assertEmittedWithDimensions(
+            'CustomersCreated',
+            new MetricDimension('Endpoint', 'Customer'),
+            new MetricDimension('Operation', 'create')
+        );
+    }
+
+    public function testSubscribesToCorrectEvent(): void
+    {
+        $subscribedEvents = $this->subscriber->subscribedTo();
+
+        self::assertCount(1, $subscribedEvents);
+        self::assertContains(CustomerCreatedEvent::class, $subscribedEvents);
     }
 }
 ```
 
 ---
 
-## Sample Log Output
+## Example: Multiple Metrics via Event Subscriber
+
+For operations that track multiple business values, use `MetricCollection` in an event subscriber:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\Order\Application\EventSubscriber;
+
+use App\Core\Order\Application\Factory\OrderItemCountMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrdersPlacedMetricFactoryInterface;
+use App\Core\Order\Application\Factory\OrderValueMetricFactoryInterface;
+use App\Core\Order\Domain\Event\OrderPlacedEvent;
+use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+
+final readonly class OrderPlacedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __construct(
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private OrdersPlacedMetricFactoryInterface $ordersPlacedMetricFactory,
+        private OrderValueMetricFactoryInterface $orderValueMetricFactory,
+        private OrderItemCountMetricFactoryInterface $orderItemCountMetricFactory
+    ) {}
+
+    public function __invoke(OrderPlacedEvent $event): void
+    {
+        // Error handling is automatic via DomainEventMessageHandler.
+        // Subscribers are executed in async workers - failures are logged + emit metrics.
+        // This ensures observability never breaks the main request (AP from CAP).
+        $this->metricsEmitter->emitCollection(new MetricCollection(
+            $this->ordersPlacedMetricFactory->create($event->paymentMethod()),
+            $this->orderValueMetricFactory->create($event->totalAmount()),
+            $this->orderItemCountMetricFactory->create($event->itemCount())
+        ));
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function subscribedTo(): array
+    {
+        return [OrderPlacedEvent::class];
+    }
+}
+```
+
+### EMF Output for Multiple Metrics
 
 ```json
 {
-  "level": "info",
-  "message": "Processing CreateCustomerCommand",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "command": "App\\Customer\\Application\\Command\\CreateCustomerCommand",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "customer_email": "john.doe@example.com",
-    "timestamp": 1702425600
-  }
-}
-
-{
-  "level": "debug",
-  "message": "Saving customer to MongoDB",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "mongodb.save"
-  }
-}
-
-{
-  "level": "info",
-  "message": "Customer saved to MongoDB",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "mongodb.save",
-    "duration_ms": 12.45
-  }
-}
-
-{
-  "level": "info",
-  "message": "Sending welcome email",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "customer_email": "john.doe@example.com",
-    "operation": "http.email.send"
-  }
-}
-
-{
-  "level": "info",
-  "message": "Welcome email sent successfully",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "http.email.send",
-    "duration_ms": 234.56
-  }
-}
-
-{
-  "level": "info",
-  "message": "Customer created successfully",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "duration_ms": 278.34
-  }
+  "_aws": {
+    "Timestamp": 1702425600000,
+    "CloudWatchMetrics": [
+      {
+        "Namespace": "CCore/BusinessMetrics",
+        "Dimensions": [["Endpoint", "Operation", "PaymentMethod"]],
+        "Metrics": [
+          { "Name": "OrdersPlaced", "Unit": "Count" },
+          { "Name": "OrderValue", "Unit": "None" },
+          { "Name": "OrderItemCount", "Unit": "Count" }
+        ]
+      }
+    ]
+  },
+  "Endpoint": "Order",
+  "Operation": "create",
+  "PaymentMethod": "credit_card",
+  "OrdersPlaced": 1,
+  "OrderValue": 299.99,
+  "OrderItemCount": 3
 }
 ```
 
 ---
 
-## Metrics Recorded
+## Example: Conditional Metrics
 
-```text
-customer.create.duration: 278.34ms (status=success)
-customer.create.total: 1
-mongodb.customer.save.duration: 12.45ms
-email.send.duration: 234.56ms (email_type=welcome)
-email.sent.total: 1 (email_type=welcome)
-domain.events.published: 2 (event_type=customer)
+For operations with different outcomes:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\Auth\Application\CommandHandler;
+
+use App\Core\Auth\Application\Command\LoginCommand;
+final readonly class LoginCommandHandler
+{
+    public function __construct(
+        private AuthServiceInterface $authService
+    ) {}
+
+    public function __invoke(LoginCommand $command): void
+    {
+        $result = $this->authService->authenticate(
+            $command->username,
+            $command->password
+        );
+
+        // Publish a domain event and emit metrics in a dedicated subscriber (best practice)
+
+        if (!$result->isSuccess()) {
+            throw new AuthenticationFailedException();
+        }
+    }
+}
 ```
 
 ---
 
-## Trace Summary
+## CloudWatch Queries
 
-| Operation                | Duration | Status     |
-| ------------------------ | -------- | ---------- |
-| Total handler execution  | 278.34ms | ✅ Success |
-| Customer domain creation | ~1ms     | ✅ Success |
-| MongoDB save             | 12.45ms  | ✅ Success |
-| Email service call       | 234.56ms | ✅ Success |
-| Event publishing         | ~2ms     | ✅ Success |
+After deploying, query your business metrics:
 
----
+```sql
+-- Total customers created
+SELECT SUM(CustomersCreated)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Customer'
 
-## Error Scenario Example
+-- Orders by payment method
+SELECT SUM(OrdersPlaced), AVG(OrderValue)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Order'
+GROUP BY PaymentMethod
 
-If the MongoDB save fails:
-
-```json
-{
-  "level": "error",
-  "message": "Failed to save customer to MongoDB",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "operation": "mongodb.save",
-    "duration_ms": 5.23,
-    "error": "Connection timeout to MongoDB"
-  }
-}
-
-{
-  "level": "error",
-  "message": "Failed to create customer",
-  "context": {
-    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-    "command": "App\\Customer\\Application\\Command\\CreateCustomerCommand",
-    "customer_id": "01JCXYZ1234567890ABCDEFGH",
-    "customer_email": "john.doe@example.com",
-    "duration_ms": 15.67,
-    "error_type": "MongoDB\\Driver\\Exception\\ConnectionTimeoutException",
-    "error_message": "Connection timeout to MongoDB",
-    "error_file": "/app/src/Customer/Infrastructure/Repository/MongoCustomerRepository.php",
-    "error_line": 45,
-    "trace": "..."
-  }
-}
-```
-
-**Metrics**:
-
-```text
-customer.create.duration: 15.67ms (status=error)
-customer.create.errors: 1 (error_type=ConnectionTimeoutException)
-mongodb.customer.save.errors: 1 (error_type=ConnectionTimeoutException)
+-- Login success rate
+SELECT SUM(LoginAttempts)
+FROM "CCore/BusinessMetrics"
+WHERE Endpoint = 'Auth'
+GROUP BY Result
 ```
 
 ---
 
 ## Key Takeaways
 
-1. **Correlation ID** flows through every operation
-2. **Structured logs** provide searchable context
-3. **Metrics** quantify performance and errors
-4. **Tracing** shows operation timing breakdown
-5. **Error handling** includes full context for debugging
-6. **Non-critical failures** (email) don't block the operation
+1. **Inject `BusinessMetricsEmitterInterface`** in constructor
+2. **Emit after successful operation** - metric represents completed business event
+3. **Use PascalCase** for metric names
+4. **Keep dimensions low cardinality** - no IDs, timestamps, or email addresses
+5. **Test with `BusinessMetricsEmitterSpy`** to verify emission
+6. **Focus on business value** - not infrastructure metrics
 
 ---
 
-## Using This Pattern
+## What NOT to Include
 
-Copy this pattern for any command handler:
+AWS AppRunner already provides infrastructure metrics. Don't add:
 
-1. Generate correlation ID at start
-2. Log operation start with context
-3. Wrap DB operations with tracing
-4. Wrap HTTP calls with tracing
-5. Record metrics for duration and errors
-6. Log success/failure with correlation ID
-7. Include full error context in logs
+- ❌ Operation duration/latency
+- ❌ Error counters
+- ❌ Request counts (use automatic `EndpointInvocations`)
+- ❌ HTTP status codes
+- ❌ Database query timing
+
+These are infrastructure concerns handled by AWS AppRunner automatically.
+
+---
+
+## Files Reference
+
+- Interface: `src/Shared/Application/Observability/Emitter/BusinessMetricsEmitterInterface.php`
+- Implementation: `src/Shared/Infrastructure/Observability/AwsEmfBusinessMetricsEmitter.php`
+- Test spy: `tests/Unit/Shared/Infrastructure/Observability/BusinessMetricsEmitterSpy.php`
+- Auto metrics: `src/Shared/Infrastructure/Observability/ApiEndpointBusinessMetricsSubscriber.php`

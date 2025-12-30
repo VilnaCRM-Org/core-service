@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
-use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -13,11 +12,16 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 /**
  * Customer Updated Event Cache Invalidation Subscriber
  *
- * Invalidates cache when a customer is updated
- * Handles email change edge case (both old and new email caches)
+ * Invalidates cache when a customer is updated.
+ * Handles email change edge case (both old and new email caches).
+ *
+ * ARCHITECTURAL DECISION: Processed via async queue (ResilientAsyncEventBus)
+ * This subscriber runs in Symfony Messenger workers. Exceptions propagate to
+ * DomainEventMessageHandler which catches, logs, and emits failure metrics.
+ * We follow AP from CAP theorem (Availability + Partition tolerance over Consistency).
  */
 final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
-    DomainEventSubscriberInterface
+    CustomerCacheInvalidationSubscriberInterface
 {
     public function __construct(
         private TagAwareCacheInterface $cache,
@@ -28,14 +32,9 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
 
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        // Cache invalidation is best-effort: don't fail the business operation if cache is down
-        try {
-            $tagsToInvalidate = $this->buildTagsToInvalidate($event);
-            $this->cache->invalidateTags($tagsToInvalidate);
-            $this->logSuccess($event);
-        } catch (\Throwable $e) {
-            $this->logError($event, $e);
-        }
+        $tagsToInvalidate = $this->buildTagsToInvalidate($event);
+        $this->cache->invalidateTags($tagsToInvalidate);
+        $this->logSuccess($event);
     }
 
     /**
@@ -69,21 +68,10 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     private function logSuccess(CustomerUpdatedEvent $event): void
     {
         $this->logger->info('Cache invalidated after customer update', [
-            'customer_id' => $event->customerId(),
-            'email_changed' => $event->emailChanged(),
             'event_id' => $event->eventId(),
+            'email_changed' => $event->emailChanged(),
             'operation' => 'cache.invalidation',
             'reason' => 'customer_updated',
-        ]);
-    }
-
-    private function logError(CustomerUpdatedEvent $event, \Throwable $e): void
-    {
-        $this->logger->error('Cache invalidation failed after customer update', [
-            'customer_id' => $event->customerId(),
-            'event_id' => $event->eventId(),
-            'error' => $e->getMessage(),
-            'operation' => 'cache.invalidation.error',
         ]);
     }
 }

@@ -141,6 +141,112 @@ namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 - ✅ Use `final` for classes that shouldn't be extended
 - ❌ NO "Helper" or "Util" classes (code smell - extract specific responsibilities)
 
+**E. Factory Pattern (Maintainability & Flexibility)**:
+
+> **Use factories when creating typed classes with dependencies or configuration**
+
+Factories provide maintainability, flexibility, and testability for object creation:
+
+| Scenario                         | Direct Instantiation | Factory              |
+| -------------------------------- | -------------------- | -------------------- |
+| Simple value objects             | ✅ Acceptable        | Optional             |
+| Objects with config/dependencies | ❌ Avoid             | ✅ Required          |
+| Objects created in production    | ❌ Avoid             | ✅ Required          |
+| Objects created in tests         | ✅ Acceptable        | Optional (for speed) |
+
+**Benefits of factories**:
+
+- ✅ Centralized object creation logic
+- ✅ Easy to inject different implementations (testing, staging, prod)
+- ✅ Configuration changes don't affect consumers
+- ✅ Single place to add validation/transformation
+- ✅ Enables dependency injection for complex objects
+
+**Example**:
+
+```php
+// ❌ BAD: Direct instantiation with configuration
+public function emit(BusinessMetric $metric): void
+{
+    $timestamp = (int)(microtime(true) * 1000);
+    $payload = new EmfPayload(
+        new EmfAwsMetadata($timestamp, new EmfCloudWatchMetricConfig(...)),
+        new EmfDimensionValueCollection(...),
+        new EmfMetricValueCollection(...)
+    );
+    $this->logger->info($payload);
+}
+
+// ✅ GOOD: Factory handles complexity
+public function emit(BusinessMetric $metric): void
+{
+    $payload = $this->payloadFactory->createFromMetric($metric);
+    $this->logger->info($payload);
+}
+```
+
+**Factory naming convention**:
+
+- `{ObjectName}Factory` - creates `{ObjectName}` instances
+- Location: Same namespace as the object being created
+- Example: `EmfPayloadFactory` creates `EmfPayload`
+
+**When factories are REQUIRED** (in production code):
+
+1. Objects with injected dependencies (timestamp providers, config, etc.)
+2. Objects that require complex construction logic
+3. Objects that might need different implementations per environment
+4. Objects created from external input (DTOs, metrics, etc.)
+
+**When factories are OPTIONAL** (in tests):
+
+- Tests can instantiate objects directly for simplicity
+- Test-specific factories can be created for reusable test fixtures
+
+**F. Classes Over Arrays (Type Safety)**:
+
+> **Prefer typed classes and collections over arrays for structured data**
+
+Arrays lack type safety and self-documentation. Use concrete classes instead:
+
+| Pattern       | Bad (Array)                               | Good (Class)                                |
+| ------------- | ----------------------------------------- | ------------------------------------------- |
+| Configuration | `['endpoint' => 'X', 'operation' => 'Y']` | `new EndpointOperationDimensions('X', 'Y')` |
+| Return data   | `return ['name' => $n, 'value' => $v]`    | `return new MetricData($n, $v)`             |
+| Method params | `function emit(array $metrics)`           | `function emit(MetricCollection $metrics)`  |
+| Events data   | `['type' => 'created', 'id' => $id]`      | `new CustomerCreatedEvent($id)`             |
+
+**Benefits of typed classes**:
+
+- ✅ IDE autocompletion and refactoring support
+- ✅ Static analysis catches type errors
+- ✅ Self-documenting code (class name describes purpose)
+- ✅ Encapsulation (validation in constructor)
+- ✅ Single Responsibility (each class has clear purpose)
+- ✅ Open/Closed (extend via new classes, not array key changes)
+
+**Collection Pattern**:
+
+```php
+// ❌ BAD: Array of arrays
+$metrics = [
+    ['name' => 'OrdersPlaced', 'value' => 1],
+    ['name' => 'OrderValue', 'value' => 99.99],
+];
+
+// ✅ GOOD: Typed collection of objects
+$metrics = new MetricCollection(
+    new OrdersPlacedMetric(value: 1),
+    new OrderValueMetric(value: 99.99)
+);
+```
+
+**When arrays ARE acceptable**:
+
+- Simple key-value maps for serialization output (`toArray()` methods)
+- Framework integration points requiring arrays
+- Temporary internal data within a single method
+
 **Action on Violations**:
 
 1. **Class in Wrong Directory**:
@@ -270,6 +376,9 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Decrease quality thresholds (PHPInsights, test coverage, mutation score)
 - Allow cyclomatic complexity > 5 per method
 - Finish task before `make ci` shows success message
+- Use arrays for structured data when typed classes would be more appropriate
+- Inject cross-cutting concerns (metrics, logging) directly into command handlers - use event subscribers instead
+- Create complex objects directly without factories in production code (use factories for maintainability)
 
 **ALWAYS**:
 
@@ -288,6 +397,10 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Maintain 100% test coverage and 100% MSI (0 escaped mutants)
 - Keep cyclomatic complexity < 5 per method
 - Mark conversations resolved after addressing
+- Prefer typed classes over arrays for structured data (configuration, DTOs, events)
+- Use collections (`MetricCollection`, `EntityCollection`) instead of arrays of objects
+- Add new features via new classes following Open/Closed principle (don't modify existing classes)
+- Use factories for creating objects with dependencies or complex construction (required in production, optional in tests)
 
 ## Format (Output)
 
@@ -331,6 +444,12 @@ Ref: https://github.com/owner/repo/pull/XX#discussion_rYYYYYYY
   - [ ] Constructor property promotion used
   - [ ] All dependencies injected (no default instantiation)
   - [ ] `readonly` and `final` used appropriately
+- [ ] **Type safety & SOLID principles enforced**:
+  - [ ] Typed classes used instead of arrays for structured data
+  - [ ] Collections used instead of arrays of objects
+  - [ ] New features added via new classes (Open/Closed principle)
+  - [ ] Cross-cutting concerns (metrics) in event subscribers, not handlers
+  - [ ] Factories used for complex object creation (required in production, optional in tests)
 - [ ] Committable suggestions applied and committed separately
 - [ ] LLM prompts executed and implemented
 - [ ] Questions answered (code or reply)
@@ -410,6 +529,121 @@ class CustomerHelper {
 - CustomerEmailValidator (Validator/)
 - CustomerNameFormatter (Formatter/)
 - CustomerDataConverter (Converter/)
+```
+
+### Issue 5: Arrays Instead of Typed Classes
+
+**Scenario**: Method returns/accepts arrays for structured data
+
+```php
+❌ WRONG: Array for configuration/data
+public function emit(array $metrics): void
+{
+    foreach ($metrics as $metric) {
+        $name = $metric['name'];     // No type safety
+        $value = $metric['value'];   // No IDE support
+    }
+}
+
+✅ CORRECT: Typed collection of objects
+public function emit(MetricCollection $metrics): void
+{
+    foreach ($metrics as $metric) {
+        $name = $metric->name();     // Type-safe
+        $value = $metric->value();   // IDE autocomplete
+    }
+}
+```
+
+### Issue 6: Missing Factory for Complex Object Creation
+
+**Scenario**: Complex objects created directly in production code
+
+```php
+❌ WRONG: Direct instantiation with configuration
+final class AwsEmfBusinessMetricsEmitter
+{
+    public function emit(BusinessMetric $metric): void
+    {
+        $timestamp = (int)(microtime(true) * 1000);
+        $dimensionValues = [];
+        foreach ($metric->dimensions()->toArray() as $key => $value) {
+            $dimensionValues[] = new EmfDimensionValue($key, $value);
+        }
+        $payload = new EmfPayload(
+            new EmfAwsMetadata($timestamp, new EmfCloudWatchMetricConfig(...)),
+            new EmfDimensionValueCollection(...$dimensionValues),
+            new EmfMetricValueCollection(new EmfMetricValue($metric->name(), $metric->value()))
+        );
+        // Complex construction logic mixed with business logic
+    }
+}
+
+✅ CORRECT: Factory encapsulates complexity
+final class AwsEmfBusinessMetricsEmitter
+{
+    public function __construct(
+        private EmfPayloadFactory $payloadFactory  // Factory injected
+    ) {}
+
+    public function emit(BusinessMetric $metric): void
+    {
+        $payload = $this->payloadFactory->createFromMetric($metric);
+        // Clean separation - emitter only handles emission
+    }
+}
+```
+
+**Note**: In tests, direct instantiation is acceptable for simplicity and speed.
+
+### Issue 7: Cross-Cutting Concerns in Handlers
+
+**Scenario**: Metrics/logging injected directly into command handlers
+
+```php
+❌ WRONG: Metrics in command handler
+final class CreateCustomerHandler
+{
+    public function __construct(
+        private CustomerRepository $repository,
+        private BusinessMetricsEmitterInterface $metrics  // Wrong place!
+    ) {}
+
+    public function __invoke(CreateCustomerCommand $cmd): void
+    {
+        $customer = Customer::create(...);
+        $this->repository->save($customer);
+        $this->metrics->emit(new CustomersCreatedMetric());  // Violates SRP
+    }
+}
+
+✅ CORRECT: Metrics in dedicated event subscriber
+final class CreateCustomerHandler
+{
+    public function __construct(
+        private CustomerRepository $repository,
+        private EventBusInterface $eventBus
+    ) {}
+
+    public function __invoke(CreateCustomerCommand $cmd): void
+    {
+        $customer = Customer::create(...);
+        $this->repository->save($customer);
+        $this->eventBus->publish(...$customer->pullDomainEvents());
+        // Metrics subscriber handles emission
+    }
+}
+
+final class CustomerCreatedMetricsSubscriber implements DomainEventSubscriberInterface
+{
+    public function __invoke(CustomerCreatedEvent $event): void
+    {
+        // Error handling is automatic via DomainEventMessageHandler.
+        // Subscribers are executed in async workers - failures are logged + emit metrics.
+        // This ensures observability never breaks the main request (AP from CAP).
+        $this->metricsEmitter->emit($this->metricFactory->create());
+    }
+}
 ```
 
 ## Related Skills

@@ -95,6 +95,24 @@ services:
     resource: '../src/'
     exclude:
       - '../src/Shared/Kernel.php'
+      - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
+
+  App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory:
+    arguments:
+      $namespace: '%env(AWS_EMF_NAMESPACE)%'
+
+  App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy:
+    arguments:
+      $delayMs: '%env(int:MESSENGER_RETRY_DELAY_MS)%'
+
+  App\Shared\Application\Validator\MutationInputValidatorInterface:
+    alias: App\Shared\Application\Validator\MutationInputValidator
+
+  App\Shared\Application\Validator\LoggingMutationInputValidator:
+    decorates: App\Shared\Application\Validator\MutationInputValidator
+    arguments:
+      $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
+      $logger: '@logger'
 
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
@@ -111,18 +129,7 @@ services:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
     public: true
 
-  # Cache invalidation event subscribers - explicitly inject cache.customer
-  App\Core\Customer\Application\EventSubscriber\CustomerCreatedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
-
-  App\Core\Customer\Application\EventSubscriber\CustomerUpdatedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
-
-  App\Core\Customer\Application\EventSubscriber\CustomerDeletedCacheInvalidationSubscriber:
-    arguments:
-      $cache: '@cache.customer'
+  # Cache invalidation event subscribers - auto-bind cache.customer
 
   # CacheKeyBuilder - auto-registered via App\ namespace
 
@@ -130,6 +137,10 @@ services:
   # please note that last definitions always *replace* previous ones
 
   _instanceof:
+    App\Core\Customer\Application\EventSubscriber\CustomerCacheInvalidationSubscriberInterface:
+      bind:
+        $cache: '@cache.customer'
+
     App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface:
       tags: ['app.event_subscriber']
     App\Shared\Domain\Bus\Command\CommandHandlerInterface:
@@ -137,13 +148,45 @@ services:
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
 
+  # ===========================================
+  # BUS CONFIGURATION (following user-service patterns)
+  # ===========================================
+
+  App\Shared\Infrastructure\Bus\MessageBusFactory: ~
+
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
+    arguments:
+      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
+      - !tagged_iterator 'app.command_handler'
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
-    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.event_subscriber]
+    arguments:
+      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
+      - !tagged_iterator 'app.event_subscriber'
     lazy: true
+
+  # ===========================================
+  # RESILIENT ASYNC EVENT BUS (AP from CAP)
+  # ===========================================
+  # For resilient async event processing via SQS:
+  # - Layer 1: ResilientAsyncEventDispatcher catches SQS failures
+  # - Layer 2: DomainEventMessageHandler catches subscriber failures
+  # All failures are logged + emit metrics (self-healing pipeline)
+
+  App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventDispatcher:
+    arguments:
+      $messageBus: '@messenger.bus.default'
+
+  App\Shared\Infrastructure\Bus\Event\Async\DomainEventMessageHandler:
+    tags: ['messenger.message_handler']
+    arguments:
+      $subscribers: !tagged_iterator 'app.event_subscriber'
+
+  # Default: Use resilient async event bus (AP from CAP theorem)
+  # Switch to InMemorySymfonyEventBus for sync processing if needed
+  App\Shared\Domain\Bus\Event\EventBusInterface:
+    alias: App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventBus
 
   Aws\Sqs\SqsClient:
     arguments:

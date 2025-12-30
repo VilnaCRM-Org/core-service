@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Customer\Application\EventSubscriber;
 
 use App\Core\Customer\Application\EventSubscriber\CustomerDeletedCacheInvalidationSubscriber;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
+use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,7 +18,7 @@ final class CustomerDeletedCacheInvalidationSubscriberTest extends UnitTestCase
     private TagAwareCacheInterface&MockObject $cache;
     private CacheKeyBuilder&MockObject $cacheKeyBuilder;
     private LoggerInterface&MockObject $logger;
-    private CustomerDeletedCacheInvalidationSubscriber $subscriber;
+    private DomainEventSubscriberInterface $subscriber;
 
     protected function setUp(): void
     {
@@ -73,9 +74,9 @@ final class CustomerDeletedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('info')
             ->with(
                 'Cache invalidated after customer deletion',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['operation'] === 'cache.invalidation'
+                $this->callback(static function ($context) {
+                    // Note: customer_id removed from logs for PII compliance
+                    return $context['operation'] === 'cache.invalidation'
                         && $context['reason'] === 'customer_deleted'
                         && isset($context['event_id']);
                 })
@@ -112,20 +113,9 @@ final class CustomerDeletedCacheInvalidationSubscriberTest extends UnitTestCase
             ->expects($this->never())
             ->method('info');
 
-        $this->logger
-            ->expects($this->once())
-            ->method('error')
-            ->with(
-                'Cache invalidation failed after customer deletion',
-                $this->callback(static function ($context) use ($customerId) {
-                    return $context['customer_id'] === $customerId
-                        && $context['error'] === 'Redis connection failed'
-                        && $context['operation'] === 'cache.invalidation.error'
-                        && isset($context['event_id']);
-                })
-            );
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Redis connection failed');
 
-        // Should not throw exception
         ($this->subscriber)($event);
     }
 }

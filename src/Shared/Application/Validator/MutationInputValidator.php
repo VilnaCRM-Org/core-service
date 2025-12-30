@@ -8,7 +8,7 @@ use ApiPlatform\Validator\Exception\ValidationException;
 use App\Shared\Application\GraphQL\MutationInput;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-final readonly class MutationInputValidator
+final readonly class MutationInputValidator implements MutationInputValidatorInterface
 {
     public function __construct(
         private ValidatorInterface $validator,

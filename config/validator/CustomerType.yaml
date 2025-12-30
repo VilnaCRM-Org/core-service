@@ -17,3 +17,17 @@ App\Core\Customer\Application\DTO\TypeCreate:
       - NotBlank: { message: 'not.blank' }
       - Length:
           max: 255
+
+App\Core\Customer\Application\MutationInput\CreateTypeMutationInput:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255
+
+App\Core\Customer\Application\MutationInput\UpdateTypeMutationInput:
+  properties:
+    value:
+      - NotBlank: { message: 'not.blank' }
+      - Length:
+          max: 255

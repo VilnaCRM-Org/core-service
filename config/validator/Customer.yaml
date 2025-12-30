@@ -31,7 +31,7 @@ App\Core\Customer\Application\DTO\CustomerPatch:
     initials:
       - Length:
           max: 255
-      - App\Shared\Application\Validator\Initials:
+      - App\Shared\Application\Validator\Initials: ~
     email:
       - Email: { message: 'email.invalid' }
       - Length:
@@ -73,56 +73,6 @@ App\Core\Customer\Application\DTO\CustomerPut:
       - NotBlank: { message: 'not.blank' }
     status:
       - NotBlank: { message: 'not.blank' }
-    confirmed:
-      - Type:
-          type: 'bool'
-          message: 'This value should be a boolean.'
-
-App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput:
-  properties:
-    initials:
-      - NotBlank: { message: 'not.blank' }
-      - Length:
-          max: 255
-      - App\Shared\Application\Validator\Initials: ~
-    email:
-      - NotBlank: { message: 'not.blank' }
-      - Email: { message: 'email.invalid' }
-      - Length:
-          max: 255
-      - App\Shared\Application\Validator\UniqueEmail: ~
-    phone:
-      - NotBlank: { message: 'not.blank' }
-      - Length:
-          max: 255
-    leadSource:
-      - NotBlank: { message: 'not.blank' }
-      - Length:
-          max: 255
-    type:
-      - NotBlank: { message: 'not.blank' }
-    status:
-      - NotBlank: { message: 'not.blank' }
-    confirmed:
-      - Type: { type: 'bool', message: 'This value should be a boolean.' }
-
-App\Core\Customer\Application\MutationInput\UpdateCustomerMutationInput:
-  properties:
-    initials:
-      - Length:
-          max: 255
-      - App\Shared\Application\Validator\Initials:
-    email:
-      - Email: { message: 'email.invalid' }
-      - Length:
-          max: 255
-      - App\Shared\Application\Validator\UniqueEmail: ~
-    phone:
-      - Length:
-          max: 255
-    leadSource:
-      - Length:
-          max: 255
     confirmed:
       - Type:
           type: 'bool'

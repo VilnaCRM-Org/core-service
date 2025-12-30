@@ -9,14 +9,14 @@ use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\Factory as CustomerFactory;
 use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Shared\Application\Validator\MutationInputValidator;
+use App\Shared\Application\Validator\MutationInputValidatorInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 
 final readonly class CreateCustomerMutationResolver implements MutationResolver
 {
     public function __construct(
         private CommandBusInterface $commandBus,
-        private MutationInputValidator $validator,
+        private MutationInputValidatorInterface $validator,
         private CustomerTf\CreateCustomerMutationInputTransformer $inputMapper,
         private CustomerFactory\CreateCustomerFactoryInterface $factory,
         private IriConverterInterface $iriConverter,
