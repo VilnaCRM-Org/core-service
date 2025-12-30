@@ -101,6 +101,10 @@ services:
     arguments:
       $namespace: '%env(AWS_EMF_NAMESPACE)%'
 
+  App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy:
+    arguments:
+      $delayMs: '%env(int:MESSENGER_RETRY_DELAY_MS)%'
+
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
