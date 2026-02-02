@@ -2,7 +2,7 @@
 include .env.test
 
 # Parameters
-PROJECT       = core-service
+PROJECT       = php-service-template
 GIT_AUTHOR    = Kravalg
 
 # Executables: local only
@@ -21,12 +21,13 @@ SYMFONY       = $(EXEC_PHP) bin/console
 SYMFONY_TEST_ENV = $(EXEC_PHP_TEST_ENV) bin/console
 
 # Executables: vendors
-BEHAT         = ./vendor/bin/behat --stop-on-failure -n
+BEHAT         = ./vendor/bin/behat
 PHPUNIT       = ./vendor/bin/phpunit
 PSALM         = ./vendor/bin/psalm
 PHP_CS_FIXER  = ./vendor/bin/php-cs-fixer
 DEPTRAC       = ./vendor/bin/deptrac
 INFECTION     = ./vendor/bin/infection
+RECTOR        = ./vendor/bin/rector
 
 # Misc
 .DEFAULT_GOAL = help
@@ -42,11 +43,7 @@ endif
 # Variables for environment and commands
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
-COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
-
-GITHUB_HOST ?= github.com
-FORMAT ?= markdown
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-clover /coverage/coverage.xml
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -e $(1) php $(2)
@@ -56,14 +53,10 @@ endef
 ifeq ($(CI),1)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
-    RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
-    RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
 endif
-
-export SYMFONY
 
 help:
 	@printf "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m\n"
@@ -90,83 +83,40 @@ psalm: ## A static analysis tool for finding errors in PHP applications
 psalm-security: ## Psalm security analysis
 	$(EXEC_ENV) $(PSALM) --taint-analysis
 
-psalm-security-report: ## Psalm security analysis with SARIF output
-	$(EXEC_ENV) $(PSALM) --taint-analysis --report=results.sarif
+phpinsights: ## Instant PHP quality checks and static analysis tool
+	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --ansi --format=github-action --disable-security-check && ./vendor/bin/phpinsights analyse tests --no-interaction
 
-phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpmd src ansi phpmd.xml --exclude vendor
-	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
-
-phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
-	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
-
-unit-tests: ## Run unit tests with 100% coverage requirement
-	@echo "Running unit tests with coverage requirement of 100%..."
-	@tmpfile=$$(mktemp); \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
-	test_status=$$?; \
-	cat $$tmpfile; \
-	if [ $$test_status -ne 0 ]; then \
-		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
-		rm -f $$tmpfile; \
-		exit $$test_status; \
-	fi; \
-	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
-		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
-		rm -f $$tmpfile; \
-		exit 1; \
-	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
-	rm -f $$tmpfile; \
-	if [ -n "$$coverage" ]; then \
-		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
-			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
-			exit 1; \
-		else \
-			echo "✅ COVERAGE SUCCESS: Line coverage is $$coverage%"; \
-		fi; \
-	else \
-		echo "❌ ERROR: Could not parse coverage from output"; \
-		exit 1; \
-	fi
+unit-tests: ## Run unit tests
+	$(EXEC_ENV) $(PHPUNIT) --testsuite=Unit
 
 deptrac: ## Check directory structure
-	$(EXEC_ENV) $(DEPTRAC) analyse --config-file=deptrac.yaml --report-uncovered --fail-on-uncovered
+	$(DEPTRAC) analyse --config-file=deptrac.yaml --report-uncovered --fail-on-uncovered
 
 deptrac-debug: ## Find files unassigned for Deptrac
-	$(EXEC_ENV) $(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
+	$(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
-setup-test-db: ## Create database for testing purposes
-	$(SYMFONY_TEST_ENV) c:c
-	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
-	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
-
-behat: setup-test-db ## A php framework for autotesting business expectations
+behat: ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
 
-integration-tests: setup-test-db ## Run integration tests
-	$(RUN_TESTS_COVERAGE) --testsuite=Integration
+rector-apply: ## Apply Rector transformations to the codebase
+	$(EXEC_ENV) env RECTOR_MODE=dev $(RECTOR) process --ansi --config=rector.php
 
-integration-negative-tests: ## Run integration negative tests
-	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
+rector-ci: ## Run Rector in CI mode (dry-run, no diffs)
+	$(EXEC_ENV) $(RECTOR) process --dry-run --ansi --no-progress-bar --no-diffs --config=rector.php
 
-fixtures-load: ## Run fixtures
-	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
+integration-tests: ## Run integration tests
+	$(EXEC_ENV) $(PHPUNIT) --testsuite=Integration
 
 tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
-negative-tests-with-coverage: ## Run negative tests with coverage reporting
-	$(RUN_INTERNAL_TESTS_COVERAGE)
+setup-test-db: ## Create database for testing purposes
+	$(SYMFONY_TEST_ENV) c:c
+	$(SYMFONY_TEST_ENV) doctrine:database:drop --force --if-exists
+	$(SYMFONY_TEST_ENV) doctrine:database:create
+	$(SYMFONY_TEST_ENV) doctrine:migrations:migrate --no-interaction
 
 all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
-
-prepare-test-data: build-k6-docker ## Prepare test data for load tests
-	tests/Load/prepare-test-data.sh
-
-cleanup-test-data: build-k6-docker ## Clean up test data after load tests
-	tests/Load/cleanup-test-data.sh
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
 	tests/Load/run-smoke-load-tests.sh
@@ -183,43 +133,20 @@ spike-load-tests: build-k6-docker ## Run load tests with a spike of extreme load
 load-tests: build-k6-docker ## Run load tests
 	tests/Load/run-load-tests.sh
 
-cache-performance-tests: setup-test-db ## Run cache performance integration tests
-	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
-
-cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load tests
-	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
-
 build-k6-docker:
 	$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .
 
-build-spectral-docker:
-	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
-
-infection: ## Run mutation testing with 100% MSI requirement
-	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
+infection: ## Run mutations test.
+	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --test-framework-options="--testsuite=Unit" --show-mutations -j8
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
 
-analyze-complexity: ## Analyze and report top N most complex classes using PHPMetrics (default: 20)
-	@bash scripts/analyze-complexity.sh text $(if $(N),$(N),20)
+doctrine-migrations-migrate: ## Executes a migration to a specified version or the latest available version
+	$(SYMFONY) d:m:m
 
-analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
-	@bash scripts/analyze-complexity.sh json $(if $(N),$(N),20)
-
-analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
-	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
-
-reset-db: ## Recreate the database schema for ephemeral test runs
-	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
-	-@$(SYMFONY) doctrine:mongodb:schema:drop
-	@$(SYMFONY) doctrine:mongodb:schema:create
-
-load-fixtures: ## Build the DB, control the schema validity, and load fixtures
-	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
-	-@$(SYMFONY) doctrine:mongodb:schema:drop
-	@$(SYMFONY) doctrine:mongodb:schema:create
-	@$(EXEC_PHP) php bin/console doctrine:mongodb:fixtures:load --no-interaction || true
+doctrine-migrations-generate: ## Generates a blank migration class
+	$(SYMFONY) d:m:g
 
 cache-clear: ## Clears and warms up the application cache for a given environment and debug mode
 	$(SYMFONY) c:c
@@ -246,20 +173,15 @@ down: ## Stop the docker hub
 	$(DOCKER_COMPOSE) down --remove-orphans
 
 sh: ## Log to the docker container
-	@echo "Connecting to core-service PHP container..."
 	@$(EXEC_PHP) sh
 
 logs: ## Show all logs
-	@$(DOCKER_COMPOSE) logs
+	@$(DOCKER_COMPOSE) logs --follow
 
 new-logs: ## Show live logs
 	@$(DOCKER_COMPOSE) logs --tail=0 --follow
 
-.PHONY: start
-start: up build-k6-docker ## Start docker with k6
-
-ps: ## Check docker containers
-	$(DOCKER_COMPOSE) ps
+start: up ## Start docker
 
 stop: ## Stop docker and the Symfony binary server
 	$(DOCKER_COMPOSE) stop
@@ -267,180 +189,28 @@ stop: ## Stop docker and the Symfony binary server
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
+load-fixtures: ## Build the DB, control the schema validity, load fixtures and check the migration status
+	@$(SYMFONY) doctrine:cache:clear-metadata
+	@$(SYMFONY) doctrine:database:create --if-not-exists
+	@$(SYMFONY) doctrine:schema:drop --force
+	@$(SYMFONY) doctrine:schema:create
+	@$(SYMFONY) doctrine:schema:validate
+	@$(SYMFONY) d:f:l
+
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
 
 coverage-xml: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover coverage/coverage.xml
 
-generate-openapi-spec: ## Generate OpenAPI specification
+generate-openapi-spec:
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
 
-generate-graphql-spec: ## Generate GraphQL specification
+generate-graphql-spec:
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
-
-validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
-	./scripts/validate-openapi-spec.sh
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	tests/Load/aws-execute-load-tests.sh
 
 aws-load-tests-cleanup: ## Cleanup AWS infrastructure after testing
 	tests/Load/cleanup.sh
-
-start-prod-loadtest: ## Start production environment with load testing capabilities
-	$(DOCKER_COMPOSE) -f docker-compose.loadtest.yml up --detach
-
-stop-prod-loadtest: ## Stop production load testing environment
-	$(DOCKER_COMPOSE) -f docker-compose.loadtest.yml down --remove-orphans
-
-validate-configuration: ## Validate configuration structure and detect locked file modifications
-	@./scripts/validate-configuration.sh
-
-ci: ## Run comprehensive CI checks (excludes bats and load tests)
-	@echo "🚀 Running comprehensive CI checks..."
-	@failed_checks=""; \
-	echo "2️⃣  Validating composer.json and composer.lock..."; \
-	if ! make composer-validate; then failed_checks="$$failed_checks\n❌ composer validation"; fi; \
-	echo "3️⃣  Checking Symfony requirements..."; \
-	if ! make check-requirements; then failed_checks="$$failed_checks\n❌ Symfony requirements check"; fi; \
-	echo "4️⃣  Running security analysis..."; \
-	if ! make check-security; then failed_checks="$$failed_checks\n❌ security analysis"; fi; \
-	echo "5️⃣  Fixing code style with PHP CS Fixer..."; \
-	if ! make phpcsfixer; then failed_checks="$$failed_checks\n❌ PHP CS Fixer"; fi; \
-	echo "6️⃣  Running static analysis with Psalm..."; \
-	if ! make psalm; then failed_checks="$$failed_checks\n❌ Psalm static analysis"; fi; \
-	echo "7️⃣  Running security taint analysis..."; \
-	if ! make psalm-security; then failed_checks="$$failed_checks\n❌ Psalm security analysis"; fi; \
-	echo "8️⃣  Running code quality analysis with PHPMD..."; \
-	if ! make phpmd; then failed_checks="$$failed_checks\n❌ PHPMD quality analysis"; fi; \
-	echo "9️⃣  Running code quality analysis with PHPInsights..."; \
-	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
-	echo "🔟  Validating architecture with Deptrac..."; \
-	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
-	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
-	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
-	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
-	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
-	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \
-	echo "1️⃣3️⃣ Validating OpenAPI specification..."; \
-	if ! make validate-openapi-spec; then failed_checks="$$failed_checks\n❌ OpenAPI spec validation"; fi; \
-	if [ -n "$$failed_checks" ]; then \
-		echo ""; \
-		echo "💥 CI checks completed with failures:"; \
-		printf "$$failed_checks\n"; \
-		echo ""; \
-		echo "❌ CI checks failed! Please fix the above issues."; \
-		exit 1; \
-	else \
-		echo "✅ CI checks successfully passed!"; \
-	fi
-
-pr-comments: ## Retrieve ALL unresolved comments (including outdated) for current PR (markdown format)
-	@if ! command -v gh >/dev/null 2>&1; then \
-		echo "Error: GitHub CLI (gh) is required but not installed."; \
-		echo "Visit: https://cli.github.com/ for installation instructions"; \
-		exit 1; \
-	fi
-	@if ! command -v jq >/dev/null 2>&1; then \
-		echo "Error: jq is required but not installed."; \
-		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
-		exit 1; \
-	fi
-ifdef PR
-	@echo "Retrieving ALL unresolved comments (including outdated) for PR #$(PR)..."
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
-		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
-else
-	@echo "Auto-detecting PR from current git branch..."
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="true" \
-		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
-endif
-
-pr-comments-current: ## Retrieve only NON-OUTDATED unresolved comments (markdown format)
-	@if ! command -v gh >/dev/null 2>&1; then \
-		echo "Error: GitHub CLI (gh) is required but not installed."; \
-		echo "Visit: https://cli.github.com/ for installation instructions"; \
-		exit 1; \
-	fi
-	@if ! command -v jq >/dev/null 2>&1; then \
-		echo "Error: jq is required but not installed."; \
-		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
-		exit 1; \
-	fi
-ifdef PR
-	@echo "Retrieving non-outdated comments for PR #$(PR)..."
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
-		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-markdown}"
-else
-	@echo "Auto-detecting PR from current git branch..."
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="false" \
-		./scripts/get-pr-comments.sh "$${FORMAT:-markdown}"
-endif
-
-pr-comments-all: ## Retrieve ALL unresolved comments (with pagination) for a GitHub Pull Request
-	@if ! command -v gh >/dev/null 2>&1; then \
-		echo "Error: GitHub CLI (gh) is required but not installed."; \
-		echo "Visit: https://cli.github.com/ for installation instructions"; \
-		exit 1; \
-	fi
-	@if ! command -v jq >/dev/null 2>&1; then \
-		echo "Error: jq is required but not installed."; \
-		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
-		exit 1; \
-	fi
-ifdef PR
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments.sh "$(PR)" "$${FORMAT:-text}"
-else
-	@GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-false}" VERBOSE="$${VERBOSE:-false}" \
-		./scripts/get-pr-comments.sh "$${FORMAT:-text}"
-endif
-
-pr-comments-to-file: ## Fetch ALL unresolved PR comments and save to pr-comments-errors.txt
-	@if ! command -v gh >/dev/null 2>&1; then \
-		echo "Error: GitHub CLI (gh) is required but not installed."; \
-		echo "Visit: https://cli.github.com/ for installation instructions"; \
-		exit 1; \
-	fi
-	@if ! command -v jq >/dev/null 2>&1; then \
-		echo "Error: jq is required but not installed."; \
-		echo "Install via package manager (e.g., apt-get install jq, brew install jq)"; \
-		exit 1; \
-	fi
-	@echo "📝 Fetching all unresolved PR comments and saving to file..."
-	@output_file="$${OUTPUT_FILE:-pr-comments-errors.txt}"; \
-	if [ -f "$$output_file" ]; then \
-		echo "⚠️  File $$output_file already exists. Creating backup..."; \
-		mv "$$output_file" "$$output_file.backup.$(shell date +%Y%m%d_%H%M%S)"; \
-	fi; \
-	{ \
-		echo "========================================"; \
-		echo "PR Comments and Errors Report"; \
-		echo "Generated: $(shell date '+%Y-%m-%d %H:%M:%S')"; \
-		echo "========================================"; \
-		echo ""; \
-	} > "$$output_file"; \
-	if [ -n "$(PR)" ]; then \
-		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments.sh "$(PR)" "text" >> "$$output_file" 2>&1 || true; \
-	else \
-		GITHUB_HOST="$(GITHUB_HOST)" INCLUDE_OUTDATED="$${INCLUDE_OUTDATED:-true}" VERBOSE="false" \
-			./scripts/get-pr-comments.sh "text" >> "$$output_file" 2>&1 || true; \
-	fi; \
-	comment_count=$$(grep -c "^Comment ID:" "$$output_file" || echo "0"); \
-	echo "" >> "$$output_file"; \
-	echo "========================================" >> "$$output_file"; \
-	echo "Report Summary:" >> "$$output_file"; \
-	echo "Total Comments Found: $$comment_count" >> "$$output_file"; \
-	echo "Report saved to: $$output_file" >> "$$output_file"; \
-	echo "========================================" >> "$$output_file"; \
-	if [ "$$comment_count" -gt 0 ]; then \
-		echo "✅ Report successfully saved to: $$output_file"; \
-		echo "📊 Total comments found: $$comment_count"; \
-		echo "📄 Total lines in report: $$(wc -l < "$$output_file")"; \
-	else \
-		echo "⚠️  No unresolved comments found in this PR"; \
-		echo "📄 Report saved to: $$output_file"; \
-	fi
