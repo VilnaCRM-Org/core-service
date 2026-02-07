@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
+# Codespaces host Docker currently exposes API 1.43; newer clients need this pin.
+export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
+
 echo "Waiting for Docker daemon..."
 for _ in $(seq 1 90); do
     if docker info >/dev/null 2>&1; then
