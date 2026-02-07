@@ -4,48 +4,17 @@ set -euo pipefail
 # Secure bootstrap for autonomous agent tooling in GitHub Codespaces.
 # This script only uses environment variables and does not write secrets to repository files.
 
-readonly DEFAULT_TOKEN_VAR="GH_AUTOMATION_TOKEN"
-readonly TOKEN_VAR="${GH_TOKEN_VAR:-$DEFAULT_TOKEN_VAR}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/codespaces/lib/github-auth.sh
+. "${SCRIPT_DIR}/lib/github-auth.sh"
+
 readonly CODEX_CONFIG="${HOME}/.codex/config.toml"
 readonly OPENROUTER_PROFILE_START="# BEGIN CORE-SERVICE OPENROUTER PROFILE"
 readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
 
-if ! command -v gh >/dev/null 2>&1; then
-    echo "Error: gh CLI is required." >&2
-    exit 1
-fi
-
-if ! command -v codex >/dev/null 2>&1; then
-    echo "Error: codex CLI is required." >&2
-    exit 1
-fi
-
-# Prefer existing gh authentication. Fall back to token env if needed.
-if ! gh auth status >/dev/null 2>&1; then
-    if [ -z "${GH_TOKEN:-}" ]; then
-        if [ -n "${!TOKEN_VAR:-}" ]; then
-            export GH_TOKEN="${!TOKEN_VAR}"
-        elif [ -n "${GITHUB_TOKEN:-}" ]; then
-            export GH_TOKEN="${GITHUB_TOKEN}"
-        elif [ -n "${GH_APP_INSTALLATION_TOKEN:-}" ]; then
-            export GH_TOKEN="${GH_APP_INSTALLATION_TOKEN}"
-        fi
-    fi
-
-    if ! gh api user >/dev/null 2>&1; then
-        cat >&2 <<'EOM'
-Error: GitHub authentication is not available.
-If gh is not already authenticated, set one of:
-  - GH_TOKEN
-  - GH_AUTOMATION_TOKEN
-  - GITHUB_TOKEN
-  - GH_APP_INSTALLATION_TOKEN
-EOM
-        exit 1
-    fi
-fi
-
-gh auth setup-git >/dev/null 2>&1 || true
+cs_require_command gh
+cs_require_command codex
+cs_ensure_gh_auth
 
 if [ -z "${OPENROUTER_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
@@ -117,5 +86,5 @@ if [ -n "${GIT_AUTHOR_EMAIL:-}" ]; then
 fi
 
 echo "Secure agent environment is ready."
-echo "GH auth: available (existing login or token env)."
+echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
 echo "Codex: configured for OpenRouter profile 'openrouter' with model openai/gpt-5.2-codex."

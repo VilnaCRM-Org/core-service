@@ -2,54 +2,37 @@
 set -euo pipefail
 
 ORG="${1:-VilnaCRM-Org}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/codespaces/lib/github-auth.sh
+. "${SCRIPT_DIR}/lib/github-auth.sh"
 
-if ! command -v gh >/dev/null 2>&1; then
-    echo "Error: gh CLI is required." >&2
-    exit 1
-fi
-
-if ! command -v codex >/dev/null 2>&1; then
-    echo "Error: codex CLI is required." >&2
-    exit 1
-fi
-
-# Accept common token env names without persisting credentials.
-if [ -z "${GH_TOKEN:-}" ]; then
-    if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
-        export GH_TOKEN="${GH_AUTOMATION_TOKEN}"
-    elif [ -n "${GITHUB_TOKEN:-}" ]; then
-        export GH_TOKEN="${GITHUB_TOKEN}"
-    elif [ -n "${GH_APP_INSTALLATION_TOKEN:-}" ]; then
-        export GH_TOKEN="${GH_APP_INSTALLATION_TOKEN}"
-    fi
-fi
+cs_require_command gh
+cs_require_command codex
 
 echo "Checking GitHub authentication..."
-if ! gh api user >/dev/null 2>&1; then
-    cat >&2 <<'EOM'
-Error: GitHub authentication is not available.
-Provide one of GH_TOKEN, GH_AUTOMATION_TOKEN, GITHUB_TOKEN, GH_APP_INSTALLATION_TOKEN, or run `gh auth login`.
-EOM
-    exit 1
-fi
+cs_ensure_gh_auth
 
-echo "Checking GitHub token scopes (if available)..."
-scopes="$(
-    gh api -i /user 2>/dev/null \
-        | tr -d '\r' \
-        | awk -F': ' 'tolower($1)=="x-oauth-scopes"{print $2; exit}'
-)"
+if [ "${CS_GH_AUTH_MODE:-}" = "user" ]; then
+    echo "Checking GitHub token scopes (if available)..."
+    scopes="$(
+        gh api -i /user 2>/dev/null \
+            | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="x-oauth-scopes"{print $2; exit}'
+    )"
 
-if [ -n "$scopes" ]; then
-    echo "Available token scopes: $scopes"
-    normalized_scopes="$(echo "$scopes" | tr -d ' ')"
-    for required_scope in repo read:org; do
-        if [[ ",$normalized_scopes," != *",$required_scope,"* ]]; then
-            echo "Warning: expected scope '$required_scope' is missing." >&2
-        fi
-    done
+    if [ -n "$scopes" ]; then
+        echo "Available token scopes: $scopes"
+        normalized_scopes="$(echo "$scopes" | tr -d ' ')"
+        for required_scope in repo read:org; do
+            if [[ ",$normalized_scopes," != *",$required_scope,"* ]]; then
+                echo "Warning: expected scope '$required_scope' is missing." >&2
+            fi
+        done
+    else
+        echo "Note: scope header unavailable for this token."
+    fi
 else
-    echo "Note: scope header unavailable (common for some auth flows, including GitHub App tokens)."
+    echo "GitHub App installation auth detected; skipping OAuth scope checks."
 fi
 
 echo "Listing repositories in org '${ORG}'..."
@@ -78,6 +61,17 @@ EOM
 else
     echo "No PR detected for current branch. Skipping PR checks."
 fi
+
+echo "Checking git push permissions on current branch..."
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+if ! git push --dry-run origin "${current_branch}" >/dev/null; then
+    cat >&2 <<EOM
+Error: git push dry-run failed for branch '${current_branch}'.
+Ensure your token has write permissions for repository contents.
+EOM
+    exit 1
+fi
+echo "Git push dry-run ok for branch '${current_branch}'."
 
 if [ -z "${OPENROUTER_API_KEY:-}" ]; then
     cat >&2 <<'EOM'

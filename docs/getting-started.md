@@ -95,6 +95,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 - GitHub CLI (`gh`)
 - OpenAI Codex CLI (`codex`)
 - Automatic bootstrap on create:
+  - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
   - `make start`
   - `make install` (when `vendor/autoload.php` is missing)
 
@@ -109,6 +110,19 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 gh --version
 codex --version
 make help
+```
+
+For autonomous AI coding in Codespaces, set repository Codespaces secrets:
+
+- `OPENROUTER_API_KEY`
+- `GH_APP_ID`
+- `GH_APP_INSTALLATION_ID`
+- `GH_APP_PRIVATE_KEY`
+
+Then run:
+
+```bash
+bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
 
 ### Working in Codespaces

@@ -29,6 +29,11 @@ if ! command -v codex >/dev/null 2>&1; then
     npm install -g @openai/codex
 fi
 
+if ! bash scripts/codespaces/setup-secure-agent-env.sh; then
+    echo "Warning: secure agent bootstrap failed."
+    echo "Set Codespaces secrets and rerun: bash scripts/codespaces/setup-secure-agent-env.sh"
+fi
+
 make start
 
 if [ ! -f vendor/autoload.php ]; then
