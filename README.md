@@ -79,36 +79,45 @@ make help
 
 Use Codespaces secrets (do not commit credentials):
 
-- `GH_AUTOMATION_TOKEN`: fine-grained PAT or classic PAT with `repo`, `read:org` (and `workflow` if your org policy requires it for Actions metadata)
-- `OPENAI_API_KEY`: key for Codex CLI non-interactive execution
+- `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
+- optional GitHub token only if `gh` is not already authenticated in the Codespace:
+  `GH_AUTOMATION_TOKEN` or `GH_APP_INSTALLATION_TOKEN` or `GITHUB_TOKEN`
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
 
-Run secure bootstrap and verification:
+Run secure bootstrap and verification scripts:
 
 ```bash
-make codespace-agent-setup
-make codespace-agent-verify ORG=VilnaCRM-Org
+bash scripts/codespaces/setup-secure-agent-env.sh
+bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
 
-What `make codespace-agent-verify` checks:
+What `verify-gh-codex.sh` checks:
 
 - GitHub auth works
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
-- `codex` can run a small read-only non-interactive task
+- `codex` can run a small read-only non-interactive task via OpenRouter
 
-Run a fully autonomous Codex task (implementation + local tests + CI + commit + push):
+Codex is configured directly (no `make` wrapper) with:
 
 ```bash
-make codex-autonomous-task TASK="Refactor customer update flow to reduce duplication"
+profile = openrouter
+model = openai/gpt-5.2-codex
+base_url = https://openrouter.ai/api/v1
 ```
 
-Safety defaults:
+Run Codex directly:
+
+```bash
+codex -p openrouter
+codex exec -p openrouter --full-auto --sandbox workspace-write "Refactor customer update flow to reduce duplication"
+```
+
+Notes:
 
 - credentials are read from environment only
 - no token values are written to repository files
-- autonomous runner refuses to run on `main`/`master`
-- autonomous runner requires a clean working tree by default
+- if `gh` already works in your Codespace session, no additional GitHub token setup is required
 
 ## Using
 

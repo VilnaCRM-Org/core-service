@@ -19,19 +19,21 @@ if [ -z "${GH_TOKEN:-}" ]; then
         export GH_TOKEN="${GH_AUTOMATION_TOKEN}"
     elif [ -n "${GITHUB_TOKEN:-}" ]; then
         export GH_TOKEN="${GITHUB_TOKEN}"
+    elif [ -n "${GH_APP_INSTALLATION_TOKEN:-}" ]; then
+        export GH_TOKEN="${GH_APP_INSTALLATION_TOKEN}"
     fi
 fi
 
 echo "Checking GitHub authentication..."
 if ! gh api user >/dev/null 2>&1; then
-    cat >&2 <<'EOF'
+    cat >&2 <<'EOM'
 Error: GitHub authentication is not available.
-Provide one of GH_TOKEN, GH_AUTOMATION_TOKEN, or GITHUB_TOKEN, or run `gh auth login`.
-EOF
+Provide one of GH_TOKEN, GH_AUTOMATION_TOKEN, GITHUB_TOKEN, GH_APP_INSTALLATION_TOKEN, or run `gh auth login`.
+EOM
     exit 1
 fi
 
-echo "Checking GitHub token scopes..."
+echo "Checking GitHub token scopes (if available)..."
 scopes="$(
     gh api -i /user 2>/dev/null \
         | tr -d '\r' \
@@ -46,11 +48,8 @@ if [ -n "$scopes" ]; then
             echo "Warning: expected scope '$required_scope' is missing." >&2
         fi
     done
-    if [[ ",$normalized_scopes," != *",workflow,"* ]]; then
-        echo "Note: 'workflow' scope is not present. It may be required in some org policies to query Actions metadata." >&2
-    fi
 else
-    echo "Warning: could not read scope header (this can happen with some token types)." >&2
+    echo "Note: scope header unavailable (common for some auth flows, including GitHub App tokens)."
 fi
 
 echo "Listing repositories in org '${ORG}'..."
@@ -65,10 +64,10 @@ echo "Checking current PR CI status..."
 pr_number="$(gh pr view --json number --jq '.number' 2>/dev/null || true)"
 if [ -n "${pr_number}" ]; then
     if ! gh pr checks "${pr_number}" --json name,state >/dev/null; then
-        cat >&2 <<EOF
+        cat >&2 <<EOM
 Error: failed to query checks for PR #${pr_number}.
-Ensure your token can read pull request checks/actions metadata for this repository.
-EOF
+Ensure your authentication can read pull request checks/actions metadata for this repository.
+EOM
         exit 1
     fi
     non_success_count="$(
@@ -80,22 +79,31 @@ else
     echo "No PR detected for current branch. Skipping PR checks."
 fi
 
-echo "Checking codex login..."
-codex login status >/dev/null 2>&1
+if [ -z "${OPENROUTER_API_KEY:-}" ]; then
+    cat >&2 <<'EOM'
+Error: OPENROUTER_API_KEY is not set.
+Provide OPENROUTER_API_KEY to verify Codex OpenRouter execution.
+EOM
+    exit 1
+fi
 
-echo "Running codex smoke task (read-only)..."
+echo "Running codex smoke task via OpenRouter profile..."
 tmp_last_msg="$(mktemp)"
+tmp_captured_output="$(mktemp)"
 cleanup() {
-    rm -f "${tmp_last_msg}"
+    rm -f "${tmp_last_msg}" "${tmp_captured_output}"
 }
 trap cleanup EXIT
 
 if ! codex exec \
+    -p openrouter \
     --sandbox read-only \
     --output-last-message "${tmp_last_msg}" \
     "Inspect this repository and respond with exactly one line in this format: codex-ok:<short-summary>" \
-    >/dev/null 2>&1; then
+    >"${tmp_captured_output}" 2>&1; then
     echo "Error: codex smoke task execution failed." >&2
+    echo "Codex output:" >&2
+    sed -n '1,80p' "${tmp_captured_output}" >&2
     exit 1
 fi
 
