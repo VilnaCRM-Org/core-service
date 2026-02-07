@@ -22,6 +22,15 @@ if ! command -v gh >/dev/null 2>&1; then
     exit 1
 fi
 
+# Accept common token env names without persisting credentials.
+if [ -z "${GH_TOKEN:-}" ]; then
+    if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
+        export GH_TOKEN="${GH_AUTOMATION_TOKEN}"
+    elif [ -n "${GITHUB_TOKEN:-}" ]; then
+        export GH_TOKEN="${GITHUB_TOKEN}"
+    fi
+fi
+
 cd "${WORK_DIR}"
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -45,7 +54,13 @@ if ! codex login status >/dev/null 2>&1; then
     exit 1
 fi
 
-gh auth status >/dev/null
+if ! gh api user >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+Error: GitHub authentication is not available.
+Provide one of GH_TOKEN, GH_AUTOMATION_TOKEN, or GITHUB_TOKEN, or run `gh auth login`.
+EOF
+    exit 1
+fi
 
 echo "Running autonomous codex task on branch '${current_branch}'..."
 
