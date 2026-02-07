@@ -75,6 +75,41 @@ codex --version
 make help
 ```
 
+#### Secure setup for autonomous AI coding agents
+
+Use Codespaces secrets (do not commit credentials):
+
+- `GH_AUTOMATION_TOKEN`: fine-grained PAT or classic PAT with `repo`, `read:org` (and `workflow` if your org policy requires it for Actions metadata)
+- `OPENAI_API_KEY`: key for Codex CLI non-interactive execution
+- optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
+
+Run secure bootstrap and verification:
+
+```bash
+make codespace-agent-setup
+make codespace-agent-verify ORG=VilnaCRM-Org
+```
+
+What `make codespace-agent-verify` checks:
+
+- GitHub auth works
+- repository listing for `VilnaCRM-Org` works
+- current PR checks can be queried via `gh`
+- `codex` can run a small read-only non-interactive task
+
+Run a fully autonomous Codex task (implementation + local tests + CI + commit + push):
+
+```bash
+make codex-autonomous-task TASK="Refactor customer update flow to reduce duplication"
+```
+
+Safety defaults:
+
+- credentials are read from environment only
+- no token values are written to repository files
+- autonomous runner refuses to run on `main`/`master`
+- autonomous runner requires a clean working tree by default
+
 ## Using
 
 You can use `make` command to easily control and work with project locally.

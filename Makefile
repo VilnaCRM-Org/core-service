@@ -337,6 +337,19 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 		echo "✅ CI checks successfully passed!"; \
 	fi
 
+codespace-agent-setup: ## Securely initialize GH/Codex auth for autonomous agents in Codespaces
+	@./scripts/codespaces/setup-secure-agent-env.sh
+
+codespace-agent-verify: ## Verify GH org access + PR checks + codex smoke task in Codespaces
+	@./scripts/codespaces/verify-gh-codex.sh "$${ORG:-VilnaCRM-Org}"
+
+codex-autonomous-task: ## Run a fully autonomous codex task (set TASK="...")
+	@if [ -z "$${TASK:-}" ]; then \
+		echo "Error: TASK is required. Example: make codex-autonomous-task TASK=\"Refactor X\""; \
+		exit 1; \
+	fi
+	@./scripts/codespaces/run-autonomous-codex-task.sh "$${TASK}"
+
 pr-comments: ## Retrieve ALL unresolved comments (including outdated) for current PR (markdown format)
 	@if ! command -v gh >/dev/null 2>&1; then \
 		echo "Error: GitHub CLI (gh) is required but not installed."; \
