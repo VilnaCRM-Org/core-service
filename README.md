@@ -56,6 +56,25 @@ Also, you can see the architecture diagram using the link below
 
 That's it. You should now be ready to use core service!
 
+### GitHub Codespaces
+
+This repository ships with a built-in Codespaces definition in `.devcontainer/devcontainer.json`.
+
+When a Codespace is created, the setup script:
+
+- installs `codex` CLI
+- provides `gh` CLI
+- starts the Docker stack with `make start`
+- installs PHP dependencies with `make install` if needed
+
+After startup, verify the environment:
+
+```bash
+gh --version
+codex --version
+make help
+```
+
 ## Using
 
 You can use `make` command to easily control and work with project locally.

@@ -12,6 +12,8 @@ Before you begin, ensure you have the following installed on your system:
 - Docker Compose 2.24.5+
 - Git 2.34.1+
 
+If you prefer cloud development, use the included GitHub Codespaces setup in `.devcontainer/` and skip local prerequisite installation.
+
 ### CLI commands
 
 As you will see, we use Make commands to manage the project. Run `make help` after setting up Core Service to see a list of all available commands.
@@ -82,3 +84,41 @@ As you will see, we use Make commands to manage the project. Run `make help` aft
    ```
 
 Learn more about [Design and Architecture Documentation](design-and-architecture.md).
+
+## GitHub Codespaces Setup
+
+This repository includes a ready-to-use Codespaces environment in `.devcontainer/devcontainer.json`.
+
+### What you get in Codespaces
+
+- Docker support so all existing `make` commands continue to work
+- GitHub CLI (`gh`)
+- OpenAI Codex CLI (`codex`)
+- Automatic bootstrap on create:
+  - `make start`
+  - `make install` (when `vendor/autoload.php` is missing)
+
+### How to start
+
+1. Open the repository in GitHub.
+2. Click `Code` -> `Codespaces` -> `Create codespace on main` (or your branch).
+3. Wait for the post-create setup to finish.
+4. Verify tools:
+
+```bash
+gh --version
+codex --version
+make help
+```
+
+### Working in Codespaces
+
+All project operations remain the same as local usage:
+
+```bash
+make start
+make install
+make ci
+```
+
+Use the forwarded ports tab in Codespaces to access the service endpoints exposed by Docker Compose.
