@@ -7,12 +7,13 @@ readonly SHIM_SCRIPT="${SCRIPT_DIR}/openrouter-responses-shim.mjs"
 readonly SHIM_HOST="${OPENROUTER_SHIM_BIND_HOST:-127.0.0.1}"
 readonly SHIM_PORT="${OPENROUTER_SHIM_PORT:-18082}"
 readonly SHIM_UPSTREAM_BASE_URL="${OPENROUTER_SHIM_UPSTREAM_BASE_URL:-https://openrouter.ai}"
+readonly SHIM_HEALTH_URL="http://${SHIM_HOST}:${SHIM_PORT}/healthz"
 readonly CODEX_HOME_DIR="${HOME}/.codex"
 readonly SHIM_PID_FILE="${CODEX_HOME_DIR}/openrouter-shim.pid"
 readonly SHIM_LOG_FILE="${CODEX_HOME_DIR}/openrouter-shim.log"
 
 is_shim_healthy() {
-    curl -fsS "http://${SHIM_HOST}:${SHIM_PORT}/healthz" >/dev/null 2>&1
+    curl -fsS "${SHIM_HEALTH_URL}" >/dev/null 2>&1
 }
 
 if ! command -v node >/dev/null 2>&1; then
