@@ -19,9 +19,13 @@ cs_load_gh_token_from_aliases() {
 
     if [ -n "${!token_var:-}" ]; then
         export GH_TOKEN="${!token_var}"
+        return 0
     elif [ -n "${GITHUB_TOKEN:-}" ]; then
         export GH_TOKEN="${GITHUB_TOKEN}"
+        return 0
     fi
+
+    return 1
 }
 
 cs_detect_user_auth() {
@@ -44,9 +48,7 @@ cs_ensure_gh_auth() {
         return 0
     fi
 
-    cs_load_gh_token_from_aliases
-
-    if auth_mode="$(cs_detect_user_auth)"; then
+    if cs_load_gh_token_from_aliases && auth_mode="$(cs_detect_user_auth)"; then
         export CS_GH_AUTH_MODE="${auth_mode}"
         gh auth setup-git >/dev/null 2>&1 || true
         return 0

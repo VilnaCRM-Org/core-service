@@ -66,6 +66,20 @@ touch "${CODEX_CONFIG}"
 
 tmp_without_block=""
 tmp_with_profile=""
+
+validate_toml_scalar_env() {
+    local var_name="$1"
+    local var_value="$2"
+
+    case "${var_value}" in
+        *$'\n'*|*$'\r'*|*\"*|*\\*)
+            echo "Error: ${var_name} contains unsupported characters for TOML scalar interpolation." >&2
+            echo "Use a value without newlines, double quotes, or backslashes." >&2
+            exit 1
+            ;;
+    esac
+}
+
 cleanup() {
     [ -n "${tmp_without_block}" ] && rm -f "${tmp_without_block}"
     [ -n "${tmp_with_profile}" ] && rm -f "${tmp_with_profile}"
@@ -100,6 +114,20 @@ END {
     }
 }
 ' "${tmp_without_block}" > "${tmp_with_profile}"
+
+for toml_env in \
+    CODEX_MODEL \
+    CODEX_MODEL_PROVIDER \
+    CODEX_REASONING_EFFORT \
+    CODEX_REASONING_SUMMARY \
+    CODEX_APPROVAL_POLICY \
+    CODEX_SANDBOX_MODE \
+    CODEX_PROVIDER_NAME \
+    CODEX_PROVIDER_WIRE_API \
+    OPENROUTER_SHIM_BIND_HOST \
+    OPENROUTER_SHIM_PORT; do
+    validate_toml_scalar_env "${toml_env}" "${!toml_env}"
+done
 
 cat >> "${tmp_with_profile}" <<EOM
 
