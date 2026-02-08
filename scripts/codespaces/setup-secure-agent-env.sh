@@ -25,9 +25,6 @@ EOM
 fi
 
 default_profile="openrouter"
-if [ -n "${OPENAI_API_KEY:-}" ]; then
-    default_profile="openai-autonomous"
-fi
 
 mkdir -p "$(dirname "${CODEX_CONFIG}")"
 touch "${CODEX_CONFIG}"
@@ -71,10 +68,10 @@ cat >> "${tmp_with_profile}" <<'EOM'
 [profiles.openrouter]
 model = "openai/gpt-5.2-codex"
 model_provider = "openrouter"
-
-[profiles.openai-autonomous]
-model = "gpt-5.2-codex"
-model_provider = "openai"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "none"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 
 [model_providers.openrouter]
 name = "OpenRouter"
@@ -96,7 +93,7 @@ fi
 
 echo "Secure agent environment is ready."
 echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
-echo "Codex profiles configured:"
-echo "  - openrouter (prompt tasks): model openai/gpt-5.2-codex via OpenRouter"
-echo "  - openai-autonomous (full tool-calling): model gpt-5.2-codex via OpenAI"
+echo "Codex profile configured:"
+echo "  - openrouter: model openai/gpt-5.2-codex via OpenRouter"
+echo "    reasoning: xhigh, summaries: none, approvals: never, sandbox: danger-full-access"
 echo "Default profile: ${default_profile}"

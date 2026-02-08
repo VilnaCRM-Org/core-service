@@ -109,35 +109,25 @@ fi
 
 echo "Codex basic smoke task ok: $(cat "${tmp_last_msg}")"
 tool_profile="openrouter"
-tool_profile_description="OpenRouter (current default in this repository)"
-if [ -n "${OPENAI_API_KEY:-}" ]; then
-    tool_profile="openai-autonomous"
-    tool_profile_description="OpenAI (OPENAI_API_KEY detected)"
-fi
-
-echo "Running Codex tool-calling smoke task via profile '${tool_profile}' (${tool_profile_description})..."
+echo "Running Codex tool-calling smoke task via profile '${tool_profile}' (full access, no approvals)..."
 
 # Tool-calling smoke test validates autonomous coding capability.
 if ! codex exec \
     -p "${tool_profile}" \
-    --sandbox read-only \
+    --dangerously-bypass-approvals-and-sandbox \
     --output-last-message "${tmp_tool_last_msg}" \
     "Run one shell command: pwd. Then reply with exactly one line: codex-ok:${tool_profile}-tools" \
     >"${tmp_tool_captured_output}" 2>&1; then
-    if [ "${tool_profile}" = "openrouter" ] && grep -q "ZodError" "${tmp_tool_captured_output}"; then
+    if grep -q "ZodError" "${tmp_tool_captured_output}"; then
         cat >&2 <<'EOM'
 Error: OpenRouter rejected Codex tool-calling payloads.
 Result: prompt-only Codex works, but autonomous coding actions (edit/refactor/test/commit flows) are blocked.
-Recommended fix for full autonomous coding:
-  1) Set OPENAI_API_KEY as a Codespaces secret
-  2) Re-run: bash scripts/codespaces/setup-secure-agent-env.sh
-  3) Re-run: bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
-OpenRouter can still be used for prompt-only Codex tasks.
-EOM
-    elif [ "${tool_profile}" = "openai-autonomous" ]; then
-        cat >&2 <<'EOM'
-Error: Codex tool-calling failed using OpenAI profile.
-Verify OPENAI_API_KEY is valid and has access to gpt-5.2-codex.
+Current profile already uses full access and no approvals:
+  - model: openai/gpt-5.2-codex
+  - provider: OpenRouter
+  - reasoning: xhigh
+Ensure profile also sets:
+  - model_reasoning_summary = "none"
 EOM
     else
         echo "Error: codex tool-calling smoke task failed." >&2

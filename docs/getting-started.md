@@ -115,7 +115,6 @@ make help
 For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
 - `OPENROUTER_API_KEY`
-- `OPENAI_API_KEY` (required for autonomous Codex tool-calling)
 - `GH_AUTOMATION_TOKEN` (or `GH_TOKEN` / `GITHUB_TOKEN`)
 
 If you prefer manual authentication inside Codespace:
@@ -132,8 +131,12 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
 
 `verify-gh-codex.sh` includes both prompt-only and tool-calling Codex checks.
-Tool-calling is verified with `openai-autonomous` when `OPENAI_API_KEY` is set.
-Use `openrouter` for prompt-only Codex tasks and `openai-autonomous` for autonomous refactor/test/commit workflows.
+This setup is OpenRouter-only and configures Codex `openrouter` profile with:
+- model `openai/gpt-5.2-codex`
+- reasoning effort `xhigh`
+- reasoning summaries `none` (required for OpenRouter tool-calling compatibility)
+- approvals `never`
+- sandbox `danger-full-access`
 
 ### Working in Codespaces
 
