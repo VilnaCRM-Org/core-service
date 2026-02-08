@@ -3,14 +3,24 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
+SETTINGS_FILE="${ROOT_DIR}/.devcontainer/codespaces-settings.env"
+
+if [ -f "${SETTINGS_FILE}" ]; then
+    # shellcheck disable=SC1090
+    . "${SETTINGS_FILE}"
+fi
 
 # Codespaces host Docker currently exposes API 1.43; newer clients need this pin.
 export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
+: "${CODEX_NPM_PACKAGE:=@openai/codex@0.98.0}"
 
 echo "Waiting for Docker daemon..."
-for _ in $(seq 1 90); do
+for attempt in $(seq 1 90); do
     if docker info >/dev/null 2>&1; then
         break
+    fi
+    if [ $((attempt % 10)) -eq 0 ]; then
+        echo "Still waiting for Docker daemon... (${attempt}/90)"
     fi
     sleep 2
 done
@@ -26,10 +36,17 @@ if ! command -v make >/dev/null 2>&1; then
 fi
 
 if ! command -v codex >/dev/null 2>&1; then
-    npm install -g @openai/codex
+    npm install -g "${CODEX_NPM_PACKAGE}"
 fi
 
+export CODEX_APPROVAL_POLICY="${CODEX_APPROVAL_POLICY:-never}"
+export CODEX_SANDBOX_MODE="${CODEX_SANDBOX_MODE:-danger-full-access}"
+export GH_TOKEN_VAR="${GH_TOKEN_VAR:-GH_AUTOMATION_TOKEN}"
+export CODESPACE_GITHUB_ORG="${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
+
+agent_env_ok=true
 if ! bash scripts/codespaces/setup-secure-agent-env.sh; then
+    agent_env_ok=false
     echo "Warning: secure agent bootstrap failed."
     echo "Set Codespaces secrets and rerun: bash scripts/codespaces/setup-secure-agent-env.sh"
 fi
@@ -40,7 +57,11 @@ if [ ! -f vendor/autoload.php ]; then
     make install
 fi
 
-bash scripts/codespaces/startup-smoke-tests.sh "${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
+if [ "${agent_env_ok}" = true ]; then
+    bash scripts/codespaces/startup-smoke-tests.sh "${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
+else
+    echo "Skipping startup smoke tests (secure agent environment is not ready)."
+fi
 
 echo "Codespace setup complete."
 echo "Use 'make help' to list all available commands."

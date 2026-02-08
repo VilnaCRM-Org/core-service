@@ -94,12 +94,13 @@ const server = http.createServer(async (request, response) => {
         copyResponseHeaders(upstreamResponse.headers, response);
         response.end(responseBody);
     } catch (error) {
+        console.error("OpenRouter shim upstream request failed:", error);
         response.statusCode = 502;
         response.setHeader("content-type", "application/json");
         response.end(
             JSON.stringify({
                 error: "upstream_request_failed",
-                message: String(error),
+                message: "An upstream request failed.",
             }),
         );
     }

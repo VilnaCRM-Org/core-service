@@ -118,6 +118,12 @@ For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 - `GH_AUTOMATION_TOKEN`
 - optional `OPENROUTER_SHIM_PORT` (default `18082`)
 
+Non-secret defaults for GitHub CLI and Codex are persisted in git:
+
+- `.devcontainer/codespaces-settings.env`
+- `.devcontainer/post-create.sh`
+- `scripts/codespaces/setup-secure-agent-env.sh`
+
 If you prefer manual authentication inside Codespace:
 
 ```bash

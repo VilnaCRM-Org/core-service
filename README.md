@@ -98,6 +98,12 @@ What `startup-smoke-tests.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - `codex` can execute one tool-calling task with the `openrouter` profile
 
+Repository-tracked defaults for GitHub and Codex bootstrap are stored in:
+
+- `.devcontainer/codespaces-settings.env`
+- `.devcontainer/post-create.sh`
+- `scripts/codespaces/setup-secure-agent-env.sh`
+
 What `verify-gh-codex.sh` checks:
 
 - GitHub auth works
@@ -109,7 +115,7 @@ What `verify-gh-codex.sh` checks:
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
-```bash
+```ini
 openrouter -> openai/gpt-5.2-codex via OpenRouter
 reasoning_effort = xhigh
 reasoning_summary = none
@@ -127,6 +133,7 @@ codex exec -p openrouter --dangerously-bypass-approvals-and-sandbox "Refactor cu
 
 Notes:
 
+- secrets are never stored in git; keep them in Codespaces secrets
 - credentials are read from environment only
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:

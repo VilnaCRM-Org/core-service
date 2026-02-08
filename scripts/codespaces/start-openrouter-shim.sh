@@ -2,6 +2,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SETTINGS_FILE="${ROOT_DIR}/.devcontainer/codespaces-settings.env"
+
+if [ -f "${SETTINGS_FILE}" ]; then
+    # shellcheck disable=SC1090
+    . "${SETTINGS_FILE}"
+fi
 
 readonly SHIM_SCRIPT="${SCRIPT_DIR}/openrouter-responses-shim.mjs"
 readonly SHIM_HOST="${OPENROUTER_SHIM_BIND_HOST:-127.0.0.1}"
@@ -42,6 +49,16 @@ if [ -f "${SHIM_PID_FILE}" ]; then
     existing_pid="$(cat "${SHIM_PID_FILE}" 2>/dev/null || true)"
     if [ -n "${existing_pid}" ] && kill -0 "${existing_pid}" >/dev/null 2>&1; then
         kill "${existing_pid}" >/dev/null 2>&1 || true
+        for _ in $(seq 1 20); do
+            if ! kill -0 "${existing_pid}" >/dev/null 2>&1; then
+                break
+            fi
+            sleep 0.2
+        done
+        if kill -0 "${existing_pid}" >/dev/null 2>&1; then
+            kill -9 "${existing_pid}" >/dev/null 2>&1 || true
+            sleep 0.2
+        fi
     fi
     rm -f "${SHIM_PID_FILE}"
 fi
@@ -63,6 +80,7 @@ for _ in $(seq 1 50); do
 done
 
 echo "Error: failed to start OpenRouter compatibility shim." >&2
+rm -f "${SHIM_PID_FILE}"
 if [ -f "${SHIM_LOG_FILE}" ]; then
     echo "Recent shim logs:" >&2
     tail -n 40 "${SHIM_LOG_FILE}" >&2 || true

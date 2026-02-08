@@ -3,8 +3,16 @@ set -euo pipefail
 
 ORG="${1:-VilnaCRM-Org}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SETTINGS_FILE="${ROOT_DIR}/.devcontainer/codespaces-settings.env"
 # shellcheck source=scripts/codespaces/lib/github-auth.sh
 . "${SCRIPT_DIR}/lib/github-auth.sh"
+
+if [ -f "${SETTINGS_FILE}" ]; then
+    # shellcheck disable=SC1090
+    . "${SETTINGS_FILE}"
+fi
+ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 
 cs_require_command gh
 cs_require_command codex
@@ -13,8 +21,9 @@ echo "Checking GitHub authentication..."
 cs_ensure_gh_auth
 
 echo "Checking GitHub token scopes (if available)..."
+scopes_headers="$(gh api -i /user 2>/dev/null || true)"
 scopes="$(
-    gh api -i /user 2>/dev/null \
+    printf '%s' "${scopes_headers}" \
         | tr -d '\r' \
         | awk -F': ' 'tolower($1)=="x-oauth-scopes"{print $2; exit}'
 )"
@@ -32,7 +41,10 @@ else
 fi
 
 echo "Listing repositories in org '${ORG}'..."
-repo_count="$(gh repo list "${ORG}" --limit 1000 --json name --jq 'length')"
+repo_count="$(gh repo list "${ORG}" --limit 1000 --json name --jq 'length' 2>/dev/null || true)"
+if ! [[ "${repo_count:-}" =~ ^[0-9]+$ ]]; then
+    repo_count=0
+fi
 if [ "${repo_count}" -le 0 ]; then
     echo "Error: failed to list repositories for org '${ORG}'." >&2
     exit 1
@@ -42,16 +54,16 @@ echo "Repository listing ok (${repo_count} repositories visible)."
 echo "Checking current PR CI status..."
 pr_number="$(gh pr view --json number --jq '.number' 2>/dev/null || true)"
 if [ -n "${pr_number}" ]; then
-    if ! gh pr checks "${pr_number}" --json name,state >/dev/null; then
+    checks_json="$(gh pr checks "${pr_number}" --json name,state 2>/dev/null)" || {
         cat >&2 <<EOM
 Error: failed to query checks for PR #${pr_number}.
 Ensure your authentication can read pull request checks/actions metadata for this repository.
 EOM
         exit 1
-    fi
+    }
     non_success_count="$(
-        gh pr checks "${pr_number}" --json state \
-            --jq '[.[].state | select(. != "SUCCESS" and . != "SKIPPED" and . != "NEUTRAL")] | length'
+        printf '%s' "${checks_json}" \
+            | jq '[.[].state | select(. != "SUCCESS" and . != "SKIPPED" and . != "NEUTRAL")] | length'
     )"
     echo "PR #${pr_number} checks query ok (non-success states: ${non_success_count})."
 else
@@ -59,7 +71,14 @@ else
 fi
 
 echo "Checking git push permissions on current branch..."
-current_branch="$(git rev-parse --abbrev-ref HEAD)"
+current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [ -z "${current_branch}" ]; then
+    cat >&2 <<'EOM'
+Error: current git checkout is in detached HEAD state.
+Check out a branch before running push verification.
+EOM
+    exit 1
+fi
 if ! git push --dry-run origin "${current_branch}" >/dev/null; then
     cat >&2 <<EOM
 Error: git push dry-run failed for branch '${current_branch}'.
@@ -81,14 +100,25 @@ echo "Ensuring OpenRouter compatibility shim is running..."
 bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
 
 echo "Running codex smoke task via OpenRouter profile..."
+tmp_last_msg=""
+tmp_captured_output=""
+tmp_tool_last_msg=""
+tmp_tool_captured_output=""
+tmp_tool_workspace=""
+cleanup() {
+    [ -n "${tmp_last_msg}" ] && rm -f "${tmp_last_msg}"
+    [ -n "${tmp_captured_output}" ] && rm -f "${tmp_captured_output}"
+    [ -n "${tmp_tool_last_msg}" ] && rm -f "${tmp_tool_last_msg}"
+    [ -n "${tmp_tool_captured_output}" ] && rm -f "${tmp_tool_captured_output}"
+    [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
+}
+trap cleanup EXIT
+
 tmp_last_msg="$(mktemp)"
 tmp_captured_output="$(mktemp)"
 tmp_tool_last_msg="$(mktemp)"
 tmp_tool_captured_output="$(mktemp)"
-cleanup() {
-    rm -f "${tmp_last_msg}" "${tmp_captured_output}" "${tmp_tool_last_msg}" "${tmp_tool_captured_output}"
-}
-trap cleanup EXIT
+tmp_tool_workspace="$(mktemp -d)"
 
 # Prompt-only smoke test validates OpenRouter connectivity for Codex.
 if ! codex exec \
@@ -115,12 +145,15 @@ tool_profile="openrouter"
 echo "Running Codex tool-calling smoke task via profile '${tool_profile}' (full access, no approvals)..."
 
 # Tool-calling smoke test validates autonomous coding capability.
-if ! codex exec \
-    -p "${tool_profile}" \
-    --dangerously-bypass-approvals-and-sandbox \
-    --output-last-message "${tmp_tool_last_msg}" \
-    "Run one shell command: pwd. Then reply with exactly one line: codex-ok:${tool_profile}-tools" \
-    >"${tmp_tool_captured_output}" 2>&1; then
+# Full-access mode is intentional for this check. Mitigations: disposable workspace,
+# timeout, deterministic marker validation, and captured output logs.
+if ! (
+    cd "${tmp_tool_workspace}" && timeout 120s codex exec \
+        -p "${tool_profile}" \
+        --dangerously-bypass-approvals-and-sandbox \
+        --output-last-message "${tmp_tool_last_msg}" \
+        "Run one shell command: pwd. Then reply with exactly one line: codex-ok:${tool_profile}-tools"
+) >"${tmp_tool_captured_output}" 2>&1; then
     if grep -q "ZodError" "${tmp_tool_captured_output}"; then
         cat >&2 <<'EOM'
 Error: OpenRouter rejected Codex tool-calling payloads.
