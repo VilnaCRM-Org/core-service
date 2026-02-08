@@ -132,6 +132,7 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 
 `verify-gh-codex.sh` includes both prompt-only and tool-calling Codex checks.
 This setup is OpenRouter-only and configures Codex `openrouter` profile with:
+
 - model `openai/gpt-5.2-codex`
 - reasoning effort `xhigh`
 - reasoning summaries `none` (required for OpenRouter tool-calling compatibility)
