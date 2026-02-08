@@ -33,6 +33,17 @@ readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
 
+# Trust model: full-access autonomous mode is expected only for ephemeral Codespaces.
+# Outside Codespaces, require explicit opt-in to keep dangerous settings.
+if [ "${CODEX_APPROVAL_POLICY}" = "never" ] \
+    && [ "${CODEX_SANDBOX_MODE}" = "danger-full-access" ] \
+    && [ "${CODESPACES:-}" != "true" ] \
+    && [ "${ENABLE_DANGEROUS_AGENT:-}" != "true" ]; then
+    echo "Warning: refusing danger-full-access outside Codespaces without ENABLE_DANGEROUS_AGENT=true." >&2
+    CODEX_APPROVAL_POLICY="on-request"
+    CODEX_SANDBOX_MODE="workspace-write"
+fi
+
 cs_require_command gh
 cs_require_command codex
 cs_ensure_gh_auth
@@ -98,6 +109,8 @@ model = "${CODEX_MODEL}"
 model_provider = "${CODEX_MODEL_PROVIDER}"
 model_reasoning_effort = "${CODEX_REASONING_EFFORT}"
 model_reasoning_summary = "${CODEX_REASONING_SUMMARY}"
+# WARNING: this profile can execute shell commands without approval.
+# It is intended for trusted, ephemeral GitHub Codespaces automation only.
 approval_policy = "${CODEX_APPROVAL_POLICY}"
 sandbox_mode = "${CODEX_SANDBOX_MODE}"
 

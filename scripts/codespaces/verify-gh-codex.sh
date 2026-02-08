@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ORG="${1:-VilnaCRM-Org}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SETTINGS_FILE="${ROOT_DIR}/.devcontainer/codespaces-settings.env"
@@ -94,6 +93,11 @@ Error: OPENROUTER_API_KEY is not set.
 Provide OPENROUTER_API_KEY to verify Codex OpenRouter execution.
 EOM
     exit 1
+fi
+
+echo "Checking codex login status..."
+if ! codex login status >/dev/null 2>&1; then
+    echo "Note: codex login is not configured. Continuing because OpenRouter API key auth is used." >&2
 fi
 
 echo "Ensuring OpenRouter compatibility shim is running..."
