@@ -68,9 +68,11 @@ if ! (
     exit 1
 fi
 
-if ! grep -q '^codex-startup-ok$' "${tmp_last_msg}"; then
+if ! grep -qE '^[[:space:]]*codex-startup-ok[[:space:]]*$' "${tmp_last_msg}"; then
+    actual_output="$(tr -d '\r' < "${tmp_last_msg}" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
     echo "Error: Codex startup smoke test returned unexpected output." >&2
-    cat "${tmp_last_msg}" >&2
+    echo "Expected pattern: codex-startup-ok" >&2
+    echo "Actual trimmed output: ${actual_output}" >&2
     exit 1
 fi
 

@@ -119,6 +119,7 @@ profile = "openrouter"
 
 [profiles.openrouter]
 model = "openai/gpt-5.2-codex"
+model_provider = "openrouter"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "none"
 approval_policy = "never"
