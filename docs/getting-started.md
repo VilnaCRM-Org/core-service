@@ -118,6 +118,7 @@ For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 - `GH_AUTOMATION_TOKEN`
 
 These secrets are mapped into the runtime shell environment via `.devcontainer/devcontainer.json` (`remoteEnv`), so `gh`, `git`, and `codex` can use them in normal terminal sessions.
+The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
 
 Non-secret defaults for GitHub CLI and Codex are persisted in git:
 

@@ -135,6 +135,7 @@ Notes:
 - secrets are never stored in git; keep them in Codespaces secrets
 - credentials are read from environment only
 - Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
+- bootstrap also writes `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
