@@ -12,27 +12,23 @@ cs_require_command codex
 echo "Checking GitHub authentication..."
 cs_ensure_gh_auth
 
-if [ "${CS_GH_AUTH_MODE:-}" = "user" ]; then
-    echo "Checking GitHub token scopes (if available)..."
-    scopes="$(
-        gh api -i /user 2>/dev/null \
-            | tr -d '\r' \
-            | awk -F': ' 'tolower($1)=="x-oauth-scopes"{print $2; exit}'
-    )"
+echo "Checking GitHub token scopes (if available)..."
+scopes="$(
+    gh api -i /user 2>/dev/null \
+        | tr -d '\r' \
+        | awk -F': ' 'tolower($1)=="x-oauth-scopes"{print $2; exit}'
+)"
 
-    if [ -n "$scopes" ]; then
-        echo "Available token scopes: $scopes"
-        normalized_scopes="$(echo "$scopes" | tr -d ' ')"
-        for required_scope in repo read:org; do
-            if [[ ",$normalized_scopes," != *",$required_scope,"* ]]; then
-                echo "Warning: expected scope '$required_scope' is missing." >&2
-            fi
-        done
-    else
-        echo "Note: scope header unavailable for this token."
-    fi
+if [ -n "$scopes" ]; then
+    echo "Available token scopes: $scopes"
+    normalized_scopes="$(echo "$scopes" | tr -d ' ')"
+    for required_scope in repo read:org; do
+        if [[ ",$normalized_scopes," != *",$required_scope,"* ]]; then
+            echo "Warning: expected scope '$required_scope' is missing." >&2
+        fi
+    done
 else
-    echo "GitHub App installation auth detected; skipping OAuth scope checks."
+    echo "Note: scope header unavailable for this token."
 fi
 
 echo "Listing repositories in org '${ORG}'..."

@@ -115,9 +115,14 @@ make help
 For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
 - `OPENROUTER_API_KEY`
-- `GH_APP_ID`
-- `GH_APP_INSTALLATION_ID`
-- `GH_APP_PRIVATE_KEY`
+- `GH_AUTOMATION_TOKEN` (or `GH_TOKEN` / `GITHUB_TOKEN`)
+
+If you prefer manual authentication inside Codespace:
+
+```bash
+gh auth login -h github.com -w
+gh auth setup-git
+```
 
 Then run:
 

@@ -80,10 +80,8 @@ make help
 Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
 
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
-- recommended for GitHub App authentication with automatic token minting on startup:
-  `GH_APP_ID`, `GH_APP_INSTALLATION_ID`, `GH_APP_PRIVATE_KEY`
-- fallback static token inputs (if not using GitHub App minting):
-  `GH_AUTOMATION_TOKEN` or `GH_APP_INSTALLATION_TOKEN` or `GITHUB_TOKEN` or `GH_TOKEN`
+- GitHub authentication token for non-interactive `gh` usage:
+  `GH_AUTOMATION_TOKEN` or `GITHUB_TOKEN` or `GH_TOKEN`
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
 
 The Codespace `post-create` step runs secure bootstrap automatically. You can also run scripts manually:
@@ -119,9 +117,9 @@ codex exec -p openrouter --full-auto --sandbox workspace-write "Refactor custome
 Notes:
 
 - credentials are read from environment only
-- GitHub App installation tokens are minted at runtime and not committed to repository files
 - no token values are written to repository files
-- if `gh` already works in your Codespace session, no additional GitHub token setup is required
+- if `gh` is not authenticated in your Codespace, run interactive login:
+  `gh auth login -h github.com -w`
 
 ## Using
 
