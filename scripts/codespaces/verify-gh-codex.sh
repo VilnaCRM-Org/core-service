@@ -100,9 +100,6 @@ if ! codex login status >/dev/null 2>&1; then
     echo "Note: codex login is not configured. Continuing because OpenRouter API key auth is used." >&2
 fi
 
-echo "Ensuring OpenRouter compatibility shim is running..."
-bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
-
 echo "Running codex smoke task via OpenRouter profile..."
 tmp_last_msg=""
 tmp_captured_output=""
@@ -168,8 +165,8 @@ Current profile already uses full access and no approvals:
   - reasoning: xhigh
 Ensure profile also sets:
   - model_reasoning_summary = "none"
-Check shim logs:
-  - ~/.codex/openrouter-shim.log
+Check Codex provider configuration:
+  - ~/.codex/config.toml
 EOM
     else
         echo "Error: codex tool-calling smoke task failed." >&2

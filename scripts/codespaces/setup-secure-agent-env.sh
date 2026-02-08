@@ -16,8 +16,6 @@ if [ -f "${SETTINGS_FILE}" ]; then
 fi
 
 readonly CODEX_CONFIG="${HOME}/.codex/config.toml"
-readonly OPENROUTER_SHIM_PORT="${OPENROUTER_SHIM_PORT:-18082}"
-readonly OPENROUTER_SHIM_BIND_HOST="${OPENROUTER_SHIM_BIND_HOST:-127.0.0.1}"
 readonly OPENROUTER_PROFILE_START="# BEGIN CORE-SERVICE OPENROUTER PROFILE"
 readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
 : "${CODEX_DEFAULT_PROFILE:=openrouter}"
@@ -29,6 +27,7 @@ readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
 : "${CODEX_SANDBOX_MODE:=danger-full-access}"
 : "${CODEX_PROVIDER_NAME:=OpenRouter}"
 : "${CODEX_PROVIDER_WIRE_API:=responses}"
+: "${CODEX_PROVIDER_BASE_URL:=https://openrouter.ai/api/v1}"
 : "${GH_HOST:=github.com}"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
@@ -55,9 +54,6 @@ Provide OPENROUTER_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
-
-echo "Starting OpenRouter compatibility shim..."
-bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
 
 default_profile="${CODEX_DEFAULT_PROFILE}"
 
@@ -124,8 +120,7 @@ for toml_env in \
     CODEX_SANDBOX_MODE \
     CODEX_PROVIDER_NAME \
     CODEX_PROVIDER_WIRE_API \
-    OPENROUTER_SHIM_BIND_HOST \
-    OPENROUTER_SHIM_PORT; do
+    CODEX_PROVIDER_BASE_URL; do
     validate_toml_scalar_env "${toml_env}" "${!toml_env}"
 done
 
@@ -144,7 +139,7 @@ sandbox_mode = "${CODEX_SANDBOX_MODE}"
 
 [model_providers.openrouter]
 name = "${CODEX_PROVIDER_NAME}"
-base_url = "http://${OPENROUTER_SHIM_BIND_HOST}:${OPENROUTER_SHIM_PORT}/api/v1"
+base_url = "${CODEX_PROVIDER_BASE_URL}"
 env_key = "OPENROUTER_API_KEY"
 wire_api = "${CODEX_PROVIDER_WIRE_API}"
 # END CORE-SERVICE OPENROUTER PROFILE
@@ -169,5 +164,5 @@ echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
 echo "Codex profile configured:"
 echo "  - ${default_profile}: model ${CODEX_MODEL} via ${CODEX_PROVIDER_NAME}"
 echo "    reasoning: ${CODEX_REASONING_EFFORT}, summaries: ${CODEX_REASONING_SUMMARY}, approvals: ${CODEX_APPROVAL_POLICY}, sandbox: ${CODEX_SANDBOX_MODE}"
-echo "    transport: local OpenRouter compatibility shim on http://${OPENROUTER_SHIM_BIND_HOST}:${OPENROUTER_SHIM_PORT}"
+echo "    transport: direct OpenRouter API at ${CODEX_PROVIDER_BASE_URL}"
 echo "Default profile: ${default_profile}"

@@ -82,7 +82,6 @@ Use Codespaces secrets (do not commit credentials). Prefer repository-level Code
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
-- optional `OPENROUTER_SHIM_PORT`: local port for OpenRouter compatibility shim (default `18082`)
 
 The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
 
@@ -121,7 +120,7 @@ reasoning_effort = xhigh
 reasoning_summary = none
 approval_policy = never
 sandbox_mode = danger-full-access
-base_url = http://127.0.0.1:18082/api/v1
+base_url = https://openrouter.ai/api/v1
 ```
 
 Run Codex directly:
@@ -135,10 +134,10 @@ Notes:
 
 - secrets are never stored in git; keep them in Codespaces secrets
 - credentials are read from environment only
+- Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
-- setup starts a local compatibility shim (`127.0.0.1`) for OpenRouter tool-calling payload normalization
 - this setup is OpenRouter-only
 
 ## Using

@@ -12,7 +12,6 @@ if [ -f "${SETTINGS_FILE}" ]; then
     # shellcheck disable=SC1090
     . "${SETTINGS_FILE}"
 fi
-ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 
 cs_require_command gh
 cs_require_command codex
@@ -40,9 +39,6 @@ Provide OPENROUTER_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
-
-echo "Ensuring OpenRouter compatibility shim is running..."
-bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
 
 tmp_last_msg=""
 tmp_captured_output=""
