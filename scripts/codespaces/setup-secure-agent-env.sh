@@ -47,11 +47,11 @@ awk -v start="${OPENROUTER_PROFILE_START}" -v end="${OPENROUTER_PROFILE_END}" '
 ' "${CODEX_CONFIG}" > "${tmp_without_block}"
 
 # Force default profile depending on available credentials.
-awk '
+awk -v profile="${default_profile}" '
 BEGIN {updated = 0}
 /^[[:space:]]*profile[[:space:]]*=/ {
     if (updated == 0) {
-        print "profile = "'"${default_profile}"'""
+        print "profile = \"" profile "\""
         updated = 1
     }
     next
@@ -60,7 +60,7 @@ BEGIN {updated = 0}
 END {
     if (updated == 0) {
         print ""
-        print "profile = "'"${default_profile}"'""
+        print "profile = \"" profile "\""
     }
 }
 ' "${tmp_without_block}" > "${tmp_with_profile}"
