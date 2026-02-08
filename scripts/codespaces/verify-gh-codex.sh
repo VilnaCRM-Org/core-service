@@ -153,7 +153,7 @@ if ! (
         -p "${tool_profile}" \
         --dangerously-bypass-approvals-and-sandbox \
         --output-last-message "${tmp_tool_last_msg}" \
-        "Run one shell command: pwd. Then reply with exactly one line: codex-ok:${tool_profile}-tools"
+        "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-ok:${tool_profile}-tools"
 ) >"${tmp_tool_captured_output}" 2>&1; then
     if grep -q "ZodError" "${tmp_tool_captured_output}"; then
         cat >&2 <<'EOM'

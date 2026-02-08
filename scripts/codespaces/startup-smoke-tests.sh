@@ -57,7 +57,7 @@ if ! timeout 90s codex exec \
     -p openrouter \
     --dangerously-bypass-approvals-and-sandbox \
     --output-last-message "${tmp_last_msg}" \
-    "Run one shell command: pwd. Then reply with exactly one line: codex-startup-ok" \
+    "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-startup-ok" \
     >"${tmp_captured_output}" 2>&1; then
     echo "Error: Codex startup smoke test failed." >&2
     sed -n '1,120p' "${tmp_captured_output}" >&2
