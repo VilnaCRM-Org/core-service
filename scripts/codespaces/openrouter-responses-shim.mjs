@@ -13,6 +13,9 @@ if (!Number.isInteger(port) || port <= 0 || port > 65535) {
 
 const hopByHopHeaders = new Set([
     "connection",
+    // Node fetch transparently decodes compressed upstream bodies.
+    // Do not forward content-encoding for decoded payloads.
+    "content-encoding",
     "content-length",
     "keep-alive",
     "proxy-authenticate",
