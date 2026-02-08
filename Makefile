@@ -137,7 +137,10 @@ deptrac: ## Check directory structure
 deptrac-debug: ## Find files unassigned for Deptrac
 	$(EXEC_ENV) $(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
-setup-test-db: ## Create database for testing purposes
+ensure-test-services: ## Ensure required Docker services for test suites are running
+	$(DOCKER_COMPOSE) up --detach database redis php caddy localstack
+
+setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
