@@ -93,7 +93,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 
 - Docker support so all existing `make` commands continue to work
 - GitHub CLI (`gh`)
-- OpenAI Codex CLI (`codex`)
+- Codex CLI (`codex`)
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
   - `make start`

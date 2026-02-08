@@ -60,10 +60,16 @@ Ensure your authentication can read pull request checks/actions metadata for thi
 EOM
         exit 1
     }
-    non_success_count="$(
+    if ! non_success_count="$(
         printf '%s' "${checks_json}" \
             | jq '[.[].state | select(. != "SUCCESS" and . != "SKIPPED" and . != "NEUTRAL")] | length'
-    )"
+    )"; then
+        cat >&2 <<EOM
+Error: failed to parse PR checks JSON for PR #${pr_number}.
+Received payload was not valid JSON.
+EOM
+        exit 1
+    fi
     echo "PR #${pr_number} checks query ok (non-success states: ${non_success_count})."
 else
     echo "No PR detected for current branch. Skipping PR checks."

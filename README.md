@@ -114,14 +114,25 @@ What `verify-gh-codex.sh` checks:
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
-```ini
-openrouter -> openai/gpt-5.2-codex via OpenRouter
-reasoning_effort = xhigh
-reasoning_summary = none
-approval_policy = never
-sandbox_mode = danger-full-access
-base_url = https://openrouter.ai/api/v1
+```toml
+profile = "openrouter"
+
+[profiles.openrouter]
+model = "openai/gpt-5.2-codex"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "none"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[model_providers.openrouter]
+name = "OpenRouter"
+base_url = "https://openrouter.ai/api/v1"
+env_key = "OPENROUTER_API_KEY"
+wire_api = "responses"
 ```
+
+`approval_policy = "never"` + `sandbox_mode = "danger-full-access"` and `--dangerously-bypass-approvals-and-sandbox` allow Codex to run shell commands without approval.
+Use this only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
 
 Run Codex directly:
 
@@ -133,9 +144,8 @@ codex exec -p openrouter --dangerously-bypass-approvals-and-sandbox "Refactor cu
 Notes:
 
 - secrets are never stored in git; keep them in Codespaces secrets
-- credentials are read from environment only
 - Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
-- bootstrap also writes `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
+- bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`

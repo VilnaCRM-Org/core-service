@@ -142,20 +142,23 @@ awk -v start="${OPENROUTER_PROFILE_START}" -v end="${OPENROUTER_PROFILE_END}" '
     skip == 0 {print}
 ' "${CODEX_CONFIG}" > "${tmp_without_block}"
 
-# Force default profile depending on available credentials.
+# Force a single top-level profile key before the first TOML table.
 awk -v profile="${default_profile}" '
-BEGIN {updated = 0}
-/^[[:space:]]*profile[[:space:]]*=/ {
-    if (updated == 0) {
+BEGIN {inserted = 0}
+/^[[:space:]]*profile[[:space:]]*=/ {next}
+/^[[:space:]]*\[/ {
+    if (inserted == 0) {
         print "profile = \"" profile "\""
-        updated = 1
+        print ""
+        inserted = 1
     }
-    next
 }
 {print}
 END {
-    if (updated == 0) {
-        print ""
+    if (inserted == 0) {
+        if (NR > 0) {
+            print ""
+        }
         print "profile = \"" profile "\""
     }
 }

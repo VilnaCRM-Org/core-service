@@ -42,23 +42,27 @@ fi
 
 tmp_last_msg=""
 tmp_captured_output=""
+tmp_tool_workspace=""
 cleanup() {
     [ -n "${tmp_last_msg}" ] && rm -f "${tmp_last_msg}"
     [ -n "${tmp_captured_output}" ] && rm -f "${tmp_captured_output}"
+    [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
 
 tmp_last_msg="$(mktemp)"
 tmp_captured_output="$(mktemp)"
+tmp_tool_workspace="$(mktemp -d)"
 
 echo "Checking Codex autonomous tool execution readiness..."
 # This uses full-access mode intentionally to verify autonomous coding capability in an ephemeral Codespace.
-if ! timeout 90s codex exec \
-    -p openrouter \
-    --dangerously-bypass-approvals-and-sandbox \
-    --output-last-message "${tmp_last_msg}" \
-    "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-startup-ok" \
-    >"${tmp_captured_output}" 2>&1; then
+if ! (
+    cd "${tmp_tool_workspace}" && timeout 90s codex exec \
+        -p openrouter \
+        --dangerously-bypass-approvals-and-sandbox \
+        --output-last-message "${tmp_last_msg}" \
+        "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-startup-ok"
+) >"${tmp_captured_output}" 2>&1; then
     echo "Error: Codex startup smoke test failed." >&2
     sed -n '1,120p' "${tmp_captured_output}" >&2
     exit 1
