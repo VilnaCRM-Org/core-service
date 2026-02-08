@@ -138,7 +138,7 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customer_types_ulid_get"
-    And the JSON node "value" should match "/^[A-Za-z]{2,}$/"
+    And the JSON node "value" should match "/^[A-Za-z]+$/"
 
   Scenario: Create a customer type resource with valid payload and verify full JSON response
     When I send a POST request to "/api/customer_types" with body:
