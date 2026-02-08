@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${SCRIPT_DIR}/lib/github-auth.sh"
 
 readonly CODEX_CONFIG="${HOME}/.codex/config.toml"
+readonly OPENROUTER_SHIM_PORT="${OPENROUTER_SHIM_PORT:-18082}"
 readonly OPENROUTER_PROFILE_START="# BEGIN CORE-SERVICE OPENROUTER PROFILE"
 readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
 
@@ -23,6 +24,9 @@ Provide OPENROUTER_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
+
+echo "Starting OpenRouter compatibility shim..."
+bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
 
 default_profile="openrouter"
 
@@ -62,7 +66,7 @@ END {
 }
 ' "${tmp_without_block}" > "${tmp_with_profile}"
 
-cat >> "${tmp_with_profile}" <<'EOM'
+cat >> "${tmp_with_profile}" <<EOM
 
 # BEGIN CORE-SERVICE OPENROUTER PROFILE
 [profiles.openrouter]
@@ -75,7 +79,7 @@ sandbox_mode = "danger-full-access"
 
 [model_providers.openrouter]
 name = "OpenRouter"
-base_url = "https://openrouter.ai/api/v1"
+base_url = "http://127.0.0.1:${OPENROUTER_SHIM_PORT}/api/v1"
 env_key = "OPENROUTER_API_KEY"
 wire_api = "responses"
 # END CORE-SERVICE OPENROUTER PROFILE
@@ -96,4 +100,5 @@ echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
 echo "Codex profile configured:"
 echo "  - openrouter: model openai/gpt-5.2-codex via OpenRouter"
 echo "    reasoning: xhigh, summaries: none, approvals: never, sandbox: danger-full-access"
+echo "    transport: local OpenRouter compatibility shim on http://127.0.0.1:${OPENROUTER_SHIM_PORT}"
 echo "Default profile: ${default_profile}"

@@ -116,6 +116,7 @@ For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
 - `OPENROUTER_API_KEY`
 - `GH_AUTOMATION_TOKEN` (or `GH_TOKEN` / `GITHUB_TOKEN`)
+- optional `OPENROUTER_SHIM_PORT` (default `18082`)
 
 If you prefer manual authentication inside Codespace:
 
@@ -138,6 +139,7 @@ This setup is OpenRouter-only and configures Codex `openrouter` profile with:
 - reasoning summaries `none` (required for OpenRouter tool-calling compatibility)
 - approvals `never`
 - sandbox `danger-full-access`
+- local provider URL `http://127.0.0.1:18082/api/v1` via compatibility shim
 
 ### Working in Codespaces
 

@@ -77,6 +77,9 @@ EOM
     exit 1
 fi
 
+echo "Ensuring OpenRouter compatibility shim is running..."
+bash "${SCRIPT_DIR}/start-openrouter-shim.sh"
+
 echo "Running codex smoke task via OpenRouter profile..."
 tmp_last_msg="$(mktemp)"
 tmp_captured_output="$(mktemp)"
@@ -128,6 +131,8 @@ Current profile already uses full access and no approvals:
   - reasoning: xhigh
 Ensure profile also sets:
   - model_reasoning_summary = "none"
+Check shim logs:
+  - ~/.codex/openrouter-shim.log
 EOM
     else
         echo "Error: codex tool-calling smoke task failed." >&2
