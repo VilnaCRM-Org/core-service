@@ -80,6 +80,7 @@ make help
 Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
 
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
+- `OPENAI_API_KEY`: required for reliable autonomous Codex tool-calling workflows
 - GitHub authentication token for non-interactive `gh` usage:
   `GH_AUTOMATION_TOKEN` or `GITHUB_TOKEN` or `GH_TOKEN`
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
@@ -99,20 +100,23 @@ What `verify-gh-codex.sh` checks:
 - current branch supports `git push --dry-run`
 - `codex` can run a prompt-only read-only non-interactive task via OpenRouter
 - `codex` can complete a tool-calling smoke task required for autonomous coding flows
+  (uses `openai-autonomous` profile when `OPENAI_API_KEY` is present)
 
-Codex is configured directly (no `make` wrapper) with:
+Codex is configured directly (no `make` wrapper) with profiles:
 
 ```bash
-profile = openrouter
-model = openai/gpt-5.2-codex
-base_url = https://openrouter.ai/api/v1
+openrouter          -> openai/gpt-5.2-codex via OpenRouter (prompt tasks)
+openai-autonomous   -> gpt-5.2-codex via OpenAI (tool-calling/autonomous tasks)
 ```
 
 Run Codex directly:
 
 ```bash
 codex -p openrouter
-codex exec -p openrouter --full-auto --sandbox workspace-write "Refactor customer update flow to reduce duplication"
+codex exec -p openrouter --sandbox read-only "Summarize duplicated logic in customer update flow"
+
+codex -p openai-autonomous
+codex exec -p openai-autonomous --full-auto --sandbox workspace-write "Refactor customer update flow to reduce duplication"
 ```
 
 Notes:
@@ -121,8 +125,7 @@ Notes:
 - no token values are written to repository files
 - if `gh` is not authenticated in your Codespace, run interactive login:
   `gh auth login -h github.com -w`
-- if OpenRouter passes prompt-only tasks but fails tool-calling, use direct OpenAI auth for full autonomous coding:
-  `codex login` or `OPENAI_API_KEY` with the default OpenAI provider
+- OpenRouter currently works for prompt-only Codex flows here; use `OPENAI_API_KEY` for autonomous coding actions
 
 ## Using
 
