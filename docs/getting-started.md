@@ -130,6 +130,9 @@ Then run:
 bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
 
+`verify-gh-codex.sh` includes both prompt-only and tool-calling Codex checks.
+If prompt-only passes but tool-calling fails on OpenRouter, switch Codex auth to direct OpenAI (`codex login` or `OPENAI_API_KEY`) for full autonomous coding workflows.
+
 ### Working in Codespaces
 
 All project operations remain the same as local usage:

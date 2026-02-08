@@ -97,7 +97,8 @@ What `verify-gh-codex.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `codex` can run a small read-only non-interactive task via OpenRouter
+- `codex` can run a prompt-only read-only non-interactive task via OpenRouter
+- `codex` can complete a tool-calling smoke task required for autonomous coding flows
 
 Codex is configured directly (no `make` wrapper) with:
 
@@ -120,6 +121,8 @@ Notes:
 - no token values are written to repository files
 - if `gh` is not authenticated in your Codespace, run interactive login:
   `gh auth login -h github.com -w`
+- if OpenRouter passes prompt-only tasks but fails tool-calling, use direct OpenAI auth for full autonomous coding:
+  `codex login` or `OPENAI_API_KEY` with the default OpenAI provider
 
 ## Using
 

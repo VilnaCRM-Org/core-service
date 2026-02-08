@@ -80,16 +80,19 @@ fi
 echo "Running codex smoke task via OpenRouter profile..."
 tmp_last_msg="$(mktemp)"
 tmp_captured_output="$(mktemp)"
+tmp_tool_last_msg="$(mktemp)"
+tmp_tool_captured_output="$(mktemp)"
 cleanup() {
-    rm -f "${tmp_last_msg}" "${tmp_captured_output}"
+    rm -f "${tmp_last_msg}" "${tmp_captured_output}" "${tmp_tool_last_msg}" "${tmp_tool_captured_output}"
 }
 trap cleanup EXIT
 
+# Prompt-only smoke test validates OpenRouter connectivity for Codex.
 if ! codex exec \
     -p openrouter \
     --sandbox read-only \
     --output-last-message "${tmp_last_msg}" \
-    "Inspect this repository and respond with exactly one line in this format: codex-ok:<short-summary>" \
+    "Reply with exactly one line: codex-ok:openrouter-basic" \
     >"${tmp_captured_output}" 2>&1; then
     echo "Error: codex smoke task execution failed." >&2
     echo "Codex output:" >&2
@@ -104,5 +107,38 @@ if ! grep -q '^codex-ok:' "${tmp_last_msg}"; then
     exit 1
 fi
 
-echo "Codex smoke task ok: $(cat "${tmp_last_msg}")"
+echo "Codex basic smoke task ok: $(cat "${tmp_last_msg}")"
+echo "Running Codex tool-calling smoke task..."
+
+# Tool-calling smoke test validates autonomous coding capability.
+if ! codex exec \
+    -p openrouter \
+    --sandbox read-only \
+    --output-last-message "${tmp_tool_last_msg}" \
+    "Run one shell command: pwd. Then reply with exactly one line: codex-ok:openrouter-tools" \
+    >"${tmp_tool_captured_output}" 2>&1; then
+    if grep -q "ZodError" "${tmp_tool_captured_output}"; then
+        cat >&2 <<'EOM'
+Error: OpenRouter rejected Codex tool-calling payloads.
+Result: prompt-only Codex works, but autonomous coding actions (edit/refactor/test/commit flows) are blocked.
+Recommended fix for full autonomous coding:
+  1) Authenticate Codex against OpenAI directly (codex login or OPENAI_API_KEY)
+  2) Keep OpenRouter only for non-tool prompt tasks
+EOM
+    else
+        echo "Error: codex tool-calling smoke task failed." >&2
+    fi
+    echo "Codex output:" >&2
+    sed -n '1,120p' "${tmp_tool_captured_output}" >&2
+    exit 1
+fi
+
+if ! grep -q '^codex-ok:' "${tmp_tool_last_msg}"; then
+    echo "Error: codex tool-calling smoke task did not return expected output." >&2
+    echo "Last message:" >&2
+    cat "${tmp_tool_last_msg}" >&2
+    exit 1
+fi
+
+echo "Codex tool-calling smoke task ok: $(cat "${tmp_tool_last_msg}")"
 echo "All GH/Codex verification checks passed."
