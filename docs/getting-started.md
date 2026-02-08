@@ -115,7 +115,7 @@ make help
 For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
 - `OPENROUTER_API_KEY`
-- `GH_AUTOMATION_TOKEN` (or `GH_TOKEN` / `GITHUB_TOKEN`)
+- `GH_AUTOMATION_TOKEN`
 - optional `OPENROUTER_SHIM_PORT` (default `18082`)
 
 If you prefer manual authentication inside Codespace:
@@ -128,8 +128,15 @@ gh auth setup-git
 Then run:
 
 ```bash
+bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
+
+`startup-smoke-tests.sh` runs the default startup checks:
+
+- `gh` is authenticated
+- org repository listing works
+- `codex` can execute one autonomous tool-calling task
 
 `verify-gh-codex.sh` includes both prompt-only and tool-calling Codex checks.
 This setup is OpenRouter-only and configures Codex `openrouter` profile with:

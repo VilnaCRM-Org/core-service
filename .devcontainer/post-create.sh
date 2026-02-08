@@ -40,5 +40,7 @@ if [ ! -f vendor/autoload.php ]; then
     make install
 fi
 
+bash scripts/codespaces/startup-smoke-tests.sh "${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
+
 echo "Codespace setup complete."
 echo "Use 'make help' to list all available commands."

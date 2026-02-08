@@ -80,17 +80,23 @@ make help
 Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
 
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
-- GitHub authentication token for non-interactive `gh` usage:
-  `GH_AUTOMATION_TOKEN` or `GITHUB_TOKEN` or `GH_TOKEN`
+- `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
 - optional `OPENROUTER_SHIM_PORT`: local port for OpenRouter compatibility shim (default `18082`)
 
-The Codespace `post-create` step runs secure bootstrap automatically. You can also run scripts manually:
+The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
 
 ```bash
 bash scripts/codespaces/setup-secure-agent-env.sh
+bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 ```
+
+What `startup-smoke-tests.sh` checks:
+
+- `gh` authentication is available
+- repository listing for `VilnaCRM-Org` works
+- `codex` can execute one tool-calling task with the `openrouter` profile
 
 What `verify-gh-codex.sh` checks:
 
@@ -123,8 +129,8 @@ Notes:
 
 - credentials are read from environment only
 - no token values are written to repository files
-- if `gh` is not authenticated in your Codespace, run interactive login:
-  `gh auth login -h github.com -w`
+- if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
+  `gh auth login -h github.com -w && gh auth setup-git`
 - setup starts a local compatibility shim (`127.0.0.1`) for OpenRouter tool-calling payload normalization
 - this setup is OpenRouter-only
 
