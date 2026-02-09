@@ -13,8 +13,11 @@ if [ -f "${SETTINGS_FILE}" ]; then
     . "${SETTINGS_FILE}"
 fi
 
+: "${OPENCODE_MODEL:=openrouter/openai/gpt-5.2-codex}"
+
 cs_require_command gh
-cs_require_command codex
+cs_require_command jq
+cs_require_command opencode
 
 echo "Running startup smoke tests..."
 
@@ -40,51 +43,46 @@ EOM
     exit 1
 fi
 
-tmp_last_msg=""
-tmp_captured_output=""
+tmp_events=""
+tmp_last_text=""
 tmp_tool_workspace=""
 cleanup() {
-    [ -n "${tmp_last_msg}" ] && rm -f "${tmp_last_msg}"
-    [ -n "${tmp_captured_output}" ] && rm -f "${tmp_captured_output}"
+    [ -n "${tmp_events}" ] && rm -f "${tmp_events}"
+    [ -n "${tmp_last_text}" ] && rm -f "${tmp_last_text}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
 
-tmp_last_msg="$(mktemp)"
-tmp_captured_output="$(mktemp)"
+tmp_events="$(mktemp)"
+tmp_last_text="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
 
-echo "Checking Codex autonomous tool execution readiness..."
-# This uses full-access mode intentionally to verify autonomous coding capability in an ephemeral Codespace.
+echo "Checking OpenCode autonomous tool execution readiness..."
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 90s codex exec \
-        -p openrouter \
-        --dangerously-bypass-approvals-and-sandbox \
-        --output-last-message "${tmp_last_msg}" \
-        "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-startup-ok"
-) >"${tmp_captured_output}" 2>&1; then
-    if grep -qE "invalid_prompt|Invalid Responses API request|ZodError" "${tmp_captured_output}"; then
+    cd "${tmp_tool_workspace}" && timeout 120s opencode run \
+        --format json \
+        -m "${OPENCODE_MODEL}" \
+        "Use the bash tool exactly once and run: true. Then reply with exactly one line: opencode-startup-ok"
+) >"${tmp_events}" 2>&1; then
+    if grep -qE "invalid_prompt|Invalid Responses API request|ZodError|No matching discriminator" "${tmp_events}"; then
         cat >&2 <<'EOM'
-Error: OpenRouter rejected Codex tool-calling payloads during startup smoke test.
+Error: OpenRouter rejected OpenCode tool-calling payloads during startup smoke test.
 This blocks autonomous coding flows (edit/test/commit/push).
-Current Codex releases require:
-  - wire_api = "responses"
-Check:
-  - ~/.codex/config.toml
 EOM
     fi
-    echo "Error: Codex startup smoke test failed." >&2
-    sed -n '1,120p' "${tmp_captured_output}" >&2
+    echo "Error: OpenCode startup smoke test failed." >&2
+    sed -n '1,120p' "${tmp_events}" >&2
     exit 1
 fi
 
-if ! grep -qE '^[[:space:]]*codex-startup-ok[[:space:]]*$' "${tmp_last_msg}"; then
-    actual_output="$(tr -d '\r' < "${tmp_last_msg}" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
-    echo "Error: Codex startup smoke test returned unexpected output." >&2
-    echo "Expected pattern: codex-startup-ok" >&2
+jq -r 'select(.type == "text" and .part.text != null) | .part.text' "${tmp_events}" > "${tmp_last_text}" || true
+if ! grep -qE '^[[:space:]]*opencode-startup-ok[[:space:]]*$' "${tmp_last_text}"; then
+    actual_output="$(tr -d '\r' < "${tmp_last_text}" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
+    echo "Error: OpenCode startup smoke test returned unexpected output." >&2
+    echo "Expected pattern: opencode-startup-ok" >&2
     echo "Actual trimmed output: ${actual_output}" >&2
     exit 1
 fi
 
-echo "Codex startup smoke test passed."
+echo "OpenCode startup smoke test passed."
 echo "Startup smoke tests completed successfully."

@@ -12,7 +12,7 @@ fi
 
 # Codespaces host Docker currently exposes API 1.43; newer clients need this pin.
 export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
-: "${CODEX_NPM_PACKAGE:=@openai/codex@0.98.0}"
+: "${OPENCODE_NPM_PACKAGE:=opencode-ai@1.1.53}"
 
 echo "Waiting for Docker daemon..."
 for attempt in $(seq 1 90); do
@@ -35,12 +35,10 @@ if ! command -v make >/dev/null 2>&1; then
     sudo apt-get install -y make
 fi
 
-if ! command -v codex >/dev/null 2>&1; then
-    npm install -g "${CODEX_NPM_PACKAGE}"
+if ! command -v opencode >/dev/null 2>&1; then
+    npm install -g "${OPENCODE_NPM_PACKAGE}"
 fi
 
-export CODEX_APPROVAL_POLICY="${CODEX_APPROVAL_POLICY:-never}"
-export CODEX_SANDBOX_MODE="${CODEX_SANDBOX_MODE:-danger-full-access}"
 export GH_TOKEN_VAR="${GH_TOKEN_VAR:-GH_AUTOMATION_TOKEN}"
 export CODESPACE_GITHUB_ORG="${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
 

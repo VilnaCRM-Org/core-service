@@ -33,7 +33,7 @@
   },
   "secrets": {
     "OPENROUTER_API_KEY": {
-      "description": "OpenRouter API key used by Codex OpenRouter profile."
+      "description": "OpenRouter API key used by OpenCode."
     },
     "GH_AUTOMATION_TOKEN": {
       "description": "GitHub token for non-interactive gh CLI and git push in Codespaces."

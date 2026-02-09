@@ -15,24 +15,16 @@ if [ -f "${SETTINGS_FILE}" ]; then
     . "${SETTINGS_FILE}"
 fi
 
-readonly CODEX_CONFIG="${HOME}/.codex/config.toml"
-readonly OPENROUTER_PROFILE_START="# BEGIN CORE-SERVICE OPENROUTER PROFILE"
-readonly OPENROUTER_PROFILE_END="# END CORE-SERVICE OPENROUTER PROFILE"
+readonly OPENCODE_CONFIG="${HOME}/.config/opencode/opencode.json"
 readonly AGENT_ENV_DIR="${HOME}/.config/core-service"
 readonly AGENT_SECRETS_FILE="${AGENT_ENV_DIR}/agent-secrets.env"
 readonly AGENT_BASHRC_FILE="${HOME}/.bashrc"
 readonly AGENT_BASHRC_START="# BEGIN CORE-SERVICE AGENT ENV"
 readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
-: "${CODEX_DEFAULT_PROFILE:=openrouter}"
-: "${CODEX_MODEL:=openai/gpt-5.2-codex}"
-: "${CODEX_MODEL_PROVIDER:=openrouter}"
-: "${CODEX_REASONING_EFFORT:=xhigh}"
-: "${CODEX_REASONING_SUMMARY:=none}"
-: "${CODEX_APPROVAL_POLICY:=never}"
-: "${CODEX_SANDBOX_MODE:=danger-full-access}"
-: "${CODEX_PROVIDER_NAME:=OpenRouter}"
-: "${CODEX_PROVIDER_WIRE_API:=responses}"
-: "${CODEX_PROVIDER_BASE_URL:=https://openrouter.ai/api/v1}"
+: "${OPENCODE_MODEL:=openrouter/openai/gpt-5.2-codex}"
+: "${OPENCODE_PROVIDER_BASE_URL:=https://openrouter.ai/api/v1}"
+: "${OPENCODE_ENABLED_PROVIDERS:=openrouter}"
+: "${OPENCODE_DEFAULT_AGENT:=build}"
 : "${GH_HOST:=github.com}"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
@@ -79,19 +71,65 @@ EOM
     mv "${tmp_bashrc}" "${AGENT_BASHRC_FILE}"
 }
 
-# Trust model: full-access autonomous mode is expected only for ephemeral Codespaces.
-# Outside Codespaces, require explicit opt-in to keep dangerous settings.
-if [ "${CODEX_APPROVAL_POLICY}" = "never" ] \
-    && [ "${CODEX_SANDBOX_MODE}" = "danger-full-access" ] \
-    && [ "${CODESPACES:-}" != "true" ] \
-    && [ "${ENABLE_DANGEROUS_AGENT:-}" != "true" ]; then
-    echo "Warning: refusing danger-full-access outside Codespaces without ENABLE_DANGEROUS_AGENT=true." >&2
-    CODEX_APPROVAL_POLICY="on-request"
-    CODEX_SANDBOX_MODE="workspace-write"
-fi
+build_enabled_providers_json() {
+    jq -n --arg raw "${OPENCODE_ENABLED_PROVIDERS}" '
+        $raw
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+    '
+}
+
+write_opencode_config() {
+    local enabled_providers_json
+    local tmp_config
+
+    enabled_providers_json="$(build_enabled_providers_json)"
+    tmp_config="$(mktemp)"
+
+    jq -n \
+        --arg schema "https://opencode.ai/config.json" \
+        --arg model "${OPENCODE_MODEL}" \
+        --arg default_agent "${OPENCODE_DEFAULT_AGENT}" \
+        --arg api_key "{env:OPENROUTER_API_KEY}" \
+        --arg base_url "${OPENCODE_PROVIDER_BASE_URL}" \
+        --argjson enabled_providers "${enabled_providers_json}" '
+        {
+          "$schema": $schema,
+          "model": $model,
+          "provider": {
+            "openrouter": {
+              "options": (
+                {
+                  "apiKey": $api_key
+                }
+                + (
+                    if ($base_url | length) > 0
+                    then {"baseURL": $base_url}
+                    else {}
+                    end
+                  )
+              )
+            }
+          },
+          "enabled_providers": $enabled_providers
+        }
+        + (
+            if ($default_agent | length) > 0
+            then {"default_agent": $default_agent}
+            else {}
+            end
+          )
+    ' > "${tmp_config}"
+
+    mkdir -p "$(dirname "${OPENCODE_CONFIG}")"
+    chmod 600 "${tmp_config}"
+    mv "${tmp_config}" "${OPENCODE_CONFIG}"
+}
 
 cs_require_command gh
-cs_require_command codex
+cs_require_command jq
+cs_require_command opencode
 cs_ensure_gh_auth
 
 if [ -z "${OPENROUTER_API_KEY:-}" ]; then
@@ -104,101 +142,7 @@ fi
 
 persist_agent_secrets_file
 ensure_shell_sources_agent_secrets
-
-default_profile="${CODEX_DEFAULT_PROFILE}"
-
-mkdir -p "$(dirname "${CODEX_CONFIG}")"
-touch "${CODEX_CONFIG}"
-
-tmp_without_block=""
-tmp_with_profile=""
-
-validate_toml_scalar_env() {
-    local var_name="$1"
-    local var_value="$2"
-
-    case "${var_value}" in
-        *$'\n'*|*$'\r'*|*\"*|*\\*)
-            echo "Error: ${var_name} contains unsupported characters for TOML scalar interpolation." >&2
-            echo "Use a value without newlines, double quotes, or backslashes." >&2
-            exit 1
-            ;;
-    esac
-}
-
-cleanup() {
-    [ -n "${tmp_without_block}" ] && rm -f "${tmp_without_block}"
-    [ -n "${tmp_with_profile}" ] && rm -f "${tmp_with_profile}"
-}
-trap cleanup EXIT
-
-tmp_without_block="$(mktemp)"
-tmp_with_profile="$(mktemp)"
-
-# Remove previously managed OpenRouter block if present.
-awk -v start="${OPENROUTER_PROFILE_START}" -v end="${OPENROUTER_PROFILE_END}" '
-    $0 == start {skip=1; next}
-    $0 == end {skip=0; next}
-    skip == 0 {print}
-' "${CODEX_CONFIG}" > "${tmp_without_block}"
-
-# Force a single top-level profile key before the first TOML table.
-awk -v profile="${default_profile}" '
-BEGIN {inserted = 0}
-/^[[:space:]]*profile[[:space:]]*=/ {next}
-/^[[:space:]]*\[/ {
-    if (inserted == 0) {
-        print "profile = \"" profile "\""
-        print ""
-        inserted = 1
-    }
-}
-{print}
-END {
-    if (inserted == 0) {
-        if (NR > 0) {
-            print ""
-        }
-        print "profile = \"" profile "\""
-    }
-}
-' "${tmp_without_block}" > "${tmp_with_profile}"
-
-for toml_env in \
-    CODEX_MODEL \
-    CODEX_MODEL_PROVIDER \
-    CODEX_REASONING_EFFORT \
-    CODEX_REASONING_SUMMARY \
-    CODEX_APPROVAL_POLICY \
-    CODEX_SANDBOX_MODE \
-    CODEX_PROVIDER_NAME \
-    CODEX_PROVIDER_WIRE_API \
-    CODEX_PROVIDER_BASE_URL; do
-    validate_toml_scalar_env "${toml_env}" "${!toml_env}"
-done
-
-cat >> "${tmp_with_profile}" <<EOM
-
-# BEGIN CORE-SERVICE OPENROUTER PROFILE
-[profiles.openrouter]
-model = "${CODEX_MODEL}"
-model_provider = "${CODEX_MODEL_PROVIDER}"
-model_reasoning_effort = "${CODEX_REASONING_EFFORT}"
-model_reasoning_summary = "${CODEX_REASONING_SUMMARY}"
-# WARNING: this profile can execute shell commands without approval.
-# It is intended for trusted, ephemeral GitHub Codespaces automation only.
-approval_policy = "${CODEX_APPROVAL_POLICY}"
-sandbox_mode = "${CODEX_SANDBOX_MODE}"
-
-[model_providers.openrouter]
-name = "${CODEX_PROVIDER_NAME}"
-base_url = "${CODEX_PROVIDER_BASE_URL}"
-env_key = "OPENROUTER_API_KEY"
-wire_api = "${CODEX_PROVIDER_WIRE_API}"
-# END CORE-SERVICE OPENROUTER PROFILE
-EOM
-
-mv "${tmp_with_profile}" "${CODEX_CONFIG}"
+write_opencode_config
 
 # Persist repository-defined GH defaults for CLI behavior in each fresh Codespace.
 gh config set git_protocol "${GH_GIT_PROTOCOL}" --host "${GH_HOST}" >/dev/null 2>&1 || true
@@ -214,10 +158,13 @@ fi
 
 echo "Secure agent environment is ready."
 echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
-echo "Codex profile configured:"
-echo "  - ${default_profile}: model ${CODEX_MODEL} via ${CODEX_PROVIDER_NAME}"
-echo "    reasoning: ${CODEX_REASONING_EFFORT}, summaries: ${CODEX_REASONING_SUMMARY}, approvals: ${CODEX_APPROVAL_POLICY}, sandbox: ${CODEX_SANDBOX_MODE}"
-echo "    transport: direct OpenRouter API at ${CODEX_PROVIDER_BASE_URL}"
+echo "OpenCode configured:"
+echo "  - model: ${OPENCODE_MODEL}"
+echo "  - providers: ${OPENCODE_ENABLED_PROVIDERS}"
+if [ -n "${OPENCODE_PROVIDER_BASE_URL}" ]; then
+    echo "  - OpenRouter base URL: ${OPENCODE_PROVIDER_BASE_URL}"
+fi
 echo "Runtime secret env:"
 echo "  - ${AGENT_SECRETS_FILE} (mode 600)"
-echo "Default profile: ${default_profile}"
+echo "OpenCode config:"
+echo "  - ${OPENCODE_CONFIG}"

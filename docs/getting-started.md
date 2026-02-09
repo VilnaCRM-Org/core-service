@@ -93,7 +93,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 
 - Docker support so all existing `make` commands continue to work
 - GitHub CLI (`gh`)
-- Codex CLI (`codex`)
+- OpenCode CLI (`opencode`)
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
   - `make start`
@@ -108,7 +108,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 
 ```bash
 gh --version
-codex --version
+opencode --version
 make help
 ```
 
@@ -117,10 +117,10 @@ For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 - `OPENROUTER_API_KEY`
 - `GH_AUTOMATION_TOKEN`
 
-These secrets are mapped into the runtime shell environment via `.devcontainer/devcontainer.json` (`remoteEnv`), so `gh`, `git`, and `codex` can use them in normal terminal sessions.
+These secrets are mapped into the runtime shell environment via `.devcontainer/devcontainer.json` (`remoteEnv`), so `gh`, `git`, and `opencode` can use them in normal terminal sessions.
 The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
 
-Non-secret defaults for GitHub CLI and Codex are persisted in git:
+Non-secret defaults for GitHub CLI and OpenCode are persisted in git:
 
 - `.devcontainer/codespaces-settings.env`
 - `.devcontainer/post-create.sh`
@@ -137,24 +137,21 @@ Then run:
 
 ```bash
 bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
-bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-opencode.sh VilnaCRM-Org
 ```
 
 `startup-smoke-tests.sh` runs the default startup checks:
 
 - `gh` is authenticated
 - org repository listing works
-- `codex` can execute one autonomous tool-calling task
+- `opencode` can execute one autonomous tool-calling task
 
-`verify-gh-codex.sh` includes both prompt-only and tool-calling Codex checks.
-This setup is OpenRouter-only and configures Codex `openrouter` profile with:
+`verify-gh-opencode.sh` includes both prompt-only and tool-calling OpenCode checks.
+This setup is OpenRouter-only and configures OpenCode with:
 
-- model `openai/gpt-5.2-codex`
-- wire API `responses` (required by current Codex CLI releases)
-- reasoning effort `xhigh`
-- reasoning summaries `none` (required for OpenRouter tool-calling compatibility)
-- approvals `never`
-- sandbox `danger-full-access`
+- model `openrouter/openai/gpt-5.2-codex`
+- enabled providers `openrouter`
+- default agent `build`
 - provider URL `https://openrouter.ai/api/v1`
 
 ### Working in Codespaces
