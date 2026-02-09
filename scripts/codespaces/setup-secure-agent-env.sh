@@ -22,9 +22,11 @@ readonly AGENT_BASHRC_FILE="${HOME}/.bashrc"
 readonly AGENT_BASHRC_START="# BEGIN CORE-SERVICE AGENT ENV"
 readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 : "${OPENCODE_MODEL:=openrouter/openai/gpt-5.2-codex}"
+: "${OPENCODE_VARIANT:=xhigh}"
 : "${OPENCODE_PROVIDER_BASE_URL:=https://openrouter.ai/api/v1}"
 : "${OPENCODE_ENABLED_PROVIDERS:=openrouter}"
 : "${OPENCODE_DEFAULT_AGENT:=build}"
+: "${OPENCODE_PERMISSION:=allow}"
 : "${GH_HOST:=github.com}"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
@@ -90,13 +92,16 @@ write_opencode_config() {
     jq -n \
         --arg schema "https://opencode.ai/config.json" \
         --arg model "${OPENCODE_MODEL}" \
+        --arg variant "${OPENCODE_VARIANT}" \
         --arg default_agent "${OPENCODE_DEFAULT_AGENT}" \
+        --arg permission "${OPENCODE_PERMISSION}" \
         --arg api_key "{env:OPENROUTER_API_KEY}" \
         --arg base_url "${OPENCODE_PROVIDER_BASE_URL}" \
         --argjson enabled_providers "${enabled_providers_json}" '
         {
           "$schema": $schema,
           "model": $model,
+          "permission": $permission,
           "provider": {
             "openrouter": {
               "options": (
@@ -112,7 +117,14 @@ write_opencode_config() {
               )
             }
           },
-          "enabled_providers": $enabled_providers
+          "enabled_providers": $enabled_providers,
+          "agent": {
+            "build": {
+              "model": $model,
+              "variant": $variant,
+              "permission": $permission
+            }
+          }
         }
         + (
             if ($default_agent | length) > 0
@@ -160,6 +172,8 @@ echo "Secure agent environment is ready."
 echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
 echo "OpenCode configured:"
 echo "  - model: ${OPENCODE_MODEL}"
+echo "  - variant: ${OPENCODE_VARIANT}"
+echo "  - permission: ${OPENCODE_PERMISSION}"
 echo "  - providers: ${OPENCODE_ENABLED_PROVIDERS}"
 if [ -n "${OPENCODE_PROVIDER_BASE_URL}" ]; then
     echo "  - OpenRouter base URL: ${OPENCODE_PROVIDER_BASE_URL}"
