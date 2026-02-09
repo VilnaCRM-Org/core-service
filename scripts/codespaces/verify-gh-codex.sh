@@ -169,7 +169,8 @@ Current profile already uses full access and no approvals:
   - model: openai/gpt-5.2-codex
   - provider: OpenRouter
   - reasoning: xhigh
-Ensure profile also sets:
+Ensure profile sets:
+  - wire_api = "chat"
   - model_reasoning_summary = "none"
 Check Codex provider configuration:
   - ~/.codex/config.toml

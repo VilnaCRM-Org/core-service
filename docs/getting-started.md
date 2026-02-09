@@ -150,6 +150,7 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 This setup is OpenRouter-only and configures Codex `openrouter` profile with:
 
 - model `openai/gpt-5.2-codex`
+- wire API `chat` (required for stable `/review` and tool-calling flows with OpenRouter)
 - reasoning effort `xhigh`
 - reasoning summaries `none` (required for OpenRouter tool-calling compatibility)
 - approvals `never`
