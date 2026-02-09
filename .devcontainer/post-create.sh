@@ -49,11 +49,14 @@ if ! bash scripts/codespaces/setup-secure-agent-env.sh; then
     echo "Set Codespaces secrets and rerun: bash scripts/codespaces/setup-secure-agent-env.sh"
 fi
 
-make start
-
 if [ ! -f vendor/autoload.php ]; then
+    if ! make start; then
+        echo "Warning: initial 'make start' failed before dependency install. Retrying after install."
+    fi
     make install
 fi
+
+make start
 
 if [ "${agent_env_ok}" = true ]; then
     bash scripts/codespaces/startup-smoke-tests.sh "${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}"
