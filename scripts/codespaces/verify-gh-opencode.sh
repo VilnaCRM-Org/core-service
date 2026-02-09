@@ -109,11 +109,14 @@ tmp_basic_text=""
 tmp_tool_events=""
 tmp_tool_text=""
 tmp_tool_workspace=""
+tmp_tool_token_file=""
+tool_token=""
 cleanup() {
     [ -n "${tmp_basic_events}" ] && rm -f "${tmp_basic_events}"
     [ -n "${tmp_basic_text}" ] && rm -f "${tmp_basic_text}"
     [ -n "${tmp_tool_events}" ] && rm -f "${tmp_tool_events}"
     [ -n "${tmp_tool_text}" ] && rm -f "${tmp_tool_text}"
+    [ -n "${tmp_tool_token_file}" ] && rm -f "${tmp_tool_token_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
@@ -123,6 +126,9 @@ tmp_basic_text="$(mktemp)"
 tmp_tool_events="$(mktemp)"
 tmp_tool_text="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
+tmp_tool_token_file="${tmp_tool_workspace}/opencode-tools-token.txt"
+tool_token="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 24)"
+printf '%s\n' "${tool_token}" > "${tmp_tool_token_file}"
 
 echo "Running OpenCode smoke task via OpenRouter..."
 if ! timeout 120s opencode run \
@@ -151,7 +157,7 @@ if ! (
     cd "${tmp_tool_workspace}" && timeout 180s opencode run \
         --format json \
         -m "${OPENCODE_MODEL}" \
-        "Use the bash tool exactly once and run: true. Then reply with exactly one line: opencode-ok:openrouter-tools"
+        "Use the bash tool exactly once and print the content of ./opencode-tools-token.txt. Then reply with exactly one line: opencode-ok:openrouter-tools:${tool_token}"
 ) >"${tmp_tool_events}" 2>&1; then
     if grep -qE "ZodError|invalid_prompt|Invalid Responses API request|No matching discriminator" "${tmp_tool_events}"; then
         cat >&2 <<'EOM'
@@ -167,8 +173,9 @@ EOM
 fi
 
 jq -r 'select(.type == "text" and .part.text != null) | .part.text' "${tmp_tool_events}" > "${tmp_tool_text}" || true
-if ! grep -q '^opencode-ok:' "${tmp_tool_text}"; then
+if ! grep -qE "^opencode-ok:openrouter-tools:${tool_token}[[:space:]]*$" "${tmp_tool_text}"; then
     echo "Error: OpenCode tool-calling smoke task did not return expected output." >&2
+    echo "Expected pattern: opencode-ok:openrouter-tools:${tool_token}" >&2
     echo "Text events:" >&2
     cat "${tmp_tool_text}" >&2
     exit 1
