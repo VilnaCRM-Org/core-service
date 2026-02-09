@@ -109,14 +109,14 @@ tmp_basic_text=""
 tmp_tool_events=""
 tmp_tool_text=""
 tmp_tool_workspace=""
-tmp_tool_token_file=""
-tool_token=""
+tmp_tool_marker_file=""
+tool_marker=""
 cleanup() {
     [ -n "${tmp_basic_events}" ] && rm -f "${tmp_basic_events}"
     [ -n "${tmp_basic_text}" ] && rm -f "${tmp_basic_text}"
     [ -n "${tmp_tool_events}" ] && rm -f "${tmp_tool_events}"
     [ -n "${tmp_tool_text}" ] && rm -f "${tmp_tool_text}"
-    [ -n "${tmp_tool_token_file}" ] && rm -f "${tmp_tool_token_file}"
+    [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
@@ -126,13 +126,12 @@ tmp_basic_text="$(mktemp)"
 tmp_tool_events="$(mktemp)"
 tmp_tool_text="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
-tmp_tool_token_file="${tmp_tool_workspace}/opencode-tools-token.txt"
+tmp_tool_marker_file="${tmp_tool_workspace}/opencode-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
-    tool_token="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
+    tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
 else
-    tool_token="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+    tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
 fi
-printf '%s\n' "${tool_token}" > "${tmp_tool_token_file}"
 
 echo "Running OpenCode smoke task via OpenRouter..."
 if ! timeout 120s opencode run \
@@ -161,7 +160,7 @@ if ! (
     cd "${tmp_tool_workspace}" && timeout 180s opencode run \
         --format json \
         -m "${OPENCODE_MODEL}" \
-        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once to read ./opencode-tools-token.txt, then reply with exactly one line: opencode-ok:openrouter-tools:${tool_token}"
+        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once and run: echo ${tool_marker} > ./opencode-tools-marker.txt. Then reply with exactly one line: opencode-ok:openrouter-tools"
 ) >"${tmp_tool_events}" 2>&1; then
     if grep -qE "ZodError|invalid_prompt|Invalid Responses API request|No matching discriminator" "${tmp_tool_events}"; then
         cat >&2 <<'EOM'
@@ -177,11 +176,17 @@ EOM
 fi
 
 jq -r 'select(.type == "text" and .part.text != null) | .part.text' "${tmp_tool_events}" > "${tmp_tool_text}" || true
-if ! grep -qE "^opencode-ok:openrouter-tools:${tool_token}[[:space:]]*$" "${tmp_tool_text}"; then
+if ! grep -qE '^opencode-ok:openrouter-tools[[:space:]]*$' "${tmp_tool_text}"; then
     echo "Error: OpenCode tool-calling smoke task did not return expected output." >&2
-    echo "Expected pattern: opencode-ok:openrouter-tools:${tool_token}" >&2
+    echo "Expected pattern: opencode-ok:openrouter-tools" >&2
     echo "Text events:" >&2
     cat "${tmp_tool_text}" >&2
+    exit 1
+fi
+
+actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
+if [ "${actual_marker}" != "${tool_marker}" ]; then
+    echo "Error: OpenCode tool-calling smoke task did not produce expected marker file content." >&2
     exit 1
 fi
 

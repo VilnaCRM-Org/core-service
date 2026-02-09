@@ -46,12 +46,12 @@ fi
 tmp_events=""
 tmp_last_text=""
 tmp_tool_workspace=""
-tmp_tool_token_file=""
-tool_token=""
+tmp_tool_marker_file=""
+tool_marker=""
 cleanup() {
     [ -n "${tmp_events}" ] && rm -f "${tmp_events}"
     [ -n "${tmp_last_text}" ] && rm -f "${tmp_last_text}"
-    [ -n "${tmp_tool_token_file}" ] && rm -f "${tmp_tool_token_file}"
+    [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
@@ -59,20 +59,19 @@ trap cleanup EXIT
 tmp_events="$(mktemp)"
 tmp_last_text="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
-tmp_tool_token_file="${tmp_tool_workspace}/opencode-startup-token.txt"
+tmp_tool_marker_file="${tmp_tool_workspace}/opencode-startup-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
-    tool_token="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
+    tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
 else
-    tool_token="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+    tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
 fi
-printf '%s\n' "${tool_token}" > "${tmp_tool_token_file}"
 
 echo "Checking OpenCode autonomous tool execution readiness..."
 if ! (
     cd "${tmp_tool_workspace}" && timeout 120s opencode run \
         --format json \
         -m "${OPENCODE_MODEL}" \
-        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once to read ./opencode-startup-token.txt, then reply with exactly one line: opencode-startup-ok:${tool_token}"
+        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once and run: echo ${tool_marker} > ./opencode-startup-marker.txt. Then reply with exactly one line: opencode-startup-ok"
 ) >"${tmp_events}" 2>&1; then
     if grep -qE "invalid_prompt|Invalid Responses API request|ZodError|No matching discriminator" "${tmp_events}"; then
         cat >&2 <<'EOM'
@@ -86,11 +85,17 @@ EOM
 fi
 
 jq -r 'select(.type == "text" and .part.text != null) | .part.text' "${tmp_events}" > "${tmp_last_text}" || true
-if ! grep -qE "^[[:space:]]*opencode-startup-ok:${tool_token}[[:space:]]*$" "${tmp_last_text}"; then
+if ! grep -qE '^[[:space:]]*opencode-startup-ok[[:space:]]*$' "${tmp_last_text}"; then
     actual_output="$(tr -d '\r' < "${tmp_last_text}" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
     echo "Error: OpenCode startup smoke test returned unexpected output." >&2
-    echo "Expected pattern: opencode-startup-ok:${tool_token}" >&2
+    echo "Expected pattern: opencode-startup-ok" >&2
     echo "Actual trimmed output: ${actual_output}" >&2
+    exit 1
+fi
+
+actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
+if [ "${actual_marker}" != "${tool_marker}" ]; then
+    echo "Error: OpenCode startup smoke test did not produce expected marker file content." >&2
     exit 1
 fi
 
