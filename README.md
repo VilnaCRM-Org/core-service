@@ -56,6 +56,102 @@ Also, you can see the architecture diagram using the link below
 
 That's it. You should now be ready to use core service!
 
+### GitHub Codespaces
+
+This repository ships with a built-in Codespaces definition in `.devcontainer/devcontainer.json`.
+
+When a Codespace is created, the setup script:
+
+- installs `codex` CLI
+- provides `gh` CLI
+- starts the Docker stack with `make start`
+- installs PHP dependencies with `make install` if needed
+
+After startup, verify the environment:
+
+```bash
+gh --version
+codex --version
+make help
+```
+
+#### Secure setup for autonomous AI coding agents
+
+Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
+
+- `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
+- `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
+- optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
+
+The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
+
+```bash
+bash scripts/codespaces/setup-secure-agent-env.sh
+bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
+```
+
+What `startup-smoke-tests.sh` checks:
+
+- `gh` authentication is available
+- repository listing for `VilnaCRM-Org` works
+- `codex` can execute one tool-calling task with the `openrouter` profile
+
+Repository-tracked defaults for GitHub and Codex bootstrap are stored in:
+
+- `.devcontainer/codespaces-settings.env`
+- `.devcontainer/post-create.sh`
+- `scripts/codespaces/setup-secure-agent-env.sh`
+
+What `verify-gh-codex.sh` checks:
+
+- GitHub auth works
+- repository listing for `VilnaCRM-Org` works
+- current PR checks can be queried via `gh`
+- current branch supports `git push --dry-run`
+- `codex` can run a prompt-only read-only non-interactive task via OpenRouter
+- `codex` can complete a tool-calling smoke task required for autonomous coding flows
+
+Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
+
+```toml
+profile = "openrouter"
+
+[profiles.openrouter]
+model = "openai/gpt-5.2-codex"
+model_provider = "openrouter"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "none"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[model_providers.openrouter]
+name = "OpenRouter"
+base_url = "https://openrouter.ai/api/v1"
+env_key = "OPENROUTER_API_KEY"
+wire_api = "responses"
+```
+
+`approval_policy = "never"` + `sandbox_mode = "danger-full-access"` and `--dangerously-bypass-approvals-and-sandbox` allow Codex to run shell commands without approval.
+Use this only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
+
+Run Codex directly:
+
+```bash
+codex -p openrouter
+codex exec -p openrouter --dangerously-bypass-approvals-and-sandbox "Refactor customer update flow to reduce duplication"
+```
+
+Notes:
+
+- secrets are never stored in git; keep them in Codespaces secrets
+- Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
+- bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
+- no token values are written to repository files
+- if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
+  `gh auth login -h github.com -w && gh auth setup-git`
+- this setup is OpenRouter-only
+
 ## Using
 
 You can use `make` command to easily control and work with project locally.
