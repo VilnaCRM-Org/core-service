@@ -127,7 +127,11 @@ tmp_tool_events="$(mktemp)"
 tmp_tool_text="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_token_file="${tmp_tool_workspace}/opencode-tools-token.txt"
-tool_token="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 24)"
+if command -v uuidgen >/dev/null 2>&1; then
+    tool_token="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
+else
+    tool_token="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+fi
 printf '%s\n' "${tool_token}" > "${tmp_tool_token_file}"
 
 echo "Running OpenCode smoke task via OpenRouter..."
