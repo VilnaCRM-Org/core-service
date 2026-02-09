@@ -72,7 +72,7 @@ if ! (
     cd "${tmp_tool_workspace}" && timeout 120s opencode run \
         --format json \
         -m "${OPENCODE_MODEL}" \
-        "Use the bash tool exactly once and print the content of ./opencode-startup-token.txt. Then reply with exactly one line: opencode-startup-ok:${tool_token}"
+        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once to read ./opencode-startup-token.txt, then reply with exactly one line: opencode-startup-ok:${tool_token}"
 ) >"${tmp_events}" 2>&1; then
     if grep -qE "invalid_prompt|Invalid Responses API request|ZodError|No matching discriminator" "${tmp_events}"; then
         cat >&2 <<'EOM'
