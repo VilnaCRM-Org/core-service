@@ -161,7 +161,7 @@ if ! (
         --output-last-message "${tmp_tool_last_msg}" \
         "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-ok:${tool_profile}-tools"
 ) >"${tmp_tool_captured_output}" 2>&1; then
-    if grep -q "ZodError" "${tmp_tool_captured_output}"; then
+    if grep -qE "ZodError|invalid_prompt|Invalid Responses API request" "${tmp_tool_captured_output}"; then
         cat >&2 <<'EOM'
 Error: OpenRouter rejected Codex tool-calling payloads.
 Result: prompt-only Codex works, but autonomous coding actions (edit/refactor/test/commit flows) are blocked.
@@ -170,7 +170,7 @@ Current profile already uses full access and no approvals:
   - provider: OpenRouter
   - reasoning: xhigh
 Ensure profile sets:
-  - wire_api = "chat"
+  - wire_api = "responses"
   - model_reasoning_summary = "none"
 Check Codex provider configuration:
   - ~/.codex/config.toml

@@ -63,6 +63,16 @@ if ! (
         --output-last-message "${tmp_last_msg}" \
         "Use the shell tool exactly once and run: true. Then reply with exactly one line: codex-startup-ok"
 ) >"${tmp_captured_output}" 2>&1; then
+    if grep -qE "invalid_prompt|Invalid Responses API request|ZodError" "${tmp_captured_output}"; then
+        cat >&2 <<'EOM'
+Error: OpenRouter rejected Codex tool-calling payloads during startup smoke test.
+This blocks autonomous coding flows (edit/test/commit/push).
+Current Codex releases require:
+  - wire_api = "responses"
+Check:
+  - ~/.codex/config.toml
+EOM
+    fi
     echo "Error: Codex startup smoke test failed." >&2
     sed -n '1,120p' "${tmp_captured_output}" >&2
     exit 1
