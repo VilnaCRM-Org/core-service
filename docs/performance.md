@@ -23,7 +23,7 @@ We run performance tests locally using the repository Docker Compose setup (not 
 ### Application Under Test:
 
 - **Core Service Version:** 0.8.0
-- **PHP Version:** 8.3
+- **PHP Version:** 8.4
 - **Symfony Version:** 7.2
 - **Database:** MongoDB 6.0
 - **Cache:** Redis (docker-compose service `redis`, image `redis:8.0.0-alpine`)

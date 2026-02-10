@@ -6,7 +6,7 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.2",
+    "php": ">=8.4",
     "ext-ctype": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
@@ -55,7 +55,7 @@
     },
     "sort-packages": true,
     "platform": {
-      "php": "8.3.12",
+      "php": "8.4.0",
       "ext-mongodb": "1.21.1"
     }
   },

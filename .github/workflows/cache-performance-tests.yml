@@ -24,7 +24,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          php-version: 8.4
 
       - name: Start application
         run: make start
@@ -43,7 +43,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          php-version: 8.4
 
       - name: Start application for load tests
         run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d

@@ -15003,7 +15003,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-dom": "*",
         "ext-iconv": "*",
@@ -15014,7 +15014,7 @@
     },
     "platform-dev": {},
     "platform-overrides": {
-        "php": "8.3.12",
+        "php": "8.4.0",
         "ext-mongodb": "1.21.1"
     },
     "plugin-api-version": "2.6.0"

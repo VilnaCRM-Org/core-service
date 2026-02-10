@@ -24,7 +24,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          php-version: 8.4
 
       - name: Checkout Repository
         uses: actions/checkout@v4.2.1

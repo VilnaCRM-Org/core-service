@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          php-version: 8.4
       - uses: actions/checkout@v3
       - name: Copy .env.test.local
         run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
