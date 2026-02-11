@@ -137,8 +137,6 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             new SpecExtensionPropertyApplier()
         );
         $method = new ReflectionMethod(SpecCleanupProcessor::class, 'applyExtensionProperties');
-        /** @psalm-suppress UnusedMethodCall */
-        $method->setAccessible(true);
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
@@ -159,15 +157,11 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         $processor = new SpecCleanupProcessor($metadataCleaner, $extensionApplier);
 
         $metadataProperty = new ReflectionProperty(SpecCleanupProcessor::class, 'metadataCleaner');
-        /** @psalm-suppress UnusedMethodCall */
-        $metadataProperty->setAccessible(true);
 
         $extensionProperty = new ReflectionProperty(
             SpecCleanupProcessor::class,
             'extensionApplier'
         );
-        /** @psalm-suppress UnusedMethodCall */
-        $extensionProperty->setAccessible(true);
 
         self::assertSame($metadataCleaner, $metadataProperty->getValue($processor));
         self::assertSame($extensionApplier, $extensionProperty->getValue($processor));

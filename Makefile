@@ -104,37 +104,29 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@cleanup_coverage() { rm -f coverage.txt; }; \
+	trap cleanup_coverage EXIT; \
 	$(RUN_TESTS_COVERAGE) --testsuite=Unit; \
 	test_status=$$?; \
 	if [ $$test_status -ne 0 ]; then \
 		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
-		cleanup_coverage; \
 		exit $$test_status; \
 	fi; \
-	wait_count=0; \
-	while [ $$wait_count -lt 10 ]; do \
-		if [ -f coverage.txt ]; then \
-			break; \
-		fi; \
-		if [ -z "$$CI" ]; then \
+	if [ -z "$$CI" ]; then \
+		wait_count=0; \
+		while [ $$wait_count -lt 3 ] && [ ! -f coverage.txt ]; do \
 			$(DOCKER_COMPOSE) cp php:/srv/app/coverage.txt coverage.txt >/dev/null 2>&1 || true; \
-		fi; \
-		if [ -f coverage.txt ]; then \
-			break; \
-		fi; \
-		wait_count=$$((wait_count + 1)); \
-		sleep 1; \
-	done; \
-	if [ ! -f coverage.txt ] && [ -z "$$CI" ]; then \
-		$(DOCKER_COMPOSE) cp php:/srv/app/coverage.txt coverage.txt >/dev/null 2>&1 || true; \
+			if [ -f coverage.txt ]; then \
+				break; \
+			fi; \
+			wait_count=$$((wait_count + 1)); \
+			sleep 1; \
+		done; \
 	fi; \
 	if [ ! -f coverage.txt ]; then \
 		echo "❌ ERROR: coverage.txt was not generated."; \
-		cleanup_coverage; \
 		exit 1; \
 	fi; \
 	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
-	cleanup_coverage; \
 	if [ -n "$$coverage" ]; then \
 		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
@@ -144,7 +136,6 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		fi; \
 	else \
 		echo "❌ ERROR: Could not parse coverage from output"; \
-		cleanup_coverage; \
 		exit 1; \
 	fi
 
