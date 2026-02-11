@@ -19,6 +19,7 @@ fi
 
 ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 : "${CODEX_PROFILE_NAME:=openrouter}"
+: "${CODEX_TOOL_SMOKE_MODE:=auto}"
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
 
 cs_require_command gh
@@ -170,24 +171,40 @@ fi
 echo "Codex basic smoke task ok."
 
 echo "Running Codex tool-calling smoke task..."
+tool_smoke_failed=0
 if ! (
     cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openrouter-tools"
 ) >"${tmp_codex_tools}" 2>&1; then
-    echo "Error: Codex tool-calling smoke task failed." >&2
-    sed -n '1,160p' "${tmp_codex_tools}" >&2
-    exit 1
+    tool_smoke_failed=1
 fi
-if ! grep -q "codex-ok:openrouter-tools" "${tmp_codex_tools}"; then
-    echo "Error: Codex tool-calling smoke task did not return expected output." >&2
-    sed -n '1,160p' "${tmp_codex_tools}" >&2
-    exit 1
+
+if [ "${tool_smoke_failed}" -eq 1 ]; then
+    if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
+        echo "Skipping Codex tool-calling smoke task failure (CODEX_TOOL_SMOKE_MODE=skip)." >&2
+    elif [ "${CODEX_TOOL_SMOKE_MODE}" = "auto" ] \
+        && [ "${CODEX_PROFILE_NAME}" = "openrouter" ] \
+        && grep -q "invalid_prompt" "${tmp_codex_tools}" \
+        && grep -q "Invalid Responses API request" "${tmp_codex_tools}"; then
+        echo "Warning: OpenRouter rejected Codex tool-call response payload (known compatibility issue)." >&2
+        echo "Continuing because CODEX_TOOL_SMOKE_MODE=auto." >&2
+    else
+        echo "Error: Codex tool-calling smoke task failed." >&2
+        sed -n '1,160p' "${tmp_codex_tools}" >&2
+        exit 1
+    fi
+else
+    if ! grep -q "codex-ok:openrouter-tools" "${tmp_codex_tools}"; then
+        echo "Error: Codex tool-calling smoke task did not return expected output." >&2
+        sed -n '1,160p' "${tmp_codex_tools}" >&2
+        exit 1
+    fi
+    actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
+    if [ "${actual_marker}" != "${tool_marker}" ]; then
+        echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
+        exit 1
+    fi
+    echo "Codex tool-calling smoke task ok."
 fi
-actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
-if [ "${actual_marker}" != "${tool_marker}" ]; then
-    echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
-    exit 1
-fi
-echo "Codex tool-calling smoke task ok."
 
 echo "Running Claude Code basic smoke task via OpenRouter..."
 if ! timeout 180s claude -p "Reply with exactly one line: claude-ok:openrouter-basic" >"${tmp_claude_basic}" 2>&1; then
