@@ -56,5 +56,4 @@ final class MongoCustomerRepository extends BaseRepository implements
 
         parent::delete($managedCustomer);
     }
-
 }
