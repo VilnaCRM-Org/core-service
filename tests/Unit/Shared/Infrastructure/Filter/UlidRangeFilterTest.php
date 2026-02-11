@@ -537,26 +537,20 @@ final class UlidRangeFilterTest extends UnitTestCase
         Ulid $lteValue,
         Ulid $betweenEndValue
     ): void {
-        $this->matchStage->expects($this->exactly(2))
-            ->method('lte')
-            ->withConsecutive(
-                [$this->equalTo($lteValue)],
-                [$this->equalTo($betweenEndValue)]
-            )
-            ->willReturnSelf();
+        $this->expectMatchStageSequentialCalls('lte', [
+            [$lteValue],
+            [$betweenEndValue],
+        ]);
     }
 
     private function setupGteExpectationsWithUlid(
         Ulid $gteValue,
         Ulid $betweenStartValue
     ): void {
-        $this->matchStage->expects($this->exactly(2))
-            ->method('gte')
-            ->withConsecutive(
-                [$this->equalTo($gteValue)],
-                [$this->equalTo($betweenStartValue)]
-            )
-            ->willReturnSelf();
+        $this->expectMatchStageSequentialCalls('gte', [
+            [$gteValue],
+            [$betweenStartValue],
+        ]);
     }
 
     private function setupMultiplePropertiesExpectations(
@@ -573,8 +567,10 @@ final class UlidRangeFilterTest extends UnitTestCase
 
         $this->matchStage->expects($this->exactly(2))
             ->method('field')
-            ->withConsecutive(['ulid'], ['customer.ulid'])
-            ->willReturnSelf();
+            ->willReturnCallback($this->buildSequentialCallback([
+                ['ulid'],
+                ['customer.ulid'],
+            ]));
 
         $this->matchStage->expects($this->exactly(2))
             ->method('lt')
@@ -615,5 +611,30 @@ final class UlidRangeFilterTest extends UnitTestCase
             ->method($operator)
             ->with($this->equalTo($value))
             ->willReturnSelf();
+    }
+
+    /**
+     * @param array<int, array<int, mixed>> $expectedArguments
+     */
+    private function buildSequentialCallback(array $expectedArguments): callable
+    {
+        $index = 0;
+
+        return function (...$arguments) use (&$index, $expectedArguments) {
+            $this->assertEquals($expectedArguments[$index], $arguments);
+            $index++;
+
+            return $this->matchStage;
+        };
+    }
+
+    /**
+     * @param array<int, array<int, mixed>> $expectedArguments
+     */
+    private function expectMatchStageSequentialCalls(string $method, array $expectedArguments): void
+    {
+        $this->matchStage->expects($this->exactly(count($expectedArguments)))
+            ->method($method)
+            ->willReturnCallback($this->buildSequentialCallback($expectedArguments));
     }
 }

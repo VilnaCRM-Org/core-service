@@ -11,7 +11,7 @@ use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-final class FactoryTest extends UnitTestCase
+final class CustomerStatusNotFoundResponseFactoryTest extends UnitTestCase
 {
     public function testGetResponse(): void
     {

@@ -42,31 +42,14 @@ final class UlidType extends Type
     public function closureToMongo(): string
     {
         return <<<'PHP'
-    $return = $value instanceof \App\Shared\Domain\ValueObject\Ulid
-        ? new \MongoDB\BSON\Binary(
-        $value->toBinary(), \MongoDB\BSON\Binary::TYPE_GENERIC
-        )
-        : null;
-    PHP;
+$return = \Doctrine\ODM\MongoDB\Types\Type::getType('ulid')->convertToDatabaseValue($value);
+PHP;
     }
 
     public function closureToPHP(): string
     {
         return <<<'PHP'
-$return = $value ? (function($value) {
-    $ulidFactory = new \App\Shared\Infrastructure\Factory\UlidFactory();
-    $transformer = new \App\Shared\Infrastructure\Transformer\UlidTransformer(
-        $ulidFactory,
-        new \App\Shared\Infrastructure\Validator\UlidValidator(),
-        new \App\Shared\Infrastructure\Transformer\UlidValueTransformer($ulidFactory)
-    );
-    $binary = $value instanceof \MongoDB\BSON\Binary ? $value
-    ->getData() : $value;
-    if (!$binary instanceof \Symfony\Component\Uid\Ulid) {
-        $binary = \Symfony\Component\Uid\Ulid::fromBinary($binary);
-    }
-    return $transformer->transformFromSymfonyUlid($binary);
-})($value) : null;
+$return = \Doctrine\ODM\MongoDB\Types\Type::getType('ulid')->convertToPHPValue($value);
 PHP;
     }
 

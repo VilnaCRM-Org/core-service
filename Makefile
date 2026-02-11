@@ -42,14 +42,14 @@ endif
 # Variables for environment and commands
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
-COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
+COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
 COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
@@ -117,7 +117,10 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	coverage_source=$$tmpfile; \
+	if [ -f coverage.txt ]; then coverage_source=coverage.txt; fi; \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$coverage_source | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	rm -f coverage.txt; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
 		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
