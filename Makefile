@@ -42,11 +42,11 @@ endif
 # Variables for environment and commands
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
-COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
+COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
@@ -103,14 +103,16 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
-	@$(RUN_TESTS_COVERAGE) --testsuite=Unit; \
+	@cleanup_coverage() { rm -f coverage.txt; }; \
+	$(RUN_TESTS_COVERAGE) --testsuite=Unit; \
 	test_status=$$?; \
 	if [ $$test_status -ne 0 ]; then \
 		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
+		cleanup_coverage; \
 		exit $$test_status; \
 	fi; \
 	wait_count=0; \
-	while [ $$wait_count -lt 5 ]; do \
+	while [ $$wait_count -lt 10 ]; do \
 		if [ -f coverage.txt ]; then \
 			break; \
 		fi; \
@@ -123,12 +125,16 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		wait_count=$$((wait_count + 1)); \
 		sleep 1; \
 	done; \
+	if [ ! -f coverage.txt ] && [ -z "$$CI" ]; then \
+		$(DOCKER_COMPOSE) cp php:/srv/app/coverage.txt coverage.txt >/dev/null 2>&1 || true; \
+	fi; \
 	if [ ! -f coverage.txt ]; then \
 		echo "❌ ERROR: coverage.txt was not generated."; \
+		cleanup_coverage; \
 		exit 1; \
 	fi; \
 	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
-	rm -f coverage.txt; \
+	cleanup_coverage; \
 	if [ -n "$$coverage" ]; then \
 		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
@@ -138,6 +144,7 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		fi; \
 	else \
 		echo "❌ ERROR: Could not parse coverage from output"; \
+		cleanup_coverage; \
 		exit 1; \
 	fi
 
