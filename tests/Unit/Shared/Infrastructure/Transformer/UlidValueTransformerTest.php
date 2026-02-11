@@ -8,6 +8,7 @@ use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Tests\Unit\UnitTestCase;
+use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidValueTransformerTest extends UnitTestCase
@@ -47,6 +48,39 @@ final class UlidValueTransformerTest extends UnitTestCase
         $this->assertSame($expectedUlid, $result);
     }
 
+    public function testToUlidWithSymfonyUlidInstance(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $expectedUlid = new Ulid((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($expectedUlid);
+
+        $result = $this->converter->toUlid($symfonyUlid);
+
+        $this->assertSame($expectedUlid, $result);
+    }
+
+    public function testToUlidWithBinary(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_UUID);
+        $expectedUlid = new Ulid((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($expectedUlid);
+
+        $result = $this->converter->toUlid($binary);
+
+        $this->assertSame($expectedUlid, $result);
+    }
+
     public function testFromBinaryWithSymfonyUlidInstance(): void
     {
         $symfonyUlid = new SymfonyUlid();
@@ -62,6 +96,17 @@ final class UlidValueTransformerTest extends UnitTestCase
         $binaryData = $symfonyUlid->toBinary();
 
         $result = $this->converter->fromBinary($binaryData);
+
+        $this->assertInstanceOf(SymfonyUlid::class, $result);
+        $this->assertEquals((string) $symfonyUlid, (string) $result);
+    }
+
+    public function testFromBinaryWithBinary(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_UUID);
+
+        $result = $this->converter->fromBinary($binary);
 
         $this->assertInstanceOf(SymfonyUlid::class, $result);
         $this->assertEquals((string) $symfonyUlid, (string) $result);
