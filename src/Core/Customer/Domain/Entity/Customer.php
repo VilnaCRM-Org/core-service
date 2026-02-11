@@ -32,6 +32,9 @@ class Customer implements CustomerInterface
         return (string) $this->ulid;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setUlid(UlidInterface $ulid): void
     {
         $this->ulid = $ulid;

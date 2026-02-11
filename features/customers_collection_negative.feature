@@ -422,7 +422,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_patch"
     And the JSON node "title" should contain "An error occurred"
-    And the JSON node "detail" should contain "Syntax error"
+    And the JSON node "detail" should contain "Parse error"
 
   Scenario: Fail to patch a customer resource with invalid type and status references and check error message
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
