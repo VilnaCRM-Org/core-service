@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Core\Customer\Domain\Entity;
 
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
-use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Domain\ValueObject\UlidInterface;
-use InvalidArgumentException;
 
 class CustomerStatus implements CustomerStatusInterface
 {
-    private mixed $ulid;
+    private UlidInterface $ulid;
 
     public function __construct(
         private string $value,
@@ -22,8 +20,6 @@ class CustomerStatus implements CustomerStatusInterface
 
     public function getUlid(): string
     {
-        $this->ulid = $this->normalizeUlid($this->ulid);
-
         return (string) $this->ulid;
     }
 
@@ -40,22 +36,5 @@ class CustomerStatus implements CustomerStatusInterface
     public function update(CustomerStatusUpdate $updateData): void
     {
         $this->value = $updateData->value;
-    }
-
-    private function normalizeUlid(mixed $ulid): UlidInterface
-    {
-        if ($ulid instanceof UlidInterface) {
-            return $ulid;
-        }
-
-        if (is_string($ulid)) {
-            return new Ulid($ulid);
-        }
-
-        if (method_exists($ulid, 'getData')) {
-            return Ulid::fromBinary($ulid->getData());
-        }
-
-        throw new InvalidArgumentException('Unsupported ulid value for CustomerStatus.');
     }
 }
