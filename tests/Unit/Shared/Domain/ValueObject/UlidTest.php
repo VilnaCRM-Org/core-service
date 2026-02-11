@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Domain\ValueObject;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidTest extends UnitTestCase
 {
@@ -77,5 +78,31 @@ final class UlidTest extends UnitTestCase
 
         $this->assertSame($uid, (string) $recreatedUlid);
         $this->assertSame(26, strlen((string) $recreatedUlid));
+    }
+
+    public function testFromBinaryMatchesSymfonyUlid(): void
+    {
+        $hex = '00112233445566778899aabbccddeeff';
+        $binary = hex2bin($hex);
+
+        $this->assertIsString($binary, 'hex2bin should return a binary string.');
+
+        $expected = (string) SymfonyUlid::fromBinary($binary);
+        $actual = (string) Ulid::fromBinary($binary);
+
+        $this->assertSame($expected, $actual);
+    }
+
+    public function testFromBinaryMatchesKnownUlid(): void
+    {
+        $hex = '00112233445566778899aabbccddeeff';
+        $binary = hex2bin($hex);
+
+        $this->assertIsString($binary, 'hex2bin should return a binary string.');
+
+        $this->assertSame(
+            '0024H36H2NCSVRH6DAQF6DVVQZ',
+            (string) Ulid::fromBinary($binary)
+        );
     }
 }

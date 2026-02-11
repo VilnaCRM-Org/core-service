@@ -25,29 +25,19 @@ final class UlidValueTransformer
             return $value;
         }
 
-        if ($value instanceof SymfonyUlid) {
-            return $this->ulidFactory->create((string) $value);
-        }
-
-        if ($value instanceof Binary) {
-            return $this->ulidFactory->create(
-                (string) SymfonyUlid::fromBinary($value->getData())
-            );
-        }
-
-        return $this->ulidFactory->create($value);
+        return $this->ulidFactory->create($this->normalizeValue($value));
     }
 
-    public function fromBinary(array|string|int|float|bool|object|null $value): SymfonyUlid
+    private function normalizeValue(array|string|int|float|bool|object|null $value): array|string|int|float|bool|null
     {
         if ($value instanceof SymfonyUlid) {
-            return $value;
+            return (string) $value;
         }
 
         if ($value instanceof Binary) {
-            return SymfonyUlid::fromBinary($value->getData());
+            return (string) SymfonyUlid::fromBinary($value->getData());
         }
 
-        return SymfonyUlid::fromBinary($value);
+        return $value;
     }
 }

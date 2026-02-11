@@ -36,7 +36,7 @@ final readonly class UlidTransformer
             return null;
         }
 
-        $symfonyUlid = $this->valueTransformer->fromBinary($value);
+        $symfonyUlid = $this->toSymfonyUlid($value);
 
         return $this->transformFromSymfonyUlid($symfonyUlid);
     }
@@ -44,5 +44,18 @@ final readonly class UlidTransformer
     public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
         return $this->ulidFactory->create((string) $symfonyUlid);
+    }
+
+    private function toSymfonyUlid(Binary|string|SymfonyUlid $value): SymfonyUlid
+    {
+        if ($value instanceof SymfonyUlid) {
+            return $value;
+        }
+
+        if ($value instanceof Binary) {
+            return SymfonyUlid::fromBinary($value->getData());
+        }
+
+        return SymfonyUlid::fromBinary($value);
     }
 }
