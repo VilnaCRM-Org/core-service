@@ -44,6 +44,11 @@ TMP_FILES=()
 CS_GIT_IDENTITY_NAME=""
 CS_GIT_IDENTITY_EMAIL=""
 
+if [ -f "${AGENT_SECRETS_FILE}" ]; then
+    # shellcheck disable=SC1090
+    . "${AGENT_SECRETS_FILE}"
+fi
+
 cleanup_tmp_files() {
     local tmp_file
     for tmp_file in "${TMP_FILES[@]}"; do

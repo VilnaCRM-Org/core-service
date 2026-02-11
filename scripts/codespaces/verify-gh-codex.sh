@@ -12,6 +12,11 @@ if [ -f "${SETTINGS_FILE}" ]; then
     . "${SETTINGS_FILE}"
 fi
 
+if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
+    # shellcheck disable=SC1091
+    . "${HOME}/.config/core-service/agent-secrets.env"
+fi
+
 ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 : "${CODEX_PROFILE_NAME:=openrouter}"
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
@@ -105,11 +110,6 @@ Error: OPENROUTER_API_KEY is not set.
 Provide OPENROUTER_API_KEY as a Codespaces secret.
 EOM
     exit 1
-fi
-
-if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
-    # shellcheck disable=SC1091
-    . "${HOME}/.config/core-service/agent-secrets.env"
 fi
 
 if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] || [ -z "${ANTHROPIC_BASE_URL:-}" ]; then
