@@ -38,11 +38,6 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
         $this->inner->delete($customer);
     }
 
-    public function deleteByEmail(string $email): void
-    {
-        $this->inner->deleteByEmail($email);
-    }
-
     /**
      * Additional method not in the interface - for testing __call() proxy
      */

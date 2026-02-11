@@ -38,6 +38,9 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return $this->delayMs;
     }
 
+    /**
+     * @psalm-suppress UnusedParam
+     */
     public function isRetryable(
         Envelope $message,
         ?\Throwable $throwable = null
@@ -45,6 +48,9 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return true;
     }
 
+    /**
+     * @psalm-suppress UnusedParam
+     */
     public function getWaitingTime(
         Envelope $message,
         ?\Throwable $throwable = null

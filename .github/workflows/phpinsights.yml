@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     name: PHP Insights checks
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ vars.PHP_VERSION }}
       - run: composer install --prefer-dist --no-progress --no-suggest --no-scripts
       - run: CI=1 make phpinsights

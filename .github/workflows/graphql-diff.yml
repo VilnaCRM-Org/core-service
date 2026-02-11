@@ -13,6 +13,8 @@ jobs:
   graphql-diff:
     name: Openapi-diff
     runs-on: ubuntu-latest
+    env:
+      PHP_VERSION: '8.4'
 
     steps:
       - name: Generate token with necessary permissions
@@ -24,10 +26,10 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ env.PHP_VERSION }}
 
       - name: Checkout Repository
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}

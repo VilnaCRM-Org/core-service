@@ -67,7 +67,7 @@ final class UlidValueTransformerTest extends UnitTestCase
     public function testToUlidWithBinary(): void
     {
         $symfonyUlid = new SymfonyUlid();
-        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_UUID);
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
         $expectedUlid = new Ulid((string) $symfonyUlid);
 
         $this->ulidFactory
@@ -104,7 +104,7 @@ final class UlidValueTransformerTest extends UnitTestCase
     public function testFromBinaryWithBinary(): void
     {
         $symfonyUlid = new SymfonyUlid();
-        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_UUID);
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
 
         $result = $this->converter->fromBinary($binary);
 

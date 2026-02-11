@@ -23,6 +23,4 @@ interface CustomerRepositoryInterface
     ): ?object;
 
     public function delete(Customer $customer): void;
-
-    public function deleteByEmail(string $email): void;
 }

@@ -125,7 +125,7 @@ class Customer implements CustomerInterface
 
     public function isConfirmed(): bool
     {
-        return $this->confirmed;
+        return (bool) $this->confirmed;
     }
 
     public function setConfirmed(bool $confirmed): void

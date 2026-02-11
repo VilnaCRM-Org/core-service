@@ -117,21 +117,20 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage_source=$$tmpfile; \
-	if [ -f coverage.txt ]; then \
-		coverage_source=coverage.txt; \
-	else \
-		wait_count=0; \
-		while [ $$wait_count -lt 120 ]; do \
-			if [ -f coverage.txt ]; then \
-				coverage_source=coverage.txt; \
-				break; \
-			fi; \
-			wait_count=$$((wait_count + 1)); \
-			sleep 1; \
-		done; \
+	wait_count=0; \
+	while [ $$wait_count -lt 10 ]; do \
+		if [ -f coverage.txt ]; then \
+			break; \
+		fi; \
+		wait_count=$$((wait_count + 1)); \
+		sleep 1; \
+	done; \
+	if [ ! -f coverage.txt ]; then \
+		echo "❌ ERROR: coverage.txt was not generated."; \
+		rm -f $$tmpfile; \
+		exit 1; \
 	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$coverage_source | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
 	rm -f coverage.txt; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
