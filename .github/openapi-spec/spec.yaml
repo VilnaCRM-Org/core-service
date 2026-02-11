@@ -3595,9 +3595,9 @@ components:
         '@type':
           readOnly: true
           type: string
-        value:
-          type: string
         ulid:
+          type: string
+        value:
           type: string
     CustomerType.TypeCreate.jsonld:
       type: object
@@ -3666,10 +3666,10 @@ components:
         '@type':
           readOnly: true
           type: string
-        value:
-          type: string
         ulid:
           $ref: '#/components/schemas/UlidInterface.jsonld-output'
+        value:
+          type: string
     Error:
       type: object
       description: 'A representation of common errors.'
