@@ -9,6 +9,9 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTime;
 use DateTimeImmutable;
 
+/**
+ * @psalm-suppress PossiblyUnusedMethod
+ */
 class Customer implements CustomerInterface
 {
     public function __construct(

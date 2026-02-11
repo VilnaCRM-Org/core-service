@@ -46,18 +46,6 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
      */
     public function __invoke(?object $item, array $context): Customer
     {
-        /**
-         * @var array{
-         *     id: string,
-         *     initials?: string|null,
-         *     email?: string|null,
-         *     phone?: string|null,
-         *     leadSource?: string|null,
-         *     type?: string|null,
-         *     status?: string|null,
-         *     confirmed?: bool|null
-         * } $input
-         */
         $input = $context['args']['input'];
         $mutationInput = $this->inputTransformer->transform($input);
         $this->validator->validate($mutationInput);

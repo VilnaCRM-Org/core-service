@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
-use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\SpecExtensionPropertyApplier;
 use App\Shared\Application\OpenApi\Cleaner\SpecMetadataCleaner;
@@ -26,11 +25,6 @@ final class SpecCleanupProcessor
             $openApi->getExtensionProperties(),
             $normalizedOpenApi
         );
-    }
-
-    private function cleanComponents(?Components $components): ?Components
-    {
-        return $this->metadataCleaner->cleanComponents($components);
     }
 
     private function applyExtensionProperties(

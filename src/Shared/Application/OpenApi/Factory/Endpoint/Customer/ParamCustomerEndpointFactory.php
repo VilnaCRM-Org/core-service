@@ -39,46 +39,46 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
     private RequestBody $replaceCustomerRequest;
 
     public function __construct(
-        private CustomerUlidParameterFactory $parameterFactory,
-        private UpdateCustomerRequestFactory $updateCustomerRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
-        private CustomerDeletedResponseFactory $deletedResponseFactory,
-        private CreateCustomerRequestFactory $replaceCustomerRequestFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory
+        CustomerUlidParameterFactory $parameterFactory,
+        UpdateCustomerRequestFactory $updateCustomerRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
+        CustomerDeletedResponseFactory $deletedResponseFactory,
+        CreateCustomerRequestFactory $replaceCustomerRequestFactory,
+        InternalErrorFactory $internalErrorFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory
     ) {
         $this->ulidWithExamplePathParam =
-            $this->parameterFactory->getParameter();
+            $parameterFactory->getParameter();
 
         $this->updateCustomerRequest =
-            $this->updateCustomerRequestFactory->getRequest();
+            $updateCustomerRequestFactory->getRequest();
 
         $this->validationResp =
-            $this->validationErrorResponseFactory->getResponse();
+            $validationErrorResponseFactory->getResponse();
 
         $this->badRequestResp =
-            $this->badRequestResponseFactory->getResponse();
+            $badRequestResponseFactory->getResponse();
 
         $this->custNotFoundResp =
-            $this->customerNotFoundResponseFactory->getResponse();
+            $customerNotFoundResponseFactory->getResponse();
 
         $this->custDeletedResp =
-            $this->deletedResponseFactory->getResponse();
+            $deletedResponseFactory->getResponse();
 
         $this->replaceCustomerRequest =
-            $this->replaceCustomerRequestFactory->getRequest();
+            $replaceCustomerRequestFactory->getRequest();
 
         $this->internalResp =
-            $this->internalErrorFactory->getResponse();
+            $internalErrorFactory->getResponse();
 
         $this->forbiddenResp =
-            $this->forbiddenResponseFactory->getResponse();
+            $forbiddenResponseFactory->getResponse();
 
         $this->unauthorizedResp =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

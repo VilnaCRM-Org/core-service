@@ -16,6 +16,9 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
     ) {
     }
 
+    /**
+     * @psalm-suppress UnusedParam
+     */
     public function shouldRetry(
         AsyncContext $context,
         ?string $responseContent,
@@ -24,6 +27,9 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return true;
     }
 
+    /**
+     * @psalm-suppress UnusedParam
+     */
     public function getDelay(
         AsyncContext $context,
         ?string $responseContent,

@@ -61,6 +61,11 @@ final readonly class EntityManager
         $this->customerRepository->delete($customer);
     }
 
+    public function deleteCustomerByEmail(string $email): void
+    {
+        $this->customerRepository->deleteByEmail($email);
+    }
+
     public function deleteType(CustomerType $type): void
     {
         $this->typeRepository->delete($type);

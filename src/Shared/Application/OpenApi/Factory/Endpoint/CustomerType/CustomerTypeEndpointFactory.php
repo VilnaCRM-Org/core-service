@@ -28,30 +28,30 @@ final class CustomerTypeEndpointFactory extends EndpointFactory
     private Response $forbiddenResp;
 
     public function __construct(
-        private TypeCreateRequestFactory $createCustomerTypeRequestFactory,
-        private ValidationErrorFactory $validationErrorResponseFactory,
-        private BadRequestResponseFactory $badRequestResponseFactory,
-        private InternalErrorFactory $internalErrorFactory,
-        private ForbiddenResponseFactory $forbiddenResponseFactory,
-        private UnauthorizedResponseFactory $unauthorizedResponseFactory,
+        TypeCreateRequestFactory $createCustomerTypeRequestFactory,
+        ValidationErrorFactory $validationErrorResponseFactory,
+        BadRequestResponseFactory $badRequestResponseFactory,
+        InternalErrorFactory $internalErrorFactory,
+        ForbiddenResponseFactory $forbiddenResponseFactory,
+        UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
         $this->createCustomerTypeRequest =
-            $this->createCustomerTypeRequestFactory->getRequest();
+            $createCustomerTypeRequestFactory->getRequest();
 
         $this->validationResp =
-            $this->validationErrorResponseFactory->getResponse();
+            $validationErrorResponseFactory->getResponse();
 
         $this->badRequestResp =
-            $this->badRequestResponseFactory->getResponse();
+            $badRequestResponseFactory->getResponse();
 
         $this->internalResp =
-            $this->internalErrorFactory->getResponse();
+            $internalErrorFactory->getResponse();
 
         $this->forbiddenResp =
-            $this->forbiddenResponseFactory->getResponse();
+            $forbiddenResponseFactory->getResponse();
 
         $this->unauthorizedResp =
-            $this->unauthorizedResponseFactory->getResponse();
+            $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

@@ -20,4 +20,46 @@
         <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin" />
         <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin" />
     </plugins>
+    <issueHandlers>
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+        <UnnecessaryVarAnnotation>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnnecessaryVarAnnotation>
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedClass>
+        <UnusedClosureParam>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedClosureParam>
+        <UnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedMethod>
+        <UnusedMethodCall>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedMethodCall>
+        <UnusedParam>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedParam>
+        <UnusedReturnValue>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedReturnValue>
+    </issueHandlers>
 </psalm>

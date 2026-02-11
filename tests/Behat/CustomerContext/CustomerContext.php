@@ -303,10 +303,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerByEmail(string $email): void
     {
-        $customer = $this->entityManager->findCustomerByEmail($email);
-        if ($customer !== null) {
-            $this->entityManager->deleteCustomer($customer);
-        }
+        $this->entityManager->deleteCustomerByEmail($email);
     }
 
     /**

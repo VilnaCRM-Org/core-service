@@ -31,6 +31,7 @@ final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubs
     public function __invoke(CustomerUpdatedEvent $event): void
     {
         $this->metricsEmitter->emit($this->metricFactory->create());
+        $event->customerId();
     }
 
     /**

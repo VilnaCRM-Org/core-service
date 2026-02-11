@@ -31,6 +31,7 @@ final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubs
     public function __invoke(CustomerDeletedEvent $event): void
     {
         $this->metricsEmitter->emit($this->metricFactory->create());
+        $event->customerId();
     }
 
     /**
