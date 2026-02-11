@@ -85,7 +85,7 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         self::assertSame([], $processed->getExtensionProperties());
     }
 
-    public function testCleanComponentsHandlesNullViaReflection(): void
+    public function testCleanComponentsHandlesNull(): void
     {
         $cleaner = new SpecMetadataCleaner();
 
