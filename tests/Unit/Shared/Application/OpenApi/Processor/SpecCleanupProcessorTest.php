@@ -87,14 +87,9 @@ final class SpecCleanupProcessorTest extends UnitTestCase
 
     public function testCleanComponentsHandlesNullViaReflection(): void
     {
-        $processor = new SpecCleanupProcessor(
-            new SpecMetadataCleaner(),
-            new SpecExtensionPropertyApplier()
-        );
-        $method = new ReflectionMethod(SpecCleanupProcessor::class, 'cleanComponents');
-        $method->setAccessible(true);
+        $cleaner = new SpecMetadataCleaner();
 
-        self::assertNull($method->invoke($processor, null));
+        self::assertNull($cleaner->cleanComponents(null));
     }
 
     public function testProcessPreservesExistingWebhookCollection(): void
