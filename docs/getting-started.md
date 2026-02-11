@@ -94,6 +94,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 - Docker support so all existing `make` commands continue to work
 - GitHub CLI (`gh`)
 - OpenCode CLI (`opencode`)
+- Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
   - `make start`
@@ -116,6 +117,7 @@ For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
 - `OPENROUTER_API_KEY`
 - `GH_AUTOMATION_TOKEN`
+- optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL` (if omitted, bootstrap uses `opencode-bot <opencode-bot@users.noreply.github.com>`)
 
 These secrets are mapped into the runtime shell environment via `.devcontainer/devcontainer.json` (`remoteEnv`), so `gh`, `git`, and `opencode` can use them in normal terminal sessions.
 The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
@@ -144,6 +146,7 @@ bash scripts/codespaces/verify-gh-opencode.sh VilnaCRM-Org
 
 - `gh` is authenticated
 - org repository listing works
+- `bats` CLI is available
 - `opencode` can execute one autonomous tool-calling task
 
 `verify-gh-opencode.sh` includes both prompt-only and tool-calling OpenCode checks.

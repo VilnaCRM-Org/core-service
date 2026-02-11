@@ -30,8 +30,12 @@ readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 : "${GH_HOST:=github.com}"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
+: "${CODESPACE_GIT_IDENTITY_NAME:=opencode-bot}"
+: "${CODESPACE_GIT_IDENTITY_EMAIL:=opencode-bot@users.noreply.github.com}"
 
 TMP_FILES=()
+CS_GIT_IDENTITY_NAME=""
+CS_GIT_IDENTITY_EMAIL=""
 
 cleanup_tmp_files() {
     local tmp_file
@@ -56,6 +60,14 @@ persist_agent_secrets_file() {
         printf 'export OPENROUTER_API_KEY=%q\n' "${OPENROUTER_API_KEY}"
         if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GH_AUTOMATION_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
+        fi
+        if [ -n "${CS_GIT_IDENTITY_NAME:-}" ]; then
+            printf 'export GIT_AUTHOR_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
+            printf 'export GIT_COMMITTER_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
+        fi
+        if [ -n "${CS_GIT_IDENTITY_EMAIL:-}" ]; then
+            printf 'export GIT_AUTHOR_EMAIL=%q\n' "${CS_GIT_IDENTITY_EMAIL}"
+            printf 'export GIT_COMMITTER_EMAIL=%q\n' "${CS_GIT_IDENTITY_EMAIL}"
         fi
     } > "${tmp_secrets_file}"
 
@@ -158,6 +170,49 @@ write_opencode_config() {
     mv "${tmp_config}" "${OPENCODE_CONFIG}"
 }
 
+configure_git_identity() {
+    local name email current_name current_email
+
+    # Empty author/committer env vars override git config and break commits.
+    if [ -z "${GIT_AUTHOR_NAME:-}" ]; then
+        unset GIT_AUTHOR_NAME || true
+    fi
+    if [ -z "${GIT_AUTHOR_EMAIL:-}" ]; then
+        unset GIT_AUTHOR_EMAIL || true
+    fi
+    if [ -z "${GIT_COMMITTER_NAME:-}" ]; then
+        unset GIT_COMMITTER_NAME || true
+    fi
+    if [ -z "${GIT_COMMITTER_EMAIL:-}" ]; then
+        unset GIT_COMMITTER_EMAIL || true
+    fi
+
+    current_name="$(git config --global --get user.name 2>/dev/null || true)"
+    current_email="$(git config --global --get user.email 2>/dev/null || true)"
+
+    name="${GIT_AUTHOR_NAME:-${current_name:-}}"
+    email="${GIT_AUTHOR_EMAIL:-${current_email:-}}"
+
+    if [ -z "${name}" ]; then
+        name="${CODESPACE_GIT_IDENTITY_NAME}"
+    fi
+    if [ -z "${email}" ]; then
+        email="${CODESPACE_GIT_IDENTITY_EMAIL}"
+    fi
+
+    git config --global user.name "${name}"
+    git config --global user.email "${email}"
+
+    # Keep author/committer identity explicit and non-empty in login shells.
+    export GIT_AUTHOR_NAME="${name}"
+    export GIT_AUTHOR_EMAIL="${email}"
+    export GIT_COMMITTER_NAME="${name}"
+    export GIT_COMMITTER_EMAIL="${email}"
+
+    CS_GIT_IDENTITY_NAME="${name}"
+    CS_GIT_IDENTITY_EMAIL="${email}"
+}
+
 cs_require_command gh
 cs_require_command jq
 cs_require_command opencode
@@ -171,6 +226,7 @@ EOM
     exit 1
 fi
 
+configure_git_identity
 persist_agent_secrets_file
 ensure_shell_sources_agent_secrets
 write_opencode_config
@@ -179,16 +235,11 @@ write_opencode_config
 gh config set git_protocol "${GH_GIT_PROTOCOL}" --host "${GH_HOST}" >/dev/null 2>&1 || true
 gh config set prompt "${GH_PROMPT}" >/dev/null 2>&1 || true
 
-# Optional git identity from environment for autonomous commits.
-if [ -n "${GIT_AUTHOR_NAME:-}" ]; then
-    git config --global user.name "${GIT_AUTHOR_NAME}"
-fi
-if [ -n "${GIT_AUTHOR_EMAIL:-}" ]; then
-    git config --global user.email "${GIT_AUTHOR_EMAIL}"
-fi
-
 echo "Secure agent environment is ready."
 echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
+echo "Git identity configured:"
+echo "  - name: ${CS_GIT_IDENTITY_NAME}"
+echo "  - email: ${CS_GIT_IDENTITY_EMAIL}"
 echo "OpenCode configured:"
 echo "  - model: ${OPENCODE_MODEL}"
 echo "  - variant: ${OPENCODE_VARIANT}"

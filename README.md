@@ -64,6 +64,7 @@ When a Codespace is created, the setup script:
 
 - installs `codex` CLI
 - provides `gh` CLI
+- installs `bats` CLI for `make bats`
 - starts the Docker stack with `make start`
 - installs PHP dependencies with `make install` if needed
 
@@ -82,6 +83,7 @@ Use Codespaces secrets (do not commit credentials). Prefer repository-level Code
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex model access
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
+  - if omitted, bootstrap defaults to `opencode-bot <opencode-bot@users.noreply.github.com>`
 
 The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
 
@@ -95,6 +97,7 @@ What `startup-smoke-tests.sh` checks:
 
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
+- `bats` CLI is available
 - `codex` can execute one tool-calling task with the `openrouter` profile
 
 Repository-tracked defaults for GitHub and Codex bootstrap are stored in:

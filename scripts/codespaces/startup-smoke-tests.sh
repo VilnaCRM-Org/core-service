@@ -18,8 +18,12 @@ fi
 cs_require_command gh
 cs_require_command jq
 cs_require_command opencode
+cs_require_command bats
 
 echo "Running startup smoke tests..."
+
+echo "Checking Bats availability..."
+bats --version
 
 echo "Checking GitHub authentication..."
 cs_ensure_gh_auth

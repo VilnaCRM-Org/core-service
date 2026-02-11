@@ -14,6 +14,22 @@ fi
 export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
 : "${OPENCODE_NPM_PACKAGE:=opencode-ai@1.1.53}"
 
+ensure_apt_packages() {
+    local missing_packages=()
+    local package
+
+    for package in "$@"; do
+        if ! dpkg -s "${package}" >/dev/null 2>&1; then
+            missing_packages+=("${package}")
+        fi
+    done
+
+    if [ "${#missing_packages[@]}" -gt 0 ]; then
+        sudo apt-get update
+        sudo apt-get install -y "${missing_packages[@]}"
+    fi
+}
+
 echo "Waiting for Docker daemon..."
 for attempt in $(seq 1 90); do
     if docker info >/dev/null 2>&1; then
@@ -30,10 +46,7 @@ docker info >/dev/null 2>&1 || {
     exit 1
 }
 
-if ! command -v make >/dev/null 2>&1; then
-    sudo apt-get update
-    sudo apt-get install -y make
-fi
+ensure_apt_packages make bats
 
 if ! command -v opencode >/dev/null 2>&1; then
     npm install -g "${OPENCODE_NPM_PACKAGE}"
