@@ -25,6 +25,10 @@
   },
   "remoteEnv": {
     "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}",
+    "ANTHROPIC_AUTH_TOKEN": "${localEnv:OPENROUTER_API_KEY}",
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    "ANTHROPIC_API_KEY": "",
+    "ANTHROPIC_MODEL": "anthropic/claude-sonnet-4.5",
     "GH_AUTOMATION_TOKEN": "${localEnv:GH_AUTOMATION_TOKEN}",
     "GH_TOKEN": "${localEnv:GH_TOKEN}",
     "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
@@ -33,7 +37,7 @@
   },
   "secrets": {
     "OPENROUTER_API_KEY": {
-      "description": "OpenRouter API key used by OpenCode."
+      "description": "OpenRouter API key used by Codex and Claude Code."
     },
     "GH_AUTOMATION_TOKEN": {
       "description": "GitHub token for non-interactive gh CLI and git push in Codespaces."
