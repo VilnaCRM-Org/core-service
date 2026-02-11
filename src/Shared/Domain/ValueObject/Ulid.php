@@ -20,6 +20,12 @@ final class Ulid implements UlidInterface
 
     public static function fromBinary(string $binary): self
     {
+        if (strlen($binary) !== 16) {
+            throw new \InvalidArgumentException(
+                sprintf('fromBinary expects a 16-byte binary string, got %d bytes.', strlen($binary))
+            );
+        }
+
         $hex = bin2hex($binary);
 
         $parts = [

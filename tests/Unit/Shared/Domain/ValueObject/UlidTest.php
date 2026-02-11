@@ -47,4 +47,23 @@ final class UlidTest extends UnitTestCase
             'The hexadecimal representation should be 32 characters long.'
         );
     }
+
+    public function testFromBinaryReturnsOriginalUlid(): void
+    {
+        $uid = (string) $this->faker->ulid();
+        $ulid = new Ulid($uid);
+        $binary = $ulid->toBinary();
+
+        $recreatedUlid = Ulid::fromBinary($binary);
+
+        $this->assertSame($uid, (string) $recreatedUlid);
+    }
+
+    public function testFromBinaryThrowsForInvalidLength(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('fromBinary expects a 16-byte binary string');
+
+        Ulid::fromBinary('too-short');
+    }
 }
