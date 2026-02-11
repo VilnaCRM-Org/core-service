@@ -21,7 +21,6 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Faker\Factory;
 use Faker\Generator;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
@@ -43,7 +42,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         StatusRepositoryInterface $statusRepository,
         UlidFactory $ulidFactory,
         CustomerRepositoryInterface $customerRepository,
-        DocumentManager $documentManager,
         CustomerFactoryInterface $customerFactory,
         StatusFactoryInterface $statusFactory,
         TypeFactoryInterface $typeFactory,
@@ -56,7 +54,6 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $statusRepository,
             $ulidFactory,
             $customerRepository,
-            $documentManager,
             $customerFactory,
             $statusFactory,
             $typeFactory
@@ -354,14 +351,12 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         StatusRepositoryInterface $statusRepository,
         UlidFactory $ulidFactory,
         CustomerRepositoryInterface $customerRepository,
-        DocumentManager $documentManager,
         CustomerFactoryInterface $customerFactory,
         StatusFactoryInterface $statusFactory,
         TypeFactoryInterface $typeFactory
     ): void {
         $this->entityManager = new EntityManager(
             $customerRepository,
-            $documentManager,
             $statusRepository,
             $typeRepository
         );

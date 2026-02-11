@@ -11,13 +11,11 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
-use Doctrine\ODM\MongoDB\DocumentManager;
 
 final readonly class EntityManager
 {
     public function __construct(
         private CustomerRepositoryInterface $customerRepository,
-        private DocumentManager $documentManager,
         private StatusRepositoryInterface $statusRepository,
         private TypeRepositoryInterface $typeRepository
     ) {
@@ -65,16 +63,12 @@ final readonly class EntityManager
 
     public function deleteCustomerByEmail(string $email): void
     {
-        $customer = $this->documentManager
-            ->getRepository(Customer::class)
-            ->findOneBy(['email' => $email]);
-
-        if (! $customer instanceof Customer) {
+        $customer = $this->findCustomerByEmail($email);
+        if ($customer === null) {
             return;
         }
 
-        $this->documentManager->remove($customer);
-        $this->documentManager->flush();
+        $this->deleteCustomer($customer);
     }
 
     public function deleteType(CustomerType $type): void
