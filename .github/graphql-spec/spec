@@ -110,8 +110,8 @@ type CustomerType implements Node {
 
 type CustomerStatus implements Node {
   id: ID!
-  value: String!
   ulid: String!
+  value: String!
 }
 
 input CustomerFilter_order {
