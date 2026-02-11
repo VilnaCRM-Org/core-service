@@ -28,8 +28,22 @@ final class UlidValueTransformer
         return $this->ulidFactory->create($this->normalizeValue($value));
     }
 
-    private function normalizeValue(array|string|int|float|bool|object|null $value): array|string|int|float|bool|null
+    public function fromBinary(Binary|string|SymfonyUlid $value): SymfonyUlid
     {
+        if ($value instanceof SymfonyUlid) {
+            return $value;
+        }
+
+        if ($value instanceof Binary) {
+            return SymfonyUlid::fromBinary($value->getData());
+        }
+
+        return SymfonyUlid::fromBinary($value);
+    }
+
+    private function normalizeValue(
+        array|string|int|float|bool|object|null $value
+    ): array|string|int|float|bool|null {
         if ($value instanceof SymfonyUlid) {
             return (string) $value;
         }
