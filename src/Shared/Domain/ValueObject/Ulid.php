@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\ValueObject;
 
+use InvalidArgumentException;
+
 final class Ulid implements UlidInterface
 {
     private string $uid;
@@ -21,7 +23,7 @@ final class Ulid implements UlidInterface
     public static function fromBinary(string $binary): self
     {
         if (strlen($binary) !== 16) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('fromBinary expects a 16-byte binary string, got %d bytes.', strlen($binary))
             );
         }
@@ -35,7 +37,7 @@ final class Ulid implements UlidInterface
             substr($hex, 12, 5),
             substr($hex, 17, 5),
             substr($hex, 22, 5),
-            substr($hex, 27, 5),
+            substr($hex, 27),
         ];
 
         $base32 = '';

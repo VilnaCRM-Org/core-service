@@ -66,4 +66,16 @@ final class UlidTest extends UnitTestCase
 
         Ulid::fromBinary('too-short');
     }
+
+    public function testFromBinaryPreservesLeadingZeros(): void
+    {
+        $uid = '00000000000000000000000000';
+        $ulid = new Ulid($uid);
+        $binary = $ulid->toBinary();
+
+        $recreatedUlid = Ulid::fromBinary($binary);
+
+        $this->assertSame($uid, (string) $recreatedUlid);
+        $this->assertSame(26, strlen((string) $recreatedUlid));
+    }
 }
