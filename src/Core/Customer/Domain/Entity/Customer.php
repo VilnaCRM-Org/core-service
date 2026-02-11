@@ -143,6 +143,7 @@ class Customer implements CustomerInterface
 
     public function isConfirmed(): bool
     {
+        // Null values are intentionally treated as false for legacy hydration.
         return (bool) $this->confirmed;
     }
 
