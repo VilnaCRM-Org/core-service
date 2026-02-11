@@ -68,6 +68,9 @@ class Customer implements CustomerInterface
         return $this->phone;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setPhone(string $phone): void
     {
         $this->phone = $phone;
@@ -78,6 +81,9 @@ class Customer implements CustomerInterface
         return $this->leadSource;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setLeadSource(string $leadSource): void
     {
         $this->leadSource = $leadSource;
@@ -88,6 +94,9 @@ class Customer implements CustomerInterface
         return $this->type;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setType(CustomerType $type): void
     {
         $this->type = $type;
@@ -98,6 +107,9 @@ class Customer implements CustomerInterface
         return $this->status;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setStatus(CustomerStatus $status): void
     {
         $this->status = $status;
@@ -108,6 +120,9 @@ class Customer implements CustomerInterface
         return $this->createdAt;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setCreatedAt(DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
@@ -118,6 +133,9 @@ class Customer implements CustomerInterface
         return $this->updatedAt;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
@@ -128,6 +146,9 @@ class Customer implements CustomerInterface
         return (bool) $this->confirmed;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setConfirmed(bool $confirmed): void
     {
         $this->confirmed = $confirmed;

@@ -18,6 +18,32 @@ final class Ulid implements UlidInterface
         return $this->uid;
     }
 
+    public static function fromBinary(string $binary): self
+    {
+        $hex = bin2hex($binary);
+
+        $parts = [
+            substr($hex, 0, 2),
+            substr($hex, 2, 5),
+            substr($hex, 7, 5),
+            substr($hex, 12, 5),
+            substr($hex, 17, 5),
+            substr($hex, 22, 5),
+            substr($hex, 27, 5),
+        ];
+
+        $base32 = '';
+        foreach ($parts as $index => $part) {
+            $length = $index === 0 ? 2 : 4;
+            $chunk = base_convert($part, 16, 32);
+            $base32 .= str_pad($chunk, $length, '0', STR_PAD_LEFT);
+        }
+
+        $ulid = strtr($base32, 'abcdefghijklmnopqrstuv', 'ABCDEFGHJKMNPQRSTVWXYZ');
+
+        return new self($ulid);
+    }
+
     public function toBinary(): string
     {
         $ulid = strtr(

@@ -161,6 +161,7 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
         $factory = new CustomerUpdateFactory($relationResolver, $scalarResolver);
 
         $resolverProperty = new ReflectionProperty(CustomerUpdateFactory::class, 'scalarResolver');
+        /** @psalm-suppress UnusedMethodCall */
         $resolverProperty->setAccessible(true);
 
         self::assertSame($scalarResolver, $resolverProperty->getValue($factory));
@@ -196,7 +197,6 @@ final class CustomerUpdateFactoryTest extends UnitTestCase
     }
 
     /**
-     * @param array<string, CustomerUpdateFactory|CustomerRelationTransformerInterface|Customer|CustomerType|CustomerStatus|array<string, string|bool>> $testData
      * @param array<string, string|bool> $input
      */
     private function setupRelationResolverForAllFields(

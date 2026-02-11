@@ -147,6 +147,7 @@ final class TagCollectorProcessorTest extends UnitTestCase
         $paths->addPath('/customers', $validPathItem);
 
         $pathsProperty = new ReflectionProperty(Paths::class, 'paths');
+        /** @psalm-suppress UnusedMethodCall */
         $pathsProperty->setAccessible(true);
         $pathsProperty->setValue($paths, [
             '/customers' => $validPathItem,
