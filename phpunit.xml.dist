@@ -6,7 +6,6 @@
          backupGlobals="false"
          colors="true"
          bootstrap="tests/bootstrap.php"
-         convertDeprecationsToExceptions="false"
 >
     <php>
         <ini name="display_errors" value="1" />
@@ -31,14 +30,16 @@
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">src</directory>
         </include>
-    </coverage>
+    </source>
+
+    <coverage includeUncoveredFiles="true" />
 
     <extensions>
-        <extension class="Symfony\Bridge\PhpUnit\SymfonyExtension" />
+        <bootstrap class="Symfony\Bridge\PhpUnit\SymfonyExtension" />
     </extensions>
 
 </phpunit>
