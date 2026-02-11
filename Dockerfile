@@ -14,7 +14,7 @@ RUN xcaddy build \
 
 # Prod image
 # Keep a maintained Alpine base for PHP 8.4 and extension installer v2.9+.
-FROM php:8.4.3-fpm-alpine AS app_php
+FROM php:8.4.3-fpm-alpine3.22 AS app_php
 
 # Allow to use development versions of Symfony
 ARG STABILITY="stable"
