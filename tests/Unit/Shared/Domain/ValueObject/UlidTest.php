@@ -105,4 +105,33 @@ final class UlidTest extends UnitTestCase
             (string) Ulid::fromBinary($binary)
         );
     }
+
+    public function testHexToBase32UsesFiveCharacterLastSlice(): void
+    {
+        $hex = bin2hex($this->faker->randomBytes(17));
+
+        $method = new \ReflectionMethod(Ulid::class, 'hexToBase32');
+        $method->setAccessible(true);
+
+        $actual = $method->invoke(null, $hex);
+
+        $parts = [
+            substr($hex, 0, 2),
+            substr($hex, 2, 5),
+            substr($hex, 7, 5),
+            substr($hex, 12, 5),
+            substr($hex, 17, 5),
+            substr($hex, 22, 5),
+            substr($hex, 27, 5),
+        ];
+
+        $expected = '';
+        foreach ($parts as $index => $part) {
+            $length = $index === 0 ? 2 : 4;
+            $chunk = base_convert($part, 16, 32);
+            $expected .= str_pad($chunk, $length, '0', STR_PAD_LEFT);
+        }
+
+        $this->assertSame($expected, $actual);
+    }
 }
