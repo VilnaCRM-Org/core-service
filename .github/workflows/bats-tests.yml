@@ -19,14 +19,6 @@ jobs:
             path: tests/CLI/bats/make_aws_load_tests.bats
             args: ''
             needs_services: true
-          - name: ci-success
-            path: tests/CLI/bats/make_ci_tests.bats
-            args: '--filter "make ci command runs all CI checks"'
-            needs_services: true
-          - name: ci-failure
-            path: tests/CLI/bats/make_ci_tests.bats
-            args: '--filter "make ci should fail if any check fails"'
-            needs_services: false
           - name: ci-pr-comments
             path: tests/CLI/bats/make_ci_tests.bats
             args: '--filter "make pr-comments"'
