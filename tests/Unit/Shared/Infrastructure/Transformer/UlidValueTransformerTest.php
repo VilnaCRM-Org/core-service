@@ -111,4 +111,14 @@ final class UlidValueTransformerTest extends UnitTestCase
         $this->assertInstanceOf(SymfonyUlid::class, $result);
         $this->assertEquals((string) $symfonyUlid, (string) $result);
     }
+
+    public function testToUlidWithUnsupportedObjectType(): void
+    {
+        $unsupportedObject = new \stdClass();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported object type: stdClass');
+
+        $this->converter->toUlid($unsupportedObject);
+    }
 }
