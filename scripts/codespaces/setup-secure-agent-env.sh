@@ -295,6 +295,8 @@ configure_git_identity() {
     fi
 
     if [ -n "${name}" ] && [ -n "${email}" ]; then
+        CS_GIT_IDENTITY_NAME="${name}"
+        CS_GIT_IDENTITY_EMAIL="${email}"
         DETECTED_GIT_IDENTITY_NAME="${name}"
         DETECTED_GIT_IDENTITY_EMAIL="${email}"
         return 0
