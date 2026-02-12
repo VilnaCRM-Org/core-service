@@ -108,24 +108,24 @@ final class UlidTest extends UnitTestCase
 
     public function testHexToBase32UsesFiveCharacterLastSlice(): void
     {
-        $hex = bin2hex(random_bytes(16));
+        // Use a 33-char hex string where the 33rd char differs to catch mutants
+        // that change substr($hex, 27, 5) to substr($hex, 27, 6)
+        $hex = str_repeat('f', 32) . 'a'; // 32 valid chars + 1 extra
 
         $method = new \ReflectionMethod(Ulid::class, 'hexToBase32');
 
         $actual = $method->invoke(null, $hex);
 
+        // Expected calculation using exactly 5 chars from position 27
         $parts = [
-            substr($hex, 0, 2),
-            substr($hex, 2, 5),
-            substr($hex, 7, 5),
-            substr($hex, 12, 5),
-            substr($hex, 17, 5),
-            substr($hex, 22, 5),
-            substr($hex, 27, 5),
+            substr($hex, 0, 2),   // 'ff'
+            substr($hex, 2, 5),   // 'fffff'
+            substr($hex, 7, 5),   // 'fffff'
+            substr($hex, 12, 5),  // 'fffff'
+            substr($hex, 17, 5),  // 'fffff'
+            substr($hex, 22, 5),  // 'fffff'
+            substr($hex, 27, 5),  // 'fffff' NOT 'fffffa'
         ];
-
-        // Verify the last slice is exactly 5 characters
-        $this->assertSame(5, strlen($parts[6]), 'Last slice must be exactly 5 characters');
 
         $expected = '';
         foreach ($parts as $index => $part) {
