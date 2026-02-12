@@ -4,9 +4,47 @@ on:
   pull_request:
 
 jobs:
-  bats_core_tests:
+  bats_core_tests_sharded:
     runs-on: ubuntu-latest
-    name: Run Bats Core Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - name: api-spec
+            path: tests/CLI/bats/make_api_spec_tests.bats
+            needs_services: true
+          - name: aws-load
+            path: tests/CLI/bats/make_aws_load_tests.bats
+            needs_services: false
+          - name: ci
+            path: tests/CLI/bats/make_ci_tests.bats
+            needs_services: true
+          - name: coverage
+            path: tests/CLI/bats/make_coverage_tests.bats
+            needs_services: true
+          - name: database
+            path: tests/CLI/bats/make_database_tests.bats
+            needs_services: true
+          - name: general
+            path: tests/CLI/bats/make_general_tests.bats
+            needs_services: true
+          - name: load
+            path: tests/CLI/bats/make_load_tests.bats
+            needs_services: false
+          - name: negative
+            path: tests/CLI/bats/make_negative_tests.bats
+            needs_services: true
+          - name: static-analyzes
+            path: tests/CLI/bats/make_static_analyzes_tests.bats
+            needs_services: true
+          - name: test
+            path: tests/CLI/bats/make_test_tests.bats
+            needs_services: true
+          - name: underlying
+            path: tests/CLI/bats/make_underlying_command_tests.bats
+            needs_services: false
+    name: Run Bats Suite (${{ matrix.suite.name }})
+    timeout-minutes: 35
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -18,8 +56,9 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Start Application
-        run: make start
+      - name: Start required services
+        if: ${{ matrix.suite.needs_services }}
+        run: make ensure-test-services
 
       - name: Setup Bats and bats libs
         uses: bats-core/bats-action@2.0.0
@@ -28,4 +67,19 @@ jobs:
           assert-path: ${{ github.workspace }}/tests/CLI/bats/bats-assert
 
       - name: Run Bats tests
-        run: make bats
+        run: make bats BATS_FILES="${{ matrix.suite.path }}"
+
+  bats_core_tests:
+    name: Run Bats Core Tests
+    runs-on: ubuntu-latest
+    needs:
+      - bats_core_tests_sharded
+    if: ${{ always() }}
+    steps:
+      - name: Validate all Bats shards succeeded
+        run: |
+          if [ "${{ needs.bats_core_tests_sharded.result }}" != "success" ]; then
+            echo "At least one Bats shard failed."
+            exit 1
+          fi
+          echo "All Bats shards passed."
