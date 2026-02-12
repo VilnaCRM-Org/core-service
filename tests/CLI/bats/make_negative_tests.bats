@@ -28,10 +28,9 @@ load 'bats-assert/load'
 
   run make unit-tests
   run make infection
+  assert_failure
 
   mv src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php tests/CLI/bats/php/
-
-  assert_failure
 
   # PHP 8.4 may show "errors were encountered" instead of "mutants were not covered"
   if [[ ! "$output" =~ "mutants were not covered by tests" ]] && [[ ! "$output" =~ "errors were encountered" ]]; then
