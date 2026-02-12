@@ -3,6 +3,9 @@ name: CLI testing
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   bats_core_tests_sharded:
     runs-on: ubuntu-latest
@@ -67,7 +70,7 @@ jobs:
     timeout-minutes: 35
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
         with:
