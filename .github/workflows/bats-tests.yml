@@ -12,36 +12,63 @@ jobs:
         suite:
           - name: api-spec
             path: tests/CLI/bats/make_api_spec_tests.bats
+            args: ''
             needs_services: true
           - name: aws-load
             path: tests/CLI/bats/make_aws_load_tests.bats
+            args: ''
             needs_services: true
-          - name: ci
+          - name: ci-success
             path: tests/CLI/bats/make_ci_tests.bats
+            args: '--filter "make ci command runs all CI checks"'
             needs_services: true
-          - name: coverage
+          - name: ci-failure
+            path: tests/CLI/bats/make_ci_tests.bats
+            args: '--filter "make ci should fail if any check fails"'
+            needs_services: false
+          - name: ci-pr-comments
+            path: tests/CLI/bats/make_ci_tests.bats
+            args: '--filter "make pr-comments"'
+            needs_services: false
+          - name: coverage-core
             path: tests/CLI/bats/make_coverage_tests.bats
+            args: '--filter "(make coverage-html command generates HTML coverage report|make coverage-xml command generates XML coverage report|make unit-tests command requires 100% coverage|make behat command runs Behat scenarios)"'
+            needs_services: true
+          - name: coverage-negative
+            path: tests/CLI/bats/make_coverage_tests.bats
+            args: '--filter "(make integration-negative-tests command executes|make negative-tests-with-coverage command executes)"'
             needs_services: true
           - name: database
             path: tests/CLI/bats/make_database_tests.bats
+            args: ''
             needs_services: true
           - name: general
             path: tests/CLI/bats/make_general_tests.bats
+            args: ''
             needs_services: true
           - name: load
             path: tests/CLI/bats/make_load_tests.bats
+            args: ''
             needs_services: false
           - name: negative
             path: tests/CLI/bats/make_negative_tests.bats
+            args: ''
             needs_services: true
           - name: static-analyzes
             path: tests/CLI/bats/make_static_analyzes_tests.bats
+            args: ''
             needs_services: true
-          - name: test
+          - name: test-integration
             path: tests/CLI/bats/make_test_tests.bats
+            args: '--filter "make integration-tests command executes"'
+            needs_services: true
+          - name: test-coverage
+            path: tests/CLI/bats/make_test_tests.bats
+            args: '--filter "make tests-with-coverage command executes"'
             needs_services: true
           - name: underlying
             path: tests/CLI/bats/make_underlying_command_tests.bats
+            args: ''
             needs_services: false
     name: Run Bats Suite (${{ matrix.suite.name }})
     timeout-minutes: 35
@@ -67,7 +94,7 @@ jobs:
           assert-path: ${{ github.workspace }}/tests/CLI/bats/bats-assert
 
       - name: Run Bats tests
-        run: make bats BATS_FILES="${{ matrix.suite.path }}"
+        run: make bats BATS_FILES="${{ matrix.suite.path }}" BATS_ARGS='${{ matrix.suite.args }}'
 
   bats_core_tests:
     name: Run Bats Core Tests
