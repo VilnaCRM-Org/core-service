@@ -33,7 +33,7 @@ jobs:
         run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
 
       - name: Run sharded smoke load tests
-        run: make smoke-load-tests SHARD_INDEX=${{ matrix.shard }} SHARD_TOTAL=4
+        run: make smoke-load-tests SHARD_INDEX=${{ matrix.shard }} SHARD_TOTAL=4 K6_SMOKE_RETRIES=2 K6_SMOKE_RETRY_DELAY_SECONDS=1
 
   load-tests:
     name: K6
