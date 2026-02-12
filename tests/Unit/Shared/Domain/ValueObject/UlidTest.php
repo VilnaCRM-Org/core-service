@@ -108,7 +108,7 @@ final class UlidTest extends UnitTestCase
 
     public function testHexToBase32UsesFiveCharacterLastSlice(): void
     {
-        $hex = bin2hex($this->faker->randomBytes(17));
+        $hex = bin2hex(random_bytes(17));
 
         $method = new \ReflectionMethod(Ulid::class, 'hexToBase32');
         $method->setAccessible(true);
