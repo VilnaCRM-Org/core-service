@@ -14,7 +14,12 @@ final class PartlyCoveredEventBusTest extends TestCase
         $eventBus = new PartlyCoveredEventBus();
         $eventBus->addEvent('test.event');
 
-        // Only testing addEvent - getEventCount and hasEvents are intentionally NOT tested
-        $this->assertTrue(true); // Minimal assertion to pass test
+        // Call getEventCount and hasEvents to ensure they have code coverage,
+        // but don't assert on their return values to allow mutants to escape
+        $eventBus->getEventCount();
+        $eventBus->hasEvents();
+
+        // Weak assertion that doesn't catch mutations
+        $this->assertTrue(true);
     }
 }
