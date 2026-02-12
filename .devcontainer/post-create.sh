@@ -12,7 +12,24 @@ fi
 
 # Codespaces host Docker currently exposes API 1.43; newer clients need this pin.
 export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
-: "${OPENCODE_NPM_PACKAGE:=opencode-ai@1.1.53}"
+: "${CODEX_NPM_PACKAGE:=@openai/codex}"
+: "${CLAUDE_NPM_PACKAGE:=@anthropic-ai/claude-code}"
+
+ensure_apt_packages() {
+    local missing_packages=()
+    local package
+
+    for package in "$@"; do
+        if ! dpkg -s "${package}" >/dev/null 2>&1; then
+            missing_packages+=("${package}")
+        fi
+    done
+
+    if [ "${#missing_packages[@]}" -gt 0 ]; then
+        sudo apt-get update
+        sudo apt-get install -y "${missing_packages[@]}"
+    fi
+}
 
 echo "Waiting for Docker daemon..."
 for attempt in $(seq 1 90); do
@@ -30,13 +47,14 @@ docker info >/dev/null 2>&1 || {
     exit 1
 }
 
-if ! command -v make >/dev/null 2>&1; then
-    sudo apt-get update
-    sudo apt-get install -y make
+ensure_apt_packages make bats
+
+if ! command -v codex >/dev/null 2>&1; then
+    npm install -g "${CODEX_NPM_PACKAGE}"
 fi
 
-if ! command -v opencode >/dev/null 2>&1; then
-    npm install -g "${OPENCODE_NPM_PACKAGE}"
+if ! command -v claude >/dev/null 2>&1; then
+    npm install -g "${CLAUDE_NPM_PACKAGE}"
 fi
 
 export GH_TOKEN_VAR="${GH_TOKEN_VAR:-GH_AUTOMATION_TOKEN}"

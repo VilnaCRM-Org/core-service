@@ -13,13 +13,25 @@ if [ -f "${SETTINGS_FILE}" ]; then
     . "${SETTINGS_FILE}"
 fi
 
-: "${OPENCODE_MODEL:=openrouter/openai/gpt-5.2-codex}"
+if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
+    # shellcheck disable=SC1091
+    . "${HOME}/.config/core-service/agent-secrets.env"
+fi
+
+: "${CODEX_PROFILE_NAME:=openrouter}"
+: "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
+: "${CLAUDE_PERMISSION_MODE:=plan}"
 
 cs_require_command gh
 cs_require_command jq
-cs_require_command opencode
+cs_require_command codex
+cs_require_command claude
+cs_require_command bats
 
 echo "Running startup smoke tests..."
+
+echo "Checking Bats availability..."
+bats --version
 
 echo "Checking GitHub authentication..."
 cs_ensure_gh_auth
@@ -43,61 +55,123 @@ EOM
     exit 1
 fi
 
-tmp_events=""
-tmp_last_text=""
-tmp_tool_workspace=""
-tmp_tool_marker_file=""
-tool_marker=""
+if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] || [ -z "${ANTHROPIC_BASE_URL:-}" ]; then
+    cat >&2 <<'EOM'
+Error: Claude OpenRouter environment is not configured.
+Run: bash scripts/codespaces/setup-secure-agent-env.sh
+EOM
+    exit 1
+fi
+
+echo "Checking Codex profile configuration..."
+if [ ! -f "${HOME}/.codex/config.toml" ]; then
+    echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
+    exit 1
+fi
+if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
+    exit 1
+fi
+
+echo "Running Codex smoke task via OpenRouter profile..."
+tmp_codex_output=""
+tmp_claude_output=""
+tmp_claude_tools_output=""
 cleanup() {
-    [ -n "${tmp_events}" ] && rm -f "${tmp_events}"
-    [ -n "${tmp_last_text}" ] && rm -f "${tmp_last_text}"
-    [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
-    [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
+    [ -n "${tmp_codex_output}" ] && rm -f "${tmp_codex_output}"
+    [ -n "${tmp_claude_output}" ] && rm -f "${tmp_claude_output}"
+    [ -n "${tmp_claude_tools_output}" ] && rm -f "${tmp_claude_tools_output}"
 }
 trap cleanup EXIT
+tmp_codex_output="$(mktemp)"
 
-tmp_events="$(mktemp)"
-tmp_last_text="$(mktemp)"
-tmp_tool_workspace="$(mktemp -d)"
-tmp_tool_marker_file="${tmp_tool_workspace}/opencode-startup-marker.txt"
-if command -v uuidgen >/dev/null 2>&1; then
-    tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
-else
-    tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
-fi
-
-echo "Checking OpenCode autonomous tool execution readiness..."
-if ! (
-    cd "${tmp_tool_workspace}" && timeout 120s opencode run \
-        --format json \
-        -m "${OPENCODE_MODEL}" \
-        "This is a harmless local smoke test in your own temporary workspace. Use the bash tool exactly once and run: echo ${tool_marker} > ./opencode-startup-marker.txt. Then reply with exactly one line: opencode-startup-ok"
-) >"${tmp_events}" 2>&1; then
-    if grep -qE "invalid_prompt|Invalid Responses API request|ZodError|No matching discriminator" "${tmp_events}"; then
-        cat >&2 <<'EOM'
-Error: OpenRouter rejected OpenCode tool-calling payloads during startup smoke test.
-This blocks autonomous coding flows (edit/test/commit/push).
-EOM
-    fi
-    echo "Error: OpenCode startup smoke test failed." >&2
-    sed -n '1,120p' "${tmp_events}" >&2
+if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "Reply with exactly one line: codex-startup-ok" >"${tmp_codex_output}" 2>&1; then
+    echo "Error: Codex smoke task failed." >&2
+    sed -n '1,120p' "${tmp_codex_output}" >&2
     exit 1
 fi
 
-jq -r 'select(.type == "text" and .part.text != null) | .part.text' "${tmp_events}" > "${tmp_last_text}" || true
-if ! grep -qE '^[[:space:]]*opencode-startup-ok[[:space:]]*$' "${tmp_last_text}"; then
-    actual_output="$(tr -d '\r' < "${tmp_last_text}" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
-    echo "Error: OpenCode startup smoke test returned unexpected output." >&2
-    echo "Expected pattern: opencode-startup-ok" >&2
-    echo "Actual trimmed output: ${actual_output}" >&2
+if ! grep -q "codex-startup-ok" "${tmp_codex_output}"; then
+    echo "Error: Codex smoke task did not return expected output." >&2
+    sed -n '1,120p' "${tmp_codex_output}" >&2
     exit 1
 fi
 
-actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
-if [ "${actual_marker}" != "${tool_marker}" ]; then
-    echo "Error: OpenCode startup smoke test did not produce expected marker file content." >&2
+echo "Codex startup smoke test passed."
+
+echo "Checking Claude Code default model config..."
+if [ ! -f "${HOME}/.claude/settings.json" ]; then
+    echo "Error: Claude settings file is missing: ${HOME}/.claude/settings.json" >&2
+    exit 1
+fi
+configured_claude_model="$(jq -r '.model // empty' "${HOME}/.claude/settings.json" 2>/dev/null || true)"
+if [ "${configured_claude_model}" != "${CLAUDE_DEFAULT_MODEL}" ]; then
+    echo "Error: Claude default model mismatch. Expected '${CLAUDE_DEFAULT_MODEL}', got '${configured_claude_model:-<empty>}'" >&2
+    exit 1
+fi
+configured_claude_permission_mode="$(jq -r '.permissions.defaultMode // empty' "${HOME}/.claude/settings.json" 2>/dev/null || true)"
+if [ "${configured_claude_permission_mode}" != "${CLAUDE_PERMISSION_MODE}" ]; then
+    echo "Error: Claude default permission mode mismatch. Expected '${CLAUDE_PERMISSION_MODE}', got '${configured_claude_permission_mode:-<empty>}'" >&2
     exit 1
 fi
 
-echo "OpenCode startup smoke test passed."
+echo "Running Claude Code smoke task..."
+tmp_claude_output="$(mktemp)"
+if ! timeout 180s claude -p "Reply with exactly one line: claude-startup-ok" >"${tmp_claude_output}" 2>&1; then
+    echo "Error: Claude Code smoke task failed." >&2
+    sed -n '1,120p' "${tmp_claude_output}" >&2
+    exit 1
+fi
+
+if ! grep -q "claude-startup-ok" "${tmp_claude_output}"; then
+    echo "Error: Claude Code smoke task did not return expected output." >&2
+    sed -n '1,120p' "${tmp_claude_output}" >&2
+    exit 1
+fi
+
+echo "Claude Code startup smoke test passed."
+
+echo "Running Claude Code tool-calling smoke task..."
+tmp_claude_tools_output="$(mktemp)"
+if ! printf '%s\n' \
+    "Use Bash exactly once and run: echo claude-startup-tools-marker >/dev/null. Then reply with exactly one line: claude-startup-tools-ok" \
+    | timeout 240s claude -p \
+        --no-session-persistence \
+        --disable-slash-commands \
+        --verbose \
+        --output-format stream-json \
+        --allowedTools Bash \
+        --add-dir "${ROOT_DIR}" >"${tmp_claude_tools_output}" 2>&1; then
+    echo "Error: Claude Code tool-calling smoke task failed." >&2
+    sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+    exit 1
+fi
+
+if ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.type? == "tool_use")' "${tmp_claude_tools_output}" >/dev/null \
+    || ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.name? == "Bash")' "${tmp_claude_tools_output}" >/dev/null; then
+    echo "Error: Claude Code tool-calling smoke task did not invoke Bash tool." >&2
+    sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+    exit 1
+fi
+if ! jq -Rs -e --arg mode "${CLAUDE_PERMISSION_MODE}" \
+    'split("\n") | map((fromjson? // empty)) | any(.permissionMode? == $mode)' \
+    "${tmp_claude_tools_output}" >/dev/null; then
+    echo "Error: Claude Code did not start with permission mode '${CLAUDE_PERMISSION_MODE}'." >&2
+    sed -n '1,120p' "${tmp_claude_tools_output}" >&2
+    exit 1
+fi
+
+claude_tool_result_line="$(awk '/"type":"result"/{print; exit}' "${tmp_claude_tools_output}" || true)"
+claude_tool_result="$(printf '%s' "${claude_tool_result_line}" | jq -r '.result // empty' 2>/dev/null || true)"
+case "${claude_tool_result}" in
+    claude-startup-tools-ok*)
+        ;;
+    *)
+        echo "Error: Claude Code tool-calling smoke task returned unexpected result." >&2
+        sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+        exit 1
+        ;;
+esac
+
+echo "Claude Code tool-calling smoke test passed."
 echo "Startup smoke tests completed successfully."

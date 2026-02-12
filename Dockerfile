@@ -48,7 +48,7 @@ RUN set -eux; \
         redis \
         openssl \
         xsl \
-        mongodb \
+        mongodb-2.1.8 \
     ;
 
 ###> recipes ###
