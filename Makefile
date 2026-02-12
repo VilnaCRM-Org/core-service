@@ -47,6 +47,9 @@ COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
 COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+BATS_BIN ?= bats
+BATS_FILES ?= tests/CLI/bats/
+BATS_ARGS ?=
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -e $(1) php $(2)
@@ -70,7 +73,7 @@ help:
 	@grep -E '^[-a-zA-Z0-9_\.\/]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
 bats: ## Run tests for bash commands
-	bats tests/CLI/bats/
+	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)
 
 phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
