@@ -15,7 +15,7 @@ jobs:
             needs_services: true
           - name: aws-load
             path: tests/CLI/bats/make_aws_load_tests.bats
-            needs_services: false
+            needs_services: true
           - name: ci
             path: tests/CLI/bats/make_ci_tests.bats
             needs_services: true
