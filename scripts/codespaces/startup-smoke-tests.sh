@@ -147,13 +147,15 @@ if ! printf '%s\n' \
     exit 1
 fi
 
-if ! grep -q '"type":"tool_use"' "${tmp_claude_tools_output}" \
-    || ! grep -q '"name":"Bash"' "${tmp_claude_tools_output}"; then
+if ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.type? == "tool_use")' "${tmp_claude_tools_output}" >/dev/null \
+    || ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.name? == "Bash")' "${tmp_claude_tools_output}" >/dev/null; then
     echo "Error: Claude Code tool-calling smoke task did not invoke Bash tool." >&2
     sed -n '1,160p' "${tmp_claude_tools_output}" >&2
     exit 1
 fi
-if ! grep -q "\"permissionMode\":\"${CLAUDE_PERMISSION_MODE}\"" "${tmp_claude_tools_output}"; then
+if ! jq -Rs -e --arg mode "${CLAUDE_PERMISSION_MODE}" \
+    'split("\n") | map((fromjson? // empty)) | any(.permissionMode? == $mode)' \
+    "${tmp_claude_tools_output}" >/dev/null; then
     echo "Error: Claude Code did not start with permission mode '${CLAUDE_PERMISSION_MODE}'." >&2
     sed -n '1,120p' "${tmp_claude_tools_output}" >&2
     exit 1

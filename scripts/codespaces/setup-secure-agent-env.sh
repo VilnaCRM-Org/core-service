@@ -91,8 +91,13 @@ trap cleanup_tmp_files EXIT
 configure_claude_openrouter_env() {
     export ANTHROPIC_AUTH_TOKEN="${OPENROUTER_API_KEY}"
     export ANTHROPIC_BASE_URL="${CLAUDE_OPENROUTER_BASE_URL}"
-    # Blank native API key so Claude CLI uses AUTH_TOKEN (OpenRouter) instead.
-    export ANTHROPIC_API_KEY=""
+    if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+        echo "Info: preserving existing ANTHROPIC_API_KEY while configuring OpenRouter defaults." >&2
+        export ANTHROPIC_API_KEY
+    else
+        # Blank native API key so Claude CLI uses AUTH_TOKEN (OpenRouter) instead.
+        export ANTHROPIC_API_KEY=""
+    fi
     export ANTHROPIC_MODEL="${CLAUDE_DEFAULT_MODEL}"
 }
 
