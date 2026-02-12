@@ -124,6 +124,9 @@ final class UlidTest extends UnitTestCase
             substr($hex, 27, 5),
         ];
 
+        // Verify the last slice is exactly 5 characters
+        $this->assertSame(5, strlen($parts[6]), 'Last slice must be exactly 5 characters');
+
         $expected = '';
         foreach ($parts as $index => $part) {
             $length = $index === 0 ? 2 : 4;
