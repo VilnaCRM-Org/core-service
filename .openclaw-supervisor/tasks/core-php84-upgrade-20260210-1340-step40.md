@@ -8,11 +8,13 @@ Current failing checks: Behat, Psalm, Run Bats Core Tests
 Current pending checks: none
 
 Goal:
+
 - Resolve required CI failures first (non-Bats first, Run Bats Core Tests last).
 - Keep changes minimal and PHP 8.4-upgrade focused.
 - Commit and push to the task branch when a fix is ready.
 
 Constraints:
+
 - Do not edit unrelated workflows or refactor.
 - Do not expose secrets.
 - Keep output concise and execution-focused.

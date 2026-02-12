@@ -340,4 +340,3 @@ Donations are very welcome, whether in beer 🍺, T-shirts 👕, or cold, hard c
 ## Changelog
 
 See [changelog](CHANGELOG.md).
-
