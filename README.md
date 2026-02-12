@@ -102,6 +102,7 @@ What `startup-smoke-tests.sh` checks:
 - `bats` CLI is available
 - `codex` can execute one non-interactive task with the `openrouter` profile
 - `claude` can execute one non-interactive task via OpenRouter
+- `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
 
 Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
 
@@ -118,6 +119,7 @@ What `verify-gh-codex.sh` checks:
 - `codex` can run basic and tool-calling non-interactive smoke tasks via OpenRouter
 - `codex` can complete a tool-calling smoke task required for autonomous coding flows
 - `claude` can run a non-interactive smoke task via OpenRouter
+- `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
 - Claude default model is set to `anthropic/claude-sonnet-4.5`
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:

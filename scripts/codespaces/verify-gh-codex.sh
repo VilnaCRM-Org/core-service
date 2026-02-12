@@ -134,6 +134,7 @@ fi
 tmp_codex_basic=""
 tmp_codex_tools=""
 tmp_claude_basic=""
+tmp_claude_tools=""
 tmp_tool_workspace=""
 tmp_tool_marker_file=""
 tool_marker=""
@@ -141,6 +142,7 @@ cleanup() {
     [ -n "${tmp_codex_basic}" ] && rm -f "${tmp_codex_basic}"
     [ -n "${tmp_codex_tools}" ] && rm -f "${tmp_codex_tools}"
     [ -n "${tmp_claude_basic}" ] && rm -f "${tmp_claude_basic}"
+    [ -n "${tmp_claude_tools}" ] && rm -f "${tmp_claude_tools}"
     [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
@@ -149,6 +151,7 @@ trap cleanup EXIT
 tmp_codex_basic="$(mktemp)"
 tmp_codex_tools="$(mktemp)"
 tmp_claude_basic="$(mktemp)"
+tmp_claude_tools="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
@@ -218,5 +221,40 @@ if ! grep -q "claude-ok:openrouter-basic" "${tmp_claude_basic}"; then
     exit 1
 fi
 echo "Claude basic smoke task ok."
+
+echo "Running Claude Code tool-calling smoke task via OpenRouter..."
+if ! printf '%s\n' \
+    "Use Bash exactly once and run: echo claude-openrouter-tools-marker >/dev/null. Then reply with exactly one line: claude-ok:openrouter-tools" \
+    | timeout 240s claude -p \
+        --no-session-persistence \
+        --disable-slash-commands \
+        --verbose \
+        --output-format stream-json \
+        --permission-mode bypassPermissions \
+        --allowedTools Bash \
+        --add-dir "${ROOT_DIR}" >"${tmp_claude_tools}" 2>&1; then
+    echo "Error: Claude tool-calling smoke task failed." >&2
+    sed -n '1,180p' "${tmp_claude_tools}" >&2
+    exit 1
+fi
+if ! grep -q '"type":"tool_use"' "${tmp_claude_tools}" \
+    || ! grep -q '"name":"Bash"' "${tmp_claude_tools}"; then
+    echo "Error: Claude tool-calling smoke task did not invoke Bash tool." >&2
+    sed -n '1,180p' "${tmp_claude_tools}" >&2
+    exit 1
+fi
+
+claude_tool_result_line="$(awk '/"type":"result"/{print; exit}' "${tmp_claude_tools}" || true)"
+claude_tool_result="$(printf '%s' "${claude_tool_result_line}" | jq -r '.result // empty' 2>/dev/null || true)"
+case "${claude_tool_result}" in
+    claude-ok:openrouter-tools*)
+        ;;
+    *)
+        echo "Error: Claude tool-calling smoke task returned unexpected result." >&2
+        sed -n '1,180p' "${tmp_claude_tools}" >&2
+        exit 1
+        ;;
+esac
+echo "Claude tool-calling smoke task ok."
 
 echo "All GH/Codex/Claude verification checks passed."

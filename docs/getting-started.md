@@ -151,8 +151,9 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 - `bats` CLI is available
 - `codex` can execute one non-interactive task via OpenRouter
 - `claude` can execute one non-interactive task via OpenRouter
+- `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
 
-`verify-gh-codex.sh` includes Codex (basic + tool-calling) and Claude Code smoke checks.
+`verify-gh-codex.sh` includes Codex (basic + tool-calling) and Claude Code (basic + tool-calling) smoke checks.
 This setup is OpenRouter-only and configures Codex with:
 
 - model `openai/gpt-5.2-codex`

@@ -73,11 +73,16 @@ if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml";
 fi
 
 echo "Running Codex smoke task via OpenRouter profile..."
-tmp_codex_output="$(mktemp)"
+tmp_codex_output=""
+tmp_claude_output=""
+tmp_claude_tools_output=""
 cleanup() {
-    rm -f "${tmp_codex_output}"
+    [ -n "${tmp_codex_output}" ] && rm -f "${tmp_codex_output}"
+    [ -n "${tmp_claude_output}" ] && rm -f "${tmp_claude_output}"
+    [ -n "${tmp_claude_tools_output}" ] && rm -f "${tmp_claude_tools_output}"
 }
 trap cleanup EXIT
+tmp_codex_output="$(mktemp)"
 
 if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "Reply with exactly one line: codex-startup-ok" >"${tmp_codex_output}" 2>&1; then
     echo "Error: Codex smoke task failed." >&2
@@ -106,7 +111,6 @@ fi
 
 echo "Running Claude Code smoke task..."
 tmp_claude_output="$(mktemp)"
-trap 'cleanup; rm -f "${tmp_claude_output}"' EXIT
 if ! timeout 180s claude -p "Reply with exactly one line: claude-startup-ok" >"${tmp_claude_output}" 2>&1; then
     echo "Error: Claude Code smoke task failed." >&2
     sed -n '1,120p' "${tmp_claude_output}" >&2
@@ -120,4 +124,42 @@ if ! grep -q "claude-startup-ok" "${tmp_claude_output}"; then
 fi
 
 echo "Claude Code startup smoke test passed."
+
+echo "Running Claude Code tool-calling smoke task..."
+tmp_claude_tools_output="$(mktemp)"
+if ! printf '%s\n' \
+    "Use Bash exactly once and run: echo claude-startup-tools-marker >/dev/null. Then reply with exactly one line: claude-startup-tools-ok" \
+    | timeout 240s claude -p \
+        --no-session-persistence \
+        --disable-slash-commands \
+        --verbose \
+        --output-format stream-json \
+        --permission-mode bypassPermissions \
+        --allowedTools Bash \
+        --add-dir "${ROOT_DIR}" >"${tmp_claude_tools_output}" 2>&1; then
+    echo "Error: Claude Code tool-calling smoke task failed." >&2
+    sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+    exit 1
+fi
+
+if ! grep -q '"type":"tool_use"' "${tmp_claude_tools_output}" \
+    || ! grep -q '"name":"Bash"' "${tmp_claude_tools_output}"; then
+    echo "Error: Claude Code tool-calling smoke task did not invoke Bash tool." >&2
+    sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+    exit 1
+fi
+
+claude_tool_result_line="$(awk '/"type":"result"/{print; exit}' "${tmp_claude_tools_output}" || true)"
+claude_tool_result="$(printf '%s' "${claude_tool_result_line}" | jq -r '.result // empty' 2>/dev/null || true)"
+case "${claude_tool_result}" in
+    claude-startup-tools-ok*)
+        ;;
+    *)
+        echo "Error: Claude Code tool-calling smoke task returned unexpected result." >&2
+        sed -n '1,160p' "${tmp_claude_tools_output}" >&2
+        exit 1
+        ;;
+esac
+
+echo "Claude Code tool-calling smoke test passed."
 echo "Startup smoke tests completed successfully."
