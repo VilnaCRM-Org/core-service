@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use InvalidArgumentException;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
@@ -53,7 +54,7 @@ final class UlidValueTransformer
         }
 
         if (is_object($value)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('Unsupported object type: %s', get_class($value))
             );
         }
