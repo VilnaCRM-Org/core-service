@@ -33,12 +33,13 @@ readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
 : "${CLAUDE_OPENROUTER_BASE_URL:=https://openrouter.ai/api}"
+: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
 
 : "${GH_HOST:=github.com}"
 : "${GH_GIT_PROTOCOL:=ssh}"
 : "${GH_PROMPT:=disabled}"
-: "${CODESPACE_GIT_IDENTITY_NAME:=codex-bot}"
-: "${CODESPACE_GIT_IDENTITY_EMAIL:=codex-bot@users.noreply.github.com}"
+: "${CODESPACE_GIT_IDENTITY_NAME:=vilnacrm ai bot}"
+: "${CODESPACE_GIT_IDENTITY_EMAIL:=info@vilnacrm.com}"
 
 TMP_FILES=()
 CS_GIT_IDENTITY_NAME=""
@@ -81,6 +82,7 @@ persist_agent_secrets_file() {
         printf 'export ANTHROPIC_BASE_URL=%q\n' "${ANTHROPIC_BASE_URL}"
         printf 'export ANTHROPIC_API_KEY=%q\n' "${ANTHROPIC_API_KEY}"
         printf 'export ANTHROPIC_MODEL=%q\n' "${ANTHROPIC_MODEL}"
+        printf 'export CLAUDE_PERMISSION_MODE=%q\n' "${CLAUDE_PERMISSION_MODE}"
         if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GH_AUTOMATION_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
         fi
@@ -162,7 +164,10 @@ write_claude_settings() {
     tmp_settings="$(mktemp)"
     track_tmp_file "${tmp_settings}"
 
-    jq -n --arg model "${CLAUDE_DEFAULT_MODEL}" '{"model": $model}' > "${tmp_settings}"
+    jq -n \
+        --arg model "${CLAUDE_DEFAULT_MODEL}" \
+        --arg mode "${CLAUDE_PERMISSION_MODE}" \
+        '{"model": $model, "permissions": {"defaultMode": $mode}}' > "${tmp_settings}"
 
     mkdir -p "$(dirname "${CLAUDE_SETTINGS_FILE}")"
     chmod 700 "$(dirname "${CLAUDE_SETTINGS_FILE}")"
@@ -171,7 +176,7 @@ write_claude_settings() {
 }
 
 configure_git_identity() {
-    local name email current_name current_email
+    local name email
 
     # Empty author/committer env vars override git config and break commits.
     if [ -z "${GIT_AUTHOR_NAME:-}" ]; then
@@ -187,18 +192,8 @@ configure_git_identity() {
         unset GIT_COMMITTER_EMAIL || true
     fi
 
-    current_name="$(git config --global --get user.name 2>/dev/null || true)"
-    current_email="$(git config --global --get user.email 2>/dev/null || true)"
-
-    name="${GIT_AUTHOR_NAME:-${current_name:-}}"
-    email="${GIT_AUTHOR_EMAIL:-${current_email:-}}"
-
-    if [ -z "${name}" ]; then
-        name="${CODESPACE_GIT_IDENTITY_NAME}"
-    fi
-    if [ -z "${email}" ]; then
-        email="${CODESPACE_GIT_IDENTITY_EMAIL}"
-    fi
+    name="${CODESPACE_GIT_IDENTITY_NAME}"
+    email="${CODESPACE_GIT_IDENTITY_EMAIL}"
 
     git config --global user.name "${name}"
     git config --global user.email "${email}"
@@ -250,6 +245,7 @@ echo "  - profile: ${CODEX_PROFILE_NAME}"
 echo "Claude Code configured:"
 echo "  - settings: ${CLAUDE_SETTINGS_FILE}"
 echo "  - default model: ${CLAUDE_DEFAULT_MODEL}"
+echo "  - default permission mode: ${CLAUDE_PERMISSION_MODE}"
 echo "  - OpenRouter base URL: ${CLAUDE_OPENROUTER_BASE_URL}"
 echo "Runtime secret env:"
 echo "  - ${AGENT_SECRETS_FILE} (mode 600)"

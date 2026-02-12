@@ -84,8 +84,8 @@ Use Codespaces secrets (do not commit credentials). Prefer repository-level Code
 
 - `OPENROUTER_API_KEY`: OpenRouter API key for Codex and Claude Code
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
-- optional `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`: identity for automated commits
-  - if omitted, bootstrap defaults to `codex-bot <codex-bot@users.noreply.github.com>`
+- bootstrap sets git identity for automated commits to:
+  - `vilnacrm ai bot <info@vilnacrm.com>`
 
 The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
 
@@ -103,6 +103,7 @@ What `startup-smoke-tests.sh` checks:
 - `codex` can execute one non-interactive task with the `openrouter` profile
 - `claude` can execute one non-interactive task via OpenRouter
 - `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
+- Claude default permission mode is set to `bypassPermissions`
 
 Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
 
@@ -121,6 +122,7 @@ What `verify-gh-codex.sh` checks:
 - `claude` can run a non-interactive smoke task via OpenRouter
 - `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
 - Claude default model is set to `anthropic/claude-sonnet-4.5`
+- Claude default permission mode is set to `bypassPermissions`
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
@@ -157,11 +159,15 @@ Claude Code is configured to use OpenRouter by default:
 - `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
 - `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
 - `ANTHROPIC_MODEL=anthropic/claude-sonnet-4.5`
+- `permissions.defaultMode=bypassPermissions`
 - `~/.claude/settings.json` contains:
 
 ```json
 {
-  "model": "anthropic/claude-sonnet-4.5"
+  "model": "anthropic/claude-sonnet-4.5",
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
 }
 ```
 

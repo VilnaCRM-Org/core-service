@@ -21,6 +21,7 @@ ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 : "${CODEX_PROFILE_NAME:=openrouter}"
 : "${CODEX_TOOL_SMOKE_MODE:=auto}"
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
+: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
 
 cs_require_command gh
 cs_require_command jq
@@ -130,6 +131,11 @@ if [ "${configured_claude_model}" != "${CLAUDE_DEFAULT_MODEL}" ]; then
     echo "Error: Claude default model mismatch. Expected '${CLAUDE_DEFAULT_MODEL}', got '${configured_claude_model:-<empty>}'" >&2
     exit 1
 fi
+configured_claude_permission_mode="$(jq -r '.permissions.defaultMode // empty' "${HOME}/.claude/settings.json" 2>/dev/null || true)"
+if [ "${configured_claude_permission_mode}" != "${CLAUDE_PERMISSION_MODE}" ]; then
+    echo "Error: Claude default permission mode mismatch. Expected '${CLAUDE_PERMISSION_MODE}', got '${configured_claude_permission_mode:-<empty>}'" >&2
+    exit 1
+fi
 
 tmp_codex_basic=""
 tmp_codex_tools=""
@@ -230,7 +236,6 @@ if ! printf '%s\n' \
         --disable-slash-commands \
         --verbose \
         --output-format stream-json \
-        --permission-mode bypassPermissions \
         --allowedTools Bash \
         --add-dir "${ROOT_DIR}" >"${tmp_claude_tools}" 2>&1; then
     echo "Error: Claude tool-calling smoke task failed." >&2
@@ -240,6 +245,11 @@ fi
 if ! grep -q '"type":"tool_use"' "${tmp_claude_tools}" \
     || ! grep -q '"name":"Bash"' "${tmp_claude_tools}"; then
     echo "Error: Claude tool-calling smoke task did not invoke Bash tool." >&2
+    sed -n '1,180p' "${tmp_claude_tools}" >&2
+    exit 1
+fi
+if ! grep -q "\"permissionMode\":\"${CLAUDE_PERMISSION_MODE}\"" "${tmp_claude_tools}"; then
+    echo "Error: Claude Code did not start with permission mode '${CLAUDE_PERMISSION_MODE}'." >&2
     sed -n '1,180p' "${tmp_claude_tools}" >&2
     exit 1
 fi
