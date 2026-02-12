@@ -112,14 +112,15 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		exit $$test_status; \
 	fi; \
 	if [ -z "$$CI" ]; then \
+		sleep 2; \
 		wait_count=0; \
-		while [ $$wait_count -lt 3 ] && [ ! -f coverage.txt ]; do \
+		while [ $$wait_count -lt 10 ] && [ ! -f coverage.txt ]; do \
 			$(DOCKER_COMPOSE) cp php:/srv/app/coverage.txt coverage.txt >/dev/null 2>&1 || true; \
 			if [ -f coverage.txt ]; then \
 				break; \
 			fi; \
 			wait_count=$$((wait_count + 1)); \
-			sleep 1; \
+			sleep 2; \
 		done; \
 	fi; \
 	if [ ! -f coverage.txt ]; then \
