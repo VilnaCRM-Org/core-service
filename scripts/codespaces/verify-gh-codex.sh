@@ -53,7 +53,7 @@ else
 fi
 
 echo "Listing repositories in org '${ORG}'..."
-repo_count="$(gh repo list "${ORG}" --limit 1000 --json name --jq 'length' 2>/dev/null || true)"
+repo_count="$(gh repo list "${ORG}" --limit 1 --json name --jq 'length' 2>/dev/null || true)"
 if ! [[ "${repo_count:-}" =~ ^[0-9]+$ ]]; then
     repo_count=0
 fi
@@ -94,7 +94,7 @@ Check out a branch before running push verification.
 EOM
     exit 1
 fi
-if ! git push --dry-run origin "${current_branch}" >/dev/null; then
+if ! git push --dry-run origin "${current_branch}" >/dev/null 2>&1; then
     cat >&2 <<EOM
 Error: git push dry-run failed for branch '${current_branch}'.
 Ensure your token has write permissions for repository contents.

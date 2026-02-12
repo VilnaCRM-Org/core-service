@@ -152,20 +152,30 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 - `codex` can execute one non-interactive task via OpenRouter
 - `claude` can execute one non-interactive task via OpenRouter
 - `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
-- Claude default permission mode is set to `bypassPermissions`
+- Claude default permission mode is set to `bypassPermissions` (no tool-use confirmation prompts; use only in trusted ephemeral environments)
 
 `verify-gh-codex.sh` includes Codex (basic + tool-calling) and Claude Code (basic + tool-calling) smoke checks.
 This setup is OpenRouter-only and configures Codex with:
 
 - model `openai/gpt-5.2-codex`
 - OpenRouter provider URL `https://openrouter.ai/api/v1`
+- default `approval_policy=on-failure`
+- default `sandbox_mode=workspace-write`
+
+If you need full autonomous mode, explicitly opt in before bootstrap:
+
+```bash
+export CODEX_ALLOW_UNSAFE_MODE=1
+export CODEX_APPROVAL_POLICY=never
+export CODEX_SANDBOX_MODE=danger-full-access
+```
 
 Claude Code is configured with:
 
 - `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
 - `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
 - default model `anthropic/claude-sonnet-4.5`
-- default permission mode `bypassPermissions`
+- default permission mode `bypassPermissions` (disables tool-use confirmation prompts)
 
 ### Working in Codespaces
 

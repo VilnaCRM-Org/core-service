@@ -28,8 +28,10 @@ readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 : "${CODEX_OPENROUTER_BASE_URL:=https://openrouter.ai/api/v1}"
 : "${CODEX_REASONING_EFFORT:=high}"
 : "${CODEX_REASONING_SUMMARY:=none}"
-: "${CODEX_APPROVAL_POLICY:=never}"
-: "${CODEX_SANDBOX_MODE:=danger-full-access}"
+# Safer defaults; override by exporting CODEX_APPROVAL_POLICY/CODEX_SANDBOX_MODE.
+: "${CODEX_APPROVAL_POLICY:=on-failure}"
+: "${CODEX_SANDBOX_MODE:=workspace-write}"
+: "${CODEX_ALLOW_UNSAFE_MODE:=0}"
 
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
 : "${CLAUDE_OPENROUTER_BASE_URL:=https://openrouter.ai/api}"
@@ -44,6 +46,8 @@ readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 TMP_FILES=()
 CS_GIT_IDENTITY_NAME=""
 CS_GIT_IDENTITY_EMAIL=""
+DETECTED_GIT_IDENTITY_NAME=""
+DETECTED_GIT_IDENTITY_EMAIL=""
 
 if [ -f "${AGENT_SECRETS_FILE}" ]; then
     # shellcheck disable=SC1090
@@ -66,6 +70,7 @@ trap cleanup_tmp_files EXIT
 configure_claude_openrouter_env() {
     export ANTHROPIC_AUTH_TOKEN="${OPENROUTER_API_KEY}"
     export ANTHROPIC_BASE_URL="${CLAUDE_OPENROUTER_BASE_URL}"
+    # Blank native API key so Claude CLI uses AUTH_TOKEN (OpenRouter) instead.
     export ANTHROPIC_API_KEY=""
     export ANTHROPIC_MODEL="${CLAUDE_DEFAULT_MODEL}"
 }
@@ -98,6 +103,7 @@ persist_agent_secrets_file() {
         elif [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GITHUB_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
         fi
+        # Persist only bootstrap-managed git identity to login shells.
         if [ -n "${CS_GIT_IDENTITY_NAME:-}" ]; then
             printf 'export GIT_AUTHOR_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
             printf 'export GIT_COMMITTER_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
@@ -187,21 +193,53 @@ write_claude_settings() {
     mv "${tmp_settings}" "${CLAUDE_SETTINGS_FILE}"
 }
 
+validate_codex_safety_settings() {
+    if [ "${CODEX_APPROVAL_POLICY}" = "never" ] \
+        && [ "${CODEX_SANDBOX_MODE}" = "danger-full-access" ] \
+        && [ "${CODEX_ALLOW_UNSAFE_MODE}" != "1" ]; then
+        cat >&2 <<'EOM'
+Error: refusing unsafe Codex defaults.
+Detected:
+  CODEX_APPROVAL_POLICY=never
+  CODEX_SANDBOX_MODE=danger-full-access
+
+Set CODEX_ALLOW_UNSAFE_MODE=1 only when this is an intentional opt-in.
+EOM
+        exit 1
+    fi
+}
+
 configure_git_identity() {
-    local name email
+    local name email configured_name configured_email var
+
+    CS_GIT_IDENTITY_NAME=""
+    CS_GIT_IDENTITY_EMAIL=""
+    DETECTED_GIT_IDENTITY_NAME=""
+    DETECTED_GIT_IDENTITY_EMAIL=""
 
     # Empty author/committer env vars override git config and break commits.
-    if [ -z "${GIT_AUTHOR_NAME:-}" ]; then
-        unset GIT_AUTHOR_NAME || true
+    for var in GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL; do
+        if [ -z "${!var:-}" ]; then
+            unset "${var}" || true
+        fi
+    done
+
+    name="${GIT_AUTHOR_NAME:-${GIT_COMMITTER_NAME:-}}"
+    email="${GIT_AUTHOR_EMAIL:-${GIT_COMMITTER_EMAIL:-}}"
+    configured_name="$(git config --global --get user.name 2>/dev/null || true)"
+    configured_email="$(git config --global --get user.email 2>/dev/null || true)"
+
+    if [ -z "${name}" ]; then
+        name="${configured_name}"
     fi
-    if [ -z "${GIT_AUTHOR_EMAIL:-}" ]; then
-        unset GIT_AUTHOR_EMAIL || true
+    if [ -z "${email}" ]; then
+        email="${configured_email}"
     fi
-    if [ -z "${GIT_COMMITTER_NAME:-}" ]; then
-        unset GIT_COMMITTER_NAME || true
-    fi
-    if [ -z "${GIT_COMMITTER_EMAIL:-}" ]; then
-        unset GIT_COMMITTER_EMAIL || true
+
+    if [ -n "${name}" ] && [ -n "${email}" ]; then
+        DETECTED_GIT_IDENTITY_NAME="${name}"
+        DETECTED_GIT_IDENTITY_EMAIL="${email}"
+        return 0
     fi
 
     name="${CODESPACE_GIT_IDENTITY_NAME}"
@@ -218,6 +256,8 @@ configure_git_identity() {
 
     CS_GIT_IDENTITY_NAME="${name}"
     CS_GIT_IDENTITY_EMAIL="${email}"
+    DETECTED_GIT_IDENTITY_NAME="${name}"
+    DETECTED_GIT_IDENTITY_EMAIL="${email}"
 }
 
 cs_require_command gh
@@ -234,6 +274,7 @@ EOM
     exit 1
 fi
 
+validate_codex_safety_settings
 configure_git_identity
 configure_claude_openrouter_env
 persist_agent_secrets_file
@@ -248,8 +289,8 @@ gh config set prompt "${GH_PROMPT}" >/dev/null 2>&1 || true
 echo "Secure agent environment is ready."
 echo "GH auth: available (mode: ${CS_GH_AUTH_MODE:-unknown})."
 echo "Git identity configured:"
-echo "  - name: ${CS_GIT_IDENTITY_NAME}"
-echo "  - email: ${CS_GIT_IDENTITY_EMAIL}"
+echo "  - name: ${DETECTED_GIT_IDENTITY_NAME:-<unset>}"
+echo "  - email: ${DETECTED_GIT_IDENTITY_EMAIL:-<unset>}"
 echo "Codex configured:"
 echo "  - config: ${CODEX_CONFIG}"
 echo "  - model: ${CODEX_MODEL}"

@@ -27,7 +27,6 @@
     "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}",
     "ANTHROPIC_AUTH_TOKEN": "${localEnv:OPENROUTER_API_KEY}",
     "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
-    "ANTHROPIC_API_KEY": "",
     "ANTHROPIC_MODEL": "anthropic/claude-sonnet-4.5",
     "GH_AUTOMATION_TOKEN": "${localEnv:GH_AUTOMATION_TOKEN}",
     "GH_TOKEN": "${localEnv:GH_TOKEN}",

@@ -103,7 +103,7 @@ What `startup-smoke-tests.sh` checks:
 - `codex` can execute one non-interactive task with the `openrouter` profile
 - `claude` can execute one non-interactive task via OpenRouter
 - `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
-- Claude default permission mode is set to `bypassPermissions`
+- Claude default permission mode is set to `bypassPermissions` (no tool-use confirmation prompts; use only in trusted ephemeral environments)
 
 Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
 
@@ -122,7 +122,7 @@ What `verify-gh-codex.sh` checks:
 - `claude` can run a non-interactive smoke task via OpenRouter
 - `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
 - Claude default model is set to `anthropic/claude-sonnet-4.5`
-- Claude default permission mode is set to `bypassPermissions`
+- Claude default permission mode is set to `bypassPermissions` (no tool-use confirmation prompts; use only in trusted ephemeral environments)
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
@@ -134,8 +134,8 @@ model = "openai/gpt-5.2-codex"
 model_provider = "openrouter"
 model_reasoning_effort = "high"
 model_reasoning_summary = "none"
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
+approval_policy = "on-failure"
+sandbox_mode = "workspace-write"
 
 [model_providers.openrouter]
 name = "OpenRouter"
@@ -144,8 +144,16 @@ env_key = "OPENROUTER_API_KEY"
 wire_api = "responses"
 ```
 
-`approval_policy = "never"` + `sandbox_mode = "danger-full-access"` and `--dangerously-bypass-approvals-and-sandbox` allow Codex to run shell commands without approval.
-Use this only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
+Default bootstrap uses safer Codex settings (`approval_policy=on-failure`, `sandbox_mode=workspace-write`).
+If you need full autonomous mode, explicit opt-in is required by setting all three before bootstrap:
+
+```bash
+export CODEX_ALLOW_UNSAFE_MODE=1
+export CODEX_APPROVAL_POLICY=never
+export CODEX_SANDBOX_MODE=danger-full-access
+```
+
+Use the unsafe combo only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
 
 Run Codex directly:
 
@@ -159,7 +167,7 @@ Claude Code is configured to use OpenRouter by default:
 - `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
 - `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
 - `ANTHROPIC_MODEL=anthropic/claude-sonnet-4.5`
-- `permissions.defaultMode=bypassPermissions`
+- `permissions.defaultMode=bypassPermissions` (disables tool-use confirmation prompts)
 - `~/.claude/settings.json` contains:
 
 ```json
