@@ -52,6 +52,12 @@ final class UlidValueTransformer
             return (string) SymfonyUlid::fromBinary($value->getData());
         }
 
+        if (is_object($value)) {
+            throw new \InvalidArgumentException(
+                sprintf('Unsupported object type: %s', get_class($value))
+            );
+        }
+
         return $value;
     }
 }
