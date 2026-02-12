@@ -1,7 +1,7 @@
 # Builder images
 FROM composer/composer:2-bin AS composer
 
-FROM mlocati/php-extension-installer:2.2 AS php_extension_installer
+FROM mlocati/php-extension-installer:2.9.29 AS php_extension_installer
 
 # Build Caddy with the Mercure and Vulcain modules
 FROM caddy:2.10-builder-alpine AS app_caddy_builder
@@ -13,10 +13,8 @@ RUN xcaddy build \
     --with github.com/dunglas/vulcain/caddy
 
 # Prod image
-# Using Alpine 3.19 instead of 3.20 due to compatibility issues with PHP extensions
-# and the mlocati/php-extension-installer. Alpine 3.20 introduced changes that cause
-# build failures with mongodb and other extensions.
-FROM php:8.3-fpm-alpine3.19 AS app_php
+# Keep a maintained Alpine base for PHP 8.4 and extension installer v2.9+.
+FROM php:8.4-fpm-alpine3.22 AS app_php
 
 # Allow to use development versions of Symfony
 ARG STABILITY="stable"

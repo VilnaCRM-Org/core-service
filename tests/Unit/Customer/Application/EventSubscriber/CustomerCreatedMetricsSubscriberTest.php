@@ -23,11 +23,9 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
 
-        $dimensionsFactory = new MetricDimensionsFactory();
-
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new CustomersCreatedMetricFactory($dimensionsFactory)
+            new CustomersCreatedMetricFactory(new MetricDimensionsFactory())
         );
     }
 
@@ -76,10 +74,9 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));
 
-        $dimensionsFactory = new MetricDimensionsFactory();
         $subscriber = new CustomerCreatedMetricsSubscriber(
             $failingEmitter,
-            new CustomersCreatedMetricFactory($dimensionsFactory)
+            new CustomersCreatedMetricFactory(new MetricDimensionsFactory())
         );
 
         $this->expectException(\RuntimeException::class);

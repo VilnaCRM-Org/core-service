@@ -13,6 +13,9 @@ final class EmptyValueGuard
         return $value === null || $value === '';
     }
 
+    /**
+     * @psalm-suppress UnusedParam
+     */
     public function shouldSkip(
         array|string|int|float|bool|null $value,
         Constraint $constraint

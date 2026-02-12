@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Webmozart\Assert\Assert;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class GraphQLContext implements Context, SnippetAcceptingContext
 {
     private readonly GraphQLRequestSender $requestSender;

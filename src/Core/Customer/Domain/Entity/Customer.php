@@ -9,8 +9,16 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTime;
 use DateTimeImmutable;
 
+/**
+ * @psalm-suppress PossiblyUnusedMethod
+ */
 class Customer implements CustomerInterface
 {
+    /**
+     * @var UlidInterface
+     */
+    private mixed $ulid;
+
     public function __construct(
         private string $initials,
         private string $email,
@@ -19,10 +27,11 @@ class Customer implements CustomerInterface
         private CustomerType $type,
         private CustomerStatus $status,
         private ?bool $confirmed,
-        private UlidInterface $ulid,
+        UlidInterface $ulid,
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTime $updatedAt = null,
     ) {
+        $this->ulid = $ulid;
         $this->createdAt ??= new DateTimeImmutable();
         $this->updatedAt ??= new DateTime();
     }
@@ -32,6 +41,9 @@ class Customer implements CustomerInterface
         return (string) $this->ulid;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setUlid(UlidInterface $ulid): void
     {
         $this->ulid = $ulid;
@@ -62,6 +74,9 @@ class Customer implements CustomerInterface
         return $this->phone;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setPhone(string $phone): void
     {
         $this->phone = $phone;
@@ -72,6 +87,9 @@ class Customer implements CustomerInterface
         return $this->leadSource;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setLeadSource(string $leadSource): void
     {
         $this->leadSource = $leadSource;
@@ -82,6 +100,9 @@ class Customer implements CustomerInterface
         return $this->type;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setType(CustomerType $type): void
     {
         $this->type = $type;
@@ -92,6 +113,9 @@ class Customer implements CustomerInterface
         return $this->status;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setStatus(CustomerStatus $status): void
     {
         $this->status = $status;
@@ -102,6 +126,9 @@ class Customer implements CustomerInterface
         return $this->createdAt;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setCreatedAt(DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
@@ -112,6 +139,9 @@ class Customer implements CustomerInterface
         return $this->updatedAt;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
@@ -119,9 +149,13 @@ class Customer implements CustomerInterface
 
     public function isConfirmed(): bool
     {
-        return $this->confirmed;
+        // Null values are intentionally treated as false for legacy hydration.
+        return (bool) $this->confirmed;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function setConfirmed(bool $confirmed): void
     {
         $this->confirmed = $confirmed;

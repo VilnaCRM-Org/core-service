@@ -2,6 +2,7 @@
 <psalm
   errorLevel="8"
   resolveFromConfigFile="true"
+  ensureOverrideAttribute="false"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="https://getpsalm.org/schema/config"
   xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
@@ -19,4 +20,16 @@
         <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin" />
         <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin" />
     </plugins>
+    <issueHandlers>
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+        <UnusedParam>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedParam>
+    </issueHandlers>
 </psalm>
