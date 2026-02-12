@@ -58,7 +58,10 @@ if [[ $scenario_name != "createCustomer" \
       && $scenario_name != "graphQLCreateCustomer" \
       && ($scenario_name == *Customer* || $scenario_name == "cachePerformance") \
       && $scenario_name != *CustomerStatus* \
-      && $scenario_name != *CustomerType* ]]; then
+      && $scenario_name != *CustomerType* \
+      && $scenario_name != "prepareCustomers" \
+      && $scenario_name != "cleanupCustomers" \
+      && $scenario_name != "insertCustomers" ]]; then
   eval "$K6" /loadTests/utils/prepareCustomers.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
 fi
 
