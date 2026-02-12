@@ -91,6 +91,8 @@ persist_agent_secrets_file() {
         if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GH_AUTOMATION_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
         fi
+        # These checks read the current shell environment. They do not read values
+        # already written above, so we explicitly cascade to persist both tokens.
         if [ -n "${GH_TOKEN:-}" ]; then
             printf 'export GH_TOKEN=%q\n' "${GH_TOKEN}"
         elif [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then

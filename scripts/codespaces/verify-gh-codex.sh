@@ -194,6 +194,7 @@ if [ "${tool_smoke_failed}" -eq 1 ]; then
         && [ "${CODEX_PROFILE_NAME}" = "openrouter" ] \
         && grep -q "invalid_prompt" "${tmp_codex_tools}" \
         && grep -q "Invalid Responses API request" "${tmp_codex_tools}"; then
+        # TODO: Remove auto-skip once OpenRouter supports Responses API tool_use payloads.
         echo "Warning: OpenRouter rejected Codex tool-call response payload (known compatibility issue)." >&2
         echo "Continuing because CODEX_TOOL_SMOKE_MODE=auto." >&2
     else
