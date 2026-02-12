@@ -103,7 +103,7 @@ What `startup-smoke-tests.sh` checks:
 - `codex` can execute one non-interactive task with the `openrouter` profile
 - `claude` can execute one non-interactive task via OpenRouter
 - `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
-- Claude default permission mode is set to `bypassPermissions` (no tool-use confirmation prompts; use only in trusted ephemeral environments)
+- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
 
 Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
 
@@ -122,7 +122,7 @@ What `verify-gh-codex.sh` checks:
 - `claude` can run a non-interactive smoke task via OpenRouter
 - `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
 - Claude default model is set to `anthropic/claude-sonnet-4.5`
-- Claude default permission mode is set to `bypassPermissions` (no tool-use confirmation prompts; use only in trusted ephemeral environments)
+- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
 
 Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
@@ -167,16 +167,23 @@ Claude Code is configured to use OpenRouter by default:
 - `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
 - `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
 - `ANTHROPIC_MODEL=anthropic/claude-sonnet-4.5`
-- `permissions.defaultMode=bypassPermissions` (disables tool-use confirmation prompts)
+- `permissions.defaultMode=plan` (safer default for tool-use confirmations)
 - `~/.claude/settings.json` contains:
 
 ```json
 {
   "model": "anthropic/claude-sonnet-4.5",
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "plan"
   }
 }
+```
+
+If you intentionally want `bypassPermissions`, opt in explicitly before bootstrap:
+
+```bash
+export CLAUDE_PERMISSION_MODE=bypassPermissions
+export CLAUDE_ALLOW_BYPASS_PERMISSIONS=1
 ```
 
 Notes:

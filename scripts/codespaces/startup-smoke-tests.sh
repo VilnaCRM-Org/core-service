@@ -20,7 +20,7 @@ fi
 
 : "${CODEX_PROFILE_NAME:=openrouter}"
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
-: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
+: "${CLAUDE_PERMISSION_MODE:=plan}"
 
 cs_require_command gh
 cs_require_command jq

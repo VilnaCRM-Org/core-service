@@ -21,7 +21,7 @@ ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
 : "${CODEX_PROFILE_NAME:=openrouter}"
 : "${CODEX_TOOL_SMOKE_MODE:=auto}"
 : "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
-: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
+: "${CLAUDE_PERMISSION_MODE:=plan}"
 
 cs_require_command gh
 cs_require_command jq
@@ -80,6 +80,7 @@ Received payload was not valid JSON.
 EOM
         exit 1
     }
+    # Informational only: checks may still be running while this preflight executes.
     echo "PR #${pr_number} checks query ok (non-success states: ${non_success_count})."
 else
     echo "No PR detected for current branch. Skipping PR checks."
@@ -181,8 +182,9 @@ echo "Codex basic smoke task ok."
 
 echo "Running Codex tool-calling smoke task..."
 tool_smoke_failed=0
+codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openrouter-tools"
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openrouter-tools"
+    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "${codex_tool_prompt}"
 ) >"${tmp_codex_tools}" 2>&1; then
     tool_smoke_failed=1
 fi
