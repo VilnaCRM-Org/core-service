@@ -86,6 +86,18 @@ persist_agent_secrets_file() {
         if [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GH_AUTOMATION_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
         fi
+        if [ -n "${GH_TOKEN:-}" ]; then
+            printf 'export GH_TOKEN=%q\n' "${GH_TOKEN}"
+        elif [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
+            printf 'export GH_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
+        fi
+        if [ -n "${GITHUB_TOKEN:-}" ]; then
+            printf 'export GITHUB_TOKEN=%q\n' "${GITHUB_TOKEN}"
+        elif [ -n "${GH_TOKEN:-}" ]; then
+            printf 'export GITHUB_TOKEN=%q\n' "${GH_TOKEN}"
+        elif [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
+            printf 'export GITHUB_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
+        fi
         if [ -n "${CS_GIT_IDENTITY_NAME:-}" ]; then
             printf 'export GIT_AUTHOR_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
             printf 'export GIT_COMMITTER_NAME=%q\n' "${CS_GIT_IDENTITY_NAME}"
