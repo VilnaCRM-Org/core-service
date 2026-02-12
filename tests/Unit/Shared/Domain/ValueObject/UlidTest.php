@@ -111,7 +111,6 @@ final class UlidTest extends UnitTestCase
         $hex = bin2hex(random_bytes(17));
 
         $method = new \ReflectionMethod(Ulid::class, 'hexToBase32');
-        $method->setAccessible(true);
 
         $actual = $method->invoke(null, $hex);
 
