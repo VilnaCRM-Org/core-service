@@ -56,7 +56,7 @@ K6="docker run --user $(id -u):$(id -g) -v ./tests/Load:/loadTests --net=host --
 # Also include cachePerformance which needs pre-existing customers
 if [[ $scenario_name != "createCustomer" \
       && $scenario_name != "graphQLCreateCustomer" \
-      && ($scenario_name == *Customer || $scenario_name == "cachePerformance") \
+      && ($scenario_name == *Customer* || $scenario_name == "cachePerformance") \
       && $scenario_name != *CustomerStatus* \
       && $scenario_name != *CustomerType* ]]; then
   eval "$K6" /loadTests/utils/prepareCustomers.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
