@@ -45,7 +45,7 @@ Local endpoints
 
 - REST API docs: https://localhost/api/docs
 - GraphQL docs: https://localhost/api/graphql
-- Architecture diagrams: http://localhost:8080/workspace/diagrams *(dev only, requires Structurizr Lite from docker-compose.override.yml)*
+- Architecture diagrams: http://localhost:8080/workspace/diagrams _(dev only, requires Structurizr Lite from docker-compose.override.yml)_
 
 ## Codespaces
 
