@@ -39,13 +39,13 @@ cd core-service
 make start
 ```
 
-Tip: wait a few minutes for the stack to be ready; use make logs to check status.
+**Tip:** Wait a few minutes for the stack to be ready; use `make logs` to check status.
 
 Local endpoints
 
 - REST API docs: https://localhost/api/docs
 - GraphQL docs: https://localhost/api/graphql
-- Architecture diagrams: http://localhost:8080/workspace/diagrams
+- Architecture diagrams: http://localhost:8080/workspace/diagrams *(dev only, requires Structurizr Lite from docker-compose.override.yml)*
 
 ## Codespaces
 
