@@ -17,7 +17,7 @@ It follows Hexagonal Architecture, DDD, and CQRS patterns, with a modern Symfony
 
 ## Stack at a glance
 
-- PHP 8.3 (see docs/performance.md)
+- PHP 8.2+ (see docs/performance.md)
 - Symfony 7.2
 - API Platform (REST + GraphQL)
 - MongoDB as the primary datastore
