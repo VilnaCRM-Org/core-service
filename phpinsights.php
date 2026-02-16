@@ -17,7 +17,6 @@ return [
     'exclude' => [
         'vendor',
         'CLI/bats/php',
-        'src/Core/Customer/Application/DTO',
     ],
     'add' => [],
     'remove' => [
@@ -27,17 +26,9 @@ return [
         SpaceAfterNotSniff::class,
         NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff::class,
         UseSpacingSniff::class,
-        NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenPublicPropertySniff::class,
     ],
 
     'config' => [
-        SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff::class => [
-            'exclude' => [
-                // Doctrine ODM requires mixed $id in find() method signature
-                'src/Core/Customer/Domain/Repository/CustomerRepositoryInterface',
-                'src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository',
-            ],
-        ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
@@ -48,19 +39,17 @@ return [
                 'phpinsights',
             ],
             'ignoreComments' => true,
-            'lineLimit' => 100,
         ],
         ForbiddenNormalClasses::class => [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
-                'src/Core/Customer/Domain/Entity/Customer',
             ],
         ],
     ],
     'requirements' => [
         'min-quality' => 100,
-        'min-complexity' => 93,
+        'min-complexity' => 95,
         'min-architecture' => 100,
         'min-style' => 100,
     ],

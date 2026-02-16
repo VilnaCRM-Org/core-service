@@ -7,14 +7,5 @@ services:
     public: true
     class: Symfony\Component\Cache\Adapter\ArrayAdapter
 
-  App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface: '@App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy'
-
-  App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
-    public: true
-
   App\Tests\Behat\:
     resource: '../tests/Behat/*'
-
-  # Use sync event bus for integration tests (not async via SQS)
-  App\Shared\Domain\Bus\Event\EventBusInterface:
-    alias: App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus

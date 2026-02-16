@@ -1,14 +1,15 @@
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://supportukrainenow.org/)
 
-# Core Service
+# Microservice template for modern PHP applications
 
 [![CodeScene Code Health](https://img.shields.io/badge/CodeScene%20%7C%20Hotspot%20Code%20Health-9.7-brightgreen)](https://codescene.io/projects/39797)
 [![CodeScene System Mastery](https://img.shields.io/badge/CodeScene%20%7C%20Average%20Code%20Health-9.8-brightgreen)](https://codescene.io/projects/39797)
-[![codecov](https://codecov.io/gh/VilnaCRM-Org/core-service/branch/main/graph/badge.svg?token=FgXtmFulVd)](https://app.codecov.io/gh/VilnaCRM-Org/core-service)
+[![codecov](https://codecov.io/gh/VilnaCRM-Org/php-service-template/branch/main/graph/badge.svg?token=J3SGCHIFD5)](https://codecov.io/gh/VilnaCRM-Org/php-service-template)
 ![PHPInsights code](https://img.shields.io/badge/PHPInsights%20%7C%20Code%20-100.0%25-success.svg)
 ![PHPInsights style](https://img.shields.io/badge/PHPInsights%20%7C%20Style%20-100.0%25-success.svg)
 ![PHPInsights complexity](https://img.shields.io/badge/PHPInsights%20%7C%20Complexity%20-100.0%25-success.svg)
 ![PHPInsights architecture](https://img.shields.io/badge/PHPInsights%20%7C%20Architecture%20-100.0%25-success.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/fc1ca51fd0faca36ab82/maintainability)](https://codeclimate.com/github/VilnaCRM-Org/php-service-template/maintainability)
 
 ## Possibilities
 
@@ -26,15 +27,17 @@
 
 ## Why you might need it
 
-The Core Service is the backbone of the VilnaCRM ecosystem, providing essential functionalities that power all components of the CRM system.
-With a robust API, the Core Service ensures seamless integration and scalability across the VilnaCRM platform,
-enabling efficient operations and consistent user experiences across all services.
+Many PHP developers need to create new projects from scratch and spend a lot of time.
+
+We decided to simplify this exhausting process and create a public template for modern PHP applications. This template is used for all our microservices in VilnaCRM.
 
 ## License
 
-This software is distributed under the [Creative Commons Zero v1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/deed) license. Please read [LICENSE](https://github.com/VilnaCRM-Org/core-service/blob/main/LICENSE) for information on the software availability and distribution.
+This software is distributed under the [Creative Commons Zero v1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/deed) license. Please read [LICENSE](https://github.com/VilnaCRM-Org/php-service-template/blob/main/LICENSE) for information on the software availability and distribution.
 
 ### Minimal installation
+
+You can clone this repository locally or use Github functionality "Use this template"
 
 Install the latest [docker](https://docs.docker.com/engine/install/) and [docker compose](https://docs.docker.com/compose/install/)
 
@@ -42,159 +45,11 @@ Use `make` command to set up project and automatically install all needed depend
 
 > make start
 
-Go to browser and open the link below to access REST API docs
+Go to browser and open the link below
 
 > https://localhost/api/docs
 
-You can access the GraphQL endpoint via the link below:
-
-> https://localhost/api/graphql
-
-Also, you can see the architecture diagram using the link below
-
-> http://localhost:8080/workspace/diagrams
-
-That's it. You should now be ready to use core service!
-
-### GitHub Codespaces
-
-This repository ships with a built-in Codespaces definition in `.devcontainer/devcontainer.json`.
-
-When a Codespace is created, the setup script:
-
-- installs `codex` CLI
-- installs `claude` CLI (Claude Code)
-- provides `gh` CLI
-- installs `bats` CLI for `make bats`
-- starts the Docker stack with `make start`
-- installs PHP dependencies with `make install` if needed
-
-After startup, verify the environment:
-
-```bash
-gh --version
-codex --version
-claude --version
-make help
-```
-
-#### Secure setup for autonomous AI coding agents
-
-Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
-
-- `OPENROUTER_API_KEY`: OpenRouter API key for Codex and Claude Code
-- `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
-- bootstrap sets git identity for automated commits to:
-  - `vilnacrm ai bot <info@vilnacrm.com>`
-
-The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
-
-```bash
-bash scripts/codespaces/setup-secure-agent-env.sh
-bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
-bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
-```
-
-What `startup-smoke-tests.sh` checks:
-
-- `gh` authentication is available
-- repository listing for `VilnaCRM-Org` works
-- `bats` CLI is available
-- `codex` can execute one non-interactive task with the `openrouter` profile
-- `claude` can execute one non-interactive task via OpenRouter
-- `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
-- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
-
-Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
-
-- `.devcontainer/codespaces-settings.env`
-- `.devcontainer/post-create.sh`
-- `scripts/codespaces/setup-secure-agent-env.sh`
-
-What `verify-gh-codex.sh` checks:
-
-- GitHub auth works
-- repository listing for `VilnaCRM-Org` works
-- current PR checks can be queried via `gh`
-- current branch supports `git push --dry-run`
-- `codex` can run basic and tool-calling non-interactive smoke tasks via OpenRouter
-- `codex` can complete a tool-calling smoke task required for autonomous coding flows
-- `claude` can run a non-interactive smoke task via OpenRouter
-- `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
-- Claude default model is set to `anthropic/claude-sonnet-4.5`
-- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
-
-Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
-
-```toml
-profile = "openrouter"
-
-[profiles.openrouter]
-model = "openai/gpt-5.2-codex"
-model_provider = "openrouter"
-model_reasoning_effort = "high"
-model_reasoning_summary = "none"
-approval_policy = "on-failure"
-sandbox_mode = "workspace-write"
-
-[model_providers.openrouter]
-name = "OpenRouter"
-base_url = "https://openrouter.ai/api/v1"
-env_key = "OPENROUTER_API_KEY"
-wire_api = "responses"
-```
-
-Default bootstrap uses safer Codex settings (`approval_policy=on-failure`, `sandbox_mode=workspace-write`).
-If you need full autonomous mode, explicit opt-in is required by setting all three before bootstrap:
-
-```bash
-export CODEX_ALLOW_UNSAFE_MODE=1
-export CODEX_APPROVAL_POLICY=never
-export CODEX_SANDBOX_MODE=danger-full-access
-```
-
-Use the unsafe combo only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
-
-Run Codex directly:
-
-```bash
-codex -p openrouter
-codex exec -p openrouter --dangerously-bypass-approvals-and-sandbox "Refactor customer update flow to reduce duplication"
-```
-
-Claude Code is configured to use OpenRouter by default:
-
-- `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
-- `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
-- `ANTHROPIC_MODEL=anthropic/claude-sonnet-4.5`
-- `permissions.defaultMode=plan` (safer default for tool-use confirmations)
-- `~/.claude/settings.json` contains:
-
-```json
-{
-  "model": "anthropic/claude-sonnet-4.5",
-  "permissions": {
-    "defaultMode": "plan"
-  }
-}
-```
-
-If you intentionally want `bypassPermissions`, opt in explicitly before bootstrap:
-
-```bash
-export CLAUDE_PERMISSION_MODE=bypassPermissions
-export CLAUDE_ALLOW_BYPASS_PERMISSIONS=1
-```
-
-Notes:
-
-- secrets are never stored in git; keep them in Codespaces secrets
-- Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
-- bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
-- no token values are written to repository files
-- if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
-  `gh auth login -h github.com -w && gh auth setup-git`
-- this setup is OpenRouter-only
+That's it. You should now be ready to use PHP service template!
 
 ## Using
 
@@ -217,10 +72,13 @@ check-requirements           Checks requirements for running Symfony and gives u
 check-security               Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 commands                     List all Symfony commands
 composer-validate            The validate command validates a given composer.json and composer.lock
-coverage-xml                 Create the code coverage report in XML format with PHPUnit
+coverage                     Create the code coverage report with PHPUnit
+doctrine-migrations-generate Generates a blank migration class
+doctrine-migrations-migrate  Executes a migration to a specified version or the latest available version
 down                         Stop the docker hub
 install                      Install vendors according to the current composer.lock file
 update                       update vendors according to the current composer.json file
+load-fixtures                Build the DB, control the schema validity, load fixtures and check the migration status
 logs                         Show all logs
 new-logs                     Show live logs
 phpcsfixer                   A tool to automatically fix PHP Coding Standards issues
@@ -229,6 +87,8 @@ phpunit                      The PHP unit testing framework
 psalm                        A static analysis tool for finding errors in PHP applications
 psalm-security               Psalm security analysis
 purge                        Purge cache and logs
+rector-apply                 Apply Rector transformations to the codebase
+rector-ci                    Run Rector in CI mode to detect refactoring issues
 sh                           Log to the docker container
 start                        Start docker
 stop                         Stop docker and the Symfony binary server
@@ -237,17 +97,17 @@ up                           Start the docker hub (PHP, caddy)
 
 ## Documentation
 
-Start reading at the [GitHub wiki](https://github.com/VilnaCRM-Org/core-service/wiki). If you're having trouble, head for [the troubleshooting guide](https://github.com/VilnaCRM-Org/core-service/wiki/Troubleshooting) as it's frequently updated.
+Start reading at the [GitHub wiki](https://github.com/VilnaCRM-Org/php-service-template/wiki). If you're having trouble, head for [the troubleshooting guide](https://github.com/VilnaCRM-Org/php-service-template/wiki/Troubleshooting) as it's frequently updated.
 
 You can generate complete API-level documentation by running `phpdoc` in the top-level folder, and documentation will appear in the `docs` folder, though you'll need to have [PHPDocumentor](http://www.phpdoc.org) installed.
 
-If the documentation doesn't cover what you need, search the [many questions on Stack Overflow](http://stackoverflow.com/questions/tagged/vilnacrm), and before you ask a question, [read the troubleshooting guide](https://github.com/VilnaCRM-Org/core-service/wiki/Troubleshooting).
+If the documentation doesn't cover what you need, search the [many questions on Stack Overflow](http://stackoverflow.com/questions/tagged/vilnacrm), and before you ask a question, [read the troubleshooting guide](https://github.com/VilnaCRM-Org/php-service-template/wiki/Troubleshooting).
 
 ## Tests
 
-[Tests](https://github.com/VilnaCRM-Org/core-service/tree/main/tests/) use PHPUnit 9 and [Behat](https://github.com/Behat/Behat).
+[Tests](https://github.com/VilnaCRM-Org/php-service-template/tree/main/tests/) use PHPUnit 9 and [Behat](https://github.com/Behat/Behat).
 
-[Test status](https://github.com/VilnaCRM-Org/core-service/actions)
+[Test status](https://github.com/VilnaCRM-Org/php-service-template/actions)
 
 If this isn't passing, is there something you can do to help?
 
@@ -321,11 +181,11 @@ For projects that prefer GitHub App authentication, please refer to the [TEMPLAT
 
 Please disclose any vulnerabilities found responsibly – report security issues to the maintainers privately.
 
-See [SECURITY](https://github.com/VilnaCRM-Org/core-service/tree/main/SECURITY.md) and [Security advisories on GitHub](https://github.com/VilnaCRM-Org/core-service/security).
+See [SECURITY](https://github.com/VilnaCRM-Org/php-service-template/tree/main/SECURITY.md) and [Security advisories on GitHub](https://github.com/VilnaCRM-Org/php-service-template/security).
 
 ## Contributing
 
-Please submit bug reports, suggestions, and pull requests to the [GitHub issue tracker](https://github.com/VilnaCRM-Org/core-service/issues).
+Please submit bug reports, suggestions, and pull requests to the [GitHub issue tracker](https://github.com/VilnaCRM-Org/php-service-template/issues).
 
 We're particularly interested in fixing edge cases, expanding test coverage, and updating translations.
 
@@ -335,7 +195,7 @@ If you found a mistake in the docs, or want to add something, go ahead and amend
 
 Development time and resources for this repository are provided by [VilnaCRM](https://vilnacrm.com/), the free and opensource CRM system.
 
-Donations are very welcome, whether in beer 🍺, T-shirts 👕, or cold, hard cash 💰. Sponsorship through GitHub is a simple and convenient way to say "thank you" to maintainers and contributors – just click the "Sponsor" button [on the project page](https://github.com/VilnaCRM-Org/core-service). If your company uses this template, consider taking part in the VilnaCRM's enterprise support program.
+Donations are very welcome, whether in beer 🍺, T-shirts 👕, or cold, hard cash 💰. Sponsorship through GitHub is a simple and convenient way to say "thank you" to maintainers and contributors – just click the "Sponsor" button [on the project page](https://github.com/VilnaCRM-Org/php-service-template). If your company uses this template, consider taking part in the VilnaCRM's enterprise support program.
 
 ## Changelog
 

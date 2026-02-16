@@ -35,30 +35,14 @@ load 'bats-assert/load'
 }
 
 @test "make behat should fail when scenarios fail" {
-  original_path="tests/Behat/CustomerContext/CustomerContext.php"
-  temp_path="tests/CustomerContext.php"
-  
-  cleanup() {
-    if [ -f "$temp_path" ]; then
-      mv "$temp_path" "$original_path"
-    fi
-  }
-  trap cleanup EXIT
-  
-  mv "$original_path" "$temp_path"
+  mv tests/Behat/DemoContext.php tests/
   run make behat
-  
-  mv "$temp_path" "$original_path"
-  
+  mv tests/DemoContext.php tests/Behat/
   assert_failure
 }
 
 @test "make psalm should fail when there are errors" {
   mv tests/CLI/bats/php/PsalmErrorExample.php src/Shared/Application/
-
-  # Regenerate autoloader and clear Psalm cache
-  composer dump-autoload
-  docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache
 
   run make psalm
 
@@ -68,15 +52,34 @@ load 'bats-assert/load'
   assert_output --partial "does not exist"
 }
 
+@test "make deptrac should fail when there are dependency violations" {
+  mkdir src/CompanySubdomain/SomeModule/Domain/Entity/
+  mv tests/CLI/bats/php/SomeEntity.php src/CompanySubdomain/SomeModule/Domain/Entity/
+
+  run make deptrac
+
+  mv src/CompanySubdomain/SomeModule/Domain/Entity/SomeEntity.php tests/CLI/bats/php/
+  rmdir src/CompanySubdomain/SomeModule/Domain/Entity/
+  assert_output --partial "App\CompanySubdomain\SomeModule\Domain\Entity\SomeEntity must not depend on App\CompanySubdomain\SomeModule\Application\Command\SomeCommand"
+  assert_failure
+}
+
+@test "make e2e-tests should fail when scenarios fail" {
+  mv tests/Behat/DemoContext.php tests/
+    run make behat
+    mv tests/DemoContext.php tests/Behat/
+    assert_failure
+}
+
 @test "make phpinsights should fail when code quality is low" {
-  mv tests/CLI/bats/php/temp_bad_code.php src/temp_bad_code.php
+  mv tests/CLI/bats/php/temp_bad_code.php temp_bad_code.php
 
   run make phpinsights
 
-  mv src/temp_bad_code.php tests/CLI/bats/php/
+  mv temp_bad_code.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "The method anotherBadMethod() has a Cyclomatic Complexity of 10"
+  assert_output --partial "The style score is too low"
 }
 
 @test "make unit-tests should fail if tests fail" {
@@ -106,5 +109,10 @@ load 'bats-assert/load'
   mv composer.json.bak composer.json
 
   assert_failure
+  assert_output --partial "does not contain valid JSON"
 }
 
+@test "make aws-lod-tests without config should fail" {
+  run make aws-load-tests
+  assert_failure
+}

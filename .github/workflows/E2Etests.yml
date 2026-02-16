@@ -2,6 +2,7 @@ name: E2E testing
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   behat:
@@ -22,5 +23,8 @@ jobs:
       - name: Start Application
         run: make start
 
+      - name: Setup Test Database
+        run: make setup-test-db
+
       - name: Run Behat Tests
-        run: make behat
+        run: make e2e-tests

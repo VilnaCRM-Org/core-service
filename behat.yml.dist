@@ -1,28 +1,13 @@
 default:
-  testers:
-    stop_on_failure: true
-    strict: true
-  autoload:
-    '': "%paths.base%/tests/Acceptance"
-  extensions:
-    FriendsOfBehat\SymfonyExtension:
-      bootstrap: 'tests/bootstrap.php'
-      kernel:
-        environment: test
-        class: App\Shared\Kernel
-    TwentytwoLabs\BehatOpenApiExtension:
-      schemaFile: "file:///srv/app/.github/openapi-spec/spec.yaml"
-    Behat\MinkExtension:
-      base_url: "http://caddy"
-      sessions:
+    suites:
         default:
-          browserkit_http: ~
-  suites:
-    default:
-      contexts:
-        - App\Tests\Behat\CustomerContext\CustomerContext
-        - App\Tests\Behat\GraphQLContext\GraphQLContext
-        - TwentytwoLabs\BehatOpenApiExtension\Context\DebugContext: ~
-        - TwentytwoLabs\BehatOpenApiExtension\Context\RestContext: ~
-        - TwentytwoLabs\BehatOpenApiExtension\Context\JsonContext: ~
-        - TwentytwoLabs\BehatOpenApiExtension\Context\OpenApiContext: ~
+            contexts:
+                - App\Tests\Behat\DemoContext
+        health_check:
+            contexts:
+                - App\Tests\Behat\HealthCheckContext\HealthCheckContext
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: 'tests/bootstrap.php'
+            kernel:
+                class: App\Shared\Kernel

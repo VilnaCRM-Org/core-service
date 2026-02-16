@@ -2,6 +2,7 @@ name: Mutation testing
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   infection:

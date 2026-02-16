@@ -29,11 +29,8 @@ final class CacheCheckSubscriberTest extends UnitTestCase
             ->with(
                 $this->equalTo('health_check'),
                 $this->isInstanceOf(\Closure::class)
-            )->willReturnCallback(
-                static function (string $key, callable $callback) {
-                    return $callback();
-                }
-            );
+            )
+            ->willReturn('ok');
 
         $event = new HealthCheckEvent();
         $this->subscriber->onHealthCheck($event);
