@@ -48,6 +48,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return $response->toArray();
     }
 
+    #[\Override]
     /**
      * Execute a GraphQL mutation with input variables.
      *
@@ -55,7 +56,6 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
      * @param array<string, string> $headers
      *
      * @return array<string, string|int|float|bool|array|null>
-     #[\Override]
      */
     protected function graphqlMutation(
         string $mutation,
@@ -65,10 +65,10 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return $this->graphqlRequest($mutation, ['input' => $input], $headers);
     }
 
+    #[\Override]
     /**
      * Assert that GraphQL response is successful (no errors).
      *
-     #[\Override]
      * @param array<string, string|int|float|bool|array|null> $response
      */
     protected function assertGraphQLSuccess(array $response): void
@@ -86,9 +86,9 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         );
     }
 
+    #[\Override]
     /**
      * Assert that GraphQL response contains specific errors.
-     #[\Override]
      *
      * @param array<string, string|int|float|bool|array|null> $response
      */
@@ -128,11 +128,11 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         );
     }
 
+    #[\Override]
     /**
      * Assert that GraphQL response data field equals expected value.
      *
      * @param array<string, string|int|float|bool|array|null> $response
-     #[\Override]
      */
     protected function assertGraphQLDataFieldEquals(
         array $response,
@@ -147,10 +147,10 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         );
     }
 
+    #[\Override]
     /**
      * Extract nested field value from GraphQL response data.
      *
-     #[\Override]
      * @param array<string, string|int|float|bool|array|null> $response
      */
     protected function getGraphQLDataField(
@@ -226,9 +226,9 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return [
             'value' => $value ?? $this->faker->word(),
         ];
-    #[\Override]
     }
 
+    #[\Override]
     /**
      * Generate customer status test data.
      *
