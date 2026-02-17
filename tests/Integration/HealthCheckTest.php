@@ -93,9 +93,7 @@ final class HealthCheckTest extends BaseTest
 
     private function createCacheMock(): CacheInterface
     {
-        $cacheMock = $this->getMockBuilder(CacheInterface::class)
-            ->onlyMethods(['get', 'delete', 'reset'])
-            ->getMock();
+        $cacheMock = $this->createMock(CacheInterface::class);
         $cacheMock->method('get')
             ->willThrowException(new CacheException('Cache is not working'));
 
@@ -106,7 +104,6 @@ final class HealthCheckTest extends BaseTest
     {
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['createQueue'])
             ->getMock();
         $sqsClientMock->expects($this->once())
             ->method('createQueue')
