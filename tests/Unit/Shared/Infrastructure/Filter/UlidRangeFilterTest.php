@@ -154,7 +154,6 @@ final class UlidRangeFilterTest extends UnitTestCase
 
         $reflection = new \ReflectionClass($filter);
         $method = $reflection->getMethod('normalizeValues');
-        $method->setAccessible(true);
 
         $result = $method->invoke($filter, $ulidString);
 
@@ -170,7 +169,6 @@ final class UlidRangeFilterTest extends UnitTestCase
 
         $reflection = new \ReflectionClass($filter);
         $method = $reflection->getMethod('normalizeValues');
-        $method->setAccessible(true);
 
         $result = $method->invoke($filter, $arrayValue);
 

@@ -93,7 +93,9 @@ final class HealthCheckTest extends BaseTest
 
     private function createCacheMock(): CacheInterface
     {
-        $cacheMock = $this->createMock(CacheInterface::class);
+        $cacheMock = $this->getMockBuilder(CacheInterface::class)
+            ->onlyMethods(['get', 'delete', 'reset'])
+            ->getMock();
         $cacheMock->method('get')
             ->willThrowException(new CacheException('Cache is not working'));
 
