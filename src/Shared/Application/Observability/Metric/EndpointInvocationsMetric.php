@@ -21,19 +21,19 @@ final readonly class EndpointInvocationsMetric extends EndpointOperationBusiness
         parent::__construct($value, new MetricUnit(MetricUnit::COUNT));
     }
 
-    #[Override]
+    #[\Override]
     public function name(): string
     {
         return 'EndpointInvocations';
     }
 
-    #[Override]
+    #[\Override]
     protected function endpoint(): string
     {
         return $this->endpoint;
     }
 
-    #[Override]
+    #[\Override]
     protected function operation(): string
     {
         return $this->operation;

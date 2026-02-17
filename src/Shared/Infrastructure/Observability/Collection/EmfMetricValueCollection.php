@@ -36,13 +36,13 @@ final readonly class EmfMetricValueCollection implements IteratorAggregate, Coun
     /**
      * @return Traversable<int, EmfMetricValue>
      */
-    #[Override]
+    #[\Override]
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->values);
     }
 
-    #[Override]
+    #[\Override]
     public function count(): int
     {
         return count($this->values);

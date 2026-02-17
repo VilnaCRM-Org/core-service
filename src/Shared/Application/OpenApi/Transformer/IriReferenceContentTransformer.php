@@ -17,7 +17,7 @@ final class IriReferenceContentTransformer implements IriReferenceContentTransfo
     /**
      * @return array<string, scalar|array<string, scalar|null>>|null
      */
-    #[Override]
+    #[\Override]
     public function transform(\ArrayObject $content): ?array
     {
         $original = $content->getArrayCopy();

@@ -16,7 +16,7 @@ final class CacheCheckSubscriber extends BaseHealthCheckSubscriber
         $this->cache = $cache;
     }
 
-    #[Override]
+    #[\Override]
     public function onHealthCheck(HealthCheckEvent $event): void
     {
         $this->cache->get('health_check', static fn (

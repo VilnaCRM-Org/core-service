@@ -32,7 +32,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return $this->delayMs;
     }
 
-    #[Override]
+    #[\Override]
     public function isRetryable(
         Envelope $message,
         ?\Throwable $throwable = null
@@ -40,7 +40,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return true;
     }
 
-    #[Override]
+    #[\Override]
     public function getWaitingTime(
         Envelope $message,
         ?\Throwable $throwable = null

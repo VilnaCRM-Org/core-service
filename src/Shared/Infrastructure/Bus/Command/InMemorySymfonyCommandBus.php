@@ -29,7 +29,7 @@ readonly class InMemorySymfonyCommandBus implements CommandBusInterface
     /**
      * @throws \Throwable
      */
-    #[Override]
+    #[\Override]
     public function dispatch(CommandInterface $command): void
     {
         try {

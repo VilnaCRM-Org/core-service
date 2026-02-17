@@ -19,7 +19,7 @@ final readonly class CreateTypeTransformer implements
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function transform(
         string $value
     ): CustomerType {

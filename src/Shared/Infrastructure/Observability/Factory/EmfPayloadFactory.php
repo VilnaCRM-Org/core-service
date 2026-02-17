@@ -33,7 +33,7 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function createFromMetric(BusinessMetric $metric): EmfPayload
     {
         $dimensionValueCollection = $this->createDimensionValueCollection($metric->dimensions());
@@ -54,7 +54,7 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
         return $payload;
     }
 
-    #[Override]
+    #[\Override]
     public function createFromCollection(MetricCollection $metrics): EmfPayload
     {
         if ($metrics->isEmpty()) {

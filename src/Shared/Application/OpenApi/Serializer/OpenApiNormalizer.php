@@ -24,7 +24,7 @@ final class OpenApiNormalizer implements NormalizerInterface
     /**
      * @param array<string, bool|int|string> $context
      */
-    #[Override]
+    #[\Override]
     public function normalize(
         mixed $object,
         ?string $format = null,
@@ -40,7 +40,7 @@ final class OpenApiNormalizer implements NormalizerInterface
     /**
      * @param array<string, bool|int|string> $context
      */
-    #[Override]
+    #[\Override]
     public function supportsNormalization(
         mixed $data,
         ?string $format = null,
@@ -52,7 +52,7 @@ final class OpenApiNormalizer implements NormalizerInterface
     /**
      * @return array<string, bool>
      */
-    #[Override]
+    #[\Override]
     public function getSupportedTypes(?string $format): array
     {
         return [

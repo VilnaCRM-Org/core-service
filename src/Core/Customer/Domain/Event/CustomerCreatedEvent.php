@@ -29,7 +29,7 @@ final class CustomerCreatedEvent extends DomainEvent
     /**
      * @param array<string, string> $body
      */
-    #[Override]
+    #[\Override]
     public static function fromPrimitives(
         array $body,
         string $eventId,
@@ -43,7 +43,7 @@ final class CustomerCreatedEvent extends DomainEvent
         );
     }
 
-    #[Override]
+    #[\Override]
     public static function eventName(): string
     {
         return 'customer.created';
@@ -52,7 +52,7 @@ final class CustomerCreatedEvent extends DomainEvent
     /**
      * @return array<string, string>
      */
-    #[Override]
+    #[\Override]
     public function toPrimitives(): array
     {
         return [

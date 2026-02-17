@@ -16,7 +16,7 @@ final class TypeUpdateRequestFactory extends CustomerTypeRequestFactory
         parent::__construct($defaultValue, $maxLength);
     }
 
-    #[Override]
+    #[\Override]
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

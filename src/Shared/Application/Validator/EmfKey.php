@@ -40,7 +40,7 @@ final class EmfKey extends Compound
      *
      * @return array<Constraint>
      */
-    #[Override]
+    #[\Override]
     protected function getConstraints(array $options): array
     {
         return [

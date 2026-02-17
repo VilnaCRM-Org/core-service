@@ -31,7 +31,7 @@ final readonly class CreateTypeMutationResolver implements MutationResolver
      *     }
      * } $context
      */
-    #[Override]
+    #[\Override]
     public function __invoke(?object $item, array $context): CustomerType
     {
         /** @var array{value: string} $input */

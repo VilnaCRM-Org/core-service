@@ -15,7 +15,7 @@ final readonly class MutationInputValidator implements MutationInputValidatorInt
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function validate(MutationInput $input): void
     {
         $violations = $this->validator->validate($input);

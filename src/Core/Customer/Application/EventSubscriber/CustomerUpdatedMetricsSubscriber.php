@@ -36,7 +36,7 @@ final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubs
     /**
      * @return array<class-string>
      */
-    #[Override]
+    #[\Override]
     public function subscribedTo(): array
     {
         return [CustomerUpdatedEvent::class];

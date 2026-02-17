@@ -13,7 +13,7 @@ use App\Core\Customer\Application\Metric\CustomersDeletedMetric;
  */
 final readonly class CustomersDeletedMetricFactory implements CustomersDeletedMetricFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(float|int $value = 1): CustomersDeletedMetric
     {
         return new CustomersDeletedMetric($value);

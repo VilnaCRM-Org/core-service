@@ -20,7 +20,7 @@ final class BrokerCheckSubscriber extends BaseHealthCheckSubscriber
         $this->queueName = $queueName;
     }
 
-    #[Override]
+    #[\Override]
     public function onHealthCheck(HealthCheckEvent $event): void
     {
         $this->createQueue($this->queueName);

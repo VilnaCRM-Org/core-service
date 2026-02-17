@@ -29,7 +29,7 @@ final readonly class CustomerUpdateFactory implements
      *     confirmed?: bool|null
      * } $input
      */
-    #[Override]
+    #[\Override]
     public function create(Customer $customer, array $input): CustomerUpdate
     {
         $stringFields = $this->scalarResolver->resolveStrings($customer, $input);

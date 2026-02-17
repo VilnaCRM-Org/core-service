@@ -13,7 +13,7 @@ use App\Core\Customer\Application\Metric\CustomersUpdatedMetric;
  */
 final readonly class CustomersUpdatedMetricFactory implements CustomersUpdatedMetricFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(float|int $value = 1): CustomersUpdatedMetric
     {
         return new CustomersUpdatedMetric($value);

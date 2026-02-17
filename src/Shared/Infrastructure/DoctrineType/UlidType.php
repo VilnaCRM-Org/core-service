@@ -21,7 +21,7 @@ final class UlidType extends Type
         return self::NAME;
     }
 
-    #[Override]
+    #[\Override]
     public function convertToDatabaseValue(mixed $value): ?Binary
     {
         return $value instanceof Binary
@@ -29,7 +29,7 @@ final class UlidType extends Type
             : $this->createTransformer()->toDatabaseValue($value);
     }
 
-    #[Override]
+    #[\Override]
     public function convertToPHPValue(mixed $value): ?Ulid
     {
         if ($value === null || $value instanceof Ulid) {
@@ -41,7 +41,7 @@ final class UlidType extends Type
         );
     }
 
-    #[Override]
+    #[\Override]
     public function closureToMongo(): string
     {
         return <<<'PHP'
@@ -53,7 +53,7 @@ final class UlidType extends Type
     PHP;
     }
 
-    #[Override]
+    #[\Override]
     public function closureToPHP(): string
     {
         return <<<'PHP'

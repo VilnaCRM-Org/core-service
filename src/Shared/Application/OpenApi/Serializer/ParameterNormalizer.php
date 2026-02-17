@@ -18,7 +18,7 @@ final class ParameterNormalizer implements NormalizerInterface
      * @param Parameter $object
      * @param array<string, bool|int|string> $context
      */
-    #[Override]
+    #[\Override]
     public function normalize(
         mixed $object,
         ?string $format = null,
@@ -34,7 +34,7 @@ final class ParameterNormalizer implements NormalizerInterface
     /**
      * @param array<string, bool|int|string> $context
      */
-    #[Override]
+    #[\Override]
     public function supportsNormalization(
         mixed $data,
         ?string $format = null,
@@ -46,7 +46,7 @@ final class ParameterNormalizer implements NormalizerInterface
     /**
      * @return array<string, bool>
      */
-    #[Override]
+    #[\Override]
     public function getSupportedTypes(?string $format): array
     {
         return [

@@ -31,13 +31,13 @@ final readonly class MetricDimensions implements IteratorAggregate, Countable
     /**
      * @return Traversable<int, MetricDimension>
      */
-    #[Override]
+    #[\Override]
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->dimensions);
     }
 
-    #[Override]
+    #[\Override]
     public function count(): int
     {
         return count($this->dimensions);

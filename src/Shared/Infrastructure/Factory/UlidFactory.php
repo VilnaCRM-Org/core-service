@@ -9,7 +9,7 @@ use App\Shared\Domain\ValueObject\Ulid;
 
 final class UlidFactory implements UlidFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(string $ulid): Ulid
     {
         return new Ulid($ulid);

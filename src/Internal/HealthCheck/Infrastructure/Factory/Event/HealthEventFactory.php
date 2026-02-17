@@ -9,7 +9,7 @@ use App\Internal\HealthCheck\Domain\Factory\Event\EventFactoryInterface;
 
 final class HealthEventFactory implements EventFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function createHealthCheckEvent(): HealthCheckEvent
     {
         return new HealthCheckEvent();

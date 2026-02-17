@@ -16,7 +16,7 @@ final readonly class LoggingMutationInputValidator implements MutationInputValid
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function validate(MutationInput $input): void
     {
         try {

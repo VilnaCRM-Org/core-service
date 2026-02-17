@@ -15,7 +15,7 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
     {
     }
 
-    #[Override]
+    #[\Override]
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(

@@ -20,7 +20,7 @@ final class MongoStatusRepository extends BaseRepository implements
         $this->documentManager = $this->getDocumentManager();
     }
 
-    #[Override]
+    #[\Override]
     public function deleteByValue(string $value): void
     {
         $customerStatus = $this->findOneByCriteria(['value' => $value]);

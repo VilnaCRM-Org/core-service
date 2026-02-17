@@ -34,7 +34,7 @@ final class MongoCustomerRepository extends BaseRepository implements
     /**
      * Find customer by email (database only, no caching)
      */
-    #[Override]
+    #[\Override]
     public function findByEmail(string $email): ?Customer
     {
         return $this->findOneByCriteria(['email' => $email]);
@@ -43,7 +43,7 @@ final class MongoCustomerRepository extends BaseRepository implements
     /**
      * Delete customer with proper entity management
      */
-    #[Override]
+    #[\Override]
     public function delete(object $entity): void
     {
         if (!$entity instanceof Customer) {

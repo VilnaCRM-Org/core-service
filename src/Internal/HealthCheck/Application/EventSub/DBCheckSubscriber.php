@@ -16,7 +16,7 @@ final class DBCheckSubscriber extends BaseHealthCheckSubscriber
         $this->documentManager = $documentManager;
     }
 
-    #[Override]
+    #[\Override]
     public function onHealthCheck(HealthCheckEvent $event): void
     {
         $client = $this->documentManager->getClient();

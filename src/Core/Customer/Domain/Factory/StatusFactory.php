@@ -9,7 +9,7 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 final class StatusFactory implements StatusFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(string $value, UlidInterface $ulid): CustomerStatus
     {
         return new CustomerStatus($value, $ulid);

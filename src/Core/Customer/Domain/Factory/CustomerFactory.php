@@ -11,7 +11,7 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 final class CustomerFactory implements CustomerFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(
         string $initials,
         string $email,

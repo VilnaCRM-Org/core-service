@@ -22,19 +22,19 @@ final readonly class CustomersCreatedMetric extends EndpointOperationBusinessMet
         parent::__construct($value, new MetricUnit(MetricUnit::COUNT));
     }
 
-    #[Override]
+    #[\Override]
     public function name(): string
     {
         return 'CustomersCreated';
     }
 
-    #[Override]
+    #[\Override]
     protected function endpoint(): string
     {
         return self::ENDPOINT;
     }
 
-    #[Override]
+    #[\Override]
     protected function operation(): string
     {
         return self::OPERATION;

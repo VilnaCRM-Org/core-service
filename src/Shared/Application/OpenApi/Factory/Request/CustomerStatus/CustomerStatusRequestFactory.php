@@ -12,7 +12,7 @@ use App\Shared\Application\OpenApi\ValueObject\Parameter;
 abstract class CustomerStatusRequestFactory implements
     RequestFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(

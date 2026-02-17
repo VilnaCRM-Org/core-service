@@ -14,7 +14,7 @@ final class TypeDeletedResponseFactory implements ResponseFactoryInterface
     {
     }
 
-    #[Override]
+    #[\Override]
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(

@@ -21,7 +21,7 @@ abstract class CustomerTypeRequestFactory implements
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function getRequest(): RequestBody
     {
         return $this->getRequestBuilder()->build(

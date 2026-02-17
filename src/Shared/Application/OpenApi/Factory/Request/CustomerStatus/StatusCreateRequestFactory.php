@@ -12,7 +12,7 @@ final class StatusCreateRequestFactory extends CustomerStatusRequestFactory
     {
     }
 
-    #[Override]
+    #[\Override]
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

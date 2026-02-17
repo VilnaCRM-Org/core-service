@@ -20,7 +20,7 @@ final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTra
      *
      * @return array<string, scalar|array<string, scalar|null>>
      */
-    #[Override]
+    #[\Override]
     public function transform(array $mediaType): array
     {
         $definition = IriReferenceMediaTypeDefinition::from($mediaType);

@@ -33,7 +33,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
      * @param array<string,string> $context
      * @param array<string,string> $uriVariables
      */
-    #[Override]
+    #[\Override]
     public function process(
         mixed $data,
         Operation $operation,

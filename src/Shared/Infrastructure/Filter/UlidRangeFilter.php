@@ -17,7 +17,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     /**
      * @return array<string, array<string, string|bool>>
      */
-    #[Override]
+    #[\Override]
     public function getDescription(string $resourceClass): array
     {
         $operators = ['lt', 'lte', 'gt', 'gte', 'between'];
@@ -39,7 +39,7 @@ final class UlidRangeFilter extends AbstractFilter implements
     /**
      * @param array<string, string> $context
      */
-    #[Override]
+    #[\Override]
     protected function filterProperty(
         string $property,
         mixed $value,

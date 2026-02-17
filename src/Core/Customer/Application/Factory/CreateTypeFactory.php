@@ -9,7 +9,7 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 
 final class CreateTypeFactory implements CreateTypeFactoryInterface
 {
-    #[Override]
+    #[\Override]
     public function create(CustomerType $type): CreateTypeCommand
     {
         return new CreateTypeCommand($type);

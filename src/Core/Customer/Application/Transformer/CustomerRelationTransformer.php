@@ -19,7 +19,7 @@ final readonly class CustomerRelationTransformer implements
     ) {
     }
 
-    #[Override]
+    #[\Override]
     public function resolveType(
         ?string $typeIri,
         Customer $customer
@@ -34,7 +34,7 @@ final readonly class CustomerRelationTransformer implements
         );
     }
 
-    #[Override]
+    #[\Override]
     public function resolveStatus(
         ?string $statusIri,
         Customer $customer

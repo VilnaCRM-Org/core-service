@@ -31,7 +31,7 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
     /**
      * @return array<string, string>
      */
-    #[Override]
+    #[\Override]
     public static function getSubscribedEvents(): array
     {
         return [

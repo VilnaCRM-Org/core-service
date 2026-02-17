@@ -18,7 +18,7 @@ final readonly class EmfPayloadValidator implements EmfPayloadValidatorInterface
 {
     private const string RESERVED_AWS_KEY = '_aws';
 
-    #[Override]
+    #[\Override]
     public function validate(EmfPayload $payload): void
     {
         $dimensionKeys = array_keys($payload->dimensionValues()->toAssociativeArray());
