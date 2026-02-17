@@ -19,6 +19,19 @@ final class DomainEventTest extends UnitTestCase
             {
                 return 'test.event';
             }
+
+            public static function fromPrimitives(
+                array $body,
+                string $eventId,
+                string $occurredOn
+            ): self {
+                return new self($eventId, $occurredOn);
+            }
+
+            public function toPrimitives(): array
+            {
+                return [];
+            }
         };
         $this->assertEquals($occurredOn, $event->occurredOn());
     }
@@ -32,6 +45,19 @@ final class DomainEventTest extends UnitTestCase
             public static function eventName(): string
             {
                 return 'test.event';
+            }
+
+            public static function fromPrimitives(
+                array $body,
+                string $eventId,
+                string $occurredOn
+            ): self {
+                return new self($eventId, $occurredOn);
+            }
+
+            public function toPrimitives(): array
+            {
+                return [];
             }
         };
 
@@ -50,6 +76,19 @@ final class DomainEventTest extends UnitTestCase
             public static function eventName(): string
             {
                 return 'test.event';
+            }
+
+            public static function fromPrimitives(
+                array $body,
+                string $eventId,
+                string $occurredOn
+            ): self {
+                return new self($eventId, $occurredOn);
+            }
+
+            public function toPrimitives(): array
+            {
+                return [];
             }
         };
 
