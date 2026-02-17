@@ -1,6 +1,6 @@
 # Repository Guidelines for AI Agents
 
-VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
+VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platform 4, and GraphQL. It provides core business functionality within the VilnaCRM ecosystem using REST API and GraphQL. The project follows hexagonal architecture with DDD & CQRS patterns and includes comprehensive testing across unit, integration, and E2E test suites.
 
 ## 🚨 CRITICAL FOR ALL AI AGENTS - READ THIS FIRST! 🚨
 
@@ -166,7 +166,7 @@ This project follows **Hexagonal Architecture** with **DDD** and **CQRS** patter
 
 ## Technology Stack
 
-PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation for complete technical details.
+PHP 8.4+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation for complete technical details.
 
 ---
 
