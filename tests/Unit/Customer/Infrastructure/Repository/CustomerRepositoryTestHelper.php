@@ -30,12 +30,13 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
         return $this->inner->findByEmail($email);
     }
 
+    #[\Override]
     public function find(mixed $id, int $lockMode = 0, ?int $lockVersion = null): ?object
     {
-        #[\Override]
         return $this->inner->find($id, $lockMode, $lockVersion);
     }
 
+    #[\Override]
     public function delete(Customer $customer): void
     {
         $this->inner->delete($customer);
