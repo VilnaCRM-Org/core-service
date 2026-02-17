@@ -307,7 +307,6 @@ final class MessageBusFactoryTest extends UnitTestCase
         self::assertContains(TestOtherEvent::class, $subscriberCalls);
     }
 
-    #[\Override]
     public function testNoHandlerExceptionWhenEventNotSubscribed(): void
     {
         $subscriber = new class() implements DomainEventSubscriberInterface {
