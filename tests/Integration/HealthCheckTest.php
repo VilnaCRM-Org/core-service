@@ -10,6 +10,7 @@ use Aws\Sqs\SqsClient;
 use Symfony\Component\Cache\Exception\CacheException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 final class HealthCheckTest extends BaseTest
 {
@@ -100,9 +101,11 @@ final class HealthCheckTest extends BaseTest
 
     private function createCacheMock(): CacheInterface
     {
-        $cacheMock = $this->createMock(CacheInterface::class);
+        $cacheMock = $this->createMock([CacheInterface::class, ResetInterface::class]);
         $cacheMock->method('get')
             ->willThrowException(new CacheException('Cache is not working'));
+        $cacheMock->method('reset')
+            ->willReturn(null);
 
         return $cacheMock;
     }
@@ -111,12 +114,15 @@ final class HealthCheckTest extends BaseTest
     {
         $sqsClientMock = $this->getMockBuilder(SqsClient::class)
             ->disableOriginalConstructor()
+            ->addMethods(['reset'])
             ->getMock();
         $sqsClientMock->expects($this->once())
             ->method('createQueue')
             ->willThrowException(new \Exception(
                 'Message broker is not available'
             ));
+        $sqsClientMock->method('reset')
+            ->willReturn(null);
 
         return $sqsClientMock;
     }
