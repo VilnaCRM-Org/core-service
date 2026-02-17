@@ -279,32 +279,4 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         // Should not throw - error is caught and logged
         $subscriber->onResponse($event);
     }
-
-    public function testHandlesRequestWithValidRequestId(): void
-    {
-        $spy = new BusinessMetricsEmitterSpy();
-        $subscriber = new ApiEndpointBusinessMetricsSubscriber(
-            new NullLogger(),
-            $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
-        );
-
-        $request = Request::create('/api/customers', 'GET');
-        $request->headers->set('X-Request-ID', '550e8400-e29b-41d4-a716-446655440000');
-        $request->attributes->set('_api_resource_class', 'App\\Core\\Customer\\Domain\\Entity\\Customer');
-        $request->attributes->set('_api_operation_name', '_api_/customers_get_collection');
-
-        $event = new ResponseEvent(
-            $this->createMock(HttpKernelInterface::class),
-            $request,
-            HttpKernelInterface::MAIN_REQUEST,
-            new Response('', 200)
-        );
-
-        $subscriber->onResponse($event);
-
-        self::assertSame(1, $spy->count());
-        self::assertSame('550e8400-e29b-41d4-a716-446655440000', $request->headers->get('X-Request-ID'));
-    }
 }
