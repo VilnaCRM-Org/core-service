@@ -75,7 +75,9 @@
     "symfony/polyfill-php73": "*",
     "symfony/polyfill-php74": "*",
     "symfony/polyfill-php80": "*",
-    "symfony/polyfill-php81": "*"
+    "symfony/polyfill-php81": "*",
+    "symfony/polyfill-php82": "*",
+    "symfony/polyfill-php83": "*"
   },
   "scripts": {
     "auto-scripts": {
@@ -112,7 +114,7 @@
     "fakerphp/faker": "^1.23.0",
     "friends-of-behat/symfony-extension": "^2.4",
     "friendsofphp/php-cs-fixer": "^3.14",
-    "infection/infection": "^0.27.10|^0.28|^0.29|^0.30|^0.31|^0.32",
+    "infection/infection": "^0.29.10",
     "marcocesarato/php-conventional-changelog": "^1.16",
     "nunomaduro/phpinsights": "^2.11|^2.12",
     "pheromone/phpcs-security-audit": "^2.0",

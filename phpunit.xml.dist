@@ -22,8 +22,8 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Integration">
-            <exclude>tests/Integration/Negative</exclude>
             <directory>tests/Integration</directory>
+            <exclude>tests/Integration/Negative</exclude>
         </testsuite>
         <testsuite name="Negative">
             <directory>tests/Integration/Negative</directory>
