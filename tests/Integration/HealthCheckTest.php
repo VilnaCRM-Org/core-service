@@ -13,6 +13,13 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 final class HealthCheckTest extends BaseTest
 {
+    #[\Override]
+    protected function tearDown(): void
+    {
+        self::ensureKernelShutdown();
+        parent::tearDown();
+    }
+
     public function testNormalHealthCheck(): void
     {
         $client = self::createClient();
