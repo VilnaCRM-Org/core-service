@@ -24,8 +24,8 @@ final readonly class TestOrdersPlacedMetric extends BusinessMetric
     {
         return 'OrdersPlaced';
     }
-#[\Override]
 
+    #[\Override]
     public function dimensions(): MetricDimensionsInterface
     {
         return new EndpointOperationMetricDimensions(

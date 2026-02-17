@@ -184,8 +184,8 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         $payload = ['value' => $value];
         return $this->createEntity('/api/customer_types', $payload);
     }
-#[\Override]
 
+    #[\Override]
     /**
      * Create a customer status for testing.
      */
@@ -214,8 +214,8 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
             'confirmed' => $this->faker->boolean(),
         ];
     }
-#[\Override]
 
+    #[\Override]
     /**
      * Generate customer type test data.
      *

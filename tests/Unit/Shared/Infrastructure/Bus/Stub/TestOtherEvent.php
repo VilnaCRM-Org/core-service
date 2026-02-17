@@ -19,15 +19,15 @@ final class TestOtherEvent extends DomainEvent
     ): self {
         return new self($eventId, $occurredOn);
     }
-#[\Override]
 
+    #[\Override]
     public static function eventName(): string
     {
         return 'test.other_event';
     }
 
+    #[\Override]
     /**
-     #[\Override]
      * @return array<string, string>
      */
     public function toPrimitives(): array

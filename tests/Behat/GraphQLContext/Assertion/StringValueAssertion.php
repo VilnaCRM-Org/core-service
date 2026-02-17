@@ -13,8 +13,8 @@ final class StringValueAssertion implements ValueAssertionInterface
     {
         return true;
     }
-#[\Override]
 
+    #[\Override]
     public function assert(string $path, string $expectedValue, mixed $actualValue): void
     {
         Assert::eq(

@@ -67,8 +67,8 @@ final class MessageBusFactoryTest extends UnitTestCase
             public function __construct(private array &$received)
             {
             }
-#[\Override]
 
+            #[\Override]
             public function subscribedTo(): array
             {
                 return [TestMessage::class, TestOtherEvent::class];
@@ -281,9 +281,9 @@ final class MessageBusFactoryTest extends UnitTestCase
             /** @param array<string> $calls */
             public function __construct(private array &$calls)
             {
-            #[\Override]
             }
 
+            #[\Override]
             public function subscribedTo(): array
             {
                 // Subscribes to BOTH events, proving subscribedTo() is used
@@ -349,11 +349,11 @@ final class MessageBusFactoryTest extends UnitTestCase
         // Subscriber: subscribedTo() returns TestMessage, but __invoke takes TestOtherEvent
         // This means routing MUST use subscribedTo(), not __invoke parameter
         $subscriber = new class($subscriberCalled) implements DomainEventSubscriberInterface {
-            #[\Override]
             public function __construct(private bool &$called)
             {
             }
 
+            #[\Override]
             public function subscribedTo(): array
             {
                 return [TestMessage::class]; // Subscribes to TestMessage ONLY

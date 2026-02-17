@@ -24,8 +24,8 @@ final readonly class TestCustomerMetric extends BusinessMetric
     {
         return 'CustomersCreated';
     }
-#[\Override]
 
+    #[\Override]
     public function dimensions(): MetricDimensionsInterface
     {
         return new EndpointOperationMetricDimensions(

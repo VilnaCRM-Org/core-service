@@ -29,8 +29,8 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     {
         $this->shouldFail = true;
     }
-#[\Override]
 
+    #[\Override]
     public function emitCollection(MetricCollection $metrics): void
     {
         foreach ($metrics as $metric) {

@@ -31,15 +31,15 @@ final class TestDomainEvent extends DomainEvent
             occurredOn: $occurredOn
         );
     }
-#[\Override]
 
+    #[\Override]
     public static function eventName(): string
     {
         return 'test.domain_event';
     }
 
+    #[\Override]
     /**
-     #[\Override]
      * @return array<string, string>
      */
     public function toPrimitives(): array

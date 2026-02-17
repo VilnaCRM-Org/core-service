@@ -13,8 +13,8 @@ final class NullValueAssertion implements ValueAssertionInterface
     {
         return strtolower($expectedValue) === 'null';
     }
-#[\Override]
 
+    #[\Override]
     public function assert(string $path, string $expectedValue, mixed $actualValue): void
     {
         Assert::null(

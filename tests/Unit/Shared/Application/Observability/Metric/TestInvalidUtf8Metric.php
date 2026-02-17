@@ -23,8 +23,8 @@ final readonly class TestInvalidUtf8Metric extends BusinessMetric
     {
         return 'InvalidMetric';
     }
-#[\Override]
 
+    #[\Override]
     public function dimensions(): MetricDimensionsInterface
     {
         return new TestInvalidUtf8Dimensions();

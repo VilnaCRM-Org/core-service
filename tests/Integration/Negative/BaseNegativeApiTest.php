@@ -20,7 +20,6 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
-#[\Override]
 
     protected static function getKernelClass(): string
     {
