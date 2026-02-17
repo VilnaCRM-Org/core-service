@@ -19,6 +19,7 @@ final class CreateStatusTransformer implements
     ) {
     }
 
+    #[Override]
     public function transform(
         string $value
     ): CustomerStatus {

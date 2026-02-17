@@ -9,6 +9,7 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 final class TypeFactory implements TypeFactoryInterface
 {
+    #[Override]
     public function create(string $value, UlidInterface $ulid): CustomerType
     {
         return new CustomerType($value, $ulid);

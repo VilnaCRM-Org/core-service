@@ -9,6 +9,7 @@ use App\Core\Customer\Domain\Entity\CustomerStatusInterface;
 
 final class CreateStatusFactory implements CreateStatusFactoryInterface
 {
+    #[Override]
     public function create(CustomerStatusInterface $status): CreateStatusCommand
     {
         return new CreateStatusCommand($status);

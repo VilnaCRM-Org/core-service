@@ -40,6 +40,7 @@ final readonly class CustomerUpdatedCacheInvalidationSubscriber implements
     /**
      * @return array<class-string>
      */
+    #[Override]
     public function subscribedTo(): array
     {
         return [CustomerUpdatedEvent::class];

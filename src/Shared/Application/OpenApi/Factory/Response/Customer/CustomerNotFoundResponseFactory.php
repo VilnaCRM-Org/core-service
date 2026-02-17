@@ -16,6 +16,7 @@ final class CustomerNotFoundResponseFactory implements ResponseFactoryInterface
     {
     }
 
+    #[Override]
     public function getResponse(): Response
     {
         return $this->responseBuilder->build(

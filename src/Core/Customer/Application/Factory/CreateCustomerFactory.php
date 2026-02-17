@@ -9,6 +9,7 @@ use App\Core\Customer\Domain\Entity\CustomerInterface;
 
 final class CreateCustomerFactory implements CreateCustomerFactoryInterface
 {
+    #[Override]
     public function create(
         CustomerInterface $customer
     ): CreateCustomerCommand {

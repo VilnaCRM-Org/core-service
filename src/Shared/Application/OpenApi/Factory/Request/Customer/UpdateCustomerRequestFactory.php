@@ -13,11 +13,13 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
     {
     }
 
+    #[Override]
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;
     }
 
+    #[Override]
     protected function getConfirmedParam(): Parameter
     {
         return Parameter::optional(
@@ -27,6 +29,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getEmailParam(): Parameter
     {
         return Parameter::optional(
@@ -38,6 +41,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getPhoneParam(): Parameter
     {
         return Parameter::optional(
@@ -48,6 +52,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getLeadSourceParam(): Parameter
     {
         return Parameter::optional(
@@ -58,6 +63,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getTypeParam(): Parameter
     {
         return Parameter::optional(
@@ -68,6 +74,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getStatusParam(): Parameter
     {
         return Parameter::optional(
@@ -78,6 +85,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         );
     }
 
+    #[Override]
     protected function getInitialsParam(): Parameter
     {
         return Parameter::optional(

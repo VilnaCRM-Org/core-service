@@ -37,6 +37,7 @@ final class EmfValue extends Compound
      *
      * @return array<Constraint>
      */
+    #[Override]
     protected function getConstraints(array $options): array
     {
         return [

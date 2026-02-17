@@ -55,6 +55,7 @@ final readonly class EmfPayload implements \JsonSerializable
     /**
      * @return array<string, string|int|float|array<string, int|array<int, array<string, string|array<int, array<int, string>|array<int, array<string, string>>>>>>>
      */
+    #[Override]
     public function jsonSerialize(): array
     {
         return array_merge(

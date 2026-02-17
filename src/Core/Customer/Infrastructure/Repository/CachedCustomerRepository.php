@@ -63,6 +63,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      * Tags: [customer, customer.{id}]
      * Notes: Read-heavy operation, tolerates brief staleness
      */
+    #[Override]
     public function find(
         mixed $id,
         int $lockMode = 0,
@@ -100,6 +101,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      * Tags: [customer, customer.email, customer.email.{hash}]
      * Notes: Common authentication/lookup operation
      */
+    #[Override]
     public function findByEmail(string $email): ?Customer
     {
         $cacheKey = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
@@ -123,6 +125,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     /**
      * Delegate persistence to inner repository (no caching on writes)
      */
+    #[Override]
     public function save(Customer $customer): void
     {
         $this->inner->save($customer);
@@ -133,6 +136,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      *
      * Cache invalidation is handled via CustomerDeletedEvent subscribers.
      */
+    #[Override]
     public function delete(Customer $customer): void
     {
         $this->inner->delete($customer);

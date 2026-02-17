@@ -8,6 +8,7 @@ use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
 final class Between implements OperatorStrategyInterface
 {
+    #[Override]
     public function apply(
         Builder $builder,
         string $field,

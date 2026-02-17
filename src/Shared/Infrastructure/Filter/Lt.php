@@ -8,6 +8,7 @@ use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
 final class Lt implements OperatorStrategyInterface
 {
+    #[Override]
     public function apply(
         Builder $builder,
         string $field,

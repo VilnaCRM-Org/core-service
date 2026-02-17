@@ -16,6 +16,7 @@ final class RequestPatchBuilder implements RequestBuilderInterface
     /**
      * @param array<Parameter> $params
      */
+    #[Override]
     public function build(
         array $params,
         bool $required = true,
@@ -35,6 +36,7 @@ final class RequestPatchBuilder implements RequestBuilderInterface
     /**
      * @param array<Parameter> $params
      */
+    #[Override]
     public function buildRequired(
         array $params,
         ?string $contentType = null
@@ -45,6 +47,7 @@ final class RequestPatchBuilder implements RequestBuilderInterface
     /**
      * @param array<Parameter> $params
      */
+    #[Override]
     public function buildOptional(
         array $params,
         ?string $contentType = null

@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 final readonly class UpdateStatusCommandFactory implements
     UpdateStatusCommandFactoryInterface
 {
+    #[Override]
     public function create(
         CustomerStatus $customerStatus,
         CustomerStatusUpdate $update

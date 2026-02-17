@@ -11,6 +11,7 @@ final class IriReferencePropertyTransformer implements IriReferencePropertyTrans
      *
      * @return array<string, scalar|array<string, scalar|null>>
      */
+    #[Override]
     public function transform(array $schema): array
     {
         return ($schema['type'] ?? null) === 'iri-reference'

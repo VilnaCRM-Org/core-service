@@ -17,6 +17,7 @@ final class UniqueEmailValidator extends ConstraintValidator
     ) {
     }
 
+    #[Override]
     public function validate(mixed $value, Constraint $constraint): void
     {
         if ($this->isEmailAlreadyUsed($value)) {

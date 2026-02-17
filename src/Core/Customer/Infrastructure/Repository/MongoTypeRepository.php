@@ -20,6 +20,7 @@ final class MongoTypeRepository extends BaseRepository implements
         $this->documentManager = $this->getDocumentManager();
     }
 
+    #[Override]
     public function deleteByValue(string $value): void
     {
         $customerType = $this->findOneByCriteria(['value' => $value]);

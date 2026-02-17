@@ -54,6 +54,7 @@ final class CustomerEndpointFactory extends EndpointFactory
             $this->unauthorizedResponseFactory->getResponse();
     }
 
+    #[Override]
     public function createEndpoint(OpenApi $openApi): void
     {
         $this->applyOperation(

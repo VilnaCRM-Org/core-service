@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 final class UpdateCustomerCommandFactory implements
     UpdateCustomerCommandFactoryInterface
 {
+    #[Override]
     public function create(
         Customer $customer,
         CustomerUpdate $updateData,

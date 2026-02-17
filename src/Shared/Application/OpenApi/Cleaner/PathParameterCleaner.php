@@ -8,6 +8,7 @@ use ApiPlatform\OpenApi\Model;
 
 final class PathParameterCleaner implements PathParameterCleanerInterface
 {
+    #[Override]
     public function clean(mixed $parameter): mixed
     {
         return $parameter instanceof Model\Parameter && $parameter->getIn() === 'path'

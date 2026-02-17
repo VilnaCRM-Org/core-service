@@ -21,6 +21,7 @@ final readonly class CustomerTransformer implements
     ) {
     }
 
+    #[Override]
     public function transform(
         string $initials,
         string $email,

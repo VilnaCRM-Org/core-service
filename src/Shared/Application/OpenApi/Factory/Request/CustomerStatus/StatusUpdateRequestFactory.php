@@ -12,6 +12,7 @@ final class StatusUpdateRequestFactory extends CustomerStatusRequestFactory
     {
     }
 
+    #[Override]
     protected function getRequestBuilder(): RequestBuilderInterface
     {
         return $this->requestBuilder;

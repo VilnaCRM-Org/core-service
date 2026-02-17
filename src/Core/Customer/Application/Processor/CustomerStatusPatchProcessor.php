@@ -32,6 +32,7 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
      * @param array<string,string> $uriVariables
      * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
+    #[Override]
     public function process(
         mixed $data,
         Operation $operation,

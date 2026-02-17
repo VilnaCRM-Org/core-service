@@ -37,6 +37,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
      *     }
      * } $context
      */
+    #[Override]
     public function __invoke(?object $item, array $context): CustomerStatus
     {
         /** @var array{id: string, value: string} $input */

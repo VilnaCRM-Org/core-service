@@ -11,6 +11,7 @@ use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 final readonly class UpdateTypeCommandFactory implements
     UpdateTypeCommandFactoryInterface
 {
+    #[Override]
     public function create(
         CustomerType $customerType,
         CustomerTypeUpdate $update

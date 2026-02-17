@@ -44,6 +44,7 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
      *     }
      * } $context
      */
+    #[Override]
     public function __invoke(?object $item, array $context): Customer
     {
         /**

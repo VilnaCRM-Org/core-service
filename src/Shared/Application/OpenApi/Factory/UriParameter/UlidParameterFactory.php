@@ -13,6 +13,7 @@ abstract class UlidParameterFactory implements UriParameterFactoryInterface
     {
     }
 
+    #[Override]
     public function getParameter(): Parameter
     {
         return $this->parameterBuilder->build(

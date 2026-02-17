@@ -15,6 +15,7 @@ final class InitialsValidator extends ConstraintValidator
     ) {
     }
 
+    #[Override]
     public function validate(mixed $value, Constraint $constraint): void
     {
         if ($this->shouldSkipValidation($value, $constraint)) {

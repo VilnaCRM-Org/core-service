@@ -6,6 +6,7 @@ namespace App\Shared\Application\Transformer;
 
 final readonly class IriTransformer implements IriTransformerInterface
 {
+    #[Override]
     public function transform(string $idOrIri): string
     {
         if (!str_starts_with($idOrIri, '/')) {

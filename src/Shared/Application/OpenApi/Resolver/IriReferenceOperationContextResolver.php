@@ -13,6 +13,7 @@ use ArrayObject;
 final class IriReferenceOperationContextResolver implements
     IriReferenceOperationContextResolverInterface
 {
+    #[Override]
     public function resolve(PathItem $pathItem, string $operation): ?IriReferenceOperationContext
     {
         $operationInstance = $pathItem->{'get' . $operation}();
