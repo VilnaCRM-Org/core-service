@@ -27,13 +27,10 @@ paths:
             application/ld+json:
               schema:
                 type: object
-                properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } }
-                  totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
-                  search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
-                required:
-                  - member
+                description: 'Customer.jsonld-output collection.'
+                allOf:
+                  - { $ref: '#/components/schemas/HydraCollectionBaseSchema' }
+                  - { type: object, required: [member], properties: { member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } } } }
         '400':
           description: 'Bad request'
           content:
@@ -127,190 +124,162 @@ paths:
           description: 'The collection page number'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 1
           style: form
           explode: false
-          allowReserved: false
         -
           name: itemsPerPage
           in: query
           description: 'The number of items per page'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 30
             minimum: 0
+            maximum: 30
           style: form
           explode: false
-          allowReserved: false
         -
           name: initials
           in: query
           description: 'Filter by customer initials (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'initials[]'
           in: query
           description: 'Filter by multiple customer initials (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: email
           in: query
           description: 'Filter by customer email address (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'email[]'
           in: query
           description: 'Filter by multiple customer email addresses (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: phone
           in: query
           description: 'Filter by customer phone number (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'phone[]'
           in: query
           description: 'Filter by multiple customer phone numbers (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: leadSource
           in: query
           description: 'Filter by lead source (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'leadSource[]'
           in: query
           description: 'Filter by multiple lead sources (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: type.value
           in: query
           description: 'Filter by customer type value (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'type.value[]'
           in: query
           description: 'Filter by multiple customer type values (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: status.value
           in: query
           description: 'Filter by customer status value (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'status.value[]'
           in: query
           description: 'Filter by multiple customer status values (exact match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: array
             items:
               type: string
           style: form
           explode: true
-          allowReserved: false
         -
           name: 'order[ulid]'
           in: query
           description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: desc
@@ -319,14 +288,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[createdAt]'
           in: query
           description: 'Sort by creation date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: desc
@@ -335,14 +302,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[updatedAt]'
           in: query
           description: 'Sort by last update date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: desc
@@ -351,14 +316,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[email]'
           in: query
           description: 'Sort by customer email address'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -367,14 +330,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[initials]'
           in: query
           description: 'Sort by customer initials'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -383,14 +344,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[phone]'
           in: query
           description: 'Sort by customer phone number'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -399,14 +358,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[leadSource]'
           in: query
           description: 'Sort by lead source'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -415,14 +372,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[type.value]'
           in: query
           description: 'Sort by customer type'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -431,14 +386,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[status.value]'
           in: query
           description: 'Sort by customer status'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -447,176 +400,146 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'createdAt[before]'
           in: query
           description: 'Filter customers created before this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'createdAt[strictly_before]'
           in: query
           description: 'Filter customers created strictly before this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'createdAt[after]'
           in: query
           description: 'Filter customers created after this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'createdAt[strictly_after]'
           in: query
           description: 'Filter customers created strictly after this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'updatedAt[before]'
           in: query
           description: 'Filter customers updated before this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'updatedAt[strictly_before]'
           in: query
           description: 'Filter customers updated strictly before this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'updatedAt[after]'
           in: query
           description: 'Filter customers updated after this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'updatedAt[strictly_after]'
           in: query
           description: 'Filter customers updated strictly after this date'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: confirmed
           in: query
           description: 'Filter by customer confirmation status (true/false)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: boolean
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lt]'
           in: query
           description: 'Filter on the ulid property using the lt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lte]'
           in: query
           description: 'Filter on the ulid property using the lte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gt]'
           in: query
           description: 'Filter on the ulid property using the gt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gte]'
           in: query
           description: 'Filter on the ulid property using the gte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[between]'
           in: query
           description: 'Filter on the ulid property using the between operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
-      deprecated: false
     post:
       operationId: api_customers_post
       tags:
@@ -785,7 +708,6 @@ paths:
               status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
               confirmed: true
         required: true
-      deprecated: false
   '/api/customers/{ulid}':
     get:
       operationId: api_customers_ulid_get
@@ -897,7 +819,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
-      deprecated: false
     put:
       operationId: api_customers_ulid_put
       tags:
@@ -1100,7 +1021,6 @@ paths:
               status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
               confirmed: true
         required: true
-      deprecated: false
     delete:
       operationId: api_customers_ulid_delete
       tags:
@@ -1210,7 +1130,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
-      deprecated: false
     patch:
       operationId: api_customers_ulid_patch
       tags:
@@ -1405,7 +1324,6 @@ paths:
               status: /api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7
               confirmed: true
         required: true
-      deprecated: false
   /api/customer_statuses:
     get:
       operationId: api_customer_statuses_get_collection
@@ -1418,13 +1336,10 @@ paths:
             application/ld+json:
               schema:
                 type: object
-                properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
-                  totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
-                  search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
-                required:
-                  - member
+                description: 'CustomerStatus.jsonld-output collection.'
+                allOf:
+                  - { $ref: '#/components/schemas/HydraCollectionBaseSchema' }
+                  - { type: object, required: [member], properties: { member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } } } }
         '400':
           description: 'Bad request'
           content:
@@ -1518,34 +1433,30 @@ paths:
           description: 'The collection page number'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 1
           style: form
           explode: false
-          allowReserved: false
         -
           name: itemsPerPage
           in: query
           description: 'The number of items per page'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 30
             minimum: 0
+            maximum: 30
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[ulid]'
           in: query
           description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: desc
@@ -1554,14 +1465,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[value]'
           in: query
           description: 'Sort by value'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -1570,80 +1479,66 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: value
           in: query
           description: 'Filter by value (partial match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lt]'
           in: query
           description: 'Filter on the ulid property using the lt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lte]'
           in: query
           description: 'Filter on the ulid property using the lte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gt]'
           in: query
           description: 'Filter on the ulid property using the gt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gte]'
           in: query
           description: 'Filter on the ulid property using the gte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[between]'
           in: query
           description: 'Filter on the ulid property using the between operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
-      deprecated: false
     post:
       operationId: api_customer_statuses_post
       tags:
@@ -1780,7 +1675,6 @@ paths:
             example:
               value: Active
         required: true
-      deprecated: false
   '/api/customer_statuses/{ulid}':
     get:
       operationId: api_customer_statuses_ulid_get
@@ -1892,7 +1786,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YPQ2
-      deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
       tags:
@@ -2063,7 +1956,6 @@ paths:
             example:
               value: Active
         required: true
-      deprecated: false
     delete:
       operationId: api_customer_statuses_ulid_delete
       tags:
@@ -2173,7 +2065,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YPQ2
-      deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
       tags:
@@ -2344,7 +2235,6 @@ paths:
             example:
               value: Active
         required: true
-      deprecated: false
   /api/customer_types:
     get:
       operationId: api_customer_types_get_collection
@@ -2357,13 +2247,10 @@ paths:
             application/ld+json:
               schema:
                 type: object
-                properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld-output' } }
-                  totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
-                  search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
-                required:
-                  - member
+                description: 'CustomerType.jsonld-output collection.'
+                allOf:
+                  - { $ref: '#/components/schemas/HydraCollectionBaseSchema' }
+                  - { type: object, required: [member], properties: { member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld-output' } } } }
         '400':
           description: 'Bad request'
           content:
@@ -2457,34 +2344,30 @@ paths:
           description: 'The collection page number'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 1
           style: form
           explode: false
-          allowReserved: false
         -
           name: itemsPerPage
           in: query
           description: 'The number of items per page'
           required: false
           deprecated: false
-          allowEmptyValue: true
           schema:
             type: integer
             default: 30
             minimum: 0
+            maximum: 30
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[ulid]'
           in: query
           description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: desc
@@ -2493,14 +2376,12 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'order[value]'
           in: query
           description: 'Sort by value'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
             default: asc
@@ -2509,80 +2390,66 @@ paths:
               - desc
           style: form
           explode: false
-          allowReserved: false
         -
           name: value
           in: query
           description: 'Filter by value (partial match)'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lt]'
           in: query
           description: 'Filter on the ulid property using the lt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[lte]'
           in: query
           description: 'Filter on the ulid property using the lte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gt]'
           in: query
           description: 'Filter on the ulid property using the gt operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[gte]'
           in: query
           description: 'Filter on the ulid property using the gte operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
         -
           name: 'ulid[between]'
           in: query
           description: 'Filter on the ulid property using the between operator'
           required: false
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
           style: form
           explode: false
-          allowReserved: false
-      deprecated: false
     post:
       operationId: api_customer_types_post
       tags:
@@ -2719,7 +2586,6 @@ paths:
             example:
               value: Prospect
         required: true
-      deprecated: false
   '/api/customer_types/{ulid}':
     get:
       operationId: api_customer_types_ulid_get
@@ -2831,7 +2697,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YJN7
-      deprecated: false
     put:
       operationId: api_customer_types_ulid_put
       tags:
@@ -3002,7 +2867,6 @@ paths:
             example:
               value: Prospect
         required: true
-      deprecated: false
     delete:
       operationId: api_customer_types_ulid_delete
       tags:
@@ -3112,7 +2976,6 @@ paths:
           style: simple
           explode: false
           example: 01JKX8XGHVDZ46MWYMZT94YJN7
-      deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
       tags:
@@ -3283,7 +3146,6 @@ paths:
             example:
               value: Prospect
         required: true
-      deprecated: false
   /api/health:
     get:
       operationId: api_health_get
@@ -3296,17 +3158,14 @@ paths:
           description: 'Health check failed.'
       summary: 'Retrieves a HealthCheck resource.'
       description: 'Retrieves a HealthCheck resource.'
-      deprecated: false
 components:
   schemas:
-    ConstraintViolation-json:
+    ConstraintViolation:
       type: object
       description: 'Unprocessable entity'
-      deprecated: false
       properties:
         status:
           default: 422
-          example: 422
           type: integer
         violations:
           type: array
@@ -3319,6 +3178,19 @@ components:
               message:
                 type: string
                 description: 'The message associated with the violation'
+              code:
+                type: string
+                description: 'The code of the violation'
+              hint:
+                type: string
+                description: 'An extra hint to understand the violation'
+              payload:
+                type: object
+                additionalProperties: true
+                description: 'The serialized payload of the violation'
+            required:
+              - propertyPath
+              - message
         detail:
           readOnly: true
           type: string
@@ -3335,11 +3207,9 @@ components:
           type:
             - string
             - 'null'
-    Customer.CustomerCreate.jsonld:
+    Customer.CustomerCreate:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       required:
         - initials
         - email
@@ -3383,11 +3253,9 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.CustomerPatch:
+    Customer.CustomerPatch.jsonMergePatch:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       properties:
         id:
           type:
@@ -3428,11 +3296,9 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.CustomerPut.jsonld:
+    Customer.CustomerPut:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       required:
         - initials
         - email
@@ -3477,60 +3343,37 @@ components:
             - boolean
             - 'null'
     Customer.jsonld-output:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+          properties:
+            initials:
               type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
-        initials:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-        leadSource:
-          type: string
-        type:
-          $ref: '#/components/schemas/CustomerType.jsonld-output'
-        status:
-          $ref: '#/components/schemas/CustomerStatus.jsonld-output'
-        confirmed:
-          type: boolean
-        ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    CustomerStatus.StatusCreate.jsonld:
+            email:
+              type: string
+            phone:
+              type: string
+            leadSource:
+              type: string
+            type:
+              $ref: '#/components/schemas/CustomerType.jsonld-output'
+            status:
+              $ref: '#/components/schemas/CustomerStatus.jsonld-output'
+            confirmed:
+              type: boolean
+            ulid:
+              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    CustomerStatus.StatusCreate:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       required:
         - value
       properties:
@@ -3539,11 +3382,9 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.StatusPatch:
+    CustomerStatus.StatusPatch.jsonMergePatch:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       properties:
         value:
           maxLength: 255
@@ -3554,11 +3395,9 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.StatusPut.jsonld:
+    CustomerStatus.StatusPut:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       required:
         - value
       properties:
@@ -3568,41 +3407,18 @@ components:
             - string
             - 'null'
     CustomerStatus.jsonld-output:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+          properties:
+            value:
               type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
-        value:
-          type: string
-        ulid:
-          type: string
-    CustomerType.TypeCreate.jsonld:
+            ulid:
+              type: string
+    CustomerType.TypeCreate:
       type: object
-      description: ''
-      deprecated: false
       required:
         - value
       properties:
@@ -3611,10 +3427,8 @@ components:
           type:
             - string
             - 'null'
-    CustomerType.TypePatch:
+    CustomerType.TypePatch.jsonMergePatch:
       type: object
-      description: ''
-      deprecated: false
       properties:
         value:
           maxLength: 255
@@ -3625,11 +3439,9 @@ components:
           type:
             - string
             - 'null'
-    CustomerType.TypePut.jsonld:
+    CustomerType.TypePut:
       type: object
-      description: ''
       additionalProperties: false
-      deprecated: false
       required:
         - value
       properties:
@@ -3639,41 +3451,19 @@ components:
             - string
             - 'null'
     CustomerType.jsonld-output:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+          properties:
+            value:
               type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
-        value:
-          type: string
-        ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+            ulid:
+              $ref: '#/components/schemas/UlidInterface.jsonld-output'
     Error:
       type: object
       description: 'A representation of common errors.'
-      deprecated: false
       properties:
         title:
           readOnly: true
@@ -3688,7 +3478,9 @@ components:
             - string
             - 'null'
         status:
-          type: number
+          type:
+            - number
+            - 'null'
           examples:
             - 404
           default: 400
@@ -3703,12 +3495,73 @@ components:
           description: 'A URI reference that identifies the problem type'
           type: string
     HealthCheck.jsonld:
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+    HydraCollectionBaseSchema:
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraCollectionBaseSchemaNoPagination'
+        -
+          type: object
+          properties:
+            view:
+              type: object
+              properties:
+                '@id':
+                  type: string
+                  format: iri-reference
+                '@type':
+                  type: string
+                first:
+                  type: string
+                  format: iri-reference
+                last:
+                  type: string
+                  format: iri-reference
+                previous:
+                  type: string
+                  format: iri-reference
+                next:
+                  type: string
+                  format: iri-reference
+              example:
+                '@id': string
+                type: string
+                first: string
+                last: string
+                previous: string
+                next: string
+    HydraCollectionBaseSchemaNoPagination:
       type: object
-      description: ''
-      deprecated: false
+      properties:
+        totalItems:
+          type: integer
+          minimum: 0
+        search:
+          type: object
+          properties:
+            '@type':
+              type: string
+            template:
+              type: string
+            variableRepresentation:
+              type: string
+            mapping:
+              type: array
+              items:
+                type: object
+                properties:
+                  '@type': { type: string }
+                  variable: { type: string }
+                  property: { type: [string, 'null'] }
+                  required: { type: boolean }
+    HydraItemBaseSchema:
+      type: object
       properties:
         '@context':
-          readOnly: true
           oneOf:
             -
               type: string
@@ -3725,51 +3578,26 @@ components:
                 - hydra
               additionalProperties: true
         '@id':
-          readOnly: true
           type: string
         '@type':
-          readOnly: true
           type: string
+      required:
+        - '@id'
+        - '@type'
     UlidInterface.jsonld-output:
       type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
-              type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
 security: []
 tags:
   -
     name: Customer
-    description: 'Operations related to customer management'
+    description: "Resource 'Customer' operations."
   -
     name: CustomerStatus
-    description: 'Operations related to customer status management'
+    description: "Resource 'CustomerStatus' operations."
   -
     name: CustomerType
-    description: 'Operations related to customer type management'
+    description: "Resource 'CustomerType' operations."
   -
     name: HealthCheck
-    description: 'Health check endpoints for monitoring'
+    description: "Resource 'HealthCheck' operations."
 webhooks: {  }
