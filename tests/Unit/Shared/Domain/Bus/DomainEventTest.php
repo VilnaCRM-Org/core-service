@@ -20,17 +20,17 @@ final class DomainEventTest extends UnitTestCase
             {
                 return 'test.event';
             }
-#[\Override]
 
+            #[\Override]
             public static function fromPrimitives(
                 array $body,
                 string $eventId,
                 string $occurredOn
             ): self {
                 return new self($eventId, $occurredOn);
-            #[\Override]
             }
 
+            #[\Override]
             public function toPrimitives(): array
             {
                 return [];
@@ -42,25 +42,25 @@ final class DomainEventTest extends UnitTestCase
     public function testEventIdIsAccessibleAndCorrect(): void
     {
         $eventId = 'event-id';
-        #[\Override]
         $occurredOn = '2023-07-24';
 
         $event = new class($eventId, $occurredOn) extends DomainEvent {
-            public static function eventName(): string
             #[\Override]
+            public static function eventName(): string
             {
                 return 'test.event';
             }
 
+            #[\Override]
             public static function fromPrimitives(
                 array $body,
                 string $eventId,
-                #[\Override]
                 string $occurredOn
             ): self {
                 return new self($eventId, $occurredOn);
             }
 
+            #[\Override]
             public function toPrimitives(): array
             {
                 return [];
@@ -73,14 +73,13 @@ final class DomainEventTest extends UnitTestCase
             'The event ID should be accessible publicly
              and match the expected value.'
         );
-    #[\Override]
     }
 
     public function testConstructWithoutProvidedDate(): void
     {
-        #[\Override]
         $eventId = 'event-id';
         $event = new class($eventId, null) extends DomainEvent {
+            #[\Override]
             public static function eventName(): string
             {
                 return 'test.event';
@@ -95,6 +94,7 @@ final class DomainEventTest extends UnitTestCase
                 return new self($eventId, $occurredOn);
             }
 
+            #[\Override]
             public function toPrimitives(): array
             {
                 return [];
