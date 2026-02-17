@@ -101,27 +101,42 @@ final class HealthCheckTest extends BaseTest
 
     private function createCacheMock(): CacheInterface
     {
-        $cacheMock = $this->getMockForIntersectionOfInterfaces([CacheInterface::class, ResetInterface::class]);
-        $cacheMock->method('get')
-            ->willThrowException(new CacheException('Cache is not working'));
-        $cacheMock->method('reset')
-            ->willReturn(null);
+        return new class implements CacheInterface, ResetInterface {
+            public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
+            {
+                throw new CacheException('Cache is not working');
+            }
 
-        return $cacheMock;
+            public function delete(string $key): bool
+            {
+                return true;
+            }
+
+            public function reset(): void
+            {
+                // No-op for test
+            }
+        };
     }
 
     private function createSqsClientMock(): SqsClient
     {
-        $sqsClientMock = $this->getMockBuilder(SqsClient::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['createQueue'])
-            ->getMock();
-        $sqsClientMock->expects($this->once())
-            ->method('createQueue')
-            ->willThrowException(new \Exception(
-                'Message broker is not available'
-            ));
+        return new class([]) extends SqsClient {
+            private bool $called = false;
 
-        return $sqsClientMock;
+            public function __call($name, $args)
+            {
+                if ($name === 'createQueue' && !$this->called) {
+                    $this->called = true;
+                    throw new \Exception('Message broker is not available');
+                }
+                return parent::__call($name, $args);
+            }
+
+            public function reset(): void
+            {
+                // No-op for test
+            }
+        };
     }
 }
