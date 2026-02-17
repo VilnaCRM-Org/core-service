@@ -66,6 +66,11 @@ parameters:
         - type: className
           regex: 'MongoDB\\BSON\\.*'
 
+    - name: PHP
+      collectors:
+        - type: className
+          regex: '^(Override|Attribute|ReturnTypeWillChange|AllowDynamicProperties|SensitiveParameter|Deprecated)$'
+
   ruleset:
     Application:
       - Domain
@@ -75,6 +80,7 @@ parameters:
       - Logging
       - GraphQl
       - BSON
+      - PHP
     Infrastructure:
       - Domain
       - Application
@@ -82,4 +88,6 @@ parameters:
       - Doctrine
       - Logging
       - BSON
-    Domain: []
+      - PHP
+    Domain:
+      - PHP
