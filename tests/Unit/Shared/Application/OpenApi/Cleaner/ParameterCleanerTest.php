@@ -11,6 +11,7 @@ final class ParameterCleanerTest extends UnitTestCase
 {
     private ParameterCleaner $cleaner;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

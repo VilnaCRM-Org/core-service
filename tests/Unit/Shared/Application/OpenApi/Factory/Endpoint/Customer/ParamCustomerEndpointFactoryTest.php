@@ -55,6 +55,7 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
     private Operation $operationGet;
     private Operation $operationDelete;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->setupFactoryMocks();

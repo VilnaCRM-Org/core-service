@@ -15,6 +15,7 @@ final class IriReferenceOperationContextResolverTest extends UnitTestCase
 {
     private IriReferenceOperationContextResolver $resolver;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->resolver = new IriReferenceOperationContextResolver();

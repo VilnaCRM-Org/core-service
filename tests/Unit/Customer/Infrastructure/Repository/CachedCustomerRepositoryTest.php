@@ -22,6 +22,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
     private LoggerInterface&MockObject $logger;
     private CachedCustomerRepository $repository;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

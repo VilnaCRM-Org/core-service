@@ -22,6 +22,7 @@ final class CreateTypeProcessorTest extends UnitTestCase
     private TypeTransformerInterface|MockObject $transformer;
     private CreateTypeProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

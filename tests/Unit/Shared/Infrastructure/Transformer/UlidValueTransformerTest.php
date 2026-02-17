@@ -15,6 +15,7 @@ final class UlidValueTransformerTest extends UnitTestCase
     private UlidValueTransformer $converter;
     private UlidFactory $ulidFactory;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

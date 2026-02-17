@@ -33,6 +33,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
     private CustomerPutProcessor $processor;
     private UlidTransformer $ulidTransformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

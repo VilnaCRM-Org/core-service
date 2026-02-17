@@ -21,6 +21,7 @@ final class CustomerTest extends UnitTestCase
     private CustomerInterface $customer;
     private UlidTransformer $ulidTransformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

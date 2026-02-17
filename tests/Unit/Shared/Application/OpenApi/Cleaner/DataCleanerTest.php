@@ -15,6 +15,7 @@ final class DataCleanerTest extends UnitTestCase
 {
     private DataCleaner $cleaner;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

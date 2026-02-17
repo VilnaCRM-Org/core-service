@@ -19,6 +19,7 @@ final class CreateTypeCommandHandlerTest extends UnitTestCase
     private TypeRepositoryInterface|MockObject $repository;
     private CreateTypeCommandHandler $handler;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

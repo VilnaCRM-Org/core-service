@@ -18,6 +18,7 @@ final class PathParameterCleanerSpy implements PathParameterCleanerInterface
         $this->decorated = new PathParameterCleaner();
     }
 
+    #[\Override]
     public function clean(mixed $parameter): mixed
     {
         if ($parameter instanceof Parameter) {

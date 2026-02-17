@@ -40,6 +40,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     private Operation $operationPost;
     private Operation $operationGet;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->setupFactoryMocks();

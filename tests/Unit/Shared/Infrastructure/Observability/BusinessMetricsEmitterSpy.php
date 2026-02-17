@@ -15,6 +15,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     private array $emitted = [];
     private bool $shouldFail = false;
 
+    #[\Override]
     public function emit(BusinessMetric $metric): void
     {
         if ($this->shouldFail) {
@@ -28,6 +29,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     {
         $this->shouldFail = true;
     }
+#[\Override]
 
     public function emitCollection(MetricCollection $metrics): void
     {

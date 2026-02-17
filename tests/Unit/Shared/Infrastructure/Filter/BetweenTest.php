@@ -17,6 +17,7 @@ final class BetweenTest extends UnitTestCase
     private Builder|MockObject $builder;
     private MatchStage|MockObject $matchStage;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->operator = new Between();

@@ -20,6 +20,7 @@ final class CustomerStatusResolverTest extends UnitTestCase
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerStatusResolver $resolver;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

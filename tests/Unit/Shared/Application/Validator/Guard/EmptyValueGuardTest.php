@@ -12,6 +12,7 @@ final class EmptyValueGuardTest extends UnitTestCase
 {
     private EmptyValueGuard $checker;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

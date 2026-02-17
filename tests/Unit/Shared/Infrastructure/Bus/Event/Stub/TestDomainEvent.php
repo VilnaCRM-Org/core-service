@@ -20,10 +20,12 @@ final class TestDomainEvent extends DomainEvent
         );
     }
 
+    #[\Override]
     public static function eventName(): string
     {
         return 'test.domain_event';
     }
+#[\Override]
 
     public function toPrimitives(): array
     {
@@ -31,6 +33,7 @@ final class TestDomainEvent extends DomainEvent
             'id' => $this->id,
             'value' => $this->value,
         ];
+    #[\Override]
     }
 
     public static function fromPrimitives(

@@ -8,10 +8,12 @@ use Webmozart\Assert\Assert;
 
 final class NullValueAssertion implements ValueAssertionInterface
 {
+    #[\Override]
     public function canAssert(string $expectedValue): bool
     {
         return strtolower($expectedValue) === 'null';
     }
+#[\Override]
 
     public function assert(string $path, string $expectedValue, mixed $actualValue): void
     {

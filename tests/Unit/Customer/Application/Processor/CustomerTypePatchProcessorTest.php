@@ -28,6 +28,7 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     private PatchUlidExtractor $patchUlidExtractor;
     private CustomerTypePatchProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -11,6 +11,7 @@ final class TestOtherEvent extends DomainEvent
     /**
      * @param array<string, string|object> $body
      */
+    #[\Override]
     public static function fromPrimitives(
         array $body,
         string $eventId,
@@ -18,6 +19,7 @@ final class TestOtherEvent extends DomainEvent
     ): self {
         return new self($eventId, $occurredOn);
     }
+#[\Override]
 
     public static function eventName(): string
     {
@@ -25,6 +27,7 @@ final class TestOtherEvent extends DomainEvent
     }
 
     /**
+     #[\Override]
      * @return array<string, string>
      */
     public function toPrimitives(): array

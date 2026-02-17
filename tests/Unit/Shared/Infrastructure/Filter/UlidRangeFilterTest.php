@@ -46,6 +46,7 @@ final class UlidRangeFilterTest extends UnitTestCase
      */
     private array $allOperatorsTestSetup;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

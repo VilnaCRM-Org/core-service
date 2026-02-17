@@ -16,6 +16,7 @@ final class UlidFilterProcessorTest extends UnitTestCase
     private Builder|MockObject $builder;
     private MatchStage|MockObject $matchStage;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

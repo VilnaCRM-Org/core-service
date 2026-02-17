@@ -16,6 +16,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
 {
     private InvokeParameterExtractor $extractor;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->extractor = new InvokeParameterExtractor();
@@ -74,6 +75,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
         return new class() implements DomainEventSubscriberInterface {
             /**
              * @return array<class-string>
+             #[\Override]
              */
             public function subscribedTo(): array
             {
@@ -91,6 +93,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
     {
         return new class() implements DomainEventSubscriberInterface {
             /**
+             #[\Override]
              * @return array<class-string>
              */
             public function subscribedTo(): array
@@ -106,6 +109,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
             /**
              * @return array<class-string>
              */
+            #[\Override]
             public function subscribedTo(): array
             {
                 return [DomainEvent::class];
@@ -123,6 +127,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
         return new class() implements DomainEventSubscriberInterface {
             /**
              * @return array<class-string>
+             #[\Override]
              */
             public function subscribedTo(): array
             {
@@ -140,6 +145,7 @@ final class InvokeParameterExtractorTest extends UnitTestCase
     {
         return new class() implements DomainEventSubscriberInterface {
             /**
+             #[\Override]
              * @return array<class-string>
              */
             public function subscribedTo(): array

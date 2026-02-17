@@ -22,6 +22,7 @@ final class CreateTypeTransformerTest extends UnitTestCase
     private UlidFactory|MockObject $ulidFactory;
     private TypeTransformerInterface $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

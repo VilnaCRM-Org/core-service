@@ -15,10 +15,12 @@ final class DomainEventTest extends UnitTestCase
         $occurredOn = '2023-07-24';
 
         $event = new class($eventId, $occurredOn) extends DomainEvent {
+            #[\Override]
             public static function eventName(): string
             {
                 return 'test.event';
             }
+#[\Override]
 
             public static function fromPrimitives(
                 array $body,
@@ -26,6 +28,7 @@ final class DomainEventTest extends UnitTestCase
                 string $occurredOn
             ): self {
                 return new self($eventId, $occurredOn);
+            #[\Override]
             }
 
             public function toPrimitives(): array
@@ -39,10 +42,12 @@ final class DomainEventTest extends UnitTestCase
     public function testEventIdIsAccessibleAndCorrect(): void
     {
         $eventId = 'event-id';
+        #[\Override]
         $occurredOn = '2023-07-24';
 
         $event = new class($eventId, $occurredOn) extends DomainEvent {
             public static function eventName(): string
+            #[\Override]
             {
                 return 'test.event';
             }
@@ -50,6 +55,7 @@ final class DomainEventTest extends UnitTestCase
             public static function fromPrimitives(
                 array $body,
                 string $eventId,
+                #[\Override]
                 string $occurredOn
             ): self {
                 return new self($eventId, $occurredOn);
@@ -67,10 +73,12 @@ final class DomainEventTest extends UnitTestCase
             'The event ID should be accessible publicly
              and match the expected value.'
         );
+    #[\Override]
     }
 
     public function testConstructWithoutProvidedDate(): void
     {
+        #[\Override]
         $eventId = 'event-id';
         $event = new class($eventId, null) extends DomainEvent {
             public static function eventName(): string
@@ -78,6 +86,7 @@ final class DomainEventTest extends UnitTestCase
                 return 'test.event';
             }
 
+            #[\Override]
             public static function fromPrimitives(
                 array $body,
                 string $eventId,

@@ -26,6 +26,7 @@ final class ResponseBuilderTest extends UnitTestCase
     private string $headerFormat;
     private string $headerExample;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

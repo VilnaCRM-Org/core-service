@@ -12,6 +12,7 @@ final class PathParameterCleanerTest extends UnitTestCase
 {
     private PathParameterCleaner $cleaner;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

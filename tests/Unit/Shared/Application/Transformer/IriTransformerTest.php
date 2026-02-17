@@ -11,6 +11,7 @@ final class IriTransformerTest extends UnitTestCase
 {
     private IriTransformer $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

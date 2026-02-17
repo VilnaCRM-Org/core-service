@@ -16,6 +16,7 @@ final class DBCheckSubscriberTest extends UnitTestCase
     private DocumentManager $documentManager;
     private DBCheckSubscriber $subscriber;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

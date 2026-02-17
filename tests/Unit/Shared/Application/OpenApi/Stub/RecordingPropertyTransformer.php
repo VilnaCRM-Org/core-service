@@ -17,6 +17,7 @@ final class RecordingPropertyTransformer implements IriReferencePropertyTransfor
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function transform(array $schema): array
     {
         $this->invoked = true;

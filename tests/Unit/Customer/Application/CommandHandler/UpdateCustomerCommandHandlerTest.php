@@ -27,6 +27,7 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
     private UlidTransformer $ulidTransformer;
     private EventBusInterface|MockObject $eventBus;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

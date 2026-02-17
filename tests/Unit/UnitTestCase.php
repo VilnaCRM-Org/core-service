@@ -12,6 +12,7 @@ abstract class UnitTestCase extends TestCase
 {
     protected Generator $faker;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

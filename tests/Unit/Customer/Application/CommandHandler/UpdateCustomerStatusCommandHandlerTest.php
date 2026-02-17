@@ -18,6 +18,7 @@ final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
     private StatusRepositoryInterface|MockObject $repository;
     private UpdateStatusCommandHandler $handler;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

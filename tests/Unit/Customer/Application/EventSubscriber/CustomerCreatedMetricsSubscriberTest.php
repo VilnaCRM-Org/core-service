@@ -17,6 +17,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
     private BusinessMetricsEmitterSpy $metricsEmitterSpy;
     private CustomerCreatedMetricsSubscriber $subscriber;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

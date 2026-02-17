@@ -12,6 +12,7 @@ final class ValueCleanerTest extends UnitTestCase
 {
     private ValueCleaner $filter;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

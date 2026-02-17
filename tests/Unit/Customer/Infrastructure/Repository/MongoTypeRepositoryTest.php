@@ -18,6 +18,7 @@ final class MongoTypeRepositoryTest extends UnitTestCase
 
     private MongoTypeRepository $repository;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

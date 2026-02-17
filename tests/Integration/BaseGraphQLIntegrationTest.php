@@ -22,6 +22,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
      *
      * @return array<string, string|int|float|bool|array|null>
      */
+    #[\Override]
     protected function graphqlRequest(
         string $query,
         array $variables = [],
@@ -54,6 +55,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
      * @param array<string, string> $headers
      *
      * @return array<string, string|int|float|bool|array|null>
+     #[\Override]
      */
     protected function graphqlMutation(
         string $mutation,
@@ -66,6 +68,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
     /**
      * Assert that GraphQL response is successful (no errors).
      *
+     #[\Override]
      * @param array<string, string|int|float|bool|array|null> $response
      */
     protected function assertGraphQLSuccess(array $response): void
@@ -85,6 +88,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
 
     /**
      * Assert that GraphQL response contains specific errors.
+     #[\Override]
      *
      * @param array<string, string|int|float|bool|array|null> $response
      */
@@ -113,6 +117,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
      *
      * @param array<string, string|int|float|bool|array|null> $response
      */
+    #[\Override]
     protected function assertGraphQLDataHasField(array $response, string $field): void
     {
         $this->assertGraphQLSuccess($response);
@@ -127,6 +132,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
      * Assert that GraphQL response data field equals expected value.
      *
      * @param array<string, string|int|float|bool|array|null> $response
+     #[\Override]
      */
     protected function assertGraphQLDataFieldEquals(
         array $response,
@@ -144,6 +150,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
     /**
      * Extract nested field value from GraphQL response data.
      *
+     #[\Override]
      * @param array<string, string|int|float|bool|array|null> $response
      */
     protected function getGraphQLDataField(
@@ -167,6 +174,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return $data;
     }
 
+    #[\Override]
     /**
      * Create a customer type for testing.
      */
@@ -176,6 +184,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         $payload = ['value' => $value];
         return $this->createEntity('/api/customer_types', $payload);
     }
+#[\Override]
 
     /**
      * Create a customer status for testing.
@@ -187,6 +196,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return $this->createEntity('/api/customer_statuses', $payload);
     }
 
+    #[\Override]
     /**
      * Generate customer test data.
      *
@@ -204,6 +214,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
             'confirmed' => $this->faker->boolean(),
         ];
     }
+#[\Override]
 
     /**
      * Generate customer type test data.
@@ -215,6 +226,7 @@ abstract class BaseGraphQLIntegrationTest extends BaseGraphQLTest
         return [
             'value' => $value ?? $this->faker->word(),
         ];
+    #[\Override]
     }
 
     /**

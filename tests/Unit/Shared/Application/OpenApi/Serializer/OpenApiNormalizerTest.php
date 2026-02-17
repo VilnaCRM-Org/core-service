@@ -19,6 +19,7 @@ final class OpenApiNormalizerTest extends UnitTestCase
     private OpenApiNormalizer $normalizer;
     private NormalizerInterface $decorated;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

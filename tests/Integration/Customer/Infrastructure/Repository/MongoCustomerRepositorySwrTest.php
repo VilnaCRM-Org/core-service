@@ -24,6 +24,7 @@ final class MongoCustomerRepositorySwrTest extends KernelTestCase
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
 
+    #[\Override]
     protected function setUp(): void
     {
         self::bootKernel();

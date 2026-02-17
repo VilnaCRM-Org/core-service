@@ -15,6 +15,7 @@ final class IriReferenceContentTransformerTest extends UnitTestCase
 {
     private IriReferenceContentTransformer $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

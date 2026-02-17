@@ -23,6 +23,7 @@ final readonly class TestDomainEventSubscriber implements DomainEventSubscriberI
     /**
      * @return array<class-string>
      */
+    #[\Override]
     public function subscribedTo(): array
     {
         return [TestDomainEvent::class];

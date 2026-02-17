@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class BaseNegativeApiTest extends ApiTestCase
 {
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -19,6 +20,7 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
     }
+#[\Override]
 
     protected static function getKernelClass(): string
     {

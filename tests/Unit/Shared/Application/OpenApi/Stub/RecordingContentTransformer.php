@@ -27,6 +27,7 @@ final class RecordingContentTransformer implements IriReferenceContentTransforme
     /**
      * @return array<string, mixed>|null
      */
+    #[\Override]
     public function transform(ArrayObject $content): ?array
     {
         $this->invoked = true;

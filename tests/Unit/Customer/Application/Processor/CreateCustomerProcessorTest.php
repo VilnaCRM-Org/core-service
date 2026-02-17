@@ -26,6 +26,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
     private CustomerTransformerInterface|MockObject $transformer;
     private CreateCustomerProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

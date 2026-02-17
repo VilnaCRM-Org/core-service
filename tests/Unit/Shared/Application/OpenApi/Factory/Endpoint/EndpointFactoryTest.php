@@ -22,6 +22,7 @@ final class EndpointFactoryTest extends UnitTestCase
         ];
 
         $factory = new class() extends EndpointFactory {
+            #[\Override]
             public function createEndpoint(OpenApi $openApi): void
             {
             }

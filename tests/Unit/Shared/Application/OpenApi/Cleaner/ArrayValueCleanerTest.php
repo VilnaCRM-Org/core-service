@@ -14,6 +14,7 @@ final class ArrayValueCleanerTest extends UnitTestCase
 {
     private ArrayValueCleaner $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

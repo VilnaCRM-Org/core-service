@@ -15,6 +15,7 @@ final class CacheCheckSubscriberTest extends BaseTest
     private CacheCheckSubscriber $subscriber;
     private CacheInterface $cache;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

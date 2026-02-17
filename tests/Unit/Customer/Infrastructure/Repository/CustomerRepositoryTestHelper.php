@@ -18,18 +18,22 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
     ) {
     }
 
+    #[\Override]
     public function save(Customer $customer): void
     {
         $this->inner->save($customer);
     }
+#[\Override]
 
     public function findByEmail(string $email): ?CustomerInterface
     {
         return $this->inner->findByEmail($email);
+    #[\Override]
     }
 
     public function find(mixed $id, int $lockMode = 0, ?int $lockVersion = null): ?object
     {
+        #[\Override]
         return $this->inner->find($id, $lockMode, $lockVersion);
     }
 

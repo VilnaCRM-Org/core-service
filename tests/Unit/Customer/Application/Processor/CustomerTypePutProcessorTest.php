@@ -26,6 +26,7 @@ final class CustomerTypePutProcessorTest extends UnitTestCase
     private UlidFactory|MockObject $ulidFactory;
     private CustomerTypePutProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

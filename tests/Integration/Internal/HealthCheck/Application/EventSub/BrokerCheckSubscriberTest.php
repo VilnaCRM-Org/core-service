@@ -15,6 +15,7 @@ final class BrokerCheckSubscriberTest extends BaseTest
     private string $testQueueName = 'test-queue';
     private BrokerCheckSubscriber $subscriber;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

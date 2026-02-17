@@ -11,6 +11,7 @@ final class CacheKeyBuilderTest extends TestCase
 {
     private CacheKeyBuilder $builder;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->builder = new CacheKeyBuilder();

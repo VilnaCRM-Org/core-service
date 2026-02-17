@@ -42,6 +42,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     /** @var array<string, string> */
     private array $resourceToIri;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

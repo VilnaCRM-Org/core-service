@@ -19,6 +19,7 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
     private ClassMetadata&MockObject $classMetadata;
     private MongoCustomerRepository $repository;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

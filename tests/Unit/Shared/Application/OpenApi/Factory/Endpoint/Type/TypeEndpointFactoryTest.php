@@ -54,6 +54,7 @@ final class TypeEndpointFactoryTest extends UnitTestCase
      */
     private array $responses = [];
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->setupFactoryMocks();

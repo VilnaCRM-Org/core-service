@@ -19,6 +19,7 @@ final class InitialsValidatorTest extends UnitTestCase
     private Constraint $constraint;
     private TranslatorInterface $translator;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -20,6 +20,7 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
     private LoggerInterface&MockObject $logger;
     private DomainEventSubscriberInterface $subscriber;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

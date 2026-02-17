@@ -19,6 +19,7 @@ final class RecordingContextResolver implements IriReferenceOperationContextReso
     ) {
     }
 
+    #[\Override]
     public function resolve(PathItem $pathItem, string $operation): ?IriReferenceOperationContext
     {
         $this->invoked = true;

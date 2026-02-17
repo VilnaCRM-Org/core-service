@@ -22,6 +22,7 @@ final class CreateCustomerCommandTest extends UnitTestCase
     private CustomerFactoryInterface $customerFactory;
     private UlidTransformer $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

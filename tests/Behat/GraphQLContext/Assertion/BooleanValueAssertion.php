@@ -8,11 +8,15 @@ use Webmozart\Assert\Assert;
 
 final class BooleanValueAssertion implements ValueAssertionInterface
 {
+    #[\Override]
+    #[\Override]
     public function canAssert(string $expectedValue): bool
     {
         return in_array(strtolower($expectedValue), ['true', 'false'], true);
+    #[\Override]
     }
 
+    #[\Override]
     public function assert(string $path, string $expectedValue, mixed $actualValue): void
     {
         $expected = filter_var($expectedValue, FILTER_VALIDATE_BOOLEAN);

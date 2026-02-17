@@ -13,6 +13,7 @@ final class AsyncEventDispatcherSpy implements AsyncEventDispatcherInterface
     private array $dispatched = [];
     private bool $shouldFail = false;
 
+    #[\Override]
     public function dispatch(DomainEvent ...$events): bool
     {
         if ($this->shouldFail) {

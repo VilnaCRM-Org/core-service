@@ -20,6 +20,7 @@ final class PathParametersProcessorTest extends UnitTestCase
     private PathParameterCleanerSpy $cleaner;
     private PathParametersProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

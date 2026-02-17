@@ -22,6 +22,7 @@ final class CreateStatusProcessorTest extends UnitTestCase
     private StatusTransformerInterface|MockObject $transformer;
     private CreateStatusProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

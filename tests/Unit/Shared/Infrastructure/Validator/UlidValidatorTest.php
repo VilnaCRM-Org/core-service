@@ -13,6 +13,7 @@ final class UlidValidatorTest extends UnitTestCase
 {
     private UlidValidator $validator;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

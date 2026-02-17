@@ -11,6 +11,7 @@ final class EmptyArrayCleanerTest extends UnitTestCase
 {
     private EmptyArrayCleaner $checker;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

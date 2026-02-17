@@ -14,6 +14,7 @@ final class ParameterNormalizerTest extends UnitTestCase
     private NormalizerInterface $decorated;
     private ParameterNormalizer $normalizer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

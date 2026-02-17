@@ -22,6 +22,7 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
     private EventBusInterface&MockObject $eventBus;
     private CreateCustomerCommandHandler $handler;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

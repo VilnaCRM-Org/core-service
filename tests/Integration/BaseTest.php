@@ -17,6 +17,7 @@ abstract class BaseTest extends ApiTestCase
 
     protected ContainerInterface $container;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

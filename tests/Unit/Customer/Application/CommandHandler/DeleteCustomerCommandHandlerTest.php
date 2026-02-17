@@ -22,6 +22,7 @@ final class DeleteCustomerCommandHandlerTest extends UnitTestCase
     private EventBusInterface&MockObject $eventBus;
     private DeleteCustomerCommandHandler $handler;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -13,6 +13,7 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
 {
     private IriReferenceMediaTypeTransformer $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

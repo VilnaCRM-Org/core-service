@@ -41,6 +41,7 @@ final class CreateCustomerTransformerTest extends UnitTestCase
 
     private Customer $customer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -17,6 +17,7 @@ final class TestOtherEventSubscriber implements DomainEventSubscriberInterface
     /**
      * @return array<class-string>
      */
+    #[\Override]
     public function subscribedTo(): array
     {
         return [TestOtherEvent::class];

@@ -17,6 +17,7 @@ final class RecordingMediaTypeTransformer implements IriReferenceMediaTypeTransf
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function transform(array $mediaType): array
     {
         $this->invoked = true;

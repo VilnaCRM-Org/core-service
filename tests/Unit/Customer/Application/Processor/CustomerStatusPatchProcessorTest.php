@@ -23,6 +23,7 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
     private CustomerStatusResolver|MockObject $resolver;
     private CustomerStatusPatchProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

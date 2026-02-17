@@ -11,6 +11,7 @@ final class CreateTypeMutationInputTransformerTest extends UnitTestCase
 {
     private CreateTypeMutationInputTransformer $transformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

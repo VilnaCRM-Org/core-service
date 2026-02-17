@@ -15,6 +15,7 @@ final class CustomerTypeFactoryTest extends UnitTestCase
     private Parameter $expectedParameter;
     private CustomerTypeUlidParameterFactory $factory;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

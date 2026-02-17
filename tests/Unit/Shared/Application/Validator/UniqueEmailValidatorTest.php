@@ -29,6 +29,7 @@ final class UniqueEmailValidatorTest extends UnitTestCase
     private TranslatorInterface $translator;
     private UniqueEmailValidator $validator;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

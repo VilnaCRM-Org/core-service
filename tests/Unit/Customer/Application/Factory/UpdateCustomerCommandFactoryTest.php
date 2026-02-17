@@ -17,6 +17,7 @@ final class UpdateCustomerCommandFactoryTest extends UnitTestCase
 {
     private UpdateCustomerCommandFactoryInterface $factory;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

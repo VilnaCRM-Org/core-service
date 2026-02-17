@@ -19,6 +19,7 @@ final class CustomerUpdateTest extends UnitTestCase
     private UlidFactory $ulidFactory;
     private UlidTransformer $ulidTransformer;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -8,10 +8,12 @@ use Webmozart\Assert\Assert;
 
 final class StringValueAssertion implements ValueAssertionInterface
 {
+    #[\Override]
     public function canAssert(string $expectedValue): bool
     {
         return true;
     }
+#[\Override]
 
     public function assert(string $path, string $expectedValue, mixed $actualValue): void
     {

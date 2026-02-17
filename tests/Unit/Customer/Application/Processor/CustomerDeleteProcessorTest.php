@@ -21,6 +21,7 @@ final class CustomerDeleteProcessorTest extends UnitTestCase
     private CommandBusInterface&MockObject $commandBus;
     private CustomerDeleteProcessor $processor;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -21,6 +21,7 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
     private IriConverterInterface|MockObject $iriConverter;
     private CustomerPatchUpdateResolver $resolver;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -19,6 +19,7 @@ final class CreateStatusCommandHandlerTest extends UnitTestCase
     private StatusRepositoryInterface|MockObject $repository;
     private CreateStatusCommandHandler $handler;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
