@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Infrastructure\Observability\Resolver;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
 use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
@@ -92,9 +93,7 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
         self::assertSame('delete', $dimensions->operation());
     }
 
-    /**
-     * @dataProvider httpMethodsProvider
-     */
+    #[DataProvider('httpMethodsProvider')]
     public function testOperationLowercasesHttpMethod(string $method, string $expected): void
     {
         $request = Request::create('/api/test', $method);
