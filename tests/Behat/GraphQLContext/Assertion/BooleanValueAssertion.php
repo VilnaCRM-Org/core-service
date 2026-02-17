@@ -9,11 +9,9 @@ use Webmozart\Assert\Assert;
 final class BooleanValueAssertion implements ValueAssertionInterface
 {
     #[\Override]
-    #[\Override]
     public function canAssert(string $expectedValue): bool
     {
         return in_array(strtolower($expectedValue), ['true', 'false'], true);
-    #[\Override]
     }
 
     #[\Override]
