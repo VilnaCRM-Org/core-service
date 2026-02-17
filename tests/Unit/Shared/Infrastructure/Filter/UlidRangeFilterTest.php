@@ -537,26 +537,36 @@ final class UlidRangeFilterTest extends UnitTestCase
         Ulid $lteValue,
         Ulid $betweenEndValue
     ): void {
+        $callCount = 0;
         $this->matchStage->expects($this->exactly(2))
             ->method('lte')
-            ->withConsecutive(
-                [$this->equalTo($lteValue)],
-                [$this->equalTo($betweenEndValue)]
-            )
-            ->willReturnSelf();
+            ->willReturnCallback(function ($value) use ($lteValue, $betweenEndValue, &$callCount) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $this->assertEquals($lteValue, $value);
+                } elseif ($callCount === 2) {
+                    $this->assertEquals($betweenEndValue, $value);
+                }
+                return $this->matchStage;
+            });
     }
 
     private function setupGteExpectationsWithUlid(
         Ulid $gteValue,
         Ulid $betweenStartValue
     ): void {
+        $callCount = 0;
         $this->matchStage->expects($this->exactly(2))
             ->method('gte')
-            ->withConsecutive(
-                [$this->equalTo($gteValue)],
-                [$this->equalTo($betweenStartValue)]
-            )
-            ->willReturnSelf();
+            ->willReturnCallback(function ($value) use ($gteValue, $betweenStartValue, &$callCount) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $this->assertEquals($gteValue, $value);
+                } elseif ($callCount === 2) {
+                    $this->assertEquals($betweenStartValue, $value);
+                }
+                return $this->matchStage;
+            });
     }
 
     private function setupMultiplePropertiesExpectations(
@@ -571,10 +581,18 @@ final class UlidRangeFilterTest extends UnitTestCase
             ->method('match')
             ->willReturn($this->matchStage);
 
+        $callCount = 0;
         $this->matchStage->expects($this->exactly(2))
             ->method('field')
-            ->withConsecutive(['ulid'], ['customer.ulid'])
-            ->willReturnSelf();
+            ->willReturnCallback(function ($field) use (&$callCount) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $this->assertEquals('ulid', $field);
+                } elseif ($callCount === 2) {
+                    $this->assertEquals('customer.ulid', $field);
+                }
+                return $this->matchStage;
+            });
 
         $this->matchStage->expects($this->exactly(2))
             ->method('lt')

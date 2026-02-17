@@ -14,10 +14,12 @@ final class DomainEventTest extends UnitTestCase
         $eventId = 'event-id';
         $occurredOn = '2023-07-24';
 
-        $event = $this->getMockForAbstractClass(
-            DomainEvent::class,
-            [$eventId, $occurredOn]
-        );
+        $event = new class($eventId, $occurredOn) extends DomainEvent {
+            public static function eventName(): string
+            {
+                return 'test.event';
+            }
+        };
         $this->assertEquals($occurredOn, $event->occurredOn());
     }
 
@@ -26,10 +28,12 @@ final class DomainEventTest extends UnitTestCase
         $eventId = 'event-id';
         $occurredOn = '2023-07-24';
 
-        $event = $this->getMockForAbstractClass(
-            DomainEvent::class,
-            [$eventId, $occurredOn]
-        );
+        $event = new class($eventId, $occurredOn) extends DomainEvent {
+            public static function eventName(): string
+            {
+                return 'test.event';
+            }
+        };
 
         $this->assertEquals(
             $eventId,
@@ -42,10 +46,12 @@ final class DomainEventTest extends UnitTestCase
     public function testConstructWithoutProvidedDate(): void
     {
         $eventId = 'event-id';
-        $event = $this->getMockForAbstractClass(
-            DomainEvent::class,
-            [$eventId, null]
-        );
+        $event = new class($eventId, null) extends DomainEvent {
+            public static function eventName(): string
+            {
+                return 'test.event';
+            }
+        };
 
         $expectedDate = (new \DateTimeImmutable())->format(
             'Y-m-d\TH:i:s+00:00'
