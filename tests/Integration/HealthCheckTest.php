@@ -121,8 +121,13 @@ final class HealthCheckTest extends BaseTest
 
     private function createSqsClientMock(): SqsClient
     {
-        return new class([]) extends SqsClient {
+        return new class extends SqsClient {
             private bool $called = false;
+
+            public function __construct()
+            {
+                // Don't call parent constructor to avoid AWS SDK configuration
+            }
 
             public function __call($name, $args)
             {
@@ -130,7 +135,8 @@ final class HealthCheckTest extends BaseTest
                     $this->called = true;
                     throw new \Exception('Message broker is not available');
                 }
-                return parent::__call($name, $args);
+                // Don't call parent::__call as it would require AWS SDK setup
+                return null;
             }
 
             public function reset(): void
