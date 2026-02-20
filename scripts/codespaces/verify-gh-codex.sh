@@ -18,15 +18,16 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
 fi
 
 ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
-: "${CODEX_PROFILE_NAME:=openrouter}"
-: "${CODEX_TOOL_SMOKE_MODE:=auto}"
-: "${CLAUDE_DEFAULT_MODEL:=anthropic/claude-sonnet-4.5}"
-: "${CLAUDE_PERMISSION_MODE:=plan}"
+: "${CODEX_PROFILE_NAME:=openai}"
+: "${CODEX_MODEL:=gpt-5.2-codex}"
+: "${CODEX_REASONING_EFFORT:=medium}"
+: "${CODEX_APPROVAL_POLICY:=never}"
+: "${CODEX_SANDBOX_MODE:=danger-full-access}"
+: "${CODEX_TOOL_SMOKE_MODE:=enforce}"
 
 cs_require_command gh
 cs_require_command jq
 cs_require_command codex
-cs_require_command claude
 cs_require_command bats
 
 echo "Checking GitHub authentication..."
@@ -107,49 +108,46 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
-if [ -z "${OPENROUTER_API_KEY:-}" ]; then
+if [ -z "${OPENAI_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
-Error: OPENROUTER_API_KEY is not set.
-Provide OPENROUTER_API_KEY as a Codespaces secret.
+Error: OPENAI_API_KEY is not set.
+Provide OPENAI_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
-
-if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] || [ -z "${ANTHROPIC_BASE_URL:-}" ]; then
-    cat >&2 <<'EOM'
-Error: Claude OpenRouter environment is not configured.
-Run: bash scripts/codespaces/setup-secure-agent-env.sh
-EOM
+if [ ! -f "${HOME}/.codex/config.toml" ]; then
+    echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
     exit 1
 fi
-
-if [ ! -f "${HOME}/.claude/settings.json" ]; then
-    echo "Error: Claude settings missing: ${HOME}/.claude/settings.json" >&2
+if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
     exit 1
 fi
-configured_claude_model="$(jq -r '.model // empty' "${HOME}/.claude/settings.json" 2>/dev/null || true)"
-if [ "${configured_claude_model}" != "${CLAUDE_DEFAULT_MODEL}" ]; then
-    echo "Error: Claude default model mismatch. Expected '${CLAUDE_DEFAULT_MODEL}', got '${configured_claude_model:-<empty>}'" >&2
+if ! grep -q "model = \"${CODEX_MODEL}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex default model '${CODEX_MODEL}' is not configured." >&2
     exit 1
 fi
-configured_claude_permission_mode="$(jq -r '.permissions.defaultMode // empty' "${HOME}/.claude/settings.json" 2>/dev/null || true)"
-if [ "${configured_claude_permission_mode}" != "${CLAUDE_PERMISSION_MODE}" ]; then
-    echo "Error: Claude default permission mode mismatch. Expected '${CLAUDE_PERMISSION_MODE}', got '${configured_claude_permission_mode:-<empty>}'" >&2
+if ! grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex reasoning effort '${CODEX_REASONING_EFFORT}' is not configured." >&2
+    exit 1
+fi
+if ! grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex approval policy '${CODEX_APPROVAL_POLICY}' is not configured." >&2
+    exit 1
+fi
+if ! grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\"" "${HOME}/.codex/config.toml"; then
+    echo "Error: Codex sandbox mode '${CODEX_SANDBOX_MODE}' is not configured." >&2
     exit 1
 fi
 
 tmp_codex_basic=""
 tmp_codex_tools=""
-tmp_claude_basic=""
-tmp_claude_tools=""
 tmp_tool_workspace=""
 tmp_tool_marker_file=""
 tool_marker=""
 cleanup() {
     [ -n "${tmp_codex_basic}" ] && rm -f "${tmp_codex_basic}"
     [ -n "${tmp_codex_tools}" ] && rm -f "${tmp_codex_tools}"
-    [ -n "${tmp_claude_basic}" ] && rm -f "${tmp_claude_basic}"
-    [ -n "${tmp_claude_tools}" ] && rm -f "${tmp_claude_tools}"
     [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
@@ -157,8 +155,6 @@ trap cleanup EXIT
 
 tmp_codex_basic="$(mktemp)"
 tmp_codex_tools="$(mktemp)"
-tmp_claude_basic="$(mktemp)"
-tmp_claude_tools="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
@@ -167,13 +163,13 @@ else
     tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
 fi
 
-echo "Running Codex basic smoke task via OpenRouter..."
-if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "Reply with exactly one line: codex-ok:openrouter-basic" >"${tmp_codex_basic}" 2>&1; then
+echo "Running Codex basic smoke task..."
+if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" "Reply with exactly one line: codex-ok:openai-basic" >"${tmp_codex_basic}" 2>&1; then
     echo "Error: Codex basic smoke task failed." >&2
     sed -n '1,120p' "${tmp_codex_basic}" >&2
     exit 1
 fi
-if ! grep -q "codex-ok:openrouter-basic" "${tmp_codex_basic}"; then
+if ! grep -q "codex-ok:openai-basic" "${tmp_codex_basic}"; then
     echo "Error: Codex basic smoke task did not return expected output." >&2
     sed -n '1,120p' "${tmp_codex_basic}" >&2
     exit 1
@@ -182,9 +178,9 @@ echo "Codex basic smoke task ok."
 
 echo "Running Codex tool-calling smoke task..."
 tool_smoke_failed=0
-codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openrouter-tools"
+codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --dangerously-bypass-approvals-and-sandbox "${codex_tool_prompt}"
+    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" "${codex_tool_prompt}"
 ) >"${tmp_codex_tools}" 2>&1; then
     tool_smoke_failed=1
 fi
@@ -192,20 +188,13 @@ fi
 if [ "${tool_smoke_failed}" -eq 1 ]; then
     if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
         echo "Skipping Codex tool-calling smoke task failure (CODEX_TOOL_SMOKE_MODE=skip)." >&2
-    elif [ "${CODEX_TOOL_SMOKE_MODE}" = "auto" ] \
-        && [ "${CODEX_PROFILE_NAME}" = "openrouter" ] \
-        && grep -q "invalid_prompt" "${tmp_codex_tools}" \
-        && grep -q "Invalid Responses API request" "${tmp_codex_tools}"; then
-        # TODO: Remove auto-skip once OpenRouter supports Responses API tool_use payloads.
-        echo "Warning: OpenRouter rejected Codex tool-call response payload (known compatibility issue)." >&2
-        echo "Continuing because CODEX_TOOL_SMOKE_MODE=auto." >&2
     else
         echo "Error: Codex tool-calling smoke task failed." >&2
         sed -n '1,160p' "${tmp_codex_tools}" >&2
         exit 1
     fi
 else
-    if ! grep -q "codex-ok:openrouter-tools" "${tmp_codex_tools}"; then
+    if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools}"; then
         echo "Error: Codex tool-calling smoke task did not return expected output." >&2
         sed -n '1,160p' "${tmp_codex_tools}" >&2
         exit 1
@@ -218,58 +207,4 @@ else
     echo "Codex tool-calling smoke task ok."
 fi
 
-echo "Running Claude Code basic smoke task via OpenRouter..."
-if ! timeout 180s claude -p "Reply with exactly one line: claude-ok:openrouter-basic" >"${tmp_claude_basic}" 2>&1; then
-    echo "Error: Claude basic smoke task failed." >&2
-    sed -n '1,120p' "${tmp_claude_basic}" >&2
-    exit 1
-fi
-if ! grep -q "claude-ok:openrouter-basic" "${tmp_claude_basic}"; then
-    echo "Error: Claude basic smoke task did not return expected output." >&2
-    sed -n '1,120p' "${tmp_claude_basic}" >&2
-    exit 1
-fi
-echo "Claude basic smoke task ok."
-
-echo "Running Claude Code tool-calling smoke task via OpenRouter..."
-if ! printf '%s\n' \
-    "Use Bash exactly once and run: echo claude-openrouter-tools-marker >/dev/null. Then reply with exactly one line: claude-ok:openrouter-tools" \
-    | timeout 240s claude -p \
-        --no-session-persistence \
-        --disable-slash-commands \
-        --verbose \
-        --output-format stream-json \
-        --allowedTools Bash \
-        --add-dir "${ROOT_DIR}" >"${tmp_claude_tools}" 2>&1; then
-    echo "Error: Claude tool-calling smoke task failed." >&2
-    sed -n '1,180p' "${tmp_claude_tools}" >&2
-    exit 1
-fi
-if ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.type? == "tool_use")' "${tmp_claude_tools}" >/dev/null \
-    || ! jq -Rs -e 'split("\n") | map((fromjson? // empty)) | any(.name? == "Bash")' "${tmp_claude_tools}" >/dev/null; then
-    echo "Error: Claude tool-calling smoke task did not invoke Bash tool." >&2
-    sed -n '1,180p' "${tmp_claude_tools}" >&2
-    exit 1
-fi
-if ! jq -Rs -e --arg mode "${CLAUDE_PERMISSION_MODE}" \
-    'split("\n") | map((fromjson? // empty)) | any(.permissionMode? == $mode)' \
-    "${tmp_claude_tools}" >/dev/null; then
-    echo "Error: Claude Code did not start with permission mode '${CLAUDE_PERMISSION_MODE}'." >&2
-    sed -n '1,180p' "${tmp_claude_tools}" >&2
-    exit 1
-fi
-
-claude_tool_result_line="$(awk '/"type":"result"/{print; exit}' "${tmp_claude_tools}" || true)"
-claude_tool_result="$(printf '%s' "${claude_tool_result_line}" | jq -r '.result // empty' 2>/dev/null || true)"
-case "${claude_tool_result}" in
-    claude-ok:openrouter-tools*)
-        ;;
-    *)
-        echo "Error: Claude tool-calling smoke task returned unexpected result." >&2
-        sed -n '1,180p' "${tmp_claude_tools}" >&2
-        exit 1
-        ;;
-esac
-echo "Claude tool-calling smoke task ok."
-
-echo "All GH/Codex/Claude verification checks passed."
+echo "All GH/Codex verification checks passed."
