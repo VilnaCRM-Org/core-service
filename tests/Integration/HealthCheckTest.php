@@ -101,7 +101,7 @@ final class HealthCheckTest extends BaseTest
 
     private function createCacheMock(): CacheInterface
     {
-        return new class implements CacheInterface, ResetInterface {
+        return new class() implements CacheInterface, ResetInterface {
             public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
             {
                 throw new CacheException('Cache is not working');
@@ -121,7 +121,7 @@ final class HealthCheckTest extends BaseTest
 
     private function createSqsClientMock(): SqsClient
     {
-        return new class extends SqsClient {
+        return new class() extends SqsClient {
             private bool $called = false;
 
             public function __construct()
