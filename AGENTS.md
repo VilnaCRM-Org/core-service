@@ -46,6 +46,7 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
    - **NEVER** run PHP commands directly on the host system
 
 2. **CRITICAL: Run CI Before Finishing Tasks**
+
    - Execute `make ci` before completing any task
    - Must see "✅ CI checks successfully passed!" in output
    - Fix all issues if "❌ CI checks failed:" appears
