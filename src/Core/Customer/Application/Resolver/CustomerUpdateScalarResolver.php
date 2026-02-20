@@ -60,9 +60,10 @@ final class CustomerUpdateScalarResolver
     {
         $trimmed = trim($candidate ?? '');
 
-        return match (true) {
-            $trimmed !== '' => $trimmed,
-            default => $fallback,
-        };
+        if ($trimmed !== '') {
+            return $trimmed;
+        }
+
+        return $fallback;
     }
 }

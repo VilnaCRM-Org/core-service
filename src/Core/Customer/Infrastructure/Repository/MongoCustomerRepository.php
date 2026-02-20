@@ -52,10 +52,22 @@ final class MongoCustomerRepository extends BaseRepository implements
             return;
         }
 
-        $managedCustomer = $this->documentManager->contains($entity)
-            ? $entity
-            : $this->documentManager->merge($entity);
+        $managedCustomer = $this->resolveManagedCustomer($entity);
+        if ($managedCustomer === null) {
+            return;
+        }
 
         parent::delete($managedCustomer);
+    }
+
+    private function resolveManagedCustomer(Customer $customer): ?Customer
+    {
+        if ($this->documentManager->contains($customer)) {
+            return $customer;
+        }
+
+        $entity = $this->find($customer->getUlid());
+
+        return $entity instanceof Customer ? $entity : null;
     }
 }

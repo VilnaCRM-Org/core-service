@@ -30,10 +30,14 @@ final class ParameterCleaner
     private function cleanParameter(
         array|string|int|float|bool|null $parameter
     ): array|string|int|float|bool|null {
-        return match (true) {
-            !is_array($parameter) => $parameter,
-            !isset($parameter['in']) || $parameter['in'] !== 'path' => $parameter,
-            default => array_diff_key($parameter, array_flip(self::DISALLOWED_PATH_PROPERTIES)),
-        };
+        if (!is_array($parameter)) {
+            return $parameter;
+        }
+
+        if (!isset($parameter['in']) || $parameter['in'] !== 'path') {
+            return $parameter;
+        }
+
+        return array_diff_key($parameter, array_flip(self::DISALLOWED_PATH_PROPERTIES));
     }
 }

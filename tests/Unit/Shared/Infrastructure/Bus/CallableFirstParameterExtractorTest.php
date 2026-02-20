@@ -60,8 +60,8 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
         return new class() implements DomainEventSubscriberInterface {
             /**
              * @return array<class-string>
-             * #[\Override]
              */
+            #[\Override]
             public function subscribedTo(): array
             {
                 return [DomainEvent::class, TestOtherEvent::class];

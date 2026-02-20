@@ -102,16 +102,19 @@ final class HealthCheckTest extends BaseTest
     private function createCacheMock(): CacheInterface
     {
         return new class() implements CacheInterface, ResetInterface {
+            #[\Override]
             public function get(string $key, callable $callback, ?float $beta = null, ?array &$metadata = null): mixed
             {
                 throw new CacheException('Cache is not working');
             }
 
+            #[\Override]
             public function delete(string $key): bool
             {
                 return true;
             }
 
+            #[\Override]
             public function reset(): void
             {
                 // No-op for test
@@ -129,6 +132,7 @@ final class HealthCheckTest extends BaseTest
                 // Don't call parent constructor to avoid AWS SDK configuration
             }
 
+            #[\Override]
             public function __call($name, $args)
             {
                 if ($name === 'createQueue' && ! $this->called) {

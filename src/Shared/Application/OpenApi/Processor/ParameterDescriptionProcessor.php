@@ -61,11 +61,11 @@ final class ParameterDescriptionProcessor
     {
         $paramName = $parameter->getName();
 
-        return match (true) {
-            !isset($descriptions[$paramName]) => $parameter,
-            self::hasDescription($parameter) => $parameter,
-            default => $parameter->withDescription($descriptions[$paramName]),
-        };
+        if (!isset($descriptions[$paramName]) || self::hasDescription($parameter)) {
+            return $parameter;
+        }
+
+        return $parameter->withDescription($descriptions[$paramName]);
     }
 
     private static function hasDescription(Parameter $parameter): bool

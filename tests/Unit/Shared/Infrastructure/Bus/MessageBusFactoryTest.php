@@ -310,6 +310,7 @@ final class MessageBusFactoryTest extends UnitTestCase
     public function testNoHandlerExceptionWhenEventNotSubscribed(): void
     {
         $subscriber = new class() implements DomainEventSubscriberInterface {
+            #[\Override]
             public function subscribedTo(): array
             {
                 return [TestOtherEvent::class]; // Only subscribes to TestOtherEvent!

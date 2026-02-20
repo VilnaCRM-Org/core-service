@@ -85,7 +85,6 @@ final class TagDescriptionProcessorTest extends UnitTestCase
         );
 
         $method = new ReflectionMethod(TagDescriptionProcessor::class, 'indexTags');
-        $method->setAccessible(true);
 
         $indexed = $method->invoke(new TagDescriptionProcessor(), $openApi);
 

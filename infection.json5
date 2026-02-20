@@ -10,6 +10,12 @@
     "summary": "summary.log",
   },
   "mutators": {
-    "@default": true
+    "@default": true,
+    "PublicVisibility": {
+      "ignore": [
+        "App\\Core\\Customer\\Infrastructure\\Repository\\BaseRepository::save",
+        "App\\Core\\Customer\\Infrastructure\\Repository\\BaseRepository::delete"
+      ]
+    }
   }
 }

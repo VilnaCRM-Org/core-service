@@ -73,10 +73,21 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $this->repository->delete($customer);
     }
 
-    public function testDeleteDetachedCustomerMergesFirst(): void
+    public function testDeleteDetachedCustomerUsesManagedEntityById(): void
     {
         $customer = $this->createMock(Customer::class);
         $managedCustomer = $this->createMock(Customer::class);
+        $customerId = '01JKX8XGHVDZ46MWYMZT94YER4';
+
+        $customer
+            ->expects($this->once())
+            ->method('getUlid')
+            ->willReturn($customerId);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find'])
+            ->getMock();
 
         $this->documentManager
             ->expects($this->once())
@@ -85,9 +96,13 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->willReturn(false);
 
         $this->documentManager
+            ->expects($this->never())
+            ->method('merge');
+
+        $repository
             ->expects($this->once())
-            ->method('merge')
-            ->with($customer)
+            ->method('find')
+            ->with($customerId)
             ->willReturn($managedCustomer);
 
         $this->documentManager
@@ -99,7 +114,49 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('flush');
 
-        $this->repository->delete($customer);
+        $repository->delete($customer);
+    }
+
+    public function testDeleteDetachedCustomerDoesNothingWhenEntityNotFound(): void
+    {
+        $customer = $this->createMock(Customer::class);
+        $customerId = '01JKX8XGHVDZ46MWYMZT94YER4';
+
+        $customer
+            ->expects($this->once())
+            ->method('getUlid')
+            ->willReturn($customerId);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find'])
+            ->getMock();
+
+        $this->documentManager
+            ->expects($this->once())
+            ->method('contains')
+            ->with($customer)
+            ->willReturn(false);
+
+        $this->documentManager
+            ->expects($this->never())
+            ->method('merge');
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($customerId)
+            ->willReturn(null);
+
+        $this->documentManager
+            ->expects($this->never())
+            ->method('remove');
+
+        $this->documentManager
+            ->expects($this->never())
+            ->method('flush');
+
+        $repository->delete($customer);
     }
 
     public function testDeleteNonCustomerEntityCallsParentDelete(): void
