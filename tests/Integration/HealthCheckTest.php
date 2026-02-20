@@ -102,7 +102,7 @@ final class HealthCheckTest extends BaseTest
     private function createCacheMock(): CacheInterface
     {
         return new class() implements CacheInterface, ResetInterface {
-            public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
+            public function get(string $key, callable $callback, ?float $beta = null, ?array &$metadata = null): mixed
             {
                 throw new CacheException('Cache is not working');
             }
@@ -131,7 +131,7 @@ final class HealthCheckTest extends BaseTest
 
             public function __call($name, $args)
             {
-                if ($name === 'createQueue' && !$this->called) {
+                if ($name === 'createQueue' && ! $this->called) {
                     $this->called = true;
                     throw new \Exception('Message broker is not available');
                 }
