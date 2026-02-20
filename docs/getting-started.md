@@ -94,6 +94,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 - Docker support so all existing `make` commands continue to work
 - GitHub CLI (`gh`)
 - Codex CLI (`codex`)
+- Claude Code CLI (`claude`)
 - Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
@@ -110,19 +111,20 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 ```bash
 gh --version
 codex --version
+claude --version
 make help
 ```
 
 For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
-- `OPENAI_API_KEY`
+- `OPENROUTER_API_KEY`
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
-These secrets are provided directly by Codespaces to the container runtime, so `gh`, `git`, and `codex` can use them in normal terminal sessions.
+These secrets are mapped into the runtime shell environment via `.devcontainer/devcontainer.json` (`remoteEnv`), so `gh`, `git`, `codex`, and `claude` can use them in normal terminal sessions.
 The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
 
-Non-secret defaults for GitHub CLI and Codex are persisted in git:
+Non-secret defaults for GitHub CLI, Codex, and Claude are persisted in git:
 
 - `.devcontainer/codespaces-settings.env`
 - `.devcontainer/post-create.sh`
@@ -147,22 +149,39 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
-- `codex` can execute one non-interactive task via OpenAI
+- `codex` can execute one non-interactive task via OpenRouter
+- `claude` can execute one non-interactive task via OpenRouter
+- `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
+- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
 
-`verify-gh-codex.sh` includes Codex basic and tool-calling smoke checks.
-This setup is OpenAI-only and configures Codex with:
+`verify-gh-codex.sh` includes Codex (basic + tool-calling) and Claude Code (basic + tool-calling) smoke checks.
+This setup is OpenRouter-only and configures Codex with:
 
-- model `gpt-5.2-codex`
-- OpenAI provider URL `https://api.openai.com/v1`
-- default `model_reasoning_effort=medium`
-- default `approval_policy=never`
-- default `sandbox_mode=danger-full-access`
+- model `openai/gpt-5.2-codex`
+- OpenRouter provider URL `https://openrouter.ai/api/v1`
+- default `approval_policy=on-failure`
+- default `sandbox_mode=workspace-write`
 
-If you need safer defaults in a Codespace, set overrides before bootstrap:
+If you need full autonomous mode, explicitly opt in before bootstrap:
 
 ```bash
-export CODEX_APPROVAL_POLICY=on-failure
-export CODEX_SANDBOX_MODE=workspace-write
+export CODEX_ALLOW_UNSAFE_MODE=1
+export CODEX_APPROVAL_POLICY=never
+export CODEX_SANDBOX_MODE=danger-full-access
+```
+
+Claude Code is configured with:
+
+- `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
+- `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
+- default model `anthropic/claude-sonnet-4.5`
+- default permission mode `plan` (safer tool-use confirmations enabled by default)
+
+If you intentionally want `bypassPermissions`, opt in explicitly before bootstrap:
+
+```bash
+export CLAUDE_PERMISSION_MODE=bypassPermissions
+export CLAUDE_ALLOW_BYPASS_PERMISSIONS=1
 ```
 
 ### Working in Codespaces

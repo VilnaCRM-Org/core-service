@@ -63,6 +63,7 @@ This repository ships with a built-in Codespaces definition in `.devcontainer/de
 When a Codespace is created, the setup script:
 
 - installs `codex` CLI
+- installs `claude` CLI (Claude Code)
 - provides `gh` CLI
 - installs `bats` CLI for `make bats`
 - starts the Docker stack with `make start`
@@ -73,6 +74,7 @@ After startup, verify the environment:
 ```bash
 gh --version
 codex --version
+claude --version
 make help
 ```
 
@@ -80,7 +82,7 @@ make help
 
 Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
 
-- `OPENAI_API_KEY`: OpenAI API key for Codex CLI
+- `OPENROUTER_API_KEY`: OpenRouter API key for Codex and Claude Code
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`
@@ -98,9 +100,12 @@ What `startup-smoke-tests.sh` checks:
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
 - `bats` CLI is available
-- `codex` can execute one non-interactive task with the `openai` profile
+- `codex` can execute one non-interactive task with the `openrouter` profile
+- `claude` can execute one non-interactive task via OpenRouter
+- `claude` can invoke Bash tool calls in non-interactive mode via OpenRouter
+- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
 
-Repository-tracked defaults for GitHub and Codex bootstrap are stored in:
+Repository-tracked defaults for GitHub, Codex, and Claude bootstrap are stored in:
 
 - `.devcontainer/codespaces-settings.env`
 - `.devcontainer/post-create.sh`
@@ -112,55 +117,84 @@ What `verify-gh-codex.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `codex` can run basic and tool-calling non-interactive smoke tasks via OpenAI
+- `codex` can run basic and tool-calling non-interactive smoke tasks via OpenRouter
 - `codex` can complete a tool-calling smoke task required for autonomous coding flows
+- `claude` can run a non-interactive smoke task via OpenRouter
+- `claude` can run a tool-calling smoke task (Bash tool_use) via OpenRouter
+- Claude default model is set to `anthropic/claude-sonnet-4.5`
+- Claude default permission mode is set to `plan` (safer tool-use confirmations enabled by default)
 
-Codex is configured directly (no `make` wrapper) with a single OpenAI profile:
+Codex is configured directly (no `make` wrapper) with a single OpenRouter profile:
 
 ```toml
-profile = "openai"
+profile = "openrouter"
 
-[profiles.openai]
-model = "gpt-5.2-codex"
-model_provider = "openai"
-model_reasoning_effort = "medium"
+[profiles.openrouter]
+model = "openai/gpt-5.2-codex"
+model_provider = "openrouter"
+model_reasoning_effort = "high"
 model_reasoning_summary = "none"
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
+approval_policy = "on-failure"
+sandbox_mode = "workspace-write"
 
-[model_providers.openai]
-name = "OpenAI"
-base_url = "https://api.openai.com/v1"
-env_key = "OPENAI_API_KEY"
+[model_providers.openrouter]
+name = "OpenRouter"
+base_url = "https://openrouter.ai/api/v1"
+env_key = "OPENROUTER_API_KEY"
 wire_api = "responses"
 ```
 
-Default bootstrap uses autonomous Codex settings (`approval_policy=never`, `sandbox_mode=danger-full-access`) with medium reasoning on `gpt-5.2-codex`.
-If you need safer defaults in a Codespace, set overrides before bootstrap:
+Default bootstrap uses safer Codex settings (`approval_policy=on-failure`, `sandbox_mode=workspace-write`).
+If you need full autonomous mode, explicit opt-in is required by setting all three before bootstrap:
 
 ```bash
-export CODEX_APPROVAL_POLICY=on-failure
-export CODEX_SANDBOX_MODE=workspace-write
+export CODEX_ALLOW_UNSAFE_MODE=1
+export CODEX_APPROVAL_POLICY=never
+export CODEX_SANDBOX_MODE=danger-full-access
 ```
 
-Use safer mode in shared or untrusted environments.
+Use the unsafe combo only in trusted ephemeral Codespaces with least-privilege tokens, protected branches, and strict review/CI gates.
 
 Run Codex directly:
 
 ```bash
-codex -p openai
-codex exec -p openai "Refactor customer update flow to reduce duplication"
+codex -p openrouter
+codex exec -p openrouter --dangerously-bypass-approvals-and-sandbox "Refactor customer update flow to reduce duplication"
+```
+
+Claude Code is configured to use OpenRouter by default:
+
+- `ANTHROPIC_AUTH_TOKEN=$OPENROUTER_API_KEY`
+- `ANTHROPIC_BASE_URL=https://openrouter.ai/api`
+- `ANTHROPIC_MODEL=anthropic/claude-sonnet-4.5`
+- `permissions.defaultMode=plan` (safer default for tool-use confirmations)
+- `~/.claude/settings.json` contains:
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4.5",
+  "permissions": {
+    "defaultMode": "plan"
+  }
+}
+```
+
+If you intentionally want `bypassPermissions`, opt in explicitly before bootstrap:
+
+```bash
+export CLAUDE_PERMISSION_MODE=bypassPermissions
+export CLAUDE_ALLOW_BYPASS_PERMISSIONS=1
 ```
 
 Notes:
 
 - secrets are never stored in git; keep them in Codespaces secrets
-- Codespaces secrets are provided directly by Codespaces to the container runtime
+- Codespaces secrets are mapped into runtime shell environment via `.devcontainer/devcontainer.json` `remoteEnv`
 - bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
-- this setup is Codex-only
+- this setup is OpenRouter-only
 
 ## Using
 

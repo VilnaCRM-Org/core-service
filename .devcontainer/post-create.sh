@@ -13,6 +13,7 @@ fi
 # Codespaces host Docker currently exposes API 1.43; newer clients need this pin.
 export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.43}"
 : "${CODEX_NPM_PACKAGE:=@openai/codex}"
+: "${CLAUDE_NPM_PACKAGE:=@anthropic-ai/claude-code}"
 
 ensure_apt_packages() {
     local missing_packages=()
@@ -50,6 +51,10 @@ ensure_apt_packages make bats
 
 if ! command -v codex >/dev/null 2>&1; then
     npm install -g "${CODEX_NPM_PACKAGE}"
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+    npm install -g "${CLAUDE_NPM_PACKAGE}"
 fi
 
 export GH_TOKEN_VAR="${GH_TOKEN_VAR:-GH_AUTOMATION_TOKEN}"
