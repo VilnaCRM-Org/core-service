@@ -180,7 +180,7 @@ echo "Running Codex tool-calling smoke task..."
 tool_smoke_failed=0
 codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" "${codex_tool_prompt}"
+    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --skip-git-repo-check "${codex_tool_prompt}"
 ) >"${tmp_codex_tools}" 2>&1; then
     tool_smoke_failed=1
 fi
