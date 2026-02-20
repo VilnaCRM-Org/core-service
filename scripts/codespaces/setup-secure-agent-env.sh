@@ -16,6 +16,7 @@ if [ -f "${SETTINGS_FILE}" ]; then
 fi
 
 readonly CODEX_CONFIG="${HOME}/.codex/config.toml"
+readonly CODEX_AUTH_JSON="${HOME}/.codex/auth.json"
 readonly AGENT_ENV_DIR="${HOME}/.config/core-service"
 readonly AGENT_SECRETS_FILE="${AGENT_ENV_DIR}/agent-secrets.env"
 readonly AGENT_BASHRC_FILE="${HOME}/.bashrc"
@@ -76,6 +77,16 @@ escape_toml_string() {
     value="${value//\\/\\\\}"
     value="${value//\"/\\\"}"
     value="${value//$'\n'/\\n}"
+    printf '%s' "${value}"
+}
+
+escape_json_string() {
+    local value="${1-}"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\t'/\\t}"
     printf '%s' "${value}"
 }
 
@@ -194,6 +205,37 @@ EOM
     mv "${tmp_config}" "${CODEX_CONFIG}"
 }
 
+write_codex_auth() {
+    local tmp_auth
+    local key_escaped
+
+    tmp_auth="$(mktemp)"
+    track_tmp_file "${tmp_auth}"
+
+    if command -v jq >/dev/null 2>&1 \
+        && [ -f "${CODEX_AUTH_JSON}" ] \
+        && jq -e '.' "${CODEX_AUTH_JSON}" >/dev/null 2>&1; then
+        if jq --arg key "${OPENAI_API_KEY}" '.OPENAI_API_KEY = $key' "${CODEX_AUTH_JSON}" > "${tmp_auth}"; then
+            :
+        else
+            : > "${tmp_auth}"
+        fi
+    fi
+
+    if [ ! -s "${tmp_auth}" ]; then
+        key_escaped="$(escape_json_string "${OPENAI_API_KEY}")"
+        cat > "${tmp_auth}" <<EOM
+{
+  "OPENAI_API_KEY": "${key_escaped}"
+}
+EOM
+    fi
+
+    mkdir -p "$(dirname "${CODEX_AUTH_JSON}")"
+    chmod 600 "${tmp_auth}"
+    mv "${tmp_auth}" "${CODEX_AUTH_JSON}"
+}
+
 validate_codex_safety_settings() {
     if [ "${CODEX_APPROVAL_POLICY}" = "never" ] \
         && [ "${CODEX_SANDBOX_MODE}" = "danger-full-access" ] \
@@ -280,6 +322,7 @@ configure_git_identity
 persist_agent_secrets_file
 ensure_shell_sources_agent_secrets
 write_codex_config
+write_codex_auth
 
 # Persist repository-defined GH defaults for CLI behavior in each fresh Codespace.
 gh config set git_protocol "${GH_GIT_PROTOCOL}" --host "${GH_HOST}" >/dev/null 2>&1 || true
@@ -292,5 +335,6 @@ echo "  - name: ${DETECTED_GIT_IDENTITY_NAME:-<unset>}"
 echo "  - email: ${DETECTED_GIT_IDENTITY_EMAIL:-<unset>}"
 echo "Codex configured:"
 echo "  - config: ${CODEX_CONFIG}"
+echo "  - auth: ${CODEX_AUTH_JSON}"
 echo "  - model: ${CODEX_MODEL}"
 echo "  - profile: ${CODEX_PROFILE_NAME}"
