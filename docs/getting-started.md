@@ -65,7 +65,6 @@ As you will see, we use Make commands to manage the project. Run `make help` aft
    [Architecture Diagrams](http://localhost:8080/workspace/diagrams) (available when running locally)
 
    You can also view the API specifications directly on GitHub:
-
    - [OpenAPI Specification](https://github.com/VilnaCRM-Org/core-service/blob/main/.github/openapi-spec/spec.yaml)
 
 5. **FAQ**

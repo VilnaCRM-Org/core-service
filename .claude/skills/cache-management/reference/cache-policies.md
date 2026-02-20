@@ -114,17 +114,14 @@ public function findById(string $id): ?Customer
 **Consider these factors when choosing TTL**:
 
 1. **Data change frequency**
-
    - Frequently updated → Shorter TTL
    - Rarely updated → Longer TTL
 
 2. **Business impact of stale data**
-
    - High impact (prices, inventory) → Shorter TTL or invalidation
    - Low impact (descriptions, images) → Longer TTL
 
 3. **Query cost**
-
    - Expensive queries → Longer TTL with invalidation
    - Cheap queries → Shorter TTL or no cache
 
@@ -414,27 +411,22 @@ private function calculateTtl(string $date): int
 Before implementing cache, answer these questions:
 
 1. **What is the query cost?**
-
    - High cost → Consider caching
    - Low cost → May not need cache
 
 2. **How frequently does data change?**
-
    - Rarely → Longer TTL
    - Frequently → Shorter TTL or no cache
 
 3. **What's the business impact of stale data?**
-
    - High impact → Strong consistency or short TTL
    - Low impact → Eventual consistency or SWR
 
 4. **What's the read:write ratio?**
-
    - High (>10:1) → Great candidate for caching
    - Low (<3:1) → Cache invalidation overhead may outweigh benefits
 
 5. **Can invalidation be triggered explicitly?**
-
    - Yes → Use invalidation + longer TTL
    - No → Use shorter TTL
 

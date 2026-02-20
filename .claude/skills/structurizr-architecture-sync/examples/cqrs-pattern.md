@@ -262,23 +262,19 @@ workspace {
 The generated diagram will show:
 
 1. **Application Layer** (top):
-
    - CreateCustomerCommandHandler
 
 2. **Domain Layer** (middle):
-
    - Customer aggregate with value objects
    - CustomerCreatedEvent
    - CustomerRepositoryInterface (port)
 
 3. **Infrastructure Layer** (bottom):
-
    - CustomerRepository implementing the interface
    - SendWelcomeEmailSubscriber
    - InMemorySymfonyEventBus
 
 4. **External Systems**:
-
    - Database (MongoDB)
    - Message Broker (AWS SQS)
 

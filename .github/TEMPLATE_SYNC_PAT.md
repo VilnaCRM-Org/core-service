@@ -49,7 +49,6 @@ To make the options for repository permissions (such as contents:write, workflow
    ```
 
 4. If you encounter the error `pull request create failed: Actions is not permitted to create or approve pull requests (createPullRequest)`, follow these additional steps:
-
    - Go to your project’s **Settings** > **Actions** > **General**.
    - Under the **Workflow permissions** section, check the box for **Allow GitHub Actions to create and approve pull requests**.
 
