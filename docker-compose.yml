@@ -60,6 +60,10 @@ services:
 
   database:
     image: mongo:6.0
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}

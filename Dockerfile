@@ -50,7 +50,7 @@ RUN set -eux; \
         redis \
         openssl \
         xsl \
-        mongodb \
+        mongodb-2.1.8 \
     ;
 
 ###> recipes ###
@@ -108,8 +108,18 @@ RUN apk add --no-cache \
     bash \
     make
 
-RUN set -o pipefail && curl -sS https://get.symfony.com/cli/installer | bash \
- && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+RUN set -euxo pipefail; \
+    for attempt in 1 2 3; do \
+        if curl -sSfL https://get.symfony.com/cli/installer | bash; then \
+            break; \
+        fi; \
+        if [ "$attempt" -eq 3 ]; then \
+            exit 1; \
+        fi; \
+        rm -rf /root/.symfony5; \
+        sleep $((attempt * 2)); \
+    done; \
+    mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 ENV APP_ENV=dev XDEBUG_MODE=off
 VOLUME /srv/app/var/

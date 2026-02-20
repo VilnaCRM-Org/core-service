@@ -56,6 +56,112 @@ Also, you can see the architecture diagram using the link below
 
 That's it. You should now be ready to use core service!
 
+### GitHub Codespaces
+
+This repository ships with a built-in Codespaces definition in `.devcontainer/devcontainer.json`.
+
+When a Codespace is created, the setup script:
+
+- installs `codex` CLI
+- provides `gh` CLI
+- installs `bats` CLI for `make bats`
+- starts the Docker stack with `make start`
+- installs PHP dependencies with `make install` if needed
+
+After startup, verify the environment:
+
+```bash
+gh --version
+codex --version
+make help
+```
+
+#### Secure setup for autonomous AI coding agents
+
+Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
+
+- `OPENAI_API_KEY`: OpenAI API key for Codex CLI
+- `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
+- bootstrap sets git identity for automated commits to:
+  - `vilnacrm ai bot <info@vilnacrm.com>`
+
+The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
+
+```bash
+bash scripts/codespaces/setup-secure-agent-env.sh
+bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
+```
+
+What `startup-smoke-tests.sh` checks:
+
+- `gh` authentication is available
+- repository listing for `VilnaCRM-Org` works
+- `bats` CLI is available
+- `codex` can execute one non-interactive task with the `openai` profile
+
+Repository-tracked defaults for GitHub and Codex bootstrap are stored in:
+
+- `.devcontainer/codespaces-settings.env`
+- `.devcontainer/post-create.sh`
+- `scripts/codespaces/setup-secure-agent-env.sh`
+
+What `verify-gh-codex.sh` checks:
+
+- GitHub auth works
+- repository listing for `VilnaCRM-Org` works
+- current PR checks can be queried via `gh`
+- current branch supports `git push --dry-run`
+- `codex` can run basic and tool-calling non-interactive smoke tasks via OpenAI
+- `codex` can complete a tool-calling smoke task required for autonomous coding flows
+
+Codex is configured directly (no `make` wrapper) with a single OpenAI profile:
+
+```toml
+profile = "openai"
+
+[profiles.openai]
+model = "gpt-5.2-codex"
+model_provider = "openai"
+model_reasoning_effort = "medium"
+model_reasoning_summary = "none"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[model_providers.openai]
+name = "OpenAI"
+base_url = "https://api.openai.com/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+```
+
+Default bootstrap uses autonomous Codex settings (`approval_policy=never`, `sandbox_mode=danger-full-access`) with medium reasoning on `gpt-5.2-codex`.
+If you need safer defaults in a Codespace, set overrides before bootstrap:
+
+```bash
+export CODEX_APPROVAL_POLICY=on-failure
+export CODEX_SANDBOX_MODE=workspace-write
+```
+
+Use safer mode in shared or untrusted environments.
+
+Run Codex directly:
+
+```bash
+codex -p openai
+codex exec -p openai "Refactor customer update flow to reduce duplication"
+```
+
+Notes:
+
+- secrets are never stored in git; keep them in Codespaces secrets
+- Codespaces secrets are provided directly by Codespaces to the container runtime
+- bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
+- no token values are written to repository files
+- if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
+  `gh auth login -h github.com -w && gh auth setup-git`
+- this setup is Codex-only
+
 ## Using
 
 You can use `make` command to easily control and work with project locally.
