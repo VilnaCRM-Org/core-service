@@ -261,7 +261,6 @@ $metrics = new MetricCollection(
    ```
 
 2. **Wrong Class Name**:
-
    - Rename class to follow naming conventions
    - Update all references to renamed class
    - Ensure name reflects actual functionality

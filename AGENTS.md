@@ -39,7 +39,6 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
 ### Essential Execution Rules
 
 1. **MANDATORY: Use Make Commands or Docker Container Access Only**
-
    - `make command-name` (preferred)
    - `docker compose exec php command` (direct container access)
    - `make sh` then run commands inside
@@ -50,6 +49,12 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
    - Must see "✅ CI checks successfully passed!" in output
    - Fix all issues if "❌ CI checks failed:" appears
    - **DO NOT** finish tasks until CI passes completely
+
+3. **CRITICAL: Use GitHub Codespaces with Login Shells (for secrets/auth)**
+   - Non-interactive commands: `gh codespace ssh -c <codespace-name> -- "bash -lc '<command>'"`
+   - Interactive session: `gh codespace ssh -c <codespace-name>` then run `bash -l`
+   - Run bootstrap from repo root when needed: `bash scripts/codespaces/setup-secure-agent-env.sh`
+   - **NEVER** use non-login SSH commands for auth-dependent checks (`gh codespace ssh -- '<command>'`) because Codespaces secrets may not be loaded
 
 ### Quick Skill Guide
 

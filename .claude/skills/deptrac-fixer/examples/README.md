@@ -82,7 +82,6 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
 **✅ CORRECT - Two-Layer Validation:**
 
 1. **Application Layer** - Input validation (format, structure, business rules)
-
    - **DTO Validation Config**: `config/validator/Customer.yaml`
      - Rules: NotBlank, Email, Length
      - NO annotations on DTO classes!
@@ -91,7 +90,6 @@ These examples follow the **actual patterns** used in `src/Core/Customer/`:
      - Part of Application layer, NOT a separate layer
 
 2. **Domain Layer (Entities)** - Business invariants only
-
    - Location: Entity business methods
    - Rules: State transitions, business rules
    - NO validation in constructors (trust Application layer)!

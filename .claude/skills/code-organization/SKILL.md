@@ -34,17 +34,17 @@ Examples:
 
 ## Quick Reference: Where Does It Belong?
 
-| Class Does                | Belongs In     | Examples             |
-| ------------------------- | -------------- | -------------------- |
-| Converts types            | `Converter/`   | UlidTypeConverter    |
+| Class Does               | Belongs In     | Examples             |
+| ------------------------ | -------------- | -------------------- |
+| Converts types           | `Converter/`   | UlidTypeConverter    |
 | Transforms data (DB↔PHP) | `Transformer/` | UlidTransformer      |
-| Validates values          | `Validator/`   | UlidValidator        |
-| Builds/constructs         | `Builder/`     | ArrayResponseBuilder |
-| Fixes/modifies            | `Fixer/`       | ContentPropertyFixer |
-| Cleans/filters            | `Cleaner/`     | ArrayValueCleaner    |
-| Creates objects           | `Factory/`     | UlidFactory          |
-| Resolves values           | `Resolver/`    | ScalarResolver       |
-| Serializes/normalizes     | `Serializer/`  | OpenApiNormalizer    |
+| Validates values         | `Validator/`   | UlidValidator        |
+| Builds/constructs        | `Builder/`     | ArrayResponseBuilder |
+| Fixes/modifies           | `Fixer/`       | ContentPropertyFixer |
+| Cleans/filters           | `Cleaner/`     | ArrayValueCleaner    |
+| Creates objects          | `Factory/`     | UlidFactory          |
+| Resolves values          | `Resolver/`    | ScalarResolver       |
+| Serializes/normalizes    | `Serializer/`  | OpenApiNormalizer    |
 
 ## Organization Checklist
 
@@ -256,17 +256,14 @@ public function fromBinary(mixed $binary): Ulid  // Name suggests only binary
 ## Common Mistakes to Avoid
 
 1. **Don't create "Helper" or "Util" classes**
-
    - These are code smells
    - Extract specific responsibilities into properly named classes
 
 2. **Don't put multiple class types in one directory**
-
    - Converters don't belong in Transformer/
    - Validators don't belong in Converter/
 
 3. **Don't use vague variable names**
-
    - `$converter` → `$typeConverter` (be specific)
    - `$data` → `$customerData` (be descriptive)
 

@@ -51,7 +51,6 @@ The `make ci` command runs these checks in sequence:
 
 1. **Identify the failing check** from the error output
 2. **Fix the specific issue**:
-
    - Code style: Review PHP CS Fixer suggestions
    - Static analysis: Fix Psalm type errors
    - Quality issues: Address PHPInsights warnings (reduce complexity, fix architecture)

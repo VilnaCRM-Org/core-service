@@ -550,7 +550,6 @@ From PHPInsights configuration:
 ### Techniques to Reduce Complexity
 
 1. **Use Match Instead of If-Else**
-
    - Each `match` case = 1 complexity
    - Each `if` = +1, each `elseif` = +1
 
@@ -638,7 +637,6 @@ if ($array === []) { }
 ```
 
 3. **Don't Create God Classes**
-
    - Split into multiple processors
    - Each processor = one concern
 

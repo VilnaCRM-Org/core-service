@@ -190,17 +190,14 @@ customerRepository -> database "retrieves from"
 The generated diagram will show:
 
 1. **Request Entry**:
-
    - CustomerController (entry point)
 
 2. **Request Processing**:
-
    - Controller → UUID Transformer (transform ID)
    - Controller → Item Provider (retrieve data)
    - Item Provider → Repository (data access)
 
 3. **UUID Transformation**:
-
    - Transformer → Factory Interface
    - Factory → Implements Interface
    - Factory → Creates UUID

@@ -369,7 +369,6 @@ src/Core/Customer/Application/
 ### "Where does my new class belong?"
 
 1. **What does it DO?**
-
    - Creates objects → `Factory/`
    - Validates data → `Validator/`
    - Converts types → `Converter/`
@@ -382,7 +381,6 @@ src/Core/Customer/Application/
    - Resolves values → `Resolver/`
 
 2. **Which LAYER?**
-
    - Domain logic → `Domain/`
    - Application logic → `Application/`
    - Infrastructure (DB, external) → `Infrastructure/`
