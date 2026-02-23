@@ -10,7 +10,6 @@ final class ConstraintViolationPayloadItemsUpdater
 {
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
-     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
     public static function update(array $constraintViolation): ?array
@@ -20,8 +19,8 @@ final class ConstraintViolationPayloadItemsUpdater
             return null;
         }
 
-        $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
-        if (!PayloadItemsRequirementChecker::shouldAddItems($payload)) {
+        $payload = self::extractPayload($properties);
+        if ($payload === null) {
             return null;
         }
 
@@ -33,8 +32,7 @@ final class ConstraintViolationPayloadItemsUpdater
 
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
-     *
-     * @return array<string, mixed>|null
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
     private static function extractProperties(array $constraintViolation): ?array
     {
@@ -46,9 +44,19 @@ final class ConstraintViolationPayloadItemsUpdater
     }
 
     /**
-     * @param array<string, mixed> $payload
-     *
-     * @return array<string, mixed>
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $properties
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
+     */
+    private static function extractPayload(array $properties): ?array
+    {
+        $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
+
+        return PayloadItemsRequirementChecker::shouldAddItems($payload) ? $payload : null;
+    }
+
+    /**
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $payload
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
     private static function payloadWithItems(array $payload): array
     {
