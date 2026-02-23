@@ -25,19 +25,25 @@ load 'bats-assert/load'
   mv tests/CLI/bats/php/PartlyCoveredEventBus.php src/Shared/Infrastructure/Bus/Event/
   mv tests/CLI/bats/php/PartlyCoveredEventBusTest.php tests/Unit/Shared/Infrastructure/Bus/Event/
 
+  cleanup() {
+    if [ -f src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php ]; then
+      mv src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php tests/CLI/bats/php/
+    fi
+    if [ -f tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php ]; then
+      mv tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php tests/CLI/bats/php/
+    fi
+  }
+  trap cleanup EXIT
+
   composer dump-autoload
 
   run make unit-tests
   run make infection
   assert_failure
 
-  mv src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php tests/CLI/bats/php/
-  mv tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php tests/CLI/bats/php/
-
   # PHP 8.4 may show "errors were encountered" instead of "mutants were not covered"
   if [[ ! "$output" =~ "mutants were not covered by tests" ]] && [[ ! "$output" =~ "errors were encountered" ]]; then
-    echo "Expected either 'mutants were not covered by tests' or 'errors were encountered', but got neither"
-    return 1
+    fail "Expected either 'mutants were not covered by tests' or 'errors were encountered', but got neither"
   fi
 }
 
@@ -114,4 +120,3 @@ load 'bats-assert/load'
 
   assert_failure
 }
-
