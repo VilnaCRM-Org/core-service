@@ -11,30 +11,48 @@ final class ConstraintViolationPayloadItemsProcessor
 {
     public function process(OpenApi $openApi): OpenApi
     {
-        $components = $openApi->getComponents();
-        $schemas = $components->getSchemas();
+        $schemas = $openApi->getComponents()->getSchemas();
         if ($schemas === null) {
             return $openApi;
         }
-        $constraintViolationSchema = $schemas['ConstraintViolation'] ?? null;
+
+        $updatedSchema = $this->withPayloadItems($schemas[ConstraintViolation] ?? null);
+        if ($updatedSchema === null) {
+            return $openApi;
+        }
+
+        $schemas[ConstraintViolation] = $updatedSchema;
+
+        return $openApi->withComponents($openApi->getComponents()->withSchemas($schemas));
+    }
+
+    private function withPayloadItems(mixed $constraintViolationSchema): array|ArrayObject|null
+    {
         $constraintViolation = SchemaNormalizer::normalize($constraintViolationSchema);
-        $violations = $constraintViolation['properties']['violations']['items'] ?? null;
-        $properties = is_array($violations) ? ($violations['properties'] ?? null) : null;
-        if (!is_array($properties)) {
-            return $openApi;
+        $properties = $this->extractViolationProperties($constraintViolation);
+        if ($properties === null) {
+            return null;
         }
-        $payload = $properties['payload'] ?? null;
-        $payload = SchemaNormalizer::normalize($payload);
+
+        $payload = SchemaNormalizer::normalize($properties[payload] ?? null);
         if (!PayloadItemsRequirementChecker::shouldAddItems($payload)) {
-            return $openApi;
+            return null;
         }
-        $payload['items'] = ['type' => 'object'];
-        $properties['payload'] = $payload;
-        $constraintViolation['properties']['violations']['items']['properties'] =
-            $properties;
-        $schemas['ConstraintViolation'] = $constraintViolationSchema instanceof ArrayObject
+
+        $payload[items] = [type => object];
+        $properties[payload] = $payload;
+        $constraintViolation[properties][violations][items][properties] = $properties;
+
+        return $constraintViolationSchema instanceof ArrayObject
             ? new ArrayObject($constraintViolation)
             : $constraintViolation;
-        return $openApi->withComponents($components->withSchemas($schemas));
+    }
+
+    private function extractViolationProperties(array $constraintViolation): ?array
+    {
+        $violations = $constraintViolation[properties][violations][items] ?? null;
+        $properties = is_array($violations) ? ($violations[properties] ?? null) : null;
+
+        return is_array($properties) ? $properties : null;
     }
 }
