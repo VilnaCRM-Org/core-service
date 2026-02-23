@@ -29,48 +29,122 @@ final class OpenApiSchemaFixesProcessor
     private function fixHydraViewExample(ArrayObject $schemas): ArrayObject
     {
         $normalizedSchemas = $schemas->getArrayCopy();
-        $schema = $normalizedSchemas[self::HYDRA_COLLECTION_SCHEMA] ?? null;
-        $normalized = SchemaNormalizer::normalize($schema);
-        $allOf = $normalized['allOf'] ?? null;
-        if (!is_array($allOf)) {
+        $normalized = $this->normalizeHydraSchema($normalizedSchemas);
+        if ($normalized === null) {
             return $schemas;
         }
 
-        foreach ($allOf as $index => $item) {
-            $normalizedItem = SchemaNormalizer::normalize($item);
-            $properties = $normalizedItem['properties'] ?? null;
-            if (!is_array($properties)) {
-                continue;
-            }
-
-            $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
-            if ($viewSchema === []) {
-                continue;
-            }
-
-            $example = $viewSchema['example'] ?? null;
-            if (!is_array($example) || !array_key_exists('type', $example)) {
-                continue;
-            }
-
-            if (array_key_exists('@type', $example)) {
-                return $schemas;
-            }
-
-            $example['@type'] = $example['type'];
-            unset($example['type']);
-
-            $viewSchema['example'] = $example;
-            $properties['view'] = new ArrayObject($viewSchema);
-            $normalizedItem['properties'] = $properties;
-            $allOf[$index] = new ArrayObject($normalizedItem);
-            $normalized['allOf'] = $allOf;
-            $normalizedSchemas[self::HYDRA_COLLECTION_SCHEMA] = new ArrayObject($normalized);
-
+        $updated = $this->withHydraViewTypeExample($normalized);
+        if ($updated === null) {
             return new ArrayObject($normalizedSchemas);
         }
 
+        $normalizedSchemas[self::HYDRA_COLLECTION_SCHEMA] = new ArrayObject($updated);
         return new ArrayObject($normalizedSchemas);
+    }
+
+    /**
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schemas
+     *
+     * @return array<string, mixed>|null
+     */
+    private function normalizeHydraSchema(array $schemas): ?array
+    {
+        $schema = $schemas[self::HYDRA_COLLECTION_SCHEMA] ?? null;
+        $normalized = SchemaNormalizer::normalize($schema);
+        $allOf = $normalized['allOf'] ?? null;
+        if (!is_array($allOf)) {
+            return null;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param array<string, mixed> $normalized
+     *
+     * @return array<string, mixed>|null
+     */
+    private function withHydraViewTypeExample(array $normalized): ?array
+    {
+        $allOf = $normalized['allOf'] ?? null;
+        if (!is_array($allOf)) {
+            return null;
+        }
+
+        $updatedAllOf = $this->updateHydraAllOf($allOf);
+        if ($updatedAllOf === null) {
+            return null;
+        }
+
+        $normalized['allOf'] = $updatedAllOf;
+
+        return $normalized;
+    }
+
+    /**
+     * @param array<int, mixed> $allOf
+     *
+     * @return array<int, mixed>|null
+     */
+    private function updateHydraAllOf(array $allOf): ?array
+    {
+        foreach ($allOf as $index => $item) {
+            $updatedItem = $this->updateHydraAllOfItem($item);
+            if ($updatedItem === null) {
+                continue;
+            }
+
+            $allOf[$index] = $updatedItem;
+
+            return $allOf;
+        }
+
+        return null;
+    }
+
+    private function updateHydraAllOfItem(mixed $item): ?ArrayObject
+    {
+        $normalizedItem = SchemaNormalizer::normalize($item);
+        $properties = $normalizedItem['properties'] ?? null;
+        if (!is_array($properties)) {
+            return null;
+        }
+
+        $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
+        if ($viewSchema === []) {
+            return null;
+        }
+
+        $example = $this->withAtTypeExample($viewSchema['example'] ?? null);
+        if ($example === null) {
+            return null;
+        }
+
+        $viewSchema['example'] = $example;
+        $properties['view'] = new ArrayObject($viewSchema);
+        $normalizedItem['properties'] = $properties;
+
+        return new ArrayObject($normalizedItem);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function withAtTypeExample(mixed $example): ?array
+    {
+        if (!is_array($example) || !array_key_exists('type', $example)) {
+            return null;
+        }
+
+        if (array_key_exists('@type', $example)) {
+            return null;
+        }
+
+        $example['@type'] = $example['type'];
+        unset($example['type']);
+
+        return $example;
     }
 
     /**
