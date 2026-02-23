@@ -9,7 +9,7 @@ use ArrayObject;
 
 final class ConstraintViolationPayloadItemsProcessor
 {
-    private const SCHEMA_KEY = 'ConstraintViolation';
+    private const SCHEMA_KEY = "ConstraintViolation";
 
     public function process(OpenApi $openApi): OpenApi
     {
@@ -19,13 +19,16 @@ final class ConstraintViolationPayloadItemsProcessor
             return $openApi;
         }
 
-        if (!array_key_exists(self::SCHEMA_KEY, $schemas)) {
+        $schema = $schemas[self::SCHEMA_KEY] ?? null;
+        if ($schema === null) {
             return $openApi;
         }
 
-        $schema = $schemas[self::SCHEMA_KEY];
         $normalized = SchemaNormalizer::normalize($schema);
         $updated = ConstraintViolationPayloadItemsUpdater::update($normalized);
+        if ($updated === null) {
+            return $openApi;
+        }
 
         $schemas[self::SCHEMA_KEY] = $schema instanceof ArrayObject
             ? new ArrayObject($updated)

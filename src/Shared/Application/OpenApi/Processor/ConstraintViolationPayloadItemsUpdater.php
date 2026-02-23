@@ -10,22 +10,25 @@ final class ConstraintViolationPayloadItemsUpdater
 {
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
-     *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
-    public static function update(array $constraintViolation): array
+    public static function update(array $constraintViolation): ?array
     {
         $properties = SchemaNormalizer::normalize(
-            $constraintViolation['properties']['violations']['items']['properties'] ?? null
+            $constraintViolation["properties"]["violations"]["items"]["properties"] ?? null
         );
-        $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
-        if (!PayloadItemsRequirementChecker::shouldAddItems($payload)) {
-            return $constraintViolation;
+        if ($properties === []) {
+            return null;
         }
 
-        $payload['items'] = ['type' => 'object'];
-        $properties['payload'] = $payload;
-        $constraintViolation['properties']['violations']['items']['properties'] = $properties;
+        $payload = SchemaNormalizer::normalize($properties["payload"] ?? null);
+        if (!PayloadItemsRequirementChecker::shouldAddItems($payload)) {
+            return null;
+        }
+
+        $payload["items"] = ["type" => "object"];
+        $properties["payload"] = $payload;
+        $constraintViolation["properties"]["violations"]["items"]["properties"] = $properties;
 
         return $constraintViolation;
     }
