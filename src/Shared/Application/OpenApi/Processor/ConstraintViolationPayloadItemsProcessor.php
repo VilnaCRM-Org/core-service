@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\OpenApi;
+use ArrayObject;
 
 final class ConstraintViolationPayloadItemsProcessor
 {
@@ -16,9 +17,14 @@ final class ConstraintViolationPayloadItemsProcessor
             return $openApi;
         }
 
-        $updatedSchema = $this->withPayloadItems($schemas['ConstraintViolation'] ?? null);
+        $constraintViolationSchema = $schemas['ConstraintViolation'] ?? null;
+        $updatedSchema = $this->withPayloadItems($constraintViolationSchema);
         if ($updatedSchema === null) {
             return $openApi;
+        }
+
+        if ($constraintViolationSchema instanceof ArrayObject && !$updatedSchema instanceof ArrayObject) {
+            $updatedSchema = new ArrayObject($updatedSchema);
         }
 
         $schemas['ConstraintViolation'] = $updatedSchema;
@@ -47,6 +53,7 @@ final class ConstraintViolationPayloadItemsProcessor
 
     /**
      * @param array<string, mixed> $constraintViolation
+     *
      * @return array<string, mixed>|null
      */
     private function extractViolationProperties(array $constraintViolation): ?array
