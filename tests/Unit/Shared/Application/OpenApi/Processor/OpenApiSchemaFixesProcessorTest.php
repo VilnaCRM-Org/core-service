@@ -8,8 +8,15 @@ use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Processor\HydraAllOfItemUpdater;
+use App\Shared\Application\OpenApi\Processor\HydraAllOfUpdater;
+use App\Shared\Application\OpenApi\Processor\HydraAtTypeExampleUpdater;
+use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
+use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
 use App\Shared\Application\OpenApi\Processor\SchemaNormalizer;
+use App\Shared\Application\OpenApi\Processor\UlidSchemaFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -52,7 +59,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -88,7 +95,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -114,7 +121,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -150,7 +157,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -193,7 +200,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -228,7 +235,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -260,7 +267,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Components($schemas)
         );
 
-        $processor = new OpenApiSchemaFixesProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -270,5 +277,18 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
 
         $this->assertSame('string', $ulidSchema['type']);
         $this->assertTrue($ulidSchema['deprecated']);
+    }
+
+    private function createProcessor(): OpenApiSchemaFixesProcessor
+    {
+        $exampleUpdater = new HydraAtTypeExampleUpdater();
+        $itemUpdater = new HydraAllOfItemUpdater($exampleUpdater);
+        $allOfUpdater = new HydraAllOfUpdater($itemUpdater);
+        $viewExampleUpdater = new HydraViewExampleUpdater($allOfUpdater);
+        $schemaNormalizer = new HydraSchemaNormalizer();
+        $hydraFixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $ulidFixer = new UlidSchemaFixer();
+
+        return new OpenApiSchemaFixesProcessor($hydraFixer, $ulidFixer);
     }
 }

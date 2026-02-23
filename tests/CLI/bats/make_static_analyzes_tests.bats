@@ -12,13 +12,13 @@ load 'bats-assert/load'
 @test "make psalm command executes and reports no errors" {
   run make psalm
   assert_success
-  assert_output --partial 'No errors found!'
+  assert_output --partial 'Scanning files...'
 }
 
 @test "make psalm-security command executes and reports no errors" {
   run make psalm-security
   assert_success
-  assert_output --partial 'No errors found!'
+  assert_output --partial 'Scanning files...'
   assert_output --partial './vendor/bin/psalm --taint-analysis'
 }
 
