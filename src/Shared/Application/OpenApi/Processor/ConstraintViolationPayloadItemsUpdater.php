@@ -11,19 +11,16 @@ final class ConstraintViolationPayloadItemsUpdater
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
      *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    public static function update(array $constraintViolation): ?array
+    public static function update(array $constraintViolation): array
     {
-        $properties = $constraintViolation['properties']['violations']['items']['properties']
-            ?? null;
-        if (!is_array($properties)) {
-            return null;
-        }
-
+        $properties = SchemaNormalizer::normalize(
+            $constraintViolation['properties']['violations']['items']['properties'] ?? null
+        );
         $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
         if (!PayloadItemsRequirementChecker::shouldAddItems($payload)) {
-            return null;
+            return $constraintViolation;
         }
 
         $payload['items'] = ['type' => 'object'];
