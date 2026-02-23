@@ -107,7 +107,13 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
+	coverage_file=var/coverage/coverage.xml; \
+	if [ "$(CI)" = "1" ]; then \
+		mkdir -p $$(dirname $$coverage_file); \
+	else \
+		$(DOCKER_COMPOSE) exec -T php mkdir -p $$(dirname $$coverage_file); \
+	fi; \
+	$(RUN_TESTS_COVERAGE) --testsuite=Unit --coverage-clover $$coverage_file > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
@@ -120,10 +126,14 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	if [ "$(CI)" = "1" ]; then \
+		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
+	else \
+		coverage=$$($(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
+	fi; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
-		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
+		if [ "$$coverage" != "100.00" ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
