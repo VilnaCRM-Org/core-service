@@ -92,6 +92,7 @@ interface Node {
 
 type Customer implements Node {
   id: ID!
+  ulid: String!
   initials: String!
   email: String!
   phone: String!
@@ -105,6 +106,7 @@ type Customer implements Node {
 
 type CustomerType implements Node {
   id: ID!
+  ulid: String!
   value: String!
 }
 
