@@ -1,8 +1,8 @@
-You are continuing PR #103 on branch openclaw/core-php84-upgrade-20260210-1340 for the PHP 8.4 upgrade.
+You are continuing PR #130 on branch openclaw/core-php84-upgrade-20260210-1340 for the PHP 8.4 upgrade.
 
-Current head SHA: b3d8d7edaf2646258d53023f3aef2cc807a404b9.
+Current head SHA: 026f0335e909ae9851357e9bc61c81b6f9bb1abe.
 
-Goal (CI FIRST): Fix failing required checks with minimal, PHP 8.4-focused changes. Right now, prioritize Infection failure first. Do not address CodeRabbit requests until required CI checks are green.
+Goal: Resolve outstanding review feedback (including CodeRabbit) with minimal, PHP 8.4-focused changes while keeping CI green.
 
 Constraints:
 
@@ -13,8 +13,8 @@ Constraints:
 
 What to do:
 
-1. Pull latest branch and inspect failing CI logs for Infection on current head.
-2. Apply minimal fix for the Infection failure.
+1. Pull latest branch and review unresolved PR comments.
+2. Apply minimal, targeted fixes for each comment.
 3. Run the smallest relevant local validation if feasible.
 4. Commit with a concise message and push.
-5. Report root cause, files changed, commands run, and commit SHA.
+5. Report files changed, commands run, and commit SHA.

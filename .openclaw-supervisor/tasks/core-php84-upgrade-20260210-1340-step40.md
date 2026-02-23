@@ -1,10 +1,10 @@
 Task: core-php84-upgrade-20260210-1340
 Repo: VilnaCRM-Org/core-service
 Branch: openclaw/core-php84-upgrade-20260210-1340
-PR: #103
-Head SHA: 02b0ec2ed1d080ab25cba2c20807c811ab80308a
+PR: #130
+Head SHA: 026f0335e909ae9851357e9bc61c81b6f9bb1abe
 Review decision: CHANGES_REQUESTED
-Current failing checks: Behat, Psalm, Run Bats Core Tests
+Current failing checks: none
 Current pending checks: none
 
 Goal:
