@@ -42,7 +42,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
         TypeUpdateRequestFactory $updateCustomerTypeRequestFactory,
         ValidationErrorFactory $validationErrorResponseFactory,
         BadRequestResponseFactory $badRequestResponseFactory,
-        TypeNotFoundResponseFactory $customerTyNFResp,
+        TypeNotFoundResponseFactory $customerTypeNotFoundResponseFactory,
         TypeDeletedResponseFactory $deletedResponseFactory,
         TypeCreateRequestFactory $replaceCustomerRequestFactory,
         InternalErrorFactory $internalErrorFactory,
@@ -62,7 +62,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
             $badRequestResponseFactory->getResponse();
 
         $this->custTyNFResp =
-            $customerTyNFResp->getResponse();
+            $customerTypeNotFoundResponseFactory->getResponse();
 
         $this->custTyDeletedResp =
             $deletedResponseFactory->getResponse();
