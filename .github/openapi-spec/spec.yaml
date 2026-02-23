@@ -3505,7 +3505,7 @@ components:
           readOnly: true
           type: string
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+          type: string
         initials:
           type: string
         email:
@@ -3667,7 +3667,7 @@ components:
           readOnly: true
           type: string
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+          type: string
         value:
           type: string
     Error:
