@@ -131,6 +131,42 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertArrayNotHasKey('@type', $example);
     }
 
+    public function testProcessContinuesPastInvalidHydraEntries(): void
+    {
+        $schemas = new ArrayObject([
+            'HydraCollectionBaseSchema' => new ArrayObject([
+                'allOf' => [
+                    ['properties' => ['view' => null]],
+                    ['properties' => ['view' => ['example' => ['@id' => 'string']]]],
+                    ['properties' => ['view' => ['example' => ['@id' => 'string', 'type' => 'Collection']]]],
+                ],
+            ]),
+        ]);
+
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $processor = new OpenApiSchemaFixesProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $hydraSchema = SchemaNormalizer::normalize(
+            $resultSchemas['HydraCollectionBaseSchema']
+        );
+        $allOf = $hydraSchema['allOf'];
+        $viewSchema = SchemaNormalizer::normalize(
+            SchemaNormalizer::normalize($allOf[2])['properties']['view']
+        );
+        $example = $viewSchema['example'];
+
+        $this->assertArrayHasKey('@type', $example);
+        $this->assertArrayNotHasKey('type', $example);
+    }
+
     public function testProcessLeavesHydraExampleWhenAtTypeAlreadySet(): void
     {
         $schemas = new ArrayObject([
@@ -172,5 +208,67 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
 
         $this->assertArrayHasKey('@type', $example);
         $this->assertArrayHasKey('type', $example);
+    }
+
+    public function testProcessDefaultsUlidDeprecatedToFalse(): void
+    {
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => new ArrayObject([
+                'description' => 'Ulid',
+                'properties' => [
+                    '@id' => ['type' => 'string'],
+                ],
+            ]),
+        ]);
+
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $processor = new OpenApiSchemaFixesProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $ulidSchema = SchemaNormalizer::normalize(
+            $resultSchemas['UlidInterface.jsonld-output']
+        );
+
+        $this->assertSame('string', $ulidSchema['type']);
+        $this->assertSame('Ulid', $ulidSchema['description']);
+        $this->assertFalse($ulidSchema['deprecated']);
+    }
+
+    public function testProcessPreservesUlidDeprecatedTrue(): void
+    {
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => new ArrayObject([
+                'description' => 'Ulid',
+                'deprecated' => true,
+                'properties' => [
+                    '@id' => ['type' => 'string'],
+                ],
+            ]),
+        ]);
+
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $processor = new OpenApiSchemaFixesProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $ulidSchema = SchemaNormalizer::normalize(
+            $resultSchemas['UlidInterface.jsonld-output']
+        );
+
+        $this->assertSame('string', $ulidSchema['type']);
+        $this->assertTrue($ulidSchema['deprecated']);
     }
 }
