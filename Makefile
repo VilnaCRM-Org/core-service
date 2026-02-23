@@ -11,10 +11,10 @@ DOCKER        = docker
 DOCKER_COMPOSE = docker compose
 
 # Executables
-EXEC_PHP      = $(DOCKER_COMPOSE) exec php
+EXEC_PHP      = $(DOCKER_COMPOSE) exec -T php
 COMPOSER      = $(EXEC_PHP) composer
 GIT           = git
-EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -e APP_ENV=test php
+EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -T -e APP_ENV=test php
 
 # Alias
 SYMFONY       = $(EXEC_PHP) bin/console
@@ -129,7 +129,10 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 	if [ "$(CI)" = "1" ]; then \
 		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
 	else \
-		coverage=$$($(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
+		coverage_output=.coverage_value.txt; \
+		$(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; $$out = $$argv[2] ?? null; if ($$file === null || $$out === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { $$coverage = "0"; } else { $$coverage = sprintf("%.2f", ($$covered / $$statements) * 100); } file_put_contents($$out, $$coverage);' -- $$coverage_file $$coverage_output; \
+		coverage=$$(cat $$coverage_output 2>/dev/null); \
+		rm -f $$coverage_output; \
 	fi; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
@@ -263,7 +266,7 @@ down: ## Stop the docker hub
 
 sh: ## Log to the docker container
 	@echo "Connecting to core-service PHP container..."
-	@$(EXEC_PHP) sh
+	@$(DOCKER_COMPOSE) exec php sh
 
 logs: ## Show all logs
 	@$(DOCKER_COMPOSE) logs
@@ -281,7 +284,7 @@ stop: ## Stop docker and the Symfony binary server
 	$(DOCKER_COMPOSE) stop
 
 commands: ## List all Symfony commands
-	@$(SYMFONY) list
+	@$(DOCKER_COMPOSE) exec -T -e APP_ENV=dev php php bin/console list
 
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html

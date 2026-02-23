@@ -27,11 +27,19 @@ abstract readonly class BusinessMetric
 
     public function value(): float|int
     {
+        if (!isset($this->value)) {
+            return 0;
+        }
+
         return $this->value;
     }
 
     public function unit(): MetricUnit
     {
+        if (!isset($this->unit)) {
+            return new MetricUnit(MetricUnit::COUNT);
+        }
+
         return $this->unit;
     }
 }

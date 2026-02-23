@@ -16,7 +16,7 @@ final class ConstraintViolationPayloadItemsUpdater
     public static function update(array $constraintViolation): ?array
     {
         $properties = self::extractProperties($constraintViolation);
-        $payload = is_array($properties) ? self::extractPayload($properties) : null;
+        $payload = self::extractPayload($properties);
         if ($payload === null) {
             return null;
         }
@@ -30,15 +30,13 @@ final class ConstraintViolationPayloadItemsUpdater
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
      *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    private static function extractProperties(array $constraintViolation): ?array
+    private static function extractProperties(array $constraintViolation): array
     {
-        $properties = SchemaNormalizer::normalize(
+        return SchemaNormalizer::normalize(
             $constraintViolation['properties']['violations']['items']['properties'] ?? null
         );
-
-        return $properties === [] ? null : $properties;
     }
 
     /**

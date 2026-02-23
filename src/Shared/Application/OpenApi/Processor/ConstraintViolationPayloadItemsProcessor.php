@@ -14,21 +14,17 @@ final class ConstraintViolationPayloadItemsProcessor
     public function process(OpenApi $openApi): OpenApi
     {
         $components = $openApi->getComponents();
-        $schemas = $components->getSchemas();
-        $schema = $schemas[self::SCHEMA_KEY] ?? null;
-        if ($schemas === null || $schema === null) {
-            return $openApi;
-        }
+        $schemas = $components->getSchemas() ?? [];
 
+        /** @psalm-suppress EmptyArrayAccess */
+        $schema = $schemas[self::SCHEMA_KEY] ?? null;
         $normalized = SchemaNormalizer::normalize($schema);
         $updated = ConstraintViolationPayloadItemsUpdater::update($normalized);
         if ($updated === null) {
             return $openApi;
         }
 
-        $schemas[self::SCHEMA_KEY] = $schema instanceof ArrayObject
-            ? new ArrayObject($updated)
-            : $updated;
+        $schemas[self::SCHEMA_KEY] = new ArrayObject($updated);
 
         return $openApi->withComponents($components->withSchemas($schemas));
     }

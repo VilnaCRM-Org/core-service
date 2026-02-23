@@ -11,7 +11,6 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
-use ErrorException;
 
 final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 {
@@ -21,15 +20,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 
         $processor = new ConstraintViolationPayloadItemsProcessor();
 
-        set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): bool {
-            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-        });
-
-        try {
-            $this->assertSame($openApi, $processor->process($openApi));
-        } finally {
-            restore_error_handler();
-        }
+        $this->assertSame($openApi, $processor->process($openApi));
     }
 
     public function testProcessAddsPayloadItemsWhenMissing(): void
@@ -86,9 +77,10 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $resultSchemas = $result->getComponents()->getSchemas();
         $this->assertInstanceOf(ArrayObject::class, $resultSchemas);
         $updatedSchema = $resultSchemas['ConstraintViolation'];
-        $this->assertIsArray($updatedSchema);
+        $this->assertInstanceOf(ArrayObject::class, $updatedSchema);
 
-        $payload = $updatedSchema['properties']['violations']['items']['properties']['payload'];
+        $schemaData = $updatedSchema->getArrayCopy();
+        $payload = $schemaData['properties']['violations']['items']['properties']['payload'];
         $this->assertSame('array', $payload['type']);
         $this->assertSame(['type' => 'object'], $payload['items']);
     }

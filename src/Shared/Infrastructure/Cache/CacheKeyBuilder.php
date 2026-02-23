@@ -29,9 +29,9 @@ final readonly class CacheKeyBuilder
     /**
      * Build customer cache key by ID
      */
-    public function buildCustomerKey(string $customerId): string
+    public function buildCustomerKey(string|int|\Stringable $customerId): string
     {
-        return $this->build('customer', $customerId);
+        return $this->build('customer', (string) $customerId);
     }
 
     /**
