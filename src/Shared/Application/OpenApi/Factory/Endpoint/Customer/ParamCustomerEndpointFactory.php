@@ -48,7 +48,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
         CreateCustomerRequestFactory $replaceCustomerRequestFactory,
         InternalErrorFactory $internalErrorFactory,
         UnauthorizedResponseFactory $unauthorizedResponseFactory,
-        ForbiddenResponseFactory $forbiddenResponseFactory
+        ForbiddenResponseFactory $forbiddenResponseFactory,
     ) {
         $this->ulidWithExamplePathParam =
             $parameterFactory->getParameter();
