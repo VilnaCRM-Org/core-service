@@ -10,6 +10,7 @@ final class ConstraintViolationPayloadItemsUpdater
 {
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
+     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
     public static function update(array $constraintViolation): ?array
@@ -28,6 +29,7 @@ final class ConstraintViolationPayloadItemsUpdater
 
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
+     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
     private static function extractProperties(array $constraintViolation): ?array
@@ -41,6 +43,7 @@ final class ConstraintViolationPayloadItemsUpdater
 
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $properties
+     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
     private static function extractPayload(array $properties): ?array
@@ -52,6 +55,7 @@ final class ConstraintViolationPayloadItemsUpdater
 
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $payload
+     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
     private static function payloadWithItems(array $payload): array
