@@ -15,11 +15,7 @@ final class ConstraintViolationPayloadItemsUpdater
     public static function update(array $constraintViolation): ?array
     {
         $properties = self::extractProperties($constraintViolation);
-        if ($properties === null) {
-            return null;
-        }
-
-        $payload = self::extractPayload($properties);
+        $payload = is_array($properties) ? self::extractPayload($properties) : null;
         if ($payload === null) {
             return null;
         }

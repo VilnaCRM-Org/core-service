@@ -15,12 +15,8 @@ final class ConstraintViolationPayloadItemsProcessor
     {
         $components = $openApi->getComponents();
         $schemas = $components->getSchemas();
-        if ($schemas === null) {
-            return $openApi;
-        }
-
         $schema = $schemas[self::SCHEMA_KEY] ?? null;
-        if ($schema === null) {
+        if ($schemas === null || $schema === null) {
             return $openApi;
         }
 
