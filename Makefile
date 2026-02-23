@@ -52,7 +52,7 @@ BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
@@ -115,12 +115,12 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
-	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
 		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	coverage=$$(sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
 		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \

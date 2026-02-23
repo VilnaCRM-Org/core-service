@@ -8,6 +8,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
+use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
 use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
@@ -29,6 +30,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         private ParameterDescriptionProcessor $parameterDescriptionProcessor,
         private IriReferenceTypeProcessor $iriReferenceTypeProcessor,
         private TagDescriptionProcessor $tagDescriptionProcessor,
+        private ConstraintViolationPayloadItemsProcessor $constraintViolationPayloadItemsProcessor,
         private OpenApiExtensionsApplier $extensionsApplier
     ) {
         $this->endpointFactories = is_array($endpointFactories)
@@ -43,10 +45,10 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     {
         $openApi = $this->decorated->__invoke($context);
         $this->applyEndpointFactories($openApi);
+        $openApi = $this->applyAugmenters($openApi);
+        $openApi = $this->constraintViolationPayloadItemsProcessor->process($openApi);
 
-        return $this->normalizeOpenApi(
-            $this->applyAugmenters($openApi)
-        );
+        return $this->normalizeOpenApi($openApi);
     }
 
     private function applyEndpointFactories(OpenApi $openApi): void

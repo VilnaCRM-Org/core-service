@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\OpenApiFactory;
+use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
 use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
@@ -33,6 +34,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $this->createMock(ParameterDescriptionProcessor::class),
             $this->createMock(IriReferenceTypeProcessor::class),
             $this->createMock(TagDescriptionProcessor::class),
+            $this->createMock(ConstraintViolationPayloadItemsProcessor::class),
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
@@ -51,6 +53,8 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->willReturn($openApi);
 
         $endpointFactories = $this->createEndpointFactories($openApi);
+        $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadProcessor->method('process')->willReturnArgument(0);
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
@@ -59,6 +63,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $this->createMock(ParameterDescriptionProcessor::class),
             $this->createMock(IriReferenceTypeProcessor::class),
             $this->createMock(TagDescriptionProcessor::class),
+            $payloadProcessor,
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
@@ -104,6 +109,9 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
         $tagProcessor->method('process')->willReturnArgument(0);
 
+        $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadProcessor->method('process')->willReturnArgument(0);
+
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
@@ -113,6 +121,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $paramProcessor,
             $iriProcessor,
             $tagProcessor,
+            $payloadProcessor,
             $extensionsApplier
         );
 
@@ -160,6 +169,9 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
         $tagProcessor->method('process')->willReturnArgument(0);
 
+        $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadProcessor->method('process')->willReturnArgument(0);
+
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
@@ -169,6 +181,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $paramProcessor,
             $iriProcessor,
             $tagProcessor,
+            $payloadProcessor,
             $extensionsApplier
         );
 

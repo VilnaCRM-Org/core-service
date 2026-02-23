@@ -17,7 +17,7 @@ api_platform:
       url: 'https://opensource.org/licenses/MIT'
 
   defaults:
-    pagination_partial: true
+    pagination_partial: false
     paginationClientItemsPerPage: true
     extra_properties:
       rfc_7807_compliant_errors: true
@@ -33,8 +33,7 @@ api_platform:
     enabled: true
     graphiql:
       enabled: true
-    graphql_playground:
-      enabled: true
+    graphql_playground: true
     # Default to ID for mutations
     default_ide: graphiql
     nesting_separator: _
