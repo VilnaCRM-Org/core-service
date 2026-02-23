@@ -15,10 +15,8 @@ final class SchemaNormalizer
      */
     public static function normalize(ArrayObject|array|null $schema): array
     {
-        if ($schema instanceof ArrayObject) {
-            return $schema->getArrayCopy();
-        }
-
-        return is_array($schema) ? $schema : [];
+        return $schema instanceof ArrayObject
+            ? $schema->getArrayCopy()
+            : (array) $schema;
     }
 }

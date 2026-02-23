@@ -6,6 +6,9 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ArrayObject;
 
+/**
+ * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
+ */
 final class HydraAllOfItemUpdater
 {
     public function __construct(
@@ -16,18 +19,15 @@ final class HydraAllOfItemUpdater
     public function update(ArrayObject|array $item): ?ArrayObject
     {
         $normalizedItem = SchemaNormalizer::normalize($item);
-        $properties = $normalizedItem['properties'] ?? null;
-        if (! is_array($properties)) {
-            return null;
-        }
+        $normalizedItem += ['properties' => null];
+        $properties = SchemaNormalizer::normalize($normalizedItem['properties']);
 
-        $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
-        if ($viewSchema === []) {
-            return null;
-        }
+        $properties += ['view' => null];
+        $viewSchema = SchemaNormalizer::normalize($properties['view']);
 
+        $viewSchema += ['example' => null];
         $example = $this->exampleUpdater->update(
-            SchemaNormalizer::normalize($viewSchema['example'] ?? null)
+            SchemaNormalizer::normalize($viewSchema['example'])
         );
         if ($example === null) {
             return null;

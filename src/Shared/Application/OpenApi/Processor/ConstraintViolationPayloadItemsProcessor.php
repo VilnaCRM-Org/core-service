@@ -17,7 +17,8 @@ final class ConstraintViolationPayloadItemsProcessor
         $schemas = $components->getSchemas() ?? [];
 
         /** @psalm-suppress EmptyArrayAccess */
-        $schema = $schemas[self::SCHEMA_KEY] ?? null;
+        $schemas += [self::SCHEMA_KEY => null];
+        $schema = $schemas[self::SCHEMA_KEY];
         $normalized = SchemaNormalizer::normalize($schema);
         $updated = ConstraintViolationPayloadItemsUpdater::update($normalized);
         if ($updated === null) {

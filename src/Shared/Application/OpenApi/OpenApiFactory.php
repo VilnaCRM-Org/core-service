@@ -95,8 +95,6 @@ final class OpenApiFactory implements OpenApiFactoryInterface
 
     private function normalizeWebhooks(?ArrayObject $webhooks): ArrayObject
     {
-        return $webhooks instanceof ArrayObject && $webhooks->count() > 0
-            ? $webhooks
-            : new ArrayObject();
+        return $webhooks ?? new ArrayObject();
     }
 }

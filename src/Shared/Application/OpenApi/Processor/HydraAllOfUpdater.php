@@ -6,6 +6,9 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ArrayObject;
 
+/**
+ * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
+ */
 final class HydraAllOfUpdater
 {
     public function __construct(
@@ -14,9 +17,9 @@ final class HydraAllOfUpdater
     }
 
     /**
-     * @param array<int, mixed> $allOf
+     * @param array<int, SchemaValue> $allOf
      *
-     * @return array<int, mixed>|null
+     * @return array<int, SchemaValue>|null
      */
     public function update(array $allOf): ?array
     {

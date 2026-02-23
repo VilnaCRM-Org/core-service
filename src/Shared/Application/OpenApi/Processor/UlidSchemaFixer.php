@@ -16,16 +16,17 @@ final class UlidSchemaFixer
     public function apply(ArrayObject $schemas): ArrayObject
     {
         $normalizedSchemas = $schemas->getArrayCopy();
-        $schema = $normalizedSchemas[self::ULID_SCHEMA] ?? null;
-        $normalized = SchemaNormalizer::normalize($schema);
+        $normalizedSchemas += [self::ULID_SCHEMA => null];
+        $normalized = SchemaNormalizer::normalize($normalizedSchemas[self::ULID_SCHEMA]);
         if ($normalized === []) {
             return $schemas;
         }
 
+        $normalized += ['description' => '', 'deprecated' => false];
         $normalizedSchemas[self::ULID_SCHEMA] = new ArrayObject([
             'type' => 'string',
-            'description' => $normalized['description'] ?? '',
-            'deprecated' => $normalized['deprecated'] ?? false,
+            'description' => $normalized['description'],
+            'deprecated' => $normalized['deprecated'],
         ]);
 
         return new ArrayObject($normalizedSchemas);

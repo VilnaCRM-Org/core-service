@@ -111,7 +111,7 @@ final class TagCollectorProcessor
             $this->getOperations($pathItem),
             static fn (array $collected, Operation $operation): array => array_merge(
                 $collected,
-                $operation->getTags() ?? []
+                (array) $operation->getTags()
             ),
             []
         );

@@ -26,11 +26,10 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
+        /** @var CustomerStatus|null $existing */
         $existing = $context['previous_data'] ?? null;
 
-        return $existing instanceof CustomerStatus
-            ? $existing
-            : $this->resolveFromIri($data->id, $context, $operation);
+        return $existing ?? $this->resolveFromIri($data->id, $context, $operation);
     }
 
     /**
@@ -48,18 +47,6 @@ final readonly class CustomerStatusResolver
         }
     }
 
-    private function requireIri(?string $iri): string
-    {
-        return $iri ?? throw new CustomerStatusNotFoundException();
-    }
-
-    private function assertStatus(string $iri, object $resource): CustomerStatus
-    {
-        return $resource instanceof CustomerStatus
-            ? $resource
-            : throw CustomerStatusNotFoundException::withIri($iri);
-    }
-
     /**
      * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
@@ -68,9 +55,14 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        $resolvedIri = $this->requireIri($iri);
-        $resource = $this->fetchResource($resolvedIri, $context, $operation);
+        $resource = $this->fetchResource(
+            $iri ?? throw new CustomerStatusNotFoundException(),
+            $context,
+            $operation
+        );
 
-        return $this->assertStatus($resolvedIri, $resource);
+        return $resource instanceof CustomerStatus
+            ? $resource
+            : throw CustomerStatusNotFoundException::withIri($iri);
     }
 }

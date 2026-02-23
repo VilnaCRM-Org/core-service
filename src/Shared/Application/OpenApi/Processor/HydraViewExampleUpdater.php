@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+/**
+ * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
+ */
 final class HydraViewExampleUpdater
 {
     public function __construct(
@@ -12,17 +15,13 @@ final class HydraViewExampleUpdater
     }
 
     /**
-     * @param array<string, mixed> $normalized
+     * @param array<string, SchemaValue> $normalized
      *
-     * @return array<string, mixed>|null
+     * @return array<string, SchemaValue>|null
      */
     public function update(array $normalized): ?array
     {
-        $allOf = $normalized['allOf'] ?? null;
-        if (! is_array($allOf)) {
-            return null;
-        }
-
+        $allOf = SchemaNormalizer::normalize($normalized['allOf'] ?? null);
         $updatedAllOf = $this->allOfUpdater->update($allOf);
         if ($updatedAllOf === null) {
             return null;
