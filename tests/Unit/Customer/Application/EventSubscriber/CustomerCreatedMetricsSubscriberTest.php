@@ -8,7 +8,6 @@ use App\Core\Customer\Application\EventSubscriber\CustomerCreatedMetricsSubscrib
 use App\Core\Customer\Application\Factory\CustomersCreatedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 
@@ -25,7 +24,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $this->subscriber = new CustomerCreatedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new CustomersCreatedMetricFactory(new MetricDimensionsFactory())
+            new CustomersCreatedMetricFactory()
         );
     }
 
@@ -76,7 +75,7 @@ final class CustomerCreatedMetricsSubscriberTest extends UnitTestCase
 
         $subscriber = new CustomerCreatedMetricsSubscriber(
             $failingEmitter,
-            new CustomersCreatedMetricFactory(new MetricDimensionsFactory())
+            new CustomersCreatedMetricFactory()
         );
 
         $this->expectException(\RuntimeException::class);
