@@ -68,10 +68,6 @@ final class OpenApiSchemaFixesProcessor
     private function withHydraViewTypeExample(array $normalized): ?array
     {
         $allOf = $normalized['allOf'] ?? null;
-        if (!is_array($allOf)) {
-            return null;
-        }
-
         $updatedAllOf = $this->updateHydraAllOf($allOf);
         if ($updatedAllOf === null) {
             return null;
