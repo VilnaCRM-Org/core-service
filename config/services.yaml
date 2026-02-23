@@ -200,7 +200,10 @@ services:
   App\Shared\Application\OpenApi\OpenApiFactory:
     decorates: 'api_platform.openapi.factory'
     arguments:
-      ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged_iterator app.openapi_endpoint_factory]
+      [
+        '@App\Shared\Application\OpenApi\OpenApiFactory.inner',
+        !tagged_iterator app.openapi_endpoint_factory,
+      ]
     autoconfigure: false
 
   App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory:
