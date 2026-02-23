@@ -9,7 +9,7 @@ use ArrayObject;
 
 final class ConstraintViolationPayloadItemsProcessor
 {
-    private const SCHEMA_KEY = "ConstraintViolation";
+    private const SCHEMA_KEY = 'ConstraintViolation';
 
     public function process(OpenApi $openApi): OpenApi
     {
