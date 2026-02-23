@@ -19,7 +19,7 @@ final class HydraViewExampleUpdater
     public function update(array $normalized): ?array
     {
         $allOf = $normalized['allOf'] ?? null;
-        if (!is_array($allOf)) {
+        if (! is_array($allOf)) {
             return null;
         }
 

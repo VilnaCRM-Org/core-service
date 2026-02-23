@@ -17,7 +17,7 @@ final class HydraAllOfItemUpdater
     {
         $normalizedItem = SchemaNormalizer::normalize($item);
         $properties = $normalizedItem['properties'] ?? null;
-        if (!is_array($properties)) {
+        if (! is_array($properties)) {
             return null;
         }
 

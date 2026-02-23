@@ -21,7 +21,7 @@ final class HydraAllOfUpdater
     public function update(array $allOf): ?array
     {
         foreach ($allOf as $index => $item) {
-            if (!is_array($item) && !$item instanceof ArrayObject) {
+            if (! is_array($item) && ! $item instanceof ArrayObject) {
                 continue;
             }
 

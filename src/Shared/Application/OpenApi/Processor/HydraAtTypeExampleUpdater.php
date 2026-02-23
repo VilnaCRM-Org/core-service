@@ -11,7 +11,7 @@ final class HydraAtTypeExampleUpdater
      */
     public function update(array $example): ?array
     {
-        if ($example === [] || !array_key_exists('type', $example)) {
+        if ($example === [] || ! array_key_exists('type', $example)) {
             return null;
         }
 

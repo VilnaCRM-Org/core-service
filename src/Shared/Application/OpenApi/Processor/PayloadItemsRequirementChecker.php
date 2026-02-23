@@ -14,6 +14,6 @@ final class PayloadItemsRequirementChecker
     public static function shouldAddItems(array $payload): bool
     {
         return ($payload['type'] ?? null) === 'array'
-            && !array_key_exists('items', $payload);
+            && ! array_key_exists('items', $payload);
     }
 }

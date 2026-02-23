@@ -31,8 +31,8 @@ final class ParameterCleaner
         array|string|int|float|bool|null $parameter
     ): array|string|int|float|bool|null {
         return match (true) {
-            !is_array($parameter) => $parameter,
-            !isset($parameter['in']) || $parameter['in'] !== 'path' => $parameter,
+            ! is_array($parameter) => $parameter,
+            ! isset($parameter['in']) || $parameter['in'] !== 'path' => $parameter,
             default => array_diff_key($parameter, array_flip(self::DISALLOWED_PATH_PROPERTIES)),
         };
     }

@@ -26,7 +26,7 @@ final class IriReferenceOperationContextResolver implements
     {
         $requestBody = $operation->getRequestBody();
 
-        if (!$requestBody instanceof RequestBody) {
+        if (! $requestBody instanceof RequestBody) {
             return null;
         }
 
