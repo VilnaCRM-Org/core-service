@@ -104,6 +104,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
+# NOTE: Non-CI coverage parsing reads a temp file created in the container, so the repo must be volume-mounted.
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
@@ -131,6 +132,11 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 	else \
 		coverage_output=.coverage_value.txt; \
 		$(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; $$out = $$argv[2] ?? null; if ($$file === null || $$out === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { $$coverage = "0"; } else { $$coverage = sprintf("%.2f", ($$covered / $$statements) * 100); } file_put_contents($$out, $$coverage);' -- $$coverage_file $$coverage_output; \
+		waits=0; \
+		while [ ! -s $$coverage_output ] && [ $$waits -lt 50 ]; do \
+			waits=$$((waits + 1)); \
+			sleep 0.2; \
+		done; \
 		coverage=$$(cat $$coverage_output 2>/dev/null); \
 		rm -f $$coverage_output; \
 	fi; \

@@ -11,7 +11,7 @@ load 'bats-assert/load'
   assert_output --partial "Targets:"
 }
 
-@test "make composer-validate command executes and reports validity with warnings" {
+@test "make composer-validate command executes" {
   run make composer-validate
   assert_success
   assert_output --partial "composer validate"
@@ -30,7 +30,7 @@ load 'bats-assert/load'
   assert_output --partial "./vendor/bin/phpinsights"
 }
 
-@test "make check-security command executes and reports no vulnerabilities" {
+@test "make check-security command executes" {
   run make check-security
   assert_success
   assert_output --partial "symfony security:check"

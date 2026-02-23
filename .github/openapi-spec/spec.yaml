@@ -3530,11 +3530,11 @@ components:
                   format: iri-reference
               example:
                 '@id': string
-                type: string
                 first: string
                 last: string
                 previous: string
                 next: string
+                '@type': string
     HydraCollectionBaseSchemaNoPagination:
       type: object
       properties:
@@ -3586,7 +3586,9 @@ components:
         - '@id'
         - '@type'
     UlidInterface.jsonld-output:
-      type: object
+      type: string
+      description: ''
+      deprecated: false
 security: []
 tags:
   -

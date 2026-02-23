@@ -203,6 +203,13 @@ services:
       [
         '@App\Shared\Application\OpenApi\OpenApiFactory.inner',
         !tagged_iterator app.openapi_endpoint_factory,
+        '@App\Shared\Application\OpenApi\Processor\PathParametersProcessor',
+        '@App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor',
+        '@App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor',
+        '@App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor',
+        '@App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor',
+        '@App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor',
+        '@App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier',
       ]
     autoconfigure: false
 
