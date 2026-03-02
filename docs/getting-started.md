@@ -92,7 +92,7 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 
 - Docker support so all existing `make` commands continue to work
 - GitHub CLI (`gh`)
-- Codex CLI (`codex`)
+- Claude CLI (`claude`)
 - Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
@@ -108,20 +108,20 @@ This repository includes a ready-to-use Codespaces environment in `.devcontainer
 
 ```bash
 gh --version
-codex --version
+claude --version
 make help
 ```
 
 For autonomous AI coding in Codespaces, set repository Codespaces secrets:
 
-- `OPENAI_API_KEY`
+- `MINIMAX_API_KEY`
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
-These secrets are provided directly by Codespaces to the container runtime, so `gh`, `git`, and `codex` can use them in normal terminal sessions.
+These secrets are provided directly by Codespaces to the container runtime, so `gh`, `git`, and `claude` can use them in normal terminal sessions.
 The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
 
-Non-secret defaults for GitHub CLI and Codex are persisted in git:
+Non-secret defaults for GitHub CLI and Claude are persisted in git:
 
 - `.devcontainer/codespaces-settings.env`
 - `.devcontainer/post-create.sh`
@@ -138,7 +138,7 @@ Then run:
 
 ```bash
 bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
-bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
 ```
 
 `startup-smoke-tests.sh` runs the default startup checks:
@@ -146,22 +146,20 @@ bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
-- `codex` can execute one non-interactive task via OpenAI
+- `claude` can execute one non-interactive task via MiniMax M2.5
 
-`verify-gh-codex.sh` includes Codex basic and tool-calling smoke checks.
-This setup is OpenAI-only and configures Codex with:
+`verify-gh-claude.sh` includes Claude basic and tool-calling smoke checks.
+This setup is MiniMax-only and configures Claude with:
 
-- model `gpt-5.2-codex`
-- OpenAI provider URL `https://api.openai.com/v1`
-- default `model_reasoning_effort=medium`
-- default `approval_policy=never`
-- default `sandbox_mode=danger-full-access`
+- model `MiniMax-M2.5`
+- Anthropic-compatible URL `https://api.minimax.io/anthropic`
+- `permissions.defaultMode=bypassPermissions` in `~/.claude/settings.json` (no manual tool approvals)
 
 If you need safer defaults in a Codespace, set overrides before bootstrap:
 
 ```bash
-export CODEX_APPROVAL_POLICY=on-failure
-export CODEX_SANDBOX_MODE=workspace-write
+export CLAUDE_PERMISSION_MODE=default
+export CLAUDE_ALLOW_UNSAFE_MODE=0
 ```
 
 ### Working in Codespaces
