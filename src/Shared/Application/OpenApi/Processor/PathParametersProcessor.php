@@ -42,11 +42,7 @@ final class PathParametersProcessor
     private function updateOperation(Operation $operation): Operation
     {
         $parameters = $operation->getParameters();
-        if ($parameters === null || $parameters === []) {
-            return $operation;
-        }
-
-        if (! \is_array($parameters)) {
+        if (! \is_array($parameters) || $parameters === []) {
             return $operation;
         }
 

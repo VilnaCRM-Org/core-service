@@ -13,12 +13,10 @@ final class SchemaNormalizer
      */
     public static function normalize(mixed $schema): array
     {
-        if (! \is_array($schema) && ! $schema instanceof ArrayObject) {
-            return [];
+        if ($schema instanceof ArrayObject) {
+            return $schema->getArrayCopy();
         }
 
-        return $schema instanceof ArrayObject
-            ? $schema->getArrayCopy()
-            : $schema;
+        return \is_array($schema) ? $schema : [];
     }
 }

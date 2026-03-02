@@ -16,15 +16,12 @@ final class ConstraintViolationPayloadItemsProcessor
         $components = $openApi->getComponents();
         $schemas = $components->getSchemas();
 
-        if ($schemas === null) {
-            $schemas = [];
-        } elseif ($schemas instanceof ArrayObject) {
+        if ($schemas instanceof ArrayObject) {
             $schemas = $schemas->getArrayCopy();
         }
 
-        if (! isset($schemas[self::SCHEMA_KEY])) {
-            $schemas[self::SCHEMA_KEY] = null;
-        }
+        $schemas ??= [];
+        $schemas[self::SCHEMA_KEY] ??= null;
 
         $schema = $schemas[self::SCHEMA_KEY];
         $normalized = SchemaNormalizer::normalize($schema);
