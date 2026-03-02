@@ -2,6 +2,7 @@ name: openapi-diff
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   openapi-diff:
