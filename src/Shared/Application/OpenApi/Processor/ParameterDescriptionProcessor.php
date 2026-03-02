@@ -75,6 +75,6 @@ final class ParameterDescriptionProcessor
 
     private static function isDescriptionEmpty(?string $description): bool
     {
-        return (string) $description === '';
+        return $description === null || $description === '';
     }
 }

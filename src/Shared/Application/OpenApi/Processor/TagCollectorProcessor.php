@@ -109,10 +109,11 @@ final class TagCollectorProcessor
     {
         return array_reduce(
             $this->getOperations($pathItem),
-            static fn (array $collected, Operation $operation): array => array_merge(
-                $collected,
-                (array) $operation->getTags()
-            ),
+            static function (array $collected, Operation $operation): array {
+                $tags = $operation->getTags();
+
+                return array_merge($collected, \is_array($tags) ? $tags : []);
+            },
             []
         );
     }

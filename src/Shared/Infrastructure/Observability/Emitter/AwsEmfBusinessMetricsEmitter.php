@@ -62,6 +62,10 @@ final readonly class AwsEmfBusinessMetricsEmitter implements BusinessMetricsEmit
     private function writeEmfLog(EmfPayload $payload): void
     {
         $formatted = $this->emfLogFormatter->format($payload);
+        if ($formatted === '') {
+            return;
+        }
+
         $this->logger->info($formatted);
     }
 }

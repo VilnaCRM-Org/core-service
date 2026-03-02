@@ -22,7 +22,8 @@ final class UlidSchemaFixer
             return $schemas;
         }
 
-        $normalized += ['description' => '', 'deprecated' => false];
+        $normalized['description'] ??= '';
+        $normalized['deprecated'] ??= false;
         $normalizedSchemas[self::ULID_SCHEMA] = new ArrayObject([
             'type' => 'string',
             'description' => $normalized['description'],

@@ -21,7 +21,11 @@ final class HydraViewExampleUpdater
      */
     public function update(array $normalized): ?array
     {
-        $allOf = SchemaNormalizer::normalize($normalized['allOf'] ?? null);
+        if (! isset($normalized['allOf'])) {
+            return null;
+        }
+
+        $allOf = SchemaNormalizer::normalize($normalized['allOf']);
         $updatedAllOf = $this->allOfUpdater->update($allOf);
         if ($updatedAllOf === null) {
             return null;

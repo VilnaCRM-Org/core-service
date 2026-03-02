@@ -9,14 +9,16 @@ use ArrayObject;
 final class SchemaNormalizer
 {
     /**
-     * @param ArrayObject|array<string, array|bool|float|int|string|ArrayObject|null>|null $schema
-     *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    public static function normalize(ArrayObject|array|null $schema): array
+    public static function normalize(mixed $schema): array
     {
+        if (! \is_array($schema) && ! $schema instanceof ArrayObject) {
+            return [];
+        }
+
         return $schema instanceof ArrayObject
             ? $schema->getArrayCopy()
-            : (array) $schema;
+            : $schema;
     }
 }
