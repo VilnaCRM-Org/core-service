@@ -42,11 +42,122 @@ Use `make` command to set up project and automatically install all needed depend
 
 > make start
 
-Go to browser and open the link below
+Go to browser and open the link below to access REST API docs
 
 > https://localhost/api/docs
 
-That's it. You should now be ready to use PHP service template!
+You can access the GraphQL endpoint via the link below:
+
+> https://localhost/api/graphql
+
+Also, you can see the architecture diagram using the link below
+
+> http://localhost:8080/workspace/diagrams
+
+That's it. You should now be ready to use core service!
+
+### GitHub Codespaces
+
+This repository ships with a built-in Codespaces definition in `.devcontainer/devcontainer.json`.
+
+When a Codespace is created, the setup script:
+
+- installs `claude` CLI
+- provides `gh` CLI
+- installs `bats` CLI for `make bats`
+- starts the Docker stack with `make start`
+- installs PHP dependencies with `make install` if needed
+
+After startup, verify the environment:
+
+```bash
+gh --version
+claude --version
+make help
+```
+
+#### Secure setup for autonomous AI coding agents
+
+Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
+
+- `MINIMAX_API_KEY`: MiniMax API key for Claude CLI (Anthropic-compatible mode)
+- `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
+- bootstrap sets git identity for automated commits to:
+  - `vilnacrm ai bot <info@vilnacrm.com>`
+
+The Codespace `post-create` step runs secure bootstrap automatically and then executes startup smoke tests. You can also run scripts manually:
+
+```bash
+bash scripts/codespaces/setup-secure-agent-env.sh
+bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
+```
+
+What `startup-smoke-tests.sh` checks:
+
+- `gh` authentication is available
+- repository listing for `VilnaCRM-Org` works
+- `bats` CLI is available
+- `claude` can execute one non-interactive task with `MiniMax-M2.5`
+
+Repository-tracked defaults for GitHub and Claude bootstrap are stored in:
+
+- `.devcontainer/codespaces-settings.env`
+- `.devcontainer/post-create.sh`
+- `scripts/codespaces/setup-secure-agent-env.sh`
+
+What `verify-gh-claude.sh` checks:
+
+- GitHub auth works
+- repository listing for `VilnaCRM-Org` works
+- current PR checks can be queried via `gh`
+- current branch supports `git push --dry-run`
+- `claude` can run basic and tool-calling non-interactive smoke tasks via MiniMax M2.5
+- `claude` can complete a tool-calling smoke task required for autonomous coding flows
+
+Claude is configured directly (no `make` wrapper) with Anthropic-compatible MiniMax settings:
+
+```json
+{
+  "model": "MiniMax-M2.5",
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "ask": []
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "<MINIMAX_API_KEY>",
+    "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
+    "ANTHROPIC_MODEL": "MiniMax-M2.5"
+  }
+}
+```
+
+Default bootstrap uses autonomous Claude settings (`CLAUDE_PERMISSION_MODE=bypassPermissions`) with model `MiniMax-M2.5`.
+If you need safer defaults in a Codespace, set overrides before bootstrap:
+
+```bash
+export CLAUDE_PERMISSION_MODE=default
+export CLAUDE_ALLOW_UNSAFE_MODE=0
+```
+
+Use safer mode in shared or untrusted environments.
+
+Run Claude directly:
+
+```bash
+claude -p --model MiniMax-M2.5 "Reply with exactly one line: claude-ok"
+claude "Refactor customer update flow to reduce duplication"
+```
+
+Notes:
+
+- secrets are never stored in git; keep them in Codespaces secrets
+- Codespaces secrets are provided directly by Codespaces to the container runtime
+- bootstrap persists required credentials into `~/.config/core-service/agent-secrets.env` with `chmod 600` for future shell sessions in the same Codespace
+- no token values are written to repository files
+- if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
+  `gh auth login -h github.com -w && gh auth setup-git`
+- this setup is Claude + MiniMax M2.5 only
 
 ## Using
 

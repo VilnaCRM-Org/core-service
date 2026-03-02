@@ -43,8 +43,8 @@ final class UpdateCustomerStatusCommandHandlerTest extends UnitTestCase
 
         $customerStatus
             ->expects($this->once())
-            ->method('setValue')
-            ->with($value);
+            ->method('update')
+            ->with($update);
 
         ($this->handler)($command);
     }

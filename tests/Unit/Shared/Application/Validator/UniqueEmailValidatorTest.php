@@ -14,6 +14,8 @@ use App\Shared\Application\Validator\UniqueEmail;
 use App\Shared\Application\Validator\UniqueEmailValidator;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
+use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\Validator\Context\ExecutionContext;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -32,7 +34,12 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         parent::setUp();
 
         $this->customerFactory = new CustomerFactory();
-        $this->transformer = new UlidTransformer(new UlidFactory());
+        $ulidFactory = new UlidFactory();
+        $this->transformer = new UlidTransformer(
+            $ulidFactory,
+            new UlidValidator(),
+            new UlidValueTransformer($ulidFactory)
+        );
         $this->customerRepository =
             $this->createMock(CustomerRepositoryInterface::class);
         $this->context = $this->createMock(ExecutionContext::class);

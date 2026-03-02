@@ -11,8 +11,6 @@ interface TypeRepositoryInterface
     public function save(CustomerType $customerType): void;
 
     /**
-     * @param string $id
-     *
      * @return CustomerType
      */
     public function find(

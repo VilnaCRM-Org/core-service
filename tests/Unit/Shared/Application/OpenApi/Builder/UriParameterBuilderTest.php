@@ -40,7 +40,7 @@ final class UriParameterBuilderTest extends UnitTestCase
         $this->assertEquals('path', $parameter->getIn());
         $this->assertEquals($description, $parameter->getDescription());
         $this->assertEquals($required, $parameter->getRequired());
-        $this->assertEquals(['type' => $type], $parameter->getSchema());
+        $this->assertEquals(['type' => $type, 'example' => $example], $parameter->getSchema());
         $this->assertEquals($example, $parameter->getExample());
     }
 
@@ -65,7 +65,7 @@ final class UriParameterBuilderTest extends UnitTestCase
         $this->assertEquals('path', $parameter->getIn());
         $this->assertEquals($description, $parameter->getDescription());
         $this->assertFalse($parameter->getRequired());
-        $this->assertEquals(['type' => $type], $parameter->getSchema());
+        $this->assertEquals(['type' => $type, 'example' => $example], $parameter->getSchema());
         $this->assertEquals($example, $parameter->getExample());
     }
 }

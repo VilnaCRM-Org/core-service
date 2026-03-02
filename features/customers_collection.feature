@@ -9,7 +9,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
 
   Scenario: Retrieve customers collection with unsupported query parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
-    When I send a GET request to "/api/customers?unsupportedParam=value"
+    When I send a GET request to "/api/customers.jsonld?unsupportedParam=value"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -21,7 +21,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER5"
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER6"
-    When I send a GET request to "/api/customers?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
+    When I send a GET request to "/api/customers.jsonld?order[ulid]=desc&ulid[lt]=01JKX8XGHVDZ46MWYMZT94YER6"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -32,8 +32,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member" should have 2 elements
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.next" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "view.previous" should contain "/api/customers?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "view.next" should contain "/api/customers.jsonld?order%5Bulid%5D=desc&ulid%5Blt%5D=01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "view.previous" should contain "/api/customers.jsonld?order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with valid cursor pagination parameters and check JSON keys and values with itemsPerPage parameter
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -53,7 +53,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "view.previous" should contain "/api/customers?itemsPerPage=1&order%5Bulid%5D=desc&ulid%5Bgt%5D=01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection with empty and verify JSON structure
-    When I send a GET request to "/api/customers"
+    When I send a GET request to "/api/customers.jsonld"
     Then the response status code should be equal to 200
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
@@ -71,6 +71,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "member[0].initials" should contain "JD"
     And the JSON node "totalItems" should be equal to the number 1
+    And the JSON node "member" should have 1 element
+    And the JSON node "member[0].initials" should be equal to "JD"
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[0].createdAt" should exist
 
   Scenario: Retrieve customers collection filtering by initials (array values) and check JSON values
     Given create customer with initials "AB"
@@ -84,6 +88,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].initials" should match "/(AB|CD)/"
     And the JSON node "member[1].initials" should match "/(AB|CD)/"
     And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
+    And the JSON node "member[0].createdAt" should exist
+    And the JSON node "member[1].createdAt" should exist
 
   Scenario: Retrieve customers collection filtering by email (single value) and validate JSON key
     Given create customer with email "john.doe@example.com"
@@ -169,7 +178,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].status.value" should be equal to "Active"
 
   Scenario: Retrieve customers collection filtering by status.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -181,8 +191,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].status.value" should be equal to "Active"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].status.value" should be equal to "Inactive"
 
   Scenario: Retrieve customers collection filtering by type.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -193,7 +205,8 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 1
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].type.value" should be equal to "VIP"
 
   Scenario: Retrieve customers collection filtering by type.value and check JSON
     Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
@@ -205,8 +218,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_get_collection"
     And the JSON node "totalItems" should be equal to the number 2
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].type.value" should be equal to "VIP"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type.value" should be equal to "Premium"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
 
   Scenario: Retrieve customers collection filtering by confirmed (single boolean) and verify JSON
     Given create customer with confirmed true

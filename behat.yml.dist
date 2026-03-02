@@ -21,6 +21,7 @@ default:
     default:
       contexts:
         - App\Tests\Behat\CustomerContext\CustomerContext
+        - App\Tests\Behat\GraphQLContext\GraphQLContext
         - TwentytwoLabs\BehatOpenApiExtension\Context\DebugContext: ~
         - TwentytwoLabs\BehatOpenApiExtension\Context\RestContext: ~
         - TwentytwoLabs\BehatOpenApiExtension\Context\JsonContext: ~

@@ -37,8 +37,8 @@ final class UpdateCustomerTypeCommandHandlerTest extends UnitTestCase
 
         $customerType
             ->expects($this->once())
-            ->method('setValue')
-            ->with($value);
+            ->method('update')
+            ->with($update);
 
         $this->repository
             ->expects($this->once())

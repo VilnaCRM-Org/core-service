@@ -18,7 +18,7 @@ final readonly class UpdateStatusCommandHandler implements
 
     public function __invoke(UpdateCustomerStatusCommand $command): void
     {
-        $command->customerStatus->setValue($command->update->value);
+        $command->customerStatus->update($command->update);
         $this->repository->save($command->customerStatus);
     }
 }

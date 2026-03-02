@@ -2,6 +2,13 @@ openapi: 3.1.0
 info:
   title: 'Core Service API'
   description: 'This API provides endpoints to manage core service data within a VilnaCRM.'
+  contact:
+    name: 'VilnaCRM Support'
+    url: 'https://vilnacrm.com'
+    email: support@vilnacrm.com
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
   version: 1.0.0
 servers:
   -
@@ -21,7 +28,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -34,10 +41,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -48,7 +55,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -56,10 +62,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -70,7 +76,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -78,10 +83,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -92,7 +97,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -100,10 +104,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -114,7 +118,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves the collection of Customer resources.'
       description: 'Retrieves the collection of Customer resources.'
       parameters:
@@ -148,7 +151,7 @@ paths:
         -
           name: initials
           in: query
-          description: ''
+          description: 'Filter by customer initials (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -160,7 +163,7 @@ paths:
         -
           name: 'initials[]'
           in: query
-          description: ''
+          description: 'Filter by multiple customer initials (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -174,7 +177,7 @@ paths:
         -
           name: email
           in: query
-          description: ''
+          description: 'Filter by customer email address (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -186,7 +189,7 @@ paths:
         -
           name: 'email[]'
           in: query
-          description: ''
+          description: 'Filter by multiple customer email addresses (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -200,7 +203,7 @@ paths:
         -
           name: phone
           in: query
-          description: ''
+          description: 'Filter by customer phone number (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -212,7 +215,7 @@ paths:
         -
           name: 'phone[]'
           in: query
-          description: ''
+          description: 'Filter by multiple customer phone numbers (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -226,7 +229,7 @@ paths:
         -
           name: leadSource
           in: query
-          description: ''
+          description: 'Filter by lead source (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -238,7 +241,7 @@ paths:
         -
           name: 'leadSource[]'
           in: query
-          description: ''
+          description: 'Filter by multiple lead sources (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -252,7 +255,7 @@ paths:
         -
           name: type.value
           in: query
-          description: ''
+          description: 'Filter by customer type value (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -264,7 +267,7 @@ paths:
         -
           name: 'type.value[]'
           in: query
-          description: ''
+          description: 'Filter by multiple customer type values (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -278,7 +281,7 @@ paths:
         -
           name: status.value
           in: query
-          description: ''
+          description: 'Filter by customer status value (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -290,7 +293,7 @@ paths:
         -
           name: 'status.value[]'
           in: query
-          description: ''
+          description: 'Filter by multiple customer status values (exact match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -302,35 +305,9 @@ paths:
           explode: true
           allowReserved: false
         -
-          name: confirmed
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: boolean
-          style: form
-          explode: false
-          allowReserved: false
-        -
-          name: 'confirmed[]'
-          in: query
-          description: ''
-          required: false
-          deprecated: false
-          allowEmptyValue: false
-          schema:
-            type: array
-            items:
-              type: boolean
-          style: form
-          explode: true
-          allowReserved: false
-        -
           name: 'order[ulid]'
           in: query
-          description: ''
+          description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -346,7 +323,7 @@ paths:
         -
           name: 'order[createdAt]'
           in: query
-          description: ''
+          description: 'Sort by creation date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -362,7 +339,7 @@ paths:
         -
           name: 'order[updatedAt]'
           in: query
-          description: ''
+          description: 'Sort by last update date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -376,9 +353,9 @@ paths:
           explode: false
           allowReserved: false
         -
-          name: 'order[initials]'
+          name: 'order[email]'
           in: query
-          description: ''
+          description: 'Sort by customer email address'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -392,9 +369,9 @@ paths:
           explode: false
           allowReserved: false
         -
-          name: 'order[email]'
+          name: 'order[initials]'
           in: query
-          description: ''
+          description: 'Sort by customer initials'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -410,7 +387,7 @@ paths:
         -
           name: 'order[phone]'
           in: query
-          description: ''
+          description: 'Sort by customer phone number'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -426,7 +403,7 @@ paths:
         -
           name: 'order[leadSource]'
           in: query
-          description: ''
+          description: 'Sort by lead source'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -442,7 +419,7 @@ paths:
         -
           name: 'order[type.value]'
           in: query
-          description: ''
+          description: 'Sort by customer type'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -458,7 +435,7 @@ paths:
         -
           name: 'order[status.value]'
           in: query
-          description: ''
+          description: 'Sort by customer status'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -474,7 +451,7 @@ paths:
         -
           name: 'createdAt[before]'
           in: query
-          description: ''
+          description: 'Filter customers created before this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -486,7 +463,7 @@ paths:
         -
           name: 'createdAt[strictly_before]'
           in: query
-          description: ''
+          description: 'Filter customers created strictly before this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -498,7 +475,7 @@ paths:
         -
           name: 'createdAt[after]'
           in: query
-          description: ''
+          description: 'Filter customers created after this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -510,7 +487,7 @@ paths:
         -
           name: 'createdAt[strictly_after]'
           in: query
-          description: ''
+          description: 'Filter customers created strictly after this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -522,7 +499,7 @@ paths:
         -
           name: 'updatedAt[before]'
           in: query
-          description: ''
+          description: 'Filter customers updated before this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -534,7 +511,7 @@ paths:
         -
           name: 'updatedAt[strictly_before]'
           in: query
-          description: ''
+          description: 'Filter customers updated strictly before this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -546,7 +523,7 @@ paths:
         -
           name: 'updatedAt[after]'
           in: query
-          description: ''
+          description: 'Filter customers updated after this date'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -558,12 +535,24 @@ paths:
         -
           name: 'updatedAt[strictly_after]'
           in: query
-          description: ''
+          description: 'Filter customers updated strictly after this date'
           required: false
           deprecated: false
           allowEmptyValue: false
           schema:
             type: string
+          style: form
+          explode: false
+          allowReserved: false
+        -
+          name: confirmed
+          in: query
+          description: 'Filter by customer confirmation status (true/false)'
+          required: false
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: boolean
           style: form
           explode: false
           allowReserved: false
@@ -638,8 +627,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/Customer.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -647,10 +635,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -661,7 +649,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -669,11 +656,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -685,11 +672,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -697,10 +681,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -711,7 +695,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -719,10 +702,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -733,7 +716,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -741,10 +723,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -755,10 +737,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Creates a Customer resource.'
       description: 'Creates a Customer resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -772,27 +752,22 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 status:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
               required:
                 - email
                 - phone
@@ -822,7 +797,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
+                $ref: '#/components/schemas/Customer.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -830,10 +805,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -844,7 +819,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -852,10 +826,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -866,7 +840,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'Customer not found'
           content:
@@ -874,10 +847,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -888,7 +861,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -896,10 +868,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -910,7 +882,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves a Customer resource.'
       description: 'Retrieves a Customer resource.'
       parameters:
@@ -920,12 +891,11 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     put:
@@ -938,8 +908,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/Customer.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -947,10 +916,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -961,7 +930,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -969,11 +937,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -985,11 +953,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -997,10 +962,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1011,7 +976,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1019,10 +983,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1033,7 +997,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'Customer not found'
           content:
@@ -1041,10 +1004,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1055,7 +1018,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1063,10 +1025,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1077,7 +1039,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Replaces the Customer resource.'
       description: 'Replaces the Customer resource.'
       parameters:
@@ -1087,12 +1048,11 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
@@ -1107,27 +1067,22 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 status:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
               required:
                 - email
                 - phone
@@ -1155,8 +1110,7 @@ paths:
           description: 'Customer resource deleted'
           content:
             application/problem+json:
-              example: ''
-          headers: {  }
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -1164,10 +1118,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1178,7 +1132,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1186,10 +1139,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1200,7 +1153,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'Customer not found'
           content:
@@ -1208,10 +1160,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1222,7 +1174,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1230,10 +1181,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1244,7 +1195,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Removes the Customer resource.'
       description: 'Removes the Customer resource.'
       parameters:
@@ -1254,12 +1204,11 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
       deprecated: false
     patch:
@@ -1272,8 +1221,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/Customer.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/Customer.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -1281,10 +1229,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1295,7 +1243,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -1303,11 +1250,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1319,11 +1266,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -1331,10 +1275,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1345,7 +1289,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1353,10 +1296,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1367,7 +1310,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'Customer not found'
           content:
@@ -1375,10 +1317,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1389,7 +1331,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Customer not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1397,10 +1338,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1411,7 +1352,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Updates the Customer resource.'
       description: 'Updates the Customer resource.'
       parameters:
@@ -1421,12 +1361,11 @@ paths:
           description: 'Customer identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YER4
           style: simple
           explode: false
-          allowReserved: false
           example: 01JKX8XGHVDZ46MWYMZT94YER4
       requestBody:
         content:
@@ -1441,28 +1380,22 @@ paths:
                 phone:
                   type: string
                   maxLength: 255
-                  format: null
                 initials:
                   type: string
                   maxLength: 255
-                  format: null
                 leadSource:
                   type: string
                   maxLength: 255
-                  format: null
                 type:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 status:
-                  type: iri-reference
+                  type: string
                   maxLength: 255
-                  format: null
+                  format: iri-reference
                 confirmed:
                   type: boolean
-                  maxLength: null
-                  format: null
-              required: []
             example:
               email: customer@example.com
               phone: '0123456789'
@@ -1486,7 +1419,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld' } }
+                  member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
                   view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
@@ -1499,10 +1432,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1513,7 +1446,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -1521,10 +1453,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1535,7 +1467,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1543,10 +1474,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1557,7 +1488,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1565,10 +1495,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1579,7 +1509,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves the collection of CustomerStatus resources.'
       description: 'Retrieves the collection of CustomerStatus resources.'
       parameters:
@@ -1613,7 +1542,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: ''
+          description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -1629,7 +1558,7 @@ paths:
         -
           name: 'order[value]'
           in: query
-          description: ''
+          description: 'Sort by value'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -1645,7 +1574,7 @@ paths:
         -
           name: value
           in: query
-          description: ''
+          description: 'Filter by value (partial match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -1725,8 +1654,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -1734,10 +1662,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1748,7 +1676,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -1756,11 +1683,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1772,11 +1699,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -1784,10 +1708,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1798,7 +1722,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1806,10 +1729,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1820,7 +1743,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1828,10 +1750,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1842,10 +1764,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Creates a CustomerStatus resource.'
       description: 'Creates a CustomerStatus resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -1855,7 +1775,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -1873,7 +1792,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '401':
           description: Unauthorized
           content:
@@ -1881,10 +1800,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1895,7 +1814,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -1903,10 +1821,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1917,7 +1835,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerStatus not found'
           content:
@@ -1925,10 +1842,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1939,7 +1856,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -1947,10 +1863,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -1961,7 +1877,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves a CustomerStatus resource.'
       description: 'Retrieves a CustomerStatus resource.'
       parameters:
@@ -1971,13 +1886,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     put:
       operationId: api_customer_statuses_ulid_put
@@ -1989,8 +1903,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -1998,10 +1911,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2012,7 +1925,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -2020,11 +1932,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2036,11 +1948,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -2048,10 +1957,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2062,7 +1971,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2070,10 +1978,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2084,7 +1992,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerStatus not found'
           content:
@@ -2092,10 +1999,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2106,7 +2013,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2114,10 +2020,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2128,7 +2034,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Replaces the CustomerStatus resource.'
       description: 'Replaces the CustomerStatus resource.'
       parameters:
@@ -2138,13 +2043,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/ld+json:
@@ -2154,7 +2058,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2170,8 +2073,7 @@ paths:
           description: 'CustomerStatus resource deleted'
           content:
             application/problem+json:
-              example: ''
-          headers: {  }
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -2179,10 +2081,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2193,7 +2095,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2201,10 +2102,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2215,7 +2116,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerStatus not found'
           content:
@@ -2223,10 +2123,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2237,7 +2137,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2245,10 +2144,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2259,7 +2158,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Removes the CustomerStatus resource.'
       description: 'Removes the CustomerStatus resource.'
       parameters:
@@ -2269,13 +2167,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       deprecated: false
     patch:
       operationId: api_customer_statuses_ulid_patch
@@ -2287,8 +2184,7 @@ paths:
           content:
             application/ld+json:
               schema:
-                $ref: '#/components/schemas/CustomerStatus.jsonld'
-          links: {  }
+                $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         '400':
           description: 'Bad request'
           content:
@@ -2296,10 +2192,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2310,7 +2206,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -2318,11 +2213,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2334,11 +2229,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -2346,10 +2238,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2360,7 +2252,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2368,10 +2259,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2382,7 +2273,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerStatus not found'
           content:
@@ -2390,10 +2280,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2404,7 +2294,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerStatus not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2412,10 +2301,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2426,7 +2315,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Updates the CustomerStatus resource.'
       description: 'Updates the CustomerStatus resource.'
       parameters:
@@ -2436,13 +2324,12 @@ paths:
           description: 'CustomerStatus identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YPQ2
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YPQ2
       requestBody:
         content:
           application/merge-patch+json:
@@ -2452,7 +2339,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2485,10 +2371,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2499,7 +2385,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -2507,10 +2392,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2521,7 +2406,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2529,10 +2413,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2543,7 +2427,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2551,10 +2434,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2565,7 +2448,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves the collection of CustomerType resources.'
       description: 'Retrieves the collection of CustomerType resources.'
       parameters:
@@ -2599,7 +2481,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: ''
+          description: 'Sort by customer unique identifier'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -2615,7 +2497,7 @@ paths:
         -
           name: 'order[value]'
           in: query
-          description: ''
+          description: 'Sort by value'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -2631,7 +2513,7 @@ paths:
         -
           name: value
           in: query
-          description: ''
+          description: 'Filter by value (partial match)'
           required: false
           deprecated: false
           allowEmptyValue: false
@@ -2712,7 +2594,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-          links: {  }
         '400':
           description: 'Bad request'
           content:
@@ -2720,10 +2601,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2734,7 +2615,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -2742,11 +2622,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2758,11 +2638,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -2770,10 +2647,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2784,7 +2661,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2792,10 +2668,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2806,7 +2682,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2814,10 +2689,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2828,10 +2703,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Creates a CustomerType resource.'
       description: 'Creates a CustomerType resource.'
-      parameters: []
       requestBody:
         content:
           application/ld+json:
@@ -2841,7 +2714,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -2867,10 +2739,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2881,7 +2753,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -2889,10 +2760,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2903,7 +2774,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerType not found'
           content:
@@ -2911,10 +2781,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2925,7 +2795,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -2933,10 +2802,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2947,7 +2816,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Retrieves a CustomerType resource.'
       description: 'Retrieves a CustomerType resource.'
       parameters:
@@ -2957,13 +2825,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     put:
       operationId: api_customer_types_ulid_put
@@ -2976,7 +2843,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-          links: {  }
         '400':
           description: 'Bad request'
           content:
@@ -2984,10 +2850,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -2998,7 +2864,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -3006,11 +2871,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3022,11 +2887,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -3034,10 +2896,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3048,7 +2910,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -3056,10 +2917,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3070,7 +2931,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerType not found'
           content:
@@ -3078,10 +2938,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3092,7 +2952,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -3100,10 +2959,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3114,7 +2973,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Replaces the CustomerType resource.'
       description: 'Replaces the CustomerType resource.'
       parameters:
@@ -3124,13 +2982,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/ld+json:
@@ -3140,7 +2997,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -3156,8 +3012,7 @@ paths:
           description: 'CustomerType resource deleted'
           content:
             application/problem+json:
-              example: ''
-          headers: {  }
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -3165,10 +3020,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3179,7 +3034,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -3187,10 +3041,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3201,7 +3055,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerType not found'
           content:
@@ -3209,10 +3062,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3223,7 +3076,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -3231,10 +3083,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3245,7 +3097,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Removes the CustomerType resource.'
       description: 'Removes the CustomerType resource.'
       parameters:
@@ -3255,13 +3106,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       deprecated: false
     patch:
       operationId: api_customer_types_ulid_patch
@@ -3274,7 +3124,6 @@ paths:
             application/ld+json:
               schema:
                 $ref: '#/components/schemas/CustomerType.jsonld-output'
-          links: {  }
         '400':
           description: 'Bad request'
           content:
@@ -3282,10 +3131,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3296,7 +3145,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'The input data is misformatted.'
                 status: 400
-          headers: {  }
         '422':
           description: 'Validation error'
           content:
@@ -3304,11 +3152,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  violations: { type: array, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3320,11 +3168,8 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  propertyPath: some_property
-                  message: 'This value should not be blank.'
-                  code: c1051bb4-d103-4f74-8988-acbcafc7fdc3
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
                 status: 422
-          headers: {  }
         '401':
           description: Unauthorized
           content:
@@ -3332,10 +3177,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3346,7 +3191,6 @@ paths:
                 title: Unauthorized
                 detail: 'Authentication credentials are missing or invalid.'
                 status: 401
-          headers: {  }
         '403':
           description: Forbidden
           content:
@@ -3354,10 +3198,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3368,7 +3212,6 @@ paths:
                 title: Forbidden
                 detail: 'The server understood the request, but refuses to authorize it.'
                 status: 403
-          headers: {  }
         '404':
           description: 'CustomerType not found'
           content:
@@ -3376,10 +3219,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3390,7 +3233,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'CustomerType not found'
                 status: 404
-          headers: {  }
         '500':
           description: 'Internal server error'
           content:
@@ -3398,10 +3240,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  type: { type: string, maxLength: null, format: null }
-                  title: { type: string, maxLength: null, format: null }
-                  detail: { type: string, maxLength: null, format: null }
-                  status: { type: integer, maxLength: null, format: null }
+                  type: { type: string }
+                  title: { type: string }
+                  detail: { type: string }
+                  status: { type: integer }
                 required:
                   - type
                   - title
@@ -3412,7 +3254,6 @@ paths:
                 title: 'An error occurred'
                 detail: 'Something went wrong'
                 status: 500
-          headers: {  }
       summary: 'Updates the CustomerType resource.'
       description: 'Updates the CustomerType resource.'
       parameters:
@@ -3422,13 +3263,12 @@ paths:
           description: 'CustomerType identifier'
           required: true
           deprecated: false
-          allowEmptyValue: false
           schema:
             type: string
+            example: 01JKX8XGHVDZ46MWYMZT94YJN7
           style: simple
           explode: false
-          allowReserved: false
-          example: 01JKX8XGHVDZ46MWYMZT94YER4
+          example: 01JKX8XGHVDZ46MWYMZT94YJN7
       requestBody:
         content:
           application/merge-patch+json:
@@ -3438,7 +3278,6 @@ paths:
                 value:
                   type: string
                   maxLength: 255
-                  format: null
               required:
                 - value
             example:
@@ -3457,7 +3296,6 @@ paths:
           description: 'Health check failed.'
       summary: 'Retrieves a HealthCheck resource.'
       description: 'Retrieves a HealthCheck resource.'
-      parameters: []
       deprecated: false
 components:
   schemas:
@@ -3500,6 +3338,7 @@ components:
     Customer.CustomerCreate.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - initials
@@ -3547,8 +3386,13 @@ components:
     Customer.CustomerPatch:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       properties:
+        id:
+          type:
+            - string
+            - 'null'
         initials:
           maxLength: 255
           type:
@@ -3587,6 +3431,7 @@ components:
     Customer.CustomerPut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - initials
@@ -3631,7 +3476,7 @@ components:
           type:
             - boolean
             - 'null'
-    Customer.jsonld:
+    Customer.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3668,17 +3513,13 @@ components:
         leadSource:
           type: string
         type:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
+          $ref: '#/components/schemas/CustomerType.jsonld-output'
         status:
-          type: string
-          format: iri-reference
-          example: 'https://example.com/'
+          $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         confirmed:
           type: boolean
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld'
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
         createdAt:
           type: string
           format: date-time
@@ -3688,6 +3529,7 @@ components:
     CustomerStatus.StatusCreate.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3700,6 +3542,7 @@ components:
     CustomerStatus.StatusPatch:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       properties:
         value:
@@ -3707,9 +3550,14 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerStatus.StatusPut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3719,7 +3567,7 @@ components:
           type:
             - string
             - 'null'
-    CustomerStatus.jsonld:
+    CustomerStatus.jsonld-output:
       type: object
       description: ''
       deprecated: false
@@ -3773,9 +3621,14 @@ components:
           type:
             - string
             - 'null'
+        id:
+          type:
+            - string
+            - 'null'
     CustomerType.TypePut.jsonld:
       type: object
       description: ''
+      additionalProperties: false
       deprecated: false
       required:
         - value
@@ -3877,34 +3730,6 @@ components:
         '@type':
           readOnly: true
           type: string
-    UlidInterface.jsonld:
-      type: object
-      description: ''
-      deprecated: false
-      properties:
-        '@context':
-          readOnly: true
-          oneOf:
-            -
-              type: string
-            -
-              type: object
-              properties:
-                '@vocab':
-                  type: string
-                hydra:
-                  type: string
-                  enum: ['http://www.w3.org/ns/hydra/core#']
-              required:
-                - '@vocab'
-                - hydra
-              additionalProperties: true
-        '@id':
-          readOnly: true
-          type: string
-        '@type':
-          readOnly: true
-          type: string
     UlidInterface.jsonld-output:
       type: object
       description: ''
@@ -3933,20 +3758,18 @@ components:
         '@type':
           readOnly: true
           type: string
-  responses: {  }
-  parameters: {  }
-  examples: {  }
-  requestBodies: {  }
-  headers: {  }
-  securitySchemes: {  }
 security: []
 tags:
   -
     name: Customer
+    description: 'Operations related to customer management'
   -
     name: CustomerStatus
+    description: 'Operations related to customer status management'
   -
     name: CustomerType
+    description: 'Operations related to customer type management'
   -
     name: HealthCheck
+    description: 'Health check endpoints for monitoring'
 webhooks: {  }

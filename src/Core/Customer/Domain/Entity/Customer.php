@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Domain\Entity;
 
+use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
+use DateTime;
 use DateTimeImmutable;
-use DateTimeInterface;
 
 class Customer implements CustomerInterface
 {
@@ -19,9 +20,11 @@ class Customer implements CustomerInterface
         private CustomerStatus $status,
         private ?bool $confirmed,
         private UlidInterface $ulid,
-        private DateTimeInterface $createdAt = new DateTimeImmutable(),
-        private DateTimeInterface $updatedAt = new DateTimeImmutable(),
+        private ?DateTimeImmutable $createdAt = null,
+        private ?DateTime $updatedAt = null,
     ) {
+        $this->createdAt ??= new DateTimeImmutable();
+        $this->updatedAt ??= new DateTime();
     }
 
     public function getUlid(): string
@@ -94,22 +97,22 @@ class Customer implements CustomerInterface
         $this->status = $status;
     }
 
-    public function getCreatedAt(): DateTimeInterface
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeInterface $createdAt): void
+    public function setCreatedAt(DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
-    public function getUpdatedAt(): DateTimeInterface
+    public function getUpdatedAt(): DateTime
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
@@ -122,5 +125,17 @@ class Customer implements CustomerInterface
     public function setConfirmed(bool $confirmed): void
     {
         $this->confirmed = $confirmed;
+    }
+
+    public function update(CustomerUpdate $updateData): void
+    {
+        $this->initials = $updateData->newInitials;
+        $this->email = $updateData->newEmail;
+        $this->phone = $updateData->newPhone;
+        $this->leadSource = $updateData->newLeadSource;
+        $this->type = $updateData->newType;
+        $this->status = $updateData->newStatus;
+        $this->confirmed = $updateData->newConfirmed;
+        $this->updatedAt = new DateTime();
     }
 }

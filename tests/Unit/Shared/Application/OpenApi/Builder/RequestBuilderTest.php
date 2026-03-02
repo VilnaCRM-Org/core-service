@@ -6,8 +6,8 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\Builder\ContextBuilder;
-use App\Shared\Application\OpenApi\Builder\Parameter;
 use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -59,6 +59,38 @@ final class RequestBuilderTest extends UnitTestCase
 
         $this->assertInstanceOf(RequestBody::class, $requestBody);
         $this->assertEquals($expectedContent, $requestBody->getContent());
+    }
+
+    public function testBuildRequiredCreatesRequiredRequestBody(): void
+    {
+        $params = [
+            new Parameter('name', 'string', 'test'),
+        ];
+
+        $this->contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new ArrayObject([]));
+
+        $requestBody = $this->builder->buildRequired($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
+    }
+
+    public function testBuildOptionalCreatesOptionalRequestBody(): void
+    {
+        $params = [
+            new Parameter('name', 'string', 'test'),
+        ];
+
+        $this->contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new ArrayObject([]));
+
+        $requestBody = $this->builder->buildOptional($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
     }
 
     private function getExpectedContent(

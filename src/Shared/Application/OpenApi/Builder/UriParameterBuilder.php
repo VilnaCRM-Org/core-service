@@ -20,7 +20,7 @@ final class UriParameterBuilder
             in: 'path',
             description: $description,
             required: $required,
-            schema: ['type' => $type],
+            schema: ['type' => $type, 'example' => $example],
             example: $example
         );
     }

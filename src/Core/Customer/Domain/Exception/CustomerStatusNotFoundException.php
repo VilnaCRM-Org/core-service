@@ -8,8 +8,10 @@ use RuntimeException;
 
 final class CustomerStatusNotFoundException extends RuntimeException
 {
-    public function __construct()
+    public static function withIri(string $iri): self
     {
-        parent::__construct('Customer status not found');
+        return new self(
+            sprintf('Customer status with IRI "%s" not found', $iri)
+        );
     }
 }

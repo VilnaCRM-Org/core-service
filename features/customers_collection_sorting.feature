@@ -17,6 +17,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].leadSource" should contain "Google"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BleadSource%5D=asc"
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
 
   Scenario: Retrieve customers collection sorted by leadSource in descending order
     Given create customer with leadSource "Bing"
@@ -28,6 +31,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[1].leadSource" should contain "Bing"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5BleadSource%5D=desc"
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].email" should exist
+    And the JSON node "member[1].email" should exist
 
   Scenario: Retrieve customers collection sorted by ulid in ascending order
     Given create customer with id "01JKX8XGHVDZ46MWYMZT94YER1"
@@ -38,6 +44,9 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER1"
     And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER2"
     And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "member" should have 2 elements
+    And the JSON node "member[0].ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER1"
+    And the JSON node "member[1].ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER2"
     And the JSON node "view.@id" should contain "order%5Bulid%5D=asc"
 
   Scenario: Retrieve customers collection sorted by ulid in descending order
@@ -123,8 +132,10 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?order[type.value]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].type.value" should be equal to "Basic"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].type.value" should be equal to "VIP"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Btype.value%5D=asc"
 
@@ -133,9 +144,11 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     Given create customer with type value "Basic" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
     When I send a GET request to "/api/customers?order[type.value]=desc"
     Then the response status code should be equal to 200
+    And the JSON node "member[0].type.value" should be equal to "VIP"
     And the response should be in JSON
-    And the JSON node "member[0].type" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].type" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].type.value" should be equal to "Basic"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Btype.value%5D=desc"
 
@@ -148,7 +161,22 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     When I send a GET request to "/api/customers?order[status.value]=asc"
     Then the response status code should be equal to 200
     And the response should be in JSON
-    And the JSON node "member[0].status" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "member[1].status" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[0].status.value" should be equal to "Active"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[1].status.value" should be equal to "Inactive"
     And the JSON node "totalItems" should be equal to the number 2
     And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=asc"
+
+  Scenario: Retrieve customers collection sorted by status.value in descending order
+    Given create customer with type value "VIP" and status value "Active" and id "01JKX8XGHVDZ46MWYMZT94YER4"
+    Given create customer with type value "Premium" and status value "Inactive" and id "01JKX8XGHVDZ46MWYMZT94YER5"
+    When I send a GET request to "/api/customers?order[status.value]=desc"
+    Then the response status code should be equal to 200
+    And the response should be in JSON
+    And the JSON node "member[0].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER5"
+    And the JSON node "member[0].status.value" should be equal to "Inactive"
+    And the JSON node "member[1].@id" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
+    And the JSON node "member[1].status.value" should be equal to "Active"
+    And the JSON node "totalItems" should be equal to the number 2
+    And the JSON node "view.@id" should contain "order%5Bstatus.value%5D=desc"

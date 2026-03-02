@@ -12,16 +12,25 @@ final class UlidFilterProcessor
     public function process(
         string $property,
         string $operator,
-        mixed $rawValue,
+        string|array|int|float|bool|null $rawValue,
         Builder $builder
     ): void {
-        if (!$this->isUlidProperty($property) || !is_string($rawValue)) {
+        if (!$this->canProcess($property, $rawValue)) {
             return;
         }
 
         $parsedValue = $this->parseUlidValue($rawValue);
 
         $this->applyOperator($operator, $parsedValue, $property, $builder);
+    }
+
+    private function canProcess(string $property, string|array|int|float|bool|null $rawValue): bool
+    {
+        if (!$this->isUlidProperty($property)) {
+            return false;
+        }
+
+        return is_string($rawValue);
     }
 
     private function isUlidProperty(string $property): bool

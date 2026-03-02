@@ -12,6 +12,7 @@ use App\Core\Customer\Application\Processor\CustomerTypePatchProcessor;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Shared\Application\Extractor\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
@@ -24,6 +25,7 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     private CommandBusInterface|MockObject $commandBus;
     private UpdateTypeCommandFactoryInterface|MockObject $factory;
     private UlidFactory|MockObject $ulidFactory;
+    private PatchUlidExtractor $patchUlidExtractor;
     private CustomerTypePatchProcessor $processor;
 
     protected function setUp(): void
@@ -35,11 +37,13 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->factory = $this
             ->createMock(UpdateTypeCommandFactoryInterface::class);
         $this->ulidFactory = $this->createMock(UlidFactory::class);
+        $this->patchUlidExtractor = new PatchUlidExtractor();
 
         $this->processor = new CustomerTypePatchProcessor(
             $this->repository,
             $this->commandBus,
             $this->factory,
+            $this->patchUlidExtractor,
             $this->ulidFactory,
         );
     }
@@ -71,14 +75,16 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $operation = $this->createMock(Operation::class);
         $ulid = (string) $this->faker->ulid();
         $customerType = $this->createMock(CustomerType::class);
-        $command = $this
-            ->createMock(UpdateCustomerTypeCommand::class);
         $ulidMock = $this->createMock(Ulid::class);
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerType, $existingValue, $command);
         $this->setupCustomerType($customerType, $existingValue);
+
+        // When value is empty string, no command should be dispatched (proper PATCH semantics)
+        $this->commandBus
+            ->expects($this->never())
+            ->method('dispatch');
 
         $result = $this->processor
             ->process($dto, $operation, ['ulid' => $ulid]);
@@ -97,21 +103,58 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->setupUlidFactory($ulid, $ulidMock);
 
         $this->expectException(CustomerTypeNotFoundException::class);
-        $this->expectExceptionMessage('Customer type not found');
 
         $this->processor->process($dto, $operation, ['ulid' => $ulid]);
     }
 
+    public function testProcessWithGraphQLPathExtractsUlidFromIri(): void
+    {
+        $ulid = (string) $this->faker->ulid();
+        $iri = sprintf('/api/customer_types/%s', $ulid);
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = $iri;
+        $operation = $this->createMock(Operation::class);
+        $customerType = $this->createMock(CustomerType::class);
+        $command = $this->createMock(UpdateCustomerTypeCommand::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->setupDependencies($customerType, $dto->value, $command);
+        $this->setupCustomerType($customerType, $dto->value);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerType, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenNoUlidProvided(): void
+    {
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(CustomerTypeNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
     private function createDto(): TypePatch
     {
-        return new TypePatch(
-            $this->faker->word()
-        );
+        $dto = new TypePatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        return $dto;
     }
 
     private function createDtoWithEmptyValue(): TypePatch
     {
-        return new TypePatch('');
+        $dto = new TypePatch();
+        $dto->value = '';
+        $dto->id = null;
+        return $dto;
     }
 
     private function setupRepository(

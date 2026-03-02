@@ -40,4 +40,36 @@ final class RequestPatchBuilderTest extends UnitTestCase
 
         $this->assertEquals($expectedContent, $actualRequestBody->getContent());
     }
+
+    public function testBuildRequiredCreatesRequiredRequestBody(): void
+    {
+        $contextBuilderMock = $this->createMock(ContextBuilder::class);
+        $params = [];
+
+        $contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new \ArrayObject([]));
+
+        $requestPatchBuilder = new RequestPatchBuilder($contextBuilderMock);
+        $requestBody = $requestPatchBuilder->buildRequired($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
+    }
+
+    public function testBuildOptionalCreatesOptionalRequestBody(): void
+    {
+        $contextBuilderMock = $this->createMock(ContextBuilder::class);
+        $params = [];
+
+        $contextBuilderMock->expects($this->once())
+            ->method('build')
+            ->with($params)
+            ->willReturn(new \ArrayObject([]));
+
+        $requestPatchBuilder = new RequestPatchBuilder($contextBuilderMock);
+        $requestBody = $requestPatchBuilder->buildOptional($params);
+
+        $this->assertInstanceOf(RequestBody::class, $requestBody);
+    }
 }

@@ -10,8 +10,8 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Core\Customer\Application\OpenApi\Endpoint\Customer\EndpointFactory;
-use App\Core\Customer\Application\OpenApi\Request\Customer\CreateFactory;
+use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\CustomerEndpointFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\ForbiddenResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\InternalErrorFactory;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 final class CustomerEndpointFactoryTest extends UnitTestCase
 {
-    private CreateFactory $createFactory;
+    private CreateCustomerRequestFactory $createFactory;
     private ValidationErrorFactory $validationErrorFactory;
     private BadRequestResponseFactory $badRequestResponseFactory;
     private InternalErrorFactory $internalErrorFactory;
@@ -52,7 +52,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
         $this->setupFactoryReturnValues();
         $this->setExpectations();
 
-        $factory = new EndpointFactory(
+        $factory = new CustomerEndpointFactory(
             $this->createFactory,
             $this->validationErrorFactory,
             $this->badRequestResponseFactory,
@@ -67,7 +67,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     private function setupFactoryMocks(): void
     {
         $this->createFactory = $this
-            ->createMock(CreateFactory::class);
+            ->createMock(CreateCustomerRequestFactory::class);
         $this->validationErrorFactory = $this
             ->createMock(ValidationErrorFactory::class);
         $this->badRequestResponseFactory = $this
@@ -139,7 +139,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
     private function setupPaths(): void
     {
         $this->openApi->method('getPaths')->willReturn($this->paths);
-        $this->paths->expects($this->once())
+        $this->paths->expects($this->exactly(2))
             ->method('getPath')
             ->with('/api/customers')
             ->willReturn($this->pathItem);
@@ -190,7 +190,7 @@ final class CustomerEndpointFactoryTest extends UnitTestCase
             ->method('withGet')
             ->with($this->operationGet)
             ->willReturnSelf();
-        $this->paths->expects($this->once())
+        $this->paths->expects($this->exactly(2))
             ->method('addPath')
             ->with('/api/customers', $this->pathItem);
     }

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
+use App\Core\Customer\Application\Resolver\CustomerPatchUpdateResolver;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Entity\CustomerStatus;
-use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
+use App\Shared\Application\Extractor\PatchUlidExtractor;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -27,7 +26,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         private CustomerRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
         private UpdateCustomerCommandFactoryInterface $commandFactory,
-        private IriConverterInterface $iriConverter,
+        private CustomerPatchUpdateResolver $patchUpdateResolver,
+        private PatchUlidExtractor $patchUlidExtractor,
         private UlidFactory $ulidTransformer,
     ) {
     }
@@ -43,102 +43,25 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customer = $this->retrieveCustomer($uriVariables);
-        $customerUpdate = $this->prepareCustomerUpdate($data, $customer);
+        $ulid = $this->patchUlidExtractor->extract(
+            $uriVariables,
+            $data->id,
+            static fn () => new CustomerNotFoundException()
+        );
+
+        $customer = $this->retrieveCustomer($ulid);
+        $customerUpdate = $this->patchUpdateResolver->build($data, $customer);
         $this->dispatchUpdateCommand($customer, $customerUpdate);
+
         return $customer;
     }
 
-    /**
-     * @param array<string,string> $uriVariables
-     */
-    private function retrieveCustomer(array $uriVariables): Customer
+    private function retrieveCustomer(string $ulid): Customer
     {
-        $ulid = $uriVariables['ulid'];
-        return $this->repository->find(
-            $this->ulidTransformer->create($ulid)
-        ) ?? throw new CustomerNotFoundException();
-    }
+        $ulidObject = $this->ulidTransformer->create($ulid);
 
-    private function prepareCustomerUpdate(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerUpdate {
-        $newInitials = $this->updateInitials($data, $customer);
-        $newEmail = $this->updateEmail($data, $customer);
-        $newPhone = $this->updatePhone($data, $customer);
-        $newLeadSource = $this->updateLeadSource($data, $customer);
-        $newType = $this->updateType($data, $customer);
-        $newStatus = $this->updateStatus($data, $customer);
-        $newConfirmed = $data->confirmed ?? $customer->isConfirmed();
-
-        return new CustomerUpdate(
-            newInitials: $newInitials,
-            newEmail: $newEmail,
-            newPhone: $newPhone,
-            newLeadSource: $newLeadSource,
-            newType: $newType,
-            newStatus: $newStatus,
-            newConfirmed: $newConfirmed
-        );
-    }
-
-    private function updateInitials(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->initials,
-            $customer->getInitials()
-        );
-    }
-
-    private function updateEmail(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->email,
-            $customer->getEmail()
-        );
-    }
-
-    private function updatePhone(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->phone,
-            $customer->getPhone()
-        );
-    }
-
-    private function updateLeadSource(
-        CustomerPatch $data,
-        Customer $customer
-    ): string {
-        return $this->getNewValue(
-            $data->leadSource,
-            $customer->getLeadSource()
-        );
-    }
-
-    private function updateType(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerType {
-        return $data->type
-            ? $this->getCustomerType($data->type)
-            : $customer->getType();
-    }
-
-    private function updateStatus(
-        CustomerPatch $data,
-        Customer $customer
-    ): CustomerStatus {
-        return $data->status
-            ? $this->getCustomerStatus($data->status)
-            : $customer->getStatus();
+        return $this->repository->find($ulidObject)
+            ?? throw new CustomerNotFoundException();
     }
 
     private function dispatchUpdateCommand(
@@ -148,26 +71,5 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         $this->commandBus->dispatch(
             $this->commandFactory->create($customer, $update)
         );
-    }
-
-    private function getNewValue(
-        ?string $newValue,
-        string $defaultValue
-    ): string {
-        return strlen(trim($newValue ?? '')) > 0
-            ? $newValue
-            : $defaultValue;
-    }
-
-    private function getCustomerType(
-        string $typeIri
-    ): CustomerType {
-        return $this->iriConverter->getResourceFromIri($typeIri);
-    }
-
-    private function getCustomerStatus(
-        string $statusIri
-    ): CustomerStatus {
-        return $this->iriConverter->getResourceFromIri($statusIri);
     }
 }

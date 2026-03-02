@@ -4,14 +4,23 @@ on:
   pull_request:
     branches: ['main']
 
+permissions:
+  contents: read
+
 jobs:
-  load-tests:
-    name: K6
+  load-tests-sharded:
+    name: Run K6 Smoke Shard (${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0, 1, 2, 3]
+    timeout-minutes: 25
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -23,5 +32,20 @@ jobs:
       - name: Start application
         run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
 
-      - name: Run load tests
-        run: make smoke-load-tests
+      - name: Run sharded smoke load tests
+        run: make smoke-load-tests SHARD_INDEX=${{ matrix.shard }} SHARD_TOTAL=4 K6_SMOKE_RETRIES=2 K6_SMOKE_RETRY_DELAY_SECONDS=1
+
+  load-tests:
+    name: K6
+    runs-on: ubuntu-latest
+    needs:
+      - load-tests-sharded
+    if: ${{ always() }}
+    steps:
+      - name: Validate all K6 shards succeeded
+        run: |
+          if [ "${{ needs.load-tests-sharded.result }}" != "success" ]; then
+            echo "At least one K6 shard failed."
+            exit 1
+          fi
+          echo "All K6 shards passed."

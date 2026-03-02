@@ -6,49 +6,43 @@ namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Validator\UlidValidator;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final readonly class UlidTransformer
 {
-    public function __construct(private UlidFactory $ulidFactory)
-    {
+    public function __construct(
+        private UlidFactory $ulidFactory,
+        private UlidValidator $validator,
+        private UlidValueTransformer $valueTransformer
+    ) {
     }
 
-    public function toDatabaseValue(mixed $value): ?Binary
+    public function toDatabaseValue(null|Ulid|string|SymfonyUlid $value): ?Binary
     {
-        if (
-            $value === null || $this->isInvalidUlidString($value)
-        ) {
+        if (!$this->validator->isValid($value)) {
             return null;
         }
 
-        $ulid = $value instanceof
-        Ulid ? $value : $this->ulidFactory->create($value);
+        $ulid = $this->valueTransformer->toUlid($value);
+
         return new Binary($ulid->toBinary(), Binary::TYPE_GENERIC);
     }
 
-    public function toPhpValue(mixed $binary): ?Ulid
+    public function toPhpValue(Binary|string|SymfonyUlid|null $value): ?Ulid
     {
-        if (!$binary instanceof SymfonyUlid) {
-            $binary = SymfonyUlid::fromBinary($binary);
+        if ($value === null) {
+            return null;
         }
-        return $this->transformFromSymfonyUlid($binary);
+
+        $symfonyUlid = $this->valueTransformer->fromBinary($value);
+
+        return $this->transformFromSymfonyUlid($symfonyUlid);
     }
 
     public function transformFromSymfonyUlid(SymfonyUlid $symfonyUlid): Ulid
     {
-        return $this->createUlid((string) $symfonyUlid);
-    }
-
-    private function createUlid(string $ulid): Ulid
-    {
-        return $this->ulidFactory->create($ulid);
-    }
-
-    private function isInvalidUlidString(mixed $value): bool
-    {
-        return is_string($value)
-            && !SymfonyUlid::isValid($value);
+        return $this->ulidFactory->create((string) $symfonyUlid);
     }
 }

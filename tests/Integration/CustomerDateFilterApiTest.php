@@ -8,7 +8,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 
-final class CustomerDateFilterApiTest extends BaseIntegrationTest
+final class CustomerDateFilterApiTest extends BaseTest
 {
     public function testFilterByUpdatedAtAfter(): void
     {

@@ -9,156 +9,127 @@ use App\Core\Customer\Application\Command\UpdateCustomerStatusCommand;
 use App\Core\Customer\Application\DTO\StatusPatch;
 use App\Core\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor;
+use App\Core\Customer\Application\Resolver\CustomerStatusResolver;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
-use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
-use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class CustomerStatusPatchProcessorTest extends UnitTestCase
 {
-    private StatusRepositoryInterface|MockObject $repository;
     private CommandBusInterface|MockObject $commandBus;
     private UpdateStatusCommandFactoryInterface|MockObject $factory;
-    private UlidFactory|MockObject $ulidFactory;
+    private CustomerStatusResolver|MockObject $resolver;
     private CustomerStatusPatchProcessor $processor;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(StatusRepositoryInterface::class);
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this
             ->createMock(UpdateStatusCommandFactoryInterface::class);
-        $this->ulidFactory = $this->createMock(UlidFactory::class);
+        $this->resolver = $this->createMock(CustomerStatusResolver::class);
 
         $this->processor = new CustomerStatusPatchProcessor(
-            $this->repository,
             $this->commandBus,
             $this->factory,
-            $this->ulidFactory,
+            $this->resolver,
         );
     }
 
-    public function testProcessUpdatesAndDispatchesCommand(): void
+    public function testProcessDispatchesCommandWithResolvedStatus(): void
     {
-        $dto = $this->createDto();
+        $dto = new StatusPatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
         $operation = $this->createMock(Operation::class);
-        $ulid = (string) $this->faker->ulid();
         $customerStatus = $this->createMock(CustomerStatus::class);
         $command = $this->createMock(UpdateCustomerStatusCommand::class);
-        $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($customerStatus, $ulidMock);
-        $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerStatus, $dto->value, $command);
-        $this->setupCustomerStatus($customerStatus, $dto->value);
-
-        $result = $this->processor
-            ->process($dto, $operation, ['ulid' => $ulid]);
-
-        $this->assertSame($customerStatus, $result);
-    }
-
-    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
-    {
-        $existingValue = $this->faker->word();
-        $dto = $this->createDtoWithEmptyValue();
-        $operation = $this->createMock(Operation::class);
-        $ulid = (string) $this->faker->ulid();
-        $customerStatus = $this->createMock(CustomerStatus::class);
-        $command = $this->createMock(UpdateCustomerStatusCommand::class);
-        $ulidMock = $this->createMock(Ulid::class);
-
-        $this->setupRepository($customerStatus, $ulidMock);
-        $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerStatus, $existingValue, $command);
-        $this->setupCustomerStatus($customerStatus, $existingValue);
-
-        $result = $this->processor
-            ->process($dto, $operation, ['ulid' => $ulid]);
-
-        $this->assertSame($customerStatus, $result);
-    }
-
-    public function testProcessThrowsExceptionWhenCustomerStatusNotFound(): void
-    {
-        $dto = $this->createDto();
-        $operation = $this->createMock(Operation::class);
-        $ulid = (string) $this->faker->ulid();
-        $ulidMock = $this->createMock(Ulid::class);
-
-        $this->setupRepository(null, $ulidMock);
-        $this->setupUlidFactory($ulid, $ulidMock);
-
-        $this->expectException(CustomerStatusNotFoundException::class);
-        $this->expectExceptionMessage('Customer status not found');
-
-        $this->processor->process($dto, $operation, ['ulid' => $ulid]);
-    }
-
-    private function createDto(): StatusPatch
-    {
-        return new StatusPatch(
-            $this->faker->word()
-        );
-    }
-
-    private function createDtoWithEmptyValue(): StatusPatch
-    {
-        return new StatusPatch('');
-    }
-
-    private function setupRepository(
-        ?CustomerStatus $customerStatus,
-        Ulid $ulidMock
-    ): void {
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with($ulidMock)
-            ->willReturn($customerStatus);
-    }
-
-    private function setupUlidFactory(string $ulid, Ulid $ulidMock): void
-    {
-        $this->ulidFactory
-            ->expects($this->once())
-            ->method('create')
-            ->with($ulid)
-            ->willReturn($ulidMock);
-    }
-
-    private function setupCustomerStatus(
-        CustomerStatus $customerStatus,
-        string $value
-    ): void {
         $customerStatus
             ->method('getValue')
-            ->willReturn($value);
-    }
+            ->willReturn($this->faker->word());
 
-    private function setupDependencies(
-        CustomerStatus $customerStatus,
-        string $value,
-        UpdateCustomerStatusCommand $command
-    ): void {
+        $this->resolver
+            ->expects($this->once())
+            ->method('resolve')
+            ->with($dto, [], $operation)
+            ->willReturn($customerStatus);
+
         $this->factory
             ->expects($this->once())
             ->method('create')
-            ->with($customerStatus, $this
-                ->callback(static function ($update) use ($value) {
-                    return $update->value === $value;
-                }))
+            ->with($customerStatus, $this->callback(
+                static fn ($update) => $update->value === $dto->value
+            ))
             ->willReturn($command);
 
         $this->commandBus
             ->expects($this->once())
             ->method('dispatch')
             ->with($command);
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerStatus, $result);
+    }
+
+    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
+    {
+        $dto = new StatusPatch();
+        $dto->value = '';
+        $dto->id = null;
+        $operation = $this->createMock(Operation::class);
+        $customerStatus = $this->createMock(CustomerStatus::class);
+        $existingValue = $this->faker->word();
+
+        $customerStatus
+            ->method('getValue')
+            ->willReturn($existingValue);
+
+        $this->resolver
+            ->expects($this->once())
+            ->method('resolve')
+            ->willReturn($customerStatus);
+
+        // When value is empty string, no command should be dispatched (proper PATCH semantics)
+        $this->commandBus
+            ->expects($this->never())
+            ->method('dispatch');
+
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerStatus, $result);
+    }
+
+    public function testProcessThrowsExceptionWhenResolverFails(): void
+    {
+        $dto = new StatusPatch();
+        $dto->value = $this->faker->word();
+        $dto->id = null;
+        $operation = $this->createMock(Operation::class);
+
+        $this->resolver
+            ->expects($this->once())
+            ->method('resolve')
+            ->willThrowException(new CustomerStatusNotFoundException());
+
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
+
+        $this->expectException(CustomerStatusNotFoundException::class);
+
+        $this->processor->process($dto, $operation);
+    }
+
+    public function testProcessThrowsExceptionWhenDataIsInvalid(): void
+    {
+        $operation = $this->createMock(Operation::class);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->processor->process(new \stdClass(), $operation);
     }
 }

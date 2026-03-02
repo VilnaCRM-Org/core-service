@@ -10,11 +10,11 @@ use App\Shared\Domain\Bus\Command\CommandInterface;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\Exception\NoHandlerForMessageException;
-use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\MessageBus;
 
-class InMemorySymfonyCommandBus implements CommandBusInterface
+readonly class InMemorySymfonyCommandBus implements CommandBusInterface
 {
-    private MessageBusInterface $bus;
+    private MessageBus $bus;
 
     /**
      * @param iterable<CommandHandlerInterface> $commandHandlers

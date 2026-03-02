@@ -14,9 +14,7 @@ interface CustomerRepositoryInterface
     public function findByEmail(string $email): ?CustomerInterface;
 
     /**
-     * @param string $id
-     *
-     * @return Customer
+     * @return Customer|null
      */
     public function find(
         mixed $id,

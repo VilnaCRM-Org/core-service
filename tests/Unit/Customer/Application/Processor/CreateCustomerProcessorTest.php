@@ -69,15 +69,15 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 
     private function createDto(): CustomerCreate
     {
-        return new CustomerCreate(
-            $this->faker->name(),
-            $this->faker->email(),
-            $this->faker->phoneNumber(),
-            $this->faker->word(),
-            '/api/customer_types/'   . $this->faker->ulid(),
-            '/api/customer_statuses/' . $this->faker->ulid(),
-            $this->faker->boolean()
-        );
+        $dto = new CustomerCreate();
+        $dto->initials = $this->faker->name();
+        $dto->email = $this->faker->email();
+        $dto->phone = $this->faker->phoneNumber();
+        $dto->leadSource = $this->faker->word();
+        $dto->type = '/api/customer_types/'   . $this->faker->ulid();
+        $dto->status = '/api/customer_statuses/' . $this->faker->ulid();
+        $dto->confirmed = $this->faker->boolean();
+        return $dto;
     }
 
     private function testIriConvertor(

@@ -31,7 +31,7 @@ App\Core\Customer\Application\DTO\CustomerPatch:
     initials:
       - Length:
           max: 255
-      - App\Shared\Application\Validator\Initials:
+      - App\Shared\Application\Validator\Initials: ~
     email:
       - Email: { message: 'email.invalid' }
       - Length:
