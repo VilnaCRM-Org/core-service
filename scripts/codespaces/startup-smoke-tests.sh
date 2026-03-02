@@ -18,15 +18,14 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
     . "${HOME}/.config/core-service/agent-secrets.env"
 fi
 
-: "${CODEX_PROFILE_NAME:=openai}"
-: "${CODEX_MODEL:=gpt-5.2-codex}"
-: "${CODEX_REASONING_EFFORT:=medium}"
-: "${CODEX_APPROVAL_POLICY:=never}"
-: "${CODEX_SANDBOX_MODE:=danger-full-access}"
+: "${CLAUDE_MODEL:=MiniMax-M2.5}"
+: "${CLAUDE_BASE_URL:=https://api.minimax.io/anthropic}"
+: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
 
 cs_require_command gh
-cs_require_command codex
+cs_require_command claude
 cs_require_command bats
+cs_require_command jq
 
 echo "Running startup smoke tests..."
 
@@ -47,59 +46,72 @@ if [ "${repo_count}" -lt 1 ]; then
 fi
 echo "GitHub CLI smoke test passed."
 
-if [ -z "${OPENAI_API_KEY:-}" ]; then
+if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] && [ -n "${MINIMAX_API_KEY:-}" ]; then
+    export ANTHROPIC_AUTH_TOKEN="${MINIMAX_API_KEY}"
+fi
+if [ -z "${MINIMAX_API_KEY:-}" ] && [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
+    export MINIMAX_API_KEY="${ANTHROPIC_AUTH_TOKEN}"
+fi
+if [ -z "${MINIMAX_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
-Error: OPENAI_API_KEY is not set.
-Provide OPENAI_API_KEY as a Codespaces secret.
+Error: MINIMAX_API_KEY is not set.
+Provide MINIMAX_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
 
-echo "Checking Codex profile configuration..."
-if [ ! -f "${HOME}/.codex/config.toml" ]; then
-    echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
-    exit 1
-fi
-if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "model = \"${CODEX_MODEL}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex default model '${CODEX_MODEL}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex reasoning effort '${CODEX_REASONING_EFFORT}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex approval policy '${CODEX_APPROVAL_POLICY}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex sandbox mode '${CODEX_SANDBOX_MODE}' is not configured." >&2
+CLAUDE_SETTINGS_JSON="${HOME}/.claude/settings.json"
+echo "Checking Claude profile configuration..."
+if [ ! -f "${CLAUDE_SETTINGS_JSON}" ]; then
+    echo "Error: Claude settings file is missing: ${CLAUDE_SETTINGS_JSON}" >&2
     exit 1
 fi
 
-echo "Running Codex smoke task via profile '${CODEX_PROFILE_NAME}'..."
-tmp_codex_output=""
+configured_model="$(jq -r '.env.ANTHROPIC_MODEL // empty' "${CLAUDE_SETTINGS_JSON}")"
+configured_base_url="$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "${CLAUDE_SETTINGS_JSON}")"
+configured_token="$(jq -r '.env.ANTHROPIC_AUTH_TOKEN // empty' "${CLAUDE_SETTINGS_JSON}")"
+
+if [ -z "${configured_token}" ]; then
+    echo "Error: Claude settings are missing env.ANTHROPIC_AUTH_TOKEN." >&2
+    exit 1
+fi
+if [ "${configured_model}" != "${CLAUDE_MODEL}" ]; then
+    echo "Error: Claude model '${CLAUDE_MODEL}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
+    exit 1
+fi
+if [ "${configured_base_url}" != "${CLAUDE_BASE_URL}" ]; then
+    echo "Error: Claude base URL '${CLAUDE_BASE_URL}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
+    exit 1
+fi
+
+echo "Running Claude smoke task with model '${CLAUDE_MODEL}'..."
+tmp_claude_output=""
 cleanup() {
-    [ -n "${tmp_codex_output}" ] && rm -f "${tmp_codex_output}"
+    [ -n "${tmp_claude_output}" ] && rm -f "${tmp_claude_output}"
 }
 trap cleanup EXIT
 
-tmp_codex_output="$(mktemp)"
-if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" "Reply with exactly one line: codex-startup-ok" >"${tmp_codex_output}" 2>&1; then
-    echo "Error: Codex smoke task failed." >&2
-    sed -n '1,120p' "${tmp_codex_output}" >&2
+tmp_claude_output="$(mktemp)"
+claude_args=(
+    -p
+    --model "${CLAUDE_MODEL}"
+    --permission-mode "${CLAUDE_PERMISSION_MODE}"
+)
+if [ "${CLAUDE_PERMISSION_MODE}" = "bypassPermissions" ]; then
+    claude_args+=(--dangerously-skip-permissions)
+fi
+
+if ! timeout 180s claude "${claude_args[@]}" "Reply with exactly one line: claude-startup-ok" >"${tmp_claude_output}" 2>&1; then
+    echo "Error: Claude smoke task failed." >&2
+    sed -n '1,120p' "${tmp_claude_output}" >&2
     exit 1
 fi
 
-if ! grep -q "codex-startup-ok" "${tmp_codex_output}"; then
-    echo "Error: Codex smoke task did not return expected output." >&2
-    sed -n '1,120p' "${tmp_codex_output}" >&2
+if ! grep -q "claude-startup-ok" "${tmp_claude_output}"; then
+    echo "Error: Claude smoke task did not return expected output." >&2
+    sed -n '1,120p' "${tmp_claude_output}" >&2
     exit 1
 fi
 
-echo "Codex startup smoke test passed."
+echo "Claude startup smoke test passed."
 echo "Startup smoke tests completed successfully."

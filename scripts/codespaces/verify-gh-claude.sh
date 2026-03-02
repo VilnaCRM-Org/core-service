@@ -18,16 +18,14 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
 fi
 
 ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
-: "${CODEX_PROFILE_NAME:=openai}"
-: "${CODEX_MODEL:=gpt-5.2-codex}"
-: "${CODEX_REASONING_EFFORT:=medium}"
-: "${CODEX_APPROVAL_POLICY:=never}"
-: "${CODEX_SANDBOX_MODE:=danger-full-access}"
-: "${CODEX_TOOL_SMOKE_MODE:=enforce}"
+: "${CLAUDE_MODEL:=MiniMax-M2.5}"
+: "${CLAUDE_BASE_URL:=https://api.minimax.io/anthropic}"
+: "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
+: "${CLAUDE_TOOL_SMOKE_MODE:=enforce}"
 
 cs_require_command gh
 cs_require_command jq
-cs_require_command codex
+cs_require_command claude
 cs_require_command bats
 
 echo "Checking GitHub authentication..."
@@ -108,103 +106,115 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
-if [ -z "${OPENAI_API_KEY:-}" ]; then
+if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] && [ -n "${MINIMAX_API_KEY:-}" ]; then
+    export ANTHROPIC_AUTH_TOKEN="${MINIMAX_API_KEY}"
+fi
+if [ -z "${MINIMAX_API_KEY:-}" ] && [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
+    export MINIMAX_API_KEY="${ANTHROPIC_AUTH_TOKEN}"
+fi
+if [ -z "${MINIMAX_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
-Error: OPENAI_API_KEY is not set.
-Provide OPENAI_API_KEY as a Codespaces secret.
+Error: MINIMAX_API_KEY is not set.
+Provide MINIMAX_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
-if [ ! -f "${HOME}/.codex/config.toml" ]; then
-    echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
+
+CLAUDE_SETTINGS_JSON="${HOME}/.claude/settings.json"
+if [ ! -f "${CLAUDE_SETTINGS_JSON}" ]; then
+    echo "Error: Claude settings file is missing: ${CLAUDE_SETTINGS_JSON}" >&2
     exit 1
 fi
-if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
+configured_model="$(jq -r '.env.ANTHROPIC_MODEL // empty' "${CLAUDE_SETTINGS_JSON}")"
+configured_base_url="$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "${CLAUDE_SETTINGS_JSON}")"
+configured_token="$(jq -r '.env.ANTHROPIC_AUTH_TOKEN // empty' "${CLAUDE_SETTINGS_JSON}")"
+if [ -z "${configured_token}" ]; then
+    echo "Error: Claude settings are missing env.ANTHROPIC_AUTH_TOKEN." >&2
     exit 1
 fi
-if ! grep -q "model = \"${CODEX_MODEL}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex default model '${CODEX_MODEL}' is not configured." >&2
+if [ "${configured_model}" != "${CLAUDE_MODEL}" ]; then
+    echo "Error: Claude model '${CLAUDE_MODEL}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
     exit 1
 fi
-if ! grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex reasoning effort '${CODEX_REASONING_EFFORT}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex approval policy '${CODEX_APPROVAL_POLICY}' is not configured." >&2
-    exit 1
-fi
-if ! grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\"" "${HOME}/.codex/config.toml"; then
-    echo "Error: Codex sandbox mode '${CODEX_SANDBOX_MODE}' is not configured." >&2
+if [ "${configured_base_url}" != "${CLAUDE_BASE_URL}" ]; then
+    echo "Error: Claude base URL '${CLAUDE_BASE_URL}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
     exit 1
 fi
 
-tmp_codex_basic=""
-tmp_codex_tools=""
+tmp_claude_basic=""
+tmp_claude_tools=""
 tmp_tool_workspace=""
 tmp_tool_marker_file=""
 tool_marker=""
 cleanup() {
-    [ -n "${tmp_codex_basic}" ] && rm -f "${tmp_codex_basic}"
-    [ -n "${tmp_codex_tools}" ] && rm -f "${tmp_codex_tools}"
+    [ -n "${tmp_claude_basic}" ] && rm -f "${tmp_claude_basic}"
+    [ -n "${tmp_claude_tools}" ] && rm -f "${tmp_claude_tools}"
     [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
 
-tmp_codex_basic="$(mktemp)"
-tmp_codex_tools="$(mktemp)"
+tmp_claude_basic="$(mktemp)"
+tmp_claude_tools="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
-tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
+tmp_tool_marker_file="${tmp_tool_workspace}/claude-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
     tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
 else
     tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
 fi
 
-echo "Running Codex basic smoke task..."
-if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" "Reply with exactly one line: codex-ok:openai-basic" >"${tmp_codex_basic}" 2>&1; then
-    echo "Error: Codex basic smoke task failed." >&2
-    sed -n '1,120p' "${tmp_codex_basic}" >&2
-    exit 1
+claude_args=(
+    -p
+    --model "${CLAUDE_MODEL}"
+    --permission-mode "${CLAUDE_PERMISSION_MODE}"
+)
+if [ "${CLAUDE_PERMISSION_MODE}" = "bypassPermissions" ]; then
+    claude_args+=(--dangerously-skip-permissions)
 fi
-if ! grep -q "codex-ok:openai-basic" "${tmp_codex_basic}"; then
-    echo "Error: Codex basic smoke task did not return expected output." >&2
-    sed -n '1,120p' "${tmp_codex_basic}" >&2
-    exit 1
-fi
-echo "Codex basic smoke task ok."
 
-echo "Running Codex tool-calling smoke task..."
+echo "Running Claude basic smoke task..."
+if ! timeout 180s claude "${claude_args[@]}" "Reply with exactly one line: claude-ok:minimax-basic" >"${tmp_claude_basic}" 2>&1; then
+    echo "Error: Claude basic smoke task failed." >&2
+    sed -n '1,120p' "${tmp_claude_basic}" >&2
+    exit 1
+fi
+if ! grep -q "claude-ok:minimax-basic" "${tmp_claude_basic}"; then
+    echo "Error: Claude basic smoke task did not return expected output." >&2
+    sed -n '1,120p' "${tmp_claude_basic}" >&2
+    exit 1
+fi
+echo "Claude basic smoke task ok."
+
+echo "Running Claude tool-calling smoke task..."
 tool_smoke_failed=0
-codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
+claude_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./claude-tools-marker.txt. Then reply with exactly one line: claude-ok:minimax-tools"
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --skip-git-repo-check "${codex_tool_prompt}"
-) >"${tmp_codex_tools}" 2>&1; then
+    cd "${tmp_tool_workspace}" && timeout 240s claude "${claude_args[@]}" --add-dir "${tmp_tool_workspace}" "${claude_tool_prompt}"
+) >"${tmp_claude_tools}" 2>&1; then
     tool_smoke_failed=1
 fi
 
 if [ "${tool_smoke_failed}" -eq 1 ]; then
-    if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
-        echo "Skipping Codex tool-calling smoke task failure (CODEX_TOOL_SMOKE_MODE=skip)." >&2
+    if [ "${CLAUDE_TOOL_SMOKE_MODE}" = "skip" ]; then
+        echo "Skipping Claude tool-calling smoke task failure (CLAUDE_TOOL_SMOKE_MODE=skip)." >&2
     else
-        echo "Error: Codex tool-calling smoke task failed." >&2
-        sed -n '1,160p' "${tmp_codex_tools}" >&2
+        echo "Error: Claude tool-calling smoke task failed." >&2
+        sed -n '1,160p' "${tmp_claude_tools}" >&2
         exit 1
     fi
 else
-    if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools}"; then
-        echo "Error: Codex tool-calling smoke task did not return expected output." >&2
-        sed -n '1,160p' "${tmp_codex_tools}" >&2
+    if ! grep -q "claude-ok:minimax-tools" "${tmp_claude_tools}"; then
+        echo "Error: Claude tool-calling smoke task did not return expected output." >&2
+        sed -n '1,160p' "${tmp_claude_tools}" >&2
         exit 1
     fi
     actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
     if [ "${actual_marker}" != "${tool_marker}" ]; then
-        echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
+        echo "Error: Claude tool-calling smoke task did not produce expected marker file content." >&2
         exit 1
     fi
-    echo "Codex tool-calling smoke task ok."
+    echo "Claude tool-calling smoke task ok."
 fi
 
-echo "All GH/Codex verification checks passed."
+echo "All GH/Claude verification checks passed."
