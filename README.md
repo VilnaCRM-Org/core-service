@@ -119,6 +119,11 @@ Claude is configured directly (no `make` wrapper) with Anthropic-compatible Mini
 
 ```json
 {
+  "model": "MiniMax-M2.5",
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "ask": []
+  },
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "<MINIMAX_API_KEY>",
     "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",

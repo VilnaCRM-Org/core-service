@@ -153,7 +153,7 @@ This setup is MiniMax-only and configures Claude with:
 
 - model `MiniMax-M2.5`
 - Anthropic-compatible URL `https://api.minimax.io/anthropic`
-- default `CLAUDE_PERMISSION_MODE=bypassPermissions`
+- `permissions.defaultMode=bypassPermissions` in `~/.claude/settings.json` (no manual tool approvals)
 
 If you need safer defaults in a Codespace, set overrides before bootstrap:
 

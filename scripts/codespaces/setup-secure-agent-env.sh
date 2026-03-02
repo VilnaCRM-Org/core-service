@@ -157,6 +157,7 @@ write_claude_settings() {
     local token_escaped
     local base_url_escaped
     local model_escaped
+    local permission_mode_escaped
 
     tmp_settings="$(mktemp)"
     track_tmp_file "${tmp_settings}"
@@ -168,10 +169,15 @@ write_claude_settings() {
             --arg token "${ANTHROPIC_AUTH_TOKEN}" \
             --arg base_url "${ANTHROPIC_BASE_URL}" \
             --arg model "${ANTHROPIC_MODEL}" \
+            --arg permission_mode "${CLAUDE_PERMISSION_MODE}" \
             '.env = (.env // {})
             | .env.ANTHROPIC_AUTH_TOKEN = $token
             | .env.ANTHROPIC_BASE_URL = $base_url
-            | .env.ANTHROPIC_MODEL = $model' \
+            | .env.ANTHROPIC_MODEL = $model
+            | .model = $model
+            | .permissions = (.permissions // {})
+            | .permissions.defaultMode = $permission_mode
+            | .permissions.ask = []' \
             "${CLAUDE_SETTINGS_JSON}" > "${tmp_settings}"; then
             :
         else
@@ -183,9 +189,15 @@ write_claude_settings() {
         token_escaped="$(escape_json_string "${ANTHROPIC_AUTH_TOKEN}")"
         base_url_escaped="$(escape_json_string "${ANTHROPIC_BASE_URL}")"
         model_escaped="$(escape_json_string "${ANTHROPIC_MODEL}")"
+        permission_mode_escaped="$(escape_json_string "${CLAUDE_PERMISSION_MODE}")"
 
         cat > "${tmp_settings}" <<EOM
 {
+  "model": "${model_escaped}",
+  "permissions": {
+    "defaultMode": "${permission_mode_escaped}",
+    "ask": []
+  },
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "${token_escaped}",
     "ANTHROPIC_BASE_URL": "${base_url_escaped}",

@@ -70,6 +70,7 @@ fi
 configured_model="$(jq -r '.env.ANTHROPIC_MODEL // empty' "${CLAUDE_SETTINGS_JSON}")"
 configured_base_url="$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "${CLAUDE_SETTINGS_JSON}")"
 configured_token="$(jq -r '.env.ANTHROPIC_AUTH_TOKEN // empty' "${CLAUDE_SETTINGS_JSON}")"
+configured_permission_mode="$(jq -r '.permissions.defaultMode // empty' "${CLAUDE_SETTINGS_JSON}")"
 
 if [ -z "${configured_token}" ]; then
     echo "Error: Claude settings are missing env.ANTHROPIC_AUTH_TOKEN." >&2
@@ -81,6 +82,10 @@ if [ "${configured_model}" != "${CLAUDE_MODEL}" ]; then
 fi
 if [ "${configured_base_url}" != "${CLAUDE_BASE_URL}" ]; then
     echo "Error: Claude base URL '${CLAUDE_BASE_URL}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
+    exit 1
+fi
+if [ "${configured_permission_mode}" != "${CLAUDE_PERMISSION_MODE}" ]; then
+    echo "Error: Claude permission mode '${CLAUDE_PERMISSION_MODE}' is not configured in ${CLAUDE_SETTINGS_JSON}." >&2
     exit 1
 fi
 
@@ -95,11 +100,7 @@ tmp_claude_output="$(mktemp)"
 claude_args=(
     -p
     --model "${CLAUDE_MODEL}"
-    --permission-mode "${CLAUDE_PERMISSION_MODE}"
 )
-if [ "${CLAUDE_PERMISSION_MODE}" = "bypassPermissions" ]; then
-    claude_args+=(--dangerously-skip-permissions)
-fi
 
 if ! timeout 180s claude "${claude_args[@]}" "Reply with exactly one line: claude-startup-ok" >"${tmp_claude_output}" 2>&1; then
     echo "Error: Claude smoke task failed." >&2
