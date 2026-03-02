@@ -190,7 +190,7 @@ echo "Running Claude tool-calling smoke task..."
 tool_smoke_failed=0
 claude_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./claude-tools-marker.txt. Then reply with exactly one line: claude-ok:minimax-tools"
 if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s claude "${claude_args[@]}" --add-dir "${tmp_tool_workspace}" "${claude_tool_prompt}"
+    cd "${tmp_tool_workspace}" && timeout 240s claude "${claude_args[@]}" "${claude_tool_prompt}"
 ) >"${tmp_claude_tools}" 2>&1; then
     tool_smoke_failed=1
 fi
