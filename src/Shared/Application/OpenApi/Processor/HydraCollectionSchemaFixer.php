@@ -29,7 +29,7 @@ final class HydraCollectionSchemaFixer
 
         $updated = $this->viewExampleUpdater->update($normalized);
         if ($updated === null) {
-            return new ArrayObject($normalizedSchemas);
+            return $schemas;
         }
 
         $normalizedSchemas[self::HYDRA_COLLECTION_SCHEMA] = new ArrayObject($updated);

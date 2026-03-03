@@ -71,5 +71,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
 
         self::assertInstanceOf(ArrayObject::class, $result);
         self::assertArrayHasKey('HydraCollectionBaseSchema', $result);
+        self::assertInstanceOf(ArrayObject::class, $result['HydraCollectionBaseSchema']);
+        self::assertSame(
+            ['allOf' => [], 'updated' => true],
+            $result['HydraCollectionBaseSchema']->getArrayCopy()
+        );
     }
 }
