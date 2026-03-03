@@ -70,13 +70,25 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
+        $pathProcessor = $this->createMock(PathParametersProcessor::class);
+        $pathProcessor->method('process')->willReturnArgument(0);
+
+        $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
+        $paramProcessor->method('process')->willReturnArgument(0);
+
+        $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
+        $iriProcessor->method('process')->willReturnArgument(0);
+
+        $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
+        $tagProcessor->method('process')->willReturnArgument(0);
+
         $factory = new OpenApiFactory(
             $decoratedFactory,
             $endpointFactories,
-            $this->createMock(PathParametersProcessor::class),
-            $this->createMock(ParameterDescriptionProcessor::class),
-            $this->createMock(IriReferenceTypeProcessor::class),
-            $this->createMock(TagDescriptionProcessor::class),
+            $pathProcessor,
+            $paramProcessor,
+            $iriProcessor,
+            $tagProcessor,
             $payloadProcessor,
             $schemaFixesProcessor,
             $this->createMock(OpenApiExtensionsApplier::class)
