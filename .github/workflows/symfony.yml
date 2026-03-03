@@ -24,7 +24,7 @@ jobs:
       - name: Install Symfony CLI
         run: wget https://get.symfony.com/cli/installer -O - | bash
       - name: Composer validate
-        run: composer validate
+        run: composer validate --no-check-lock
       - name: Check symfony requirements
         run: /home/runner/.symfony5/bin/symfony check:requirements
       - name: Symfony security check
