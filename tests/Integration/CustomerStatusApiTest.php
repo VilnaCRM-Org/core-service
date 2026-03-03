@@ -274,9 +274,9 @@ final class CustomerStatusApiTest extends BaseTest
         return ['value' => $value];
     }
 
-    private function createCustomerStatus(): string
+    private function createCustomerStatus(): void
     {
-        return $this->createEntity(
+        $this->createEntity(
             '/api/customer_statuses',
             $this->getStatusPayload()
         );

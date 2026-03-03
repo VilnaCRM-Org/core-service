@@ -25,6 +25,9 @@ use Faker\Factory;
 use Faker\Generator;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class CustomerContext implements Context, SnippetAcceptingContext
 {
     private Generator $faker;
@@ -303,10 +306,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
      */
     public function deleteCustomerByEmail(string $email): void
     {
-        $customer = $this->entityManager->findCustomerByEmail($email);
-        if ($customer !== null) {
-            $this->entityManager->deleteCustomer($customer);
-        }
+        $this->entityManager->deleteCustomerByEmail($email);
     }
 
     /**

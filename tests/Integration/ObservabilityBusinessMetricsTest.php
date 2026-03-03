@@ -14,7 +14,6 @@ final class ObservabilityBusinessMetricsTest extends BaseTest
         $client = self::createClient();
         $client->disableReboot();
 
-        /** @var BusinessMetricsEmitterSpy $spy */
         $spy = $client->getContainer()->get(BusinessMetricsEmitterSpy::class);
         $spy->clear();
 
@@ -35,7 +34,6 @@ final class ObservabilityBusinessMetricsTest extends BaseTest
         $client = self::createClient();
         $client->disableReboot();
 
-        /** @var BusinessMetricsEmitterSpy $spy */
         $spy = $client->getContainer()->get(BusinessMetricsEmitterSpy::class);
         $spy->clear();
 

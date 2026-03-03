@@ -8,6 +8,9 @@ use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use PHPUnit\Framework\Assert;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class TestDomainEventSubscriber implements DomainEventSubscriberInterface
 {
     public function __invoke(DomainEvent $event): void

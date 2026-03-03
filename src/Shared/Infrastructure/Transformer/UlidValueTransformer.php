@@ -6,6 +6,8 @@ namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use InvalidArgumentException;
+use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 /**
@@ -20,15 +22,43 @@ final class UlidValueTransformer
 
     public function toUlid(array|string|int|float|bool|object|null $value): Ulid
     {
-        return $value instanceof Ulid
-            ? $value
-            : $this->ulidFactory->create($value);
+        if ($value instanceof Ulid) {
+            return $value;
+        }
+
+        return $this->ulidFactory->create($this->normalizeValue($value));
     }
 
-    public function fromBinary(array|string|int|float|bool|object|null $value): SymfonyUlid
+    public function fromBinary(Binary|string|SymfonyUlid $value): SymfonyUlid
     {
-        return $value instanceof SymfonyUlid
-            ? $value
-            : SymfonyUlid::fromBinary($value);
+        if ($value instanceof SymfonyUlid) {
+            return $value;
+        }
+
+        if ($value instanceof Binary) {
+            return SymfonyUlid::fromBinary($value->getData());
+        }
+
+        return SymfonyUlid::fromBinary($value);
+    }
+
+    private function normalizeValue(
+        array|string|int|float|bool|object|null $value
+    ): array|string|int|float|bool|null {
+        if ($value instanceof SymfonyUlid) {
+            return (string) $value;
+        }
+
+        if ($value instanceof Binary) {
+            return (string) SymfonyUlid::fromBinary($value->getData());
+        }
+
+        if (is_object($value)) {
+            throw new InvalidArgumentException(
+                sprintf('Unsupported object type: %s', get_class($value))
+            );
+        }
+
+        return $value;
     }
 }

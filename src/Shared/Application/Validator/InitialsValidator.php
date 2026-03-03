@@ -17,7 +17,7 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($this->shouldSkipValidation($value, $constraint)) {
+        if ($this->shouldSkipValidation($value)) {
             return;
         }
 
@@ -26,7 +26,7 @@ final class InitialsValidator extends ConstraintValidator
         }
     }
 
-    private function shouldSkipValidation(mixed $value, Constraint $constraint): bool
+    private function shouldSkipValidation(mixed $value): bool
     {
         return $value === null;
     }

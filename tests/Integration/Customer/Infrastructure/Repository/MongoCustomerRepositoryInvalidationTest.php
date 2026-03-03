@@ -17,7 +17,6 @@ use App\Shared\Domain\ValueObject\Ulid;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 {
@@ -26,7 +25,6 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private CacheItemPoolInterface $cachePool;
-    private TagAwareCacheInterface $tagCache;
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
 
@@ -39,7 +37,6 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cachePool = self::getContainer()->get('cache.customer');
-        $this->tagCache = self::getContainer()->get('cache.customer');
 
         $this->cachePool->clear();
         $this->ensureDefaultTypeAndStatus();
