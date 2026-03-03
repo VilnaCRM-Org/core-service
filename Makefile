@@ -50,9 +50,9 @@ COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite 
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
-PHPINSIGHTS_ARGS ?=
-INFECTION_MIN_MSI ?= 100
-INFECTION_MIN_COVERED_MSI ?= 100
+override PHPINSIGHTS_ARGS :=
+override INFECTION_MIN_MSI := 100
+override INFECTION_MIN_COVERED_MSI := 100
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -T -e $(1) php $(2)

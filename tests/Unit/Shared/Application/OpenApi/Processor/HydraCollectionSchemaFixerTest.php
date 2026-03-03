@@ -31,7 +31,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         self::assertSame($schemas, $result);
     }
 
-    public function testApplyReturnsNewArrayObjectWhenUpdatedIsNull(): void
+    public function testApplyReturnsOriginalSchemasWhenUpdatedIsNull(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
         $schemaNormalizer->expects(self::once())
@@ -48,7 +48,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
 
         $result = $fixer->apply($schemas);
 
-        self::assertInstanceOf(ArrayObject::class, $result);
+        self::assertSame($schemas, $result);
         self::assertSame(['key' => 'value'], $result->getArrayCopy());
     }
 

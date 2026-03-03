@@ -58,12 +58,12 @@ final class OpenApiFactoryTest extends UnitTestCase
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $factory = new OpenApiFactory(
@@ -123,13 +123,13 @@ final class OpenApiFactoryTest extends UnitTestCase
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
@@ -193,13 +193,13 @@ final class OpenApiFactoryTest extends UnitTestCase
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $extensionsApplier = new OpenApiExtensionsApplier();

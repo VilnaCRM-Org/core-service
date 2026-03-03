@@ -36,6 +36,10 @@ PY
 }
 
 UUID_SUFFIX="$(generate_uuid | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-')"
+if [ -z "$UUID_SUFFIX" ]; then
+  echo "Failed to generate a valid bucket suffix" >&2
+  exit 1
+fi
 BUCKET_NAME="loadtest-bucket-${UUID_SUFFIX}"
 
 usage() {
