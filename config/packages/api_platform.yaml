@@ -33,7 +33,8 @@ api_platform:
     enabled: true
     graphiql:
       enabled: true
-    graphql_playground: true
+    graphql_playground:
+      enabled: true
     # Default to ID for mutations
     default_ide: graphiql
     nesting_separator: _

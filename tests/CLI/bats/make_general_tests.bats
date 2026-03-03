@@ -17,7 +17,7 @@ load 'bats-assert/load'
   assert_output --partial "composer validate"
 }
 
-@test "make check-requirements command executes and passes" {
+@test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success
   assert_output --partial "symfony check:requirements"
