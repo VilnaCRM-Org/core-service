@@ -87,7 +87,7 @@ load 'bats-assert/load'
   assert_output --partial "Usage:"
   assert_output --partial "command [options] [arguments]"
   assert_output --partial "Options:"
-  assert_output --partial "-h, --help            Display help for the given command."
+  assert_output --partial "Display help for the given command"
   assert_output --partial "Available commands:"
 }
 

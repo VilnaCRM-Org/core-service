@@ -81,13 +81,13 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
 
 composer-validate: ## The validate command validates a given composer.json and composer.lock
-	$(COMPOSER) validate
+	script -q -c 'docker compose exec php composer validate' /dev/null
 
 check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
-	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
+	script -q -c 'docker compose exec -e APP_ENV=test php bin/console check:requirements' /dev/null
 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(EXEC_ENV) $(SYMFONY_BIN) security:check
+	script -q -c 'docker compose exec -e APP_ENV=test php bin/console security:check' /dev/null
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
@@ -103,8 +103,8 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
-	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
+	script -q -c 'docker compose exec -e APP_ENV=test php ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check' /dev/null
+	script -q -c 'docker compose exec -e APP_ENV=test php ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php' /dev/null
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
@@ -146,9 +146,9 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	$(DOCKER_COMPOSE) up --detach database redis php caddy localstack
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
-	$(SYMFONY_TEST_ENV) c:c
-	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
-	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
+	script -q -c 'docker compose exec -e APP_ENV=test php bin/console c:c' /dev/null
+	-script -q -c 'docker compose exec -e APP_ENV=test php bin/console doctrine:mongodb:schema:drop' /dev/null
+	-script -q -c 'docker compose exec -e APP_ENV=test php bin/console doctrine:mongodb:schema:create' /dev/null
 
 behat: setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
@@ -204,7 +204,7 @@ build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
 
 infection: ## Run mutation testing with 100% MSI requirement
-	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
+	script -q -c 'docker compose exec -e APP_ENV=test php php -d memory_limit=-1 ./vendor/bin/infection --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100' /dev/null
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
@@ -273,7 +273,7 @@ stop: ## Stop docker and the Symfony binary server
 	$(DOCKER_COMPOSE) stop
 
 commands: ## List all Symfony commands
-	@$(SYMFONY) list
+	@script -q -c 'docker compose exec php bin/console list' /dev/null
 
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
