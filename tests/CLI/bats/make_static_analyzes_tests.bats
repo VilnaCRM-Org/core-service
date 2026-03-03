@@ -9,13 +9,13 @@ load 'bats-assert/load'
   assert_output --partial "Running analysis on 1 core sequentially."
 }
 
-@test "make psalm command executes and reports no errors" {
+@test "make psalm command executes successfully" {
   run make psalm
   assert_success
   assert_output --partial 'Scanning files...'
 }
 
-@test "make psalm-security command executes and reports no errors" {
+@test "make psalm-security command executes successfully" {
   run make psalm-security
   assert_success
   assert_output --partial 'Scanning files...'

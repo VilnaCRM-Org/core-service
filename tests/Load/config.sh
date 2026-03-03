@@ -35,7 +35,8 @@ PY
   printf '%s-%s-%s-%s-%s\n' "$(date +%s)" "$RANDOM" "$RANDOM" "$RANDOM" "$RANDOM"
 }
 
-BUCKET_NAME="loadtest-bucket-$(generate_uuid)"
+UUID_SUFFIX="$(generate_uuid | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-')"
+BUCKET_NAME="loadtest-bucket-${UUID_SUFFIX}"
 
 usage() {
   echo "Usage: $0 [-r region] [-a ami_id] [-t instance_type] [-i instance_tag] [-o role_name] [-b branch_name] [-s security_group_name] [-l local_mode]"

@@ -14,9 +14,9 @@ use ArrayObject;
 
 final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 {
-    public function testProcessAddsPayloadItemsWhenSchemasIsNull(): void
+    public function testProcessReturnsOriginalWhenSchemasIsNull(): void
     {
-        // Create a components mock that returns null for getSchemas()
+        // Returns original OpenApi since there is no ConstraintViolation schema to update
         $components = $this->createMock(Components::class);
         $components->method('getSchemas')->willReturn(null);
 
@@ -30,7 +30,6 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $processor = new ConstraintViolationPayloadItemsProcessor();
         $result = $processor->process($openApi);
 
-        // Should return original since there's no schema to process
         $this->assertSame($openApi, $result);
     }
 

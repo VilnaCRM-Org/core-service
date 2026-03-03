@@ -23,6 +23,10 @@ setup() {
   assert_output --partial "1 package has known vulnerabilities"
 }
 
+# Tech debt: Previous behavioral negative tests for infection (mutation score threshold)
+# and psalm (static analysis errors) were removed due to environment complexity.
+# The current tests only verify binary-missing error handling.
+# To restore: create fixture projects with known failures and test Make targets against them.
 @test "make infection should fail when binary is missing" {
   run make infection INFECTION=./vendor/bin/infection-does-not-exist
 

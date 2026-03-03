@@ -29,7 +29,11 @@ final readonly class CustomerStatusResolver
         /** @var CustomerStatus|null $existing */
         $existing = $context['previous_data'] ?? null;
 
-        return $existing ?? $this->resolveFromIri($data->id, $context, $operation);
+        if ($existing instanceof CustomerStatus) {
+            return $existing;
+        }
+
+        return $this->resolveFromIri($data->id, $context, $operation);
     }
 
     /**
