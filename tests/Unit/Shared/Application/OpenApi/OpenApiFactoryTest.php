@@ -46,7 +46,11 @@ final class OpenApiFactoryTest extends UnitTestCase
     public function testInvoke(): void
     {
         $context = ['key' => 'value'];
-        $openApi = $this->createMock(OpenApi::class);
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths()
+        );
 
         $decoratedFactory = $this->createMock(OpenApiFactoryInterface::class);
         $decoratedFactory->expects($this->once())
@@ -58,12 +62,12 @@ final class OpenApiFactoryTest extends UnitTestCase
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->isInstanceOf(OpenApi::class))
+            ->with($this->identicalTo($openApi))
             ->willReturnArgument(0);
 
         $factory = new OpenApiFactory(
