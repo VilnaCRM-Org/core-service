@@ -18,7 +18,7 @@ final class SpecExtensionPropertyApplier
      */
     public function apply(array|ArrayObject|null $extensionProperties, OpenApi $openApi): OpenApi
     {
-        return !is_array($extensionProperties) || $extensionProperties === []
+        return ! is_array($extensionProperties) || $extensionProperties === []
             ? $openApi
             : array_reduce(
                 array_keys($extensionProperties),
