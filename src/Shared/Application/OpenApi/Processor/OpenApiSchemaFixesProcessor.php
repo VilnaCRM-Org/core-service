@@ -10,8 +10,7 @@ use ArrayObject;
 final class OpenApiSchemaFixesProcessor
 {
     public function __construct(
-        private HydraCollectionSchemaFixer $hydraCollectionSchemaFixer,
-        private UlidSchemaFixer $ulidSchemaFixer
+        private HydraCollectionSchemaFixer $hydraCollectionSchemaFixer
     ) {
     }
 
@@ -21,7 +20,6 @@ final class OpenApiSchemaFixesProcessor
         $schemas = $components->getSchemas() ?? new ArrayObject();
 
         $schemas = $this->hydraCollectionSchemaFixer->apply($schemas);
-        $schemas = $this->ulidSchemaFixer->apply($schemas);
 
         return $openApi->withComponents($components->withSchemas($schemas));
     }

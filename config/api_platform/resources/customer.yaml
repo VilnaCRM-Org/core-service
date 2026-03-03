@@ -102,6 +102,8 @@ App\Core\Customer\Domain\Entity\Customer:
       denormalizationContext:
         allow_extra_attributes: false
       extraArgs:
+        _id:
+          type: 'String'
         initials:
           type: 'String'
         email:

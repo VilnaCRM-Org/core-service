@@ -54,6 +54,7 @@ jobs:
       - name: GraphQL Inspector
         uses: kamilkisiela/graphql-inspector@release-1701263349990
         with:
-          schema: 'main:.github/graphql-spec/spec'
+          schema: '.github/graphql-spec/spec'
+          old_schema: 'main:.github/graphql-spec/spec'
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}

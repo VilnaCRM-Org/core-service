@@ -322,6 +322,7 @@ type createCustomerPayload {
 input updateCustomerInput {
   id: ID!
   clientMutationId: String
+  _id: String
   initials: String
   email: String
   phone: String
@@ -370,6 +371,7 @@ type createCustomerStatusPayload {
 input updateCustomerStatusInput {
   id: ID!
   clientMutationId: String
+  _id: String
   value: String
 }
 
@@ -412,6 +414,7 @@ type createCustomerTypePayload {
 input updateCustomerTypeInput {
   id: ID!
   clientMutationId: String
+  _id: String
   value: String
 }
 

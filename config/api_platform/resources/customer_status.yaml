@@ -61,6 +61,8 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
       denormalizationContext:
         allow_extra_attributes: false
       extraArgs:
+        _id:
+          type: 'String'
         value:
           type: 'String'
     ApiPlatform\Metadata\GraphQl\DeleteMutation:

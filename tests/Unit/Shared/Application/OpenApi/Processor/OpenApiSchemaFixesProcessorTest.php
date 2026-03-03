@@ -16,13 +16,12 @@ use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
 use App\Shared\Application\OpenApi\Processor\SchemaNormalizer;
-use App\Shared\Application\OpenApi\Processor\UlidSchemaFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
 final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
 {
-    public function testProcessUpdatesHydraViewExampleAndUlidSchema(): void
+    public function testProcessUpdatesHydraViewExample(): void
     {
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => new ArrayObject([
@@ -41,13 +40,6 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
                             ],
                         ],
                     ],
-                ],
-            ]),
-            'UlidInterface.jsonld-output' => new ArrayObject([
-                'description' => 'Ulid',
-                'deprecated' => false,
-                'properties' => [
-                    '@id' => ['type' => 'string'],
                 ],
             ]),
         ]);
@@ -76,16 +68,9 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
 
         $this->assertArrayHasKey('@type', $example);
         $this->assertArrayNotHasKey('type', $example);
-
-        $ulidSchema = SchemaNormalizer::normalize(
-            $resultSchemas['UlidInterface.jsonld-output']
-        );
-        $this->assertSame('string', $ulidSchema['type']);
-        $this->assertSame('Ulid', $ulidSchema['description']);
-        $this->assertFalse($ulidSchema['deprecated']);
     }
 
-    public function testProcessLeavesSchemasWhenHydraAndUlidMissing(): void
+    public function testProcessLeavesSchemasWhenHydraMissing(): void
     {
         $schemas = new ArrayObject();
         $openApi = new OpenApi(
@@ -217,68 +202,6 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertArrayHasKey('type', $example);
     }
 
-    public function testProcessDefaultsUlidDeprecatedToFalse(): void
-    {
-        $schemas = new ArrayObject([
-            'UlidInterface.jsonld-output' => new ArrayObject([
-                'description' => 'Ulid',
-                'properties' => [
-                    '@id' => ['type' => 'string'],
-                ],
-            ]),
-        ]);
-
-        $openApi = new OpenApi(
-            new Info('Test', '1.0.0'),
-            [],
-            new Paths(),
-            new Components($schemas)
-        );
-
-        $processor = $this->createProcessor();
-        $result = $processor->process($openApi);
-
-        $resultSchemas = $result->getComponents()->getSchemas();
-        $ulidSchema = SchemaNormalizer::normalize(
-            $resultSchemas['UlidInterface.jsonld-output']
-        );
-
-        $this->assertSame('string', $ulidSchema['type']);
-        $this->assertSame('Ulid', $ulidSchema['description']);
-        $this->assertFalse($ulidSchema['deprecated']);
-    }
-
-    public function testProcessPreservesUlidDeprecatedTrue(): void
-    {
-        $schemas = new ArrayObject([
-            'UlidInterface.jsonld-output' => new ArrayObject([
-                'description' => 'Ulid',
-                'deprecated' => true,
-                'properties' => [
-                    '@id' => ['type' => 'string'],
-                ],
-            ]),
-        ]);
-
-        $openApi = new OpenApi(
-            new Info('Test', '1.0.0'),
-            [],
-            new Paths(),
-            new Components($schemas)
-        );
-
-        $processor = $this->createProcessor();
-        $result = $processor->process($openApi);
-
-        $resultSchemas = $result->getComponents()->getSchemas();
-        $ulidSchema = SchemaNormalizer::normalize(
-            $resultSchemas['UlidInterface.jsonld-output']
-        );
-
-        $this->assertSame('string', $ulidSchema['type']);
-        $this->assertTrue($ulidSchema['deprecated']);
-    }
-
     private function createProcessor(): OpenApiSchemaFixesProcessor
     {
         $exampleUpdater = new HydraAtTypeExampleUpdater();
@@ -287,8 +210,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $viewExampleUpdater = new HydraViewExampleUpdater($allOfUpdater);
         $schemaNormalizer = new HydraSchemaNormalizer();
         $hydraFixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
-        $ulidFixer = new UlidSchemaFixer();
 
-        return new OpenApiSchemaFixesProcessor($hydraFixer, $ulidFixer);
+        return new OpenApiSchemaFixesProcessor($hydraFixer);
     }
 }
