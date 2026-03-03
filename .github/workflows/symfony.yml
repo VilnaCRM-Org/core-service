@@ -11,6 +11,8 @@ jobs:
         with:
           php-version: ${{ vars.PHP_VERSION }}
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Copy .env.test.local
         run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
       - name: Cache Composer packages
