@@ -142,22 +142,17 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
         $tagProcessor->method('process')->willReturnArgument(0);
 
-        $payloadOutput = new OpenApi(
-            new Info('Payload', '1.0.0'),
-            [],
-            new Paths()
-        );
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($openApi))
-            ->willReturn($payloadOutput);
+            ->willReturn($openApi);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($payloadOutput))
-            ->willReturn($payloadOutput);
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
@@ -217,22 +212,17 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
         $tagProcessor->method('process')->willReturnArgument(0);
 
-        $payloadOutput = new OpenApi(
-            new Info('Payload', '1.0.0'),
-            [],
-            new Paths()
-        );
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($openApi))
-            ->willReturn($payloadOutput);
+            ->willReturn($openApi);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($payloadOutput))
-            ->willReturn($payloadOutput);
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
