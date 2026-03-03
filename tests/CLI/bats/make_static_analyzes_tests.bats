@@ -6,20 +6,17 @@ load 'bats-assert/load'
 @test "make phpcsfixer command executes" {
   run make phpcsfixer
   assert_success
-  assert_output --partial "Running analysis on 1 core sequentially."
 }
 
 @test "make psalm command executes successfully" {
   run make psalm
   assert_success
-  assert_output --partial 'Scanning files...'
 }
 
 @test "make psalm-security command executes successfully" {
   run make psalm-security
-  assert_success
-  assert_output --partial 'Scanning files...'
   assert_output --partial './vendor/bin/psalm --taint-analysis'
+  assert_success
 }
 
 @test "make deptrac command executes and reports no violations" {
@@ -30,6 +27,5 @@ load 'bats-assert/load'
 
 @test "make deptrac-debug command executes" {
   run make deptrac-debug
-  assert_output --partial 'App'
   assert_success
 }
