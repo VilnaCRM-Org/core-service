@@ -55,5 +55,6 @@ jobs:
         uses: kamilkisiela/graphql-inspector@release-1701263349990
         with:
           schema: '.github/graphql-spec/spec'
+          experimental_merge: false
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
