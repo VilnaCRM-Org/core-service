@@ -45,10 +45,14 @@ file_put_contents('.github/openapi-spec/spec.yaml', $content);
 // Fix 3: Change ulid $ref to type: string in Customer.jsonld-output and CustomerType.jsonld-output
 $content = file_get_contents('.github/openapi-spec/spec.yaml');
 $lines = explode("\n", $content);
-for ($i = 0; $i < count($lines) - 2; $i++) {
-    if (trim($lines[$i]) === 'ulid:' && strpos($lines[$i + 1], '$ref') !== false && strpos($lines[$i + 1], 'UlidInterface') !== false) {
+$lineCount = count($lines) - 2;
+for ($i = 0; $i < $lineCount; $i++) {
+    $currentLine = trim($lines[$i]);
+    $nextLine = $lines[$i + 1];
+    $followingLine = trim($lines[$i + 2]);
+    if ($currentLine === 'ulid:' && strpos($nextLine, '$ref') !== false && strpos($nextLine, 'UlidInterface') !== false) {
         // Check if this is the Customer ulid (followed by createdAt) or CustomerType ulid (followed by Error)
-        if (trim($lines[$i + 2]) === 'createdAt:' || trim($lines[$i + 2]) === 'Error:') {
+        if ($followingLine === 'createdAt:' || $followingLine === 'Error:') {
             $lines[$i + 1] = '          type: string';
         }
     }
