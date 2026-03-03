@@ -122,7 +122,7 @@ final class OpenApiFactoryTest extends UnitTestCase
         $endpointFactory = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory->expects($this->once())
             ->method('createEndpoint')
-            ->with($this->isInstanceOf(OpenApi::class));
+            ->with($this->identicalTo($openApi));
 
         $pathProcessor = $this->createMock(PathParametersProcessor::class);
         $pathProcessor->method('process')->willReturnArgument(0);
