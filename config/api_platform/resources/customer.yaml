@@ -79,6 +79,21 @@ App\Core\Customer\Domain\Entity\Customer:
       processor: App\Core\Customer\Application\Processor\CreateCustomerProcessor
       denormalizationContext:
         allow_extra_attributes: false
+      extraArgs:
+        initials:
+          type: 'String'
+        email:
+          type: 'String'
+        phone:
+          type: 'String'
+        leadSource:
+          type: 'String'
+        type:
+          type: 'String'
+        status:
+          type: 'String'
+        confirmed:
+          type: 'Boolean'
     update_mutation:
       class: ApiPlatform\Metadata\GraphQl\Mutation
       name: update
@@ -86,6 +101,21 @@ App\Core\Customer\Domain\Entity\Customer:
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
+      extraArgs:
+        initials:
+          type: 'String'
+        email:
+          type: 'String'
+        phone:
+          type: 'String'
+        leadSource:
+          type: 'String'
+        type:
+          type: 'String'
+        status:
+          type: 'String'
+        confirmed:
+          type: 'Boolean'
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
       processor: App\Core\Customer\Application\Processor\CustomerDeleteProcessor
