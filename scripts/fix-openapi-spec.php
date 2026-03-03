@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 // Fix 1: Change 'type: string' to '@type: string' in view examples
-shell_exec("sed -i \"s/example: { '@id': string, type: string,/example: { '@id': string, '@type': string,/g\" .github/openapi-spec/spec.yaml");
+$specFile = '.github/openapi-spec/spec.yaml';
+$search = "example: { '@id': string, type: string,";
+$replace = "example: { '@id': string, '@type': string,";
+shell_exec('sed -i "s/' . $search . '/' . $replace . '/g" ' . $specFile);
 
 // Fix 2: Add ulid property to UlidInterface.jsonld-output
 $content = file_get_contents('.github/openapi-spec/spec.yaml');
