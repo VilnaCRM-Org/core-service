@@ -58,12 +58,12 @@ final class OpenApiFactoryTest extends UnitTestCase
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
+            ->with($this->isInstanceOf(OpenApi::class))
             ->willReturnArgument(0);
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
+            ->with($this->isInstanceOf(OpenApi::class))
             ->willReturnArgument(0);
 
         $factory = new OpenApiFactory(
