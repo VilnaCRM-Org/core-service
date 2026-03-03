@@ -62,7 +62,7 @@ This repository ships with a built-in Codespaces definition in `.devcontainer/de
 
 When a Codespace is created, the setup script:
 
-- installs `codex` CLI
+- installs `claude` CLI
 - provides `gh` CLI
 - installs `bats` CLI for `make bats`
 - starts the Docker stack with `make start`
@@ -72,7 +72,7 @@ After startup, verify the environment:
 
 ```bash
 gh --version
-codex --version
+claude --version
 make help
 ```
 
@@ -80,7 +80,7 @@ make help
 
 Use Codespaces secrets (do not commit credentials). Prefer repository-level Codespaces secrets for this repository:
 
-- `OPENAI_API_KEY`: OpenAI API key for Codex CLI
+- `MINIMAX_API_KEY`: MiniMax API key for Claude CLI (Anthropic-compatible mode)
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`
@@ -90,7 +90,7 @@ The Codespace `post-create` step runs secure bootstrap automatically and then ex
 ```bash
 bash scripts/codespaces/setup-secure-agent-env.sh
 bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
-bash scripts/codespaces/verify-gh-codex.sh VilnaCRM-Org
+bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
 ```
 
 What `startup-smoke-tests.sh` checks:
@@ -98,58 +98,55 @@ What `startup-smoke-tests.sh` checks:
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
 - `bats` CLI is available
-- `codex` can execute one non-interactive task with the `openai` profile
+- `claude` can execute one non-interactive task with `MiniMax-M2.5`
 
-Repository-tracked defaults for GitHub and Codex bootstrap are stored in:
+Repository-tracked defaults for GitHub and Claude bootstrap are stored in:
 
 - `.devcontainer/codespaces-settings.env`
 - `.devcontainer/post-create.sh`
 - `scripts/codespaces/setup-secure-agent-env.sh`
 
-What `verify-gh-codex.sh` checks:
+What `verify-gh-claude.sh` checks:
 
 - GitHub auth works
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `codex` can run basic and tool-calling non-interactive smoke tasks via OpenAI
-- `codex` can complete a tool-calling smoke task required for autonomous coding flows
+- `claude` can run basic and tool-calling non-interactive smoke tasks via MiniMax M2.5
+- `claude` can complete a tool-calling smoke task required for autonomous coding flows
 
-Codex is configured directly (no `make` wrapper) with a single OpenAI profile:
+Claude is configured directly (no `make` wrapper) with Anthropic-compatible MiniMax settings:
 
-```toml
-profile = "openai"
-
-[profiles.openai]
-model = "gpt-5.2-codex"
-model_provider = "openai"
-model_reasoning_effort = "medium"
-model_reasoning_summary = "none"
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
-
-[model_providers.openai]
-name = "OpenAI"
-base_url = "https://api.openai.com/v1"
-env_key = "OPENAI_API_KEY"
-wire_api = "responses"
+```json
+{
+  "model": "MiniMax-M2.5",
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "ask": []
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "<MINIMAX_API_KEY>",
+    "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
+    "ANTHROPIC_MODEL": "MiniMax-M2.5"
+  }
+}
 ```
 
-Default bootstrap uses autonomous Codex settings (`approval_policy=never`, `sandbox_mode=danger-full-access`) with medium reasoning on `gpt-5.2-codex`.
+Default bootstrap uses autonomous Claude settings (`CLAUDE_PERMISSION_MODE=bypassPermissions`) with model `MiniMax-M2.5`.
 If you need safer defaults in a Codespace, set overrides before bootstrap:
 
 ```bash
-export CODEX_APPROVAL_POLICY=on-failure
-export CODEX_SANDBOX_MODE=workspace-write
+export CLAUDE_PERMISSION_MODE=default
+export CLAUDE_ALLOW_UNSAFE_MODE=0
 ```
 
 Use safer mode in shared or untrusted environments.
 
-Run Codex directly:
+Run Claude directly:
 
 ```bash
-codex -p openai
-codex exec -p openai "Refactor customer update flow to reduce duplication"
+claude -p --model MiniMax-M2.5 "Reply with exactly one line: claude-ok"
+claude "Refactor customer update flow to reduce duplication"
 ```
 
 Notes:
@@ -160,7 +157,7 @@ Notes:
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
-- this setup is Codex-only
+- this setup is Claude + MiniMax M2.5 only
 
 ## Using
 
