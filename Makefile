@@ -59,10 +59,12 @@ endef
 ifeq ($(CI),1)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
+    RUN_UNIT_TESTS_COVERAGE = $(RUN_TESTS_COVERAGE)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
+    RUN_UNIT_TESTS_COVERAGE = script -q -c 'docker compose exec -e APP_ENV=test -e XDEBUG_MODE=coverage php php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text --testsuite=Unit' /dev/null
     RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
 endif
 
@@ -107,7 +109,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
+	$(RUN_UNIT_TESTS_COVERAGE) > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
