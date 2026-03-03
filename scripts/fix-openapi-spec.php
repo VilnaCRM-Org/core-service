@@ -50,7 +50,9 @@ for ($i = 0; $i < $lineCount; $i++) {
     $currentLine = trim($lines[$i]);
     $nextLine = $lines[$i + 1];
     $followingLine = trim($lines[$i + 2]);
-    if ($currentLine === 'ulid:' && strpos($nextLine, '$ref') !== false && strpos($nextLine, 'UlidInterface') !== false) {
+    $hasRef = strpos($nextLine, '$ref') !== false;
+    $hasUlidInterface = strpos($nextLine, 'UlidInterface') !== false;
+    if ($currentLine === 'ulid:' && $hasRef && $hasUlidInterface) {
         // Check if this is the Customer ulid (followed by createdAt) or CustomerType ulid (followed by Error)
         if ($followingLine === 'createdAt:' || $followingLine === 'Error:') {
             $lines[$i + 1] = '          type: string';
