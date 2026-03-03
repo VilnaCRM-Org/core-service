@@ -60,15 +60,20 @@ final class OpenApiFactoryTest extends UnitTestCase
 
         $endpointFactories = $this->createEndpointFactories($openApi);
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadOutput = new OpenApi(
+            new Info('Payload', '1.0.0'),
+            [],
+            new Paths()
+        );
         $payloadProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->willReturn($payloadOutput);
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($payloadOutput))
+            ->willReturn($payloadOutput);
 
         $pathProcessor = $this->createMock(PathParametersProcessor::class);
         $pathProcessor->method('process')->willReturnArgument(0);
@@ -137,16 +142,21 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor->method('process')->willReturnArgument(0);
 
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadOutput = new OpenApi(
+            new Info('Payload', '1.0.0'),
+            [],
+            new Paths()
+        );
         $payloadProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->willReturn($payloadOutput);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($payloadOutput))
+            ->willReturn($payloadOutput);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
@@ -207,16 +217,21 @@ final class OpenApiFactoryTest extends UnitTestCase
         $tagProcessor->method('process')->willReturnArgument(0);
 
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
+        $payloadOutput = new OpenApi(
+            new Info('Payload', '1.0.0'),
+            [],
+            new Paths()
+        );
         $payloadProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->willReturn($payloadOutput);
 
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($payloadOutput))
+            ->willReturn($payloadOutput);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
