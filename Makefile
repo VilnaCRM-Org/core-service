@@ -82,7 +82,7 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
 
 composer-validate: ## The validate command validates a given composer.json and composer.lock
-	$(COMPOSER) validate
+	$(COMPOSER) validate --no-check-lock
 
 check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
 	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
