@@ -54,10 +54,15 @@ final class PathsMapper
 
     private static function copyExtensionProperties(OpenApi $source, OpenApi $target): OpenApi
     {
-        foreach ($source->getExtensionProperties() as $key => $value) {
-            $target = $target->withExtensionProperty($key, $value);
-        }
+        $extensions = iterator_to_array($source->getExtensionProperties());
 
-        return $target;
+        return array_reduce(
+            array_keys($extensions),
+            static fn (OpenApi $current, string $key): OpenApi => $current->withExtensionProperty(
+                $key,
+                $extensions[$key]
+            ),
+            $target
+        );
     }
 }

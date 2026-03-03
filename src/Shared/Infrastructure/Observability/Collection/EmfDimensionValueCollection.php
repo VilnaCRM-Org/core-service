@@ -63,12 +63,15 @@ final readonly class EmfDimensionValueCollection implements IteratorAggregate, C
      */
     public function toAssociativeArray(): array
     {
-        $result = [];
-        foreach ($this->dimensions as $dimension) {
-            $result[$dimension->key()] = $dimension->value();
-        }
+        return array_reduce(
+            $this->dimensions,
+            static function (array $result, EmfDimensionValue $dim): array {
+                $result[$dim->key()] = $dim->value();
 
-        return $result;
+                return $result;
+            },
+            []
+        );
     }
 
     public function keys(): EmfDimensionKeys

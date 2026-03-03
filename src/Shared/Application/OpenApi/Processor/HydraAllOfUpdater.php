@@ -23,19 +23,18 @@ final class HydraAllOfUpdater
      */
     public function update(array $allOf): ?array
     {
-        foreach ($allOf as $index => $item) {
-            if (! is_array($item) && ! $item instanceof ArrayObject) {
-                continue;
-            }
+        $validItems = array_filter(
+            $allOf,
+            static fn ($item): bool => is_array($item) || $item instanceof ArrayObject
+        );
 
+        foreach ($validItems as $index => $item) {
             $updatedItem = $this->itemUpdater->update($item);
-            if ($updatedItem === null) {
-                continue;
+            if ($updatedItem !== null) {
+                $allOf[$index] = $updatedItem;
+
+                return $allOf;
             }
-
-            $allOf[$index] = $updatedItem;
-
-            return $allOf;
         }
 
         return null;
