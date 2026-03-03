@@ -46,7 +46,7 @@ foreach ($lines as $line) {
         continue;
     }
 
-    if ($inUlidInterface && !$addedUlid && strpos($line, 'properties:') !== false) {
+    if ($inUlidInterface && ! $addedUlid && strpos($line, 'properties:') !== false) {
         $output[] = '        ulid:';
         $output[] = '          type: string';
         $addedUlid = true;
