@@ -67,7 +67,7 @@ setup() {
 @test "phpunit should fail if tests fail" {
   mv tests/CLI/bats/php/FailingTest.php tests/Unit/
 
-  run docker compose exec -T -e APP_ENV=test php ./vendor/bin/phpunit --testsuite=Unit --filter FailingTest
+  run make unit-tests ARGS="--filter FailingTest"
 
   mv tests/Unit/FailingTest.php tests/CLI/bats/php/
 
