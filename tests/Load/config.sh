@@ -1,7 +1,15 @@
 #!/bin/bash
 set -e
 
-export $(grep -v '^#' .env | xargs)
+# Source environment variables from .env if it exists, otherwise use defaults
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
+# Provide defaults for CI environment where .env is not available
+LOCALSTACK_PORT=${LOCALSTACK_PORT:-4566}
+AWS_SQS_KEY=${AWS_SQS_KEY:-fake}
+AWS_SQS_SECRET=${AWS_SQS_SECRET:-fake}
 
 DEFAULT_REGION="us-east-1"
 DEFAULT_AMI_ID="ami-0e86e20dae9224db8"
