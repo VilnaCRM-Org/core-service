@@ -108,14 +108,13 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
-if [ -z "${OPENAI_API_KEY:-}" ]; then
+if ! printenv OPENAI_API_KEY > /dev/null 2>&1; then
     cat >&2 <<'EOM'
-Error: OPENAI_API_KEY is not set.
-Provide OPENAI_API_KEY as a Codespaces secret.
+Error: OPENAI_API_KEY is not set or not exported.
+Provide OPENAI_API_KEY as a Codespaces secret and ensure it is exported.
 EOM
     exit 1
 fi
-export OPENAI_API_KEY
 if [ ! -f "${HOME}/.codex/config.toml" ]; then
     echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
     exit 1
