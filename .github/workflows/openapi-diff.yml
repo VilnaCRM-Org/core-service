@@ -69,9 +69,9 @@ jobs:
           php scripts/fix-openapi-spec.php
         working-directory: base
       - name: Run OpenAPI Diff (from HEAD revision)
-        uses: docker://openapitools/openapi-diff:latest
-        with:
-          args: '/github/workspace/base/.github/openapi-spec/spec.yaml /github/workspace/head/.github/openapi-spec/spec.yaml'
+        run: |
+          mkdir -p ./output
+          docker run --rm -v ${{ github.workspace }}:/github/workspace openapitools/openapi-diff:latest --markdown /github/workspace/output/diff.md /github/workspace/base/.github/openapi-spec/spec.yaml /github/workspace/head/.github/openapi-spec/spec.yaml
       - uses: actions/upload-artifact@v4
         with:
           name: diff-reports
