@@ -12,25 +12,6 @@ use ArrayObject;
 
 final class HydraCollectionSchemaFixerTest extends UnitTestCase
 {
-    public function testApplyReturnsOriginalSchemasWhenNormalizedIsNull(): void
-    {
-        $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
-        $schemaNormalizer->expects(self::once())
-            ->method('normalize')
-            ->willReturn(null);
-
-        $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
-        $viewExampleUpdater->expects(self::never())
-            ->method('update');
-
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
-        $schemas = new ArrayObject(['key' => 'value']);
-
-        $result = $fixer->apply($schemas);
-
-        self::assertSame($schemas, $result);
-    }
-
     public function testApplyReturnsOriginalSchemasWhenUpdatedIsNull(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
