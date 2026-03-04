@@ -44,7 +44,10 @@ jobs:
           ref: main
           path: base
       - name: Apply OpenAPI spec fixes to base
-        run: php scripts/fix-openapi-spec.php
+        run: |
+          if [ -f scripts/fix-openapi-spec.php ]; then
+            php scripts/fix-openapi-spec.php
+          fi
         working-directory: base
       - name: Run OpenAPI Diff (from HEAD revision)
         uses: docker://openapitools/openapi-diff:latest
