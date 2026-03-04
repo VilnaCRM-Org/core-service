@@ -25,7 +25,7 @@ final class SpecMetadataCleaner
             $this->cleanComponents($openApi->getComponents()),
             $openApi->getSecurity(),
             $openApi->getTags(),
-            webhooks: $webhooks instanceof ArrayObject ? $webhooks : new ArrayObject()
+            webhooks: $webhooks ?? new ArrayObject()
         );
     }
 

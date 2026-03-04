@@ -42,11 +42,12 @@ final class PathParametersProcessor
     private function updateOperation(Operation $operation): Operation
     {
         $parameters = $operation->getParameters();
+        if (! \is_array($parameters) || $parameters === []) {
+            return $operation;
+        }
 
-        return is_array($parameters)
-            ? $operation->withParameters(
-                array_map($this->parameterCleaner->clean(...), $parameters)
-            )
-            : $operation;
+        return $operation->withParameters(
+            array_map($this->parameterCleaner->clean(...), $parameters)
+        );
     }
 }

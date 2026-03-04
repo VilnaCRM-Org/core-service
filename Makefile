@@ -11,10 +11,10 @@ DOCKER        = docker
 DOCKER_COMPOSE = docker compose
 
 # Executables
-EXEC_PHP      = $(DOCKER_COMPOSE) exec php
+EXEC_PHP      = $(DOCKER_COMPOSE) exec -T php
 COMPOSER      = $(EXEC_PHP) composer
 GIT           = git
-EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -e APP_ENV=test php
+EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -T -e APP_ENV=test php
 
 # Alias
 SYMFONY       = $(EXEC_PHP) bin/console
@@ -50,9 +50,12 @@ COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite 
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
+override PHPINSIGHTS_ARGS :=
+override INFECTION_MIN_MSI := 100
+override INFECTION_MIN_COVERED_MSI := 100
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
@@ -72,6 +75,9 @@ help:
 	@printf "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m\n"
 	@grep -E '^[-a-zA-Z0-9_\.\/]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
+submodule-init: ## Initialize git submodules
+	$(GIT) submodule update --init --recursive
+
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)
 
@@ -79,7 +85,7 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
 
 composer-validate: ## The validate command validates a given composer.json and composer.lock
-	$(COMPOSER) validate
+	$(COMPOSER) validate --strict
 
 check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
 	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
@@ -101,13 +107,20 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
+	$(EXEC_ENV) ./vendor/bin/phpinsights $(PHPINSIGHTS_ARGS) --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
+# NOTE: Non-CI coverage parsing reads a temp file created in the container, so the repo must be volume-mounted.
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
+	coverage_file=var/coverage/coverage.xml; \
+	if [ "$(CI)" = "1" ]; then \
+		mkdir -p $$(dirname $$coverage_file); \
+	else \
+		$(DOCKER_COMPOSE) exec -T php mkdir -p $$(dirname $$coverage_file); \
+	fi; \
+	$(RUN_TESTS_COVERAGE) --testsuite=Unit --coverage-clover $$coverage_file > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
@@ -115,15 +128,27 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
-	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
 		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	if [ "$(CI)" = "1" ]; then \
+		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
+	else \
+		coverage_output=.coverage_value.txt; \
+		$(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; $$out = $$argv[2] ?? null; if ($$file === null || $$out === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { $$coverage = "0"; } else { $$coverage = sprintf("%.2f", ($$covered / $$statements) * 100); } file_put_contents($$out, $$coverage);' -- $$coverage_file $$coverage_output; \
+		waits=0; \
+		while [ ! -s $$coverage_output ] && [ $$waits -lt 50 ]; do \
+			waits=$$((waits + 1)); \
+			sleep 0.2; \
+		done; \
+		coverage=$$(cat $$coverage_output 2>/dev/null); \
+		rm -f $$coverage_output; \
+	fi; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
-		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
+		if [ "$$coverage" != "100.00" ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
@@ -202,7 +227,7 @@ build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
 
 infection: ## Run mutation testing with 100% MSI requirement
-	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
+	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=$(INFECTION_MIN_MSI) --min-covered-msi=$(INFECTION_MIN_COVERED_MSI)
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
@@ -253,7 +278,7 @@ down: ## Stop the docker hub
 
 sh: ## Log to the docker container
 	@echo "Connecting to core-service PHP container..."
-	@$(EXEC_PHP) sh
+	@$(DOCKER_COMPOSE) exec php sh
 
 logs: ## Show all logs
 	@$(DOCKER_COMPOSE) logs
@@ -271,7 +296,7 @@ stop: ## Stop docker and the Symfony binary server
 	$(DOCKER_COMPOSE) stop
 
 commands: ## List all Symfony commands
-	@$(SYMFONY) list
+	@$(DOCKER_COMPOSE) exec -T -e APP_ENV=dev php php bin/console list
 
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
@@ -281,6 +306,7 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 
 generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+	$(EXEC_PHP) php scripts/fix-openapi-spec.php
 
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec

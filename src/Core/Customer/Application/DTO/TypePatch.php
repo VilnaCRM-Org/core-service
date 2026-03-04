@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\DTO;
 
-final class TypePatch
+final readonly class TypePatch
 {
-    public ?string $value = null;
-
-    public ?string $id = null;
-
-    public function __construct(?string $value = null, ?string $id = null)
-    {
-        $this->value = $value;
-        $this->id = $id;
+    public function __construct(
+        public ?string $value = null,
+        public ?string $id = null,
+    ) {
     }
 }

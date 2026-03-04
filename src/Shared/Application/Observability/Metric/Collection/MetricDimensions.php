@@ -64,12 +64,15 @@ final readonly class MetricDimensions implements IteratorAggregate, Countable
      */
     public function toAssociativeArray(): array
     {
-        $result = [];
-        foreach ($this->dimensions as $dimension) {
-            $result[$dimension->key()] = $dimension->value();
-        }
+        return array_reduce(
+            $this->dimensions,
+            static function (array $result, MetricDimension $dim): array {
+                $result[$dim->key()] = $dim->value();
 
-        return $result;
+                return $result;
+            },
+            []
+        );
     }
 
     private function assertUniqueKeys(MetricDimension ...$dimensions): void

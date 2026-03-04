@@ -100,10 +100,10 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
     private function createDimensionValueCollection(
         MetricDimensionsInterface $dimensions
     ): EmfDimensionValueCollection {
-        $dimensionValues = [];
-        foreach ($dimensions->values() as $dimension) {
-            $dimensionValues[] = new EmfDimensionValue($dimension->key(), $dimension->value());
-        }
+        $dimensionValues = array_map(
+            static fn ($dimension) => new EmfDimensionValue($dimension->key(), $dimension->value()),
+            iterator_to_array($dimensions->values())
+        );
 
         return new EmfDimensionValueCollection($this->dimensionValidator, ...$dimensionValues);
     }

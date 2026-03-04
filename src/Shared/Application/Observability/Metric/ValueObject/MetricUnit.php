@@ -34,7 +34,7 @@ final readonly class MetricUnit
 
     public function __construct(string $value)
     {
-        if (!in_array($value, self::ALLOWED, true)) {
+        if (! in_array($value, self::ALLOWED, true)) {
             throw new InvalidArgumentException(sprintf('Invalid metric unit "%s".', $value));
         }
 

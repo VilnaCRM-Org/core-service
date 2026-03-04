@@ -21,6 +21,23 @@ final class CacheKeyBuilderTest extends TestCase
         self::assertSame('customer.abc', $this->builder->buildCustomerKey('abc'));
     }
 
+    public function testBuildCustomerKeyCastsInt(): void
+    {
+        self::assertSame('customer.123', $this->builder->buildCustomerKey(123));
+    }
+
+    public function testBuildCustomerKeyCastsStringable(): void
+    {
+        $customerId = new class() implements \Stringable {
+            public function __toString(): string
+            {
+                return 'stringable-id';
+            }
+        };
+
+        self::assertSame('customer.stringable-id', $this->builder->buildCustomerKey($customerId));
+    }
+
     public function testBuildCustomerEmailKeyHashesLowercasedEmail(): void
     {
         $key = $this->builder->buildCustomerEmailKey('John@Example.COM');

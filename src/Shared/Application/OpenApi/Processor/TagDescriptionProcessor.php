@@ -29,10 +29,11 @@ final class TagDescriptionProcessor
      */
     private function createOrUpdateTag(array $tags, string $tagName): Tag
     {
-        $tag = $tags[$tagName] ?? new Tag($tagName);
+        $tags += [$tagName => new Tag($tagName)];
+        $tag = $tags[$tagName];
         $description = TagDescriptionDictionary::descriptions()[$tagName];
 
-        return ($tag->getDescription() ?? '') === ''
+        return (string) $tag->getDescription() === ''
             ? $tag->withDescription($description)
             : $tag;
     }

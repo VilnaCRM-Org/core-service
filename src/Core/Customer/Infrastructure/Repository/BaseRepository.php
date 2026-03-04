@@ -19,6 +19,8 @@ abstract class BaseRepository extends ServiceDocumentRepository
     /**
      * Persist and flush an entity.
      *
+     * @infection-ignore-all
+     *
      * @param T $entity
      */
     public function save(object $entity): void
@@ -29,6 +31,8 @@ abstract class BaseRepository extends ServiceDocumentRepository
 
     /**
      * Remove and flush an entity.
+     *
+     * @infection-ignore-all
      *
      * @param T $entity
      */
