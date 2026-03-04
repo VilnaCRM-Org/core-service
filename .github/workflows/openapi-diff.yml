@@ -46,9 +46,11 @@ jobs:
       - name: Generate and fix openapi spec for base
         run: |
           # Copy vendor, env and fix script from HEAD to base
-          cp -r ../vendor vendor
-          cp ../.env.test.local .env.test.local 2>/dev/null || true
-          if [ -f ../scripts/fix-openapi-spec.php ]; then
+          cp -r ../head/vendor vendor 2>/dev/null || cp -r ../vendor vendor 2>/dev/null || true
+          cp ../head/.env.test.local .env.test.local 2>/dev/null || cp ../.env.test.local .env.test.local 2>/dev/null || true
+          if [ -f ../head/scripts/fix-openapi-spec.php ]; then
+            cp ../head/scripts/fix-openapi-spec.php scripts/
+          elif [ -f ../scripts/fix-openapi-spec.php ]; then
             cp ../scripts/fix-openapi-spec.php scripts/
           fi
           # Generate spec for base (only if bin/console exists)
