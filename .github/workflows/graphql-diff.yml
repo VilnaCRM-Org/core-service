@@ -58,5 +58,5 @@ jobs:
           git fetch origin "${{ github.base_ref }}" --depth=1
           git show "origin/${{ github.base_ref }}:.github/graphql-spec/spec" > /tmp/base.graphql || true
           if [ -s /tmp/base.graphql ]; then
-            npx -y `@graphql-inspector/cli` diff /tmp/base.graphql .github/graphql-spec/spec --fail-on-breaking
+            npx -y @graphql-inspector/cli diff /tmp/base.graphql .github/graphql-spec/spec --fail-on-breaking
           fi
