@@ -30,12 +30,33 @@ $content = str_replace(
 );
 $writeSpec($specFile, $content);
 
-// Fix 2: Add ulid property to UlidInterface.jsonld-output
+// Fix 2: Add ulid property to UlidInterface.jsonld-output (idempotent)
 $content = $readSpec('.github/openapi-spec/spec.yaml');
 $lines = explode("\n", $content);
 $output = [];
 $inUlidInterface = false;
 $addedUlid = false;
+$ulidAlreadyExists = false;
+
+// First pass: check if ulid already exists in UlidInterface.jsonld-output
+foreach ($lines as $scanLine) {
+    $trimmed = trim($scanLine);
+    if ($trimmed === 'UlidInterface.jsonld-output:') {
+        $inUlidInterface = true;
+        continue;
+    }
+
+    if ($inUlidInterface && $trimmed === 'ulid:') {
+        $ulidAlreadyExists = true;
+        break;
+    }
+
+    if ($inUlidInterface && preg_match('/^ {4}[A-Za-z0-9_.-]+:\s*$/', $scanLine) === 1) {
+        break;
+    }
+}
+
+$inUlidInterface = false;
 
 foreach ($lines as $line) {
     $output[] = $line;
@@ -45,7 +66,7 @@ foreach ($lines as $line) {
         continue;
     }
 
-    if ($inUlidInterface && ! $addedUlid && strpos($line, 'properties:') !== false) {
+    if ($inUlidInterface && ! $addedUlid && ! $ulidAlreadyExists && strpos($line, 'properties:') !== false) {
         $output[] = '        ulid:';
         $output[] = '          type: string';
         $addedUlid = true;

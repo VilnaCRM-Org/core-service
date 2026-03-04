@@ -45,8 +45,10 @@ jobs:
           path: base
       - name: Generate and fix openapi spec for base
         run: |
-          # Copy vendor, env and fix script from HEAD to base
-          cp -r ../head/vendor vendor 2>/dev/null || cp -r ../vendor vendor 2>/dev/null || true
+          # Install base dependencies from base's own composer.lock
+          if [ -f composer.lock ]; then
+            composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          fi
           cp ../head/.env.test.local .env.test.local 2>/dev/null || cp ../.env.test.local .env.test.local 2>/dev/null || true
           if [ -f ../head/scripts/fix-openapi-spec.php ]; then
             cp ../head/scripts/fix-openapi-spec.php scripts/
