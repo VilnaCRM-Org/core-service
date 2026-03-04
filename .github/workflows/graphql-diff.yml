@@ -59,7 +59,7 @@ jobs:
           if git cat-file -e "origin/${{ github.base_ref }}:.github/graphql-spec/spec" 2>/dev/null; then
             git show "origin/${{ github.base_ref }}:.github/graphql-spec/spec" > /tmp/base.graphql
             cp .github/graphql-spec/spec /tmp/head.graphql
-            npx -y @graphql-inspector/cli diff /tmp/base.graphql /tmp/head.graphql --fail-on-breaking
+            npx -y @graphql-inspector/cli@4.0.0 diff /tmp/base.graphql /tmp/head.graphql --fail-on-breaking
           else
             echo "Base schema not found on ${GITHUB_BASE_REF}; skipping compatibility check."
           fi
