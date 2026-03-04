@@ -64,7 +64,7 @@ writeSpec('.github/openapi-spec/spec.yaml', $content);
 // Fix 3: Change ulid $ref to type: string in Customer.jsonld-output and CustomerType.jsonld-output
 $content = readSpec('.github/openapi-spec/spec.yaml');
 $lines = explode("\n", $content);
-$lineCount = count($lines) - 2;
+$lineCount = max(0, count($lines) - 2);
 for ($i = 0; $i < $lineCount; $i++) {
     $currentLine = trim($lines[$i]);
     $nextLine = $lines[$i + 1];

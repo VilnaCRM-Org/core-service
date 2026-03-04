@@ -115,6 +115,7 @@ Provide OPENAI_API_KEY as a Codespaces secret.
 EOM
     exit 1
 fi
+export OPENAI_API_KEY
 if [ ! -f "${HOME}/.codex/config.toml" ]; then
     echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
     exit 1

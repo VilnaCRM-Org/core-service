@@ -18,7 +18,8 @@ return [
         'vendor',
         'CLI/bats/php',
         'src/Core/Customer/Application/DTO',
-        'scripts',
+        'scripts/*.sh',
+        'scripts/codespaces',
     ],
     'add' => [],
     'remove' => [

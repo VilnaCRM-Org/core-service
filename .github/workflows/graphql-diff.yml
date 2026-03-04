@@ -53,3 +53,10 @@ jobs:
 
       # GraphQL Inspector step disabled - the action has bugs with local file paths
       # The schema is still being generated and committed successfully
+      - name: Verify GraphQL schema compatibility (temporary fallback)
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          git show "origin/${{ github.base_ref }}:.github/graphql-spec/spec" > /tmp/base.graphql || true
+          if [ -s /tmp/base.graphql ]; then
+            npx -y `@graphql-inspector/cli` diff /tmp/base.graphql .github/graphql-spec/spec --fail-on-breaking
+          fi

@@ -9,12 +9,12 @@ use App\Tests\Unit\UnitTestCase;
 
 final class BusinessMetricTest extends UnitTestCase
 {
-    public function testDefaultsWhenMetricIsUninitialized(): void
+    public function testMetricReturnsProvidedValues(): void
     {
-        $reflection = new \ReflectionClass(TestBusinessMetric::class);
-        $metric = $reflection->newInstanceWithoutConstructor();
+        $unit = new MetricUnit(MetricUnit::SECONDS);
+        $metric = new TestBusinessMetric(42, $unit);
 
-        self::assertSame(0, $metric->value());
-        self::assertSame(MetricUnit::COUNT, $metric->unit()->value());
+        self::assertSame(42, $metric->value());
+        self::assertSame(MetricUnit::SECONDS, $metric->unit()->value());
     }
 }
