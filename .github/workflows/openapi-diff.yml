@@ -50,19 +50,23 @@ jobs:
             composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
           fi
           cp ../head/.env.test.local .env.test.local 2>/dev/null || cp ../.env.test.local .env.test.local 2>/dev/null || true
+          mkdir -p scripts
           if [ -f ../head/scripts/fix-openapi-spec.php ]; then
-            cp ../head/scripts/fix-openapi-spec.php scripts/
+            cp ../head/scripts/fix-openapi-spec.php scripts/fix-openapi-spec.php
           elif [ -f ../scripts/fix-openapi-spec.php ]; then
-            cp ../scripts/fix-openapi-spec.php scripts/
+            cp ../scripts/fix-openapi-spec.php scripts/fix-openapi-spec.php
+          else
+            echo "Base fix script not found; cannot normalize base spec consistently" >&2
+            exit 1
           fi
-          # Generate spec for base (only if bin/console exists)
-          if [ -f bin/console ]; then
-            php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+          # Generate spec for base; fail fast if checkout is incomplete
+          if [ ! -f bin/console ]; then
+            echo "Line [59]: base/bin/console not found; cannot generate OpenAPI spec" >&2
+            exit 1
           fi
-          # Apply fixes if script exists
-          if [ -f scripts/fix-openapi-spec.php ]; then
-            php scripts/fix-openapi-spec.php
-          fi
+          php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+          # Apply fixes unconditionally
+          php scripts/fix-openapi-spec.php
         working-directory: base
       - name: Run OpenAPI Diff (from HEAD revision)
         uses: docker://openapitools/openapi-diff:latest
