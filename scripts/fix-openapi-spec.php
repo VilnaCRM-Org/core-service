@@ -24,8 +24,8 @@ $writeSpec = static function (string $path, string $content): void {
 // Fix 1: Change 'type: string' to '@type: string' in view examples
 $content = $readSpec($specFile);
 $content = str_replace(
-    "example: { '@id': string, type: string,",
-    "example: { '@id': string, '@type': string,",
+    "example: { '@id': string, type: string, first:",
+    "example: { '@id': string, '@type': string, first:",
     $content
 );
 $writeSpec($specFile, $content);
