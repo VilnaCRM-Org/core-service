@@ -11,7 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.4",
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^8.57.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "acorn": "^8.16.0",
     "eslint": "^8.57.1",
