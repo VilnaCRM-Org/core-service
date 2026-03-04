@@ -74,6 +74,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Initialize Git Submodules
+        run: git submodule update --init --recursive
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
