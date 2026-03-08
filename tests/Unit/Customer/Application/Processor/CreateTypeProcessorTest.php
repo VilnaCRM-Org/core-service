@@ -65,8 +65,6 @@ final class CreateTypeProcessorTest extends UnitTestCase
 
     private function createDto(): TypeCreate
     {
-        $dto = new TypeCreate();
-        $dto->value = $this->faker->word();
-        return $dto;
+        return new TypeCreate(value: $this->faker->word());
     }
 }

@@ -32,7 +32,10 @@ final readonly class ResilientAsyncEventDispatcher implements AsyncEventDispatch
         $allSucceeded = true;
 
         foreach ($events as $event) {
-            $allSucceeded = $this->dispatchSingle($event) && $allSucceeded;
+            $result = $this->dispatchSingle($event);
+            if (! $result) {
+                $allSucceeded = false;
+            }
         }
 
         return $allSucceeded;

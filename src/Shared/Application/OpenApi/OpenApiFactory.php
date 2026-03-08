@@ -14,6 +14,7 @@ use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
 use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\UlidInterfaceSchemaFixer;
 use ArrayObject;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
@@ -33,6 +34,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         private TagDescriptionProcessor $tagDescriptionProcessor,
         private ConstraintViolationPayloadItemsProcessor $constraintViolationPayloadItemsProcessor,
         private OpenApiSchemaFixesProcessor $schemaFixesProcessor,
+        private UlidInterfaceSchemaFixer $ulidInterfaceSchemaFixer,
         private OpenApiExtensionsApplier $extensionsApplier
     ) {
         $this->endpointFactories = is_array($endpointFactories)
@@ -50,6 +52,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         $openApi = $this->applyAugmenters($openApi);
         $openApi = $this->constraintViolationPayloadItemsProcessor->process($openApi);
         $openApi = $this->schemaFixesProcessor->process($openApi);
+        $openApi = $this->ulidInterfaceSchemaFixer->process($openApi);
 
         return $this->normalizeOpenApi($openApi);
     }

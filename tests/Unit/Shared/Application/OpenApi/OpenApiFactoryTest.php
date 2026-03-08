@@ -17,6 +17,7 @@ use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
 use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
 use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
 use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\UlidInterfaceSchemaFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayIterator;
 use ArrayObject;
@@ -37,6 +38,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $this->createMock(TagDescriptionProcessor::class),
             $this->createMock(ConstraintViolationPayloadItemsProcessor::class),
             $this->createMock(OpenApiSchemaFixesProcessor::class),
+            $this->createMock(UlidInterfaceSchemaFixer::class),
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
@@ -105,6 +107,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $tagProcessor,
             $payloadProcessor,
             $schemaFixesProcessor,
+            $this->createMock(UlidInterfaceSchemaFixer::class),
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
@@ -170,6 +173,12 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with($this->identicalTo($openApi))
             ->willReturn($openApi);
 
+        $ulidFixer = $this->createMock(UlidInterfaceSchemaFixer::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
@@ -181,6 +190,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $tagProcessor,
             $payloadProcessor,
             $schemaFixesProcessor,
+            $ulidFixer,
             $extensionsApplier
         );
 
@@ -248,6 +258,12 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with($this->identicalTo($openApi))
             ->willReturn($openApi);
 
+        $ulidFixer = $this->createMock(UlidInterfaceSchemaFixer::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
@@ -259,6 +275,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $tagProcessor,
             $payloadProcessor,
             $schemaFixesProcessor,
+            $ulidFixer,
             $extensionsApplier
         );
 

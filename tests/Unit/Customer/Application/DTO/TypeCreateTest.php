@@ -12,8 +12,7 @@ final class TypeCreateTest extends UnitTestCase
     public function testConstruct(): void
     {
         $value = $this->faker->word();
-        $dto = new TypeCreate();
-        $dto->value = $value;
+        $dto = new TypeCreate(value: $value);
 
         $this->assertEquals($value, $dto->value);
     }

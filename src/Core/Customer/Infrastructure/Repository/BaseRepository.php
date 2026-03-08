@@ -32,8 +32,6 @@ abstract class BaseRepository extends ServiceDocumentRepository
     /**
      * Remove and flush an entity.
      *
-     * @infection-ignore-all
-     *
      * @param T $entity
      */
     public function delete(object $entity): void

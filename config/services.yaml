@@ -209,6 +209,7 @@ services:
         '@App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor',
         '@App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor',
         '@App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor',
+        '@App\Shared\Application\OpenApi\Processor\UlidInterfaceSchemaFixer',
         '@App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier',
       ]
     autoconfigure: false

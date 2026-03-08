@@ -306,7 +306,6 @@ coverage-xml: ## Create the code coverage report with PHPUnit
 
 generate-openapi-spec: ## Generate OpenAPI specification
 	$(EXEC_PHP) php bin/console api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
-	$(EXEC_PHP) php scripts/fix-openapi-spec.php
 
 generate-graphql-spec: ## Generate GraphQL specification
 	$(EXEC_PHP) php bin/console api:graphql:export --output=.github/graphql-spec/spec
