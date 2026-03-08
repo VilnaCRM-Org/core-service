@@ -57,5 +57,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ['allOf' => [], 'updated' => true],
             $result['HydraCollectionBaseSchema']->getArrayCopy()
         );
+        self::assertArrayHasKey('key', $result);
+        self::assertSame('value', $result['key']);
     }
 }
