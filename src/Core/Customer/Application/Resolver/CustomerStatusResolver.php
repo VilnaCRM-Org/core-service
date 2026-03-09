@@ -59,14 +59,16 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
+        $resolvedIri = $iri ?? throw new CustomerStatusNotFoundException();
+
         $resource = $this->fetchResource(
-            $iri ?? throw new CustomerStatusNotFoundException(),
+            $resolvedIri,
             $context,
             $operation
         );
 
         return $resource instanceof CustomerStatus
             ? $resource
-            : throw CustomerStatusNotFoundException::withIri($iri);
+            : throw CustomerStatusNotFoundException::withIri($resolvedIri);
     }
 }

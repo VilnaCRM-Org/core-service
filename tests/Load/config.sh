@@ -25,11 +25,15 @@ generate_uuid() {
   fi
 
   if command -v python3 >/dev/null 2>&1; then
-    python3 - <<'PY'
+    output=$(python3 - <<'PY'
 import uuid
 print(uuid.uuid4())
 PY
-    return 0
+)
+    if [ -n "$output" ]; then
+      printf '%s' "$output"
+      return 0
+    fi
   fi
 
   printf '%s-%s-%s-%s-%s\n' "$(date +%s)" "$RANDOM" "$RANDOM" "$RANDOM" "$RANDOM"

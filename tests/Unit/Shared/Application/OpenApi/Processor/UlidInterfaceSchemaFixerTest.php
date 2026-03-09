@@ -241,6 +241,45 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['ulid']);
     }
 
+    public function testHandlesUlidInterfaceSchemaAsArrayObject(): void
+    {
+        // Test with ArrayObject as schema value (production case from OpenApi)
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => new ArrayObject([
+                'type' => 'object',
+                'properties' => new ArrayObject(),
+            ]),
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $ulidInterface = $resultSchemas['UlidInterface.jsonld-output'];
+
+        // ArrayObject should be treated as non-array and get default empty array
+        self::assertArrayHasKey('properties', $ulidInterface);
+    }
+
+    public function testHandlesUlidInterfaceWithoutPropertiesKey(): void
+    {
+        // Test when UlidInterface exists but has no 'properties' key
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => ['type' => 'object'],
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $ulidInterface = $resultSchemas['UlidInterface.jsonld-output'];
+
+        // Should add ulid property
+        self::assertArrayHasKey('properties', $ulidInterface);
+        self::assertArrayHasKey('ulid', $ulidInterface['properties']);
+        self::assertSame(['type' => 'string'], $ulidInterface['properties']['ulid']);
+    }
+
     private function createOpenApi(ArrayObject|null $schemas): OpenApi
     {
         return new OpenApi(
