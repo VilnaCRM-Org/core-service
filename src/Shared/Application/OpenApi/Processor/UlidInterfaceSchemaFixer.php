@@ -36,9 +36,8 @@ final class UlidInterfaceSchemaFixer
     private function addUlidProperty(array $schemas): array
     {
         $schemas = $this->addUlidToInterfaceSchema($schemas);
-        $customerSchemas = ['Customer.jsonld-output', 'CustomerType.jsonld-output'];
 
-        return $this->fixCustomerUlidRef($schemas, ...$customerSchemas);
+        return $this->fixCustomerUlidRef($schemas, 'Customer.jsonld-output', 'CustomerType.jsonld-output');
     }
 
     /**
@@ -66,23 +65,43 @@ final class UlidInterfaceSchemaFixer
     private function fixCustomerUlidRef(array $schemas, string ...$schemaNames): array
     {
         foreach ($schemaNames as $schemaName) {
-            $schema = $schemas[$schemaName] ?? [];
-
-            if (! isset($schema['properties']['ulid'])) {
-                continue;
-            }
-
-            $ulidProp = $schema['properties']['ulid'];
-            $ref = $ulidProp['$ref'] ?? null;
-
-            if (! is_string($ref) || ! str_contains($ref, 'UlidInterface')) {
-                continue;
-            }
-
-            $schema['properties']['ulid'] = ['type' => 'string'];
-            $schemas[$schemaName] = $schema;
+            $schemas = $this->fixSingleSchemaUlidRef($schemas, $schemaName);
         }
 
         return $schemas;
+    }
+
+    /**
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schemas
+     *
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>
+     */
+    private function fixSingleSchemaUlidRef(array $schemas, string $schemaName): array
+    {
+        $schema = $schemas[$schemaName] ?? [];
+
+        if (! isset($schema['properties']['ulid'])) {
+            return $schemas;
+        }
+
+        $ulidProp = $schema['properties']['ulid'];
+        $ref = $ulidProp['$ref'] ?? null;
+
+        if (! $this->isUlidInterfaceRef($ref)) {
+            return $schemas;
+        }
+
+        $schema['properties']['ulid'] = ['type' => 'string'];
+        $schemas[$schemaName] = $schema;
+
+        return $schemas;
+    }
+
+    /**
+     * @param array|bool|float|int|string|ArrayObject|null $ref
+     */
+    private function isUlidInterfaceRef(mixed $ref): bool
+    {
+        return is_string($ref) && str_contains($ref, 'UlidInterface');
     }
 }
