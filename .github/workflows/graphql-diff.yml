@@ -2,12 +2,7 @@ name: GraphQL spec backward comparability
 
 on:
   pull_request:
-
-permissions:
-  contents: write
-  pull-requests: write
-  checks: write
-  statuses: write
+    branches: ['main']
 
 jobs:
   graphql-diff:
@@ -15,13 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Generate token with necessary permissions
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.VILNACRM_APP_ID }}
-          private_key: ${{ secrets.VILNACRM_APP_PRIVATE_KEY }}
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
@@ -29,9 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.1
         with:
-          token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
 
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
@@ -39,21 +25,22 @@ jobs:
       - name: Start application
         run: make start
 
+      - name: Setup test db
+        run: make setup-test-db
+
       - name: Generate GraphQL spec
         run: make generate-graphql-spec
 
       - name: Copy openapi spec to host
-        run: docker cp core-service-php-1:/srv/app/.github/graphql-spec/spec .github/graphql-spec/spec
+        run: docker cp php-service-template-php-1:/srv/app/.github/graphql-spec/spec .github/graphql-spec/spec
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
           add: '.github/graphql-spec/spec'
-          message: 'feat(#${{ github.event.number }}): generate graphql spec'
+          message: 'feat(#${{ toJSON(github.event.number) }}): generate graphql spec'
 
       - name: GraphQL Inspector
         uses: kamilkisiela/graphql-inspector@release-1701263349990
         with:
           schema: 'master:.github/graphql-spec/spec'
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}

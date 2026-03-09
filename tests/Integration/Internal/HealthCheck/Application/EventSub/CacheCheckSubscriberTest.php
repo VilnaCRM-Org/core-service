@@ -6,11 +6,11 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Application\EventSub\CacheCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use App\Tests\Integration\BaseTest;
+use App\Tests\Integration\IntegrationTestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Contracts\Cache\CacheInterface;
 
-final class CacheCheckSubscriberTest extends BaseTest
+final class CacheCheckSubscriberTest extends IntegrationTestCase
 {
     private CacheCheckSubscriber $subscriber;
     private CacheInterface $cache;
@@ -22,55 +22,29 @@ final class CacheCheckSubscriberTest extends BaseTest
         $this->subscriber = new CacheCheckSubscriber($this->cache);
     }
 
-    public function testInitialHealthCheckSetsCache(): void
+    public function testOnHealthCheckCachesResult(): void
     {
         $event = new HealthCheckEvent();
         $this->subscriber->onHealthCheck($event);
-        $cacheItem = $this->cache->getItem('health_check');
-        $this->assertTrue(
-            $cacheItem->isHit(),
-            'Expected cache item present.'
-        );
-        $this->assertEquals(
-            'ok',
-            $cacheItem->get(),
-            'Cache should have "ok".'
-        );
-        $this->assertEquals(
-            'ok',
-            $this->getHealthCheckCacheValue(),
-            'Cached value remains ok.'
-        );
-    }
 
-    public function testHealthCheckCacheIdempotence(): void
-    {
-        $event = new HealthCheckEvent();
-        $this->subscriber->onHealthCheck($event);
-        $val = $this->getHealthCheckCacheValue();
-        $this->subscriber->onHealthCheck($event);
+        $result = $this->cache->get('health_check', static function () {
+            return 'not_ok';
+        });
+
         $this->assertEquals(
-            $val,
-            $this->getHealthCheckCacheValue(),
-            'Subsequent calls return same value.'
+            'ok',
+            $result,
+            'The cache should return "ok" for health_check key'
         );
     }
 
     public function testGetSubscribedEvents(): void
     {
-        $exp = [HealthCheckEvent::class => 'onHealthCheck'];
+        $expected = [HealthCheckEvent::class => 'onHealthCheck'];
         $this->assertEquals(
-            $exp,
+            $expected,
             CacheCheckSubscriber::getSubscribedEvents(),
-            'Events array should bind HealthCheckEvent to onHealthCheck.'
-        );
-    }
-
-    private function getHealthCheckCacheValue(): string
-    {
-        return $this->cache->get(
-            'health_check',
-            static fn (): string => 'not_ok'
+            'Events should correctly bind to onHealthCheck method'
         );
     }
 }

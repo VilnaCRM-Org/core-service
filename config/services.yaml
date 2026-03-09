@@ -11,182 +11,28 @@ services:
     autowire: true # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-  app.customer.mongodb.order_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments:
-      [
-        {
-          'ulid': 'desc',
-          'createdAt': 'desc',
-          'updatedAt': 'desc',
-          'email': 'asc',
-          'initials': 'asc',
-          'phone': 'asc',
-          'leadSource': 'asc',
-          'type.value': 'asc',
-          'status.value': 'asc',
-        },
-      ]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.order' }
-
-  app.customer.mongodb.range_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.range_filter'
-    class: App\Shared\Infrastructure\Filter\UlidRangeFilter
-    arguments: [{ 'ulid': ~ }]
-    tags:
-      - { name: 'api_platform.filter', id: 'mongodb.range' }
-
-  app.customer.mongodb.date_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.date_filter'
-    arguments: [{ 'createdAt': ~, 'updatedAt': ~ }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.date' }
-
-  app.customer.mongodb.boolean_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
-    arguments: [{ 'confirmed': ~ }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.boolean' }
-
-  app.customer.mongodb.search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments:
-      [
-        {
-          initials: 'exact',
-          email: 'exact',
-          phone: 'exact',
-          leadSource: 'exact',
-          'type.value': 'exact',
-          'status.value': 'exact',
-        },
-      ]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.search' }
-
-  app.customer_type.order_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.type.order' }
-
-  app.customer_type.partial_search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments: [{ 'value': 'partial' }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.type.partial_search' }
-
-  app.customer_status.order_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
-    arguments: [{ 'ulid': 'desc', 'value': 'asc' }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.status.order' }
-
-  app.customer_status.partial_search_filter:
-    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
-    arguments: [{ 'value': 'partial' }]
-    tags:
-      - { name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search' }
-
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/'
     exclude:
       - '../src/Shared/Kernel.php'
-      - '../src/Shared/Application/Validator/LoggingMutationInputValidator.php'
-
-  App\Shared\Infrastructure\Observability\Factory\EmfAwsMetadataFactory:
-    arguments:
-      $namespace: '%env(AWS_EMF_NAMESPACE)%'
-
-  App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy:
-    arguments:
-      $delayMs: '%env(int:MESSENGER_RETRY_DELAY_MS)%'
-
-  App\Shared\Application\Validator\MutationInputValidatorInterface:
-    alias: App\Shared\Application\Validator\MutationInputValidator
-
-  App\Shared\Application\Validator\LoggingMutationInputValidator:
-    decorates: App\Shared\Application\Validator\MutationInputValidator
-    arguments:
-      $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
-      $logger: '@logger'
-
-  # Base repository - used by API Platform for collections
-  App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
-    public: true
-
-  # Cached repository - wraps base repository with caching
-  App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository:
-    arguments:
-      $inner: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
-      $cache: '@cache.customer'
-
-  # Alias interface to cached repository for dependency injection
-  App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
-    alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
-    public: true
-
-  # Cache invalidation event subscribers - auto-bind cache.customer
-
-  # CacheKeyBuilder - auto-registered via App\ namespace
 
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
 
   _instanceof:
-    App\Core\Customer\Application\EventSubscriber\CustomerCacheInvalidationSubscriberInterface:
-      bind:
-        $cache: '@cache.customer'
-
     App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface:
       tags: ['app.event_subscriber']
     App\Shared\Domain\Bus\Command\CommandHandlerInterface:
       tags: ['app.command_handler']
-    App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
-      tags: ['app.openapi_endpoint_factory']
-
-  # ===========================================
-  # BUS CONFIGURATION (following user-service patterns)
-  # ===========================================
-
-  App\Shared\Infrastructure\Bus\MessageBusFactory: ~
-
   App\Shared\Infrastructure\Bus\Command\InMemorySymfonyCommandBus:
-    arguments:
-      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
-      - !tagged_iterator 'app.command_handler'
+    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.command_handler]
     lazy: true
 
   App\Shared\Infrastructure\Bus\Event\InMemorySymfonyEventBus:
-    arguments:
-      - '@App\Shared\Infrastructure\Bus\MessageBusFactory'
-      - !tagged_iterator 'app.event_subscriber'
+    arguments: ['@App\Shared\Infrastructure\Bus\MessageBusFactory', !tagged app.event_subscriber]
     lazy: true
-
-  # ===========================================
-  # RESILIENT ASYNC EVENT BUS (AP from CAP)
-  # ===========================================
-  # For resilient async event processing via SQS:
-  # - Layer 1: ResilientAsyncEventDispatcher catches SQS failures
-  # - Layer 2: DomainEventMessageHandler catches subscriber failures
-  # All failures are logged + emit metrics (self-healing pipeline)
-
-  App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventDispatcher:
-    arguments:
-      $messageBus: '@messenger.bus.default'
-
-  App\Shared\Infrastructure\Bus\Event\Async\DomainEventMessageHandler:
-    tags: ['messenger.message_handler']
-    arguments:
-      $subscribers: !tagged_iterator 'app.event_subscriber'
-
-  # Default: Use resilient async event bus (AP from CAP theorem)
-  # Switch to InMemorySymfonyEventBus for sync processing if needed
-  App\Shared\Domain\Bus\Event\EventBusInterface:
-    alias: App\Shared\Infrastructure\Bus\Event\Async\ResilientAsyncEventBus
 
   Aws\Sqs\SqsClient:
     arguments:
@@ -196,46 +42,3 @@ services:
         credentials:
           key: '%env(AWS_SQS_KEY)%'
           secret: '%env(AWS_SQS_SECRET)%'
-
-  App\Shared\Application\OpenApi\OpenApiFactory:
-    decorates: 'api_platform.openapi.factory'
-    arguments:
-      ['@App\Shared\Application\OpenApi\OpenApiFactory.inner', !tagged app.openapi_endpoint_factory]
-    autoconfigure: false
-
-  App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
-
-  App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
-
-  App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeCreateRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
-
-  App\Shared\Application\OpenApi\Factory\Request\CustomerType\TypeUpdateRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
-
-  App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusCreateRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
-
-  App\Shared\Application\OpenApi\Factory\Request\CustomerStatus\StatusUpdateRequestFactory:
-    arguments:
-      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'
-
-  App\Shared\Application\OpenApi\Serializer\ParameterNormalizer:
-    decorates: 'api_platform.openapi.normalizer.api_gateway'
-    decoration_priority: 10
-    arguments:
-      - '@App\Shared\Application\OpenApi\Serializer\ParameterNormalizer.inner'
-    autoconfigure: false
-
-  App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer:
-    decorates: 'api_platform.openapi.normalizer.api_gateway'
-    decoration_priority: 5
-    arguments:
-      $decorated: '@App\Shared\Application\OpenApi\Serializer\OpenApiNormalizer.inner'
