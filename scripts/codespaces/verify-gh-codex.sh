@@ -108,9 +108,9 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
-if ! printenv OPENAI_API_KEY > /dev/null 2>&1; then
+if [ -z "${OPENAI_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
-Error: OPENAI_API_KEY is not set or not exported.
+Error: OPENAI_API_KEY is not set or empty.
 Provide OPENAI_API_KEY as a Codespaces secret and ensure it is exported.
 EOM
     exit 1
@@ -119,23 +119,23 @@ if [ ! -f "${HOME}/.codex/config.toml" ]; then
     echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
     exit 1
 fi
-if ! grep -q "profile = \"${CODEX_PROFILE_NAME}\"" "${HOME}/.codex/config.toml"; then
+if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "profile = \"${CODEX_PROFILE_NAME}\""; then
     echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
     exit 1
 fi
-if ! grep -q "model = \"${CODEX_MODEL}\"" "${HOME}/.codex/config.toml"; then
+if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "model = \"${CODEX_MODEL}\""; then
     echo "Error: Codex default model '${CODEX_MODEL}' is not configured." >&2
     exit 1
 fi
-if ! grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\"" "${HOME}/.codex/config.toml"; then
+if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\""; then
     echo "Error: Codex reasoning effort '${CODEX_REASONING_EFFORT}' is not configured." >&2
     exit 1
 fi
-if ! grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\"" "${HOME}/.codex/config.toml"; then
+if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\""; then
     echo "Error: Codex approval policy '${CODEX_APPROVAL_POLICY}' is not configured." >&2
     exit 1
 fi
-if ! grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\"" "${HOME}/.codex/config.toml"; then
+if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\""; then
     echo "Error: Codex sandbox mode '${CODEX_SANDBOX_MODE}' is not configured." >&2
     exit 1
 fi

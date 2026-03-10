@@ -28,15 +28,15 @@ final class HydraAllOfUpdater
             static fn ($item): bool => is_array($item) || $item instanceof ArrayObject
         );
 
+        $hasChanges = false;
         foreach ($validItems as $index => $item) {
             $updatedItem = $this->itemUpdater->update($item);
             if ($updatedItem !== null) {
                 $allOf[$index] = $updatedItem;
-
-                return $allOf;
+                $hasChanges = true;
             }
         }
 
-        return null;
+        return $hasChanges ? $allOf : null;
     }
 }

@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
+use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
@@ -101,7 +102,10 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
         MetricDimensionsInterface $dimensions
     ): EmfDimensionValueCollection {
         $dimensionValues = array_map(
-            static fn ($dimension) => new EmfDimensionValue($dimension->key(), $dimension->value()),
+            static fn (MetricDimension $dimension): EmfDimensionValue => new EmfDimensionValue(
+                $dimension->key(),
+                $dimension->value()
+            ),
             iterator_to_array($dimensions->values())
         );
 
