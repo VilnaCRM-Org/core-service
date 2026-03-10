@@ -24,8 +24,8 @@ final class UlidInterfaceSchemaFixer
             return $openApi;
         }
 
-        $schemasArray = $schemas->getArrayCopy();
-        $schemasArray = $this->addUlidProperty($schemasArray);
+        $schemasArray = (new UlidInterfaceSchemaNormalizer())->normalize($schemas->getArrayCopy());
+        $schemasArray = $this->replaceCustomerSchemaUlids($schemasArray, new CustomerUlidRefReplacer());
 
         return $openApi->withComponents($components->withSchemas(new ArrayObject($schemasArray)));
     }
@@ -35,78 +35,12 @@ final class UlidInterfaceSchemaFixer
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    private function addUlidProperty(array $schemas): array
+    private function replaceCustomerSchemaUlids(array $schemas, CustomerUlidRefReplacer $replacer): array
     {
-        $schemas = $this->addUlidToInterfaceSchema($schemas);
-
         foreach (self::CUSTOMER_SCHEMAS as $schemaName) {
-            $schemas = $this->fixSingleSchemaUlidRef($schemas, $schemaName);
+            $schemas = $replacer->replace($schemas, $schemaName);
         }
 
         return $schemas;
-    }
-
-    /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schemas
-     *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>
-     */
-    private function addUlidToInterfaceSchema(array $schemas): array
-    {
-        $ulidInterface = $schemas['UlidInterface.jsonld-output'] ?? [];
-
-        if (is_array($ulidInterface) && ! isset($ulidInterface['properties']['ulid'])) {
-            $ulidInterface['properties']['ulid'] = ['type' => 'string'];
-            $schemas['UlidInterface.jsonld-output'] = $ulidInterface;
-        }
-
-        return $schemas;
-    }
-
-    /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schemas
-     *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>
-     */
-    private function fixSingleSchemaUlidRef(array $schemas, string $schemaName): array
-    {
-        $schema = $schemas[$schemaName] ?? [];
-
-        if (! $this->hasUlidProperty($schema)) {
-            return $schemas;
-        }
-
-        $ulidProp = $schema['properties']['ulid'];
-
-        if (! $this->hasUlidInterfaceRef($ulidProp)) {
-            return $schemas;
-        }
-
-        $schema['properties']['ulid'] = ['type' => 'string'];
-        $schemas[$schemaName] = $schema;
-
-        return $schemas;
-    }
-
-    private function hasUlidProperty(array|ArrayObject|string|int|bool|float|null $schema): bool
-    {
-        if (! is_array($schema) && ! $schema instanceof ArrayObject) {
-            return false;
-        }
-
-        return isset($schema['properties']['ulid']);
-    }
-
-    private function hasUlidInterfaceRef(array|ArrayObject|string|int|bool|float|null $ulidProp): bool
-    {
-        $ref = is_array($ulidProp)
-            ? ($ulidProp['$ref'] ?? null)
-            : ($ulidProp instanceof ArrayObject ? ($ulidProp['$ref'] ?? null) : null);
-
-        if (! is_string($ref)) {
-            return false;
-        }
-
-        return str_contains($ref, 'UlidInterface');
     }
 }
