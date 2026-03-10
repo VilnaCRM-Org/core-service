@@ -215,6 +215,28 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['$ref' => 123], $customer['properties']['ulid']);
     }
 
+    public function testHandlesUlidPropertyAsArrayObject(): void
+    {
+        // Test when ulid property in Customer schema is an ArrayObject (production case)
+        $schemas = new ArrayObject([
+            'Customer.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => new ArrayObject(['$ref' => '#/components/schemas/UlidInterface.jsonld-output']),
+                ],
+            ],
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $customer = $resultSchemas['Customer.jsonld-output'];
+
+        // ArrayObject with UlidInterface ref should be replaced with string type
+        self::assertSame(['type' => 'string'], $customer['properties']['ulid']);
+    }
+
     public function testHandlesMultipleSchemaRefTypes(): void
     {
         $schemas = new ArrayObject([
@@ -280,7 +302,7 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['type' => 'string'], $ulidInterface['properties']['ulid']);
     }
 
-    private function createOpenApi(ArrayObject|null $schemas): OpenApi
+    private function createOpenApi(?ArrayObject $schemas): OpenApi
     {
         return new OpenApi(
             new Info('Test', '1.0.0'),

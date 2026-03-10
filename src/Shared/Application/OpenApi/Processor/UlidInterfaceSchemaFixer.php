@@ -72,14 +72,13 @@ final class UlidInterfaceSchemaFixer
     {
         $schema = $schemas[$schemaName] ?? [];
 
-        if (! isset($schema['properties']['ulid'])) {
+        if (! $this->hasUlidProperty($schema)) {
             return $schemas;
         }
 
         $ulidProp = $schema['properties']['ulid'];
-        $ref = $ulidProp['$ref'] ?? null;
 
-        if (! is_string($ref) || ! str_contains($ref, 'UlidInterface')) {
+        if (! $this->hasUlidInterfaceRef($ulidProp)) {
             return $schemas;
         }
 
@@ -87,5 +86,33 @@ final class UlidInterfaceSchemaFixer
         $schemas[$schemaName] = $schema;
 
         return $schemas;
+    }
+
+    /**
+     * @param array|ArrayObject|string|int|bool|float|null $schema
+     */
+    private function hasUlidProperty(array|ArrayObject|string|int|bool|float|null $schema): bool
+    {
+        if (! is_array($schema) && ! $schema instanceof ArrayObject) {
+            return false;
+        }
+
+        return isset($schema['properties']['ulid']);
+    }
+
+    /**
+     * @param array|ArrayObject|string|int|bool|float|null $ulidProp
+     */
+    private function hasUlidInterfaceRef(array|ArrayObject|string|int|bool|float|null $ulidProp): bool
+    {
+        $ref = is_array($ulidProp)
+            ? ($ulidProp['$ref'] ?? null)
+            : (($ulidProp instanceof ArrayObject) ? ($ulidProp['$ref'] ?? null) : null);
+
+        if (! is_string($ref)) {
+            return false;
+        }
+
+        return str_contains($ref, 'UlidInterface');
     }
 }
