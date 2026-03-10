@@ -215,6 +215,24 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['$ref' => 123], $customer['properties']['ulid']);
     }
 
+    public function testHandlesNonArraySchemaProperty(): void
+    {
+        // Test when Customer schema value itself is not an array/ArrayObject (e.g., string)
+        // This triggers the hasUlidProperty early return for non-array schema
+        $schemas = new ArrayObject([
+            'Customer.jsonld-output' => 'not-an-array',
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        // Should not modify the schema when schema itself is not an array/ArrayObject
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $customer = $resultSchemas['Customer.jsonld-output'];
+
+        self::assertSame('not-an-array', $customer);
+    }
+
     public function testHandlesUlidPropertyAsArrayObject(): void
     {
         // Test when ulid property in Customer schema is an ArrayObject (production case)

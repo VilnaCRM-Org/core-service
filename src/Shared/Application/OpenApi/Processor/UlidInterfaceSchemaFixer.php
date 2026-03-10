@@ -88,9 +88,6 @@ final class UlidInterfaceSchemaFixer
         return $schemas;
     }
 
-    /**
-     * @param array|ArrayObject|string|int|bool|float|null $schema
-     */
     private function hasUlidProperty(array|ArrayObject|string|int|bool|float|null $schema): bool
     {
         if (! is_array($schema) && ! $schema instanceof ArrayObject) {
@@ -100,14 +97,11 @@ final class UlidInterfaceSchemaFixer
         return isset($schema['properties']['ulid']);
     }
 
-    /**
-     * @param array|ArrayObject|string|int|bool|float|null $ulidProp
-     */
     private function hasUlidInterfaceRef(array|ArrayObject|string|int|bool|float|null $ulidProp): bool
     {
         $ref = is_array($ulidProp)
             ? ($ulidProp['$ref'] ?? null)
-            : (($ulidProp instanceof ArrayObject) ? ($ulidProp['$ref'] ?? null) : null);
+            : ($ulidProp instanceof ArrayObject ? ($ulidProp['$ref'] ?? null) : null);
 
         if (! is_string($ref)) {
             return false;
