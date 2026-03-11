@@ -38,7 +38,7 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerStatus {
-        if (!$data instanceof StatusPatch) {
+        if (! $data instanceof StatusPatch) {
             throw new InvalidArgumentException(sprintf(
                 'Expected %s, got %s',
                 StatusPatch::class,

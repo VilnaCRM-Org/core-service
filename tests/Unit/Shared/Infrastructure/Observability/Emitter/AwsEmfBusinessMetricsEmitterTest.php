@@ -211,10 +211,10 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
             ->expects($this->once())
             ->method('info')
             ->with($this->callback(function (string $message): bool {
+                /** @var array<string, mixed> $decoded */
                 $decoded = json_decode(rtrim($message, "\n"), true);
                 self::assertIsArray($decoded);
 
-                /** @var array<string, mixed> $decoded */
                 $this->capturedContext = $decoded;
 
                 return true;

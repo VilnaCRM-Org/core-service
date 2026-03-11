@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\DTO;
 
-final class StatusPatch
+final readonly class StatusPatch
 {
-    public ?string $value = null;
-
-    public ?string $id = null;
-
-    public function __construct(?string $value = null, ?string $id = null)
-    {
-        $this->value = $value;
-        $this->id = $id;
+    public function __construct(
+        public ?string $value = null,
+        public ?string $id = null,
+    ) {
     }
 }

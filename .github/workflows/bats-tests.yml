@@ -71,6 +71,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Initialize Git Submodules
+        run: git submodule update --init --recursive
 
       - uses: shivammathur/setup-php@v2
         with:

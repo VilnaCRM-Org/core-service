@@ -6,7 +6,6 @@ namespace App\Shared\Application\OpenApi\Resolver;
 
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
-use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\OpenApi\ValueObject\IriReferenceOperationContext;
 use ArrayObject;
 
@@ -25,12 +24,7 @@ final class IriReferenceOperationContextResolver implements
     private function createContext(Operation $operation): ?IriReferenceOperationContext
     {
         $requestBody = $operation->getRequestBody();
-
-        if (!$requestBody instanceof RequestBody) {
-            return null;
-        }
-
-        $content = $requestBody->getContent();
+        $content = $requestBody?->getContent();
 
         return $content instanceof ArrayObject
             ? new IriReferenceOperationContext($operation, $requestBody, $content)

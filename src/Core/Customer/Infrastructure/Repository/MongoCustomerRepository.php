@@ -44,7 +44,7 @@ final class MongoCustomerRepository extends BaseRepository implements
      */
     public function delete(object $entity): void
     {
-        if (!$entity instanceof Customer) {
+        if (! $entity instanceof Customer) {
             parent::delete($entity);
 
             return;

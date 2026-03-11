@@ -12,7 +12,39 @@ DEFAULT_BRANCH_NAME="main"
 DEFAULT_SECURITY_GROUP_NAME="LoadTestSecurityGroup"
 DEFAULT_LOCAL_MODE="false"
 BUCKET_FILE='./tests/Load/bucket_name.txt'
-BUCKET_NAME="loadtest-bucket-$(uuidgen)"
+
+generate_uuid() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuidgen
+    return 0
+  fi
+
+  if [ -r /proc/sys/kernel/random/uuid ]; then
+    cat /proc/sys/kernel/random/uuid
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    output=$(python3 - <<'PY'
+import uuid
+print(uuid.uuid4())
+PY
+)
+    if [ -n "$output" ]; then
+      printf '%s' "$output"
+      return 0
+    fi
+  fi
+
+  printf '%s-%s-%s-%s-%s\n' "$(date +%s)" "$RANDOM" "$RANDOM" "$RANDOM" "$RANDOM"
+}
+
+UUID_SUFFIX="$(generate_uuid | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-')"
+if [ -z "$UUID_SUFFIX" ]; then
+  echo "Failed to generate a valid bucket suffix" >&2
+  exit 1
+fi
+BUCKET_NAME="loadtest-bucket-${UUID_SUFFIX}"
 
 usage() {
   echo "Usage: $0 [-r region] [-a ami_id] [-t instance_type] [-i instance_tag] [-o role_name] [-b branch_name] [-s security_group_name] [-l local_mode]"

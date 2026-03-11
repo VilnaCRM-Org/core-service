@@ -111,9 +111,8 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
     {
         $ulid = (string) $this->faker->ulid();
         $iri = sprintf('/api/customer_types/%s', $ulid);
-        $dto = new TypePatch();
-        $dto->value = $this->faker->word();
-        $dto->id = $iri;
+        $value = $this->faker->word();
+        $dto = new TypePatch(value: $value, id: $iri);
         $operation = $this->createMock(Operation::class);
         $customerType = $this->createMock(CustomerType::class);
         $command = $this->createMock(UpdateCustomerTypeCommand::class);
@@ -121,8 +120,8 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupDependencies($customerType, $dto->value, $command);
-        $this->setupCustomerType($customerType, $dto->value);
+        $this->setupDependencies($customerType, $value, $command);
+        $this->setupCustomerType($customerType, $value);
 
         $result = $this->processor->process($dto, $operation);
 
@@ -131,9 +130,7 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
     public function testProcessThrowsExceptionWhenNoUlidProvided(): void
     {
-        $dto = new TypePatch();
-        $dto->value = $this->faker->word();
-        $dto->id = null;
+        $dto = new TypePatch(value: $this->faker->word(), id: null);
         $operation = $this->createMock(Operation::class);
 
         $this->expectException(CustomerTypeNotFoundException::class);
@@ -143,18 +140,12 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
     private function createDto(): TypePatch
     {
-        $dto = new TypePatch();
-        $dto->value = $this->faker->word();
-        $dto->id = null;
-        return $dto;
+        return new TypePatch(value: $this->faker->word(), id: null);
     }
 
     private function createDtoWithEmptyValue(): TypePatch
     {
-        $dto = new TypePatch();
-        $dto->value = '';
-        $dto->id = null;
-        return $dto;
+        return new TypePatch(value: '', id: null);
     }
 
     private function setupRepository(
