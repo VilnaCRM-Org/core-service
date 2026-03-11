@@ -14,15 +14,48 @@ use ArrayObject;
 
 final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
 {
-    public function testDoesNotDropSchemasWhenRefIsNotUlidInterface(): void
+    public function testPreservesAllSchemasWhenUlidPropertyExists(): void
     {
         $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['type' => 'string'],
+                ],
+            ],
             'Customer.jsonld-output' => [
                 'type' => 'object',
                 'properties' => [
-                    'ulid' => ['$ref' => '#/components/schemas/SomeOtherSchema'],
+                    'ulid' => ['type' => 'string'],
                 ],
             ],
+            'CustomerType.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'value' => ['type' => 'string'],
+                ],
+            ],
+        ]);
+
+        $fixer = new UlidInterfaceSchemaFixer();
+        $result = $fixer->process($this->createOpenApi($schemas));
+        $resultSchemas = $result->getComponents()->getSchemas();
+
+        // Verify all schemas are preserved when ulid already exists
+        self::assertArrayHasKey('UlidInterface.jsonld-output', $resultSchemas);
+        self::assertArrayHasKey('Customer.jsonld-output', $resultSchemas);
+        self::assertArrayHasKey('CustomerType.jsonld-output', $resultSchemas);
+    }
+
+    public function testDoesNotDropSchemasWhenRefIsNotUlidInterface(): void
+    {
+        $schemas = new ArrayObject([
+            'Customer.jsonld-output' => new ArrayObject([
+                'type' => 'object',
+                'properties' => new ArrayObject([
+                    'ulid' => ['$ref' => '#/components/schemas/SomeOtherSchema'],
+                ]),
+            ]),
             'SomeOtherSchema' => [
                 'type' => 'object',
                 'properties' => [

@@ -32,9 +32,9 @@ final class CustomerUlidRefReplacer
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, array|bool|float|int|string|null>
      */
-    private function toArray(mixed $value): array
+    private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
         if ($value instanceof ArrayObject) {
             return $value->getArrayCopy();
