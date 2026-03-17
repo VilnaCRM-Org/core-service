@@ -26,7 +26,8 @@ final class UlidInterfaceSchemaFixer
 
         $normalizer = new UlidInterfaceSchemaNormalizer();
         $schemasArray = $normalizer->normalize($schemas->getArrayCopy());
-        $schemasArray = $this->replaceCustomerSchemaUlids($schemasArray, new CustomerUlidRefReplacer());
+        $replacer = new CustomerUlidRefReplacer();
+        $schemasArray = $this->replaceCustomerSchemaUlids($schemasArray, $replacer);
 
         return $openApi->withComponents($components->withSchemas(new ArrayObject($schemasArray)));
     }
@@ -39,8 +40,7 @@ final class UlidInterfaceSchemaFixer
     private function replaceCustomerSchemaUlids(
         array $schemas,
         CustomerUlidRefReplacer $replacer,
-    ): array
-    {
+    ): array {
         foreach (self::CUSTOMER_SCHEMAS as $schemaName) {
             $schemas = $replacer->replace($schemas, $schemaName);
         }
