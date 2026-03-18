@@ -286,6 +286,43 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['ulid']);
     }
 
+    public function testPreservesUnfixedSchemasWhenMultiple(): void
+    {
+        // Test that when processing multiple schemas, schemas that don't need fixing
+        // are preserved while schemas that need fixing are modified.
+        // This catches potential mutation where early return could drop other schemas.
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [],
+            ],
+            'Customer.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['$ref' => '#/components/schemas/UlidInterface.jsonld-output'],
+                ],
+            ],
+            'Product.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['$ref' => '#/components/schemas/SomeOtherSchema'],
+                ],
+            ],
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+
+        // Customer gets fixed (UlidInterface ref -> string type)
+        self::assertSame(['type' => 'string'], $resultSchemas['Customer.jsonld-output']['properties']['ulid']);
+        // Product is preserved untouched (non-UlidInterface ref)
+        self::assertSame(['$ref' => '#/components/schemas/SomeOtherSchema'], $resultSchemas['Product.jsonld-output']['properties']['ulid']);
+        // UlidInterface schema is also present
+        self::assertArrayHasKey('UlidInterface.jsonld-output', $resultSchemas);
+    }
+
     public function testHandlesUlidInterfaceSchemaAsArrayObject(): void
     {
         // Test with ArrayObject as schema value (production case from OpenApi)
