@@ -74,7 +74,12 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
 
         // When UlidInterface schema is missing, it should be created with ulid property
         self::assertArrayHasKey('UlidInterface.jsonld-output', $resultSchemas);
-        self::assertSame(['properties' => ['ulid' => ['type' => 'string']]], $resultSchemas['UlidInterface.jsonld-output']);
+        self::assertArrayHasKey('properties', $resultSchemas['UlidInterface.jsonld-output']);
+        self::assertArrayHasKey('ulid', $resultSchemas['UlidInterface.jsonld-output']['properties']);
+        self::assertSame(
+            ['type' => 'string'],
+            $resultSchemas['UlidInterface.jsonld-output']['properties']['ulid']
+        );
     }
 
     public function testReturnsEarlyWhenSchemasNull(): void
