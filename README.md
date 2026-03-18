@@ -112,7 +112,7 @@ What `verify-gh-claude.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `claude` can run basic and tool-calling non-interactive smoke tasks via MiniMax M2.7
+- `claude` can run basic and tool-calling non-interactive smoke tasks via `MiniMax-M2.7`
 - `claude` can complete a tool-calling smoke task required for autonomous coding flows
 
 Claude is configured directly (no `make` wrapper) with Anthropic-compatible MiniMax settings:
@@ -157,7 +157,7 @@ Notes:
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
-- this setup is Claude + MiniMax M2.7 only
+- this setup is Claude + `MiniMax-M2.7` only
 
 ## Using
 

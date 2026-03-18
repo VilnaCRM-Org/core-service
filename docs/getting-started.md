@@ -146,7 +146,7 @@ bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
-- `claude` can execute one non-interactive task via MiniMax M2.7
+- `claude` can execute one non-interactive task via `MiniMax-M2.7`
 
 `verify-gh-claude.sh` includes Claude basic and tool-calling smoke checks.
 This setup is MiniMax-only and configures Claude with:
