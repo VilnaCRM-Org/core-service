@@ -20,7 +20,7 @@ final class CustomerUlidRefReplacer
         $ulidProperty = $this->toArray($properties['ulid'] ?? []);
         $ref = $ulidProperty['$ref'] ?? null;
 
-        if (!is_string($ref) || !str_contains($ref, 'UlidInterface')) {
+        if (! is_string($ref) || ! str_contains($ref, 'UlidInterface')) {
             return $schemas;
         }
 

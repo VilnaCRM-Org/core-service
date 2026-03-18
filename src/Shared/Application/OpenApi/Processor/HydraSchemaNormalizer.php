@@ -19,7 +19,7 @@ final class HydraSchemaNormalizer
     {
         $schemas += [self::HYDRA_COLLECTION_SCHEMA => null];
         $normalized = SchemaNormalizer::normalize($schemas[self::HYDRA_COLLECTION_SCHEMA]);
-        if (!array_key_exists('allOf', $normalized)) {
+        if (! array_key_exists('allOf', $normalized)) {
             $normalized['allOf'] = null;
         }
 
