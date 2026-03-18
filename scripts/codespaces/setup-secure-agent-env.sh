@@ -22,7 +22,7 @@ readonly AGENT_BASHRC_FILE="${HOME}/.bashrc"
 readonly AGENT_BASHRC_START="# BEGIN CORE-SERVICE AGENT ENV"
 readonly AGENT_BASHRC_END="# END CORE-SERVICE AGENT ENV"
 
-: "${CLAUDE_MODEL:=MiniMax-M2.5}"
+: "${CLAUDE_MODEL:=MiniMax-M2.7}"
 : "${CLAUDE_BASE_URL:=https://api.minimax.io/anthropic}"
 # Unsafe-by-default autonomous Codespaces profile.
 : "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"

@@ -18,7 +18,7 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
 fi
 
 ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
-: "${CLAUDE_MODEL:=MiniMax-M2.5}"
+: "${CLAUDE_MODEL:=MiniMax-M2.7}"
 : "${CLAUDE_BASE_URL:=https://api.minimax.io/anthropic}"
 : "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
 : "${CLAUDE_TOOL_SMOKE_MODE:=enforce}"
