@@ -335,7 +335,10 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
 	echo "🔄 Restarting PHP container to ensure clean state..."; \
 	$(DOCKER_COMPOSE) restart php; \
-	sleep 5; \
+	timeout=30; elapsed=0; \
+	until $(DOCKER_COMPOSE) exec -T php php -v >/dev/null 2>&1 || [ $$elapsed -ge $$timeout ]; do \
+	    sleep 1; elapsed=$$((elapsed + 1)); \
+	done; \
 	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
