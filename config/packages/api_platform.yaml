@@ -17,7 +17,6 @@ api_platform:
       url: 'https://opensource.org/licenses/MIT'
 
   defaults:
-    pagination_partial: false
     paginationClientItemsPerPage: true
     extra_properties:
       rfc_7807_compliant_errors: true
