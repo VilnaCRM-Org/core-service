@@ -17,6 +17,7 @@ final class PayloadItemsRequirementChecker
         $items = $payload['items'] ?? null;
 
         return $type === 'array'
-            && ($items === null || ! array_key_exists('items', $payload));
+            && (! array_key_exists('items', $payload)
+                || $payload['items'] === null);
     }
 }
