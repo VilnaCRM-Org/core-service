@@ -98,7 +98,7 @@ What `startup-smoke-tests.sh` checks:
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
 - `bats` CLI is available
-- `claude` can execute one non-interactive task with `MiniMax-M2.5`
+- `claude` can execute one non-interactive task with `MiniMax-M2.7`
 
 Repository-tracked defaults for GitHub and Claude bootstrap are stored in:
 
@@ -112,14 +112,14 @@ What `verify-gh-claude.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `claude` can run basic and tool-calling non-interactive smoke tasks via MiniMax M2.5
+- `claude` can run basic and tool-calling non-interactive smoke tasks via MiniMax M2.7
 - `claude` can complete a tool-calling smoke task required for autonomous coding flows
 
 Claude is configured directly (no `make` wrapper) with Anthropic-compatible MiniMax settings:
 
 ```json
 {
-  "model": "MiniMax-M2.5",
+  "model": "MiniMax-M2.7",
   "permissions": {
     "defaultMode": "bypassPermissions",
     "ask": []
@@ -127,12 +127,12 @@ Claude is configured directly (no `make` wrapper) with Anthropic-compatible Mini
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "<MINIMAX_API_KEY>",
     "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
-    "ANTHROPIC_MODEL": "MiniMax-M2.5"
+    "ANTHROPIC_MODEL": "MiniMax-M2.7"
   }
 }
 ```
 
-Default bootstrap uses autonomous Claude settings (`CLAUDE_PERMISSION_MODE=bypassPermissions`) with model `MiniMax-M2.5`.
+Default bootstrap uses autonomous Claude settings (`CLAUDE_PERMISSION_MODE=bypassPermissions`) with model `MiniMax-M2.7`.
 If you need safer defaults in a Codespace, set overrides before bootstrap:
 
 ```bash
@@ -145,7 +145,7 @@ Use safer mode in shared or untrusted environments.
 Run Claude directly:
 
 ```bash
-claude -p --model MiniMax-M2.5 "Reply with exactly one line: claude-ok"
+claude -p --model MiniMax-M2.7 "Reply with exactly one line: claude-ok"
 claude "Refactor customer update flow to reduce duplication"
 ```
 
@@ -157,7 +157,7 @@ Notes:
 - no token values are written to repository files
 - if you do not provide `GH_AUTOMATION_TOKEN`, run interactive login:
   `gh auth login -h github.com -w && gh auth setup-git`
-- this setup is Claude + MiniMax M2.5 only
+- this setup is Claude + MiniMax M2.7 only
 
 ## Using
 

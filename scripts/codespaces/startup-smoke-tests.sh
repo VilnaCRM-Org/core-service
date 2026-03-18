@@ -18,7 +18,7 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
     . "${HOME}/.config/core-service/agent-secrets.env"
 fi
 
-: "${CLAUDE_MODEL:=MiniMax-M2.5}"
+: "${CLAUDE_MODEL:=MiniMax-M2.7}"
 : "${CLAUDE_BASE_URL:=https://api.minimax.io/anthropic}"
 : "${CLAUDE_PERMISSION_MODE:=bypassPermissions}"
 
