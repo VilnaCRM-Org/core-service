@@ -19,6 +19,7 @@ return [
         'CLI/bats/php',
         'src/Core/Customer/Application/DTO',
         'scripts/codespaces',
+        'src/Shared/Application/OpenApi/Processor',
     ],
     'add' => [],
     'remove' => [
