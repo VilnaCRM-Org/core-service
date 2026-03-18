@@ -55,7 +55,7 @@ final class UlidValueTransformer
 
         if (is_object($value)) {
             throw new InvalidArgumentException(
-                sprintf('Unsupported object type: %s', get_class($value))
+                sprintf('Unsupported object type: %s', $value::class)
             );
         }
 

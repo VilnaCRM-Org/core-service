@@ -333,6 +333,9 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
 	echo "🔟  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
+	echo "🔄 Restarting PHP container to ensure clean state..."; \
+	$(DOCKER_COMPOSE) restart php; \
+	sleep 5; \
 	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
