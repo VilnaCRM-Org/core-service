@@ -98,6 +98,12 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->method('process')
             ->willReturnArgument(0);
 
+        $ulidFixer = $this->createMock(UlidInterfaceSchemaFixer::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($payloadOutput))
+            ->willReturn($payloadOutput);
+
         $factory = new OpenApiFactory(
             $decoratedFactory,
             $endpointFactories,
@@ -107,7 +113,7 @@ final class OpenApiFactoryTest extends UnitTestCase
             $tagProcessor,
             $payloadProcessor,
             $schemaFixesProcessor,
-            $this->createMock(UlidInterfaceSchemaFixer::class),
+            $ulidFixer,
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
