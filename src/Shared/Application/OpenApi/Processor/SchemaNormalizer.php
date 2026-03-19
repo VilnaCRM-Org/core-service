@@ -9,7 +9,7 @@ use ArrayObject;
 final class SchemaNormalizer
 {
     /**
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>
+     * @return array<int|string, mixed>|ArrayObject
      */
     public static function normalize(mixed $schema): array
     {
