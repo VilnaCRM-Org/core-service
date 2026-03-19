@@ -39,9 +39,11 @@ final class OpenApiFixer
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param string $path
+     *
+     * @return array<string, mixed>
      */
-    private function readSpec(array $path): array
+    private function readSpec(string $path): array
     {
         try {
             return Yaml::parseFile($path);
