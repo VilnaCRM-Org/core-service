@@ -668,7 +668,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -949,7 +949,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1108,9 +1108,6 @@ paths:
       responses:
         204:
           description: 'Customer resource deleted'
-          content:
-            application/problem+json:
-              example: {  }
         401:
           description: Unauthorized
           content:
@@ -1262,7 +1259,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1695,7 +1692,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1944,7 +1941,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2071,9 +2068,6 @@ paths:
       responses:
         204:
           description: 'CustomerStatus resource deleted'
-          content:
-            application/problem+json:
-              example: {  }
         401:
           description: Unauthorized
           content:
@@ -2225,7 +2219,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2634,7 +2628,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2883,7 +2877,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -3010,9 +3004,6 @@ paths:
       responses:
         204:
           description: 'CustomerType resource deleted'
-          content:
-            application/problem+json:
-              example: {  }
         401:
           description: Unauthorized
           content:
@@ -3164,7 +3155,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
