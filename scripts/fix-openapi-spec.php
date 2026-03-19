@@ -35,6 +35,12 @@ final class OpenApiFixer
             $this->fixUlidRefToType($spec['components']);
         }
 
+        // Fix 4: Fix 422 error responses to use correct error type (/errors/422)
+        $this->fix422ErrorType($spec);
+
+        // Fix 5: Remove content from 204 responses (no body on success)
+        $this->fix204Responses($spec);
+
         $this->writeSpec($spec);
     }
 
@@ -177,6 +183,79 @@ final class OpenApiFixer
                     $properties['ulid'] = [
                         'type' => 'string',
                     ];
+                }
+            }
+        }
+    }
+
+    /**
+     * Fix 422 validation error responses to use correct error type
+     *
+     * @param array<string, mixed> $spec
+     */
+    private function fix422ErrorType(array &$spec): void
+    {
+        if (!isset($spec['paths'])) {
+            return;
+        }
+
+        foreach ($spec['paths'] as &$path) {
+            if (!is_array($path)) {
+                continue;
+            }
+
+            foreach ($path as &$methodData) {
+                if (!is_array($methodData) || !isset($methodData['responses'])) {
+                    continue;
+                }
+
+                foreach ($methodData['responses'] as &$response) {
+                    if (!is_array($response) || !isset($response['content'])) {
+                        continue;
+                    }
+
+                    // Check if this is a 422 response
+                    $responseExample = $response['content']['application/problem+json']['example'] ?? null;
+                    if (is_array($responseExample) && ($responseExample['status'] ?? null) === 422) {
+                        // Fix the error type for validation errors
+                        if (isset($responseExample['type']) && $responseExample['type'] === '/errors/500') {
+                            $response['content']['application/problem+json']['example']['type'] = '/errors/422';
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Fix 204 responses to not declare content (no body on success)
+     *
+     * @param array<string, mixed> $spec
+     */
+    private function fix204Responses(array &$spec): void
+    {
+        if (!isset($spec['paths'])) {
+            return;
+        }
+
+        foreach ($spec['paths'] as &$path) {
+            if (!is_array($path)) {
+                continue;
+            }
+
+            foreach ($path as &$methodData) {
+                if (!is_array($methodData) || !isset($methodData['responses'])) {
+                    continue;
+                }
+
+                foreach ($methodData['responses'] as $statusCode => &$response) {
+                    // Only process 204 responses (handle both string and integer keys)
+                    if (!in_array($statusCode, ['204', 204], true) || !is_array($response)) {
+                        continue;
+                    }
+
+                    // Remove content section for 204 responses
+                    unset($response['content']);
                 }
             }
         }
