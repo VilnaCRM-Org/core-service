@@ -49,19 +49,22 @@ final class OpenApiFixer
 
     /**
      * @return SpecSchema
+     *
+     * @throws \RuntimeException when spec file cannot be parsed
      */
     private function readSpec(string $path): array
     {
         try {
             return Yaml::parseFile($path);
         } catch (ParseException $e) {
-            fwrite(STDERR, "Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}\n");
-            exit(1);
+            throw new \RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e);
         }
     }
 
     /**
      * @param SpecSchema $spec
+     *
+     * @throws \RuntimeException when spec cannot be written
      */
     private function writeSpec(array &$spec): void
     {
@@ -74,22 +77,18 @@ final class OpenApiFixer
             // Handle both top-level and indented entries
             $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                fwrite(STDERR, "Failed to normalize security sections in YAML (pattern 1)\n");
-                exit(1);
+                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 1)');
             }
             $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                fwrite(STDERR, "Failed to normalize security sections in YAML (pattern 2)\n");
-                exit(1);
+                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 2)');
             }
 
             if (file_put_contents($this->specFile, $yaml) === false) {
-                fwrite(STDERR, "Failed to write OpenAPI spec: {$this->specFile}\n");
-                exit(1);
+                throw new \RuntimeException("Failed to write OpenAPI spec: {$this->specFile}");
             }
         } catch (DumpException $e) {
-            fwrite(STDERR, "Failed to dump OpenAPI spec: {$e->getMessage()}\n");
-            exit(1);
+            throw new \RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e);
         }
     }
 
