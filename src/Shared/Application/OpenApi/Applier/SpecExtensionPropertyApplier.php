@@ -18,13 +18,17 @@ final class SpecExtensionPropertyApplier
      */
     public function apply(array|ArrayObject|null $extensionProperties, OpenApi $openApi): OpenApi
     {
-        return ! is_array($extensionProperties) || $extensionProperties === []
+        $properties = $extensionProperties instanceof ArrayObject
+            ? $extensionProperties->getArrayCopy()
+            : $extensionProperties;
+
+        return ! is_array($properties) || $properties === []
             ? $openApi
             : array_reduce(
-                array_keys($extensionProperties),
+                array_keys($properties),
                 static fn (OpenApi $api, string $key): OpenApi => $api->withExtensionProperty(
                     $key,
-                    $extensionProperties[$key]
+                    $properties[$key]
                 ),
                 $openApi
             );
