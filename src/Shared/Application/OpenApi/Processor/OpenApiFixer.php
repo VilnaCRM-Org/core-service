@@ -69,7 +69,7 @@ final class OpenApiFixer
      *
      * @throws \RuntimeException when spec cannot be written
      */
-    private function writeSpec(array &$spec): void
+    private function writeSpec(array $spec): void
     {
         try {
             // Use DUMP_NUMERIC_KEY_AS_STRING to ensure HTTP status codes are quoted
