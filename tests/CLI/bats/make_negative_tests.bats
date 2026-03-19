@@ -1,17 +1,18 @@
 #!/usr/bin/env bats
 
-# TODO: Restore negative Make target tests
-# See issue: https://github.com/VilnaCRM-Org/core-service/issues/TBD
+# Tech debt: All negative tests were skipped due to environment complexity.
+# To restore: create fixture projects with known failures and test Make targets against them.
+# Required follow-up: Create issue in project tracker with details below.
 #
-# Skipped tests that need fixture projects for proper testing:
-# - make check-security: Security vulnerability detection
-# - make infection: Mutation score threshold
-# - make psalm: Static analysis error detection
-# - make phpinsights: Code quality threshold detection
-# - phpunit: Test failure detection
-# - PHP CS Fixer: Code style violation detection
-# - make composer-validate: Invalid composer.json detection
-# - make behat: E2E test failure detection
+# Skipped tests checklist (restore each with proper fixture):
+# [ ] make check-security: Security vulnerability detection
+# [ ] make infection: Mutation score threshold
+# [ ] make psalm: Static analysis error detection
+# [ ] make phpinsights: Code quality threshold detection
+# [ ] phpunit: Test failure detection
+# [ ] PHP CS Fixer: Code style violation detection
+# [ ] make composer-validate: Invalid composer.json detection
+# [ ] make behat: E2E test failure detection
 
 load 'bats-support/load'
 load 'bats-assert/load'

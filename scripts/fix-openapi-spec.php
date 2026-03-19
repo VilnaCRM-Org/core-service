@@ -43,8 +43,13 @@ function fixExampleTypeToAtType(array &$data): void
     // Check if this is an example object that needs fixing
     if (isset($data['example']) && is_array($data['example'])) {
         $example = $data['example'];
+        // If type exists without @type, move type to @type
         if (array_key_exists('type', $example) && !array_key_exists('@type', $example)) {
             $data['example']['@type'] = $data['example']['type'];
+            unset($data['example']['type']);
+        }
+        // If both type and @type exist, remove spurious type (keep @type)
+        if (array_key_exists('type', $example) && array_key_exists('@type', $example)) {
             unset($data['example']['type']);
         }
     }
