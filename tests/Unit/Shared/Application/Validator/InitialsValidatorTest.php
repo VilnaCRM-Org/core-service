@@ -103,7 +103,7 @@ final class InitialsValidatorTest extends UnitTestCase
 
     public function testNonStringValue(): void
     {
-        $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedTypeException::class);
+        $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedValueException::class);
 
         $this->validator->validate(
             12345,
