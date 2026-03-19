@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-# Tech debt: All negative tests were skipped due to environment complexity.
-# To restore: create fixture projects with known failures and test Make targets against them.
-# Required follow-up: Create issue in project tracker with details below.
+# TODO: Create issue in project tracker to restore negative Make target tests.
+#       Issue should include: expected fixture details, CI constraints, and target estimate.
+#       Reference: https://github.com/VilnaCRM-Org/core-service/issues/new
 #
 # Skipped tests checklist (restore each with proper fixture):
 # [ ] make check-security: Security vulnerability detection

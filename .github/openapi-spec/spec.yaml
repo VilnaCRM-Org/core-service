@@ -30,7 +30,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -668,7 +668,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -949,7 +949,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1108,6 +1108,9 @@ paths:
       responses:
         '204':
           description: 'Customer resource deleted'
+          content:
+            application/problem+json:
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -1259,7 +1262,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1418,7 +1421,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -1692,7 +1695,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1941,7 +1944,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2068,6 +2071,9 @@ paths:
       responses:
         '204':
           description: 'CustomerStatus resource deleted'
+          content:
+            application/problem+json:
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -2219,7 +2225,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2354,7 +2360,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -2628,7 +2634,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2877,7 +2883,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -3004,6 +3010,9 @@ paths:
       responses:
         '204':
           description: 'CustomerType resource deleted'
+          content:
+            application/problem+json:
+              example: []
         '401':
           description: Unauthorized
           content:
@@ -3155,7 +3164,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
