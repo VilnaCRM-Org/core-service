@@ -88,10 +88,6 @@ final class OpenApiFixer
      */
     private function fixExampleTypeToAtType(array &$data): void
     {
-        if (!is_array($data)) {
-            return;
-        }
-
         // Check if this is an example object that needs fixing
         if (isset($data['example']) && is_array($data['example'])) {
             $example = $data['example'];
