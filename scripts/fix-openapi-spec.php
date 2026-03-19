@@ -171,9 +171,8 @@ final class OpenApiFixer
 
             // Check if ulid property exists and has a $ref to UlidInterface
             if (isset($properties['ulid']) && is_array($properties['ulid'])) {
-                $ulidRef = $properties['ulid']['$ref'] ?? '';
-                $hasUlidRef = strpos($ulidRef, 'UlidInterface') !== false;
-                if ($hasUlidRef) {
+                $ulidRef = $properties['ulid']['$ref'] ?? null;
+                if (is_string($ulidRef) && str_contains($ulidRef, 'UlidInterface')) {
                     // Replace $ref with direct type: string
                     $properties['ulid'] = [
                         'type' => 'string',
