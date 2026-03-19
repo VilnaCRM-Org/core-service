@@ -63,7 +63,14 @@ final class OpenApiFixer
     private function writeSpec(array $spec): void
     {
         try {
-            $yaml = Yaml::dump($spec, 10, 2);
+            // Use DUMP_NUMERIC_KEY_AS_STRING to ensure HTTP status codes are quoted
+            $yaml = Yaml::dump($spec, 10, 2, Yaml::DUMP_NUMERIC_KEY_AS_STRING);
+
+            // Fix known empty-sequence fields: security: { } -> security: []
+            // Also handle security: null -> security: []
+            $yaml = preg_replace('/^security: \{\s*\}$/m', 'security: []', $yaml);
+            $yaml = preg_replace('/^security: null$/m', 'security: []', $yaml);
+
             if (file_put_contents($this->specFile, $yaml) === false) {
                 fwrite(STDERR, "Failed to write OpenAPI spec: {$this->specFile}\n");
                 exit(1);
