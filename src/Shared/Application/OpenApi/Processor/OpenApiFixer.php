@@ -73,7 +73,15 @@ final class OpenApiFixer
             // Also handle security: null -> security: []
             // Handle both top-level and indented entries
             $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
+            if ($yaml === null) {
+                fwrite(STDERR, "Failed to normalize security sections in YAML (pattern 1)\n");
+                exit(1);
+            }
             $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
+            if ($yaml === null) {
+                fwrite(STDERR, "Failed to normalize security sections in YAML (pattern 2)\n");
+                exit(1);
+            }
 
             if (file_put_contents($this->specFile, $yaml) === false) {
                 fwrite(STDERR, "Failed to write OpenAPI spec: {$this->specFile}\n");
