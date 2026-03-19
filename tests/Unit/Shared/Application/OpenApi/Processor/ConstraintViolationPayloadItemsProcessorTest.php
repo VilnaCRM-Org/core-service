@@ -139,4 +139,23 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 
         $this->assertSame($openApi, $processor->process($openApi));
     }
+
+    public function testProcessSkipsNonConstraintViolationSchemas(): void
+    {
+        // Schema with key that does NOT start with "ConstraintViolation"
+        $otherSchema = ['type' => 'object'];
+        $constraintViolation = ['type' => 'object'];
+        $schemas = new ArrayObject([
+            'OtherSchema' => $otherSchema,
+            'ConstraintViolation' => $constraintViolation,
+        ]);
+        $components = new Components($schemas);
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
+
+        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $result = $processor->process($openApi);
+
+        // Should return original since ConstraintViolation has no violations property to update
+        $this->assertSame($openApi, $result);
+    }
 }
