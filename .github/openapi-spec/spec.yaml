@@ -668,7 +668,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -949,7 +949,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1259,7 +1259,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1692,7 +1692,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -1941,7 +1941,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2219,7 +2219,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2628,7 +2628,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -2877,7 +2877,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
@@ -3155,7 +3155,7 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/422
+                type: /errors/500
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
