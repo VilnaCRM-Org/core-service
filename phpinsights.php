@@ -22,6 +22,7 @@ return [
         'scripts/fix-openapi-spec.php',
         'scripts/validate-openapi-spec.sh',
         'src/Shared/Application/OpenApi/Processor',
+        'src/Shared/Application/OpenApi/Processor/OpenApiFixer.php',
     ],
     'add' => [],
     'remove' => [
