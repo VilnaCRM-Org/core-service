@@ -13,7 +13,11 @@ use ArrayObject;
  */
 final class UlidInterfaceSchemaFixer
 {
-    private const CUSTOMER_SCHEMAS = ['Customer.jsonld-output', 'CustomerType.jsonld-output'];
+    private const CUSTOMER_SCHEMAS = [
+        'Customer.jsonld-output',
+        'CustomerType.jsonld-output',
+        'CustomerStatus.jsonld-output',
+    ];
 
     public function process(OpenApi $openApi): OpenApi
     {
