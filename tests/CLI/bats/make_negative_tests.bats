@@ -1,5 +1,18 @@
 #!/usr/bin/env bats
 
+# TODO: Restore negative Make target tests
+# See issue: https://github.com/VilnaCRM-Org/core-service/issues/TBD
+#
+# Skipped tests that need fixture projects for proper testing:
+# - make check-security: Security vulnerability detection
+# - make infection: Mutation score threshold
+# - make psalm: Static analysis error detection
+# - make phpinsights: Code quality threshold detection
+# - phpunit: Test failure detection
+# - PHP CS Fixer: Code style violation detection
+# - make composer-validate: Invalid composer.json detection
+# - make behat: E2E test failure detection
+
 load 'bats-support/load'
 load 'bats-assert/load'
 

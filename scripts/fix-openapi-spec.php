@@ -2,105 +2,140 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../vendor/autoload.php';
+
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
+
 $specFile = '.github/openapi-spec/spec.yaml';
 
-$readSpec = static function (string $path): string {
-    $content = file_get_contents($path);
-    if ($content === false) {
-        fwrite(STDERR, "Failed to read OpenAPI spec: {$path}\n");
-        exit(1);
-    }
-
-    return $content;
-};
-
-$writeSpec = static function (string $path, string $content): void {
-    if (file_put_contents($path, $content) === false) {
-        fwrite(STDERR, "Failed to write OpenAPI spec: {$path}\n");
+$readSpec = static function (string $path): array {
+    try {
+        return Yaml::parseFile($path);
+    } catch (ParseException $e) {
+        fwrite(STDERR, "Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}\n");
         exit(1);
     }
 };
 
-// Fix 1: Change 'type: string' to '@type: string' in view examples
-$content = $readSpec($specFile);
-$content = str_replace(
-    "example: { '@id': string, type: string, first:",
-    "example: { '@id': string, '@type': string, first:",
-    $content
-);
-$writeSpec($specFile, $content);
+$writeSpec = static function (string $path, array $spec): void {
+    try {
+        $yaml = Yaml::dump($spec, 10, 2);
+        if (file_put_contents($path, $yaml) === false) {
+            fwrite(STDERR, "Failed to write OpenAPI spec: {$path}\n");
+            exit(1);
+        }
+    } catch (ParseException $e) {
+        fwrite(STDERR, "Failed to dump OpenAPI spec: {$e->getMessage()}\n");
+        exit(1);
+    }
+};
 
-// Fix 2: Add ulid property to UlidInterface.jsonld-output (idempotent)
-$content = $readSpec('.github/openapi-spec/spec.yaml');
-$lines = explode("\n", $content);
-$output = [];
-$inUlidInterface = false;
-$addedUlid = false;
-$ulidAlreadyExists = false;
-
-// First pass: check if ulid already exists in UlidInterface.jsonld-output
-foreach ($lines as $scanLine) {
-    $trimmed = trim($scanLine);
-    if ($trimmed === 'UlidInterface.jsonld-output:') {
-        $inUlidInterface = true;
-        continue;
+/**
+ * Recursively find and fix 'type: string' to '@type: string' in example objects
+ */
+function fixExampleTypeToAtType(array &$data): void
+{
+    if (!is_array($data)) {
+        return;
     }
 
-    if ($inUlidInterface && $trimmed === 'ulid:') {
-        $ulidAlreadyExists = true;
-        break;
+    // Check if this is an example object that needs fixing
+    if (isset($data['example']) && is_array($data['example'])) {
+        $example = $data['example'];
+        if (array_key_exists('type', $example) && !array_key_exists('@type', $example)) {
+            $data['example']['@type'] = $data['example']['type'];
+            unset($data['example']['type']);
+        }
     }
 
-    if ($inUlidInterface && preg_match('/^ {4}[A-Za-z0-9_.-]+:\s*$/', $scanLine) === 1) {
-        break;
-    }
-}
-
-$inUlidInterface = false;
-
-foreach ($lines as $line) {
-    $output[] = $line;
-
-    if (trim($line) === 'UlidInterface.jsonld-output:') {
-        $inUlidInterface = true;
-        continue;
-    }
-
-    if ($inUlidInterface
-        && ! $addedUlid
-        && ! $ulidAlreadyExists
-        && strpos($line, 'properties:') !== false
-    ) {
-        $output[] = '        ulid:';
-        $output[] = '          type: string';
-        $addedUlid = true;
-        continue;
-    }
-
-    if ($addedUlid && strpos($line, '@context') !== false) {
-        $inUlidInterface = false;
-    }
-}
-
-$content = implode("\n", $output);
-$writeSpec('.github/openapi-spec/spec.yaml', $content);
-
-// Fix 3: Change ulid $ref to type: string in Customer.jsonld-output and CustomerType.jsonld-output
-$content = $readSpec('.github/openapi-spec/spec.yaml');
-$lines = explode("\n", $content);
-$lineCount = max(0, count($lines) - 2);
-for ($i = 0; $i < $lineCount; $i++) {
-    $currentLine = trim($lines[$i]);
-    $nextLine = $lines[$i + 1];
-    $followingLine = trim($lines[$i + 2]);
-    $hasRef = strpos($nextLine, '$ref') !== false;
-    $hasUlidInterface = strpos($nextLine, 'UlidInterface') !== false;
-    if ($currentLine === 'ulid:' && $hasRef && $hasUlidInterface) {
-        // Check if this is the Customer ulid (followed by createdAt) or CustomerType ulid (followed by Error)
-        if ($followingLine === 'createdAt:' || $followingLine === 'Error:') {
-            $lines[$i + 1] = '          type: string';
+    // Recurse into nested arrays
+    foreach ($data as &$value) {
+        if (is_array($value)) {
+            fixExampleTypeToAtType($value);
         }
     }
 }
-$content = implode("\n", $lines);
-$writeSpec('.github/openapi-spec/spec.yaml', $content);
+
+/**
+ * Find UlidInterface.jsonld-output schema and idempotently add 'ulid' property
+ */
+function addUlidProperty(array &$components): void
+{
+    if (!isset($components['schemas']) || !is_array($components['schemas'])) {
+        return;
+    }
+
+    $schemas = &$components['schemas'];
+
+    // Check if UlidInterface.jsonld-output exists
+    if (!isset($schemas['UlidInterface.jsonld-output'])) {
+        return;
+    }
+
+    $ulidInterface = &$schemas['UlidInterface.jsonld-output'];
+
+    if (!isset($ulidInterface['properties']) || !is_array($ulidInterface['properties'])) {
+        $ulidInterface['properties'] = [];
+    }
+
+    // Add ulid property if it doesn't exist
+    if (!array_key_exists('ulid', $ulidInterface['properties'])) {
+        $ulidInterface['properties']['ulid'] = [
+            'type' => 'string',
+        ];
+    }
+}
+
+/**
+ * Find Customer.jsonld-output and CustomerType.jsonld-output schemas and change
+ * ulid $ref to type: string
+ */
+function fixUlidRefToType(array &$components): void
+{
+    if (!isset($components['schemas']) || !is_array($components['schemas'])) {
+        return;
+    }
+
+    $schemas = &$components['schemas'];
+
+    foreach (['Customer.jsonld-output', 'CustomerType.jsonld-output'] as $schemaName) {
+        if (!isset($schemas[$schemaName])) {
+            continue;
+        }
+
+        $schema = &$schemas[$schemaName];
+
+        if (!isset($schema['properties']) || !is_array($schema['properties'])) {
+            continue;
+        }
+
+        $properties = &$schema['properties'];
+
+        // Check if ulid property exists and has a $ref to UlidInterface
+        if (isset($properties['ulid']) && is_array($properties['ulid'])) {
+            if (isset($properties['ulid']['$ref']) && strpos($properties['ulid']['$ref'], 'UlidInterface') !== false) {
+                // Replace $ref with direct type: string
+                $properties['ulid'] = [
+                    'type' => 'string',
+                ];
+            }
+        }
+    }
+}
+
+// Main execution
+$spec = $readSpec($specFile);
+
+// Fix 1: Change 'type: string' to '@type: string' in view examples
+fixExampleTypeToAtType($spec);
+
+// Fix 2: Add ulid property to UlidInterface.jsonld-output (idempotent)
+if (isset($spec['components'])) {
+    addUlidProperty($spec['components']);
+
+    // Fix 3: Change ulid $ref to type: string in Customer and CustomerType schemas
+    fixUlidRefToType($spec['components']);
+}
+
+$writeSpec($specFile, $spec);
