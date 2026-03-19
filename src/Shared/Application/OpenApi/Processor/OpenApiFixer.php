@@ -239,7 +239,7 @@ final class OpenApiFixer
                     $problemJson = &$response['content']['application/problem+json'];
                     $responseExample = $problemJson['example'] ?? null;
                     $is422Error = is_array($responseExample)
-                        && ($responseExample['status'] ?? null) === 422;
+                        && (int) ($responseExample['status'] ?? 0) === 422;
                     if ($is422Error) {
                         // Fix the error type for validation errors
                         $exampleType = $responseExample['type'] ?? null;
