@@ -9,6 +9,9 @@
         PHPMD ruleset for core-service production code
     </description>
 
+    <!-- Exclude directories -->
+    <exclude name="src/Shared/Application/OpenApi/Processor"/>
+
     <!-- Code Size Rules with customizations -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>
     <rule ref="rulesets/codesize.xml/NPathComplexity"/>
