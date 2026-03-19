@@ -90,4 +90,24 @@ final class InitialsValidatorTest extends UnitTestCase
             $this->constraint
         );
     }
+
+    public function testInvalidConstraintType(): void
+    {
+        $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedTypeException::class);
+
+        $this->validator->validate(
+            $this->faker->firstName(),
+            $this->createMock(Constraint::class)
+        );
+    }
+
+    public function testNonStringValue(): void
+    {
+        $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedTypeException::class);
+
+        $this->validator->validate(
+            12345,
+            new Initials()
+        );
+    }
 }
