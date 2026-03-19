@@ -218,11 +218,16 @@ final class OpenApiFixer
                     }
 
                     // Check if this is a 422 response
-                    $responseExample = $response['content']['application/problem+json']['example'] ?? null;
-                    if (is_array($responseExample) && ($responseExample['status'] ?? null) === 422) {
+                    $content = $response['content'];
+                    $problemJson = $content['application/problem+json'] ?? null;
+                    $responseExample = $problemJson['example'] ?? null;
+                    $is422Error = is_array($responseExample)
+                        && ($responseExample['status'] ?? null) === 422;
+                    if ($is422Error) {
                         // Fix the error type for validation errors
-                        if (isset($responseExample['type']) && $responseExample['type'] === '/errors/500') {
-                            $response['content']['application/problem+json']['example']['type'] = '/errors/422';
+                        $exampleType = $responseExample['type'] ?? null;
+                        if ($exampleType === '/errors/500') {
+                            $problemJson['example']['type'] = '/errors/422';
                         }
                     }
                 }

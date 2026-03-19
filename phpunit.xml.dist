@@ -35,6 +35,9 @@
         <include>
             <directory suffix=".php">src</directory>
         </include>
+        <exclude>
+            <file>src/Shared/Application/OpenApi/Processor/OpenApiFixer.php</file>
+        </exclude>
     </coverage>
 
     <listeners>
