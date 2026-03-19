@@ -39,8 +39,6 @@ final class OpenApiFixer
     }
 
     /**
-     * @param string $path
-     *
      * @return array<string, mixed>
      */
     private function readSpec(string $path): array
