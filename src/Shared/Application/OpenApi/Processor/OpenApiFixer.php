@@ -10,6 +10,9 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * OpenAPI spec fixer - addresses JSON-LD @type issues in Hydra output
+ *
+ * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
+ * @phpstan-type SpecSchema array<string, SchemaValue>
  */
 final class OpenApiFixer
 {
@@ -45,7 +48,7 @@ final class OpenApiFixer
     }
 
     /**
-     * @return array<string, mixed>
+     * @return SpecSchema
      */
     private function readSpec(string $path): array
     {
@@ -58,7 +61,7 @@ final class OpenApiFixer
     }
 
     /**
-     * @param array<string, mixed> $spec
+     * @param SpecSchema $spec
      */
     private function writeSpec(array &$spec): void
     {
@@ -68,8 +71,9 @@ final class OpenApiFixer
 
             // Fix known empty-sequence fields: security: { } -> security: []
             // Also handle security: null -> security: []
-            $yaml = preg_replace('/^security: \{\s*\}$/m', 'security: []', $yaml);
-            $yaml = preg_replace('/^security: null$/m', 'security: []', $yaml);
+            // Handle both top-level and indented entries
+            $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
+            $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
 
             if (file_put_contents($this->specFile, $yaml) === false) {
                 fwrite(STDERR, "Failed to write OpenAPI spec: {$this->specFile}\n");
@@ -84,7 +88,7 @@ final class OpenApiFixer
     /**
      * Recursively find and fix 'type: string' to '@type: string' in JSON-LD example objects
      *
-     * @param array<string, mixed> $data
+     * @param SpecSchema $data
      */
     private function fixExampleTypeToAtType(array &$data): void
     {
@@ -122,7 +126,7 @@ final class OpenApiFixer
     /**
      * Find UlidInterface.jsonld-output schema and idempotently add 'ulid' property
      *
-     * @param array<string, mixed> $components
+     * @param SpecSchema $components
      */
     private function addUlidProperty(array &$components): void
     {
@@ -155,7 +159,7 @@ final class OpenApiFixer
      * Find Customer.jsonld-output and CustomerType.jsonld-output schemas and change
      * ulid $ref to type: string
      *
-     * @param array<string, mixed> $components
+     * @param SpecSchema $components
      */
     private function fixUlidRefToType(array &$components): void
     {
@@ -194,7 +198,7 @@ final class OpenApiFixer
     /**
      * Fix 422 validation error responses to use correct error type
      *
-     * @param array<string, mixed> $spec
+     * @param SpecSchema $spec
      */
     private function fix422ErrorType(array &$spec): void
     {
@@ -217,9 +221,12 @@ final class OpenApiFixer
                         continue;
                     }
 
-                    // Check if this is a 422 response
-                    $content = $response['content'];
-                    $problemJson = $content['application/problem+json'] ?? null;
+                    // Check if this is a 422 response - use references to persist changes
+                    if (!isset($response['content']['application/problem+json'])) {
+                        continue;
+                    }
+
+                    $problemJson = &$response['content']['application/problem+json'];
                     $responseExample = $problemJson['example'] ?? null;
                     $is422Error = is_array($responseExample)
                         && ($responseExample['status'] ?? null) === 422;
@@ -238,7 +245,7 @@ final class OpenApiFixer
     /**
      * Fix 204 responses to not declare content (no body on success)
      *
-     * @param array<string, mixed> $spec
+     * @param SpecSchema $spec
      */
     private function fix204Responses(array &$spec): void
     {
