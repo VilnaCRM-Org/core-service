@@ -32,7 +32,7 @@ final class CustomerUlidRefReplacer
     }
 
     /**
-     * @return array<string, array|bool|float|int|string|null>
+     * @return array<int|string, mixed>
      */
     private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {

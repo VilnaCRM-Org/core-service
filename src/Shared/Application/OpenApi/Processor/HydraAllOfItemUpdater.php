@@ -19,13 +19,19 @@ final class HydraAllOfItemUpdater
     public function update(ArrayObject|array $item): ?ArrayObject
     {
         $normalizedItem = SchemaNormalizer::normalize($item);
-        $normalizedItem += ['properties' => null];
+        if (! array_key_exists('properties', $normalizedItem)) {
+            $normalizedItem['properties'] = null;
+        }
         $properties = SchemaNormalizer::normalize($normalizedItem['properties']);
 
-        $properties += ['view' => null];
+        if (! array_key_exists('view', $properties)) {
+            $properties['view'] = null;
+        }
         $viewSchema = SchemaNormalizer::normalize($properties['view']);
 
-        $viewSchema += ['example' => null];
+        if (! array_key_exists('example', $viewSchema)) {
+            $viewSchema['example'] = null;
+        }
         $example = $this->exampleUpdater->update(
             SchemaNormalizer::normalize($viewSchema['example'])
         );

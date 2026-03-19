@@ -4,10 +4,7 @@ load 'bats-support/load'
 load 'bats-assert/load'
 
 @test "make aws-load-tests works correctly" {
-  if [ -n "${CI:-}" ]; then
-    skip "Requires AWS CLI/localstack - skipped in CI environment"
-  fi
-  if ! command -v aws &> /dev/null; then
+  if ! command -v aws >/dev/null 2>&1; then
     skip "AWS CLI not available - skipped"
   fi
   run make aws-load-tests LOCAL_MODE_ENV=true
