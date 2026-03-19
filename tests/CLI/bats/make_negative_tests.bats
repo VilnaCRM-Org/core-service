@@ -1,8 +1,7 @@
 #!/usr/bin/env bats
 
-# TODO: Create issue in project tracker to restore negative Make target tests.
-#       Issue should include: expected fixture details, CI constraints, and target estimate.
-#       Reference: https://github.com/VilnaCRM-Org/core-service/issues/new
+# TODO: Track restoration of negative Make target tests in issue #142
+#       See: https://github.com/VilnaCRM-Org/core-service/issues/142
 #
 # Skipped tests checklist (restore each with proper fixture):
 # [ ] make check-security: Security vulnerability detection
