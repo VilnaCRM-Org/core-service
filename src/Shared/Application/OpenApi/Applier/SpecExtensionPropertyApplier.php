@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Applier;
 
 use ApiPlatform\OpenApi\OpenApi;
+use ArrayObject;
 
 use function is_array;
 
