@@ -66,7 +66,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         );
         $example = $viewSchema['example'];
 
-        $this->assertArrayHasKey('@type', $example);
+        $this->assertSame('string', $example['@type']);
         $this->assertArrayNotHasKey('type', $example);
     }
 
@@ -155,7 +155,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         );
         $example = $viewSchema['example'];
 
-        $this->assertArrayHasKey('@type', $example);
+        $this->assertSame('Collection', $example['@type']);
         $this->assertArrayNotHasKey('type', $example);
     }
 
@@ -198,8 +198,8 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         );
         $example = $viewSchema['example'];
 
-        $this->assertArrayHasKey('@type', $example);
-        $this->assertArrayHasKey('type', $example);
+        $this->assertSame('Collection', $example['@type']);
+        $this->assertSame('Collection', $example['type']);
     }
 
     private function createProcessor(): OpenApiSchemaFixesProcessor

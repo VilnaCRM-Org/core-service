@@ -137,7 +137,14 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
 	else \
 		coverage_output=.coverage_value.txt; \
+		rm -f $$coverage_output; \
 		$(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; $$out = $$argv[2] ?? null; if ($$file === null || $$out === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { $$coverage = "0"; } else { $$coverage = sprintf("%.2f", ($$covered / $$statements) * 100); } file_put_contents($$out, $$coverage);' -- $$coverage_file $$coverage_output; \
+		parse_status=$$?; \
+		if [ $$parse_status -ne 0 ]; then \
+			rm -f $$coverage_output; \
+			echo "❌ ERROR: Could not parse coverage XML"; \
+			exit $$parse_status; \
+		fi; \
 		waits=0; \
 		while [ ! -s $$coverage_output ] && [ $$waits -lt 50 ]; do \
 			waits=$$((waits + 1)); \
