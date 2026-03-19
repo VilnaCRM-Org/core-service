@@ -22,7 +22,7 @@ final class OpenApiFixer
 
     public function run(): void
     {
-        $spec = $this->readSpec();
+        $spec = $this->readSpec($this->specFile);
 
         // Fix 1: Change 'type: string' to '@type: string' in view examples
         $this->fixExampleTypeToAtType($spec);
