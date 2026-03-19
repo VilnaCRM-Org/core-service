@@ -7,6 +7,7 @@ namespace App\Shared\Application\Validator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InitialsValidator extends ConstraintValidator
@@ -27,7 +28,7 @@ final class InitialsValidator extends ConstraintValidator
         }
 
         if (!is_string($value)) {
-            throw new UnexpectedTypeException($value, 'string');
+            throw new UnexpectedValueException($value, 'string');
         }
 
         if ($this->isOnlyWhitespace($value)) {
