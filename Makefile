@@ -155,7 +155,7 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 	fi; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
-		if [ "$$coverage" != "100.00" ]; then \
+		if ! echo "$$coverage 100" | awk '{if ($$1 != $$2) exit 1;}'; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
