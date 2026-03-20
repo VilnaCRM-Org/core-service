@@ -80,18 +80,18 @@ final class OpenApiFixer
             // Handle both top-level and indented entries
             $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 1)');
+                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 1)'); // @codeCoverageIgnore
             }
             $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 2)');
+                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 2)'); // @codeCoverageIgnore
             }
 
             if (file_put_contents($this->specFile, $yaml) === false) {
                 throw new \RuntimeException("Failed to write OpenAPI spec: {$this->specFile}");
             }
-        } catch (DumpException $e) {
-            throw new \RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e);
+        } catch (DumpException $e) { // @codeCoverageIgnore
+            throw new \RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e); // @codeCoverageIgnore
         }
     }
 

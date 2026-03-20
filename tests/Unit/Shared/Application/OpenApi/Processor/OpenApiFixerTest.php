@@ -28,16 +28,6 @@ final class OpenApiFixerTest extends UnitTestCase
         $this->recursiveDelete($this->tempDir);
     }
 
-    private function recursiveDelete(string $path): void
-    {
-        if (is_dir($path)) {
-            array_map(fn ($file) => $this->recursiveDelete($file), glob($path . '/*'));
-            rmdir($path);
-        } elseif (is_file($path)) {
-            unlink($path);
-        }
-    }
-
     public function testFixExampleTypeToAtTypeWithJsonLdMarker(): void
     {
         // Test: JSON-LD marker exists, @type already set, type also set - should remove type, keep @type
@@ -111,6 +101,44 @@ final class OpenApiFixerTest extends UnitTestCase
 
         $this->assertArrayHasKey('@type', $example);
         $this->assertSame('Collection', $example['@type']);
+        $this->assertArrayNotHasKey('type', $example);
+    }
+
+    public function testFixExampleTypeToAtTypeWithAtIdMarkerWithoutAtType(): void
+    {
+        // Test: Has @id marker (JSON-LD), has plain type, but NO @type - should transform type to @type
+        $spec = [
+            'paths' => [
+                '/test' => [
+                    'get' => [
+                        'responses' => [
+                            '200' => [
+                                'content' => [
+                                    'application/ld+json' => [
+                                        'example' => [
+                                            '@id' => '/api/customers/123',
+                                            'name' => 'test',
+                                            'type' => 'Customer',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $example = $result['paths']['/test']['get']['responses']['200']['content']['application/ld+json']['example'];
+
+        // Should transform type to @type
+        $this->assertArrayHasKey('@type', $example);
+        $this->assertSame('Customer', $example['@type']);
         $this->assertArrayNotHasKey('type', $example);
     }
 
@@ -220,6 +248,47 @@ final class OpenApiFixerTest extends UnitTestCase
         $result = $this->readSpecFile();
         // Should not throw and should not add anything
         $this->assertArrayNotHasKey('ulid', $result['components']['schemas']['Customer.jsonld-output']['properties'] ?? []);
+    }
+
+    public function testAddUlidPropertyNoSchemasKey(): void
+    {
+        // Test case: components exists but schemas is not an array
+        $spec = [
+            'components' => [
+                'schemas' => 'not-an-array',
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        // Should not throw
+        $this->assertSame('not-an-array', $result['components']['schemas']);
+    }
+
+    public function testAddUlidPropertyWithNonArrayProperties(): void
+    {
+        // Test case: UlidInterface.jsonld-output exists but properties is not an array
+        $spec = [
+            'components' => [
+                'schemas' => [
+                    'UlidInterface.jsonld-output' => [
+                        'type' => 'object',
+                        'properties' => 'not-an-array',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        // Should initialize properties as empty array
+        $this->assertIsArray($result['components']['schemas']['UlidInterface.jsonld-output']['properties']);
     }
 
     public function testFixUlidRefToType(): void
@@ -466,6 +535,99 @@ final class OpenApiFixerTest extends UnitTestCase
         // The YAML should have security as an empty array
         $content = file_get_contents($this->specFile);
         $this->assertStringContainsString('security: []', $content);
+    }
+
+    public function testRunThrowsExceptionOnInvalidYaml(): void
+    {
+        // Write invalid YAML to trigger ParseException in readSpec
+        file_put_contents($this->specFile, 'invalid: yaml: content:');
+
+        $fixer = new OpenApiFixer($this->specFile);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Failed to parse OpenAPI spec');
+
+        $fixer->run();
+    }
+
+    public function testFix422ErrorTypeWithNonArrayPath(): void
+    {
+        // Test case: path item is not an array (edge case) - should skip gracefully
+        $spec = [
+            'paths' => [
+                '/test' => 'not-an-array', // This should be skipped
+                '/other' => [
+                    'post' => [
+                        'responses' => [
+                            '422' => [
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                            'detail' => 'Validation failed',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        // Should not throw and should process the valid path
+        $result = $this->readSpecFile();
+        $this->assertSame('/errors/422', $result['paths']['/other']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+    }
+
+    public function testFix422ErrorTypeWithNonArrayMethod(): void
+    {
+        // Test case: method is not an array - should skip gracefully
+        $spec = [
+            'paths' => [
+                '/test' => [
+                    'get' => 'not-an-array', // This should be skipped
+                    'post' => [
+                        'responses' => [
+                            '422' => [
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                            'detail' => 'Validation failed',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        // Should not throw and should process the valid method
+        $result = $this->readSpecFile();
+        $this->assertSame('/errors/422', $result['paths']['/test']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+    }
+
+    private function recursiveDelete(string $path): void
+    {
+        if (is_dir($path)) {
+            array_map(fn ($file) => $this->recursiveDelete($file), glob($path . '/*'));
+            rmdir($path);
+        } elseif (is_file($path)) {
+            unlink($path);
+        }
     }
 
     private function writeSpecFile(array $spec): void
