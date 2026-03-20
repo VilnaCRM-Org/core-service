@@ -25,6 +25,7 @@ final class HydraSchemaNormalizer
             $normalized['allOf'] = null;
         }
         $schemas[self::HYDRA_COLLECTION_SCHEMA] = $normalized;
+        $schemas['allOf'] = $normalized['allOf'];
 
         return $schemas;
     }
