@@ -11,7 +11,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-mbstring": "*",
-    "ext-mongodb": "^2.1",
+    "ext-mongodb": "2.1.8",
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "^4.0",
@@ -122,7 +122,7 @@
     "symfony/browser-kit": "7.2.*",
     "symfony/css-selector": "7.2.*",
     "symfony/mime": "^7.2",
-    "symfony/phpunit-bridge": "8.0.*",
+    "symfony/phpunit-bridge": "7.1.*",
     "twentytwo-labs/behat-open-api": "^1.0",
     "vimeo/psalm": "*",
     "weirdan/doctrine-psalm-plugin": "^2.5"
