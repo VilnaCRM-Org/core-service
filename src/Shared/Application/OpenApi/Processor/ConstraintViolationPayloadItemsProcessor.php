@@ -14,22 +14,44 @@ final class ConstraintViolationPayloadItemsProcessor
     public function process(OpenApi $openApi): OpenApi
     {
         $components = $openApi->getComponents();
-        $schemas = $components->getSchemas();
+        $schemas = $this->normalizeSchemas($components->getSchemas());
 
-        if ($schemas instanceof ArrayObject) {
-            $schemas = $schemas->getArrayCopy();
+        $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
+
+        if (!$changed) {
+            return $openApi;
         }
 
-        $schemas ??= [];
+        return $openApi->withComponents($components->withSchemas(new ArrayObject($schemas)));
+    }
 
-        $changed = false;
+    /**
+     * @param array<string, mixed>|ArrayObject $schemas
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeSchemas(array|ArrayObject $schemas): array
+    {
+        if ($schemas instanceof ArrayObject) {
+            return $schemas->getArrayCopy();
+        }
+
+        return $schemas ?? [];
+    }
+
+    /**
+     * @param array<string, mixed> $schemas
+     *
+     * @return array<string, mixed>
+     */
+    private function updateConstraintViolationSchemas(array $schemas, bool &$changed): array
+    {
         foreach ($schemas as $key => $schema) {
             if (!str_starts_with($key, self::SCHEMA_KEY_PREFIX)) {
                 continue;
             }
 
-            $normalized = SchemaNormalizer::normalize($schema);
-            $updated = ConstraintViolationPayloadItemsUpdater::update($normalized);
+            $updated = $this->updateSchema($schema);
             if ($updated === null) {
                 continue;
             }
@@ -38,10 +60,18 @@ final class ConstraintViolationPayloadItemsProcessor
             $changed = true;
         }
 
-        if (!$changed) {
-            return $openApi;
-        }
+        return $schemas;
+    }
 
-        return $openApi->withComponents($components->withSchemas(new ArrayObject($schemas)));
+    /**
+     * @param array<string, mixed>|null $schema
+     *
+     * @return array<string, mixed>|null
+     */
+    private function updateSchema(?array $schema): ?array
+    {
+        $normalized = SchemaNormalizer::normalize($schema);
+
+        return ConstraintViolationPayloadItemsUpdater::update($normalized);
     }
 }

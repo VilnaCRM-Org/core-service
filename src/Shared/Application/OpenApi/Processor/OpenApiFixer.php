@@ -227,42 +227,71 @@ final class OpenApiFixer
         }
 
         foreach ($spec['paths'] as &$path) {
-            // @infection-ignore-line Skip is behavior-neutral
-            if (!is_array($path)) {
-                continue;
-            }
+            $this->processPathFor422Errors($path);
+        }
+    }
 
-            foreach ($path as &$methodData) {
-                // @infection-ignore-line Skip is behavior-neutral
-                if (!is_array($methodData) || !isset($methodData['responses'])) {
-                    continue;
-                }
+    /**
+     * Process a single path item for 422 error fixes
+     *
+     * @param array $path
+     */
+    private function processPathFor422Errors(array &$path): void
+    {
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!is_array($path)) {
+            return;
+        }
 
-                foreach ($methodData['responses'] as &$response) {
-                    // @infection-ignore-line Skip is behavior-neutral
-                    if (!is_array($response) || !isset($response['content'])) {
-                        continue;
-                    }
+        foreach ($path as &$methodData) {
+            $this->processMethodFor422Errors($methodData);
+        }
+    }
 
-                    // Check if this is a 422 response - use references to persist changes
-                    // @infection-ignore-line Skip is behavior-neutral
-                    if (!isset($response['content']['application/problem+json'])) {
-                        continue;
-                    }
+    /**
+     * Process a single method for 422 error fixes
+     *
+     * @param array $methodData
+     */
+    private function processMethodFor422Errors(array &$methodData): void
+    {
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!is_array($methodData) || !isset($methodData['responses'])) {
+            return;
+        }
 
-                    $problemJson = &$response['content']['application/problem+json'];
-                    $responseExample = $problemJson['example'] ?? null;
-                    // @infection-ignore-line Type cast is behavior-neutral
-                    $is422Error = is_array($responseExample)
-                        && (int) ($responseExample['status'] ?? 0) === 422;
-                    if ($is422Error) {
-                        // Fix the error type for validation errors
-                        $exampleType = $responseExample['type'] ?? null;
-                        if ($exampleType === '/errors/500') {
-                            $problemJson['example']['type'] = '/errors/422';
-                        }
-                    }
-                }
+        foreach ($methodData['responses'] as &$response) {
+            $this->processResponseFor422Errors($response);
+        }
+    }
+
+    /**
+     * Process a single response for 422 error fixes
+     *
+     * @param array $response
+     */
+    private function processResponseFor422Errors(array &$response): void
+    {
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!is_array($response) || !isset($response['content'])) {
+            return;
+        }
+
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!isset($response['content']['application/problem+json'])) {
+            return;
+        }
+
+        $problemJson = &$response['content']['application/problem+json'];
+        $responseExample = $problemJson['example'] ?? null;
+        // @infection-ignore-line Type cast is behavior-neutral
+        $is422Error = is_array($responseExample)
+            && (int) ($responseExample['status'] ?? 0) === 422;
+        if ($is422Error) {
+            // Fix the error type for validation errors
+            $exampleType = $responseExample['type'] ?? null;
+            if ($exampleType === '/errors/500') {
+                $problemJson['example']['type'] = '/errors/422';
             }
         }
     }
@@ -280,28 +309,58 @@ final class OpenApiFixer
         }
 
         foreach ($spec['paths'] as &$path) {
-            // @infection-ignore-line Skip is behavior-neutral
-            if (!is_array($path)) {
-                continue;
-            }
-
-            foreach ($path as &$methodData) {
-                // @infection-ignore-line Skip is behavior-neutral
-                if (!is_array($methodData) || !isset($methodData['responses'])) {
-                    continue;
-                }
-
-                foreach ($methodData['responses'] as $statusCode => &$response) {
-                    // Only process 204 responses (handle both string and integer keys)
-                    // @infection-ignore-line Skip is behavior-neutral
-                    if (!in_array($statusCode, ['204', 204], true) || !is_array($response)) {
-                        continue;
-                    }
-
-                    // Remove content section for 204 responses
-                    unset($response['content']);
-                }
-            }
+            $this->processPathFor204Responses($path);
         }
+    }
+
+    /**
+     * Process a single path item for 204 response fixes
+     *
+     * @param array $path
+     */
+    private function processPathFor204Responses(array &$path): void
+    {
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!is_array($path)) {
+            return;
+        }
+
+        foreach ($path as &$methodData) {
+            $this->processMethodFor204Responses($methodData);
+        }
+    }
+
+    /**
+     * Process a single method for 204 response fixes
+     *
+     * @param array $methodData
+     */
+    private function processMethodFor204Responses(array &$methodData): void
+    {
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!is_array($methodData) || !isset($methodData['responses'])) {
+            return;
+        }
+
+        foreach ($methodData['responses'] as $statusCode => &$response) {
+            $this->processResponseFor204($statusCode, $response);
+        }
+    }
+
+    /**
+     * Process a single response for 204
+     *
+     * @param array $response
+     */
+    private function processResponseFor204(string|int $statusCode, array &$response): void
+    {
+        // Only process 204 responses (handle both string and integer keys)
+        // @infection-ignore-line Skip is behavior-neutral
+        if (!in_array($statusCode, ['204', 204], true) || !is_array($response)) {
+            return;
+        }
+
+        // Remove content section for 204 responses
+        unset($response['content']);
     }
 }

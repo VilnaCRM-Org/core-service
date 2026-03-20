@@ -19,22 +19,10 @@ final class HydraAllOfItemUpdater
     public function update(ArrayObject|array $item): ?ArrayObject
     {
         $normalizedItem = SchemaNormalizer::normalize($item);
-        if (! array_key_exists('properties', $normalizedItem)) {
-            $normalizedItem['properties'] = null;
-        }
-        $properties = SchemaNormalizer::normalize($normalizedItem['properties']);
+        $properties = $this->extractAndNormalizeProperties($normalizedItem);
+        $viewSchema = $this->extractAndNormalizeView($properties);
+        $example = $this->extractAndUpdateExample($viewSchema);
 
-        if (! array_key_exists('view', $properties)) {
-            $properties['view'] = null;
-        }
-        $viewSchema = SchemaNormalizer::normalize($properties['view']);
-
-        if (! array_key_exists('example', $viewSchema)) {
-            $viewSchema['example'] = null;
-        }
-        $example = $this->exampleUpdater->update(
-            SchemaNormalizer::normalize($viewSchema['example'])
-        );
         if ($example === null) {
             return null;
         }
@@ -44,5 +32,34 @@ final class HydraAllOfItemUpdater
         $normalizedItem['properties'] = $properties;
 
         return new ArrayObject($normalizedItem);
+    }
+
+    private function extractAndNormalizeProperties(array $normalizedItem): array
+    {
+        if (! array_key_exists('properties', $normalizedItem)) {
+            $normalizedItem['properties'] = null;
+        }
+
+        return SchemaNormalizer::normalize($normalizedItem['properties']);
+    }
+
+    private function extractAndNormalizeView(array $properties): array
+    {
+        if (! array_key_exists('view', $properties)) {
+            $properties['view'] = null;
+        }
+
+        return SchemaNormalizer::normalize($properties['view']);
+    }
+
+    private function extractAndUpdateExample(array $viewSchema): ?array
+    {
+        if (! array_key_exists('example', $viewSchema)) {
+            $viewSchema['example'] = null;
+        }
+
+        return $this->exampleUpdater->update(
+            SchemaNormalizer::normalize($viewSchema['example'])
+        );
     }
 }
