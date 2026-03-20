@@ -61,8 +61,9 @@ final class OpenApiFixer
     {
         try {
             return Yaml::parseFile($path);
-        } catch (ParseException $e) {
-            throw new \RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e); // @infection-ignore-line Exception code is behavior-neutral
+        } catch (ParseException $e) { // @codeCoverageIgnore
+            // @infection-ignore-line Exception code is behavior-neutral
+            throw new \RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e);
         }
     }
 

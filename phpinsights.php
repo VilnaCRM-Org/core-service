@@ -39,6 +39,9 @@ return [
                 // Doctrine ODM requires mixed $id in find() method signature
                 'src/Core/Customer/Domain/Repository/CustomerRepositoryInterface',
                 'src/Core/Customer/Infrastructure/Repository/CachedCustomerRepository',
+                // OpenAPI processors need mixed return types for schema normalization
+                'src/Shared/Application/OpenApi/Processor/CustomerUlidRefReplacer',
+                'src/Shared/Application/OpenApi/Processor/SchemaNormalizer',
             ],
         ],
         ParameterTypeHintSniff::class => [
@@ -49,6 +52,8 @@ return [
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
+                // OpenApiFixer.php has long lines due to error messages and @infection-ignore-line annotations
+                'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
             ],
             'ignoreComments' => true,
             'lineLimit' => 100,
