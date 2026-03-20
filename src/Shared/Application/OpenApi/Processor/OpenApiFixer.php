@@ -234,9 +234,9 @@ final class OpenApiFixer
     /**
      * Process a single path item for 422 error fixes
      *
-     * @param array $path
+     * @param array|string|null $path
      */
-    private function processPathFor422Errors(array &$path): void
+    private function processPathFor422Errors(array|string|null &$path): void
     {
         // @infection-ignore-line Skip is behavior-neutral
         if (!is_array($path)) {
@@ -251,9 +251,9 @@ final class OpenApiFixer
     /**
      * Process a single method for 422 error fixes
      *
-     * @param array $methodData
+     * @param array|string|null $methodData
      */
-    private function processMethodFor422Errors(array &$methodData): void
+    private function processMethodFor422Errors(array|string|null &$methodData): void
     {
         // @infection-ignore-line Skip is behavior-neutral
         if (!is_array($methodData) || !isset($methodData['responses'])) {
@@ -316,9 +316,9 @@ final class OpenApiFixer
     /**
      * Process a single path item for 204 response fixes
      *
-     * @param array $path
+     * @param array|string|null $path
      */
-    private function processPathFor204Responses(array &$path): void
+    private function processPathFor204Responses(array|string|null &$path): void
     {
         // @infection-ignore-line Skip is behavior-neutral
         if (!is_array($path)) {
@@ -333,9 +333,9 @@ final class OpenApiFixer
     /**
      * Process a single method for 204 response fixes
      *
-     * @param array $methodData
+     * @param array|string|null $methodData
      */
-    private function processMethodFor204Responses(array &$methodData): void
+    private function processMethodFor204Responses(array|string|null &$methodData): void
     {
         // @infection-ignore-line Skip is behavior-neutral
         if (!is_array($methodData) || !isset($methodData['responses'])) {

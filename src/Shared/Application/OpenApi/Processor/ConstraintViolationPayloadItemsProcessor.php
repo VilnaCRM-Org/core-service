@@ -16,6 +16,11 @@ final class ConstraintViolationPayloadItemsProcessor
         $components = $openApi->getComponents();
         $schemas = $this->normalizeSchemas($components->getSchemas());
 
+        if ($schemas === []) {
+            return $openApi;
+        }
+
+        $changed = false;
         $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
 
         if (!$changed) {
@@ -26,17 +31,17 @@ final class ConstraintViolationPayloadItemsProcessor
     }
 
     /**
-     * @param array<string, mixed>|ArrayObject $schemas
+     * @param ArrayObject|null $schemas
      *
      * @return array<string, mixed>
      */
-    private function normalizeSchemas(array|ArrayObject $schemas): array
+    private function normalizeSchemas(?ArrayObject $schemas): array
     {
-        if ($schemas instanceof ArrayObject) {
-            return $schemas->getArrayCopy();
+        if ($schemas === null) {
+            return [];
         }
 
-        return $schemas ?? [];
+        return $schemas->getArrayCopy();
     }
 
     /**
@@ -51,7 +56,10 @@ final class ConstraintViolationPayloadItemsProcessor
                 continue;
             }
 
-            $updated = $this->updateSchema($schema);
+            // Convert ArrayObject to array if needed
+            $schemaArray = $schema instanceof ArrayObject ? $schema->getArrayCopy() : $schema;
+
+            $updated = $this->updateSchema($schemaArray);
             if ($updated === null) {
                 continue;
             }
