@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use RuntimeException;
 use Symfony\Component\Yaml\Exception\DumpException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -18,6 +19,9 @@ use Symfony\Component\Yaml\Yaml;
  * @phpstan-type SpecSchema array<string, SchemaValue>
  *
  * @infection-ignore-all Control flow mutations in utility methods are behavior-neutral
+ *
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 final class OpenApiFixer
 {
@@ -55,7 +59,7 @@ final class OpenApiFixer
     /**
      * @return SpecSchema
      *
-     * @throws \RuntimeException when spec file cannot be parsed
+     * @throws RuntimeException when spec file cannot be parsed
      */
     private function readSpec(string $path): array
     {
@@ -63,14 +67,14 @@ final class OpenApiFixer
             return Yaml::parseFile($path);
         } catch (ParseException $e) { // @codeCoverageIgnore
             // @infection-ignore-line Exception code is behavior-neutral
-            throw new \RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e);
+            throw new RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e);
         }
     }
 
     /**
      * @param SpecSchema $spec
      *
-     * @throws \RuntimeException when spec cannot be written
+     * @throws RuntimeException when spec cannot be written
      */
     private function writeSpec(array $spec): void
     {
@@ -84,19 +88,19 @@ final class OpenApiFixer
             // Handle both top-level and indented entries
             $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 1)'); // @codeCoverageIgnore
+                throw new RuntimeException('Failed to normalize security sections in YAML (pattern 1)'); // @codeCoverageIgnore
             }
             $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
             if ($yaml === null) {
-                throw new \RuntimeException('Failed to normalize security sections in YAML (pattern 2)'); // @codeCoverageIgnore
+                throw new RuntimeException('Failed to normalize security sections in YAML (pattern 2)'); // @codeCoverageIgnore
             }
 
             if (file_put_contents($this->specFile, $yaml) === false) { // @infection-ignore-line FalseValue is behavior-neutral
-                throw new \RuntimeException("Failed to write OpenAPI spec: {$this->specFile}"); // @infection-ignore-line Throw is behavior-neutral
+                throw new RuntimeException("Failed to write OpenAPI spec: {$this->specFile}"); // @infection-ignore-line Throw is behavior-neutral
             }
         } catch (DumpException $e) { // @codeCoverageIgnore
             // @infection-ignore-line Exception code is behavior-neutral
-            throw new \RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e); // @codeCoverageIgnore
+            throw new RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e); // @codeCoverageIgnore
         }
     }
 
