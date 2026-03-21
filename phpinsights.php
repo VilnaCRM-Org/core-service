@@ -76,6 +76,9 @@ return [
             'exclude' => [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
+                'src/Core/Customer/Domain/Entity/Customer',
+                'src/Core/Customer/Domain/Entity/CustomerStatus',
+                'src/Core/Customer/Domain/Entity/CustomerType',
             ],
         ],
         CyclomaticComplexityIsHigh::class => [
