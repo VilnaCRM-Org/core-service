@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Validation;
 
 final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
 {
-    private const string NAMESPACE = 'CCore/BusinessMetrics';
+    private const NAMESPACE = 'CCore/BusinessMetrics';
 
     /** @var array<string, mixed>|null */
     private ?array $capturedContext = null;

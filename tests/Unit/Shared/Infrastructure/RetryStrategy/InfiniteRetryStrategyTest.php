@@ -11,7 +11,7 @@ use Symfony\Component\Messenger\Envelope;
 
 final class InfiniteRetryStrategyTest extends UnitTestCase
 {
-    private const int DELAY_MS = 60000;
+    private const DELAY_MS = 60000;
 
     private InfiniteRetryStrategy $retryStrategy;
 
