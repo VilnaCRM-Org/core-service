@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\DTO;
 
-final readonly class TypeCreate
+final class TypeCreate
 {
+    public ?string $value = null;
+
     public function __construct(
-        public ?string $value = null,
+        ?string $value = null
     ) {
+        $this->value = $value;
     }
 }

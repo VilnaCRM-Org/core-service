@@ -114,7 +114,7 @@ final class OpenApiFixer
 
             if ($hasJsonLdMarker || $hasTypeMarker) {
                 // If type exists without @type, move type to @type
-                if ($hasPlainType && !$hasTypeMarker) {
+                if ($hasPlainType && ! $hasTypeMarker) {
                     $data['example']['@type'] = $data['example']['type'];
                 }
 
@@ -140,25 +140,25 @@ final class OpenApiFixer
     private function addUlidProperty(array &$components): void
     {
         // @infection-ignore-next-line guard prevents invalid schema access
-        if (!isset($components['schemas']) || !is_array($components['schemas'])) {
+        if (! isset($components['schemas']) || ! is_array($components['schemas'])) {
             return;
         }
 
         $schemas = &$components['schemas'];
 
         // Check if UlidInterface.jsonld-output exists
-        if (!isset($schemas['UlidInterface.jsonld-output'])) {
+        if (! isset($schemas['UlidInterface.jsonld-output'])) {
             return;
         }
 
         $ulidInterface = &$schemas['UlidInterface.jsonld-output'];
 
-        if (!isset($ulidInterface['properties']) || !is_array($ulidInterface['properties'])) {
+        if (! isset($ulidInterface['properties']) || ! is_array($ulidInterface['properties'])) {
             $ulidInterface['properties'] = [];
         }
 
         // Add ulid property if it doesn't exist
-        if (!array_key_exists('ulid', $ulidInterface['properties'])) {
+        if (! array_key_exists('ulid', $ulidInterface['properties'])) {
             $ulidInterface['properties']['ulid'] = [
                 'type' => 'string',
             ];
@@ -174,7 +174,7 @@ final class OpenApiFixer
     private function fixUlidRefToType(array &$components): void
     {
         // @infection-ignore-next-line guard prevents invalid schema access
-        if (!isset($components['schemas']) || !is_array($components['schemas'])) {
+        if (! isset($components['schemas']) || ! is_array($components['schemas'])) {
             return;
         }
 
@@ -182,14 +182,14 @@ final class OpenApiFixer
 
         foreach (['Customer.jsonld-output', 'CustomerType.jsonld-output'] as $schemaName) {
             // @infection-ignore-next-line loop should skip missing schemas
-            if (!isset($schemas[$schemaName])) {
+            if (! isset($schemas[$schemaName])) {
                 continue;
             }
 
             $schema = &$schemas[$schemaName];
 
             // @infection-ignore-next-line loop should skip invalid properties
-            if (!isset($schema['properties']) || !is_array($schema['properties'])) {
+            if (! isset($schema['properties']) || ! is_array($schema['properties'])) {
                 continue;
             }
 
@@ -217,7 +217,7 @@ final class OpenApiFixer
     private function fix422ErrorType(array &$spec): void
     {
         // @infection-ignore-line Early return is behavior-neutral
-        if (!isset($spec['paths']) || !is_array($spec['paths'])) {
+        if (! isset($spec['paths']) || ! is_array($spec['paths'])) {
             return;
         }
 
@@ -228,13 +228,11 @@ final class OpenApiFixer
 
     /**
      * Process a single path item for 422 error fixes
-     *
-     * @param array|string|null $path
      */
     private function processPathFor422Errors(array|string|null &$path): void
     {
         // @infection-ignore-line Skip is behavior-neutral
-        if (!is_array($path)) {
+        if (! is_array($path)) {
             return;
         }
 
@@ -245,13 +243,11 @@ final class OpenApiFixer
 
     /**
      * Process a single method for 422 error fixes
-     *
-     * @param array|string|null $methodData
      */
     private function processMethodFor422Errors(array|string|null &$methodData): void
     {
         // @infection-ignore-next-line guard prevents iterating invalid responses
-        if (!is_array($methodData) || !isset($methodData['responses']) || !is_array($methodData['responses'])) {
+        if (! is_array($methodData) || ! isset($methodData['responses']) || ! is_array($methodData['responses'])) {
             return;
         }
 
@@ -264,17 +260,15 @@ final class OpenApiFixer
 
     /**
      * Process a single response for 422 error fixes
-     *
-     * @param array $response
      */
     private function processResponseFor422Errors(array &$response): void
     {
-        if (!isset($response['content'])) {
+        if (! isset($response['content'])) {
             return;
         }
 
         // @infection-ignore-line Skip is behavior-neutral
-        if (!isset($response['content']['application/problem+json'])) {
+        if (! isset($response['content']['application/problem+json'])) {
             return;
         }
 
@@ -300,7 +294,7 @@ final class OpenApiFixer
     private function fix204Responses(array &$spec): void
     {
         // @infection-ignore-line Early return is behavior-neutral
-        if (!isset($spec['paths']) || !is_array($spec['paths'])) {
+        if (! isset($spec['paths']) || ! is_array($spec['paths'])) {
             return;
         }
 
@@ -311,13 +305,11 @@ final class OpenApiFixer
 
     /**
      * Process a single path item for 204 response fixes
-     *
-     * @param array|string|null $path
      */
     private function processPathFor204Responses(array|string|null &$path): void
     {
         // @infection-ignore-line Skip is behavior-neutral
-        if (!is_array($path)) {
+        if (! is_array($path)) {
             return;
         }
 
@@ -328,13 +320,11 @@ final class OpenApiFixer
 
     /**
      * Process a single method for 204 response fixes
-     *
-     * @param array|string|null $methodData
      */
     private function processMethodFor204Responses(array|string|null &$methodData): void
     {
         // @infection-ignore-next-line guard prevents iterating invalid responses
-        if (!is_array($methodData) || !isset($methodData['responses']) || !is_array($methodData['responses'])) {
+        if (! is_array($methodData) || ! isset($methodData['responses']) || ! is_array($methodData['responses'])) {
             return;
         }
 
@@ -347,14 +337,12 @@ final class OpenApiFixer
 
     /**
      * Process a single response for 204
-     *
-     * @param array $response
      */
     private function processResponseFor204(string|int $statusCode, array &$response): void
     {
         // Only process 204 responses (handle both string and integer keys)
         // @infection-ignore-next-line handle both YAML string and integer keys
-        if (!in_array($statusCode, ['204', 204], true) || !is_array($response)) {
+        if (! in_array($statusCode, ['204', 204], true) || ! is_array($response)) {
             return;
         }
 

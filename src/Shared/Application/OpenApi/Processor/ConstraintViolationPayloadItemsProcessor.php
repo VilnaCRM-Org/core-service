@@ -23,7 +23,7 @@ final class ConstraintViolationPayloadItemsProcessor
         $changed = false;
         $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
 
-        if (!$changed) {
+        if (! $changed) {
             return $openApi;
         }
 
@@ -31,8 +31,6 @@ final class ConstraintViolationPayloadItemsProcessor
     }
 
     /**
-     * @param ArrayObject|null $schemas
-     *
      * @return array<string, mixed>
      */
     private function normalizeSchemas(?ArrayObject $schemas): array
@@ -52,7 +50,7 @@ final class ConstraintViolationPayloadItemsProcessor
     private function updateConstraintViolationSchemas(array $schemas, bool &$changed): array
     {
         foreach ($schemas as $key => $schema) {
-            if (!str_starts_with($key, self::SCHEMA_KEY_PREFIX)) {
+            if (! str_starts_with($key, self::SCHEMA_KEY_PREFIX)) {
                 continue;
             }
 
