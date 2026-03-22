@@ -19,6 +19,7 @@ final class DBCheckSubscriber extends BaseHealthCheckSubscriber
     public function onHealthCheck(HealthCheckEvent $event): void
     {
         $client = $this->documentManager->getClient();
+        // mongodb/mongodb 2.x returns a generic iterator here, and invoking the call is the health check.
         $client->listDatabases();
     }
 }

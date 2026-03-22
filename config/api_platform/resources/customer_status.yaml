@@ -50,9 +50,6 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
       processor: App\Core\Customer\Application\Processor\CreateStatusProcessor
       denormalizationContext:
         allow_extra_attributes: false
-      extraArgs:
-        value:
-          type: 'String'
     update_mutation:
       class: ApiPlatform\Metadata\GraphQl\Mutation
       name: update
@@ -60,11 +57,6 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
       processor: App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor
       denormalizationContext:
         allow_extra_attributes: false
-      extraArgs:
-        _id:
-          type: 'String'
-        value:
-          type: 'String'
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
       normalizationContext:

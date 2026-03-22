@@ -159,8 +159,15 @@ tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
     tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
-else
+elif [ -r /proc/sys/kernel/random/uuid ]; then
     tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+elif command -v python3 >/dev/null 2>&1; then
+    tool_marker="$(python3 -c 'import uuid; print(str(uuid.uuid4()).replace("-", ""))')"
+elif command -v openssl >/dev/null 2>&1; then
+    tool_marker="$(openssl rand -hex 16)"
+else
+    echo "Error: could not generate Codex tool marker (uuidgen/python3/openssl unavailable)." >&2
+    exit 1
 fi
 
 echo "Running Codex basic smoke task..."

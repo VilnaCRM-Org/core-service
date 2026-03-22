@@ -20,4 +20,33 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
 
         $this->assertNull($updater->update(['properties' => []]));
     }
+
+    public function testUpdateReturnsNullWhenAllOfUpdateReturnsNull(): void
+    {
+        $normalized = ['allOf' => [['type' => 'object']]];
+        $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
+        $allOfUpdater->expects($this->once())
+            ->method('update')
+            ->with([['type' => 'object']])
+            ->willReturn(null);
+
+        $updater = new HydraViewExampleUpdater($allOfUpdater);
+
+        $this->assertNull($updater->update($normalized));
+    }
+
+    public function testUpdateReturnsUpdatedAllOfPayload(): void
+    {
+        $normalized = ['allOf' => [['type' => 'object']]];
+        $updatedAllOf = [['type' => 'string']];
+        $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
+        $allOfUpdater->expects($this->once())
+            ->method('update')
+            ->with([['type' => 'object']])
+            ->willReturn($updatedAllOf);
+
+        $updater = new HydraViewExampleUpdater($allOfUpdater);
+
+        $this->assertSame(['allOf' => $updatedAllOf], $updater->update($normalized));
+    }
 }

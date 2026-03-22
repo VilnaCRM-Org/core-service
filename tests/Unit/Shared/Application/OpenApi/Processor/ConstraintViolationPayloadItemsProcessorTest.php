@@ -142,7 +142,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 
     public function testProcessSkipsNonConstraintViolationSchemas(): void
     {
-        // Schema with key that does NOT start with "ConstraintViolation"
+        // Includes a ConstraintViolation schema, but not in a shape the processor updates.
         $otherSchema = ['type' => 'object'];
         $constraintViolation = ['type' => 'object'];
         $schemas = new ArrayObject([

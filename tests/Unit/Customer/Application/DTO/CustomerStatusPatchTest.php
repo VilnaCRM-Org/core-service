@@ -12,23 +12,26 @@ final class CustomerStatusPatchTest extends UnitTestCase
     public function testConstruct(): void
     {
         $value = $this->faker->word();
+        $id = $this->faker->uuid();
 
-        $dto = new StatusPatch(value: $value, id: null);
+        $dto = new StatusPatch(value: $value, id: $id);
 
-        $this->assertDto($dto, $value);
+        $this->assertDto($dto, $value, $id);
     }
 
     public function testConstructWithNullValue(): void
     {
         $dto = new StatusPatch(value: null, id: null);
 
-        $this->assertDto($dto, null);
+        $this->assertDto($dto, null, null);
     }
 
     private function assertDto(
         StatusPatch $dto,
-        ?string $value
+        ?string $value,
+        ?string $id
     ): void {
         $this->assertEquals($value, $dto->value);
+        $this->assertSame($id, $dto->id);
     }
 }

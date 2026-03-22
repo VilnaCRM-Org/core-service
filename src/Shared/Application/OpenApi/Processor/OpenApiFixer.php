@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use RuntimeException;
-use Symfony\Component\Yaml\Exception\DumpException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -17,8 +17,6 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
  * @phpstan-type SpecSchema array<string, SchemaValue>
- *
- * @infection-ignore-all Control flow mutations in utility methods are behavior-neutral
  *
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -66,7 +64,7 @@ final class OpenApiFixer
         try {
             return Yaml::parseFile($path);
         } catch (ParseException $e) { // @codeCoverageIgnore
-            // @infection-ignore-line Exception code is behavior-neutral
+            // @infection-ignore-next-line Exception code is behavior-neutral
             throw new RuntimeException("Failed to parse OpenAPI spec: {$path} - {$e->getMessage()}", 0, $e);
         }
     }
@@ -78,30 +76,23 @@ final class OpenApiFixer
      */
     private function writeSpec(array $spec): void
     {
-        try {
-            // Use DUMP_NUMERIC_KEY_AS_STRING to ensure HTTP status codes are quoted
-            // @infection-ignore-line Dump parameters are behavior-neutral
-            $yaml = Yaml::dump($spec, 10, 2, Yaml::DUMP_NUMERIC_KEY_AS_STRING);
+        // Use DUMP_NUMERIC_KEY_AS_STRING to ensure HTTP status codes are quoted
+        // @infection-ignore-next-line dump depth/indent are formatting-only for this generated spec
+        $yaml = Yaml::dump($spec, 10, 2, Yaml::DUMP_NUMERIC_KEY_AS_STRING);
 
-            // Fix known empty-sequence fields: security: { } -> security: []
-            // Also handle security: null -> security: []
-            // Handle both top-level and indented entries
-            $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
-            if ($yaml === null) {
-                throw new RuntimeException('Failed to normalize security sections in YAML (pattern 1)'); // @codeCoverageIgnore
-            }
-            $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
-            if ($yaml === null) {
-                throw new RuntimeException('Failed to normalize security sections in YAML (pattern 2)'); // @codeCoverageIgnore
-            }
-
-            if (file_put_contents($this->specFile, $yaml) === false) { // @infection-ignore-line FalseValue is behavior-neutral
-                throw new RuntimeException("Failed to write OpenAPI spec: {$this->specFile}"); // @infection-ignore-line Throw is behavior-neutral
-            }
-        } catch (DumpException $e) { // @codeCoverageIgnore
-            // @infection-ignore-line Exception code is behavior-neutral
-            throw new RuntimeException("Failed to dump OpenAPI spec: {$e->getMessage()}", 0, $e); // @codeCoverageIgnore
+        // Fix known empty-sequence fields: security: { } -> security: []
+        // Also handle security: null -> security: []
+        // Handle both top-level and indented entries
+        $yaml = preg_replace('/^(\s*)security: \{\s*\}$/m', '$1security: []', $yaml);
+        if ($yaml === null) {
+            throw new RuntimeException('Failed to normalize security sections in YAML (pattern 1)'); // @codeCoverageIgnore
         }
+        $yaml = preg_replace('/^(\s*)security: null$/m', '$1security: []', $yaml);
+        if ($yaml === null) {
+            throw new RuntimeException('Failed to normalize security sections in YAML (pattern 2)'); // @codeCoverageIgnore
+        }
+
+        (new Filesystem())->dumpFile($this->specFile, $yaml);
     }
 
     /**
@@ -125,11 +116,10 @@ final class OpenApiFixer
                 // If type exists without @type, move type to @type
                 if ($hasPlainType && !$hasTypeMarker) {
                     $data['example']['@type'] = $data['example']['type'];
-                    unset($data['example']['type']); // @infection-ignore-line Conditional unset is behavior-neutral
                 }
-                // If both type and @type exist, remove spurious type (keep @type)
-                if ($hasPlainType && $hasTypeMarker) {
-                    unset($data['example']['type']); // @infection-ignore-line Conditional unset is behavior-neutral
+
+                if ($hasPlainType) {
+                    unset($data['example']['type']);
                 }
             }
         }
@@ -149,7 +139,7 @@ final class OpenApiFixer
      */
     private function addUlidProperty(array &$components): void
     {
-        // @infection-ignore-line Early return is behavior-neutral
+        // @infection-ignore-next-line guard prevents invalid schema access
         if (!isset($components['schemas']) || !is_array($components['schemas'])) {
             return;
         }
@@ -183,7 +173,7 @@ final class OpenApiFixer
      */
     private function fixUlidRefToType(array &$components): void
     {
-        // @infection-ignore-line Early return is behavior-neutral
+        // @infection-ignore-next-line guard prevents invalid schema access
         if (!isset($components['schemas']) || !is_array($components['schemas'])) {
             return;
         }
@@ -191,14 +181,14 @@ final class OpenApiFixer
         $schemas = &$components['schemas'];
 
         foreach (['Customer.jsonld-output', 'CustomerType.jsonld-output'] as $schemaName) {
-            // @infection-ignore-line Skip is behavior-neutral
+            // @infection-ignore-next-line loop should skip missing schemas
             if (!isset($schemas[$schemaName])) {
                 continue;
             }
 
             $schema = &$schemas[$schemaName];
 
-            // @infection-ignore-line Skip is behavior-neutral
+            // @infection-ignore-next-line loop should skip invalid properties
             if (!isset($schema['properties']) || !is_array($schema['properties'])) {
                 continue;
             }
@@ -208,6 +198,7 @@ final class OpenApiFixer
             // Check if ulid property exists and has a $ref to UlidInterface
             if (isset($properties['ulid']) && is_array($properties['ulid'])) {
                 $ulidRef = $properties['ulid']['$ref'] ?? null;
+                // @infection-ignore-next-line both checks are required for safe replacement
                 if (is_string($ulidRef) && str_contains($ulidRef, 'UlidInterface')) {
                     // Replace $ref with direct type: string
                     $properties['ulid'] = [
@@ -226,7 +217,7 @@ final class OpenApiFixer
     private function fix422ErrorType(array &$spec): void
     {
         // @infection-ignore-line Early return is behavior-neutral
-        if (!isset($spec['paths'])) {
+        if (!isset($spec['paths']) || !is_array($spec['paths'])) {
             return;
         }
 
@@ -259,13 +250,15 @@ final class OpenApiFixer
      */
     private function processMethodFor422Errors(array|string|null &$methodData): void
     {
-        // @infection-ignore-line Skip is behavior-neutral
-        if (!is_array($methodData) || !isset($methodData['responses'])) {
+        // @infection-ignore-next-line guard prevents iterating invalid responses
+        if (!is_array($methodData) || !isset($methodData['responses']) || !is_array($methodData['responses'])) {
             return;
         }
 
         foreach ($methodData['responses'] as &$response) {
-            $this->processResponseFor422Errors($response);
+            if (is_array($response)) {
+                $this->processResponseFor422Errors($response);
+            }
         }
     }
 
@@ -276,8 +269,7 @@ final class OpenApiFixer
      */
     private function processResponseFor422Errors(array &$response): void
     {
-        // @infection-ignore-line Skip is behavior-neutral
-        if (!is_array($response) || !isset($response['content'])) {
+        if (!isset($response['content'])) {
             return;
         }
 
@@ -288,9 +280,9 @@ final class OpenApiFixer
 
         $problemJson = &$response['content']['application/problem+json'];
         $responseExample = $problemJson['example'] ?? null;
-        // @infection-ignore-line Type cast is behavior-neutral
         $is422Error = is_array($responseExample)
-            && (int) ($responseExample['status'] ?? 0) === 422;
+            && array_key_exists('status', $responseExample)
+            && (int) $responseExample['status'] === 422;
         if ($is422Error) {
             // Fix the error type for validation errors
             $exampleType = $responseExample['type'] ?? null;
@@ -308,7 +300,7 @@ final class OpenApiFixer
     private function fix204Responses(array &$spec): void
     {
         // @infection-ignore-line Early return is behavior-neutral
-        if (!isset($spec['paths'])) {
+        if (!isset($spec['paths']) || !is_array($spec['paths'])) {
             return;
         }
 
@@ -341,13 +333,15 @@ final class OpenApiFixer
      */
     private function processMethodFor204Responses(array|string|null &$methodData): void
     {
-        // @infection-ignore-line Skip is behavior-neutral
-        if (!is_array($methodData) || !isset($methodData['responses'])) {
+        // @infection-ignore-next-line guard prevents iterating invalid responses
+        if (!is_array($methodData) || !isset($methodData['responses']) || !is_array($methodData['responses'])) {
             return;
         }
 
         foreach ($methodData['responses'] as $statusCode => &$response) {
-            $this->processResponseFor204($statusCode, $response);
+            if (is_array($response)) {
+                $this->processResponseFor204($statusCode, $response);
+            }
         }
     }
 
@@ -359,7 +353,7 @@ final class OpenApiFixer
     private function processResponseFor204(string|int $statusCode, array &$response): void
     {
         // Only process 204 responses (handle both string and integer keys)
-        // @infection-ignore-line Skip is behavior-neutral
+        // @infection-ignore-next-line handle both YAML string and integer keys
         if (!in_array($statusCode, ['204', 204], true) || !is_array($response)) {
             return;
         }

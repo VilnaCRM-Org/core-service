@@ -22,7 +22,6 @@ return [
         'CLI/bats/php',
         'src/Core/Customer/Application/DTO',
         'scripts/codespaces',
-        'scripts/fix-openapi-spec.php',
         'scripts/validate-openapi-spec.sh',
     ],
     'add' => [],

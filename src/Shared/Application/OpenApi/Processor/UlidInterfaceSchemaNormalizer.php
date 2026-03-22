@@ -32,14 +32,8 @@ final class UlidInterfaceSchemaNormalizer
     /**
      * @return array<string, array|bool|float|int|string|null>
      */
-    #[\ReturnTypeWillChange]
     private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
-        /** @infection-ignore-all */
-        if ($value instanceof ArrayObject) {
-            return $value->getArrayCopy();
-        }
-
-        return is_array($value) ? $value : [];
+        return SchemaNormalizer::normalize($value);
     }
 }
