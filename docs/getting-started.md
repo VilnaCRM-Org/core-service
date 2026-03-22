@@ -12,7 +12,7 @@ Before you begin, ensure you have the following installed on your system:
 - Docker Compose 2.24.5+
 - Git 2.34.1+
 
-If you prefer cloud development, use the included GitHub Codespaces setup in `.devcontainer/` and skip local prerequisite installation.
+If you prefer a workspace-managed environment, use the included devcontainer setup in `.devcontainer/` and skip local prerequisite installation.
 
 ### CLI commands
 
@@ -84,50 +84,52 @@ As you will see, we use Make commands to manage the project. Run `make help` aft
 
 Learn more about [Design and Architecture Documentation](design-and-architecture.md).
 
-## GitHub Codespaces Setup
+## Workspace Setup
 
-This repository includes a ready-to-use Codespaces environment in `.devcontainer/devcontainer.json`.
+This repository includes a ready-to-use devcontainer environment in `.devcontainer/devcontainer.json`.
+It is designed to run in a local Coder workspace with Docker access.
+Bootstrap is handled through `scripts/local-coder/*`.
 
-### What you get in Codespaces
+### What you get
 
-- Docker support so all existing `make` commands continue to work
+- Docker support so the existing `make` commands continue to work
 - GitHub CLI (`gh`)
-- Claude CLI (`claude`)
+- Codex CLI (`codex`) when workspace auth is available
 - Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
-  - secure agent bootstrap (`scripts/codespaces/setup-secure-agent-env.sh`)
+  - secure agent bootstrap (`scripts/local-coder/setup-secure-agent-env.sh`)
   - `make start`
-  - `make install` (when `vendor/autoload.php` is missing)
+  - `make install` when `vendor/autoload.php` is missing
 
 ### How to start
 
-1. Open the repository in GitHub.
-2. Click `Code` -> `Codespaces` -> `Create codespace on main` (or your branch).
-3. Wait for the post-create setup to finish.
-4. Verify tools:
+1. Open the repository in your workspace.
+2. Wait for the post-create setup to finish.
+3. Verify tools:
 
 ```bash
 gh --version
-claude --version
+codex --version
 make help
 ```
 
-For autonomous AI coding in Codespaces, set repository Codespaces secrets:
+For autonomous AI coding in a workspace, set workspace secrets:
 
-- `MINIMAX_API_KEY`
+- `OPENAI_API_KEY`
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
-These secrets are provided directly by Codespaces to the container runtime, so `gh`, `git`, and `claude` can use them in normal terminal sessions.
-The bootstrap also persists them into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the Codespace.
+The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; if they are absent, the workspace bootstrap skips host secret and Codex auth sync gracefully.
 
-Non-secret defaults for GitHub CLI and Claude are persisted in git:
+The bootstrap persists those values into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the workspace.
 
-- `.devcontainer/codespaces-settings.env`
+Non-secret defaults are persisted in git:
+
+- `.devcontainer/workspace-settings.env`
 - `.devcontainer/post-create.sh`
-- `scripts/codespaces/setup-secure-agent-env.sh`
+- `scripts/local-coder/setup-secure-agent-env.sh`
 
-If you prefer manual authentication inside Codespace:
+If you prefer manual authentication in the workspace:
 
 ```bash
 gh auth login -h github.com -w
@@ -137,8 +139,8 @@ gh auth setup-git
 Then run:
 
 ```bash
-bash scripts/codespaces/startup-smoke-tests.sh VilnaCRM-Org
-bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
+bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
+bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
 
 `startup-smoke-tests.sh` runs the default startup checks:
@@ -146,23 +148,12 @@ bash scripts/codespaces/verify-gh-claude.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
-- `claude` can execute one non-interactive task via `MiniMax-M2.7`
+- `codex` can execute one non-interactive task
 
-`verify-gh-claude.sh` includes Claude basic and tool-calling smoke checks.
-This setup is MiniMax-only and configures Claude with:
+`verify-gh-codex.sh` always runs the basic Codex smoke check.
+Tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`.
 
-- model `MiniMax-M2.7`
-- Anthropic-compatible URL `https://api.minimax.io/anthropic`
-- `permissions.defaultMode=bypassPermissions` in `~/.claude/settings.json` (no manual tool approvals)
-
-If you need safer defaults in a Codespace, set overrides before bootstrap:
-
-```bash
-export CLAUDE_PERMISSION_MODE=default
-export CLAUDE_ALLOW_UNSAFE_MODE=0
-```
-
-### Working in Codespaces
+### Working in the workspace
 
 All project operations remain the same as local usage:
 
@@ -172,4 +163,4 @@ make install
 make ci
 ```
 
-Use the forwarded ports tab in Codespaces to access the service endpoints exposed by Docker Compose.
+Use the forwarded ports tab in your workspace to access the service endpoints exposed by Docker Compose.
