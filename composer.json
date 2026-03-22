@@ -100,7 +100,7 @@
       "docker": true
     },
     "_comments": {
-      "behat-gherkin": "Version locked to 4.10 due to compatibility issues. See: https://github.com/Behat/Gherkin/issues/317"
+      "behat-gherkin": "Compatibility issue from Behat/Gherkin issue #317 is resolved; the project now uses 4.16.1."
     }
   },
   "require-dev": {
