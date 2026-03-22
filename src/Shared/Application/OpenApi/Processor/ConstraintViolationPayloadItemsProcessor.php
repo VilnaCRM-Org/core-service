@@ -54,8 +54,13 @@ final class ConstraintViolationPayloadItemsProcessor
                 continue;
             }
 
-            // Convert ArrayObject to array if needed
-            $schemaArray = $schema instanceof ArrayObject ? $schema->getArrayCopy() : $schema;
+            if ($schema instanceof ArrayObject) {
+                $schemaArray = $schema->getArrayCopy();
+            } elseif (is_array($schema)) {
+                $schemaArray = $schema;
+            } else {
+                continue;
+            }
 
             $updated = $this->updateSchema($schemaArray);
             if ($updated === null) {

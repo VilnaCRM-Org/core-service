@@ -184,34 +184,34 @@ fi
 echo "Codex basic smoke task ok."
 
 echo "Running Codex tool-calling smoke task..."
-tool_smoke_failed=0
-codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
-if ! (
-    cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --skip-git-repo-check "${codex_tool_prompt}"
-) >"${tmp_codex_tools}" 2>&1; then
-    tool_smoke_failed=1
-fi
+if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
+    echo "Skipping Codex tool-calling smoke task (CODEX_TOOL_SMOKE_MODE=skip)."
+else
+    tool_smoke_failed=0
+    codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
+    if ! (
+        cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --skip-git-repo-check "${codex_tool_prompt}"
+    ) >"${tmp_codex_tools}" 2>&1; then
+        tool_smoke_failed=1
+    fi
 
-if [ "${tool_smoke_failed}" -eq 1 ]; then
-    if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
-        echo "Skipping Codex tool-calling smoke task failure (CODEX_TOOL_SMOKE_MODE=skip)." >&2
-    else
+    if [ "${tool_smoke_failed}" -eq 1 ]; then
         echo "Error: Codex tool-calling smoke task failed." >&2
         sed -n '1,160p' "${tmp_codex_tools}" >&2
         exit 1
+    else
+        if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools}"; then
+            echo "Error: Codex tool-calling smoke task did not return expected output." >&2
+            sed -n '1,160p' "${tmp_codex_tools}" >&2
+            exit 1
+        fi
+        actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
+        if [ "${actual_marker}" != "${tool_marker}" ]; then
+            echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
+            exit 1
+        fi
+        echo "Codex tool-calling smoke task ok."
     fi
-else
-    if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools}"; then
-        echo "Error: Codex tool-calling smoke task did not return expected output." >&2
-        sed -n '1,160p' "${tmp_codex_tools}" >&2
-        exit 1
-    fi
-    actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
-    if [ "${actual_marker}" != "${tool_marker}" ]; then
-        echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
-        exit 1
-    fi
-    echo "Codex tool-calling smoke task ok."
 fi
 
 echo "All GH/Codex verification checks passed."
