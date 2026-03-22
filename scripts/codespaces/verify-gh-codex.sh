@@ -3,4 +3,4 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-exec "${SCRIPT_DIR}/../local-coder/startup-smoke-tests.sh" "$@"
+exec "${SCRIPT_DIR}/../local-coder/verify-gh-codex.sh" "$@"
