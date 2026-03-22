@@ -115,6 +115,7 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
+# If Codex already has stored credentials, prefer that session over API-key auth.
 if codex login status >/dev/null 2>&1; then
     unset OPENAI_API_KEY
 elif [ -z "${OPENAI_API_KEY:-}" ]; then
@@ -151,8 +152,12 @@ tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
     tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
-else
+elif [ -f /proc/sys/kernel/random/uuid ]; then
     tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
+elif command -v openssl >/dev/null 2>&1; then
+    tool_marker="$(openssl rand -hex 16 | tr '[:upper:]' '[:lower:]' | tr -d '-')"
+else
+    tool_marker="smoke${RANDOM}${RANDOM}${RANDOM}"
 fi
 
 echo "Running Codex basic smoke task..."
@@ -172,6 +177,12 @@ if ! grep -q "codex-ok:openai-basic" "${tmp_codex_basic_message}"; then
 fi
 echo "Codex basic smoke task ok."
 
+if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
+    echo "Skipping Codex tool-calling smoke task (CODEX_TOOL_SMOKE_MODE=skip)."
+    echo "All GH/Codex verification checks passed."
+    exit 0
+fi
+
 echo "Running Codex tool-calling smoke task..."
 tool_smoke_failed=0
 codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
@@ -184,13 +195,9 @@ if ! "${codex_tool_cmd[@]}" >"${tmp_codex_tools_output}" 2>&1; then
 fi
 
 if [ "${tool_smoke_failed}" -eq 1 ]; then
-    if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
-        echo "Skipping Codex tool-calling smoke task failure (CODEX_TOOL_SMOKE_MODE=skip)." >&2
-    else
-        echo "Error: Codex tool-calling smoke task failed." >&2
-        sed -n '1,160p' "${tmp_codex_tools_output}" >&2
-        exit 1
-    fi
+    echo "Error: Codex tool-calling smoke task failed." >&2
+    sed -n '1,160p' "${tmp_codex_tools_output}" >&2
+    exit 1
 else
     if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools_message}"; then
         echo "Error: Codex tool-calling smoke task did not return expected output." >&2

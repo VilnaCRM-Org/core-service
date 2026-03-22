@@ -81,6 +81,7 @@ make help
 #### Secure setup for autonomous AI coding agents
 
 Use workspace secrets or environment variables. Do not commit credentials.
+The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; when they are absent, the workspace bootstrap skips host secret or Codex auth sync gracefully.
 
 - `OPENAI_API_KEY`: API key for the Codex CLI
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
@@ -115,7 +116,8 @@ What `verify-gh-codex.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
-- `codex` can run basic and tool-calling non-interactive smoke tasks
+- `codex` can run basic non-interactive smoke tasks
+- tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`
 
 Notes:
 

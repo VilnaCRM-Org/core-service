@@ -40,7 +40,7 @@ cs_detect_user_auth() {
 cs_ensure_gh_auth() {
     local auth_mode
 
-    cs_require_command gh
+    cs_require_command gh || return 1
 
     if auth_mode="$(cs_detect_user_auth)"; then
         export CS_GH_AUTH_MODE="${auth_mode}"
