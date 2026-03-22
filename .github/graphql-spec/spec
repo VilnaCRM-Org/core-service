@@ -475,4 +475,3 @@ type createHealthCheckPayload {
   healthCheck: HealthCheck
   clientMutationId: String
 }
-
