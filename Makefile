@@ -107,8 +107,21 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpinsights $(PHPINSIGHTS_ARGS) --no-interaction --flush-cache --fix --ansi --disable-security-check
-	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
+	@phpinsights_args='$(PHPINSIGHTS_ARGS)'; \
+	phpinsights_memory_limit=$$(printf '%s\n' "$$phpinsights_args" | sed -n 's/.*--memory-limit=\([^[:space:]]*\).*/\1/p'); \
+	if [ -n "$$phpinsights_memory_limit" ]; then \
+		phpinsights_args=$$(printf '%s\n' "$$phpinsights_args" | sed -E 's/(^|[[:space:]])--memory-limit=[^[:space:]]+//g; s/^[[:space:]]+//; s/[[:space:]]+$$//'); \
+		echo "PHPInsights compatibility: translating --memory-limit=$$phpinsights_memory_limit to PHP memory_limit"; \
+		echo "$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
+		$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check; \
+		echo "$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
+		$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php; \
+	else \
+		echo "$(EXEC_ENV) ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
+		$(EXEC_ENV) ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check; \
+		echo "$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
+		$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php; \
+	fi
 
 # NOTE: Non-CI coverage parsing reads a temp file created in the container, so the repo must be volume-mounted.
 unit-tests: ## Run unit tests with 100% coverage requirement
@@ -136,22 +149,12 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 	if [ "$(CI)" = "1" ]; then \
 		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
 	else \
-		coverage_output=.coverage_value.txt; \
-		rm -f $$coverage_output; \
-		$(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; $$out = $$argv[2] ?? null; if ($$file === null || $$out === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { $$coverage = "0"; } else { $$coverage = sprintf("%.2f", ($$covered / $$statements) * 100); } file_put_contents($$out, $$coverage);' -- $$coverage_file $$coverage_output; \
+		coverage=$$($(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
 		parse_status=$$?; \
 		if [ $$parse_status -ne 0 ]; then \
-			rm -f $$coverage_output; \
 			echo "❌ ERROR: Could not parse coverage XML"; \
 			exit $$parse_status; \
 		fi; \
-		waits=0; \
-		while [ ! -s $$coverage_output ] && [ $$waits -lt 50 ]; do \
-			waits=$$((waits + 1)); \
-			sleep 0.2; \
-		done; \
-		coverage=$$(cat $$coverage_output 2>/dev/null); \
-		rm -f $$coverage_output; \
 	fi; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
