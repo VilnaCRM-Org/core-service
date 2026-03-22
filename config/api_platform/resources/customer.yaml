@@ -17,6 +17,7 @@ App\Core\Customer\Domain\Entity\Customer:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
+      strictQueryParameterValidation: false
       filters:
         - customer.mongodb.search
         - customer.mongodb.order

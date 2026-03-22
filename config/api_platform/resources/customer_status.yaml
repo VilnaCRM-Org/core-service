@@ -9,6 +9,7 @@ App\Core\Customer\Domain\Entity\CustomerStatus:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
+      strictQueryParameterValidation: false
       filters:
         - customer.mongodb.status.order
         - customer.mongodb.status.partial_search
