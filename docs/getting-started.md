@@ -88,7 +88,7 @@ Learn more about [Design and Architecture Documentation](design-and-architecture
 
 This repository includes a ready-to-use devcontainer environment in `.devcontainer/devcontainer.json`.
 It is designed to run in a local Coder workspace with Docker access.
-Primary bootstrap path: `scripts/local-coder/*`. `scripts/codespaces/*` remains only as a compatibility alias.
+Bootstrap is handled through `scripts/local-coder/*`.
 
 ### What you get
 
@@ -128,7 +128,6 @@ Non-secret defaults are persisted in git:
 - `.devcontainer/workspace-settings.env`
 - `.devcontainer/post-create.sh`
 - `scripts/local-coder/setup-secure-agent-env.sh`
-- `scripts/codespaces/setup-secure-agent-env.sh` as compatibility alias
 
 If you prefer manual authentication in the workspace:
 

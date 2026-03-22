@@ -60,7 +60,7 @@ That's it. You should now be ready to use core service!
 
 This repository ships with a built-in devcontainer in `.devcontainer/devcontainer.json`.
 It is designed to run in a local Coder workspace with Docker access.
-Primary bootstrap path: `scripts/local-coder/*`. `scripts/codespaces/*` remains only as a compatibility alias.
+Bootstrap is handled through `scripts/local-coder/*`.
 
 When the workspace is created, the post-create script:
 
@@ -108,7 +108,6 @@ Repository-tracked defaults for workspace bootstrap are stored in:
 - `.devcontainer/workspace-settings.env`
 - `.devcontainer/post-create.sh`
 - `scripts/local-coder/setup-secure-agent-env.sh`
-- `scripts/codespaces/setup-secure-agent-env.sh` as compatibility alias
 
 What `verify-gh-codex.sh` checks:
 
