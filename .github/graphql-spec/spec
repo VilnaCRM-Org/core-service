@@ -1,7 +1,7 @@
 type Query {
   node(id: ID!): Node
-  customer(id: ID!): Customer
-  customers(
+  exampleApiResource(id: ID!): ExampleApiResource
+  exampleApiResources(
     "Returns the first n elements from the list."
     first: Int
 
@@ -13,61 +13,7 @@ type Query {
 
     "Returns the elements in the list that come after the specified cursor."
     after: String
-
-    initials: String
-    initials_list: [String]
-    email: String
-    email_list: [String]
-    phone: String
-    phone_list: [String]
-    leadSource: String
-    leadSource_list: [String]
-    type_value: String
-    type_value_list: [String]
-    status_value: String
-    status_value_list: [String]
-    order: [CustomerFilter_order]
-    createdAt: [CustomerFilter_createdAt]
-    updatedAt: [CustomerFilter_updatedAt]
-    confirmed: Boolean
-    ulid: [CustomerFilter_ulid]
-  ): CustomerCursorConnection
-  customerStatus(id: ID!): CustomerStatus
-  customerStatuses(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-
-    order: [CustomerStatusFilter_order]
-    value: String
-    ulid: [CustomerStatusFilter_ulid]
-  ): CustomerStatusCursorConnection
-  customerType(id: ID!): CustomerType
-  customerTypes(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-
-    order: [CustomerTypeFilter_order]
-    value: String
-    ulid: [CustomerTypeFilter_ulid]
-  ): CustomerTypeCursorConnection
+  ): ExampleApiResourceCursorConnection
   healthCheck(id: ID!): HealthCheck
   healthChecks(
     "Returns the first n elements from the list."
@@ -90,147 +36,25 @@ interface Node {
   id: ID!
 }
 
-type Customer implements Node {
+type ExampleApiResource implements Node {
   id: ID!
-  initials: String!
-  email: String!
-  phone: String!
-  leadSource: String!
-  type: CustomerType!
-  status: CustomerStatus!
-  confirmed: Boolean!
-  createdAt: String!
-  updatedAt: String!
 }
 
-type CustomerType implements Node {
-  id: ID!
-  value: String!
-}
-
-type CustomerStatus implements Node {
-  id: ID!
-  value: String!
-  ulid: String!
-}
-
-input CustomerFilter_order {
-  ulid: String
-  createdAt: String
-  updatedAt: String
-  email: String
-  initials: String
-  phone: String
-  leadSource: String
-  type_value: String
-  status_value: String
-}
-
-input CustomerFilter_createdAt {
-  before: String
-  strictly_before: String
-  after: String
-  strictly_after: String
-}
-
-input CustomerFilter_updatedAt {
-  before: String
-  strictly_before: String
-  after: String
-  strictly_after: String
-}
-
-input CustomerFilter_ulid {
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  between: String
-}
-
-"Cursor connection for Customer."
-type CustomerCursorConnection {
-  edges: [CustomerEdge]
-  pageInfo: CustomerPageInfo!
+"Cursor connection for ExampleApiResource."
+type ExampleApiResourceCursorConnection {
+  edges: [ExampleApiResourceEdge]
+  pageInfo: ExampleApiResourcePageInfo!
   totalCount: Int!
 }
 
-"Edge of Customer."
-type CustomerEdge {
-  node: Customer
+"Edge of ExampleApiResource."
+type ExampleApiResourceEdge {
+  node: ExampleApiResource
   cursor: String!
 }
 
 "Information about the current page."
-type CustomerPageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-input CustomerStatusFilter_order {
-  ulid: String
-  value: String
-}
-
-input CustomerStatusFilter_ulid {
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  between: String
-}
-
-"Cursor connection for CustomerStatus."
-type CustomerStatusCursorConnection {
-  edges: [CustomerStatusEdge]
-  pageInfo: CustomerStatusPageInfo!
-  totalCount: Int!
-}
-
-"Edge of CustomerStatus."
-type CustomerStatusEdge {
-  node: CustomerStatus
-  cursor: String!
-}
-
-"Information about the current page."
-type CustomerStatusPageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-input CustomerTypeFilter_order {
-  ulid: String
-  value: String
-}
-
-input CustomerTypeFilter_ulid {
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  between: String
-}
-
-"Cursor connection for CustomerType."
-type CustomerTypeCursorConnection {
-  edges: [CustomerTypeEdge]
-  pageInfo: CustomerTypePageInfo!
-  totalCount: Int!
-}
-
-"Edge of CustomerType."
-type CustomerTypeEdge {
-  node: CustomerType
-  cursor: String!
-}
-
-"Information about the current page."
-type CustomerTypePageInfo {
+type ExampleApiResourcePageInfo {
   endCursor: String
   startCursor: String
   hasNextPage: Boolean!
@@ -263,32 +87,14 @@ type HealthCheckPageInfo {
 }
 
 type Mutation {
-  "Creates a Customer."
-  createCustomer(input: createCustomerInput!): createCustomerPayload
+  "Updates a ExampleApiResource."
+  updateExampleApiResource(input: updateExampleApiResourceInput!): updateExampleApiResourcePayload
 
-  "Updates a Customer."
-  updateCustomer(input: updateCustomerInput!): updateCustomerPayload
+  "Deletes a ExampleApiResource."
+  deleteExampleApiResource(input: deleteExampleApiResourceInput!): deleteExampleApiResourcePayload
 
-  "Deletes a Customer."
-  deleteCustomer(input: deleteCustomerInput!): deleteCustomerPayload
-
-  "Creates a CustomerStatus."
-  createCustomerStatus(input: createCustomerStatusInput!): createCustomerStatusPayload
-
-  "Updates a CustomerStatus."
-  updateCustomerStatus(input: updateCustomerStatusInput!): updateCustomerStatusPayload
-
-  "Deletes a CustomerStatus."
-  deleteCustomerStatus(input: deleteCustomerStatusInput!): deleteCustomerStatusPayload
-
-  "Creates a CustomerType."
-  createCustomerType(input: createCustomerTypeInput!): createCustomerTypePayload
-
-  "Updates a CustomerType."
-  updateCustomerType(input: updateCustomerTypeInput!): updateCustomerTypePayload
-
-  "Deletes a CustomerType."
-  deleteCustomerType(input: deleteCustomerTypeInput!): deleteCustomerTypePayload
+  "Creates a ExampleApiResource."
+  createExampleApiResource(input: createExampleApiResourceInput!): createExampleApiResourcePayload
 
   "Updates a HealthCheck."
   updateHealthCheck(input: updateHealthCheckInput!): updateHealthCheckPayload
@@ -300,145 +106,39 @@ type Mutation {
   createHealthCheck(input: createHealthCheckInput!): createHealthCheckPayload
 }
 
-"Creates a Customer."
-input createCustomerInput {
-  initials: String
-  email: String
-  phone: String
-  leadSource: String
-  type: String
-  status: String
-  confirmed: Boolean
-  clientMutationId: String
-}
-
-"Creates a Customer."
-type createCustomerPayload {
-  customer: Customer
-  clientMutationId: String
-}
-
-"Updates a Customer."
-input updateCustomerInput {
-  id: ID!
-  _id: String
-  initials: String
-  email: String
-  phone: String
-  leadSource: String
-  type: String
-  status: String
-  confirmed: Boolean
-  clientMutationId: String
-}
-
-"Updates a Customer."
-type updateCustomerPayload {
-  customer: Customer
-  clientMutationId: String
-}
-
-"Deletes a Customer."
-input deleteCustomerInput {
+"Updates a ExampleApiResource."
+input updateExampleApiResourceInput {
   id: ID!
   clientMutationId: String
 }
 
-"Deletes a Customer."
-type deleteCustomerPayload {
-  customer: deleteCustomerPayloadData
+"Updates a ExampleApiResource."
+type updateExampleApiResourcePayload {
+  exampleApiResource: ExampleApiResource
   clientMutationId: String
 }
 
-"Deletes a Customer."
-type deleteCustomerPayloadData implements Node {
-  id: ID!
-}
-
-"Creates a CustomerStatus."
-input createCustomerStatusInput {
-  value: String
-  clientMutationId: String
-}
-
-"Creates a CustomerStatus."
-type createCustomerStatusPayload {
-  customerStatus: CustomerStatus
-  clientMutationId: String
-}
-
-"Updates a CustomerStatus."
-input updateCustomerStatusInput {
-  id: ID!
-  value: String
-  _id: String
-  clientMutationId: String
-}
-
-"Updates a CustomerStatus."
-type updateCustomerStatusPayload {
-  customerStatus: CustomerStatus
-  clientMutationId: String
-}
-
-"Deletes a CustomerStatus."
-input deleteCustomerStatusInput {
+"Deletes a ExampleApiResource."
+input deleteExampleApiResourceInput {
   id: ID!
   clientMutationId: String
 }
 
-"Deletes a CustomerStatus."
-type deleteCustomerStatusPayload {
-  customerStatus: deleteCustomerStatusPayloadData
+"Deletes a ExampleApiResource."
+type deleteExampleApiResourcePayload {
+  exampleApiResource: ExampleApiResource
   clientMutationId: String
 }
 
-"Deletes a CustomerStatus."
-type deleteCustomerStatusPayloadData implements Node {
-  id: ID!
-}
-
-"Creates a CustomerType."
-input createCustomerTypeInput {
-  value: String
+"Creates a ExampleApiResource."
+input createExampleApiResourceInput {
   clientMutationId: String
 }
 
-"Creates a CustomerType."
-type createCustomerTypePayload {
-  customerType: CustomerType
+"Creates a ExampleApiResource."
+type createExampleApiResourcePayload {
+  exampleApiResource: ExampleApiResource
   clientMutationId: String
-}
-
-"Updates a CustomerType."
-input updateCustomerTypeInput {
-  id: ID!
-  value: String
-  _id: String
-  clientMutationId: String
-}
-
-"Updates a CustomerType."
-type updateCustomerTypePayload {
-  customerType: CustomerType
-  clientMutationId: String
-}
-
-"Deletes a CustomerType."
-input deleteCustomerTypeInput {
-  id: ID!
-  clientMutationId: String
-}
-
-"Deletes a CustomerType."
-type deleteCustomerTypePayload {
-  customerType: deleteCustomerTypePayloadData
-  clientMutationId: String
-}
-
-"Deletes a CustomerType."
-type deleteCustomerTypePayloadData implements Node {
-  id: ID!
 }
 
 "Updates a HealthCheck."

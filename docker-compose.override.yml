@@ -19,8 +19,6 @@ services:
   caddy:
     command:
       ['caddy', 'run', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile', '--watch']
-    environment:
-      SERVER_NAME: caddy
     volumes:
       - ./public:/srv/app/public:ro
       - ./infrastructure/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
@@ -42,6 +40,6 @@ services:
       - DEBUG=1
     volumes:
       - localstack_data:/var/lib/localstack
-
+      - ./infrastructure/docker/php/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
 volumes:
   localstack_data:

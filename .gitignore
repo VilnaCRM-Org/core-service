@@ -35,17 +35,6 @@
 
 ###> super-linter/super-linter ###
 super-linter-output
-/node_modules
 super-linter.log
 venv
 ###< super-linter/super-linter ###
-# Load tests dependencies
-/tests/Load/node_modules/
-
-# Structurizr files
-/.structurizr/
-/workspace.json
-
-# Infection
-infection.log
-summary.log
