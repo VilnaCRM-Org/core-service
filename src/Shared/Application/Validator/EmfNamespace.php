@@ -20,13 +20,13 @@ use Symfony\Component\Validator\Constraints\Regex;
  */
 final class EmfNamespace extends Compound
 {
-    public const MAX_LENGTH = 256;
+    public const int MAX_LENGTH = 256;
 
-    public const EMPTY_MESSAGE =
+    public const string EMPTY_MESSAGE =
         'EMF namespace must contain at least one non-whitespace character';
-    public const TOO_LONG_MESSAGE =
+    public const string TOO_LONG_MESSAGE =
         'EMF namespace must not exceed 256 characters';
-    public const INVALID_CHARACTERS_MESSAGE =
+    public const string INVALID_CHARACTERS_MESSAGE =
         'EMF namespace must contain only alphanumeric characters and . - _ / # :';
 
     /**

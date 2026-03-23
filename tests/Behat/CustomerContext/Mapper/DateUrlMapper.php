@@ -9,7 +9,7 @@ use DateTime;
 
 final readonly class DateUrlMapper
 {
-    private const PATTERN = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
+    private const string PATTERN = '/!%date\((.*?)\),date_interval\((.*?)\)!%/';
 
     public function map(string $url): string
     {

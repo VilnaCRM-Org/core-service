@@ -20,8 +20,8 @@ use Symfony\Component\Validator\Validation;
 
 final class EmfPayloadFactoryTest extends UnitTestCase
 {
-    public const FIXED_TIMESTAMP = 1702425600000;
-    private const NAMESPACE = 'TestApp/Metrics';
+    public const int FIXED_TIMESTAMP = 1702425600000;
+    private const string NAMESPACE = 'TestApp/Metrics';
 
     public function testCreatesPayloadFromSingleMetric(): void
     {

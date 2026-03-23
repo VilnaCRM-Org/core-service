@@ -16,7 +16,7 @@ use App\Shared\Infrastructure\Observability\ValueObject\EmfPayload;
  */
 final readonly class EmfPayloadValidator implements EmfPayloadValidatorInterface
 {
-    private const RESERVED_AWS_KEY = '_aws';
+    private const string RESERVED_AWS_KEY = '_aws';
 
     public function validate(EmfPayload $payload): void
     {
