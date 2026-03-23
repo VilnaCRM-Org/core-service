@@ -146,6 +146,39 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
         $this->assertSame('/errors/422', $result['paths']['/test']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
     }
 
+    public function testRunSkipsNonArrayComponentsAndContinuesOtherFixes(): void
+    {
+        $spec = [
+            'components' => 'not-an-array',
+            'paths' => [
+                '/customers' => [
+                    'post' => [
+                        'responses' => [
+                            '422' => [
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame('not-an-array', $result['components']);
+        $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+    }
+
     public function testFix204ResponsesSkipsMethodWithoutResponsesAndContinues(): void
     {
         $spec = [

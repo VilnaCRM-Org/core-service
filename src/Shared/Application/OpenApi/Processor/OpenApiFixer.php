@@ -38,7 +38,7 @@ final class OpenApiFixer
         $this->fixExampleTypeToAtType($spec);
 
         // Fix 2: Add ulid property to UlidInterface.jsonld-output (idempotent)
-        if (isset($spec['components'])) {
+        if (isset($spec['components']) && is_array($spec['components'])) {
             $this->addUlidProperty($spec['components']);
 
             // Fix 3: Change ulid $ref to type: string in Customer and CustomerType schemas
