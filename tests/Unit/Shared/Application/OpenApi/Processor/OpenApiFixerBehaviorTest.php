@@ -56,7 +56,7 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
 
     public function testRunThrowsExceptionWithParseExceptionAsPrevious(): void
     {
-        file_put_contents($this->specFile, 'invalid: yaml: content:');
+        file_put_contents($this->specFile, "foo:\n  - [\nbar");
 
         $fixer = new OpenApiFixer($this->specFile);
 
@@ -234,8 +234,9 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
     private function recursiveDelete(string $path): void
     {
         if (is_dir($path)) {
-            $files = glob($path . '/*') ?: [];
-            array_map(fn ($file) => $this->recursiveDelete($file), $files);
+            foreach (glob($path . '/*') ?: [] as $file) {
+                $this->recursiveDelete($file);
+            }
             rmdir($path);
         } elseif (is_file($path)) {
             unlink($path);
