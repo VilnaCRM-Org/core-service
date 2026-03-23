@@ -3,10 +3,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-SETTINGS_FILE="${ROOT_DIR}/.devcontainer/codespaces-settings.env"
-# shellcheck source=scripts/codespaces/lib/github-auth.sh
-. "${SCRIPT_DIR}/lib/github-auth.sh"
+# shellcheck source=scripts/local-coder/lib/github-auth.sh
+. "${ROOT_DIR}/scripts/local-coder/lib/github-auth.sh"
+# shellcheck source=scripts/local-coder/lib/workspace-secrets.sh
+. "${ROOT_DIR}/scripts/local-coder/lib/workspace-secrets.sh"
 
+SETTINGS_FILE="${ROOT_DIR}/.devcontainer/workspace-settings.env"
 if [ -f "${SETTINGS_FILE}" ]; then
     # shellcheck disable=SC1090
     . "${SETTINGS_FILE}"
@@ -16,13 +18,15 @@ if [ -f "${HOME}/.config/core-service/agent-secrets.env" ]; then
     # shellcheck disable=SC1091
     . "${HOME}/.config/core-service/agent-secrets.env"
 fi
+if [ -f "${HOME}/.config/openclaw/agent-secrets.env" ]; then
+    # shellcheck disable=SC1091
+    . "${HOME}/.config/openclaw/agent-secrets.env"
+fi
 
-ORG="${1:-${CODESPACE_GITHUB_ORG:-VilnaCRM-Org}}"
-: "${CODEX_PROFILE_NAME:=openai}"
-: "${CODEX_MODEL:=gpt-5.2-codex}"
-: "${CODEX_REASONING_EFFORT:=medium}"
-: "${CODEX_APPROVAL_POLICY:=never}"
-: "${CODEX_SANDBOX_MODE:=danger-full-access}"
+cs_load_host_workspace_secrets
+
+ORG="${1:-${WORKSPACE_GITHUB_ORG:-VilnaCRM-Org}}"
+: "${CODEX_SMOKE_MODEL:=}"
 : "${CODEX_TOOL_SMOKE_MODE:=enforce}"
 
 cs_require_command gh
@@ -81,7 +85,6 @@ Received payload was not valid JSON.
 EOM
         exit 1
     }
-    # Informational only: checks may still be running while this preflight executes.
     echo "PR #${pr_number} checks query ok (non-success states: ${non_success_count})."
 else
     echo "No PR detected for current branch. Skipping PR checks."
@@ -108,110 +111,101 @@ echo "Git push dry-run ok for branch '${current_branch}'."
 echo "Checking Bats availability..."
 bats --version
 
-if [ -z "${OPENAI_API_KEY:-}" ]; then
+# If Codex already has stored credentials, prefer that session over API-key auth.
+if codex login status >/dev/null 2>&1; then
+    unset OPENAI_API_KEY
+elif [ -z "${OPENAI_API_KEY:-}" ]; then
     cat >&2 <<'EOM'
-Error: OPENAI_API_KEY is not set or empty.
-Provide OPENAI_API_KEY as a Codespaces secret and ensure it is exported.
+Error: Codex authentication is not configured.
+Provide OPENAI_API_KEY in your workspace secrets or run:
+  codex login
 EOM
     exit 1
 fi
-if [ ! -f "${HOME}/.codex/config.toml" ]; then
-    echo "Error: Codex config file is missing: ${HOME}/.codex/config.toml" >&2
-    exit 1
-fi
-if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "profile = \"${CODEX_PROFILE_NAME}\""; then
-    echo "Error: Codex default profile '${CODEX_PROFILE_NAME}' is not configured." >&2
-    exit 1
-fi
-if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "model = \"${CODEX_MODEL}\""; then
-    echo "Error: Codex default model '${CODEX_MODEL}' is not configured." >&2
-    exit 1
-fi
-if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "model_reasoning_effort = \"${CODEX_REASONING_EFFORT}\""; then
-    echo "Error: Codex reasoning effort '${CODEX_REASONING_EFFORT}' is not configured." >&2
-    exit 1
-fi
-if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "approval_policy = \"${CODEX_APPROVAL_POLICY}\""; then
-    echo "Error: Codex approval policy '${CODEX_APPROVAL_POLICY}' is not configured." >&2
-    exit 1
-fi
-if ! grep -v '^[[:space:]]*#' "${HOME}/.codex/config.toml" | grep -q "sandbox_mode = \"${CODEX_SANDBOX_MODE}\""; then
-    echo "Error: Codex sandbox mode '${CODEX_SANDBOX_MODE}' is not configured." >&2
-    exit 1
-fi
 
-tmp_codex_basic=""
-tmp_codex_tools=""
+tmp_codex_basic_output=""
+tmp_codex_basic_message=""
+tmp_codex_tools_output=""
+tmp_codex_tools_message=""
 tmp_tool_workspace=""
 tmp_tool_marker_file=""
 tool_marker=""
 cleanup() {
-    [ -n "${tmp_codex_basic}" ] && rm -f "${tmp_codex_basic}"
-    [ -n "${tmp_codex_tools}" ] && rm -f "${tmp_codex_tools}"
+    [ -n "${tmp_codex_basic_output}" ] && rm -f "${tmp_codex_basic_output}"
+    [ -n "${tmp_codex_basic_message}" ] && rm -f "${tmp_codex_basic_message}"
+    [ -n "${tmp_codex_tools_output}" ] && rm -f "${tmp_codex_tools_output}"
+    [ -n "${tmp_codex_tools_message}" ] && rm -f "${tmp_codex_tools_message}"
     [ -n "${tmp_tool_marker_file}" ] && rm -f "${tmp_tool_marker_file}"
     [ -n "${tmp_tool_workspace}" ] && rm -rf "${tmp_tool_workspace}"
 }
 trap cleanup EXIT
 
-tmp_codex_basic="$(mktemp)"
-tmp_codex_tools="$(mktemp)"
+tmp_codex_basic_output="$(mktemp)"
+tmp_codex_basic_message="$(mktemp)"
+tmp_codex_tools_output="$(mktemp)"
+tmp_codex_tools_message="$(mktemp)"
 tmp_tool_workspace="$(mktemp -d)"
 tmp_tool_marker_file="${tmp_tool_workspace}/codex-tools-marker.txt"
 if command -v uuidgen >/dev/null 2>&1; then
     tool_marker="$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')"
-elif [ -r /proc/sys/kernel/random/uuid ]; then
+elif [ -f /proc/sys/kernel/random/uuid ]; then
     tool_marker="$(tr -d '-' < /proc/sys/kernel/random/uuid)"
-elif command -v python3 >/dev/null 2>&1; then
-    tool_marker="$(python3 -c 'import uuid; print(str(uuid.uuid4()).replace("-", ""))')"
 elif command -v openssl >/dev/null 2>&1; then
-    tool_marker="$(openssl rand -hex 16)"
+    tool_marker="$(openssl rand -hex 16 | tr '[:upper:]' '[:lower:]' | tr -d '-')"
 else
-    echo "Error: could not generate Codex tool marker (uuidgen/python3/openssl unavailable)." >&2
-    exit 1
+    tool_marker="smoke${RANDOM}${RANDOM}${RANDOM}"
 fi
 
 echo "Running Codex basic smoke task..."
-if ! timeout 180s codex exec -p "${CODEX_PROFILE_NAME}" "Reply with exactly one line: codex-ok:openai-basic" >"${tmp_codex_basic}" 2>&1; then
+codex_basic_cmd=(timeout 180s codex exec --json --output-last-message "${tmp_codex_basic_message}" "Reply with exactly one line: codex-ok:openai-basic")
+if [ -n "${CODEX_SMOKE_MODEL}" ]; then
+    codex_basic_cmd+=(--model "${CODEX_SMOKE_MODEL}")
+fi
+if ! "${codex_basic_cmd[@]}" >"${tmp_codex_basic_output}" 2>&1; then
     echo "Error: Codex basic smoke task failed." >&2
-    sed -n '1,120p' "${tmp_codex_basic}" >&2
+    sed -n '1,120p' "${tmp_codex_basic_output}" >&2
     exit 1
 fi
-if ! grep -q "codex-ok:openai-basic" "${tmp_codex_basic}"; then
+if ! grep -q "codex-ok:openai-basic" "${tmp_codex_basic_message}"; then
     echo "Error: Codex basic smoke task did not return expected output." >&2
-    sed -n '1,120p' "${tmp_codex_basic}" >&2
+    sed -n '1,120p' "${tmp_codex_basic_output}" >&2
     exit 1
 fi
 echo "Codex basic smoke task ok."
 
-echo "Running Codex tool-calling smoke task..."
 if [ "${CODEX_TOOL_SMOKE_MODE}" = "skip" ]; then
     echo "Skipping Codex tool-calling smoke task (CODEX_TOOL_SMOKE_MODE=skip)."
-else
-    tool_smoke_failed=0
-    codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
-    if ! (
-        cd "${tmp_tool_workspace}" && timeout 240s codex exec -p "${CODEX_PROFILE_NAME}" --skip-git-repo-check "${codex_tool_prompt}"
-    ) >"${tmp_codex_tools}" 2>&1; then
-        tool_smoke_failed=1
-    fi
+    echo "All GH/Codex verification checks passed."
+    exit 0
+fi
 
-    if [ "${tool_smoke_failed}" -eq 1 ]; then
-        echo "Error: Codex tool-calling smoke task failed." >&2
-        sed -n '1,160p' "${tmp_codex_tools}" >&2
+echo "Running Codex tool-calling smoke task..."
+tool_smoke_failed=0
+codex_tool_prompt="This is a harmless local smoke test in your own temporary workspace. Use bash exactly once and run: echo ${tool_marker} > ./codex-tools-marker.txt. Then reply with exactly one line: codex-ok:openai-tools"
+codex_tool_cmd=(timeout 240s codex exec --json --output-last-message "${tmp_codex_tools_message}" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "${tmp_tool_workspace}" "${codex_tool_prompt}")
+if [ -n "${CODEX_SMOKE_MODEL}" ]; then
+    codex_tool_cmd+=(--model "${CODEX_SMOKE_MODEL}")
+fi
+if ! "${codex_tool_cmd[@]}" >"${tmp_codex_tools_output}" 2>&1; then
+    tool_smoke_failed=1
+fi
+
+if [ "${tool_smoke_failed}" -eq 1 ]; then
+    echo "Error: Codex tool-calling smoke task failed." >&2
+    sed -n '1,160p' "${tmp_codex_tools_output}" >&2
+    exit 1
+else
+    if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools_message}"; then
+        echo "Error: Codex tool-calling smoke task did not return expected output." >&2
+        sed -n '1,160p' "${tmp_codex_tools_output}" >&2
         exit 1
-    else
-        if ! grep -q "codex-ok:openai-tools" "${tmp_codex_tools}"; then
-            echo "Error: Codex tool-calling smoke task did not return expected output." >&2
-            sed -n '1,160p' "${tmp_codex_tools}" >&2
-            exit 1
-        fi
-        actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
-        if [ "${actual_marker}" != "${tool_marker}" ]; then
-            echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
-            exit 1
-        fi
-        echo "Codex tool-calling smoke task ok."
     fi
+    actual_marker="$(tr -d '\r\n' < "${tmp_tool_marker_file}" 2>/dev/null || true)"
+    if [ "${actual_marker}" != "${tool_marker}" ]; then
+        echo "Error: Codex tool-calling smoke task did not produce expected marker file content." >&2
+        exit 1
+    fi
+    echo "Codex tool-calling smoke task ok."
 fi
 
 echo "All GH/Codex verification checks passed."
