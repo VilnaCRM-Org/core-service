@@ -123,20 +123,25 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 		$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php; \
 	fi
 
-# NOTE: Non-CI coverage parsing reads a temp file created in the container, so the repo must be volume-mounted.
+# NOTE: Coverage is written to a repo-local XML file so both CI and containerized runs can parse it.
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	script -q -e -c '$(RUN_TESTS_COVERAGE) --testsuite=Unit' /dev/null > $$tmpfile 2>&1; \
+	coverage_file=coverage/unit-coverage.xml; \
+	mkdir -p coverage; \
+	rm -f $$coverage_file; \
+	script -q -e -c '$(RUN_TESTS_COVERAGE) --testsuite=Unit --coverage-clover='"$$coverage_file"'' /dev/null > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
 		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$coverage_file; \
 		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
 	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
 		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
+		rm -f $$coverage_file; \
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
@@ -150,6 +155,7 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 			exit $$parse_status; \
 		fi; \
 	fi; \
+	rm -f $$coverage_file; \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
 		if ! echo "$$coverage 100" | awk '{if ($$1 != $$2) exit 1;}'; then \

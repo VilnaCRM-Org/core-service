@@ -54,14 +54,16 @@ final class ConstraintViolationPayloadItemsProcessor
                 continue;
             }
 
+            $schemaArray = null;
             if ($schema instanceof ArrayObject) {
                 $schemaArray = $schema->getArrayCopy();
-            } elseif (is_array($schema)) {
-                $schemaArray = $schema;
-            } else {
+            }
+
+            if ($schemaArray === null && ! is_array($schema)) {
                 continue;
             }
 
+            $schemaArray ??= $schema;
             $updated = $this->updateSchema($schemaArray);
             if ($updated === null) {
                 continue;
