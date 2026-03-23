@@ -174,6 +174,19 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $this->assertSame($openApi, $processor->process($openApi));
     }
 
+    public function testProcessSkipsConstraintViolationSchemasWithUnsupportedShape(): void
+    {
+        $schemas = new ArrayObject([
+            'ConstraintViolation' => new \stdClass(),
+        ]);
+        $components = new Components($schemas);
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
+
+        $processor = new ConstraintViolationPayloadItemsProcessor();
+
+        $this->assertSame($openApi, $processor->process($openApi));
+    }
+
     public function testProcessSkipsNonConstraintViolationSchemas(): void
     {
         // Includes a ConstraintViolation schema, but not in a shape the processor updates.
