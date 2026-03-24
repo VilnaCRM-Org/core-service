@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\OpenApiFixer;
 use App\Tests\Unit\UnitTestCase;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 final class OpenApiFixerBehaviorTest extends UnitTestCase
@@ -65,7 +66,7 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
             $this->fail('Expected RuntimeException was not thrown.');
         } catch (\RuntimeException $exception) {
             $this->assertSame(0, $exception->getCode());
-            $this->assertInstanceOf(\Throwable::class, $exception->getPrevious());
+            $this->assertInstanceOf(ParseException::class, $exception->getPrevious());
         }
     }
 
