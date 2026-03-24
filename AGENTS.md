@@ -50,11 +50,10 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
    - Fix all issues if "❌ CI checks failed:" appears
    - **DO NOT** finish tasks until CI passes completely
 
-3. **CRITICAL: Use GitHub Codespaces with Login Shells (for secrets/auth)**
-   - Non-interactive commands: `gh codespace ssh -c <codespace-name> -- "bash -lc '<command>'"`
-   - Interactive session: `gh codespace ssh -c <codespace-name>` then run `bash -l`
-   - Run bootstrap from repo root when needed: `bash scripts/codespaces/setup-secure-agent-env.sh`
-   - **NEVER** use non-login SSH commands for auth-dependent checks (`gh codespace ssh -- '<command>'`) because Codespaces secrets may not be loaded
+3. **CRITICAL: Use Workspace Login Shells for Secrets/Auth**
+   - Run bootstrap from repo root when needed: `bash scripts/local-coder/setup-secure-agent-env.sh`
+   - Use a login shell (`bash -l`) before auth-dependent checks when the workspace was just created
+   - Avoid non-login shells immediately after bootstrap because `~/.config/core-service/agent-secrets.env` is sourced from `~/.bashrc` and `~/.profile`
 
 ### Quick Skill Guide
 

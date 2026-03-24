@@ -106,33 +106,29 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
-	@cleanup_coverage() { rm -f coverage.txt; }; \
-	trap cleanup_coverage EXIT; \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit; \
+	@tmpfile=$$(mktemp); \
+	script -qec "$(RUN_TESTS_COVERAGE) --testsuite=Unit" /dev/null > $$tmpfile 2>&1; \
 	test_status=$$?; \
+	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
 		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
-	if [ -z "$$CI" ]; then \
-		sleep 2; \
-		wait_count=0; \
-		while [ $$wait_count -lt 10 ] && [ ! -f coverage.txt ]; do \
-			$(DOCKER_COMPOSE) cp php:/srv/app/coverage.txt coverage.txt >/dev/null 2>&1 || true; \
-			if [ -f coverage.txt ]; then \
-				break; \
-			fi; \
-			wait_count=$$((wait_count + 1)); \
-			sleep 2; \
-		done; \
+	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
+		rm -f $$tmpfile; \
+		exit 1; \
 	fi; \
 	if [ ! -f coverage.txt ]; then \
 		echo "❌ ERROR: coverage.txt was not generated."; \
+		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
 	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
-		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
+		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
@@ -150,7 +146,20 @@ deptrac-debug: ## Find files unassigned for Deptrac
 	$(EXEC_ENV) $(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
 ensure-test-services: ## Ensure required Docker services for test suites are running
-	$(DOCKER_COMPOSE) up --detach database redis php caddy localstack
+	@attempt=1; \
+	max_attempts=3; \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
+		if [ $$attempt -ge $$max_attempts ]; then \
+			echo "❌ Failed to start required test services after $$attempt attempts."; \
+			$(DOCKER_COMPOSE) ps || true; \
+			exit 1; \
+		fi; \
+		echo "⚠️  Failed to start required test services (attempt $$attempt/$$max_attempts). Retrying..."; \
+		$(DOCKER_COMPOSE) ps || true; \
+		attempt=$$((attempt + 1)); \
+		sleep 5; \
+	done; \
+	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
