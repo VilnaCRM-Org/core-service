@@ -104,7 +104,8 @@ load 'bats-assert/load'
 }
 
 @test "make ensure-test-services uses docker compose wait mode" {
-  run rg -n --fixed-strings 'up --detach --wait database redis php caddy localstack' Makefile
+  run sed -n '/^ensure-test-services:/,/^setup-test-db:/p' Makefile
   assert_success
   assert_output --partial 'ensure-test-services'
+  assert_output --partial 'up --detach --wait database redis php caddy localstack'
 }
