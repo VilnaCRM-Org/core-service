@@ -9,10 +9,7 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerStatus implements CustomerStatusInterface
 {
-    /**
-     * @var UlidInterface
-     */
-    private mixed $ulid;
+    private UlidInterface $ulid;
 
     public function __construct(
         private string $value,

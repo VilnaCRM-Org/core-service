@@ -16,44 +16,32 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
     ) {
     }
 
-    /**
-     * @psalm-suppress UnusedParam
-     */
     public function shouldRetry(
-        AsyncContext $context,
-        ?string $responseContent,
-        ?TransportExceptionInterface $exception
+        AsyncContext $_context,
+        ?string $_responseContent,
+        ?TransportExceptionInterface $_exception
     ): ?bool {
         return true;
     }
 
-    /**
-     * @psalm-suppress UnusedParam
-     */
     public function getDelay(
-        AsyncContext $context,
-        ?string $responseContent,
-        ?TransportExceptionInterface $exception
+        AsyncContext $_context,
+        ?string $_responseContent,
+        ?TransportExceptionInterface $_exception
     ): int {
         return $this->delayMs;
     }
 
-    /**
-     * @psalm-suppress UnusedParam
-     */
     public function isRetryable(
-        Envelope $message,
-        ?\Throwable $throwable = null
+        Envelope $_message,
+        ?\Throwable $_throwable = null
     ): bool {
         return true;
     }
 
-    /**
-     * @psalm-suppress UnusedParam
-     */
     public function getWaitingTime(
-        Envelope $message,
-        ?\Throwable $throwable = null
+        Envelope $_message,
+        ?\Throwable $_throwable = null
     ): int {
         return $this->delayMs;
     }

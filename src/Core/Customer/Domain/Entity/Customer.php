@@ -9,15 +9,9 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 use DateTime;
 use DateTimeImmutable;
 
-/**
- * @psalm-suppress PossiblyUnusedMethod
- */
 class Customer implements CustomerInterface
 {
-    /**
-     * @var UlidInterface
-     */
-    private mixed $ulid;
+    private UlidInterface $ulid;
 
     public function __construct(
         private string $initials,

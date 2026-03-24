@@ -28,10 +28,7 @@ final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubs
     ) {
     }
 
-    /**
-     * @psalm-suppress UnusedParam
-     */
-    public function __invoke(CustomerUpdatedEvent $event): void
+    public function __invoke(CustomerUpdatedEvent $_event): void
     {
         $this->metricsEmitter->emit($this->metricFactory->create());
     }
