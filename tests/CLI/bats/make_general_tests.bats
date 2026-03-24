@@ -102,3 +102,9 @@ load 'bats-assert/load'
   [ -f "$openapi_file" ]
   assert_success
 }
+
+@test "make ensure-test-services uses docker compose wait mode" {
+  run rg -n --fixed-strings 'up --detach --wait database redis php caddy localstack' Makefile
+  assert_success
+  assert_output --partial 'ensure-test-services'
+}

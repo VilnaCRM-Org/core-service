@@ -143,7 +143,7 @@ deptrac-debug: ## Find files unassigned for Deptrac
 ensure-test-services: ## Ensure required Docker services for test suites are running
 	@attempt=1; \
 	max_attempts=3; \
-	until $(DOCKER_COMPOSE) up --detach database redis php caddy localstack; do \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
 			$(DOCKER_COMPOSE) ps || true; \
