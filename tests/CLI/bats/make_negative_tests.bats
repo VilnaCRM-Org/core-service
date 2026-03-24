@@ -41,10 +41,7 @@ load 'bats-assert/load'
   run make infection
   assert_failure
 
-  # PHP 8.4 may show "errors were encountered" instead of "mutants were not covered"
-  if [[ ! "$output" =~ "mutants were not covered by tests" ]] && [[ ! "$output" =~ "errors were encountered" ]]; then
-    fail "Expected either 'mutants were not covered by tests' or 'errors were encountered', but got neither"
-  fi
+  assert_output --partial "1 covered mutants were not detected"
 }
 
 @test "make behat should fail when scenarios fail" {
