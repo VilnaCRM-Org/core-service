@@ -314,23 +314,28 @@ final class OpenApiFixerTest extends UnitTestCase
 
     public function testAddUlidPropertyWithNonArrayProperties(): void
     {
-        $spec = [
-            'components' => [
-                'schemas' => [
-                    'UlidInterface.jsonld-output' => [
-                        'type' => 'object',
-                        'properties' => 'not-an-array',
-                    ],
-                ],
-            ],
-        ];
+        $spec = ['components' => ['schemas' => ['UlidInterface.jsonld-output' => ['type' => 'object', 'properties' => 'not-an-array']]]];
 
         $this->writeSpecFile($spec);
         $fixer = new OpenApiFixer($this->specFile);
         $fixer->run();
 
         $result = $this->readSpecFile();
-        $this->assertIsArray($result['components']['schemas']['UlidInterface.jsonld-output']['properties']);
+        $properties = $result['components']['schemas']['UlidInterface.jsonld-output']['properties'];
+        $this->assertIsArray($properties);
+        $this->assertSame(['type' => 'string'], $properties['ulid']);
+    }
+
+    public function testAddUlidPropertyWithNullUlidInterfaceSchema(): void
+    {
+        $spec = ['components' => ['schemas' => ['UlidInterface.jsonld-output' => null]]];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame(['type' => 'string'], $result['components']['schemas']['UlidInterface.jsonld-output']['properties']['ulid']);
     }
 
     public function testFixUlidRefToType(): void

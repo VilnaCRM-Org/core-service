@@ -146,12 +146,16 @@ final class OpenApiFixer
 
         $schemas = &$components['schemas'];
 
-        // Check if UlidInterface.jsonld-output exists
-        if (! isset($schemas['UlidInterface.jsonld-output'])) {
+        // Check if UlidInterface.jsonld-output exists, even if it is explicitly null
+        if (! array_key_exists('UlidInterface.jsonld-output', $schemas)) {
             return;
         }
 
         $ulidInterface = &$schemas['UlidInterface.jsonld-output'];
+
+        if (! is_array($ulidInterface)) {
+            $ulidInterface = [];
+        }
 
         if (! isset($ulidInterface['properties']) || ! is_array($ulidInterface['properties'])) {
             $ulidInterface['properties'] = [];

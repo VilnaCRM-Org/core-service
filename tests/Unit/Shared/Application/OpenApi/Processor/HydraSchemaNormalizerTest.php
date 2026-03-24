@@ -12,32 +12,75 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
     public function testNormalizeAddsAllOfKeyWhenMissing(): void
     {
         $normalizer = new HydraSchemaNormalizer();
-        $schemas = ['HydraCollectionBaseSchema' => ['some' => 'value']];
+        $schemas = [
+            'HydraCollectionBaseSchema' => ['some' => 'value'],
+            'UnrelatedSchema' => ['type' => 'string'],
+        ];
 
         $result = $normalizer->normalize($schemas);
 
-        self::assertArrayHasKey('allOf', $result);
-        self::assertNull($result['allOf']);
+        self::assertSame(
+            [
+                'HydraCollectionBaseSchema' => [
+                    'some' => 'value',
+                    'allOf' => null,
+                ],
+                'UnrelatedSchema' => ['type' => 'string'],
+                'allOf' => null,
+            ],
+            $result
+        );
     }
 
     public function testNormalizeKeepsExistingAllOfKey(): void
     {
         $normalizer = new HydraSchemaNormalizer();
-        $schemas = ['HydraCollectionBaseSchema' => ['allOf' => ['existing' => 'value']]];
+        $schemas = [
+            'HydraCollectionBaseSchema' => [
+                'allOf' => [
+                    ['existing' => 'value'],
+                ],
+            ],
+            'UnrelatedSchema' => ['type' => 'integer'],
+        ];
 
         $result = $normalizer->normalize($schemas);
 
-        self::assertSame(['existing' => 'value'], $result['allOf']);
+        self::assertSame(
+            [
+                'HydraCollectionBaseSchema' => [
+                    'allOf' => [
+                        ['existing' => 'value'],
+                    ],
+                ],
+                'UnrelatedSchema' => ['type' => 'integer'],
+                'allOf' => [
+                    ['existing' => 'value'],
+                ],
+            ],
+            $result
+        );
     }
 
     public function testNormalizeWithNullSchema(): void
     {
         $normalizer = new HydraSchemaNormalizer();
-        $schemas = ['HydraCollectionBaseSchema' => null];
+        $schemas = [
+            'HydraCollectionBaseSchema' => null,
+            'UnrelatedSchema' => ['type' => 'boolean'],
+        ];
 
         $result = $normalizer->normalize($schemas);
 
-        self::assertArrayHasKey('allOf', $result);
-        self::assertNull($result['allOf']);
+        self::assertSame(
+            [
+                'HydraCollectionBaseSchema' => [
+                    'allOf' => null,
+                ],
+                'UnrelatedSchema' => ['type' => 'boolean'],
+                'allOf' => null,
+            ],
+            $result
+        );
     }
 }
