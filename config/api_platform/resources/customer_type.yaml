@@ -9,7 +9,6 @@ App\Core\Customer\Domain\Entity\CustomerType:
   # REST Operations
   operations:
     ApiPlatform\Metadata\GetCollection:
-      strictQueryParameterValidation: false
       filters:
         - customer.mongodb.type.order
         - customer.mongodb.type.partial_search
