@@ -68,10 +68,12 @@ final class MongoCustomerRepository extends BaseRepository implements
 
     public function deleteById(mixed $id): void
     {
-        $this->createQueryBuilder()
-            ->remove()
-            ->field('ulid')->equals($id)
-            ->getQuery()
-            ->execute();
+        $customer = $this->find($id);
+
+        if (! $customer instanceof Customer) {
+            return;
+        }
+
+        $this->delete($customer);
     }
 }

@@ -102,6 +102,62 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         self::assertNull($result2);
     }
 
+    public function testCacheInvalidatedAfterDirectDeleteByEmail(): void
+    {
+        $email = sprintf('john+%s@example.com', (string) $this->generateUlid());
+        $customer = $this->createTestCustomer('John Doe', $email);
+
+        $cachedCustomer = $this->repository->findByEmail($email);
+        self::assertNotNull($cachedCustomer);
+        self::assertTrue(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($email)))
+                ->isHit()
+        );
+
+        $this->repository->deleteByEmail($email);
+
+        self::assertFalse(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($email)))
+                ->isHit()
+        );
+        self::assertFalse(
+            $this->cachePool->getItem('customer.' . $customer->getUlid())->isHit()
+        );
+        self::assertNull($this->repository->findByEmail($email));
+    }
+
+    public function testCacheInvalidatedAfterDirectDeleteById(): void
+    {
+        $customer = $this->createTestCustomer(
+            'John Doe',
+            sprintf('john+%s@example.com', (string) $this->generateUlid())
+        );
+        $customerId = $customer->getUlid();
+
+        $cachedCustomer = $this->repository->find($customerId);
+        self::assertNotNull($cachedCustomer);
+        self::assertTrue(
+            $this->cachePool->getItem('customer.' . $customerId)->isHit()
+        );
+
+        $this->repository->deleteById($customerId);
+
+        self::assertFalse(
+            $this->cachePool->getItem('customer.' . $customerId)->isHit()
+        );
+        self::assertFalse(
+            $this->cachePool
+                ->getItem(
+                    'customer.email.' .
+                    hash('sha256', strtolower($customer->getEmail()))
+                )
+                ->isHit()
+        );
+        self::assertNull($this->repository->find($customerId));
+    }
+
     public function testEmailCacheInvalidatedAfterEmailChange(): void
     {
         $oldEmail = sprintf('john+%s@example.com', (string) $this->generateUlid());

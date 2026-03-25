@@ -186,47 +186,48 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $repository->deleteByEmail($email);
     }
 
-    public function testDeleteByIdBuildsRemoveQuery(): void
+    public function testDeleteByIdDeletesResolvedCustomer(): void
     {
         $id = (string) $this->faker->ulid();
-        $builder = $this->createMock(Builder::class);
-        $query = $this->createMock(Query::class);
+        $customer = $this->createMock(Customer::class);
 
         $repository = $this->getMockBuilder(MongoCustomerRepository::class)
             ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['createQueryBuilder'])
+            ->onlyMethods(['find', 'delete'])
             ->getMock();
 
         $repository
             ->expects($this->once())
-            ->method('createQueryBuilder')
-            ->willReturn($builder);
-
-        $builder
-            ->expects($this->once())
-            ->method('remove')
-            ->willReturnSelf();
-
-        $builder
-            ->expects($this->once())
-            ->method('field')
-            ->with('ulid')
-            ->willReturnSelf();
-
-        $builder
-            ->expects($this->once())
-            ->method('equals')
+            ->method('find')
             ->with($id)
-            ->willReturnSelf();
+            ->willReturn($customer);
 
-        $builder
+        $repository
             ->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($query);
+            ->method('delete')
+            ->with($customer);
 
-        $query
+        $repository->deleteById($id);
+    }
+
+    public function testDeleteByIdReturnsWhenCustomerDoesNotExist(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find', 'delete'])
+            ->getMock();
+
+        $repository
             ->expects($this->once())
-            ->method('execute');
+            ->method('find')
+            ->with($id)
+            ->willReturn(null);
+
+        $repository
+            ->expects($this->never())
+            ->method('delete');
 
         $repository->deleteById($id);
     }

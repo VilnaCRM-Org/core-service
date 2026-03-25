@@ -28,7 +28,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  *
  * Cache Invalidation:
  * - Handled by CustomerCacheInvalidationSubscriber via domain events
- * - This class only reads from cache, never invalidates
+ * - Direct deleteByEmail/deleteById cleanup paths invalidate cache explicitly
  */
 final class CachedCustomerRepository implements CustomerRepositoryInterface
 {
@@ -138,14 +138,36 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         $this->inner->delete($customer);
     }
 
+    /**
+     * Direct deletion by email bypasses domain events, so cache invalidation
+     * must happen here to keep test cleanup and other raw-delete callers
+     * consistent with the normal event-driven delete path.
+     */
     public function deleteByEmail(string $email): void
     {
+        $customer = $this->inner->findByEmail($email);
+
         $this->inner->deleteByEmail($email);
+
+        $this->invalidateTagsForDeletedCustomer($customer, $email);
     }
 
+    /**
+     * Direct deletion by ID bypasses domain events, so cache invalidation
+     * must happen here to keep test cleanup and other raw-delete callers
+     * consistent with the normal event-driven delete path.
+     */
     public function deleteById(mixed $id): void
     {
+        $customer = $this->inner->find($id);
+
         $this->inner->deleteById($id);
+
+        $this->invalidateTagsForDeletedCustomer(
+            $customer instanceof Customer ? $customer : null,
+            null,
+            (string) $id
+        );
     }
 
     /**
@@ -204,5 +226,34 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             'error' => $e->getMessage(),
             'operation' => 'cache.error',
         ]);
+    }
+
+    private function invalidateTagsForDeletedCustomer(
+        ?Customer $customer,
+        ?string $deletedEmail = null,
+        ?string $deletedId = null
+    ): void {
+        $tags = ['customer.collection'];
+
+        if ($customer instanceof Customer) {
+            $tags[] = 'customer.' . $customer->getUlid();
+            $tags[] = 'customer.email.' .
+                $this->cacheKeyBuilder->hashEmail($customer->getEmail());
+
+            $this->cache->invalidateTags(array_values(array_unique($tags)));
+
+            return;
+        }
+
+        if ($deletedId !== null) {
+            $tags[] = 'customer.' . $deletedId;
+        }
+
+        if ($deletedEmail !== null) {
+            $tags[] = 'customer.email.' .
+                $this->cacheKeyBuilder->hashEmail($deletedEmail);
+        }
+
+        $this->cache->invalidateTags(array_values(array_unique($tags)));
     }
 }

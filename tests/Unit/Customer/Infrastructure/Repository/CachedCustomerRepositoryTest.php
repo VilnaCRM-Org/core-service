@@ -192,11 +192,70 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
     public function testDeleteByEmailDelegatesToInnerRepository(): void
     {
         $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
 
         $this->innerRepository
             ->expects($this->once())
             ->method('deleteByEmail')
             ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.' . $customer->getUlid(),
+                'customer.email.' . $emailHash,
+            ]);
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailInvalidatesFallbackTagsWhenCustomerLookupMisses(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn(null);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.email.' . $emailHash,
+            ]);
 
         $this->repository->deleteByEmail($email);
     }
@@ -204,11 +263,64 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
     public function testDeleteByIdDelegatesToInnerRepository(): void
     {
         $id = (string) $this->faker->ulid();
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => $id,
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn($customer);
 
         $this->innerRepository
             ->expects($this->once())
             ->method('deleteById')
             ->with($id);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.' . $id,
+                'customer.email.' . $emailHash,
+            ]);
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdInvalidatesFallbackTagsWhenCustomerLookupMisses(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn(null);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.' . $id,
+            ]);
 
         $this->repository->deleteById($id);
     }
