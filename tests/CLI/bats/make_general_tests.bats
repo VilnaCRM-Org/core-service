@@ -117,5 +117,5 @@ load 'bats-assert/load'
   assert_success
   assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRIES:-5'
   assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRY_DELAY_SECONDS:-5'
-  assert_output --partial 'docker build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
+  assert_output --partial '$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
 }
