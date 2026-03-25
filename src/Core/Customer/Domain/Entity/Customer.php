@@ -11,8 +11,6 @@ use DateTimeImmutable;
 
 class Customer implements CustomerInterface
 {
-    private UlidInterface $ulid;
-
     public function __construct(
         private string $initials,
         private string $email,
@@ -21,11 +19,10 @@ class Customer implements CustomerInterface
         private CustomerType $type,
         private CustomerStatus $status,
         private ?bool $confirmed,
-        UlidInterface $ulid,
+        private UlidInterface $ulid,
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTime $updatedAt = null,
     ) {
-        $this->ulid = $ulid;
         $this->createdAt ??= new DateTimeImmutable();
         $this->updatedAt ??= new DateTime();
     }

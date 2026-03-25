@@ -9,6 +9,9 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
+/**
+ * @psalm-suppress UnusedParam
+ */
 final class InfiniteRetryStrategy implements RetryStrategyInterface
 {
     public function __construct(

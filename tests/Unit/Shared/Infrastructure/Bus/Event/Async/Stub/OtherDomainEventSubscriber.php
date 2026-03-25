@@ -30,6 +30,8 @@ final class OtherDomainEventSubscriber implements DomainEventSubscriberInterface
 
     /**
      * @return array<DomainEvent>
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function handled(): array
     {

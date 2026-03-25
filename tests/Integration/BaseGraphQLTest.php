@@ -127,6 +127,8 @@ abstract class BaseGraphQLTest extends BaseTest
      * Assert that GraphQL response data field equals expected value.
      *
      * @param array<string, string|int|float|bool|array|null> $response
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     protected function assertGraphQLDataFieldEquals(
         array $response,
@@ -233,6 +235,8 @@ abstract class BaseGraphQLTest extends BaseTest
      * Extract ULID from IRI path.
      *
      * GraphQL mutations expect just the ULID, not the full IRI path.
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     protected function extractUlidFromIri(string $iri): string
     {

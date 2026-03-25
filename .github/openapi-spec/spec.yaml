@@ -3504,8 +3504,6 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
         initials:
           type: string
         email:
@@ -3520,6 +3518,8 @@ components:
           $ref: '#/components/schemas/CustomerStatus.jsonld-output'
         confirmed:
           type: boolean
+        ulid:
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
         createdAt:
           type: string
           format: date-time
@@ -3595,9 +3595,9 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          type: string
         value:
+          type: string
+        ulid:
           type: string
     CustomerType.TypeCreate.jsonld:
       type: object
@@ -3666,10 +3666,10 @@ components:
         '@type':
           readOnly: true
           type: string
-        ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
         value:
           type: string
+        ulid:
+          $ref: '#/components/schemas/UlidInterface.jsonld-output'
     Error:
       type: object
       description: 'A representation of common errors.'

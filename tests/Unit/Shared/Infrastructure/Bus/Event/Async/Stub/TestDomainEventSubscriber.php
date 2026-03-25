@@ -43,6 +43,9 @@ final class TestDomainEventSubscriber implements DomainEventSubscriberInterface
         return $this->handled;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function clear(): void
     {
         $this->handled = [];

@@ -9,13 +9,10 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 class CustomerType implements CustomerTypeInterface
 {
-    private UlidInterface $ulid;
-
     public function __construct(
         private string $value,
-        UlidInterface $ulid
+        private UlidInterface $ulid,
     ) {
-        $this->ulid = $ulid;
     }
 
     public function getUlid(): string

@@ -50,9 +50,10 @@ COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
+DOCKER_TTY_FLAG = $(if $(CI),-T,)
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable

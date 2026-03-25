@@ -13,7 +13,7 @@ final class TestMessageReusableHandler
     {
     }
 
-    public function __invoke(TestMessage $message): void
+    public function __invoke(TestMessage $_message): void
     {
         ++$this->counter->value;
     }

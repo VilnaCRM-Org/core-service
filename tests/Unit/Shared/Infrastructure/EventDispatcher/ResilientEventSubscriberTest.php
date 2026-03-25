@@ -87,7 +87,7 @@ final class ResilientEventSubscriberTest extends UnitTestCase
         // Trigger a TypeError by calling a function with wrong argument type
         $subscriber->executeSafely(static function (): void {
             // This will trigger a TypeError: argument must be of type int, string given
-            $func = static function (int $value): void {
+            $func = static function (int $_value): void {
             };
             $func('invalid'); // @phpstan-ignore-line
         });

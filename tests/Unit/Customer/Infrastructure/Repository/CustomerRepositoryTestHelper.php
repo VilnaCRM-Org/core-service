@@ -50,6 +50,8 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
 
     /**
      * Additional method not in the interface - for testing __call() proxy
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function getClassName(): string
     {

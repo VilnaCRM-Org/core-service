@@ -39,6 +39,9 @@ final class AsyncEventDispatcherSpy implements AsyncEventDispatcherInterface
         return $this->dispatched;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function clear(): void
     {
         $this->dispatched = [];
