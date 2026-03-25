@@ -46,7 +46,25 @@ jobs:
           php-version: ${{ vars.PHP_VERSION }}
 
       - name: Start application for load tests
-        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
+        run: |
+          attempt=1
+          max_attempts=5
+          retry_delay=5
+
+          while [ "$attempt" -le "$max_attempts" ]; do
+            if docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq "$max_attempts" ]; then
+              echo "Failed to start load test application after $attempt attempts."
+              exit 1
+            fi
+
+            echo "Load test application startup failed on attempt $attempt/$max_attempts. Retrying in $retry_delay seconds..."
+            attempt=$((attempt + 1))
+            sleep "$retry_delay"
+          done
 
       - name: Run Cache Performance Load Tests
         run: make cache-performance-load-tests

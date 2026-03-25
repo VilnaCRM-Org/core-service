@@ -107,5 +107,15 @@ load 'bats-assert/load'
   run sed -n '/^ensure-test-services:/,/^setup-test-db:/p' Makefile
   assert_success
   assert_output --partial 'ensure-test-services'
+  assert_output --partial 'DOCKER_COMPOSE_UP_RETRIES:-5'
+  assert_output --partial 'DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5'
   assert_output --partial 'up --detach --wait database redis php caddy localstack'
+}
+
+@test "make build-spectral-docker retries transient docker failures" {
+  run sed -n '/^build-spectral-docker:/,/^infection:/p' Makefile
+  assert_success
+  assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRIES:-5'
+  assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRY_DELAY_SECONDS:-5'
+  assert_output --partial 'docker build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
 }

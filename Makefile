@@ -147,7 +147,8 @@ deptrac-debug: ## Find files unassigned for Deptrac
 
 ensure-test-services: ## Ensure required Docker services for test suites are running
 	@attempt=1; \
-	max_attempts=3; \
+	max_attempts=$${DOCKER_COMPOSE_UP_RETRIES:-5}; \
+	retry_delay=$${DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5}; \
 	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
@@ -157,7 +158,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		echo "⚠️  Failed to start required test services (attempt $$attempt/$$max_attempts). Retrying..."; \
 		$(DOCKER_COMPOSE) ps || true; \
 		attempt=$$((attempt + 1)); \
-		sleep 5; \
+		sleep $$retry_delay; \
 	done; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
@@ -231,7 +232,21 @@ build-k6-docker:
 	done
 
 build-spectral-docker:
-	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
+	@max_attempts=$${SPECTRAL_DOCKER_BUILD_RETRIES:-5}; \
+	retry_delay=$${SPECTRAL_DOCKER_BUILD_RETRY_DELAY_SECONDS:-5}; \
+	attempt=1; \
+	while [ $$attempt -le $$max_attempts ]; do \
+		if $(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .; then \
+			exit 0; \
+		fi; \
+		if [ $$attempt -eq $$max_attempts ]; then \
+			echo "Spectral Docker image build failed after $$attempt attempts."; \
+			exit 1; \
+		fi; \
+		echo "Spectral Docker image build failed on attempt $$attempt/$$max_attempts. Retrying in $$retry_delay seconds..."; \
+		sleep $$retry_delay; \
+		attempt=$$((attempt + 1)); \
+	done
 
 infection: ## Run mutation testing with 100% MSI requirement
 	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
