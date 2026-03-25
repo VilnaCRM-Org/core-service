@@ -214,7 +214,21 @@ cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load t
 	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
 
 build-k6-docker:
-	$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .
+	@max_attempts=$${K6_DOCKER_BUILD_RETRIES:-3}; \
+	retry_delay=$${K6_DOCKER_BUILD_RETRY_DELAY_SECONDS:-2}; \
+	attempt=1; \
+	while [ $$attempt -le $$max_attempts ]; do \
+		if $(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .; then \
+			exit 0; \
+		fi; \
+		if [ $$attempt -eq $$max_attempts ]; then \
+			echo "K6 Docker image build failed after $$attempt attempts."; \
+			exit 1; \
+		fi; \
+		echo "K6 Docker image build failed on attempt $$attempt/$$max_attempts. Retrying in $$retry_delay seconds..."; \
+		sleep $$retry_delay; \
+		attempt=$$((attempt + 1)); \
+	done
 
 build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
