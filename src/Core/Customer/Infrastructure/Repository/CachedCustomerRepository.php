@@ -138,6 +138,16 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         $this->inner->delete($customer);
     }
 
+    public function deleteByEmail(string $email): void
+    {
+        $this->inner->deleteByEmail($email);
+    }
+
+    public function deleteById(mixed $id): void
+    {
+        $this->inner->deleteById($id);
+    }
+
     /**
      * Load customer from database and configure cache item
      */

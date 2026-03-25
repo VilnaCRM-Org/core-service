@@ -10,6 +10,8 @@ use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+use Doctrine\ODM\MongoDB\Query\Builder;
+use Doctrine\ODM\MongoDB\Query\Query;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
@@ -137,5 +139,95 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $result = $repository->findByEmail($email);
 
         self::assertSame($customer, $result);
+    }
+
+    public function testDeleteByEmailBuildsRemoveQuery(): void
+    {
+        $email = 'test@example.com';
+        $builder = $this->createMock(Builder::class);
+        $query = $this->createMock(Query::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['createQueryBuilder'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($builder);
+
+        $builder
+            ->expects($this->once())
+            ->method('remove')
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('field')
+            ->with('email')
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('equals')
+            ->with($email)
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $query
+            ->expects($this->once())
+            ->method('execute');
+
+        $repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByIdBuildsRemoveQuery(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $builder = $this->createMock(Builder::class);
+        $query = $this->createMock(Query::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['createQueryBuilder'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($builder);
+
+        $builder
+            ->expects($this->once())
+            ->method('remove')
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('field')
+            ->with('ulid')
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('equals')
+            ->with($id)
+            ->willReturnSelf();
+
+        $builder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $query
+            ->expects($this->once())
+            ->method('execute');
+
+        $repository->deleteById($id);
     }
 }

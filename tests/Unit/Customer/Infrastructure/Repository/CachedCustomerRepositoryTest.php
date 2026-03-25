@@ -189,6 +189,30 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->repository->delete($customer);
     }
 
+    public function testDeleteByEmailDelegatesToInnerRepository(): void
+    {
+        $email = 'test@example.com';
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByIdDelegatesToInnerRepository(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->repository->deleteById($id);
+    }
+
     public function testFindCacheMissLoadsFromDatabase(): void
     {
         $customerId = (string) $this->faker->ulid();
