@@ -23,7 +23,7 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
             [
                 'HydraCollectionBaseSchema' => [
                     'some' => 'value',
-                    'allOf' => null,
+                    'allOf' => [],
                 ],
                 'UnrelatedSchema' => ['type' => 'string'],
             ],
@@ -71,7 +71,7 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
         self::assertSame(
             [
                 'HydraCollectionBaseSchema' => [
-                    'allOf' => null,
+                    'allOf' => [],
                 ],
                 'UnrelatedSchema' => ['type' => 'boolean'],
             ],

@@ -42,10 +42,10 @@ final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
         $result = $fixer->process($this->createOpenApi($schemas));
         $resultSchemas = $result->getComponents()->getSchemas();
 
-        // Verify all schemas are preserved when ulid already exists
-        self::assertArrayHasKey('UlidInterface.jsonld-output', $resultSchemas);
-        self::assertArrayHasKey('Customer.jsonld-output', $resultSchemas);
-        self::assertArrayHasKey('CustomerType.jsonld-output', $resultSchemas);
+        self::assertSame(['type' => 'string'], $resultSchemas['UlidInterface.jsonld-output']['properties']['ulid']);
+        self::assertSame(['type' => 'string'], $resultSchemas['Customer.jsonld-output']['properties']['ulid']);
+        self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['ulid']);
+        self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['value']);
     }
 
     public function testDoesNotDropSchemasWhenRefIsNotUlidInterface(): void

@@ -22,7 +22,7 @@ final class HydraSchemaNormalizer
         }
         $normalized = SchemaNormalizer::normalize($schemas[self::HYDRA_COLLECTION_SCHEMA]);
         if (! array_key_exists('allOf', $normalized)) {
-            $normalized['allOf'] = null;
+            $normalized['allOf'] = [];
         }
         $schemas[self::HYDRA_COLLECTION_SCHEMA] = $normalized;
 
