@@ -14,20 +14,24 @@ final class ConstraintViolationPayloadItemsProcessor
     public function process(OpenApi $openApi): OpenApi
     {
         $components = $openApi->getComponents();
-        $schemas = $this->normalizeSchemas($components->getSchemas());
+        if ($components !== null) {
+            $schemas = $this->normalizeSchemas($components->getSchemas());
 
-        if ($schemas === []) {
-            return $openApi;
+            if ($schemas === []) {
+                return $openApi;
+            }
+
+            $changed = false;
+            $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
+
+            if ($changed) {
+                $updatedComponents = $components->withSchemas(new ArrayObject($schemas));
+
+                return $openApi->withComponents($updatedComponents);
+            }
         }
 
-        $changed = false;
-        $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
-
-        if (! $changed) {
-            return $openApi;
-        }
-
-        return $openApi->withComponents($components->withSchemas(new ArrayObject($schemas)));
+        return $openApi;
     }
 
     /**
