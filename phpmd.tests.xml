@@ -12,6 +12,7 @@
     <rule ref="rulesets/codesize.xml">
         <exclude name="TooManyPublicMethods"/>
         <exclude name="ExcessiveClassComplexity"/>
+        <exclude name="ExcessiveClassLength"/>
         <exclude name="ExcessiveMethodLength"/>
         <exclude name="TooManyMethods"/>
         <exclude name="TooManyFields"/>

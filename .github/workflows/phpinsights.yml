@@ -9,7 +9,7 @@ jobs:
     name: PHP Insights checks
     steps:
       - uses: actions/checkout@v4
-      - name: Start application
-        run: make start
+      - name: Start application services
+        run: docker compose up --detach --wait php
       - name: Run PHP Insights using docker
         run: docker compose run --rm php php ./vendor/bin/phpinsights --no-interaction --ansi --disable-security-check

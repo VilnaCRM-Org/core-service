@@ -15,8 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Start application
-        run: make start
+      - name: Start application services
+        run: docker compose up --detach --wait php
 
       - name: Run Psalm
         run: make psalm
