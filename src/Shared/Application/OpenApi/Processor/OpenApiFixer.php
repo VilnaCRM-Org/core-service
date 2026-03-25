@@ -393,11 +393,13 @@ final class OpenApiFixer
             return;
         }
 
-        if (
-            $node['security'] === null
-            || $node['security'] === []
-            || ($node['security'] instanceof ArrayObject && $node['security']->count() === 0)
-        ) {
+        if ($node['security'] === null || $node['security'] === []) {
+            $node['security'] = self::EMPTY_SECURITY_PLACEHOLDER;
+
+            return;
+        }
+
+        if ($node['security'] instanceof ArrayObject && $node['security']->count() === 0) {
             $node['security'] = self::EMPTY_SECURITY_PLACEHOLDER;
         }
     }

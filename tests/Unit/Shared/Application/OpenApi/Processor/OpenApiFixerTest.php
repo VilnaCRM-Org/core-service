@@ -722,6 +722,107 @@ final class OpenApiFixerTest extends UnitTestCase
         );
     }
 
+    public function testSecurityNormalizationContinuesPastNonArrayPathItems(): void
+    {
+        $spec = [
+            'paths' => [
+                '/invalid' => 'not-an-array',
+                '/valid' => [
+                    'security' => null,
+                    'get' => [
+                        'security' => null,
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame([], $result['paths']['/valid']['security']);
+        $this->assertSame([], $result['paths']['/valid']['get']['security']);
+    }
+
+    public function testSecurityNormalizationContinuesPastNonArrayOperations(): void
+    {
+        $spec = [
+            'paths' => [
+                '/valid' => [
+                    'summary' => 'not-an-operation-array',
+                    'get' => [
+                        'security' => null,
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame([], $result['paths']['/valid']['get']['security']);
+    }
+
+    public function testSecurityNormalizationPreservesConfiguredSecurityRequirements(): void
+    {
+        $spec = [
+            'security' => [
+                ['bearerAuth' => []],
+            ],
+            'paths' => [
+                '/valid' => [
+                    'get' => [
+                        'security' => [
+                            ['apiKeyAuth' => []],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame([['bearerAuth' => []]], $result['security']);
+        $this->assertSame([['apiKeyAuth' => []]], $result['paths']['/valid']['get']['security']);
+    }
+
+    public function testNonEmptyArrayObjectSecurityIsNotNormalized(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $node = [
+            'security' => new ArrayObject([
+                ['apiKeyAuth' => []],
+            ]),
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'normalizeSecurityValue');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, [&$node]);
+
+        $this->assertInstanceOf(ArrayObject::class, $node['security']);
+        $this->assertCount(1, $node['security']);
+    }
+
+    public function testEmptyArrayObjectSecurityIsNormalized(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $node = [
+            'security' => new ArrayObject(),
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'normalizeSecurityValue');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, [&$node]);
+
+        $this->assertSame('__OPENAPI_EMPTY_SECURITY__', $node['security']);
+    }
+
     public function testRunThrowsExceptionOnInvalidYaml(): void
     {
         // Write invalid YAML to trigger ParseException in readSpec

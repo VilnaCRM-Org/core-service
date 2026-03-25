@@ -6,7 +6,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use App\Shared\Application\OpenApi\Processor\OpenApiFixer;
 
-$specFile = __DIR__ . '/../.github/openapi-spec/spec.yaml';
+$specFile = $argv[1] ?? (__DIR__ . '/../.github/openapi-spec/spec.yaml');
 
 try {
     $fixer = new OpenApiFixer($specFile);
