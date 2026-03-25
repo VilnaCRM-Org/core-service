@@ -1037,6 +1037,39 @@ final class OpenApiFixerTest extends UnitTestCase
         $this->assertSame('/errors/500', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
     }
 
+    public function testFix422ErrorTypeSkipsNonArrayIndividualResponse(): void
+    {
+        $spec = [
+            'paths' => [
+                '/customers' => [
+                    'post' => [
+                        'responses' => [
+                            '422' => 'not-an-array',
+                            '500' => [
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame('not-an-array', $result['paths']['/customers']['post']['responses']['422']);
+        $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
+    }
+
     public function testFix204ResponsesWithNonArrayResponses(): void
     {
         $spec = [

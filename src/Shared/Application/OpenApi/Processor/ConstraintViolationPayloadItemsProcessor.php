@@ -54,16 +54,11 @@ final class ConstraintViolationPayloadItemsProcessor
                 continue;
             }
 
-            $schemaArray = null;
-            if ($schema instanceof ArrayObject) {
-                $schemaArray = $schema->getArrayCopy();
-            }
-
-            if ($schemaArray === null && ! is_array($schema)) {
+            $schemaArray = $this->normalizeSchema($schema);
+            if ($schemaArray === null) {
                 continue;
             }
 
-            $schemaArray ??= $schema;
             $updated = $this->updateSchema($schemaArray);
             if ($updated === null) {
                 continue;
@@ -86,5 +81,17 @@ final class ConstraintViolationPayloadItemsProcessor
         $normalized = SchemaNormalizer::normalize($schema);
 
         return ConstraintViolationPayloadItemsUpdater::update($normalized);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function normalizeSchema(mixed $schema): ?array
+    {
+        return match (true) {
+            $schema instanceof ArrayObject => $schema->getArrayCopy(),
+            is_array($schema) => $schema,
+            default => null,
+        };
     }
 }

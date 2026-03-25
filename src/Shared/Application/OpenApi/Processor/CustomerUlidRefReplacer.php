@@ -18,9 +18,11 @@ final class CustomerUlidRefReplacer
         $schema = $this->toArray($schemas[$schemaName] ?? []);
         $properties = $this->toArray($schema['properties'] ?? []);
         $ulidProperty = $this->toArray($properties['ulid'] ?? []);
-        $ref = $ulidProperty['$ref'] ?? null;
+        $ref = is_string($ulidProperty['$ref'] ?? null)
+            ? $ulidProperty['$ref']
+            : '';
 
-        if (! is_string($ref) || ! str_contains($ref, 'UlidInterface')) {
+        if (! str_contains($ref, 'UlidInterface')) {
             return $schemas;
         }
 
@@ -36,10 +38,10 @@ final class CustomerUlidRefReplacer
      */
     private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
-        if ($value instanceof ArrayObject) {
-            return $value->getArrayCopy();
-        }
-
-        return is_array($value) ? $value : [];
+        return match (true) {
+            $value instanceof ArrayObject => $value->getArrayCopy(),
+            is_array($value) => $value,
+            default => [],
+        };
     }
 }

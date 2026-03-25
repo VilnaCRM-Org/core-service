@@ -40,11 +40,11 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
 
     public function onResponse(ResponseEvent $event): void
     {
-        if (! $this->shouldEmitMetric($event)) {
-            return;
-        }
-
         $this->safeExecute(function () use ($event): void {
+            if (! $this->shouldEmitMetric($event)) {
+                return;
+            }
+
             $this->emitEndpointMetric($event);
         }, KernelEvents::RESPONSE);
     }

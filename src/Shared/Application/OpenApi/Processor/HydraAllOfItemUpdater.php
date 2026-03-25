@@ -34,6 +34,11 @@ final class HydraAllOfItemUpdater
         return new ArrayObject($normalizedItem);
     }
 
+    /**
+     * @param array<string, SchemaValue> $normalizedItem
+     *
+     * @return array<string, SchemaValue>
+     */
     private function extractAndNormalizeProperties(array $normalizedItem): array
     {
         if (! array_key_exists('properties', $normalizedItem)) {
@@ -43,6 +48,11 @@ final class HydraAllOfItemUpdater
         return SchemaNormalizer::normalize($normalizedItem['properties']);
     }
 
+    /**
+     * @param array<string, SchemaValue> $properties
+     *
+     * @return array<string, SchemaValue>
+     */
     private function extractAndNormalizeView(array $properties): array
     {
         if (! array_key_exists('view', $properties)) {
@@ -52,6 +62,11 @@ final class HydraAllOfItemUpdater
         return SchemaNormalizer::normalize($properties['view']);
     }
 
+    /**
+     * @param array<string, SchemaValue> $viewSchema
+     *
+     * @return array<string, SchemaValue>|null
+     */
     private function extractAndUpdateExample(array $viewSchema): ?array
     {
         if (! array_key_exists('example', $viewSchema)) {

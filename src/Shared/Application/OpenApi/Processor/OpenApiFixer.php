@@ -256,17 +256,19 @@ final class OpenApiFixer
         }
 
         foreach ($methodData['responses'] as &$response) {
-            if (is_array($response)) {
-                $this->processResponseFor422Errors($response);
-            }
+            $this->processResponseFor422Errors($response);
         }
     }
 
     /**
      * Process a single response for 422 error fixes
      */
-    private function processResponseFor422Errors(array &$response): void
+    private function processResponseFor422Errors(mixed &$response): void
     {
+        if (! is_array($response)) {
+            return;
+        }
+
         if (! isset($response['content'])) {
             return;
         }
@@ -333,16 +335,14 @@ final class OpenApiFixer
         }
 
         foreach ($methodData['responses'] as $statusCode => &$response) {
-            if (is_array($response)) {
-                $this->processResponseFor204($statusCode, $response);
-            }
+            $this->processResponseFor204($statusCode, $response);
         }
     }
 
     /**
      * Process a single response for 204
      */
-    private function processResponseFor204(string|int $statusCode, array &$response): void
+    private function processResponseFor204(string|int $statusCode, mixed &$response): void
     {
         // Only process 204 responses (handle both string and integer keys)
         // @infection-ignore-next-line handle both YAML string and integer keys
