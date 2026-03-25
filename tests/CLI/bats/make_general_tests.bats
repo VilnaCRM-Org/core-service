@@ -95,8 +95,10 @@ load 'bats-assert/load'
 @test "make commands lists all available Symfony commands" {
   run bash -c "CI=1 make commands"
   assert_success
+  assert_output --partial "Available commands"
   run make commands
   assert_success
+  assert_output --partial "Available commands"
 }
 
 @test "make coverage-html command executes" {

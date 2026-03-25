@@ -32,6 +32,7 @@ final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
             'CustomerType.jsonld-output' => [
                 'type' => 'object',
                 'properties' => [
+                    'ulid' => ['type' => 'string'],
                     'value' => ['type' => 'string'],
                 ],
             ],

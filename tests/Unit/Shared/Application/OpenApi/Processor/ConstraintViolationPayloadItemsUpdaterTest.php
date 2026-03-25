@@ -56,7 +56,6 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
 
     public function testUpdateRemovesNullItemsFromArrayPayload(): void
     {
-        // Test case where items key exists but is null - should be unset before adding new items
         $input = [
             'properties' => [
                 'violations' => [
@@ -72,7 +71,32 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
         $updated = ConstraintViolationPayloadItemsUpdater::update($input);
 
         $this->assertNotNull($updated);
-        // The null items should be removed, then new items should be added
+        $this->assertSame(
+            ['type' => 'object'],
+            $updated['properties']['violations']['items']['properties']['payload']['items']
+        );
+    }
+
+    public function testUpdateTreatsNullableArrayPayloadAsArray(): void
+    {
+        $input = [
+            'properties' => [
+                'violations' => [
+                    'items' => [
+                        'properties' => [
+                            'payload' => [
+                                'type' => ['array', 'null'],
+                                'items' => null,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+
+        $this->assertNotNull($updated);
         $this->assertSame(
             ['type' => 'object'],
             $updated['properties']['violations']['items']['properties']['payload']['items']

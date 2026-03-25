@@ -23,8 +23,11 @@ final class HydraCollectionSchemaFixer
     {
         $normalizedSchemas = $schemas->getArrayCopy();
         $normalized = $this->schemaNormalizer->normalize($normalizedSchemas);
+        $hydraSchema = SchemaNormalizer::normalize(
+            $normalized[self::HYDRA_COLLECTION_SCHEMA] ?? null
+        );
 
-        $updated = $this->viewExampleUpdater->update($normalized);
+        $updated = $this->viewExampleUpdater->update($hydraSchema);
         if ($updated === null) {
             return $schemas;
         }

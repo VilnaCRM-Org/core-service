@@ -88,6 +88,22 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertCount(0, $resultSchemas);
     }
 
+    public function testProcessCreatesComponentsWhenMissing(): void
+    {
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths(),
+            null
+        );
+
+        $processor = $this->createProcessor();
+        $result = $processor->process($openApi);
+
+        $this->assertNotNull($result->getComponents());
+        $this->assertInstanceOf(ArrayObject::class, $result->getComponents()->getSchemas());
+    }
+
     public function testProcessSkipsInvalidHydraExamples(): void
     {
         $schemas = new ArrayObject([

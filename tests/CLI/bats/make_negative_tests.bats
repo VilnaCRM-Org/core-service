@@ -53,5 +53,12 @@ setup() {
 }
 
 @test "make composer-validate should fail with invalid composer.json" {
-  skip "Test expects failure but composer validate may not fail consistently in CI environment"
+  run bash -lc '
+    backup=$(mktemp)
+    cp composer.json "$backup"
+    trap '\''mv "$backup" composer.json'\'' EXIT
+    printf "{ invalid json\n" > composer.json
+    make composer-validate
+  '
+  assert_failure
 }

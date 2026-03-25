@@ -339,8 +339,9 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         $resultSchemas = $result->getComponents()->getSchemas();
         $ulidInterface = $resultSchemas['UlidInterface.jsonld-output'];
 
-        // ArrayObject should be treated as non-array and get default empty array
         self::assertArrayHasKey('properties', $ulidInterface);
+        self::assertArrayHasKey('ulid', $ulidInterface['properties']);
+        self::assertSame(['type' => 'string'], $ulidInterface['properties']['ulid']);
     }
 
     public function testHandlesUlidInterfaceWithoutPropertiesKey(): void

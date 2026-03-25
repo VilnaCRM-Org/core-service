@@ -277,6 +277,34 @@ final class OpenApiFixerTest extends UnitTestCase
         $this->assertArrayNotHasKey('ulid', $result['components']['schemas']['Customer.jsonld-output']['properties'] ?? []);
     }
 
+    public function testFixUlidRefToTypeAlsoHandlesCustomerStatusSchema(): void
+    {
+        $spec = [
+            'components' => [
+                'schemas' => [
+                    'CustomerStatus.jsonld-output' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'ulid' => [
+                                '$ref' => '#/components/schemas/UlidInterface.jsonld-output',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame(
+            ['type' => 'string'],
+            $result['components']['schemas']['CustomerStatus.jsonld-output']['properties']['ulid']
+        );
+    }
+
     public function testAddUlidPropertyNoSchemasKey(): void
     {
         $spec = [
@@ -656,6 +684,42 @@ final class OpenApiFixerTest extends UnitTestCase
         // The YAML should have security as an empty array
         $content = file_get_contents($this->specFile);
         $this->assertStringContainsString('security: []', $content);
+    }
+
+    public function testSecurityNormalizationDoesNotTouchExampleFieldsNamedSecurity(): void
+    {
+        $spec = [
+            'security' => [],
+            'paths' => [
+                '/test' => [
+                    'get' => [
+                        'security' => null,
+                        'responses' => [
+                            '200' => [
+                                'content' => [
+                                    'application/json' => [
+                                        'example' => [
+                                            'security' => null,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame([], $result['security']);
+        $this->assertSame([], $result['paths']['/test']['get']['security']);
+        $this->assertNull(
+            $result['paths']['/test']['get']['responses']['200']['content']['application/json']['example']['security']
+        );
     }
 
     public function testRunThrowsExceptionOnInvalidYaml(): void

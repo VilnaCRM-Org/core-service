@@ -47,8 +47,12 @@ final class ConstraintViolationPayloadItemsUpdater
     private static function extractPayload(array $properties): ?array
     {
         $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
+        $payloadType = $payload['type'] ?? null;
+        $isArrayPayload = $payloadType === 'array'
+            || (is_array($payloadType) && in_array('array', $payloadType, true));
+
         if (
-            ($payload['type'] ?? null) === 'array'
+            $isArrayPayload
             && array_key_exists('items', $payload)
             && $payload['items'] === null
         ) {

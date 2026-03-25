@@ -17,11 +17,14 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
         $schemaNormalizer->expects(self::once())
             ->method('normalize')
-            ->willReturn(['allOf' => null]);
+            ->willReturn([
+                'HydraCollectionBaseSchema' => ['allOf' => null],
+            ]);
 
         $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
         $viewExampleUpdater->expects(self::once())
             ->method('update')
+            ->with(['allOf' => null])
             ->willReturn(null);
 
         $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
@@ -38,11 +41,14 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
         $schemaNormalizer->expects(self::once())
             ->method('normalize')
-            ->willReturn(['allOf' => []]);
+            ->willReturn([
+                'HydraCollectionBaseSchema' => ['allOf' => []],
+            ]);
 
         $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
         $viewExampleUpdater->expects(self::once())
             ->method('update')
+            ->with(['allOf' => []])
             ->willReturn(['allOf' => [], 'updated' => true]);
 
         $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);

@@ -26,7 +26,6 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
                     'allOf' => null,
                 ],
                 'UnrelatedSchema' => ['type' => 'string'],
-                'allOf' => null,
             ],
             $result
         );
@@ -54,9 +53,6 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
                     ],
                 ],
                 'UnrelatedSchema' => ['type' => 'integer'],
-                'allOf' => [
-                    ['existing' => 'value'],
-                ],
             ],
             $result
         );
@@ -78,7 +74,6 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
                     'allOf' => null,
                 ],
                 'UnrelatedSchema' => ['type' => 'boolean'],
-                'allOf' => null,
             ],
             $result
         );

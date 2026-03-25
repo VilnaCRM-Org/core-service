@@ -52,15 +52,11 @@ return [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
                 // OpenApiFixer has complex parameter structures
                 'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
-                'src/Shared/Application/OpenApi/Processor/HydraAllOfItemUpdater',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
             ],
         ],
         ReturnTypeHintSniff::class => [
-            'exclude' => [
-                // OpenAPI processors have complex return types
-                'src/Shared/Application/OpenApi/Processor/HydraAllOfItemUpdater',
-            ],
+            'exclude' => [],
         ],
         LineLengthSniff::class => [
             'exclude' => [
@@ -86,7 +82,6 @@ return [
                 'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsUpdater',
-                'src/Shared/Application/OpenApi/Processor/HydraAllOfItemUpdater',
                 'src/Shared/Application/OpenApi/Processor/OpenApiSchemaFixesProcessor',
                 'src/Shared/Application/OpenApi/Processor/HydraAllOfUpdater',
                 'src/Shared/Application/OpenApi/Processor/PayloadItemsRequirementChecker',
@@ -97,7 +92,6 @@ return [
                 // OpenAPI processors have longer functions due to schema processing requirements
                 'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
-                'src/Shared/Application/OpenApi/Processor/HydraAllOfItemUpdater',
             ],
         ],
     ],

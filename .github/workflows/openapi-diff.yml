@@ -58,6 +58,7 @@ jobs:
             exit 1
           fi
           php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
+          php scripts/fix-openapi-spec.php
         working-directory: base
       - name: Run OpenAPI Diff (from HEAD revision)
         run: |
