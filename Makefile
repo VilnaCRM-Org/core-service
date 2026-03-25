@@ -176,7 +176,20 @@ deptrac-debug: ## Find files unassigned for Deptrac
 	$(EXEC_ENV) $(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
 ensure-test-services: ## Ensure required Docker services for test suites are running
-	$(DOCKER_COMPOSE) up --detach database redis php caddy localstack
+	@attempt=1; \
+	max_attempts=3; \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
+		if [ $$attempt -ge $$max_attempts ]; then \
+			echo "❌ Failed to start required test services after $$attempt attempts."; \
+			$(DOCKER_COMPOSE) ps || true; \
+			exit 1; \
+		fi; \
+		echo "⚠️  Failed to start required test services (attempt $$attempt/$$max_attempts). Retrying..."; \
+		$(DOCKER_COMPOSE) ps || true; \
+		attempt=$$((attempt + 1)); \
+		sleep 5; \
+	done; \
+	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
