@@ -30,10 +30,10 @@ load 'bats-assert/load'
   assert_output --partial "./vendor/bin/phpinsights"
 }
 
-@test "make phpinsights propagates CLI overrides" {
-  run env PHPINSIGHTS_ARGS="--memory-limit=256M" make phpinsights
+@test "make phpinsights uses the default invocation" {
+  run make phpinsights
   assert_success
-  assert_output --partial -- "--memory-limit=256M"
+  refute_output --partial -- "--memory-limit="
 }
 
 @test "make check-security command executes" {
@@ -48,11 +48,12 @@ load 'bats-assert/load'
   assert_output --partial "./vendor/bin/infection"
 }
 
-@test "make infection propagates threshold overrides" {
-  run env INFECTION_MIN_MSI="99" INFECTION_MIN_COVERED_MSI="98" make infection
+@test "make infection keeps 100 percent thresholds hardcoded" {
+  run make infection
   assert_success
-  assert_output --partial -- "--min-msi=99"
-  assert_output --partial -- "--min-covered-msi=98"
+  assert_output --partial -- "--min-msi=100"
+  assert_output --partial -- "--min-covered-msi=100"
+  refute_output --partial -- "--only-covered"
 }
 
 @test "make execute-load-tests-script command executes" {

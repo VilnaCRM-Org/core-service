@@ -48,7 +48,7 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
         return new Parameter(
             'type',
             'string',
-            '/errors/500'
+            '/errors/422'
         );
     }
 

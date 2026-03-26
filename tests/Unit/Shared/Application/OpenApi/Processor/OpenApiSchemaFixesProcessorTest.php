@@ -218,6 +218,49 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertSame('Collection', $example['type']);
     }
 
+    public function testProcessUpdatesNonBaseHydraCollectionSchemas(): void
+    {
+        $schemas = new ArrayObject([
+            'CustomerCollection.jsonld-output' => new ArrayObject([
+                'allOf' => [
+                    [
+                        'properties' => [
+                            'view' => [
+                                'example' => [
+                                    '@id' => 'string',
+                                    'type' => 'Collection',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $processor = $this->createProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $hydraSchema = SchemaNormalizer::normalize(
+            $resultSchemas['CustomerCollection.jsonld-output']
+        );
+        $allOf = $hydraSchema['allOf'];
+        $viewSchema = SchemaNormalizer::normalize(
+            SchemaNormalizer::normalize($allOf[0])['properties']['view']
+        );
+        $example = $viewSchema['example'];
+
+        $this->assertSame('Collection', $example['@type']);
+        $this->assertArrayNotHasKey('type', $example);
+    }
+
     private function createProcessor(): OpenApiSchemaFixesProcessor
     {
         $exampleUpdater = new HydraAtTypeExampleUpdater();

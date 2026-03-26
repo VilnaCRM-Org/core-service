@@ -69,7 +69,7 @@ final class ValidationErrorResponseFactoryTest extends UnitTestCase
         return new Parameter(
             'type',
             'string',
-            '/errors/500'
+            '/errors/422'
         );
     }
 

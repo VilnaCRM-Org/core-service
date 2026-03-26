@@ -18,14 +18,16 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         $schemaNormalizer->expects(self::once())
             ->method('normalize')
             ->willReturn([
+                'key' => 'value',
                 'HydraCollectionBaseSchema' => ['allOf' => null],
             ]);
 
         $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
-        $viewExampleUpdater->expects(self::once())
+        $viewExampleUpdater->expects(self::exactly(2))
             ->method('update')
-            ->with(['allOf' => null])
-            ->willReturn(null);
+            ->willReturnCallback(
+                static fn (array $schema): ?array => $schema === ['allOf' => null] ? null : null
+            );
 
         $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject(['key' => 'value']);
@@ -42,14 +44,18 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         $schemaNormalizer->expects(self::once())
             ->method('normalize')
             ->willReturn([
+                'key' => 'value',
                 'HydraCollectionBaseSchema' => ['allOf' => []],
             ]);
 
         $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
-        $viewExampleUpdater->expects(self::once())
+        $viewExampleUpdater->expects(self::exactly(2))
             ->method('update')
-            ->with(['allOf' => []])
-            ->willReturn(['allOf' => [], 'updated' => true]);
+            ->willReturnCallback(
+                static fn (array $schema): ?array => $schema === ['allOf' => []]
+                    ? ['allOf' => [], 'updated' => true]
+                    : null
+            );
 
         $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject(['key' => 'value']);

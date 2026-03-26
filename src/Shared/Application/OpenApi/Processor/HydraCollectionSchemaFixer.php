@@ -8,8 +8,6 @@ use ArrayObject;
 
 final class HydraCollectionSchemaFixer
 {
-    private const HYDRA_COLLECTION_SCHEMA = 'HydraCollectionBaseSchema';
-
     public function __construct(
         private HydraSchemaNormalizer $schemaNormalizer,
         private HydraViewExampleUpdater $viewExampleUpdater
@@ -23,17 +21,20 @@ final class HydraCollectionSchemaFixer
     {
         $normalizedSchemas = $schemas->getArrayCopy();
         $normalized = $this->schemaNormalizer->normalize($normalizedSchemas);
-        $hydraSchema = SchemaNormalizer::normalize(
-            $normalized[self::HYDRA_COLLECTION_SCHEMA] ?? null
-        );
+        $hasChanges = false;
 
-        $updated = $this->viewExampleUpdater->update($hydraSchema);
-        if ($updated === null) {
-            return $schemas;
+        foreach ($normalized as $schemaName => $schema) {
+            $updated = $this->viewExampleUpdater->update(
+                SchemaNormalizer::normalize($schema)
+            );
+            if ($updated === null) {
+                continue;
+            }
+
+            $normalizedSchemas[$schemaName] = new ArrayObject($updated);
+            $hasChanges = true;
         }
 
-        $normalizedSchemas[self::HYDRA_COLLECTION_SCHEMA] = new ArrayObject($updated);
-
-        return new ArrayObject($normalizedSchemas);
+        return $hasChanges ? new ArrayObject($normalizedSchemas) : $schemas;
     }
 }

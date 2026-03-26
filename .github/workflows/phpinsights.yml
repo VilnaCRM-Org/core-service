@@ -11,5 +11,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Start application services
         run: docker compose up --detach --wait php
-      - name: Run PHP Insights using docker
-        run: docker compose run --rm php php ./vendor/bin/phpinsights --no-interaction --ansi --disable-security-check
+      - name: Run PHP Insights checks
+        run: CI=1 make phpinsights

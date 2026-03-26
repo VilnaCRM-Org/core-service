@@ -50,9 +50,6 @@ COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite 
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
-PHPINSIGHTS_ARGS ?=
-INFECTION_MIN_MSI ?= 100
-INFECTION_MIN_COVERED_MSI ?= 100
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
@@ -107,21 +104,10 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	@phpinsights_args='$(PHPINSIGHTS_ARGS)'; \
-	phpinsights_memory_limit=$$(printf '%s\n' "$$phpinsights_args" | sed -n 's/.*--memory-limit=\([^[:space:]]*\).*/\1/p'); \
-	if [ -n "$$phpinsights_memory_limit" ]; then \
-		phpinsights_args=$$(printf '%s\n' "$$phpinsights_args" | sed -E 's/(^|[[:space:]])--memory-limit=[^[:space:]]+//g; s/^[[:space:]]+//; s/[[:space:]]+$$//'); \
-		echo "PHPInsights compatibility: translating --memory-limit=$$phpinsights_memory_limit to PHP memory_limit"; \
-		echo "$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
-		$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check; \
-		echo "$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
-		$(EXEC_ENV) php -d memory_limit=$$phpinsights_memory_limit ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php; \
-	else \
-		echo "$(EXEC_ENV) ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
-		$(EXEC_ENV) ./vendor/bin/phpinsights $$phpinsights_args --no-interaction --flush-cache --fix --ansi --disable-security-check; \
-		echo "$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
-		$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php; \
-	fi
+	@echo "$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
+	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check; \
+	echo "$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
+	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
 # NOTE: Coverage is written to a repo-local XML file so both CI and containerized runs can parse it.
 unit-tests: ## Run unit tests with 100% coverage requirement
@@ -258,7 +244,7 @@ build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
 
 infection: ## Run mutation testing with 100% MSI requirement
-	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=$(INFECTION_MIN_MSI) --min-covered-msi=$(INFECTION_MIN_COVERED_MSI) --only-covered
+	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)
