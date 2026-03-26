@@ -92,11 +92,11 @@ final class OpenApiFactoryTest extends UnitTestCase
             [],
             new Paths()
         );
-        $ulidOutput = new OpenApi(
+        $ulidOutput = (new OpenApi(
             new Info('Ulid', '1.0.0'),
             [],
             new Paths()
-        );
+        ))->withExtensionProperty('x-stage', 'ulid');
         $finalOpenApi = new OpenApi(
             new Info('Final', '1.0.0'),
             [],
@@ -149,7 +149,7 @@ final class OpenApiFactoryTest extends UnitTestCase
                 $this->callback(static fn (OpenApi $normalizedOpenApi): bool => $normalizedOpenApi !== $ulidOutput
                     && $normalizedOpenApi->getInfo() === $ulidOutput->getInfo()
                     && $normalizedOpenApi->getPaths() === $ulidOutput->getPaths()),
-                $this->identicalTo($ulidOutput->getExtensionProperties())
+                $this->identicalTo(['x-stage' => 'ulid'])
             )
             ->willReturn($finalOpenApi);
 

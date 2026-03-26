@@ -255,17 +255,17 @@ final class OpenApiFixer
             return;
         }
 
-        foreach ($methodData['responses'] as &$response) {
-            $this->processResponseFor422Errors($response);
+        foreach ($methodData['responses'] as $statusCode => &$response) {
+            $this->processResponseFor422Errors($statusCode, $response);
         }
     }
 
     /**
      * Process a single response for 422 error fixes
      */
-    private function processResponseFor422Errors(mixed &$response): void
+    private function processResponseFor422Errors(string|int $statusCode, mixed &$response): void
     {
-        if (! is_array($response)) {
+        if (! in_array($statusCode, ['422', 422], true) || ! is_array($response)) {
             return;
         }
 

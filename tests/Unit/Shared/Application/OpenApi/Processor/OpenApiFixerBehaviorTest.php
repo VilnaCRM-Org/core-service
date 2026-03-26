@@ -180,6 +180,50 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
         $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
     }
 
+    public function testFix422ErrorTypeDoesNotRewriteNon422Responses(): void
+    {
+        $spec = [
+            'paths' => [
+                '/customers' => [
+                    'post' => [
+                        'responses' => [
+                            '500' => [
+                                'description' => 'Internal Server Error',
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            '422' => [
+                                'description' => 'Validation failed',
+                                'content' => [
+                                    'application/problem+json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame('/errors/500', $result['paths']['/customers']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
+        $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+    }
+
     public function testFix204ResponsesSkipsMethodWithoutResponsesAndContinues(): void
     {
         $spec = [
@@ -215,21 +259,31 @@ final class OpenApiFixerBehaviorTest extends UnitTestCase
 
     public function testFix204ResponsesWithQuotedStringStatusKey(): void
     {
-        $fixer = new OpenApiFixer($this->specFile);
-        $response = [
-            'description' => 'No Content',
-            'content' => [
-                'application/json' => [
-                    'schema' => ['type' => 'object'],
+        $spec = [
+            'paths' => [
+                '/customers/{id}' => [
+                    'delete' => [
+                        'responses' => [
+                            '204' => [
+                                'description' => 'No Content',
+                                'content' => [
+                                    'application/json' => [
+                                        'schema' => ['type' => 'object'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
             ],
         ];
 
-        $method = new \ReflectionMethod($fixer, 'processResponseFor204');
-        $method->setAccessible(true);
-        $method->invokeArgs($fixer, ['204', &$response]);
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
 
-        $this->assertArrayNotHasKey('content', $response);
+        $result = $this->readSpecFile();
+        $this->assertArrayNotHasKey('content', $result['paths']['/customers/{id}']['delete']['responses']['204']);
     }
 
     private function recursiveDelete(string $path): void

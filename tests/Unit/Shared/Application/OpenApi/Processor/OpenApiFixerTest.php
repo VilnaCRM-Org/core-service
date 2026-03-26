@@ -986,7 +986,7 @@ final class OpenApiFixerTest extends UnitTestCase
 
         $result = $this->readSpecFile();
         $this->assertSame('Validation failed', $result['paths']['/test']['post']['responses']['422']['description']);
-        $this->assertSame('/errors/422', $result['paths']['/test']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
+        $this->assertSame('/errors/500', $result['paths']['/test']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
     }
 
     public function testFix422ErrorTypeCastsStringStatusToInteger(): void
@@ -1083,7 +1083,7 @@ final class OpenApiFixerTest extends UnitTestCase
 
         $result = $this->readSpecFile();
         $this->assertSame('not-an-array', $result['paths']['/customers']['post']['responses']['422']);
-        $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
+        $this->assertSame('/errors/500', $result['paths']['/customers']['post']['responses']['500']['content']['application/problem+json']['example']['type']);
     }
 
     public function testFix204ResponsesWithNonArrayResponses(): void
