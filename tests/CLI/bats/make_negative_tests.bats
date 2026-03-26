@@ -27,7 +27,7 @@ setup() {
 # Tech debt: Previous behavioral negative tests for infection (mutation score threshold)
 # and psalm (static analysis errors) remain skipped pending fixture-based coverage.
 # To restore: create fixture projects with known failures and test Make targets against them.
-@test "make infection should fail when binary is missing" {
+@test "make infection should fail when mutation score is below threshold" {
   skip "Error detection may vary in CI environment"
 }
 
@@ -35,7 +35,7 @@ setup() {
   skip "Test relies on environment-specific behavior"
 }
 
-@test "make psalm should fail when binary is missing" {
+@test "make psalm should fail when static analysis errors are present" {
   skip "Error message format differs between environments"
 }
 
@@ -60,4 +60,5 @@ setup() {
     make composer-validate
   '
   assert_failure
+  assert_output --partial "composer.json"
 }
