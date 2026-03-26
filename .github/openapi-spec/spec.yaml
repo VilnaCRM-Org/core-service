@@ -659,7 +659,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -672,7 +672,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -940,7 +940,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -953,7 +953,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1250,7 +1250,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1263,7 +1263,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1683,7 +1683,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1696,7 +1696,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1932,7 +1932,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1945,7 +1945,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2210,7 +2210,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2223,7 +2223,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2619,7 +2619,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2632,7 +2632,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2868,7 +2868,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2881,7 +2881,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -3146,7 +3146,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -3159,7 +3159,7 @@ paths:
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized

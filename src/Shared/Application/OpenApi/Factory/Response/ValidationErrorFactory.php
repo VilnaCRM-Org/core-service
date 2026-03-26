@@ -35,19 +35,10 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
         return new Parameter(
             name: 'violations',
             type: 'array',
-            example: [[
-                'propertyPath' => 'some_property',
-                'message' => 'This value should not be blank.',
-                'code' => 'c1051bb4-d103-4f74-8988-acbcafc7fdc3',
-            ],
-            ],
+            example: [$this->getViolationExample()],
             items: [
                 'type' => 'object',
-                'properties' => [
-                    'propertyPath' => ['type' => 'string'],
-                    'message' => ['type' => 'string'],
-                    'code' => ['type' => 'string'],
-                ],
+                'properties' => $this->getViolationProperties(),
             ]
         );
     }
@@ -86,5 +77,34 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
             'integer',
             HttpResponse::HTTP_UNPROCESSABLE_ENTITY
         );
+    }
+
+    /**
+     * @return array<string, array<int, array<string, string>>|string>
+     */
+    private function getViolationExample(): array
+    {
+        return [
+            'propertyPath' => 'some_property',
+            'message' => 'This value should not be blank.',
+            'code' => 'c1051bb4-d103-4f74-8988-acbcafc7fdc3',
+            'payload' => [['type' => 'string']],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, array<string, string>|string>>
+     */
+    private function getViolationProperties(): array
+    {
+        return [
+            'propertyPath' => ['type' => 'string'],
+            'message' => ['type' => 'string'],
+            'code' => ['type' => 'string'],
+            'payload' => [
+                'type' => 'array',
+                'items' => ['type' => 'object'],
+            ],
+        ];
     }
 }
