@@ -27,9 +27,27 @@ if (! is_file($legacyI18nPath)) {
         }
 
         if (! $symlinkCreated && ! is_file($legacyI18nPath)) {
-            if (! @copy($packageI18nPath, $legacyI18nPath)) {
+            $copyError = null;
+            set_error_handler(static function (int $severity, string $message) use (
+                &$copyError
+            ): bool {
+                $copyError = sprintf('[%d] %s', $severity, $message);
+
+                return true;
+            });
+
+            try {
+                $copySucceeded = copy($packageI18nPath, $legacyI18nPath);
+            } finally {
+                restore_error_handler();
+            }
+
+            if (! $copySucceeded && ! is_file($legacyI18nPath)) {
                 trigger_error(
-                    'Could not create vendor/i18n.php symlink or copy for Behat Gherkin.',
+                    sprintf(
+                        'Could not create vendor/i18n.php symlink or copy for Behat Gherkin. %s',
+                        $copyError ?? 'No additional error details were provided.'
+                    ),
                     E_USER_WARNING
                 );
             }

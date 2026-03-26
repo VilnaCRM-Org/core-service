@@ -9,9 +9,12 @@ use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Strings\UnnecessaryStringConcatSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
+use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
+use SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
+use SlevomatCodingStandard\Sniffs\TypeHints\ReturnTypeHintSniff;
 
 return [
     'preset' => 'symfony',
@@ -26,7 +29,11 @@ return [
         SuperfluousInterfaceNamingSniff::class,
         SuperfluousExceptionNamingSniff::class,
         ForbiddenSetterSniff::class,
+        InlineDocCommentDeclarationSniff::class,
         UseSpacingSniff::class,
+        DisallowMixedTypeHintSniff::class,
+        ParameterTypeHintSniff::class,
+        ReturnTypeHintSniff::class,
     ],
     'config' => [
         ParameterTypeHintSniff::class => [
