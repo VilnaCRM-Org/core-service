@@ -138,6 +138,32 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $this->assertSame(['type' => 'object'], $payload['items']);
     }
 
+    public function testProcessCreatesPayloadWhenMissing(): void
+    {
+        $constraintViolation = [
+            'properties' => [
+                'violations' => [
+                    'items' => [
+                        'properties' => [],
+                    ],
+                ],
+            ],
+        ];
+        $schemas = new ArrayObject(['ConstraintViolation' => $constraintViolation]);
+        $components = new Components($schemas);
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
+
+        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $updatedSchema = $resultSchemas['ConstraintViolation'];
+        $schemaData = $updatedSchema->getArrayCopy();
+        $payload = $schemaData['properties']['violations']['items']['properties']['payload'];
+        $this->assertSame('array', $payload['type']);
+        $this->assertSame(['type' => 'object'], $payload['items']);
+    }
+
     public function testProcessReturnsOriginalWhenSchemaMissing(): void
     {
         $schemas = new ArrayObject();

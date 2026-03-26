@@ -14,6 +14,39 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
         $this->assertNull(ConstraintViolationPayloadItemsUpdater::update([]));
     }
 
+    public function testUpdateReturnsNullWhenViolationsNodeIsMissing(): void
+    {
+        $input = [
+            'properties' => [],
+        ];
+
+        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+    }
+
+    public function testUpdateReturnsNullWhenItemsPropertiesNodeIsMissing(): void
+    {
+        $input = [
+            'properties' => [
+                'violations' => [
+                    'items' => [],
+                ],
+            ],
+        ];
+
+        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+    }
+
+    public function testUpdateReturnsNullWhenItemsNodeIsMissing(): void
+    {
+        $input = [
+            'properties' => [
+                'violations' => [],
+            ],
+        ];
+
+        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+    }
+
     public function testUpdateReturnsNullWhenPayloadIsNotArrayWithoutItems(): void
     {
         $input = [
@@ -48,6 +81,31 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
         $updated = ConstraintViolationPayloadItemsUpdater::update($input);
 
         $this->assertNotNull($updated);
+        $this->assertSame(
+            ['type' => 'object'],
+            $updated['properties']['violations']['items']['properties']['payload']['items']
+        );
+    }
+
+    public function testUpdateCreatesPayloadWhenMissing(): void
+    {
+        $input = [
+            'properties' => [
+                'violations' => [
+                    'items' => [
+                        'properties' => [],
+                    ],
+                ],
+            ],
+        ];
+
+        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+
+        $this->assertNotNull($updated);
+        $this->assertSame(
+            'array',
+            $updated['properties']['violations']['items']['properties']['payload']['type']
+        );
         $this->assertSame(
             ['type' => 'object'],
             $updated['properties']['violations']['items']['properties']['payload']['items']

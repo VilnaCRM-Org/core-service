@@ -18,6 +18,7 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->fixer = new UlidInterfaceSchemaFixer();
     }
 

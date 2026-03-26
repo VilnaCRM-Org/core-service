@@ -61,5 +61,6 @@ jobs:
             cp .github/graphql-spec/spec /tmp/head.graphql
             npx -y @graphql-inspector/cli@4.0.0 diff /tmp/base.graphql /tmp/head.graphql --fail-on-breaking
           else
-            echo "Base schema not found on ${{ github.base_ref }}; skipping compatibility check."
+            echo "Base schema not found on ${{ github.base_ref }}; failing compatibility check."
+            exit 1
           fi

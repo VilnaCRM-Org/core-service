@@ -12,9 +12,15 @@ final class ConstraintViolationPayloadItemsUpdater
      * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public static function update(array $constraintViolation): ?array
     {
+        if (! self::hasViolationItemProperties($constraintViolation)) {
+            return null;
+        }
+
         $properties = self::extractProperties($constraintViolation);
         $payload = self::extractPayload($properties);
         if ($payload === null) {
@@ -25,6 +31,34 @@ final class ConstraintViolationPayloadItemsUpdater
         $constraintViolation['properties']['violations']['items']['properties'] = $properties;
 
         return $constraintViolation;
+    }
+
+    /**
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $constraintViolation
+     */
+    private static function hasViolationItemProperties(array $constraintViolation): bool
+    {
+        $properties = $constraintViolation['properties'] ?? null;
+        if (! is_array($properties) && ! $properties instanceof ArrayObject) {
+            return false;
+        }
+
+        $normalizedProperties = SchemaNormalizer::normalize($properties);
+        $violations = $normalizedProperties['violations'] ?? null;
+        if (! is_array($violations) && ! $violations instanceof ArrayObject) {
+            return false;
+        }
+
+        $normalizedViolations = SchemaNormalizer::normalize($violations);
+        $items = $normalizedViolations['items'] ?? null;
+        if (! is_array($items) && ! $items instanceof ArrayObject) {
+            return false;
+        }
+
+        $normalizedItems = SchemaNormalizer::normalize($items);
+        $itemProperties = $normalizedItems['properties'] ?? null;
+
+        return is_array($itemProperties) || $itemProperties instanceof ArrayObject;
     }
 
     /**
@@ -46,6 +80,10 @@ final class ConstraintViolationPayloadItemsUpdater
      */
     private static function extractPayload(array $properties): ?array
     {
+        if (! array_key_exists('payload', $properties)) {
+            return ['type' => 'array'];
+        }
+
         $payload = SchemaNormalizer::normalize($properties['payload'] ?? null);
         $payloadTypes = (array) ($payload['type'] ?? []);
         $isArrayPayload = in_array('array', $payloadTypes, true);

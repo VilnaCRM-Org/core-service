@@ -14,7 +14,7 @@ load 'bats-assert/load'
 @test "make composer-validate command executes" {
   run make composer-validate
   assert_success
-  assert_output --partial "composer validate"
+  assert_output --partial "composer validate --strict"
 }
 
 @test "make check-requirements command is invoked" {

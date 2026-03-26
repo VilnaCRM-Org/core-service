@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 use App\Shared\Application\OpenApi\Processor\OpenApiFixer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 
 final class OpenApiFixerTest extends UnitTestCase
@@ -17,8 +18,18 @@ final class OpenApiFixerTest extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tempDir = sys_get_temp_dir() . '/openapi_fixer_test_' . uniqid();
-        mkdir($this->tempDir, 0755, true);
+        $tempFile = tempnam(sys_get_temp_dir(), 'openapi_fixer_test_');
+        if ($tempFile === false) {
+            throw new RuntimeException('Failed to create a temporary file for OpenApiFixerTest.');
+        }
+
+        unlink($tempFile);
+
+        if (! mkdir($tempFile, 0755) && ! is_dir($tempFile)) {
+            throw new RuntimeException(sprintf('Failed to create temporary directory "%s".', $tempFile));
+        }
+
+        $this->tempDir = $tempFile;
         $this->specFile = $this->tempDir . '/spec.yaml';
     }
 
@@ -1177,18 +1188,31 @@ final class OpenApiFixerTest extends UnitTestCase
     private function recursiveDelete(string $path): void
     {
         if (is_dir($path)) {
-            $files = glob($path . '/*') ?: [];
-            array_map(fn ($file) => $this->recursiveDelete($file), $files);
-            rmdir($path);
+            $files = scandir($path);
+            if ($files === false) {
+                throw new RuntimeException(sprintf('Failed to read directory "%s".', $path));
+            }
+
+            foreach (array_diff($files, ['.', '..']) as $file) {
+                $this->recursiveDelete($path . '/' . $file);
+            }
+
+            if (! rmdir($path)) {
+                throw new RuntimeException(sprintf('Failed to remove directory "%s".', $path));
+            }
         } elseif (is_file($path)) {
-            unlink($path);
+            if (! unlink($path)) {
+                throw new RuntimeException(sprintf('Failed to remove file "%s".', $path));
+            }
         }
     }
 
     private function writeSpecFile(array $spec): void
     {
         $yaml = Yaml::dump($spec, 10, 2, Yaml::DUMP_NUMERIC_KEY_AS_STRING);
-        file_put_contents($this->specFile, $yaml);
+        if (file_put_contents($this->specFile, $yaml) === false) {
+            throw new RuntimeException(sprintf('Failed to write spec file "%s".', $this->specFile));
+        }
     }
 
     private function readSpecFile(): array

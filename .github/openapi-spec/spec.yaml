@@ -3310,6 +3310,10 @@ components:
               message:
                 type: string
                 description: 'The message associated with the violation'
+              payload:
+                type: array
+                items:
+                  type: object
         detail:
           readOnly: true
           type: string
