@@ -23,9 +23,9 @@ load 'bats-assert/load'
   skip "Requires git branch setup"
 }
 
-@test "openapi-diff workflow normalizes each checkout with its own fixer" {
+@test "openapi-diff workflow generates specs without post-export fixer scripts" {
   run sed -n '/Generate openapi spec/,/Run OpenAPI Diff/p' .github/workflows/openapi-diff.yml
   assert_success
-  assert_output --partial 'php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml'
+  refute_output --partial 'php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml'
   refute_output --partial 'php ../scripts/fix-openapi-spec.php'
 }

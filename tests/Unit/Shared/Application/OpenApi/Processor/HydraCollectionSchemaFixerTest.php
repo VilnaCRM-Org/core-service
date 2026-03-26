@@ -72,4 +72,24 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         self::assertArrayHasKey('key', $result);
         self::assertSame('value', $result['key']);
     }
+
+    public function testFixSchemaDelegatesToViewExampleUpdater(): void
+    {
+        $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
+        $schemaNormalizer->expects(self::never())
+            ->method('normalize');
+
+        $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
+        $viewExampleUpdater->expects(self::once())
+            ->method('update')
+            ->with(['allOf' => []])
+            ->willReturn(['allOf' => [], 'updated' => true]);
+
+        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+
+        self::assertSame(
+            ['allOf' => [], 'updated' => true],
+            $fixer->fixSchema(['allOf' => []])
+        );
+    }
 }

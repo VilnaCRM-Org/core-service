@@ -50,8 +50,6 @@ return [
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
-                // OpenApiFixer has complex parameter structures
-                'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
             ],
         ],
@@ -61,8 +59,6 @@ return [
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
-                // OpenApiFixer.php has long lines due to error messages and @infection-ignore-line annotations
-                'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
             ],
             'ignoreComments' => true,
             'lineLimit' => 100,
@@ -78,19 +74,19 @@ return [
         ],
         CyclomaticComplexityIsHigh::class => [
             'exclude' => [
-                // OpenAPI spec fixers have intentional complexity for processing nested structures
-                'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
+                // OpenAPI processors traverse nested schema trees and remain intentionally localized.
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsUpdater',
+                'src/Shared/Application/OpenApi/Processor/HydraDirectViewExampleUpdater',
                 'src/Shared/Application/OpenApi/Processor/OpenApiSchemaFixesProcessor',
                 'src/Shared/Application/OpenApi/Processor/HydraAllOfUpdater',
+                'src/Shared/Application/OpenApi/Processor/HydraViewExampleUpdater',
                 'src/Shared/Application/OpenApi/Processor/PayloadItemsRequirementChecker',
             ],
         ],
         FunctionLengthSniff::class => [
             'exclude' => [
-                // OpenAPI processors have longer functions due to schema processing requirements
-                'src/Shared/Application/OpenApi/Processor/OpenApiFixer',
+                // OpenAPI processors have longer functions due to schema processing requirements.
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
             ],
         ],

@@ -10,7 +10,8 @@ namespace App\Shared\Application\OpenApi\Processor;
 final class HydraViewExampleUpdater
 {
     public function __construct(
-        private HydraAllOfUpdater $allOfUpdater
+        private HydraAllOfUpdater $allOfUpdater,
+        private HydraDirectViewExampleUpdater $directViewExampleUpdater
     ) {
     }
 
@@ -21,12 +22,24 @@ final class HydraViewExampleUpdater
      */
     public function update(array $normalized): ?array
     {
-        if (! isset($normalized['allOf'])) {
-            return null;
+        $updatedViewSchema = $this->directViewExampleUpdater->update($normalized);
+        if ($updatedViewSchema !== null || ! isset($normalized['allOf'])) {
+            return $updatedViewSchema;
         }
 
-        $allOf = SchemaNormalizer::normalize($normalized['allOf']);
-        $updatedAllOf = $this->allOfUpdater->update($allOf);
+        return $this->updateAllOf($normalized);
+    }
+
+    /**
+     * @param array<string, SchemaValue> $normalized
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function updateAllOf(array $normalized): ?array
+    {
+        $updatedAllOf = $this->allOfUpdater->update(
+            SchemaNormalizer::normalize($normalized['allOf'])
+        );
         if ($updatedAllOf === null) {
             return null;
         }

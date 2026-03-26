@@ -5,20 +5,61 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\HydraAllOfUpdater;
+use App\Shared\Application\OpenApi\Processor\HydraDirectViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Tests\Unit\UnitTestCase;
 
 final class HydraViewExampleUpdaterTest extends UnitTestCase
 {
-    public function testUpdateReturnsNullWhenAllOfIsMissing(): void
+    public function testUpdateReturnsNullWhenAllOfAndDirectViewAreMissing(): void
     {
         $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
         $allOfUpdater->expects($this->never())
             ->method('update');
 
-        $updater = new HydraViewExampleUpdater($allOfUpdater);
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
 
         $this->assertNull($updater->update(['properties' => []]));
+    }
+
+    public function testUpdateReturnsUpdatedDirectViewExample(): void
+    {
+        $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
+        $allOfUpdater->expects($this->never())
+            ->method('update');
+
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
+
+        $updated = $updater->update([
+            'properties' => [
+                'view' => [
+                    'example' => [
+                        '@id' => '/api/customers?page=1',
+                        'type' => 'PartialCollectionView',
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            [
+                'properties' => [
+                    'view' => [
+                        'example' => [
+                            '@id' => '/api/customers?page=1',
+                            '@type' => 'PartialCollectionView',
+                        ],
+                    ],
+                ],
+            ],
+            $updated
+        );
     }
 
     public function testUpdateReturnsNullWhenAllOfIsExplicitlyNull(): void
@@ -27,7 +68,10 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
         $allOfUpdater->expects($this->never())
             ->method('update');
 
-        $updater = new HydraViewExampleUpdater($allOfUpdater);
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
 
         $this->assertNull($updater->update(['allOf' => null]));
     }
@@ -41,7 +85,10 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
             ->with([['type' => 'object']])
             ->willReturn(null);
 
-        $updater = new HydraViewExampleUpdater($allOfUpdater);
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
 
         $this->assertNull($updater->update($normalized));
     }
@@ -56,7 +103,10 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
             ->with([['type' => 'object']])
             ->willReturn($updatedAllOf);
 
-        $updater = new HydraViewExampleUpdater($allOfUpdater);
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
 
         $this->assertSame(['allOf' => $updatedAllOf], $updater->update($normalized));
     }

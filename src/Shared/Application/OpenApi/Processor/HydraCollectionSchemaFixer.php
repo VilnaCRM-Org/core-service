@@ -37,4 +37,16 @@ final class HydraCollectionSchemaFixer
 
         return $hasChanges ? new ArrayObject($normalizedSchemas) : $schemas;
     }
+
+    /**
+     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schema
+     *
+     * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
+     */
+    public function fixSchema(array $schema): ?array
+    {
+        return $this->viewExampleUpdater->update(
+            SchemaNormalizer::normalize($schema)
+        );
+    }
 }

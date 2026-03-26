@@ -6,12 +6,17 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Info;
+use ApiPlatform\OpenApi\Model\MediaType;
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
+use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\HydraAllOfItemUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraAllOfUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraAtTypeExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\HydraDirectViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
@@ -261,12 +266,277 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertArrayNotHasKey('type', $example);
     }
 
+    public function testProcessUpdatesHydraViewExampleInPathResponseSchemas(): void
+    {
+        $paths = new Paths();
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet(
+                new Operation(
+                    responses: [
+                        '200' => new Response(
+                            description: 'ok',
+                            content: new ArrayObject([
+                                'application/ld+json' => new MediaType(
+                                    new ArrayObject([
+                                        'allOf' => [
+                                            ['type' => 'object'],
+                                            [
+                                                'type' => 'object',
+                                                'properties' => [
+                                                    'view' => [
+                                                        'type' => 'object',
+                                                        'example' => [
+                                                            '@id' => '/api/customers?page=1',
+                                                            'type' => 'PartialCollectionView',
+                                                        ],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ])
+                                ),
+                            ])
+                        ),
+                    ]
+                )
+            )
+        );
+
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            $paths,
+            new Components(new ArrayObject())
+        );
+
+        $processor = $this->createProcessor();
+        $result = $processor->process($openApi);
+
+        $responses = $result->getPaths()->getPath('/customers')->getGet()?->getResponses();
+        self::assertIsArray($responses);
+
+        $content = $responses['200']->getContent();
+        self::assertInstanceOf(ArrayObject::class, $content);
+
+        self::assertInstanceOf(MediaType::class, $content['application/ld+json']);
+
+        $schema = SchemaNormalizer::normalize($content['application/ld+json']->getSchema());
+        $viewSchema = SchemaNormalizer::normalize(
+            SchemaNormalizer::normalize($schema['allOf'][1])['properties']['view']
+        );
+
+        self::assertSame('PartialCollectionView', $viewSchema['example']['@type']);
+        self::assertArrayNotHasKey('type', $viewSchema['example']);
+    }
+
+    public function testProcessLeavesResponsesWithoutContentUntouched(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation(responses: ['200' => new Response(description: 'ok')]);
+        $response = new Response(description: 'ok');
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet($operation)
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
+    public function testProcessLeavesOperationsWithoutResponsesUntouched(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation();
+        $paths->addPath('/customers', (new PathItem())->withGet($operation));
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
+    public function testProcessLeavesArrayContentDefinitionsWithoutSchemaUntouched(): void
+    {
+        $paths = new Paths();
+        $response = new Response(
+            description: 'ok',
+            content: new ArrayObject([
+                'application/json' => ['example' => ['type' => 'plain']],
+            ])
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet(new Operation(responses: ['200' => $response]))
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        $responses = $result->getPaths()->getPath('/customers')->getGet()?->getResponses();
+
+        self::assertSame($response, $responses['200']);
+    }
+
+    public function testProcessSkipsNonResponseEntries(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation(responses: ['default' => ['description' => 'fallback']]);
+        $paths->addPath('/customers', (new PathItem())->withGet($operation));
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
+    public function testProcessLeavesMediaTypeWithoutSchemaUntouched(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation(
+            responses: [
+                '200' => new Response(
+                    description: 'ok',
+                    content: new ArrayObject([
+                        'application/ld+json' => new MediaType(),
+                    ])
+                ),
+            ]
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet($operation)
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
+    public function testProcessLeavesMediaTypeWithoutHydraFixesUntouched(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation(
+            responses: [
+                '200' => new Response(
+                    description: 'ok',
+                    content: new ArrayObject([
+                        'application/ld+json' => new MediaType(new ArrayObject(['type' => 'object'])),
+                    ])
+                ),
+            ]
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet($operation)
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
+    public function testProcessUpdatesArrayContentDefinitionsWithHydraSchema(): void
+    {
+        $paths = new Paths();
+        $response = new Response(
+            description: 'ok',
+            content: new ArrayObject([
+                'application/json' => [
+                    'schema' => [
+                        'properties' => [
+                            'view' => [
+                                'example' => [
+                                    '@id' => '/api/customers?page=1',
+                                    'type' => 'PartialCollectionView',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet(new Operation(responses: ['200' => $response]))
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        $responses = $result->getPaths()->getPath('/customers')->getGet()?->getResponses();
+        $content = $responses['200']->getContent();
+
+        self::assertInstanceOf(ArrayObject::class, $content);
+        self::assertIsArray($content['application/json']);
+        self::assertSame(
+            'PartialCollectionView',
+            $content['application/json']['schema']['properties']['view']['example']['@type']
+        );
+        self::assertArrayNotHasKey(
+            'type',
+            $content['application/json']['schema']['properties']['view']['example']
+        );
+    }
+
+    public function testProcessLeavesArrayContentDefinitionsWithUnchangedSchemaUntouched(): void
+    {
+        $paths = new Paths();
+        $operation = new Operation(
+            responses: [
+                '200' => new Response(
+                    description: 'ok',
+                    content: new ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'properties' => [
+                                    'view' => [
+                                        'example' => [
+                                            '@id' => '/api/customers?page=1',
+                                            '@type' => 'PartialCollectionView',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ])
+                ),
+            ]
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet($operation)
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        self::assertSame($operation, $result->getPaths()->getPath('/customers')->getGet());
+    }
+
     private function createProcessor(): OpenApiSchemaFixesProcessor
     {
         $exampleUpdater = new HydraAtTypeExampleUpdater();
         $itemUpdater = new HydraAllOfItemUpdater($exampleUpdater);
         $allOfUpdater = new HydraAllOfUpdater($itemUpdater);
-        $viewExampleUpdater = new HydraViewExampleUpdater($allOfUpdater);
+        $viewExampleUpdater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
         $schemaNormalizer = new HydraSchemaNormalizer();
         $hydraFixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
 
