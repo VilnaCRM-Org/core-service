@@ -124,5 +124,5 @@ load 'bats-assert/load'
   run sed -n '/^  localstack:/,/^  redis:/p' docker-compose.load_test.override.yml
   assert_success
   assert_output --partial 'curl -sk https://localhost:4566/_localstack/health'
-  assert_output --partial '"sqs": "available"'
+  assert_output --partial "grep -Eq ''\"sqs\":[[:space:]]*\"available\"''"
 }
