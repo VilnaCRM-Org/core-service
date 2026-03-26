@@ -27,7 +27,12 @@ if (! is_file($legacyI18nPath)) {
         }
 
         if (! $symlinkCreated && ! is_file($legacyI18nPath)) {
-            copy($packageI18nPath, $legacyI18nPath);
+            if (! @copy($packageI18nPath, $legacyI18nPath)) {
+                trigger_error(
+                    'Could not create vendor/i18n.php symlink or copy for Behat Gherkin.',
+                    E_USER_WARNING
+                );
+            }
         }
     }
 }

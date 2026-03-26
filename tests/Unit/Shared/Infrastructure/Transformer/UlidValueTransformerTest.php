@@ -6,6 +6,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Tests\Unit\UnitTestCase;
 use MongoDB\BSON\Binary;
@@ -20,7 +22,11 @@ final class UlidValueTransformerTest extends UnitTestCase
     {
         parent::setUp();
         $this->ulidFactory = $this->createMock(UlidFactory::class);
-        $this->converter = new UlidValueTransformer($this->ulidFactory);
+        $this->converter = new UlidValueTransformer(
+            $this->ulidFactory,
+            new UlidRepresentationTransformer(),
+            new SymfonyUlidBinaryTransformer()
+        );
     }
 
     public function testToUlidWithUlidInstance(): void

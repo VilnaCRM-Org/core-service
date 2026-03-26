@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Customer\Infrastructure\Repository;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository;
+use App\Core\Customer\Infrastructure\Resolver\CustomerCacheTagResolver;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -35,6 +36,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             $this->innerRepository,
             $this->cache,
             $this->cacheKeyBuilder,
+            new CustomerCacheTagResolver($this->cacheKeyBuilder),
             $this->logger
         );
     }
@@ -454,6 +456,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             $innerRepo,
             $cache,
             $cacheKeyBuilder,
+            new CustomerCacheTagResolver($cacheKeyBuilder),
             $logger
         );
 

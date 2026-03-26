@@ -127,7 +127,7 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		exit 1; \
 	fi; \
 	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
-	rm -f $$tmpfile; \
+	rm -f $$tmpfile coverage.txt; \
 	if [ -n "$$coverage" ]; then \
 		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
@@ -216,38 +216,10 @@ cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load t
 	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
 
 build-k6-docker:
-	@max_attempts=$${K6_DOCKER_BUILD_RETRIES:-3}; \
-	retry_delay=$${K6_DOCKER_BUILD_RETRY_DELAY_SECONDS:-2}; \
-	attempt=1; \
-	while [ $$attempt -le $$max_attempts ]; do \
-		if $(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .; then \
-			exit 0; \
-		fi; \
-		if [ $$attempt -eq $$max_attempts ]; then \
-			echo "K6 Docker image build failed after $$attempt attempts."; \
-			exit 1; \
-		fi; \
-		echo "K6 Docker image build failed on attempt $$attempt/$$max_attempts. Retrying in $$retry_delay seconds..."; \
-		sleep $$retry_delay; \
-		attempt=$$((attempt + 1)); \
-	done
+	$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .
 
 build-spectral-docker:
-	@max_attempts=$${SPECTRAL_DOCKER_BUILD_RETRIES:-5}; \
-	retry_delay=$${SPECTRAL_DOCKER_BUILD_RETRY_DELAY_SECONDS:-5}; \
-	attempt=1; \
-	while [ $$attempt -le $$max_attempts ]; do \
-		if $(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .; then \
-			exit 0; \
-		fi; \
-		if [ $$attempt -eq $$max_attempts ]; then \
-			echo "Spectral Docker image build failed after $$attempt attempts."; \
-			exit 1; \
-		fi; \
-		echo "Spectral Docker image build failed on attempt $$attempt/$$max_attempts. Retrying in $$retry_delay seconds..."; \
-		sleep $$retry_delay; \
-		attempt=$$((attempt + 1)); \
-	done
+	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
 
 infection: ## Run mutation testing with 100% MSI requirement
 	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
@@ -378,6 +350,10 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	until $(DOCKER_COMPOSE) exec -T php php -v >/dev/null 2>&1 || [ $$elapsed -ge $$timeout ]; do \
 	    sleep 1; elapsed=$$((elapsed + 1)); \
 	done; \
+	if ! $(DOCKER_COMPOSE) exec -T php php -v >/dev/null 2>&1; then \
+		echo "❌ PHP container did not become ready within 30s."; \
+		exit 1; \
+	fi; \
 	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \

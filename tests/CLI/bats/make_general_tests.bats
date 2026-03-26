@@ -119,10 +119,9 @@ load 'bats-assert/load'
   assert_output --partial '$(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)'
 }
 
-@test "make build-spectral-docker retries transient docker failures" {
+@test "make build-spectral-docker builds spectral image directly" {
   run sed -n '/^build-spectral-docker:/,/^infection:/p' Makefile
   assert_success
-  assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRIES:-5'
-  assert_output --partial 'SPECTRAL_DOCKER_BUILD_RETRY_DELAY_SECONDS:-5'
+  assert_output --partial 'build-spectral-docker:'
   assert_output --partial '$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
 }

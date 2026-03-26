@@ -6,6 +6,7 @@ namespace App\Core\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Infrastructure\Resolver\CustomerCacheTagResolver;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -36,6 +37,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         private CustomerRepositoryInterface $inner,
         private TagAwareCacheInterface $cache,
         private CacheKeyBuilder $cacheKeyBuilder,
+        private CustomerCacheTagResolver $cacheTagResolver,
         private LoggerInterface $logger
     ) {
     }
@@ -233,27 +235,12 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         ?string $deletedEmail = null,
         ?string $deletedId = null
     ): void {
-        $tags = ['customer.collection'];
-
-        if ($customer instanceof Customer) {
-            $tags[] = 'customer.' . $customer->getUlid();
-            $tags[] = 'customer.email.' .
-                $this->cacheKeyBuilder->hashEmail($customer->getEmail());
-
-            $this->cache->invalidateTags(array_values(array_unique($tags)));
-
-            return;
-        }
-
-        if ($deletedId !== null) {
-            $tags[] = 'customer.' . $deletedId;
-        }
-
-        if ($deletedEmail !== null) {
-            $tags[] = 'customer.email.' .
-                $this->cacheKeyBuilder->hashEmail($deletedEmail);
-        }
-
-        $this->cache->invalidateTags(array_values(array_unique($tags)));
+        $this->cache->invalidateTags(
+            $this->cacheTagResolver->resolveForDeletedCustomer(
+                $customer,
+                $deletedEmail,
+                $deletedId
+            )
+        );
     }
 }
