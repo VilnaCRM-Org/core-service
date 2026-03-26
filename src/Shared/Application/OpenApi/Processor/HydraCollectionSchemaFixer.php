@@ -19,19 +19,27 @@ final class HydraCollectionSchemaFixer
      */
     public function apply(ArrayObject $schemas): ArrayObject
     {
-        $normalizedSchemas = $schemas->getArrayCopy();
-        $normalized = $this->schemaNormalizer->normalize($normalizedSchemas);
+        $schemasArray = $schemas->getArrayCopy();
+        $normalized = $this->schemaNormalizer->normalize($schemasArray);
+        $normalizedSchemas = $schemasArray;
         $hasChanges = false;
 
         foreach ($normalized as $schemaName => $schema) {
-            $updated = $this->viewExampleUpdater->update(
-                SchemaNormalizer::normalize($schema)
-            );
-            if ($updated === null) {
-                continue;
+            $normalizedSchema = SchemaNormalizer::normalize($schema);
+            $updatedSchema = $this->viewExampleUpdater->update($normalizedSchema);
+            $schemaWasNormalized = array_key_exists($schemaName, $schemasArray)
+                ? $schemasArray[$schemaName] !== $schema
+                : false;
+
+            if ($updatedSchema === null) {
+                if (! $schemaWasNormalized) {
+                    continue;
+                }
+
+                $updatedSchema = $normalizedSchema;
             }
 
-            $normalizedSchemas[$schemaName] = new ArrayObject($updated);
+            $normalizedSchemas[$schemaName] = new ArrayObject($updatedSchema);
             $hasChanges = true;
         }
 

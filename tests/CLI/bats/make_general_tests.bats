@@ -17,6 +17,13 @@ load 'bats-assert/load'
   assert_output --partial "composer validate --strict"
 }
 
+@test "make submodule-init syncs metadata before updating" {
+  run make submodule-init
+  assert_success
+  assert_output --partial "git submodule sync --recursive"
+  assert_output --partial "git submodule update --init --recursive"
+}
+
 @test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success

@@ -276,6 +276,12 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
                     'ulid' => ['$ref' => '#/components/schemas/UlidInterface.jsonld-output'],
                 ],
             ],
+            'CustomerStatus.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['$ref' => '#/components/schemas/UlidInterface.jsonld-output'],
+                ],
+            ],
         ]);
 
         $openApi = $this->createOpenApi($schemas);
@@ -285,6 +291,7 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
 
         self::assertSame(['type' => 'string'], $resultSchemas['Customer.jsonld-output']['properties']['ulid']);
         self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['ulid']);
+        self::assertSame(['type' => 'string'], $resultSchemas['CustomerStatus.jsonld-output']['properties']['ulid']);
     }
 
     public function testPreservesUnfixedSchemasWhenMultiple(): void

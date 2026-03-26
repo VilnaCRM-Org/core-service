@@ -12,22 +12,18 @@ use ArrayObject;
 
 final class HydraCollectionSchemaFixerTest extends UnitTestCase
 {
-    public function testApplyReturnsOriginalSchemasWhenUpdatedIsNull(): void
+    public function testApplyReturnsOriginalSchemasWhenNothingChanges(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
         $schemaNormalizer->expects(self::once())
             ->method('normalize')
-            ->willReturn([
-                'key' => 'value',
-                'HydraCollectionBaseSchema' => ['allOf' => null],
-            ]);
+            ->willReturn(['key' => 'value']);
 
         $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
-        $viewExampleUpdater->expects(self::exactly(2))
+        $viewExampleUpdater->expects(self::once())
             ->method('update')
-            ->willReturnCallback(
-                static fn (array $schema): ?array => $schema === ['allOf' => null] ? null : null
-            );
+            ->with([])
+            ->willReturn(null);
 
         $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject(['key' => 'value']);
@@ -36,6 +32,34 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
 
         self::assertSame($schemas, $result);
         self::assertSame(['key' => 'value'], $result->getArrayCopy());
+    }
+
+    public function testApplyPersistsNormalizedSchemasWhenUpdaterReturnsNull(): void
+    {
+        $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
+        $schemaNormalizer->expects(self::once())
+            ->method('normalize')
+            ->willReturn([
+                'HydraCollectionBaseSchema' => ['allOf' => []],
+            ]);
+
+        $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
+        $viewExampleUpdater->expects(self::once())
+            ->method('update')
+            ->with(['allOf' => []])
+            ->willReturn(null);
+
+        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $schemas = new ArrayObject([
+            'HydraCollectionBaseSchema' => null,
+        ]);
+
+        $result = $fixer->apply($schemas);
+
+        self::assertNotSame($schemas, $result);
+        self::assertArrayHasKey('HydraCollectionBaseSchema', $result);
+        self::assertInstanceOf(ArrayObject::class, $result['HydraCollectionBaseSchema']);
+        self::assertSame(['allOf' => []], $result['HydraCollectionBaseSchema']->getArrayCopy());
     }
 
     public function testApplyReturnsUpdatedSchemasWhenBothReturnValues(): void

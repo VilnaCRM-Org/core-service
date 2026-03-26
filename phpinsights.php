@@ -77,6 +77,7 @@ return [
                 // OpenAPI processors traverse nested schema trees and remain intentionally localized.
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
                 'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsUpdater',
+                'src/Shared/Application/OpenApi/Processor/HydraCollectionSchemaFixer',
                 'src/Shared/Application/OpenApi/Processor/HydraDirectViewExampleUpdater',
                 'src/Shared/Application/OpenApi/Processor/OpenApiSchemaFixesProcessor',
                 'src/Shared/Application/OpenApi/Processor/HydraAllOfUpdater',

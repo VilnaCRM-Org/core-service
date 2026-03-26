@@ -17,7 +17,7 @@ use PHPUnit\Framework\Assert;
 final class UntypedParameterSubscriber implements DomainEventSubscriberInterface
 {
     /**
-     * No type hint to test extractor returns null for untyped parameters.
+     * No type hint to test extractor throws for untyped parameters.
      */
     public function __invoke($someClass): void
     {
