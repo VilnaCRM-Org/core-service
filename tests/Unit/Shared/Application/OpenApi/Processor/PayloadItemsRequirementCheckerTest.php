@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\PayloadItemsRequirementChecker;
 use App\Tests\Unit\UnitTestCase;
+use ArrayObject;
 
 final class PayloadItemsRequirementCheckerTest extends UnitTestCase
 {
@@ -33,6 +34,13 @@ final class PayloadItemsRequirementCheckerTest extends UnitTestCase
     public function testShouldAddItemsReturnsTrueWhenItemsIsNull(): void
     {
         $payload = ['type' => 'array', 'items' => null];
+
+        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+    }
+
+    public function testShouldAddItemsReturnsTrueWhenTypeIsArrayObject(): void
+    {
+        $payload = ['type' => new ArrayObject(['array']), 'items' => null];
 
         $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
     }

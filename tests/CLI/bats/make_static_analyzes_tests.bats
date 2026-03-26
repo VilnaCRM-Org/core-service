@@ -10,6 +10,7 @@ load 'bats-assert/load'
 
 @test "make psalm command executes successfully" {
   run make psalm
+  assert_output --partial './vendor/bin/psalm'
   assert_success
 }
 

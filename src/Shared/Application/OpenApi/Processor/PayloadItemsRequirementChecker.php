@@ -13,7 +13,8 @@ final class PayloadItemsRequirementChecker
      */
     public static function shouldAddItems(array $payload): bool
     {
-        $types = (array) ($payload['type'] ?? []);
+        $type = $payload['type'] ?? [];
+        $types = \is_string($type) ? [$type] : SchemaNormalizer::normalize($type);
 
         return in_array('array', $types, true)
             && (($payload['items'] ?? null) === null);

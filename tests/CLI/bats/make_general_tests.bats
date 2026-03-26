@@ -119,3 +119,10 @@ load 'bats-assert/load'
   assert_output --partial 'ensure-test-services'
   assert_output --partial 'up --detach --wait database redis php caddy localstack'
 }
+
+@test "load test LocalStack healthcheck waits for SQS readiness" {
+  run sed -n '/^  localstack:/,/^  redis:/p' docker-compose.load_test.override.yml
+  assert_success
+  assert_output --partial 'localstack status services --format=json'
+  assert_output --partial '"sqs": "available"'
+}

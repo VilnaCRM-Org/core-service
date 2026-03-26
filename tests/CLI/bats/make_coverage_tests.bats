@@ -17,6 +17,13 @@ load 'bats-assert/load'
   assert_output --partial "COVERAGE SUCCESS: Line coverage is 100.00%"
 }
 
+@test "make unit-tests coverage gate compares exact statement counts" {
+  run sed -n '/^unit-tests:/,/^deptrac:/p' Makefile
+  assert_success
+  assert_output --partial 'covered_statements=$${coverage_stats%%:*}'
+  assert_output --partial '[ "$$covered_statements" -ne "$$total_statements" ]'
+}
+
 @test "make behat command runs Behat scenarios" {
   run make behat
   assert_success
@@ -31,4 +38,3 @@ load 'bats-assert/load'
   run make negative-tests-with-coverage
   assert_success
 }
-

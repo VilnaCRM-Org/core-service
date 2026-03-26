@@ -28,7 +28,9 @@ jobs:
       - name: Generate openapi spec
         run: |
           php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
-          php scripts/fix-openapi-spec.php
+          if [ -f scripts/fix-openapi-spec.php ]; then
+            php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml
+          fi
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -58,7 +60,9 @@ jobs:
             exit 1
           fi
           php bin/console --env=test api:openapi:export --yaml --output=.github/openapi-spec/spec.yaml
-          php ../scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml
+          if [ -f scripts/fix-openapi-spec.php ]; then
+            php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml
+          fi
         working-directory: base
       - name: Run OpenAPI Diff (from HEAD revision)
         run: |

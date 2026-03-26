@@ -146,19 +146,27 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		exit 1; \
 	fi; \
 	if [ "$(CI)" = "1" ]; then \
-		coverage=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
-	else \
-		coverage=$$($(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; if ($$statements === 0) { echo "0"; } else { printf("%.2f", ($$covered / $$statements) * 100); }' -- $$coverage_file); \
+		coverage_stats=$$(php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;' -- $$coverage_file); \
 		parse_status=$$?; \
-		if [ $$parse_status -ne 0 ]; then \
-			echo "❌ ERROR: Could not parse coverage XML"; \
-			exit $$parse_status; \
-		fi; \
+	else \
+		coverage_stats=$$($(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;' -- $$coverage_file); \
+		parse_status=$$?; \
+	fi; \
+	if [ $$parse_status -ne 0 ]; then \
+		echo "❌ ERROR: Could not parse coverage XML"; \
+		exit $$parse_status; \
 	fi; \
 	rm -f $$coverage_file; \
 	rm -f $$tmpfile; \
-	if [ -n "$$coverage" ]; then \
-		if ! echo "$$coverage" | awk '{if (($$1 + 0) < 100) exit 1;}'; then \
+	if [ -n "$$coverage_stats" ]; then \
+		covered_statements=$${coverage_stats%%:*}; \
+		remaining_stats=$${coverage_stats#*:}; \
+		total_statements=$${remaining_stats%%:*}; \
+		coverage=$${coverage_stats##*:}; \
+		if [ "$$total_statements" -eq 0 ]; then \
+			echo "❌ ERROR: Coverage XML reported zero statements"; \
+			exit 1; \
+		elif [ "$$covered_statements" -ne "$$total_statements" ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \

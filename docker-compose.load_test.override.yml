@@ -84,7 +84,11 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
     healthcheck:
-      test: ['CMD-SHELL', 'curl -fsS http://localhost:4566/_localstack/health >/dev/null || exit 1']
+      test:
+        [
+          'CMD-SHELL',
+          '/opt/code/localstack/.venv/bin/localstack status services --format=json | grep -q ''"sqs": "available"''',
+        ]
       interval: 10s
       timeout: 5s
       retries: 12
