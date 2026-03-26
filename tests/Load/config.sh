@@ -14,23 +14,28 @@ DEFAULT_LOCAL_MODE="false"
 BUCKET_FILE='./tests/Load/bucket_name.txt'
 
 generate_uuid() {
+  local output
+
   if command -v uuidgen >/dev/null 2>&1; then
-    uuidgen
-    return 0
+    if output="$(uuidgen 2>/dev/null)" && [ -n "$output" ]; then
+      printf '%s\n' "$output"
+      return 0
+    fi
   fi
 
   if [ -r /proc/sys/kernel/random/uuid ]; then
-    cat /proc/sys/kernel/random/uuid
-    return 0
+    if output="$(cat /proc/sys/kernel/random/uuid 2>/dev/null)" && [ -n "$output" ]; then
+      printf '%s\n' "$output"
+      return 0
+    fi
   fi
 
   if command -v python3 >/dev/null 2>&1; then
-    output=$(python3 - <<'PY'
+    if output="$(python3 - <<'PY' 2>/dev/null
 import uuid
 print(uuid.uuid4())
 PY
-)
-    if [ -n "$output" ]; then
+)" && [ -n "$output" ]; then
       printf '%s' "$output"
       return 0
     fi
