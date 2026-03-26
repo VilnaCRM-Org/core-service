@@ -20,11 +20,11 @@ final class HydraDirectViewExampleUpdater
         $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
         $example = SchemaNormalizer::normalize($viewSchema['example'] ?? null);
 
-        if (! array_key_exists('type', $example) || array_key_exists('@type', $example)) {
+        if (! array_key_exists('type', $example)) {
             return null;
         }
 
-        $example['@type'] = $example['type'];
+        $example['@type'] ??= $example['type'];
         unset($example['type']);
 
         $viewSchema['example'] = $example;

@@ -81,7 +81,7 @@ final class OpenApiSchemaFixesProcessor
     }
 
     /**
-     * @param array<int|string, Response|array>|null $responses
+     * @param array<int|string, Response>|null $responses
      *
      * @return array<int|string, Response|array>|null
      */
@@ -108,7 +108,7 @@ final class OpenApiSchemaFixesProcessor
     }
 
     /**
-     * @param array<int|string, Response|array> $responses
+     * @param array<int|string, Response> $responses
      */
     private function updateResponseAtStatus(
         array &$responses,

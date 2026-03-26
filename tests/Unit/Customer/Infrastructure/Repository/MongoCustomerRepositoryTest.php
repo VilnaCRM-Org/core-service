@@ -101,18 +101,15 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $this->repository->delete($customer);
     }
 
-    public function testDeleteNonCustomerEntityCallsParentDelete(): void
+    public function testDeleteNonCustomerEntityThrows(): void
     {
         $entity = new \stdClass();
 
-        $this->documentManager
-            ->expects($this->once())
-            ->method('remove')
-            ->with($entity);
+        $this->documentManager->expects($this->never())->method('remove');
+        $this->documentManager->expects($this->never())->method('flush');
 
-        $this->documentManager
-            ->expects($this->once())
-            ->method('flush');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected Customer instance.');
 
         $this->repository->delete($entity);
     }

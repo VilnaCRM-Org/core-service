@@ -74,6 +74,18 @@ final class CustomerStatusResolverTest extends UnitTestCase
         $this->resolver->resolve($dto, [], $operation);
     }
 
+    public function testResolveThrowsExceptionWhenIdIsBlank(): void
+    {
+        $dto = new StatusPatch($this->faker->word(), '   ');
+        $operation = $this->createMock(Operation::class);
+
+        $this->iriConverter->expects($this->never())->method('getResourceFromIri');
+
+        $this->expectException(CustomerStatusNotFoundException::class);
+
+        $this->resolver->resolve($dto, [], $operation);
+    }
+
     public function testResolveThrowsExceptionWhenConverterFails(): void
     {
         $ulid = (string) $this->faker->ulid();

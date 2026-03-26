@@ -7,6 +7,7 @@ namespace App\Core\Customer\Infrastructure\Repository;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
+use InvalidArgumentException;
 
 /**
  * MongoDB Customer Repository
@@ -45,9 +46,7 @@ final class MongoCustomerRepository extends BaseRepository implements
     public function delete(object $entity): void
     {
         if (! $entity instanceof Customer) {
-            parent::delete($entity);
-
-            return;
+            throw new InvalidArgumentException('Expected Customer instance.');
         }
 
         $managedCustomer = $this->documentManager->contains($entity)

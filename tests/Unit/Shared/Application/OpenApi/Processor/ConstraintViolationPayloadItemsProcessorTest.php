@@ -184,7 +184,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
                         'properties' => [
                             'payload' => [
                                 'type' => 'array',
-                                'items' => ['type' => 'string'],
+                                'items' => ['type' => 'object'],
                             ],
                         ],
                     ],
