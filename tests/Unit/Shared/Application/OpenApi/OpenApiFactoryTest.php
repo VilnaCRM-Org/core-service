@@ -67,15 +67,45 @@ final class OpenApiFactoryTest extends UnitTestCase
             [],
             new Paths()
         );
+        $parameterOutput = new OpenApi(
+            new Info('Parameters', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $tagOutput = new OpenApi(
+            new Info('Tags', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $iriOutput = new OpenApi(
+            new Info('Iri', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $pathOutput = new OpenApi(
+            new Info('Paths', '1.0.0'),
+            [],
+            new Paths()
+        );
         $schemaFixesOutput = new OpenApi(
             new Info('Schema fixes', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $ulidOutput = new OpenApi(
+            new Info('Ulid', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $finalOpenApi = new OpenApi(
+            new Info('Final', '1.0.0'),
             [],
             new Paths()
         );
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
+            ->with($this->identicalTo($pathOutput))
             ->willReturn($payloadOutput);
         $schemaFixesProcessor = $this->createMock(OpenApiSchemaFixesProcessor::class);
         $schemaFixesProcessor->expects($this->once())
@@ -86,28 +116,42 @@ final class OpenApiFactoryTest extends UnitTestCase
         $pathProcessor = $this->createMock(PathParametersProcessor::class);
         $pathProcessor->expects($this->once())
             ->method('process')
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($iriOutput))
+            ->willReturn($pathOutput);
 
         $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
         $paramProcessor->expects($this->once())
             ->method('process')
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($openApi))
+            ->willReturn($parameterOutput);
 
         $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
         $iriProcessor->expects($this->once())
             ->method('process')
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($tagOutput))
+            ->willReturn($iriOutput);
 
         $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
         $tagProcessor->expects($this->once())
             ->method('process')
-            ->willReturnArgument(0);
+            ->with($this->identicalTo($parameterOutput))
+            ->willReturn($tagOutput);
 
         $ulidFixer = $this->createMock(UlidInterfaceSchemaFixer::class);
         $ulidFixer->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($schemaFixesOutput))
-            ->willReturn($schemaFixesOutput);
+            ->willReturn($ulidOutput);
+        $extensionsApplier = $this->createMock(OpenApiExtensionsApplier::class);
+        $extensionsApplier->expects($this->once())
+            ->method('apply')
+            ->with(
+                $this->callback(static fn (OpenApi $normalizedOpenApi): bool => $normalizedOpenApi !== $ulidOutput
+                    && $normalizedOpenApi->getInfo() === $ulidOutput->getInfo()
+                    && $normalizedOpenApi->getPaths() === $ulidOutput->getPaths()),
+                $this->identicalTo($ulidOutput->getExtensionProperties())
+            )
+            ->willReturn($finalOpenApi);
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
@@ -119,12 +163,12 @@ final class OpenApiFactoryTest extends UnitTestCase
             $payloadProcessor,
             $schemaFixesProcessor,
             $ulidFixer,
-            $this->createMock(OpenApiExtensionsApplier::class)
+            $extensionsApplier
         );
 
         $result = $factory->__invoke($context);
 
-        $this->assertInstanceOf(OpenApi::class, $result);
+        $this->assertSame($finalOpenApi, $result);
     }
 
     public function testInvokeNormalizesWebhooksAndExtensions(): void

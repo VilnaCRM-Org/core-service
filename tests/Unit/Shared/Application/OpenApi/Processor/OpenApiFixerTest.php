@@ -837,7 +837,7 @@ final class OpenApiFixerTest extends UnitTestCase
     public function testRunThrowsExceptionOnInvalidYaml(): void
     {
         // Write invalid YAML to trigger ParseException in readSpec
-        if (false === file_put_contents($this->specFile, 'invalid: yaml: content:')) {
+        if (file_put_contents($this->specFile, 'invalid: yaml: content:') === false) {
             $this->fail(sprintf('Failed to write invalid YAML fixture: %s', $this->specFile));
         }
 
@@ -1017,7 +1017,10 @@ final class OpenApiFixerTest extends UnitTestCase
         $fixer->run();
 
         $result = $this->readSpecFile();
-        $this->assertSame('/errors/422', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+        $example = $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example'];
+
+        $this->assertSame(422, $example['status']);
+        $this->assertSame('/errors/422', $example['type']);
     }
 
     public function testFix422ErrorTypeDoesNotChangeMissingStatusExample(): void

@@ -284,6 +284,8 @@ final class OpenApiFixer
             && array_key_exists('status', $responseExample)
             && (int) $responseExample['status'] === 422;
         if ($is422Error) {
+            $problemJson['example']['status'] = 422;
+
             // Fix the error type for validation errors
             $exampleType = $responseExample['type'] ?? null;
             if ($exampleType === '/errors/500') {
