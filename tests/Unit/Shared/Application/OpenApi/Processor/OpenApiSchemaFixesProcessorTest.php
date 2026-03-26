@@ -334,7 +334,6 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
     {
         $paths = new Paths();
         $operation = new Operation(responses: ['200' => new Response(description: 'ok')]);
-        $response = new Response(description: 'ok');
         $paths->addPath(
             '/customers',
             (new PathItem())->withGet($operation)

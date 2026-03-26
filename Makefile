@@ -116,7 +116,7 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 	coverage_file=coverage/unit-coverage.xml; \
 	mkdir -p coverage; \
 	rm -f $$coverage_file; \
-	script -q -e -c '$(RUN_TESTS_COVERAGE) --testsuite=Unit --coverage-clover='"$$coverage_file"'' /dev/null > $$tmpfile 2>&1; \
+	$(RUN_TESTS_COVERAGE) --fail-on-incomplete --testsuite=Unit --coverage-clover="$$coverage_file" > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
@@ -125,8 +125,8 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
-	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
-		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
+	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!'; then \
+		echo "❌ TEST FAILURE: Unit tests reported failures or errors."; \
 		rm -f $$coverage_file; \
 		rm -f $$tmpfile; \
 		exit 1; \
