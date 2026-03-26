@@ -40,7 +40,7 @@ cs_detect_user_auth() {
 cs_ensure_gh_auth() {
     local auth_mode
 
-    cs_require_command gh
+    cs_require_command gh || return 1
 
     if auth_mode="$(cs_detect_user_auth)"; then
         export CS_GH_AUTH_MODE="${auth_mode}"
@@ -60,7 +60,7 @@ Provide one of:
   - GH_TOKEN
   - GH_AUTOMATION_TOKEN
   - GITHUB_TOKEN
-or run interactive login in the Codespace:
+or run interactive login in the workspace:
   gh auth login -h github.com -w
 EOM
     return 1

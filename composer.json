@@ -14,14 +14,15 @@
     "ext-mongodb": "*",
     "ext-simplexml": "*",
     "ext-xml": "*",
-    "api-platform/core": "^4.0",
-    "api-platform/doctrine-odm": "*",
+    "api-platform/core": "4.1.*",
+    "api-platform/doctrine-odm": "4.1.*",
     "aws/aws-sdk-php": "^3.317.1",
     "cfpinto/graphql": "^2.0",
     "doctrine/mongodb-odm": "^2.10",
     "doctrine/mongodb-odm-bundle": "^5.3",
     "dpauli/graphql-request-builder": "^1.8",
-    "phpmailer/phpmailer": "^6.6",
+    "mongodb/mongodb": "^1.21",
+    "phpmailer/phpmailer": "^7.0",
     "sebastian/phpcpd": "^6.0",
     "symfony/asset": "7.2.*",
     "symfony/cache": "7.2.*",
@@ -38,8 +39,7 @@
     "symfony/uid": "7.2.*",
     "symfony/validator": "7.2.*",
     "symfony/yaml": "7.2.*",
-    "webonyx/graphql-php": "^15.14",
-    "mongodb/mongodb": "^1.21"
+    "webonyx/graphql-php": "^15.14"
   },
   "config": {
     "allow-plugins": {
@@ -100,12 +100,12 @@
       "docker": true
     },
     "_comments": {
-      "behat-gherkin": "Version locked to 4.10 due to compatibility issues. See: https://github.com/Behat/Gherkin/issues/317"
+      "behat-gherkin": "Compatibility issue from Behat/Gherkin issue #317 is resolved; the project now uses 4.16.1."
     }
   },
   "require-dev": {
     "behat/behat": "^3.19",
-    "behat/gherkin": "4.10",
+    "behat/gherkin": "4.16.1",
     "behat/mink": "^1.12",
     "behat/mink-browserkit-driver": "^2.0",
     "dg/bypass-finals": "^1.5",
@@ -127,7 +127,7 @@
     "symfony/browser-kit": "7.2.*",
     "symfony/css-selector": "7.2.*",
     "symfony/mime": "^7.2",
-    "symfony/phpunit-bridge": "7.2.*",
+    "symfony/phpunit-bridge": "8.0.*",
     "twentytwo-labs/behat-open-api": "^1.0",
     "vimeo/psalm": "*",
     "weirdan/doctrine-psalm-plugin": "^2.5"

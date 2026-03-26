@@ -107,7 +107,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	$(RUN_TESTS_COVERAGE) --testsuite=Unit > $$tmpfile 2>&1; \
+	script -qec "$(RUN_TESTS_COVERAGE) --testsuite=Unit" /dev/null > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
@@ -120,10 +120,10 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep "^  Lines:" | awk '{print $$2}' | sed 's/%//' | head -1); \
+	coverage=$$(perl -ne 's/\e\[[0-9;]*m//g; if (/^\s*Lines:\s+([0-9.]+)%/) { print "$$1\n"; exit 0 }' $$tmpfile); \
 	rm -f $$tmpfile; \
 	if [ -n "$$coverage" ]; then \
-		if [ $$(echo "$$coverage < 100" | bc -l) -eq 1 ]; then \
+		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
@@ -141,7 +141,20 @@ deptrac-debug: ## Find files unassigned for Deptrac
 	$(EXEC_ENV) $(DEPTRAC) debug:unassigned --config-file=deptrac.yaml
 
 ensure-test-services: ## Ensure required Docker services for test suites are running
-	$(DOCKER_COMPOSE) up --detach database redis php caddy localstack
+	@attempt=1; \
+	max_attempts=3; \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
+		if [ $$attempt -ge $$max_attempts ]; then \
+			echo "❌ Failed to start required test services after $$attempt attempts."; \
+			$(DOCKER_COMPOSE) ps || true; \
+			exit 1; \
+		fi; \
+		echo "⚠️  Failed to start required test services (attempt $$attempt/$$max_attempts). Retrying..."; \
+		$(DOCKER_COMPOSE) ps || true; \
+		attempt=$$((attempt + 1)); \
+		sleep 5; \
+	done; \
+	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
