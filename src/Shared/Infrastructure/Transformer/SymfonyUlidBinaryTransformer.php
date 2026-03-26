@@ -19,6 +19,8 @@ final class SymfonyUlidBinaryTransformer
             return SymfonyUlid::fromBinary($value->getData());
         }
 
-        return SymfonyUlid::fromBinary($value);
+        return strlen($value) === 16
+            ? SymfonyUlid::fromBinary($value)
+            : SymfonyUlid::fromString($value);
     }
 }

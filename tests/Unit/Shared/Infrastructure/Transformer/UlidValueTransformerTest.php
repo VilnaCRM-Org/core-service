@@ -107,6 +107,16 @@ final class UlidValueTransformerTest extends UnitTestCase
         $this->assertEquals((string) $symfonyUlid, (string) $result);
     }
 
+    public function testFromBinaryWithCanonicalUlidString(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+
+        $result = $this->converter->fromBinary((string) $symfonyUlid);
+
+        $this->assertInstanceOf(SymfonyUlid::class, $result);
+        $this->assertEquals((string) $symfonyUlid, (string) $result);
+    }
+
     public function testFromBinaryWithBinary(): void
     {
         $symfonyUlid = new SymfonyUlid();

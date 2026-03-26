@@ -13,6 +13,9 @@ final class TestMessageReusableHandler
     {
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function __invoke(TestMessage $_message): void
     {
         ++$this->counter->value;

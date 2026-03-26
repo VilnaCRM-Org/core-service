@@ -84,6 +84,23 @@ final class UlidTransformerTest extends UnitTestCase
         $this->assertInstanceOf(Ulid::class, $result);
     }
 
+    public function testToPhpValueWithCanonicalUlidString(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $ulidMock = $this->createMock(Ulid::class);
+        $ulidMock->method('__toString')->willReturn((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($ulidMock);
+
+        $result = $this->ulidTransformer->toPhpValue((string) $symfonyUlid);
+
+        $this->assertInstanceOf(Ulid::class, $result);
+    }
+
     public function testToPhpValueWithBinaryObject(): void
     {
         $symfonyUlid = new SymfonyUlid();

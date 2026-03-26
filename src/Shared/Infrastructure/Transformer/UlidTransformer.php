@@ -48,14 +48,6 @@ final readonly class UlidTransformer
 
     private function toSymfonyUlid(Binary|string|SymfonyUlid $value): SymfonyUlid
     {
-        if ($value instanceof SymfonyUlid) {
-            return $value;
-        }
-
-        if ($value instanceof Binary) {
-            return SymfonyUlid::fromBinary($value->getData());
-        }
-
-        return SymfonyUlid::fromBinary($value);
+        return $this->valueTransformer->fromBinary($value);
     }
 }
