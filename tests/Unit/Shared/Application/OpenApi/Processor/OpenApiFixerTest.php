@@ -837,7 +837,9 @@ final class OpenApiFixerTest extends UnitTestCase
     public function testRunThrowsExceptionOnInvalidYaml(): void
     {
         // Write invalid YAML to trigger ParseException in readSpec
-        file_put_contents($this->specFile, 'invalid: yaml: content:');
+        if (false === file_put_contents($this->specFile, 'invalid: yaml: content:')) {
+            $this->fail(sprintf('Failed to write invalid YAML fixture: %s', $this->specFile));
+        }
 
         $fixer = new OpenApiFixer($this->specFile);
 

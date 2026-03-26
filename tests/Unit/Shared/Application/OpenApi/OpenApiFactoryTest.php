@@ -67,6 +67,11 @@ final class OpenApiFactoryTest extends UnitTestCase
             [],
             new Paths()
         );
+        $schemaFixesOutput = new OpenApi(
+            new Info('Schema fixes', '1.0.0'),
+            [],
+            new Paths()
+        );
         $payloadProcessor = $this->createMock(ConstraintViolationPayloadItemsProcessor::class);
         $payloadProcessor->expects($this->once())
             ->method('process')
@@ -76,7 +81,7 @@ final class OpenApiFactoryTest extends UnitTestCase
         $schemaFixesProcessor->expects($this->once())
             ->method('process')
             ->with($this->identicalTo($payloadOutput))
-            ->willReturn($payloadOutput);
+            ->willReturn($schemaFixesOutput);
 
         $pathProcessor = $this->createMock(PathParametersProcessor::class);
         $pathProcessor->expects($this->once())
@@ -101,8 +106,8 @@ final class OpenApiFactoryTest extends UnitTestCase
         $ulidFixer = $this->createMock(UlidInterfaceSchemaFixer::class);
         $ulidFixer->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($payloadOutput))
-            ->willReturn($payloadOutput);
+            ->with($this->identicalTo($schemaFixesOutput))
+            ->willReturn($schemaFixesOutput);
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
