@@ -1023,6 +1023,50 @@ final class OpenApiFixerTest extends UnitTestCase
         $this->assertSame('/errors/422', $example['type']);
     }
 
+    public function testProcessResponseFor422ErrorsWithIntegerStatusCode(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $response = [
+            'content' => [
+                'application/problem+json' => [
+                    'example' => [
+                        'status' => 422,
+                        'type' => '/errors/500',
+                    ],
+                ],
+            ],
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'processResponseFor422Errors');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, [422, &$response]);
+
+        $this->assertSame(422, $response['content']['application/problem+json']['example']['status']);
+        $this->assertSame('/errors/422', $response['content']['application/problem+json']['example']['type']);
+    }
+
+    public function testProcessResponseFor422ErrorsWithStringStatusCode(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $response = [
+            'content' => [
+                'application/problem+json' => [
+                    'example' => [
+                        'status' => 422,
+                        'type' => '/errors/500',
+                    ],
+                ],
+            ],
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'processResponseFor422Errors');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, ['422', &$response]);
+
+        $this->assertSame(422, $response['content']['application/problem+json']['example']['status']);
+        $this->assertSame('/errors/422', $response['content']['application/problem+json']['example']['type']);
+    }
+
     public function testFix422ErrorTypeDoesNotChangeMissingStatusExample(): void
     {
         $spec = [
@@ -1051,6 +1095,37 @@ final class OpenApiFixerTest extends UnitTestCase
 
         $result = $this->readSpecFile();
         $this->assertSame('/errors/500', $result['paths']['/customers']['post']['responses']['422']['content']['application/problem+json']['example']['type']);
+    }
+
+    public function testFix422ErrorTypeLeavesNonProblemJsonContentUnchanged(): void
+    {
+        $spec = [
+            'paths' => [
+                '/customers' => [
+                    'post' => [
+                        'responses' => [
+                            '422' => [
+                                'content' => [
+                                    'application/json' => [
+                                        'example' => [
+                                            'status' => 422,
+                                            'type' => '/errors/500',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->writeSpecFile($spec);
+        $fixer = new OpenApiFixer($this->specFile);
+        $fixer->run();
+
+        $result = $this->readSpecFile();
+        $this->assertSame('/errors/500', $result['paths']['/customers']['post']['responses']['422']['content']['application/json']['example']['type']);
     }
 
     public function testFix422ErrorTypeSkipsNonArrayIndividualResponse(): void
@@ -1150,6 +1225,44 @@ final class OpenApiFixerTest extends UnitTestCase
         $result = $this->readSpecFile();
         $this->assertNull($result['paths']['/test']['delete']['responses']);
         $this->assertArrayNotHasKey('content', $result['paths']['/test']['post']['responses']['204']);
+    }
+
+    public function testProcessResponseFor204WithIntegerStatusCode(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $response = [
+            'description' => 'No Content',
+            'content' => [
+                'application/json' => [
+                    'schema' => ['type' => 'object'],
+                ],
+            ],
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'processResponseFor204');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, [204, &$response]);
+
+        $this->assertArrayNotHasKey('content', $response);
+    }
+
+    public function testProcessResponseFor204WithStringStatusCode(): void
+    {
+        $fixer = new OpenApiFixer($this->specFile);
+        $response = [
+            'description' => 'No Content',
+            'content' => [
+                'application/json' => [
+                    'schema' => ['type' => 'object'],
+                ],
+            ],
+        ];
+
+        $method = new \ReflectionMethod($fixer, 'processResponseFor204');
+        $method->setAccessible(true);
+        $method->invokeArgs($fixer, ['204', &$response]);
+
+        $this->assertArrayNotHasKey('content', $response);
     }
 
     public function testFix204ResponsesDoesNotRemoveContentFromNon204Status(): void
