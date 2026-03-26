@@ -87,7 +87,7 @@ services:
       test:
         [
           'CMD-SHELL',
-          'curl -sk https://localhost:4566/_localstack/health | grep -Eq ''"sqs":[[:space:]]*"available"''',
+          'curl -sf http://localhost:4566/_localstack/health | grep -Eq ''"sqs":[[:space:]]*"available"''',
         ]
       interval: 10s
       timeout: 5s

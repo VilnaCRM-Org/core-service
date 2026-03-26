@@ -5,12 +5,12 @@
 #
 # Skipped tests checklist (restore each with proper fixture):
 # [ ] make check-security: Security vulnerability detection
-# [ ] make infection: Mutation score threshold
-# [ ] make psalm: Static analysis error detection
+# [ ] make infection: Mutation score threshold (currently skipped pending fixture-based coverage)
+# [ ] make psalm: Static analysis error detection (currently skipped pending fixture-based coverage)
 # [ ] make phpinsights: Code quality threshold detection
 # [ ] phpunit: Test failure detection
 # [ ] PHP CS Fixer: Code style violation detection
-# [ ] make composer-validate: Invalid composer.json detection
+# [x] make composer-validate: Invalid composer.json detection
 # [ ] make behat: E2E test failure detection
 
 load 'bats-support/load'
@@ -25,8 +25,7 @@ setup() {
 }
 
 # Tech debt: Previous behavioral negative tests for infection (mutation score threshold)
-# and psalm (static analysis errors) were removed due to environment complexity.
-# The current tests only verify binary-missing error handling.
+# and psalm (static analysis errors) remain skipped pending fixture-based coverage.
 # To restore: create fixture projects with known failures and test Make targets against them.
 @test "make infection should fail when binary is missing" {
   skip "Error detection may vary in CI environment"

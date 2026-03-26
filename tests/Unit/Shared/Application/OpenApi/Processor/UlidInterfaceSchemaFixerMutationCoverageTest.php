@@ -36,6 +36,13 @@ final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
                     'value' => ['type' => 'string'],
                 ],
             ],
+            'CustomerStatus.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['type' => 'string'],
+                    'value' => ['type' => 'string'],
+                ],
+            ],
         ]);
 
         $fixer = new UlidInterfaceSchemaFixer();
@@ -46,6 +53,8 @@ final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
         self::assertSame(['type' => 'string'], $resultSchemas['Customer.jsonld-output']['properties']['ulid']);
         self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['ulid']);
         self::assertSame(['type' => 'string'], $resultSchemas['CustomerType.jsonld-output']['properties']['value']);
+        self::assertSame(['type' => 'string'], $resultSchemas['CustomerStatus.jsonld-output']['properties']['ulid']);
+        self::assertSame(['type' => 'string'], $resultSchemas['CustomerStatus.jsonld-output']['properties']['value']);
     }
 
     public function testDoesNotDropSchemasWhenRefIsNotUlidInterface(): void
