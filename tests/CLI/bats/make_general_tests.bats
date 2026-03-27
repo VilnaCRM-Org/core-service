@@ -18,7 +18,7 @@ load 'bats-assert/load'
 }
 
 @test "make submodule-init syncs metadata before updating" {
-  run make submodule-init
+  run make -n submodule-init
   assert_success
   sync_line="$(printf '%s\n' "$output" | grep -nF 'git submodule sync --recursive' | head -n1 | cut -d: -f1)"
   update_line="$(printf '%s\n' "$output" | grep -nF 'git submodule update --init --recursive' | head -n1 | cut -d: -f1)"
@@ -34,14 +34,14 @@ load 'bats-assert/load'
 }
 
 @test "make phpinsights command executes and completes analysis" {
-  run make phpinsights
+  run make -n phpinsights
   assert_success
   assert_output --partial "./vendor/bin/phpmd"
   assert_output --partial "./vendor/bin/phpinsights"
 }
 
 @test "make phpinsights uses the default invocation" {
-  run make phpinsights
+  run make -n phpinsights
   assert_success
   refute_output --partial -- "--memory-limit="
 }
@@ -53,13 +53,13 @@ load 'bats-assert/load'
 }
 
 @test "make infection command executes" {
-  run make infection
+  run make -n infection
   assert_success
   assert_output --partial "./vendor/bin/infection"
 }
 
 @test "make infection keeps 100 percent thresholds hardcoded" {
-  run make infection
+  run make -n infection
   assert_success
   assert_output --partial -- "--min-msi=100"
   assert_output --partial -- "--min-covered-msi=100"
