@@ -72,9 +72,13 @@ abstract class EndpointFactory implements EndpointFactoryInterface
      */
     private function normalizeResponses(array|ArrayObject|null $responses): array
     {
+        if ($responses === null) {
+            return [];
+        }
+
         return $responses instanceof ArrayObject
             ? $responses->getArrayCopy()
-            : (array) $responses;
+            : $responses;
     }
 
     private function applyRequestBody(

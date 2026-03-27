@@ -36,19 +36,56 @@ setup() {
 }
 
 @test "make psalm should fail when static analysis errors are present" {
-  skip "Error message format differs between environments"
+  run bash -lc '
+    set -e
+    cd /workspaces/core-service
+    target=src/Shared/Application/PsalmErrorExample.php
+    cp tests/CLI/bats/php/PsalmErrorExample.php "$target"
+    trap '\''rm -f "$target"; docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null 2>&1 || true'\'' EXIT
+    docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
+    make psalm
+  '
+  assert_failure
+  assert_output --partial "does not exist"
 }
 
 @test "make phpinsights should fail when code quality is low" {
-  skip "phpinsights does not return non-zero on quality thresholds in this environment"
+  run bash -lc '
+    set -e
+    cd /workspaces/core-service
+    target=src/temp_bad_code.php
+    cp tests/CLI/bats/php/temp_bad_code.php "$target"
+    trap '\''rm -f "$target"'\'' EXIT
+    make phpinsights
+  '
+  assert_failure
+  assert_output --partial "Cyclomatic Complexity of 10"
 }
 
 @test "phpunit should fail if tests fail" {
-  skip "Test relies on ARGS being passed to Makefile, but unit-tests target ignores ARGS variable"
+  run bash -lc '
+    set -e
+    cd /workspaces/core-service
+    target=tests/Unit/FailingTest.php
+    cp tests/CLI/bats/php/FailingTest.php "$target"
+    trap '\''rm -f "$target"'\'' EXIT
+    make unit-tests
+  '
+  assert_failure
+  assert_output --partial "FAILURES!"
 }
 
 @test "PHP CS Fixer should report violations if present" {
-  skip "Test requires specific output that may not appear in all conditions"
+  run bash -lc '
+    set -e
+    cd /workspaces/core-service
+    target=temp_file.php
+    printf "<?php \$foo = '\''bar'\'' ;\n" > "$target"
+    trap '\''rm -f "$target"'\'' EXIT
+    docker compose exec -T php ./vendor/bin/php-cs-fixer fix "$target" --dry-run --diff
+  '
+  assert_failure
+  assert_output --partial "--- Original"
 }
 
 @test "make composer-validate should fail with invalid composer.json" {

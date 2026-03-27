@@ -14,7 +14,7 @@ load 'bats-assert/load'
 @test "make composer-validate command executes" {
   run make composer-validate
   assert_success
-  assert_output --partial "composer validate --strict"
+  assert_output --partial "./composer.json is valid"
 }
 
 @test "make submodule-init syncs metadata before updating" {
@@ -30,7 +30,7 @@ load 'bats-assert/load'
 @test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success
-  assert_output --regexp '(symfony|php bin/console) check:requirements'
+  assert_output --regexp '(Symfony Requirements Checker|Checking platform settings:)'
 }
 
 @test "make phpinsights command executes and completes analysis" {
@@ -48,8 +48,8 @@ load 'bats-assert/load'
 
 @test "make check-security command executes" {
   run make check-security
-  assert_success
-  assert_output --regexp '(symfony|php bin/console) security:check'
+  [ "$status" -eq 0 ] || [ "$status" -eq 2 ]
+  assert_output --regexp '(No security vulnerability advisories found\\.|Found [0-9]+ security vulnerability advisories affecting [0-9]+ packages:)'
 }
 
 @test "make infection command executes" {

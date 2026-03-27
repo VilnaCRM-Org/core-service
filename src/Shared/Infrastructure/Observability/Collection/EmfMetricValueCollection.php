@@ -64,15 +64,12 @@ final readonly class EmfMetricValueCollection implements IteratorAggregate, Coun
      */
     public function toAssociativeArray(): array
     {
-        return array_reduce(
-            $this->values,
-            static function (array $result, EmfMetricValue $value): array {
-                $result[$value->name()] = $value->value();
+        $result = [];
+        foreach ($this->values as $value) {
+            $result[$value->name()] = $value->value();
+        }
 
-                return $result;
-            },
-            []
-        );
+        return $result;
     }
 
     private function assertUniqueNames(EmfMetricValue ...$values): void

@@ -6,7 +6,6 @@ namespace App\Shared\Infrastructure\Observability\Factory;
 
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
-use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimensionsInterface;
 use App\Shared\Infrastructure\Observability\Collection\EmfDimensionValueCollection;
 use App\Shared\Infrastructure\Observability\Collection\EmfMetricValueCollection;
@@ -101,13 +100,10 @@ final readonly class EmfPayloadFactory implements EmfPayloadFactoryInterface
     private function createDimensionValueCollection(
         MetricDimensionsInterface $dimensions
     ): EmfDimensionValueCollection {
-        $dimensionValues = array_map(
-            static fn (MetricDimension $dimension): EmfDimensionValue => new EmfDimensionValue(
-                $dimension->key(),
-                $dimension->value()
-            ),
-            iterator_to_array($dimensions->values())
-        );
+        $dimensionValues = [];
+        foreach ($dimensions->values() as $dimension) {
+            $dimensionValues[] = new EmfDimensionValue($dimension->key(), $dimension->value());
+        }
 
         return new EmfDimensionValueCollection($this->dimensionValidator, ...$dimensionValues);
     }

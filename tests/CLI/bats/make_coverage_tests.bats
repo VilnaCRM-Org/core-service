@@ -18,10 +18,16 @@ load 'bats-assert/load'
 }
 
 @test "make unit-tests coverage gate compares exact statement counts" {
-  run sed -n '/^unit-tests:/,/^deptrac:/p' Makefile
-  assert_success
-  assert_output --partial 'covered_statements=$${coverage_stats%%:*}'
-  assert_output --partial '[ "$$covered_statements" -ne "$$total_statements" ]'
+  run bash -lc '
+    set -e
+    cd /workspaces/core-service
+    target=src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php
+    cp tests/CLI/bats/php/PartlyCoveredEventBus.php "$target"
+    trap '\''rm -f "$target"'\'' EXIT
+    make unit-tests
+  '
+  assert_failure
+  assert_output --partial "COVERAGE FAILURE:"
 }
 
 @test "make behat command runs Behat scenarios" {

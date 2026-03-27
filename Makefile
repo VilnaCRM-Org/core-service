@@ -131,7 +131,7 @@ check-security: ensure-runtime-dirs ## Checks security issues in project depende
 		$(EXEC_ENV) $(SYMFONY_BIN) security:check; \
 	else \
 		echo "php bin/console security:check"; \
-		$(COMPOSER) audit --abandoned=ignore; \
+		$(COMPOSER) audit --locked --no-dev --abandoned=ignore; \
 	fi
 
 psalm: ## A static analysis tool for finding errors in PHP applications

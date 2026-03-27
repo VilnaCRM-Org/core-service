@@ -6,6 +6,7 @@ load 'bats-assert/load'
 @test "make setup-test-db command executes successfully" {
   run make setup-test-db
   assert_success
+  assert_output --partial "Clearing the cache"
 }
 
 @test "make reset-db command recreates database schema" {
@@ -22,4 +23,3 @@ load 'bats-assert/load'
   run make fixtures-load
   assert_success
 }
-
