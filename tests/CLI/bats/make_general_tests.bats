@@ -20,8 +20,11 @@ load 'bats-assert/load'
 @test "make submodule-init syncs metadata before updating" {
   run make submodule-init
   assert_success
-  assert_output --partial "git submodule sync --recursive"
-  assert_output --partial "git submodule update --init --recursive"
+  sync_line="$(printf '%s\n' "$output" | grep -nF 'git submodule sync --recursive' | head -n1 | cut -d: -f1)"
+  update_line="$(printf '%s\n' "$output" | grep -nF 'git submodule update --init --recursive' | head -n1 | cut -d: -f1)"
+  [ -n "$sync_line" ]
+  [ -n "$update_line" ]
+  [ "$sync_line" -lt "$update_line" ]
 }
 
 @test "make check-requirements command is invoked" {

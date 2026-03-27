@@ -116,9 +116,8 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	coverage_file=coverage/unit-coverage.xml; \
+	coverage_file=coverage/unit-coverage.$$$$.xml; \
 	mkdir -p coverage; \
-	rm -f $$coverage_file; \
 	$(RUN_TESTS_COVERAGE) --fail-on-incomplete --testsuite=Unit --coverage-clover="$$coverage_file" > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
