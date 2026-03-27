@@ -185,11 +185,16 @@ final class OpenApiSchemaFixesProcessor implements OpenApiProcessorInterface
             return null;
         }
 
+        $normalizedSchema = SchemaNormalizer::normalize($normalizedDefinition['schema']);
         $updatedSchema = $this->hydraCollectionSchemaFixer->fixSchema(
-            SchemaNormalizer::normalize($normalizedDefinition['schema'])
+            $normalizedSchema
         );
         if ($updatedSchema === null) {
-            return null;
+            if ($normalizedSchema === $normalizedDefinition['schema']) {
+                return null;
+            }
+
+            $updatedSchema = $normalizedSchema;
         }
 
         $normalizedDefinition['schema'] = $updatedSchema;

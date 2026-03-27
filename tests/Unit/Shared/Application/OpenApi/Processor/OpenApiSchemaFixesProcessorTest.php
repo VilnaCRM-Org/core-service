@@ -491,6 +491,39 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         );
     }
 
+    public function testProcessPersistsNormalizedInlineSchemasWhenUpdaterMakesNoChanges(): void
+    {
+        $paths = new Paths();
+        $response = new Response(
+            description: 'ok',
+            content: new ArrayObject([
+                'application/json' => [
+                    'schema' => new ArrayObject([
+                        'type' => 'object',
+                    ]),
+                ],
+            ])
+        );
+        $paths->addPath(
+            '/customers',
+            (new PathItem())->withGet(new Operation(responses: ['200' => $response]))
+        );
+
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], $paths, new Components(new ArrayObject()));
+        $processor = $this->createProcessor();
+
+        $result = $processor->process($openApi);
+        $responses = $result->getPaths()->getPath('/customers')->getGet()?->getResponses();
+        $content = $responses['200']->getContent();
+
+        self::assertInstanceOf(ArrayObject::class, $content);
+        self::assertIsArray($content['application/json']);
+        self::assertSame(
+            ['type' => 'object'],
+            $content['application/json']['schema']
+        );
+    }
+
     public function testProcessLeavesArrayContentDefinitionsWithUnchangedSchemaUntouched(): void
     {
         $paths = new Paths();

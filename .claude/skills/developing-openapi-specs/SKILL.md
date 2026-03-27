@@ -35,7 +35,7 @@ src/Shared/Application/OpenApi/
 │   ├── Response/         # Response schemas
 │   └── UriParameter/     # Path parameter factories
 ├── Processor/            # Spec transformation processors
-└── OpenApiFactory.php    # Main coordinator
+└── OpenApiFactory.php    # Main coordinator for tagged factories/processors
 ```
 
 ### Key Principles
@@ -177,7 +177,7 @@ See [REFERENCE.md - Adding Endpoint Factories](REFERENCE.md#adding-a-new-endpoin
 
 ### Adding Parameter Descriptions
 
-Add to `ParameterDescriptionAugmenter::getParameterDescriptions()`:
+Extend `ParameterDescriptionProcessor` with a focused provider and wire it into `getParameterDescriptions()`:
 
 ```php
 private function getYourFilterDescriptions(): array
@@ -192,7 +192,7 @@ private function getParameterDescriptions(): array
 {
     return array_merge(
         $this->getOrderDescriptions(),
-        $this->getYourFilterDescriptions(),  // Add here
+        $this->getYourFilterDescriptions(),
     );
 }
 ```
@@ -240,9 +240,9 @@ For comprehensive patterns, step-by-step guides, and examples:
 
 - **[REFERENCE.md](REFERENCE.md)** - Full directory structure, all patterns with examples, troubleshooting guide
 - **Codebase Examples**:
-  - `ParameterDescriptionAugmenter.php` - All key patterns
-  - `IriReferenceTypeFixer.php` - Complexity reduction journey
-  - `PathParametersSanitizer.php` - Delegation pattern
+  - `ParameterDescriptionProcessor.php` - Parameter-description provider pattern
+  - `IriReferenceTypeProcessor.php` - Schema transformation pattern
+  - `PathParametersProcessor.php` - Delegation pattern for path cleanup
 
 ## Quick Checklist
 
