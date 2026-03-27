@@ -13,4 +13,8 @@ if (file_exists(dirname(__DIR__).'/config/bootstrap.php')) {
     (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
 }
 
-BypassFinals::enable();
+$entrypoint = basename($_SERVER['argv'][0] ?? '');
+
+if ($entrypoint !== 'behat') {
+    BypassFinals::enable();
+}
