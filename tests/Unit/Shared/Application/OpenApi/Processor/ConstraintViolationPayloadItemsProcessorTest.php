@@ -160,8 +160,43 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $updatedSchema = $resultSchemas['ConstraintViolation'];
         $schemaData = $updatedSchema->getArrayCopy();
         $payload = $schemaData['properties']['violations']['items']['properties']['payload'];
+        $code = $schemaData['properties']['violations']['items']['properties']['code'];
+        $this->assertSame('string', $code['type']);
+        $this->assertSame('The machine-readable violation code', $code['description']);
         $this->assertSame('array', $payload['type']);
         $this->assertSame(['type' => 'object'], $payload['items']);
+    }
+
+    public function testProcessPreservesExistingCodeProperty(): void
+    {
+        $constraintViolation = [
+            'properties' => [
+                'violations' => [
+                    'items' => [
+                        'properties' => [
+                            'code' => [
+                                'type' => 'string',
+                                'description' => 'Existing description',
+                            ],
+                            'payload' => ['type' => 'array'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $schemas = new ArrayObject(['ConstraintViolation' => $constraintViolation]);
+        $components = new Components($schemas);
+        $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
+
+        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $result = $processor->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $updatedSchema = $resultSchemas['ConstraintViolation'];
+        $schemaData = $updatedSchema->getArrayCopy();
+        $code = $schemaData['properties']['violations']['items']['properties']['code'];
+
+        $this->assertSame('Existing description', $code['description']);
     }
 
     public function testProcessReturnsOriginalWhenSchemaMissing(): void

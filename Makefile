@@ -62,12 +62,12 @@ ifneq ($(CI),)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
-    PARSE_COVERAGE_XML_CMD = php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
+    PARSE_COVERAGE_XML_CMD = php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } libxml_use_internal_errors(true); $$xml = simplexml_load_file($$file); if ($$xml === false || !isset($$xml->project->metrics)) { echo ""; exit(1); } $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
     RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
-    PARSE_COVERAGE_XML_CMD = $(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } $$xml = simplexml_load_file($$file); $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
+    PARSE_COVERAGE_XML_CMD = $(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } libxml_use_internal_errors(true); $$xml = simplexml_load_file($$file); if ($$xml === false || !isset($$xml->project->metrics)) { echo ""; exit(1); } $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
 endif
 
 export SYMFONY

@@ -31,6 +31,37 @@ load 'bats-assert/load'
   assert_output --partial "COVERAGE FAILURE:"
 }
 
+@test "make unit-tests fails when Clover XML is malformed" {
+  REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../.." && pwd)"
+  run bash -lc '
+    set -euo pipefail
+    cd "$1"
+    stub="$(mktemp)"
+    cat > "$stub" <<'"'"'\'"'"''"'"'EOF'"'"'\'"'"''"'"'
+#!/usr/bin/env bash
+set -euo pipefail
+coverage_file=""
+for arg in "$@"; do
+  case "$arg" in
+    --coverage-clover=*)
+      coverage_file="${arg#--coverage-clover=}"
+      ;;
+  esac
+done
+if [ -z "$coverage_file" ]; then
+  exit 1
+fi
+mkdir -p "$(dirname "$coverage_file")"
+printf "<coverage>" > "$coverage_file"
+EOF
+    chmod +x "$stub"
+    trap '\''rm -f "$stub"'\'' EXIT
+    make unit-tests RUN_TESTS_COVERAGE="$stub"
+  ' bash "$REPO_ROOT"
+  assert_failure
+  assert_output --partial "ERROR: Could not parse coverage XML"
+}
+
 @test "make behat command runs Behat scenarios" {
   run make behat
   assert_success

@@ -22,7 +22,7 @@ final class CustomerUlidRefReplacer
             ? $ulidProperty['$ref']
             : '';
 
-        if (! str_contains($ref, 'UlidInterface')) {
+        if (! $this->isSupportedUlidReference($ref)) {
             return $schemas;
         }
 
@@ -43,5 +43,10 @@ final class CustomerUlidRefReplacer
             is_array($value) => $value,
             default => [],
         };
+    }
+
+    private function isSupportedUlidReference(string $ref): bool
+    {
+        return preg_match('~^#/components/schemas/UlidInterface(?:\.jsonld-output)?$~', $ref) === 1;
     }
 }

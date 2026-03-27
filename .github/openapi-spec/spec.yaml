@@ -3310,6 +3310,9 @@ components:
               message:
                 type: string
                 description: 'The message associated with the violation'
+              code:
+                type: string
+                description: 'The machine-readable violation code'
               payload:
                 type: array
                 items:

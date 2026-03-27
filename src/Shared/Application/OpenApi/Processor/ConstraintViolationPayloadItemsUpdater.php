@@ -27,6 +27,7 @@ final class ConstraintViolationPayloadItemsUpdater
             return null;
         }
 
+        $properties += ['code' => self::defaultCodeProperty()];
         $properties['payload'] = self::payloadWithItems($payload);
         $rootProperties = SchemaNormalizer::normalize($constraintViolation['properties'] ?? null);
         $violations = SchemaNormalizer::normalize($rootProperties['violations'] ?? null);
@@ -111,5 +112,16 @@ final class ConstraintViolationPayloadItemsUpdater
         $payload['items'] = ['type' => 'object'];
 
         return $payload;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function defaultCodeProperty(): array
+    {
+        return [
+            'type' => 'string',
+            'description' => 'The machine-readable violation code',
+        ];
     }
 }

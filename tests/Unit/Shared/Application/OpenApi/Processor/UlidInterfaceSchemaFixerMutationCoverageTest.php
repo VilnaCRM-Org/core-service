@@ -83,6 +83,27 @@ final class UlidInterfaceSchemaFixerMutationCoverageTest extends UnitTestCase
         self::assertSame(['$ref' => '#/components/schemas/SomeOtherSchema'], $resultSchemas['Customer.jsonld-output']['properties']['ulid']);
     }
 
+    public function testDoesNotRewriteSchemasContainingUlidInterfaceSubstring(): void
+    {
+        $schemas = new ArrayObject([
+            'Customer.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [
+                    'ulid' => ['$ref' => '#/components/schemas/SomeUlidInterfaceAlias'],
+                ],
+            ],
+        ]);
+
+        $fixer = new UlidInterfaceSchemaFixer();
+        $result = $fixer->process($this->createOpenApi($schemas));
+        $resultSchemas = $result->getComponents()->getSchemas();
+
+        self::assertSame(
+            ['$ref' => '#/components/schemas/SomeUlidInterfaceAlias'],
+            $resultSchemas['Customer.jsonld-output']['properties']['ulid']
+        );
+    }
+
     private function createOpenApi(?ArrayObject $schemas): OpenApi
     {
         return new OpenApi(
