@@ -37,6 +37,7 @@ INFECTION     = ./vendor/bin/infection
 # Conditional execution based on CI environment variable
 EXEC_ENV ?= $(EXEC_PHP_TEST_ENV)
 ifneq ($(CI),)
+  SYMFONY_BIN = php bin/console
   EXEC_ENV =
 endif
 
@@ -47,7 +48,7 @@ COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover coverage/coverage.xml
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
@@ -183,7 +184,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		attempt=$$((attempt + 1)); \
 		sleep 5; \
 	done; \
-	mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log coverage; \
+	mkdir -p coverage; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
@@ -207,6 +208,7 @@ tests-with-coverage: ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
 negative-tests-with-coverage: ## Run negative tests with coverage reporting
+	@mkdir -p coverage
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
 all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests

@@ -30,7 +30,7 @@ load 'bats-assert/load'
 @test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success
-  assert_output --partial "symfony check:requirements"
+  assert_output --regexp '(symfony|php bin/console) check:requirements'
 }
 
 @test "make phpinsights command executes and completes analysis" {
@@ -49,7 +49,7 @@ load 'bats-assert/load'
 @test "make check-security command executes" {
   run make check-security
   assert_success
-  assert_output --partial "symfony security:check"
+  assert_output --regexp '(symfony|php bin/console) security:check'
 }
 
 @test "make infection command executes" {
