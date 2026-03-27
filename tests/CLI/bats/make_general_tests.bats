@@ -30,7 +30,7 @@ load 'bats-assert/load'
 @test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success
-  assert_output --regexp '(Symfony Requirements Checker|Checking platform settings:)'
+  [[ "$output" =~ Symfony\ Requirements\ Checker|Checking\ platform\ requirements\ for\ packages\ in\ the\ vendor\ dir|Checking\ platform\ settings: ]]
 }
 
 @test "make phpinsights command executes and completes analysis" {
@@ -49,7 +49,7 @@ load 'bats-assert/load'
 @test "make check-security command executes" {
   run make check-security
   [ "$status" -eq 0 ] || [ "$status" -eq 2 ]
-  assert_output --regexp '(No security vulnerability advisories found\\.|Found [0-9]+ security vulnerability advisories affecting [0-9]+ packages:)'
+  [[ "$output" =~ No\ security\ vulnerability\ advisories\ found\.|Found\ [0-9]+\ security\ vulnerability\ advisories\ affecting\ [0-9]+\ packages?: ]]
 }
 
 @test "make infection command executes" {

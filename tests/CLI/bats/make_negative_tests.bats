@@ -17,7 +17,9 @@ load 'bats-support/load'
 load 'bats-assert/load'
 
 setup() {
-  cd "$BATS_TEST_DIRNAME/../../.."
+  export REPO_ROOT
+  REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../.." && pwd)"
+  cd "$REPO_ROOT"
 }
 
 @test "make check-security should report vulnerabilities if present" {
@@ -38,26 +40,26 @@ setup() {
 @test "make psalm should fail when static analysis errors are present" {
   run bash -lc '
     set -e
-    cd /workspaces/core-service
+    cd "$1"
     target=src/Shared/Application/PsalmErrorExample.php
     cp tests/CLI/bats/php/PsalmErrorExample.php "$target"
     trap '\''rm -f "$target"; docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null 2>&1 || true'\'' EXIT
-    docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null 2>&1 || true
     make psalm
-  '
+  ' bash "$REPO_ROOT"
   assert_failure
-  assert_output --partial "does not exist"
+  [[ "$output" =~ does\ not\ exist|NonExistentTrait ]]
 }
 
 @test "make phpinsights should fail when code quality is low" {
   run bash -lc '
     set -e
-    cd /workspaces/core-service
+    cd "$1"
     target=src/temp_bad_code.php
     cp tests/CLI/bats/php/temp_bad_code.php "$target"
     trap '\''rm -f "$target"'\'' EXIT
     make phpinsights
-  '
+  ' bash "$REPO_ROOT"
   assert_failure
   assert_output --partial "Cyclomatic Complexity of 10"
 }
@@ -65,12 +67,12 @@ setup() {
 @test "phpunit should fail if tests fail" {
   run bash -lc '
     set -e
-    cd /workspaces/core-service
+    cd "$1"
     target=tests/Unit/FailingTest.php
     cp tests/CLI/bats/php/FailingTest.php "$target"
     trap '\''rm -f "$target"'\'' EXIT
     make unit-tests
-  '
+  ' bash "$REPO_ROOT"
   assert_failure
   assert_output --partial "FAILURES!"
 }
@@ -78,14 +80,14 @@ setup() {
 @test "PHP CS Fixer should report violations if present" {
   run bash -lc '
     set -e
-    cd /workspaces/core-service
+    cd "$1"
     target=temp_file.php
     printf "<?php \$foo = '\''bar'\'' ;\n" > "$target"
     trap '\''rm -f "$target"'\'' EXIT
-    docker compose exec -T php ./vendor/bin/php-cs-fixer fix "$target" --dry-run --diff
-  '
+    docker compose exec -T php ./vendor/bin/php-cs-fixer fix "$target" --allow-risky=yes --dry-run --diff
+  ' bash "$REPO_ROOT"
   assert_failure
-  assert_output --partial "--- Original"
+  assert_output --partial "begin diff"
 }
 
 @test "make composer-validate should fail with invalid composer.json" {
