@@ -18,14 +18,15 @@ load 'bats-assert/load'
 }
 
 @test "make unit-tests coverage gate compares exact statement counts" {
+  REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../.." && pwd)"
   run bash -lc '
     set -e
-    cd /workspaces/core-service
+    cd "$1"
     target=src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php
     cp tests/CLI/bats/php/PartlyCoveredEventBus.php "$target"
     trap '\''rm -f "$target"'\'' EXIT
     make unit-tests
-  '
+  ' bash "$REPO_ROOT"
   assert_failure
   assert_output --partial "COVERAGE FAILURE:"
 }
