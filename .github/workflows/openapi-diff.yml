@@ -40,7 +40,7 @@ jobs:
       - name: Check out master branch
         uses: actions/checkout@v2
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.base.ref }}
           path: base
       - name: Generate openapi spec for base
         run: |
@@ -63,6 +63,7 @@ jobs:
           mkdir -p ./output
           docker run --rm -v ${{ github.workspace }}:/github/workspace openapitools/openapi-diff:2.1.7 --markdown /github/workspace/output/diff.md /github/workspace/base/.github/openapi-spec/spec.yaml /github/workspace/.github/openapi-spec/spec.yaml
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: diff-reports
           path: ./output

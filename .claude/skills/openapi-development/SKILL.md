@@ -91,13 +91,14 @@ URI parameter factories build path parameters:
 
 ### Processor/
 
-Processors transform the generated OpenAPI spec:
+Processors transform the generated OpenAPI spec. The inventory below is illustrative rather than exhaustive; the current runtime pipeline also includes later payload/schema/ULID fixup stages.
 
 - **`ParameterDescriptionProcessor`**: Adds descriptions to query/filter parameters
 - **`PathParametersProcessor`**: Cleans path parameters
 - **`PathParameterCleaner`**: Removes deprecated properties from path parameters
 - **`IriReferenceTypeProcessor`**: Fixes IRI reference types (iri-reference → string with format)
 - **`TagDescriptionProcessor`**: Adds descriptions to OpenAPI tags
+- **Additional fixup processors**: payload, schema, and ULID processors may run later in the tagged pipeline depending on the current service wiring
 
 ### OpenApiFactory.php
 

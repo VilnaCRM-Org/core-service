@@ -30,3 +30,10 @@ load 'bats-assert/load'
   refute_output --partial 'php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml'
   refute_output --partial 'php ../scripts/fix-openapi-spec.php'
 }
+
+@test "openapi-diff workflow compares against the pull request base ref" {
+  run sed -n '/Check out master branch/,/Generate openapi spec for base/p' .github/workflows/openapi-diff.yml
+  assert_success
+  assert_output --partial 'ref: ${{ github.event.pull_request.base.ref }}'
+  refute_output --partial 'ref: main'
+}

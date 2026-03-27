@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi;
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Info;
+use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
@@ -106,7 +107,10 @@ final class OpenApiFactoryTest extends UnitTestCase
         $parameterProcessor = $this->createMock(OpenApiProcessorInterface::class);
         $parameterProcessor->expects($this->once())
             ->method('process')
-            ->with($this->identicalTo($openApi))
+            ->with($this->callback(static function (OpenApi $processedOpenApi) use ($openApi): bool {
+                return $processedOpenApi === $openApi
+                    && $processedOpenApi->getPaths()->getPath('/from-endpoint-factory') instanceof PathItem;
+            }))
             ->willReturn($parameterOutput);
         $tagProcessor = $this->createMock(OpenApiProcessorInterface::class);
         $tagProcessor->expects($this->once())
@@ -350,12 +354,18 @@ final class OpenApiFactoryTest extends UnitTestCase
         $endpointFactory1 = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory1->expects($this->once())
             ->method('createEndpoint')
-            ->with($openApi);
+            ->with($openApi)
+            ->willReturnCallback(static function (OpenApi $openApi): void {
+                $openApi->getPaths()->addPath('/from-endpoint-factory', new PathItem());
+            });
 
         $endpointFactory2 = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory2->expects($this->once())
             ->method('createEndpoint')
-            ->with($openApi);
+            ->with($openApi)
+            ->willReturnCallback(static function (OpenApi $openApi): void {
+                self::assertInstanceOf(PathItem::class, $openApi->getPaths()->getPath('/from-endpoint-factory'));
+            });
 
         return [$endpointFactory1, $endpointFactory2];
     }

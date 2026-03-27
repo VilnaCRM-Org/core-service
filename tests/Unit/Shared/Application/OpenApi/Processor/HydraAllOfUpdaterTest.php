@@ -62,4 +62,28 @@ final class HydraAllOfUpdaterTest extends UnitTestCase
         $this->assertTrue(($result[0]['updated'] ?? false));
         $this->assertTrue(($result[1]['updated'] ?? false));
     }
+
+    public function testUpdatePreservesUnchangedItemsWhenSiblingChanges(): void
+    {
+        $itemUpdater = $this->createMock(HydraAllOfItemUpdater::class);
+        $itemUpdater->expects($this->exactly(2))
+            ->method('update')
+            ->willReturnCallback(static fn ($item) => ($item['type'] ?? null) === 'object'
+                ? new ArrayObject(array_merge((array) $item, ['updated' => true]))
+                : null);
+
+        $updater = new HydraAllOfUpdater($itemUpdater);
+
+        $unchangedItem = ['type' => 'string'];
+        $allOf = [
+            ['type' => 'object'],
+            $unchangedItem,
+        ];
+
+        $result = $updater->update($allOf);
+
+        $this->assertNotNull($result);
+        $this->assertTrue(($result[0]['updated'] ?? false));
+        $this->assertSame($unchangedItem, $result[1]);
+    }
 }
