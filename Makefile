@@ -111,10 +111,28 @@ ensure-runtime-dirs: ## Ensure runtime cache and log directories are writable fo
 	fi
 
 check-requirements: ensure-runtime-dirs ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
-	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
+	@if command -v symfony >/dev/null 2>&1; then \
+		echo "symfony check:requirements"; \
+		$(EXEC_ENV) symfony check:requirements; \
+	elif $(EXEC_ENV) $(SYMFONY_BIN) list check >/dev/null 2>&1; then \
+		echo "$(SYMFONY_BIN) check:requirements"; \
+		$(EXEC_ENV) $(SYMFONY_BIN) check:requirements; \
+	else \
+		echo "php bin/console check:requirements"; \
+		$(COMPOSER) check-platform-reqs; \
+	fi
 
 check-security: ensure-runtime-dirs ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(EXEC_ENV) $(SYMFONY_BIN) security:check
+	@if command -v symfony >/dev/null 2>&1; then \
+		echo "symfony security:check"; \
+		$(EXEC_ENV) symfony security:check; \
+	elif $(EXEC_ENV) $(SYMFONY_BIN) list security >/dev/null 2>&1; then \
+		echo "$(SYMFONY_BIN) security:check"; \
+		$(EXEC_ENV) $(SYMFONY_BIN) security:check; \
+	else \
+		echo "php bin/console security:check"; \
+		$(COMPOSER) audit --abandoned=ignore; \
+	fi
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
@@ -213,11 +231,11 @@ setup-test-db: ensure-test-services ## Create database for testing purposes
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
 	@$(MAKE) ensure-runtime-dirs
 
-behat: setup-test-db ## A php framework for autotesting business expectations
+behat: generate-openapi-spec setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
 
 integration-tests: setup-test-db ## Run integration tests
-	$(RUN_TESTS_COVERAGE) --testsuite=Integration
+	$(EXEC_PHP_TEST_ENV) sh -lc 'XDEBUG_MODE=coverage php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text --testsuite=Integration'
 
 integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
@@ -226,7 +244,7 @@ fixtures-load: ## Run fixtures
 	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
 
 tests-with-coverage: ## Run tests with coverage
-	$(RUN_TESTS_COVERAGE)
+	$(EXEC_PHP_TEST_ENV) sh -lc 'XDEBUG_MODE=coverage php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text'
 
 negative-tests-with-coverage: ## Run negative tests with coverage reporting
 	@mkdir -p coverage
@@ -256,7 +274,7 @@ load-tests: build-k6-docker ## Run load tests
 	tests/Load/run-load-tests.sh
 
 cache-performance-tests: setup-test-db ## Run cache performance integration tests
-	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
+	$(EXEC_PHP_TEST_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
 
 cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load tests
 	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
