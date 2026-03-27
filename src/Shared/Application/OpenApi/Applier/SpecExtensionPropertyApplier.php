@@ -12,13 +12,15 @@ use function is_array;
 final class SpecExtensionPropertyApplier
 {
     /**
-     * @param array<string, string|int|float|bool|array|null>
-     *        |ArrayObject<string, string|int|float|bool|array|null>
-     *        |null $extensionProperties
+     * @param array<string, string|int|float|bool|array|null>|ArrayObject<string, string|int|float|bool|array|null>|null $extensionProperties
      */
     public function apply(array|ArrayObject|null $extensionProperties, OpenApi $openApi): OpenApi
     {
-        return !is_array($extensionProperties) || $extensionProperties === []
+        if ($extensionProperties instanceof ArrayObject) {
+            $extensionProperties = $extensionProperties->getArrayCopy();
+        }
+
+        return ! is_array($extensionProperties) || $extensionProperties === []
             ? $openApi
             : array_reduce(
                 array_keys($extensionProperties),

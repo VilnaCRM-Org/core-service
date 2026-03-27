@@ -51,9 +51,16 @@ jobs:
           add: '.github/graphql-spec/spec'
           message: 'feat(#${{ github.event.number }}): generate graphql spec'
 
-      - name: GraphQL Inspector
-        uses: kamilkisiela/graphql-inspector@release-1701263349990
-        with:
-          schema: 'master:.github/graphql-spec/spec'
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+      # GraphQL Inspector step disabled - the action has bugs with local file paths
+      # The schema is still being generated and committed successfully
+      - name: Verify GraphQL schema compatibility (temporary fallback)
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          if git cat-file -e "origin/${{ github.base_ref }}:.github/graphql-spec/spec" 2>/dev/null; then
+            git show "origin/${{ github.base_ref }}:.github/graphql-spec/spec" > /tmp/base.graphql
+            cp .github/graphql-spec/spec /tmp/head.graphql
+            npx -y @graphql-inspector/cli@4.0.0 diff /tmp/base.graphql /tmp/head.graphql --fail-on-breaking
+          else
+            echo "Base schema not found on ${{ github.base_ref }}; failing compatibility check."
+            exit 1
+          fi

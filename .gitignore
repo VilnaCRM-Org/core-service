@@ -28,11 +28,7 @@
 /.phpcs-cache
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
-
-###> qossmic/deptrac-shim ###
 /.deptrac.cache
-###< qossmic/deptrac-shim ###
-
 ###> super-linter/super-linter ###
 super-linter-output
 /node_modules

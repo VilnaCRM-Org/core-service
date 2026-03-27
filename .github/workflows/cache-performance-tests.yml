@@ -26,9 +26,6 @@ jobs:
         with:
           php-version: ${{ vars.PHP_VERSION }}
 
-      - name: Start application
-        run: make start
-
       - name: Run Cache Performance Integration Tests
         run: make cache-performance-tests
 
@@ -46,7 +43,7 @@ jobs:
           php-version: ${{ vars.PHP_VERSION }}
 
       - name: Start application for load tests
-        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d
+        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d --wait database redis php caddy
 
       - name: Run Cache Performance Load Tests
         run: make cache-performance-load-tests

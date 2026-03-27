@@ -21,6 +21,7 @@ use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
 use App\Tests\Unit\UnitTestCase;
+use ArrayObject;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Uid\Ulid;
 
@@ -99,6 +100,24 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->method('find')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn(null);
+
+        $this->expectException(CustomerNotFoundException::class);
+        $this->processor->process($dto, $operation, $uriVariables);
+    }
+
+    public function testProcessThrowsExceptionWhenRepositoryReturnsUnexpectedObject(): void
+    {
+        $dto = $this->createDto();
+        $operation = $this->createMock(Operation::class);
+        $ulidString = (string) $this->faker->ulid();
+        $ulid = new Ulid($ulidString);
+        $uriVariables = ['ulid' => $ulidString];
+
+        $this->repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
+            ->willReturn(new ArrayObject());
 
         $this->expectException(CustomerNotFoundException::class);
         $this->processor->process($dto, $operation, $uriVariables);

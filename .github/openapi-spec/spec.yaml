@@ -30,7 +30,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/Customer.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -659,7 +659,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -668,11 +668,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -940,7 +940,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -949,11 +949,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1108,9 +1108,6 @@ paths:
       responses:
         '204':
           description: 'Customer resource deleted'
-          content:
-            application/problem+json:
-              example: []
         '401':
           description: Unauthorized
           content:
@@ -1253,7 +1250,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1262,11 +1259,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1421,7 +1418,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/CustomerStatus.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -1686,7 +1683,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1695,11 +1692,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -1935,7 +1932,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -1944,11 +1941,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2071,9 +2068,6 @@ paths:
       responses:
         '204':
           description: 'CustomerStatus resource deleted'
-          content:
-            application/problem+json:
-              example: []
         '401':
           description: Unauthorized
           content:
@@ -2216,7 +2210,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2225,11 +2219,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2360,7 +2354,7 @@ paths:
                 properties:
                   member: { type: array, items: { $ref: '#/components/schemas/CustomerType.jsonld-output' } }
                   totalItems: { type: integer, minimum: 0 }
-                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, type: string, first: string, last: string, previous: string, next: string } }
+                  view: { type: object, properties: { '@id': { type: string, format: iri-reference }, '@type': { type: string }, first: { type: string, format: iri-reference }, last: { type: string, format: iri-reference }, previous: { type: string, format: iri-reference }, next: { type: string, format: iri-reference } }, example: { '@id': string, first: string, last: string, previous: string, next: string, '@type': string } }
                   search: { type: object, properties: { '@type': { type: string }, template: { type: string }, variableRepresentation: { type: string }, mapping: { type: array, items: { type: object, properties: { '@type': { type: string }, variable: { type: string }, property: { type: [string, 'null'] }, required: { type: boolean } } } } } }
                 required:
                   - member
@@ -2625,7 +2619,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2634,11 +2628,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -2874,7 +2868,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -2883,11 +2877,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -3010,9 +3004,6 @@ paths:
       responses:
         '204':
           description: 'CustomerType resource deleted'
-          content:
-            application/problem+json:
-              example: []
         '401':
           description: Unauthorized
           content:
@@ -3155,7 +3146,7 @@ paths:
                   type: { type: string }
                   title: { type: string }
                   detail: { type: string }
-                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string } } } }
+                  violations: { type: array, items: { type: object, properties: { propertyPath: { type: string }, message: { type: string }, code: { type: string }, payload: { type: array, items: { type: object } } } } }
                   status: { type: integer }
                 required:
                   - type
@@ -3164,11 +3155,11 @@ paths:
                   - violations
                   - status
               example:
-                type: /errors/500
+                type: /errors/422
                 title: 'An error occurred'
                 detail: 'some_property: This value should not be blank.'
                 violations:
-                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3 }
+                  - { propertyPath: some_property, message: 'This value should not be blank.', code: c1051bb4-d103-4f74-8988-acbcafc7fdc3, payload: [{ type: string }] }
                 status: 422
         '401':
           description: Unauthorized
@@ -3319,6 +3310,13 @@ components:
               message:
                 type: string
                 description: 'The message associated with the violation'
+              code:
+                type: string
+                description: 'The machine-readable violation code'
+              payload:
+                type: array
+                items:
+                  type: object
         detail:
           readOnly: true
           type: string
@@ -3519,7 +3517,7 @@ components:
         confirmed:
           type: boolean
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+          type: string
         createdAt:
           type: string
           format: date-time
@@ -3669,7 +3667,7 @@ components:
         value:
           type: string
         ulid:
-          $ref: '#/components/schemas/UlidInterface.jsonld-output'
+          type: string
     Error:
       type: object
       description: 'A representation of common errors.'
@@ -3757,6 +3755,8 @@ components:
           type: string
         '@type':
           readOnly: true
+          type: string
+        ulid:
           type: string
 security: []
 tags:

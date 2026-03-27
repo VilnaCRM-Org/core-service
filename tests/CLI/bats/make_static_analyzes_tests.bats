@@ -6,7 +6,7 @@ load 'bats-assert/load'
 @test "make phpcsfixer command executes" {
   run make phpcsfixer
   assert_success
-  assert_output --partial "Running analysis on "
+  assert_output --partial "Running analysis"
 }
 
 @test "make psalm command executes and reports no errors" {
@@ -31,5 +31,6 @@ load 'bats-assert/load'
 @test "make deptrac-debug command executes" {
   run make deptrac-debug
   assert_output --partial 'App'
-  assert_success
+  # deptrac debug:unassigned may return 2 when it finds uncovered files.
+  [[ "$status" -eq 0 || "$status" -eq 2 ]]
 }

@@ -18,8 +18,8 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Start Application
-        run: make start
+      - name: Start application services
+        run: docker compose up --detach --wait php
 
       - name: Run Deptrac
         run: make deptrac

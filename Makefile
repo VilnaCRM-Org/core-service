@@ -1,5 +1,6 @@
 # Load environment variables from .env.test
 include .env.test
+export SYMFONY_DEPRECATIONS_HELPER
 
 # Parameters
 PROJECT       = core-service
@@ -11,10 +12,10 @@ DOCKER        = docker
 DOCKER_COMPOSE = docker compose
 
 # Executables
-EXEC_PHP      = $(DOCKER_COMPOSE) exec php
+EXEC_PHP      = $(DOCKER_COMPOSE) exec -T php
 COMPOSER      = $(EXEC_PHP) composer
 GIT           = git
-EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -e APP_ENV=test php
+EXEC_PHP_TEST_ENV = $(DOCKER_COMPOSE) exec -T -e APP_ENV=test php
 
 # Alias
 SYMFONY       = $(EXEC_PHP) bin/console
@@ -35,7 +36,8 @@ INFECTION     = ./vendor/bin/infection
 
 # Conditional execution based on CI environment variable
 EXEC_ENV ?= $(EXEC_PHP_TEST_ENV)
-ifeq ($(CI),1)
+ifneq ($(CI),)
+  SYMFONY_BIN = php bin/console
   EXEC_ENV =
 endif
 
@@ -46,24 +48,26 @@ COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover coverage/coverage.xml
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
-ifeq ($(CI),1)
+ifneq ($(CI),)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
+    PARSE_COVERAGE_XML_CMD = php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } libxml_use_internal_errors(true); $$xml = simplexml_load_file($$file); if ($$xml === false || !isset($$xml->project->metrics)) { echo ""; exit(1); } $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
     RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
+    PARSE_COVERAGE_XML_CMD = $(DOCKER_COMPOSE) exec -T php php -r '$$file = $$argv[1] ?? null; if ($$file === null || !is_file($$file)) { echo ""; exit(1); } libxml_use_internal_errors(true); $$xml = simplexml_load_file($$file); if ($$xml === false || !isset($$xml->project->metrics)) { echo ""; exit(1); } $$metrics = $$xml->project->metrics; $$statements = (int) $$metrics["statements"]; $$covered = (int) $$metrics["coveredstatements"]; $$coverage = $$statements === 0 ? "0.00" : sprintf("%.2f", ($$covered / $$statements) * 100); echo $$covered . ":" . $$statements . ":" . $$coverage;'
 endif
 
 export SYMFONY
@@ -72,6 +76,10 @@ help:
 	@printf "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m\n"
 	@grep -E '^[-a-zA-Z0-9_\.\/]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
+submodule-init: ## Initialize git submodules
+	$(GIT) submodule sync --recursive
+	$(GIT) submodule update --init --recursive
+
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)
 
@@ -79,13 +87,52 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 	$(RUN_PHP_CS_FIXER)
 
 composer-validate: ## The validate command validates a given composer.json and composer.lock
-	$(COMPOSER) validate
+	$(COMPOSER) validate --strict
 
-check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
-	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
+ensure-runtime-dirs: ## Ensure runtime cache and log directories are writable for host-side commands
+	@mkdir -p coverage; \
+	runtime_dirs='var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log'; \
+	if ! mkdir -p $$runtime_dirs 2>/dev/null; then \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo mkdir -p $$runtime_dirs; \
+		else \
+			echo "❌ Failed to create runtime directories. Please fix permissions for var/cache and var/log."; \
+			exit 1; \
+		fi; \
+	fi; \
+	if ! chmod -R 777 var/cache var/log 2>/dev/null; then \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo chown -R "$$(id -u):$$(id -g)" var/cache var/log; \
+			sudo chmod -R 777 var/cache var/log; \
+		else \
+			echo "❌ Failed to update permissions for var/cache and var/log."; \
+			exit 1; \
+		fi; \
+	fi
 
-check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(EXEC_ENV) $(SYMFONY_BIN) security:check
+check-requirements: ensure-runtime-dirs ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
+	@if command -v symfony >/dev/null 2>&1; then \
+		echo "symfony check:requirements"; \
+		$(EXEC_ENV) symfony check:requirements; \
+	elif $(EXEC_ENV) $(SYMFONY_BIN) list check >/dev/null 2>&1; then \
+		echo "$(SYMFONY_BIN) check:requirements"; \
+		$(EXEC_ENV) $(SYMFONY_BIN) check:requirements; \
+	else \
+		echo "php bin/console check:requirements"; \
+		$(COMPOSER) check-platform-reqs; \
+	fi
+
+check-security: ensure-runtime-dirs ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
+	@if command -v symfony >/dev/null 2>&1; then \
+		echo "symfony security:check"; \
+		$(EXEC_ENV) symfony security:check; \
+	elif $(EXEC_ENV) $(SYMFONY_BIN) list security >/dev/null 2>&1; then \
+		echo "$(SYMFONY_BIN) security:check"; \
+		$(EXEC_ENV) $(SYMFONY_BIN) security:check; \
+	else \
+		echo "php bin/console security:check"; \
+		$(COMPOSER) audit --locked --no-dev --abandoned=ignore; \
+	fi
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
@@ -101,29 +148,51 @@ phpmd: ## Instant PHP MD quality checks, static analysis, and complexity insight
 	$(EXEC_ENV) ./vendor/bin/phpmd tests ansi phpmd.tests.xml --exclude vendor,tests/CLI/bats
 
 phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexity insights
-	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
+	@echo "$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check"; \
+	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check; \
+	echo "$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php"; \
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
+# NOTE: Coverage is written to a repo-local XML file so both CI and containerized runs can parse it.
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@tmpfile=$$(mktemp); \
-	script -qec "$(RUN_TESTS_COVERAGE) --testsuite=Unit" /dev/null > $$tmpfile 2>&1; \
+	coverage_file=coverage/unit-coverage.$$$$.xml; \
+	mkdir -p coverage; \
+	$(RUN_TESTS_COVERAGE) --fail-on-incomplete --testsuite=Unit --coverage-clover="$$coverage_file" > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
 	if [ $$test_status -ne 0 ]; then \
 		echo "❌ TEST FAILURE: Unit tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$coverage_file; \
 		rm -f $$tmpfile; \
 		exit $$test_status; \
 	fi; \
-	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
-		echo "❌ TEST FAILURE: Unit tests reported failures, errors, or incomplete tests."; \
+	if sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\r//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!'; then \
+		echo "❌ TEST FAILURE: Unit tests reported failures or errors."; \
+		rm -f $$coverage_file; \
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(perl -ne 's/\e\[[0-9;]*m//g; if (/^\s*Lines:\s+([0-9.]+)%/) { print "$$1\n"; exit 0 }' $$tmpfile); \
+	coverage_stats=$$($(PARSE_COVERAGE_XML_CMD) -- $$coverage_file); \
+	parse_status=$$?; \
+	if [ $$parse_status -ne 0 ]; then \
+		echo "❌ ERROR: Could not parse coverage XML"; \
+		rm -f $$coverage_file; \
+		rm -f $$tmpfile; \
+		exit $$parse_status; \
+	fi; \
+	rm -f $$coverage_file; \
 	rm -f $$tmpfile; \
-	if [ -n "$$coverage" ]; then \
-		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
+	if [ -n "$$coverage_stats" ]; then \
+		covered_statements=$${coverage_stats%%:*}; \
+		remaining_stats=$${coverage_stats#*:}; \
+		total_statements=$${remaining_stats%%:*}; \
+		coverage=$${coverage_stats##*:}; \
+		if [ "$$total_statements" -eq 0 ]; then \
+			echo "❌ ERROR: Coverage XML reported zero statements"; \
+			exit 1; \
+		elif [ "$$covered_statements" -ne "$$total_statements" ]; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
 			exit 1; \
 		else \
@@ -153,19 +222,20 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		$(DOCKER_COMPOSE) ps || true; \
 		attempt=$$((attempt + 1)); \
 		sleep 5; \
-	done; \
-	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
+	done
+	@$(MAKE) ensure-runtime-dirs
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
+	@$(MAKE) ensure-runtime-dirs
 
-behat: setup-test-db ## A php framework for autotesting business expectations
-	$(EXEC_ENV) $(BEHAT)
+behat: generate-openapi-spec setup-test-db ## A php framework for autotesting business expectations
+	$(EXEC_PHP_TEST_ENV) $(BEHAT)
 
 integration-tests: setup-test-db ## Run integration tests
-	$(RUN_TESTS_COVERAGE) --testsuite=Integration
+	$(EXEC_PHP_TEST_ENV) sh -lc 'XDEBUG_MODE=coverage php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text --testsuite=Integration'
 
 integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
@@ -174,9 +244,10 @@ fixtures-load: ## Run fixtures
 	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
 
 tests-with-coverage: ## Run tests with coverage
-	$(RUN_TESTS_COVERAGE)
+	$(EXEC_PHP_TEST_ENV) sh -lc 'XDEBUG_MODE=coverage php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text'
 
 negative-tests-with-coverage: ## Run negative tests with coverage reporting
+	@mkdir -p coverage
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
 all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
@@ -203,7 +274,7 @@ load-tests: build-k6-docker ## Run load tests
 	tests/Load/run-load-tests.sh
 
 cache-performance-tests: setup-test-db ## Run cache performance integration tests
-	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
+	$(EXEC_PHP_TEST_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
 
 cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load tests
 	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
@@ -266,7 +337,7 @@ down: ## Stop the docker hub
 
 sh: ## Log to the docker container
 	@echo "Connecting to core-service PHP container..."
-	@$(EXEC_PHP) sh
+	@$(DOCKER_COMPOSE) exec php sh
 
 logs: ## Show all logs
 	@$(DOCKER_COMPOSE) logs
@@ -284,7 +355,7 @@ stop: ## Stop docker and the Symfony binary server
 	$(DOCKER_COMPOSE) stop
 
 commands: ## List all Symfony commands
-	@$(SYMFONY) list
+	@$(DOCKER_COMPOSE) exec -T -e APP_ENV=dev php php bin/console list
 
 coverage-html: ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html

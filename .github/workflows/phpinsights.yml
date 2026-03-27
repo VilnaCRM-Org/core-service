@@ -8,9 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     name: PHP Insights checks
     steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-      - run: composer install --prefer-dist --no-progress --no-suggest --no-scripts
-      - run: CI=1 make phpinsights
+      - uses: actions/checkout@v4
+      - name: Start application services
+        run: docker compose up --detach --wait php
+      - name: Run PHP Insights checks
+        run: CI=1 make phpinsights

@@ -91,17 +91,18 @@ URI parameter factories build path parameters:
 
 ### Processor/
 
-Processors transform the generated OpenAPI spec:
+Processors transform the generated OpenAPI spec. The inventory below is illustrative rather than exhaustive; the current runtime pipeline also includes later payload/schema/ULID fixup stages.
 
-- **`ParameterDescriptionAugmenter`**: Adds descriptions to query/filter parameters
-- **`PathParametersSanitizer`**: Cleans path parameters
+- **`ParameterDescriptionProcessor`**: Adds descriptions to query/filter parameters
+- **`PathParametersProcessor`**: Cleans path parameters
 - **`PathParameterCleaner`**: Removes deprecated properties from path parameters
-- **`IriReferenceTypeFixer`**: Fixes IRI reference types (iri-reference → string with format)
-- **`TagDescriptionAugmenter`**: Adds descriptions to OpenAPI tags
+- **`IriReferenceTypeProcessor`**: Fixes IRI reference types (iri-reference → string with format)
+- **`TagDescriptionProcessor`**: Adds descriptions to OpenAPI tags
+- **Additional fixup processors**: payload, schema, and ULID processors may run later in the tagged pipeline depending on the current service wiring
 
 ### OpenApiFactory.php
 
-Main coordinator that orchestrates all factories and processors:
+Main coordinator that orchestrates endpoint factories plus the tagged processor pipeline:
 
 ```php
 public function __invoke(array $context = []): OpenApi
@@ -112,10 +113,9 @@ public function __invoke(array $context = []): OpenApi
         $endpointFactory->createEndpoint($openApi);
     }
 
-    $this->parameterDescriptionAugmenter->augment($openApi);
-    $openApi = $this->tagDescriptionAugmenter->augment($openApi);
-    $this->iriReferenceTypeFixer->fix($openApi);
-    $openApi = $this->pathParametersSanitizer->sanitize($openApi);
+    foreach ($this->processors as $processor) {
+        $openApi = $processor->process($openApi);
+    }
 
     return $openApi;
 }
@@ -170,29 +170,26 @@ final class YourProcessor
 }
 ```
 
-2. **Inject it into OpenApiFactory**:
+2. **Implement `OpenApiProcessorInterface` and tag it**:
 
 ```php
-// src/Shared/Application/OpenApi/OpenApiFactory.php
-public function __construct(
-    private OpenApiFactoryInterface $decorated,
-    private iterable $endpointFactories,
-    private PathParametersSanitizer $pathParametersSanitizer
-        = new PathParametersSanitizer(),
-    private YourProcessor $yourProcessor = new YourProcessor(),  // Add here
-    // ...
-) {}
-
-public function __invoke(array $context = []): OpenApi
+final class YourProcessor implements OpenApiProcessorInterface
 {
-    $openApi = $this->decorated->__invoke($context);
-
-    // ...
-    $openApi = $this->yourProcessor->process($openApi);  // Add here
-
-    return $openApi;
+    public function process(OpenApi $openApi): OpenApi
+    {
+        // ...
+    }
 }
 ```
+
+```yaml
+# config/services.yaml
+App\Shared\Application\OpenApi\Processor\YourProcessor:
+  tags:
+    - { name: 'app.openapi_processor', priority: 100 }
+```
+
+`OpenApiFactory` consumes `!tagged_iterator app.openapi_processor`, so new processors must be auto-discovered through the tag. Do not hardcode each processor as a separate constructor argument or service argument.
 
 ### Adding a New Endpoint Factory
 
@@ -250,10 +247,10 @@ The factory will be auto-discovered and injected into `OpenApiFactory`.
 
 ### Adding Parameter Descriptions
 
-1. **Add to ParameterDescriptionAugmenter**:
+1. **Add a focused provider to `ParameterDescriptionProcessor`**:
 
 ```php
-// src/Shared/Application/OpenApi/Processor/ParameterDescriptionAugmenter.php
+// src/Shared/Application/OpenApi/Processor/ParameterDescriptionProcessor.php
 
 private function getYourFilterDescriptions(): array
 {
@@ -269,8 +266,7 @@ private function getParameterDescriptions(): array
     return array_merge(
         $this->getOrderDescriptions(),
         $this->getFilterDescriptions(),
-        $this->getYourFilterDescriptions(),  // Add here
-        // ...
+        $this->getYourFilterDescriptions(),
     );
 }
 ```
@@ -387,7 +383,7 @@ Expected: No violations
 - `augmentParameters()`: Uses array_map
 - `augmentParameter()`: Static pure function
 
-### Example 2: IriReferenceTypeFixer
+### Example 2: IriReferenceTypeProcessor
 
 Shows complexity reduction:
 
@@ -395,14 +391,14 @@ Shows complexity reduction:
 - Extracted `fixProperties()` and `fixProperty()` methods
 - array_map for transformation
 
-**Location**: `src/Shared/Application/OpenApi/Processor/IriReferenceTypeFixer.php`
+**Location**: `src/Shared/Application/OpenApi/Processor/IriReferenceTypeProcessor.php`
 
 **Complexity Journey**:
 
 - Original: 12 cyclomatic complexity
 - After refactoring: 8 cyclomatic complexity
 
-### Example 3: PathParametersSanitizer
+### Example 3: PathParametersProcessor
 
 Shows delegation pattern:
 
@@ -410,7 +406,7 @@ Shows delegation pattern:
 - Uses OPERATIONS constant
 - Match expression for operation processing
 
-**Location**: `src/Shared/Application/OpenApi/Processor/PathParametersSanitizer.php`
+**Location**: `src/Shared/Application/OpenApi/Processor/PathParametersProcessor.php`
 
 ## Configuration Files
 

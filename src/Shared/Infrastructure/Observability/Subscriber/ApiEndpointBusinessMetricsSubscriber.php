@@ -40,29 +40,29 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
 
     public function onResponse(ResponseEvent $event): void
     {
-        if (!$this->shouldEmitMetric($event)) {
-            return;
-        }
-
         $this->safeExecute(function () use ($event): void {
+            if (! $this->shouldEmitMetric($event)) {
+                return;
+            }
+
             $this->emitEndpointMetric($event);
         }, KernelEvents::RESPONSE);
     }
 
     private function shouldEmitMetric(ResponseEvent $event): bool
     {
-        if (!$event->isMainRequest()) {
+        if (! $event->isMainRequest()) {
             return false;
         }
 
         $path = $event->getRequest()->getPathInfo();
 
-        if (!str_starts_with($path, '/api')) {
+        if (! str_starts_with($path, '/api')) {
             return false;
         }
 
         // Exclude health check endpoints from business metrics
-        return !str_starts_with($path, '/api/health');
+        return ! str_starts_with($path, '/api/health');
     }
 
     private function emitEndpointMetric(ResponseEvent $event): void

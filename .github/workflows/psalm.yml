@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Start application
-        run: make start
+      - name: Start application services
+        run: docker compose up --detach --wait php
 
       - name: Run Psalm
         run: make psalm

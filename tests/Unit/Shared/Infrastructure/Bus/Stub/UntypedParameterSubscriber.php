@@ -9,17 +9,15 @@ use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use PHPUnit\Framework\Assert;
 
 /**
- * Stub subscriber with intentionally untyped __invoke parameter.
- * Used to test exception for missing type hint in InvokeParameterExtractor.
+ * Stub subscriber with untyped __invoke parameter for testing.
+ * Used to test behavior with missing type hint in InvokeParameterExtractor.
  *
  * @psalm-suppress MissingParamType
  */
 final class UntypedParameterSubscriber implements DomainEventSubscriberInterface
 {
     /**
-     * Intentionally untyped to test exception for missing type hint.
-     *
-     * @param object $someClass
+     * No type hint to test extractor throws for untyped parameters.
      */
     public function __invoke($someClass): void
     {

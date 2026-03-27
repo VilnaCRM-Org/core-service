@@ -12,6 +12,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      localstack:
+        condition: service_healthy
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
@@ -81,6 +83,16 @@ services:
       - DEBUG=0
     volumes:
       - localstack_data:/var/lib/localstack
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -sf http://localhost:4566/_localstack/health | grep -Eq ''"sqs":[[:space:]]*"available"''',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   redis:
     image: redis:8.0.0-alpine

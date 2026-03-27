@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\TagDescriptionDictionary;
 
-final class TagDescriptionProcessor
+final class TagDescriptionProcessor implements OpenApiProcessorInterface
 {
     public function process(OpenApi $openApi): OpenApi
     {
@@ -29,10 +29,11 @@ final class TagDescriptionProcessor
      */
     private function createOrUpdateTag(array $tags, string $tagName): Tag
     {
-        $tag = $tags[$tagName] ?? new Tag($tagName);
+        $tags += [$tagName => new Tag($tagName)];
+        $tag = $tags[$tagName];
         $description = TagDescriptionDictionary::descriptions()[$tagName];
 
-        return ($tag->getDescription() ?? '') === ''
+        return (string) $tag->getDescription() === ''
             ? $tag->withDescription($description)
             : $tag;
     }

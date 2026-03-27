@@ -155,6 +155,30 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         self::assertSame($openApi, $result);
     }
 
+    public function testApplyExtensionPropertiesHandlesArrayObjectValue(): void
+    {
+        $processor = new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        );
+        $method = new ReflectionMethod(SpecCleanupProcessor::class, 'applyExtensionProperties');
+        $method->setAccessible(true);
+
+        $openApi = new OpenApi(
+            new Info('title', '1.0', ''),
+            [new Server('https://localhost')],
+            new Paths()
+        );
+
+        $result = $method->invoke(
+            $processor,
+            new ArrayObject(['x-build' => 'ci']),
+            $openApi
+        );
+
+        self::assertSame('ci', $result->getExtensionProperties()['x-build']);
+    }
+
     public function testConstructorUsesProvidedCollaborators(): void
     {
         $metadataCleaner = new SpecMetadataCleaner();

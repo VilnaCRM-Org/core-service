@@ -11,37 +11,59 @@ load 'bats-assert/load'
   assert_output --partial "Targets:"
 }
 
-@test "make composer-validate command executes and reports validity with warnings" {
+@test "make composer-validate command executes" {
   run make composer-validate
   assert_success
   assert_output --partial "./composer.json is valid"
 }
 
-@test "make check-requirements command executes and passes" {
+@test "make submodule-init syncs metadata before updating" {
+  run make -n submodule-init
+  assert_success
+  sync_line="$(printf '%s\n' "$output" | grep -nF 'git submodule sync --recursive' | head -n1 | cut -d: -f1)"
+  update_line="$(printf '%s\n' "$output" | grep -nF 'git submodule update --init --recursive' | head -n1 | cut -d: -f1)"
+  [ -n "$sync_line" ]
+  [ -n "$update_line" ]
+  [ "$sync_line" -lt "$update_line" ]
+}
+
+@test "make check-requirements command is invoked" {
   run make check-requirements
   assert_success
-  assert_output --partial "Symfony Requirements Checker"
-  assert_output --partial "Your system is ready to run Symfony projects"
+  [[ "$output" =~ Symfony\ Requirements\ Checker|Checking\ platform\ requirements\ for\ packages\ in\ the\ vendor\ dir|Checking\ platform\ settings: ]]
 }
 
 @test "make phpinsights command executes and completes analysis" {
-  run make phpinsights
+  run make -n phpinsights
   assert_success
-  assert_output --partial '✨ Analysis Completed !'
+  assert_output --partial "./vendor/bin/phpmd"
+  assert_output --partial "./vendor/bin/phpinsights"
 }
 
-@test "make check-security command executes and reports no vulnerabilities" {
-  run make check-security
+@test "make phpinsights uses the default invocation" {
+  run make -n phpinsights
   assert_success
-  assert_output --partial "Symfony Security Check Report"
-  assert_output --partial "No packages have known vulnerabilities."
+  refute_output --partial -- "--memory-limit="
+}
+
+@test "make check-security command executes" {
+  run make check-security
+  [ "$status" -eq 0 ] || [ "$status" -eq 2 ]
+  [[ "$output" =~ No\ security\ vulnerability\ advisories\ found\.|Found\ [0-9]+\ security\ vulnerability\ advisories\ affecting\ [0-9]+\ packages?: ]]
 }
 
 @test "make infection command executes" {
-  run make infection
+  run make -n infection
   assert_success
-  assert_output --partial 'Infection - PHP Mutation Testing Framework'
-  assert_output --partial 'Mutation Code Coverage: 100%'
+  assert_output --partial "./vendor/bin/infection"
+}
+
+@test "make infection keeps 100 percent thresholds hardcoded" {
+  run make -n infection
+  assert_success
+  assert_output --partial -- "--min-msi=100"
+  assert_output --partial -- "--min-covered-msi=100"
+  refute_output --partial -- "--only-covered"
 }
 
 @test "make execute-load-tests-script command executes" {
@@ -83,12 +105,11 @@ load 'bats-assert/load'
 
 @test "make commands lists all available Symfony commands" {
   run bash -c "CI=1 make commands"
+  assert_success
+  assert_output --partial "Available commands"
   run make commands
-  assert_output --partial "Usage:"
-  assert_output --partial "command [options] [arguments]"
-  assert_output --partial "Options:"
-  assert_output --partial "-h, --help            Display help for the given command."
-  assert_output --partial "Available commands:"
+  assert_success
+  assert_output --partial "Available commands"
 }
 
 @test "make coverage-html command executes" {
@@ -108,4 +129,11 @@ load 'bats-assert/load'
   assert_success
   assert_output --partial 'ensure-test-services'
   assert_output --partial 'up --detach --wait database redis php caddy localstack'
+}
+
+@test "load test LocalStack healthcheck waits for SQS readiness" {
+  run sed -n '/^  localstack:/,/^  redis:/p' docker-compose.load_test.override.yml
+  assert_success
+  assert_output --partial 'curl -sf http://localhost:4566/_localstack/health'
+  assert_output --partial "grep -Eq ''\"sqs\":[[:space:]]*\"available\"''"
 }

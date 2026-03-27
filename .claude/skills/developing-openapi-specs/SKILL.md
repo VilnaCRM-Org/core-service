@@ -35,7 +35,7 @@ src/Shared/Application/OpenApi/
 │   ├── Response/         # Response schemas
 │   └── UriParameter/     # Path parameter factories
 ├── Processor/            # Spec transformation processors
-└── OpenApiFactory.php    # Main coordinator
+└── OpenApiFactory.php    # Main coordinator for tagged factories/processors
 ```
 
 ### Key Principles
@@ -160,10 +160,10 @@ private function fixProperties(array $mediaTypeObject): ?array
 ### Adding a Processor
 
 1. Create class in `src/Shared/Application/OpenApi/Processor/`
-2. Implement `process(OpenApi $openApi): OpenApi`
+2. Implement `OpenApiProcessorInterface`
 3. Use OPERATIONS constant, match expressions, functional style
-4. Inject into `OpenApiFactory` constructor
-5. Call in `OpenApiFactory::__invoke()`
+4. Tag the service with `app.openapi_processor` and an explicit priority
+5. Do not add a new dedicated constructor argument to `OpenApiFactory`
 
 See [REFERENCE.md - Adding Processors](REFERENCE.md#adding-a-new-processor) for complete examples.
 
@@ -177,7 +177,7 @@ See [REFERENCE.md - Adding Endpoint Factories](REFERENCE.md#adding-a-new-endpoin
 
 ### Adding Parameter Descriptions
 
-Add to `ParameterDescriptionAugmenter::getParameterDescriptions()`:
+Extend `ParameterDescriptionProcessor` with a focused provider and wire it into `getParameterDescriptions()`:
 
 ```php
 private function getYourFilterDescriptions(): array
@@ -192,7 +192,7 @@ private function getParameterDescriptions(): array
 {
     return array_merge(
         $this->getOrderDescriptions(),
-        $this->getYourFilterDescriptions(),  // Add here
+        $this->getYourFilterDescriptions(),
     );
 }
 ```
@@ -240,9 +240,9 @@ For comprehensive patterns, step-by-step guides, and examples:
 
 - **[REFERENCE.md](REFERENCE.md)** - Full directory structure, all patterns with examples, troubleshooting guide
 - **Codebase Examples**:
-  - `ParameterDescriptionAugmenter.php` - All key patterns
-  - `IriReferenceTypeFixer.php` - Complexity reduction journey
-  - `PathParametersSanitizer.php` - Delegation pattern
+  - `ParameterDescriptionProcessor.php` - Parameter-description provider pattern
+  - `IriReferenceTypeProcessor.php` - Schema transformation pattern
+  - `PathParametersProcessor.php` - Delegation pattern for path cleanup
 
 ## Quick Checklist
 
