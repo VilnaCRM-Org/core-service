@@ -8,13 +8,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
-use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor;
-use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
-use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
-use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
-use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
-use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
-use App\Shared\Application\OpenApi\Processor\UlidInterfaceSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\OpenApiProcessorInterface;
 use ArrayObject;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
@@ -22,24 +16,25 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     /** @var list<EndpointFactoryInterface> */
     private array $endpointFactories;
 
+    /** @var list<OpenApiProcessorInterface> */
+    private array $processors;
+
     /**
      * @param iterable<EndpointFactoryInterface> $endpointFactories
+     * @param iterable<OpenApiProcessorInterface> $processors
      */
     public function __construct(
         private OpenApiFactoryInterface $decorated,
         iterable $endpointFactories,
-        private PathParametersProcessor $pathParametersProcessor,
-        private ParameterDescriptionProcessor $parameterDescriptionProcessor,
-        private IriReferenceTypeProcessor $iriReferenceTypeProcessor,
-        private TagDescriptionProcessor $tagDescriptionProcessor,
-        private ConstraintViolationPayloadItemsProcessor $constraintViolationPayloadItemsProcessor,
-        private OpenApiSchemaFixesProcessor $schemaFixesProcessor,
-        private UlidInterfaceSchemaFixer $ulidInterfaceSchemaFixer,
+        iterable $processors,
         private OpenApiExtensionsApplier $extensionsApplier
     ) {
         $this->endpointFactories = is_array($endpointFactories)
             ? $endpointFactories
             : iterator_to_array($endpointFactories);
+        $this->processors = is_array($processors)
+            ? $processors
+            : iterator_to_array($processors);
     }
 
     /**
@@ -49,10 +44,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
     {
         $openApi = $this->decorated->__invoke($context);
         $this->applyEndpointFactories($openApi);
-        $openApi = $this->applyAugmenters($openApi);
-        $openApi = $this->constraintViolationPayloadItemsProcessor->process($openApi);
-        $openApi = $this->schemaFixesProcessor->process($openApi);
-        $openApi = $this->ulidInterfaceSchemaFixer->process($openApi);
+        $openApi = $this->applyProcessors($openApi);
 
         return $this->normalizeOpenApi($openApi);
     }
@@ -69,13 +61,13 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         );
     }
 
-    private function applyAugmenters(OpenApi $openApi): OpenApi
+    private function applyProcessors(OpenApi $openApi): OpenApi
     {
-        $openApi = $this->parameterDescriptionProcessor->process($openApi);
-        $openApi = $this->tagDescriptionProcessor->process($openApi);
-        $openApi = $this->iriReferenceTypeProcessor->process($openApi);
+        foreach ($this->processors as $processor) {
+            $openApi = $processor->process($openApi);
+        }
 
-        return $this->pathParametersProcessor->process($openApi);
+        return $openApi;
     }
 
     private function normalizeOpenApi(OpenApi $openApi): OpenApi

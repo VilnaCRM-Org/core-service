@@ -8,7 +8,7 @@ use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\TagDescriptionDictionary;
 
-final class TagDescriptionProcessor
+final class TagDescriptionProcessor implements OpenApiProcessorInterface
 {
     public function process(OpenApi $openApi): OpenApi
     {

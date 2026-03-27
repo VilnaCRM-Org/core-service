@@ -12,7 +12,7 @@ use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 
-final class PathParametersProcessor
+final class PathParametersProcessor implements OpenApiProcessorInterface
 {
     private readonly PathParameterCleanerInterface $parameterCleaner;
 

@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Processor;
 use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
 
-final class ConstraintViolationPayloadItemsProcessor
+final class ConstraintViolationPayloadItemsProcessor implements OpenApiProcessorInterface
 {
     private const SCHEMA_KEY_PREFIX = 'ConstraintViolation';
 

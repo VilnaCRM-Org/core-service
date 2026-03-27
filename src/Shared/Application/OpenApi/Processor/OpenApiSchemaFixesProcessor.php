@@ -17,7 +17,7 @@ use ArrayObject;
 /**
  * @phpstan-type SchemaValue array|bool|float|int|string|ArrayObject|null
  */
-final class OpenApiSchemaFixesProcessor
+final class OpenApiSchemaFixesProcessor implements OpenApiProcessorInterface
 {
     public function __construct(
         private HydraCollectionSchemaFixer $hydraCollectionSchemaFixer

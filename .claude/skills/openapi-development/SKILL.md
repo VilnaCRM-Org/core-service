@@ -170,29 +170,26 @@ final class YourProcessor
 }
 ```
 
-2. **Inject it into OpenApiFactory**:
+2. **Implement `OpenApiProcessorInterface` and tag it**:
 
 ```php
-// src/Shared/Application/OpenApi/OpenApiFactory.php
-public function __construct(
-    private OpenApiFactoryInterface $decorated,
-    private iterable $endpointFactories,
-    private PathParametersSanitizer $pathParametersSanitizer
-        = new PathParametersSanitizer(),
-    private YourProcessor $yourProcessor = new YourProcessor(),  // Add here
-    // ...
-) {}
-
-public function __invoke(array $context = []): OpenApi
+final class YourProcessor implements OpenApiProcessorInterface
 {
-    $openApi = $this->decorated->__invoke($context);
-
-    // ...
-    $openApi = $this->yourProcessor->process($openApi);  // Add here
-
-    return $openApi;
+    public function process(OpenApi $openApi): OpenApi
+    {
+        // ...
+    }
 }
 ```
+
+```yaml
+# config/services.yaml
+App\Shared\Application\OpenApi\Processor\YourProcessor:
+  tags:
+    - { name: 'app.openapi_processor', priority: 100 }
+```
+
+`OpenApiFactory` consumes `!tagged_iterator app.openapi_processor`, so new processors must be auto-discovered through the tag. Do not hardcode each processor as a separate constructor argument or service argument.
 
 ### Adding a New Endpoint Factory
 

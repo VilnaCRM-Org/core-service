@@ -160,10 +160,10 @@ private function fixProperties(array $mediaTypeObject): ?array
 ### Adding a Processor
 
 1. Create class in `src/Shared/Application/OpenApi/Processor/`
-2. Implement `process(OpenApi $openApi): OpenApi`
+2. Implement `OpenApiProcessorInterface`
 3. Use OPERATIONS constant, match expressions, functional style
-4. Inject into `OpenApiFactory` constructor
-5. Call in `OpenApiFactory::__invoke()`
+4. Tag the service with `app.openapi_processor` and an explicit priority
+5. Do not add a new dedicated constructor argument to `OpenApiFactory`
 
 See [REFERENCE.md - Adding Processors](REFERENCE.md#adding-a-new-processor) for complete examples.
 

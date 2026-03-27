@@ -11,7 +11,7 @@ use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use App\Shared\Application\OpenApi\ParameterDescriptionDictionary;
 
-final class ParameterDescriptionProcessor
+final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
 {
     public function process(OpenApi $openApi): OpenApi
     {

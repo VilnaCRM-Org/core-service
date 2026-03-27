@@ -11,7 +11,7 @@ use ArrayObject;
  * Adds missing ulid property to UlidInterface.jsonld-output schema
  * and fixes ulid $ref to type: string in Customer schemas.
  */
-final class UlidInterfaceSchemaFixer
+final class UlidInterfaceSchemaFixer implements OpenApiProcessorInterface
 {
     private const CUSTOMER_SCHEMAS = [
         'Customer.jsonld-output',
