@@ -232,7 +232,7 @@ setup-test-db: ensure-test-services ## Create database for testing purposes
 	@$(MAKE) ensure-runtime-dirs
 
 behat: generate-openapi-spec setup-test-db ## A php framework for autotesting business expectations
-	$(EXEC_ENV) $(BEHAT)
+	$(EXEC_PHP_TEST_ENV) $(BEHAT)
 
 integration-tests: setup-test-db ## Run integration tests
 	$(EXEC_PHP_TEST_ENV) sh -lc 'XDEBUG_MODE=coverage php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text --testsuite=Integration'
