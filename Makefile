@@ -1,5 +1,6 @@
 # Load environment variables from .env.test
 include .env.test
+export SYMFONY_DEPRECATIONS_HELPER
 
 # Parameters
 PROJECT       = core-service
@@ -182,6 +183,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		attempt=$$((attempt + 1)); \
 		sleep 5; \
 	done; \
+	mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log coverage; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
