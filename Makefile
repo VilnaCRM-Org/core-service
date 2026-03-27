@@ -89,10 +89,31 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 composer-validate: ## The validate command validates a given composer.json and composer.lock
 	$(COMPOSER) validate --strict
 
-check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
+ensure-runtime-dirs: ## Ensure runtime cache and log directories are writable for host-side commands
+	@mkdir -p coverage; \
+	runtime_dirs='var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log'; \
+	if ! mkdir -p $$runtime_dirs 2>/dev/null; then \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo mkdir -p $$runtime_dirs; \
+		else \
+			echo "❌ Failed to create runtime directories. Please fix permissions for var/cache and var/log."; \
+			exit 1; \
+		fi; \
+	fi; \
+	if ! chmod -R 777 var/cache var/log 2>/dev/null; then \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo chown -R "$$(id -u):$$(id -g)" var/cache var/log; \
+			sudo chmod -R 777 var/cache var/log; \
+		else \
+			echo "❌ Failed to update permissions for var/cache and var/log."; \
+			exit 1; \
+		fi; \
+	fi
+
+check-requirements: ensure-runtime-dirs ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
 	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
 
-check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
+check-security: ensure-runtime-dirs ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 	$(EXEC_ENV) $(SYMFONY_BIN) security:check
 
 psalm: ## A static analysis tool for finding errors in PHP applications
@@ -183,16 +204,14 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		$(DOCKER_COMPOSE) ps || true; \
 		attempt=$$((attempt + 1)); \
 		sleep 5; \
-	done; \
-	mkdir -p coverage; \
-	mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log; \
-	chmod -R 777 var/cache var/log; \
-	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
+	done
+	@$(MAKE) ensure-runtime-dirs
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
+	@$(MAKE) ensure-runtime-dirs
 
 behat: setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
