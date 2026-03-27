@@ -185,6 +185,8 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		sleep 5; \
 	done; \
 	mkdir -p coverage; \
+	mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log; \
+	chmod -R 777 var/cache var/log; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
 setup-test-db: ensure-test-services ## Create database for testing purposes
