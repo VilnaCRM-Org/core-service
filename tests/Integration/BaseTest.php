@@ -6,7 +6,6 @@ namespace App\Tests\Integration;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Tests\Unit\UlidProvider;
-use Doctrine\Common\DataFixtures\Purger\MongoDBPurgeMode;
 use Doctrine\Common\DataFixtures\Purger\MongoDBPurger;
 use Faker\Factory;
 use Faker\Generator;
@@ -26,7 +25,6 @@ abstract class BaseTest extends ApiTestCase
         $this->faker->addProvider(new UlidProvider($this->faker));
         $dm = $this->container->get('doctrine_mongodb.odm.document_manager');
         $purger = new MongoDBPurger($dm);
-        $purger->setPurgeMode(MongoDBPurgeMode::Delete);
         $purger->purge();
     }
 

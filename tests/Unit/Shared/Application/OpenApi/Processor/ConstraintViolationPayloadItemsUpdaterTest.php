@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsUpdater;
 use App\Tests\Unit\UnitTestCase;
+use ArrayObject;
 
 final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
 {
@@ -150,6 +151,29 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
                     ],
                 ],
             ],
+        ];
+
+        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+
+        $this->assertNotNull($updated);
+        $this->assertSame(
+            ['type' => 'object'],
+            $updated['properties']['violations']['items']['properties']['payload']['items']
+        );
+    }
+
+    public function testUpdatePersistsPayloadWhenIntermediateNodesAreArrayObjects(): void
+    {
+        $input = [
+            'properties' => new ArrayObject([
+                'violations' => new ArrayObject([
+                    'items' => new ArrayObject([
+                        'properties' => [
+                            'payload' => ['type' => 'array'],
+                        ],
+                    ]),
+                ]),
+            ]),
         ];
 
         $updated = ConstraintViolationPayloadItemsUpdater::update($input);

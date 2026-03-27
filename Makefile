@@ -35,7 +35,7 @@ INFECTION     = ./vendor/bin/infection
 
 # Conditional execution based on CI environment variable
 EXEC_ENV ?= $(EXEC_PHP_TEST_ENV)
-ifeq ($(CI),1)
+ifneq ($(CI),)
   EXEC_ENV =
 endif
 
@@ -56,7 +56,7 @@ $(DOCKER_COMPOSE) exec -T -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
-ifeq ($(CI),1)
+ifneq ($(CI),)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)

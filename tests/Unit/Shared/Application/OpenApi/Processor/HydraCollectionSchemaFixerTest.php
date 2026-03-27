@@ -116,4 +116,27 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             $fixer->fixSchema(['allOf' => []])
         );
     }
+
+    public function testApplyReturnsOriginalSchemasWhenOnlyRepresentationDiffers(): void
+    {
+        $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
+        $schemaNormalizer->expects(self::once())
+            ->method('normalize')
+            ->willReturn([
+                'HydraCollectionBaseSchema' => ['allOf' => []],
+            ]);
+
+        $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
+        $viewExampleUpdater->expects(self::once())
+            ->method('update')
+            ->with(['allOf' => []])
+            ->willReturn(null);
+
+        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $schemas = new ArrayObject([
+            'HydraCollectionBaseSchema' => new ArrayObject(['allOf' => []]),
+        ]);
+
+        self::assertSame($schemas, $fixer->apply($schemas));
+    }
 }

@@ -12,7 +12,6 @@ use SlevomatCodingStandard\Sniffs\Functions\FunctionLengthSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
-use SlevomatCodingStandard\Sniffs\TypeHints\ReturnTypeHintSniff;
 
 return [
     'preset' => 'symfony',
@@ -50,11 +49,7 @@ return [
         ParameterTypeHintSniff::class => [
             'exclude' => [
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
-                'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
             ],
-        ],
-        ReturnTypeHintSniff::class => [
-            'exclude' => [],
         ],
         LineLengthSniff::class => [
             'exclude' => [

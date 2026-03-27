@@ -28,7 +28,13 @@ final class ConstraintViolationPayloadItemsUpdater
         }
 
         $properties['payload'] = self::payloadWithItems($payload);
-        $constraintViolation['properties']['violations']['items']['properties'] = $properties;
+        $rootProperties = SchemaNormalizer::normalize($constraintViolation['properties'] ?? null);
+        $violations = SchemaNormalizer::normalize($rootProperties['violations'] ?? null);
+        $items = SchemaNormalizer::normalize($violations['items'] ?? null);
+        $items['properties'] = $properties;
+        $violations['items'] = $items;
+        $rootProperties['violations'] = $violations;
+        $constraintViolation['properties'] = $rootProperties;
 
         return $constraintViolation;
     }

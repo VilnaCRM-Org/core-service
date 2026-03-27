@@ -28,8 +28,7 @@ final class HydraCollectionSchemaFixer
             $normalizedSchema = SchemaNormalizer::normalize($schema);
             $updatedSchema = $this->viewExampleUpdater->update($normalizedSchema);
             $schemaWasNormalized = array_key_exists($schemaName, $schemasArray)
-                ? $schemasArray[$schemaName] !== $schema
-                : false;
+                && SchemaNormalizer::normalize($schemasArray[$schemaName]) !== $normalizedSchema;
 
             if ($updatedSchema === null) {
                 if (! $schemaWasNormalized) {
