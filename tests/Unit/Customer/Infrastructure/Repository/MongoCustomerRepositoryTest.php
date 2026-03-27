@@ -105,6 +105,8 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
     {
         $entity = new \stdClass();
 
+        $this->documentManager->expects($this->never())->method('contains');
+        $this->documentManager->expects($this->never())->method('merge');
         $this->documentManager->expects($this->never())->method('remove');
         $this->documentManager->expects($this->never())->method('flush');
 

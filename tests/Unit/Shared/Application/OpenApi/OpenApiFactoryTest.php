@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
@@ -92,10 +93,16 @@ final class OpenApiFactoryTest extends UnitTestCase
             [],
             new Paths()
         );
+        $components = new Components(
+            new ArrayObject([
+                'CustomerUlid' => ['type' => 'string'],
+            ])
+        );
         $ulidOutput = (new OpenApi(
             new Info('Ulid', '1.0.0'),
             [],
-            new Paths()
+            new Paths(),
+            $components
         ))->withExtensionProperty('x-stage', 'ulid');
         $finalOpenApi = new OpenApi(
             new Info('Final', '1.0.0'),
@@ -148,7 +155,8 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with(
                 $this->callback(static fn (OpenApi $normalizedOpenApi): bool => $normalizedOpenApi !== $ulidOutput
                     && $normalizedOpenApi->getInfo() === $ulidOutput->getInfo()
-                    && $normalizedOpenApi->getPaths() === $ulidOutput->getPaths()),
+                    && $normalizedOpenApi->getPaths() === $ulidOutput->getPaths()
+                    && $normalizedOpenApi->getComponents() === $ulidOutput->getComponents()),
                 $this->identicalTo(['x-stage' => 'ulid'])
             )
             ->willReturn($finalOpenApi);
