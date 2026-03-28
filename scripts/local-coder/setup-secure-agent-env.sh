@@ -272,9 +272,10 @@ fi
 bmalph_ready=false
 if command -v bmalph >/dev/null 2>&1; then
     bmalph_ready=true
-else
-    ensure_bmalph_cli
+elif ensure_bmalph_cli; then
     bmalph_ready=true
+else
+    echo "Warning: BMALPH CLI is unavailable; continuing without BMALPH bootstrap." >&2
 fi
 
 configure_git_identity

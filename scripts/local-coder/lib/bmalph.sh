@@ -95,7 +95,7 @@ cs_verify_bmalph_dry_run() {
         return 1
     fi
 
-    if ! grep -q "${expected_marker}" "${tmp_output}"; then
+    if ! grep -Fq "${expected_marker}" "${tmp_output}"; then
         echo "Error: BMALPH dry-run verification did not report expected platform output '${expected_marker}'." >&2
         sed -n '1,160p' "${tmp_output}" >&2
         return 1
