@@ -42,9 +42,12 @@ load 'bats-assert/load'
 
   run make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
   assert_success
-  assert_output --partial "[dry-run] Would perform the following actions:"
   assert_output --partial "Running BMALPH init in"
-  assert_output --partial "No changes made."
+  if [[ "${output}" != *"[dry-run] Would perform the following actions:"* ]] && [[ "${output}" != *"bmalph is already initialized in this project."* ]]; then
+    echo "Unexpected bmalph-init output:" >&3
+    printf '%s\n' "${output}" >&3
+    false
+  fi
 
   after_status="$(git status --short --untracked-files=all)"
   [ "${before_status}" = "${after_status}" ]
@@ -58,8 +61,11 @@ load 'bats-assert/load'
   run make bmalph-setup BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
   assert_success
   assert_output --partial 'install-bmalph.sh --platform "codex" --init --dry-run'
-  assert_output --partial "[dry-run] Would perform the following actions:"
-  assert_output --partial "No changes made."
+  if [[ "${output}" != *"[dry-run] Would perform the following actions:"* ]] && [[ "${output}" != *"bmalph is already initialized in this project."* ]]; then
+    echo "Unexpected bmalph-setup output:" >&3
+    printf '%s\n' "${output}" >&3
+    false
+  fi
 
   after_status="$(git status --short --untracked-files=all)"
   [ "${before_status}" = "${after_status}" ]

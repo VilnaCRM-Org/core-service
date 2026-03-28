@@ -32,7 +32,6 @@ persist_env_file() {
         append_export_if_set OPENAI_MODEL
         append_export_if_set OPENAI_ORG_ID
         append_export_if_set OPENAI_PROJECT
-        append_export_if_set ANTHROPIC_API_KEY
         append_export_if_set GH_TOKEN
         append_export_if_set GITHUB_TOKEN
 

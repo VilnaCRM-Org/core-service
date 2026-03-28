@@ -139,6 +139,16 @@ if [ "${dry_run}" = true ] && [ "${run_init}" != true ]; then
 fi
 
 if [ "${run_init}" = true ]; then
+    if [ ! -d "${project_dir}" ]; then
+        echo "Error: --project-dir '${project_dir}' does not exist or is not a directory." >&2
+        exit 1
+    fi
+
+    if [ ! -w "${project_dir}" ]; then
+        echo "Error: --project-dir '${project_dir}' is not writable." >&2
+        exit 1
+    fi
+
     echo "Running BMALPH init in '${project_dir}' for platform '${platform}'."
     init_cmd=(
         bmalph
