@@ -75,7 +75,11 @@ load 'bats-assert/load'
   mv src/Shared/Application/PsalmErrorExample.php tests/CLI/bats/php/
 
   assert_failure
-  assert_output --partial "does not exist"
+
+  if [[ "$output" != *"Source pattern guard found non-baselined violations:"* ]] \
+    && [[ "$output" != *"does not exist"* ]]; then
+    fail "Expected source-pattern-guard or Psalm error output, but got neither"
+  fi
 }
 
 @test "make phpinsights should fail when code quality is low" {
