@@ -55,6 +55,11 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
    - Use a login shell (`bash -l`) before auth-dependent checks when the workspace was just created
    - Avoid non-login shells immediately after bootstrap because `~/.config/core-service/agent-secrets.env` is sourced from `~/.bashrc` and `~/.profile`
 
+4. **Optional: Use BMALPH When Needed**
+   - Coder CE bootstrap installs `bmalph` automatically for Codex-oriented workflows
+   - For local setup, run `bash scripts/local-coder/install-bmalph.sh --platform codex`
+   - To preview BMALPH repo initialization safely, use `bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run`
+
 ### Quick Skill Guide
 
 | Task Type                  | Skill                           | When to Use                                  |

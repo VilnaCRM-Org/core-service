@@ -95,6 +95,7 @@ Bootstrap is handled through `scripts/local-coder/*`.
 - Docker support so the existing `make` commands continue to work
 - GitHub CLI (`gh`)
 - Codex CLI (`codex`) when workspace auth is available
+- BMALPH CLI (`bmalph`) for Codex and Claude development workflows
 - Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/local-coder/setup-secure-agent-env.sh`)
@@ -110,12 +111,14 @@ Bootstrap is handled through `scripts/local-coder/*`.
 ```bash
 gh --version
 codex --version
+bmalph --version
 make help
 ```
 
 For autonomous AI coding in a workspace, set workspace secrets:
 
 - `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY` for Claude Code if you use it locally or in the workspace
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
@@ -139,6 +142,7 @@ gh auth setup-git
 Then run:
 
 ```bash
+bash scripts/local-coder/install-bmalph.sh --platform codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -148,10 +152,36 @@ bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can execute one non-interactive task
 
-`verify-gh-codex.sh` always runs the basic Codex smoke check.
+`verify-gh-codex.sh` also verifies that `bmalph` can run a non-destructive
+Codex initialization preview.
 Tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`.
+
+### Local BMALPH setup for Codex or Claude
+
+If you are working outside Coder CE, use the helper below from the repository
+root to install BMALPH locally:
+
+```bash
+# Codex
+bash scripts/local-coder/install-bmalph.sh --platform codex
+
+# Claude Code
+bash scripts/local-coder/install-bmalph.sh --platform claude-code
+```
+
+To preview project initialization without changing repository files:
+
+```bash
+bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run
+bash scripts/local-coder/install-bmalph.sh --platform claude-code --init --dry-run
+```
+
+`bmalph init` writes BMAD/Ralph assets and platform-specific instruction files.
+Run the dry-run first, then initialize only when you want those files in your
+working tree.
 
 ### Working in the workspace
 

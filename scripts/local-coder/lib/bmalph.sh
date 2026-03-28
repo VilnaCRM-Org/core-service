@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+
+cs_bmalph_load_defaults() {
+    : "${BMALPH_NPM_PACKAGE:=bmalph}"
+    : "${BMALPH_DEFAULT_PLATFORM:=codex}"
+    : "${BMALPH_DEFAULT_PROJECT_NAME:=core-service}"
+    : "${BMALPH_DEFAULT_PROJECT_DESCRIPTION:=VilnaCRM Core Service}"
+    : "${CS_USER_NPM_GLOBAL_BIN:=${HOME}/.npm-global/bin}"
+}
+
+cs_bmalph_expected_platform_marker() {
+    local platform="${1:-${BMALPH_DEFAULT_PLATFORM:-codex}}"
+
+    case "${platform}" in
+        codex)
+            printf '.agents/skills/'
+            ;;
+        claude-code)
+            printf '.claude/commands/'
+            ;;
+        *)
+            printf 'bmalph/config.json'
+            ;;
+    esac
+}
+
+cs_bmalph_platform_cli_hint() {
+    local platform="${1:-${BMALPH_DEFAULT_PLATFORM:-codex}}"
+
+    case "${platform}" in
+        codex)
+            printf 'codex'
+            ;;
+        claude-code)
+            printf 'claude'
+            ;;
+        *)
+            printf ''
+            ;;
+    esac
+}
+
+cs_ensure_bmalph_cli() {
+    cs_bmalph_load_defaults
+    export PATH="${CS_USER_NPM_GLOBAL_BIN}:${PATH}"
+
+    if command -v bmalph >/dev/null 2>&1; then
+        return 0
+    fi
+
+    cs_require_command npm || return 1
+
+    mkdir -p "${HOME}/.npm-global"
+    npm config set prefix "${HOME}/.npm-global" >/dev/null 2>&1 || true
+    npm install -g "${BMALPH_NPM_PACKAGE}"
+
+    if ! command -v bmalph >/dev/null 2>&1; then
+        cat >&2 <<'EOM'
+Error: BMALPH CLI installation completed but 'bmalph' is still not in PATH.
+Ensure npm global bin is available in the current shell.
+EOM
+        return 1
+    fi
+}
+
+cs_verify_bmalph_dry_run() {
+    local platform="${1:-${BMALPH_DEFAULT_PLATFORM:-codex}}"
+    local project_name="${2:-${BMALPH_DEFAULT_PROJECT_NAME:-core-service}}"
+    local project_description="${3:-${BMALPH_DEFAULT_PROJECT_DESCRIPTION:-VilnaCRM Core Service}}"
+    local expected_marker
+    local tmp_project_dir
+    local tmp_output
+
+    cs_bmalph_load_defaults
+    export PATH="${CS_USER_NPM_GLOBAL_BIN}:${PATH}"
+    cs_require_command bmalph || return 1
+
+    expected_marker="$(cs_bmalph_expected_platform_marker "${platform}")"
+    tmp_project_dir="$(mktemp -d)"
+    tmp_output="$(mktemp)"
+
+    cleanup() {
+        rm -rf "${tmp_project_dir}" "${tmp_output}"
+    }
+    trap cleanup RETURN
+
+    if ! bmalph -C "${tmp_project_dir}" init \
+        --platform "${platform}" \
+        --name "${project_name}" \
+        --description "${project_description}" \
+        --dry-run >"${tmp_output}" 2>&1; then
+        echo "Error: BMALPH dry-run verification failed for platform '${platform}'." >&2
+        sed -n '1,160p' "${tmp_output}" >&2
+        return 1
+    fi
+
+    if ! grep -q "${expected_marker}" "${tmp_output}"; then
+        echo "Error: BMALPH dry-run verification did not report expected platform output '${expected_marker}'." >&2
+        sed -n '1,160p' "${tmp_output}" >&2
+        return 1
+    fi
+}

@@ -45,6 +45,12 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    ```bash
    make start
    ```
+4. If you plan to use BMALPH with Codex or Claude during development, install it with:
+   ```bash
+   bash scripts/local-coder/install-bmalph.sh --platform codex
+   # or
+   bash scripts/local-coder/install-bmalph.sh --platform claude-code
+   ```
 
 ### Version Control Configuration
 

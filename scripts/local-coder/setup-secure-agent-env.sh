@@ -10,6 +10,8 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 . "${ROOT_DIR}/scripts/local-coder/lib/github-auth.sh"
 # shellcheck source=scripts/local-coder/lib/workspace-secrets.sh
 . "${ROOT_DIR}/scripts/local-coder/lib/workspace-secrets.sh"
+# shellcheck source=scripts/local-coder/lib/bmalph.sh
+. "${ROOT_DIR}/scripts/local-coder/lib/bmalph.sh"
 
 SETTINGS_FILE="${ROOT_DIR}/.devcontainer/workspace-settings.env"
 if [ -f "${SETTINGS_FILE}" ]; then
@@ -28,6 +30,8 @@ readonly AGENT_PROFILE_END="# END CORE-SERVICE AGENT ENV"
 readonly USER_NPM_GLOBAL_BIN="${HOME}/.npm-global/bin"
 
 : "${CODEX_NPM_PACKAGE:=@openai/codex}"
+: "${BMALPH_NPM_PACKAGE:=bmalph}"
+: "${BMALPH_DEFAULT_PLATFORM:=codex}"
 : "${CORE_SERVICE_BOOTSTRAP_STRICT:=false}"
 
 : "${GH_HOST:=github.com}"
@@ -225,6 +229,11 @@ EOM
     fi
 }
 
+ensure_bmalph_cli() {
+    export CS_USER_NPM_GLOBAL_BIN="${USER_NPM_GLOBAL_BIN}"
+    cs_ensure_bmalph_cli
+}
+
 cs_require_command gh
 if ! cs_ensure_gh_auth; then
     if [ "${CORE_SERVICE_BOOTSTRAP_STRICT}" = "1" ] || [ "${CORE_SERVICE_BOOTSTRAP_STRICT}" = "true" ]; then
@@ -260,6 +269,14 @@ EOM
     echo "Warning: Codex authentication is not configured; continuing without AI bootstrap." >&2
 fi
 
+bmalph_ready=false
+if command -v bmalph >/dev/null 2>&1; then
+    bmalph_ready=true
+else
+    ensure_bmalph_cli
+    bmalph_ready=true
+fi
+
 configure_git_identity
 persist_agent_secrets_file
 ensure_shell_sources_agent_secrets
@@ -271,6 +288,11 @@ gh config set prompt "${GH_PROMPT}" >/dev/null 2>&1 || true
 codex_version=""
 if [ "${codex_ready}" = true ]; then
     codex_version="$(codex --version 2>/dev/null || true)"
+fi
+
+bmalph_version=""
+if [ "${bmalph_ready}" = true ]; then
+    bmalph_version="$(bmalph --version 2>/dev/null || true)"
 fi
 
 
@@ -286,4 +308,13 @@ if [ "${codex_ready}" = true ]; then
     echo "  - npm package: ${CODEX_NPM_PACKAGE}"
 else
     echo "Codex configured: unavailable."
+fi
+if [ "${bmalph_ready}" = true ]; then
+    echo "BMALPH configured:"
+    echo "  - command: $(command -v bmalph)"
+    echo "  - version: ${bmalph_version:-unknown}"
+    echo "  - npm package: ${BMALPH_NPM_PACKAGE}"
+    echo "  - default platform: ${BMALPH_DEFAULT_PLATFORM}"
+else
+    echo "BMALPH configured: unavailable."
 fi

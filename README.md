@@ -75,6 +75,7 @@ After startup, verify the environment:
 ```bash
 gh --version
 codex --version
+bmalph --version
 make help
 ```
 
@@ -84,6 +85,7 @@ Use workspace secrets or environment variables. Do not commit credentials.
 The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; when they are absent, the workspace bootstrap skips host secret or Codex auth sync gracefully.
 
 - `OPENAI_API_KEY`: API key for the Codex CLI
+- `ANTHROPIC_API_KEY`: API key for Claude Code when you want local Claude workflows
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`
@@ -92,6 +94,7 @@ The post-create step runs secure bootstrap automatically and then executes start
 
 ```bash
 bash scripts/local-coder/setup-secure-agent-env.sh
+bash scripts/local-coder/install-bmalph.sh --platform codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -101,6 +104,7 @@ What `startup-smoke-tests.sh` checks:
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
 - `bats` CLI is available
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can execute one non-interactive task
 
 Repository-tracked defaults for workspace bootstrap are stored in:
@@ -115,8 +119,34 @@ What `verify-gh-codex.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can run basic non-interactive smoke tasks
 - tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`
+
+#### BMALPH for Codex and Claude
+
+The workspace bootstrap installs the `bmalph` CLI automatically so it is ready
+for Codex-based development in Coder CE. For local setup, use the helper script:
+
+```bash
+# Install and verify bmalph for Codex
+bash scripts/local-coder/install-bmalph.sh --platform codex
+
+# Install and verify bmalph for Claude Code
+bash scripts/local-coder/install-bmalph.sh --platform claude-code
+```
+
+To preview how BMALPH would initialize this repository for a platform without
+changing any tracked files, run:
+
+```bash
+bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run
+bash scripts/local-coder/install-bmalph.sh --platform claude-code --init --dry-run
+```
+
+`bmalph init` writes BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
+platform-specific instruction files. Use the dry-run first, then initialize from
+a clean branch when you intentionally want to adopt those files.
 
 Notes:
 
