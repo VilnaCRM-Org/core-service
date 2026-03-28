@@ -132,6 +132,10 @@ if [ "${skip_verify}" != true ]; then
     echo "BMALPH dry-run verification passed for platform '${platform}'."
 fi
 
+if [ "${dry_run}" = true ] && [ "${run_init}" != true ]; then
+    echo "Warning: --dry-run has no effect unless --init is also provided." >&2
+fi
+
 if [ "${run_init}" = true ]; then
     echo "Running BMALPH init in '${project_dir}' for platform '${platform}'."
     init_cmd=(
