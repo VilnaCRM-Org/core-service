@@ -25,6 +25,7 @@ run_init=false
 dry_run=false
 skip_verify=false
 
+# Print CLI usage for local BMALPH installation and optional init flows.
 usage() {
     cat <<'EOM'
 Usage: bash scripts/local-coder/install-bmalph.sh [options]
@@ -105,13 +106,14 @@ case "${platform}" in
         ;;
 esac
 
-export CS_USER_NPM_GLOBAL_BIN="${HOME}/.npm-global/bin"
+export CS_USER_NPM_GLOBAL_BIN="${CS_USER_NPM_GLOBAL_BIN:-${HOME}/.npm-global/bin}"
+CS_NPM_PREFIX="${CS_USER_NPM_GLOBAL_BIN%/bin}"
 export PATH="${CS_USER_NPM_GLOBAL_BIN}:${PATH}"
 
 if [ "${upgrade}" = true ] && command -v bmalph >/dev/null 2>&1; then
     cs_require_command npm
-    mkdir -p "${HOME}/.npm-global"
-    npm config set prefix "${HOME}/.npm-global" >/dev/null 2>&1 || true
+    mkdir -p "${CS_NPM_PREFIX}"
+    npm config set prefix "${CS_NPM_PREFIX}" >/dev/null 2>&1 || true
     npm install -g "${BMALPH_NPM_PACKAGE}"
 else
     cs_ensure_bmalph_cli

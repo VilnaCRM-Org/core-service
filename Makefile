@@ -87,7 +87,7 @@ bmalph-init: ## Initialize BMALPH for current project; set BMALPH_DRY_RUN=true t
 	bash scripts/local-coder/install-bmalph.sh --platform "$(BMALPH_PLATFORM)" --init $(if $(filter true TRUE 1 yes YES,$(BMALPH_DRY_RUN)),--dry-run,)
 
 bmalph-setup: ## Install and initialize BMALPH for current project; defaults to BMALPH_PLATFORM=codex
-	bash scripts/local-coder/install-bmalph.sh --platform "$(BMALPH_PLATFORM)" --init $(if $(filter true TRUE 1 yes YES,$(BMALPH_DRY_RUN)),--dry-run,)
+	@$(MAKE) bmalph-init BMALPH_PLATFORM="$(BMALPH_PLATFORM)" BMALPH_DRY_RUN="$(BMALPH_DRY_RUN)"
 
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)

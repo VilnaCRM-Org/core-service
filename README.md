@@ -89,7 +89,7 @@ The default devcontainer bind mounts look for host-side directories under `${HOM
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`
 
-The post-create step runs secure bootstrap automatically and then executes startup smoke tests when auth is available. You can also run scripts manually:
+The post-create step runs secure bootstrap automatically and then executes startup smoke tests when auth is available. Run the following commands from the repository root in a login shell (`bash -l`) so PATH and synced credentials are available:
 
 ```bash
 bash scripts/local-coder/setup-secure-agent-env.sh

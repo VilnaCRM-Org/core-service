@@ -3,6 +3,7 @@ name: CLI testing
 on:
   pull_request:
     paths:
+      - '.devcontainer/workspace-settings.env'
       - '.github/workflows/bats-tests.yml'
       - 'Makefile'
       - 'scripts/**/*.sh'

@@ -38,7 +38,7 @@ load 'bats-assert/load'
 @test "make bmalph-init supports dry-run without changing tracked files" {
   local before_status after_status
 
-  before_status="$(git status --short --untracked-files=no)"
+  before_status="$(git status --short --untracked-files=all)"
 
   run make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
   assert_success
@@ -46,14 +46,14 @@ load 'bats-assert/load'
   assert_output --partial "Running BMALPH init in"
   assert_output --partial "No changes made."
 
-  after_status="$(git status --short --untracked-files=no)"
+  after_status="$(git status --short --untracked-files=all)"
   [ "${before_status}" = "${after_status}" ]
 }
 
 @test "make bmalph-setup supports one-command dry-run without changing tracked files" {
   local before_status after_status
 
-  before_status="$(git status --short --untracked-files=no)"
+  before_status="$(git status --short --untracked-files=all)"
 
   run make bmalph-setup BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
   assert_success
@@ -61,6 +61,6 @@ load 'bats-assert/load'
   assert_output --partial "[dry-run] Would perform the following actions:"
   assert_output --partial "No changes made."
 
-  after_status="$(git status --short --untracked-files=no)"
+  after_status="$(git status --short --untracked-files=all)"
   [ "${before_status}" = "${after_status}" ]
 }
