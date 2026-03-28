@@ -235,12 +235,14 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         ?string $deletedEmail = null,
         ?string $deletedId = null
     ): void {
+        $tags = $this->cacheTagResolver->resolveForDeletedCustomer(
+            $customer,
+            $deletedEmail,
+            $deletedId
+        );
+
         $this->cache->invalidateTags(
-            $this->cacheTagResolver->resolveForDeletedCustomer(
-                $customer,
-                $deletedEmail,
-                $deletedId
-            )
+            iterator_to_array($tags)
         );
     }
 }

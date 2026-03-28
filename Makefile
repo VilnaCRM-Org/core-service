@@ -23,7 +23,7 @@ SYMFONY_TEST_ENV = $(EXEC_PHP_TEST_ENV) bin/console
 # Executables: vendors
 BEHAT         = ./vendor/bin/behat --stop-on-failure -n
 PHPUNIT       = ./vendor/bin/phpunit
-PSALM         = ./vendor/bin/psalm
+PSALM         = php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' ./vendor/bin/psalm
 PHP_CS_FIXER  = ./vendor/bin/php-cs-fixer
 DEPTRAC       = ./vendor/bin/deptrac
 INFECTION     = ./vendor/bin/infection
@@ -88,7 +88,10 @@ check-requirements: ## Checks requirements for running Symfony and gives useful 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 	$(EXEC_ENV) $(SYMFONY_BIN) security:check
 
-psalm: ## A static analysis tool for finding errors in PHP applications
+source-pattern-guard: ## Guard src/ against banned native array types and hardcoded new expressions
+	$(EXEC_ENV) php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' scripts/guard-source-patterns.php
+
+psalm: source-pattern-guard ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
 
 psalm-security: ## Psalm security analysis

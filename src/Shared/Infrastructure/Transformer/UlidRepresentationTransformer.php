@@ -10,9 +10,8 @@ use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidRepresentationTransformer
 {
-    public function normalizeForUlidFactory(
-        array|string|int|float|bool|object|null $value
-    ): array|string|int|float|bool|null {
+    public function normalizeForUlidFactory(mixed $value): string|int|float|bool|null
+    {
         if ($value instanceof SymfonyUlid) {
             return (string) $value;
         }

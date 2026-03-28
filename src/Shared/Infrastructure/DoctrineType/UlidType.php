@@ -5,12 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\DoctrineType;
 
 use App\Shared\Domain\ValueObject\Ulid;
-use App\Shared\Infrastructure\Factory\UlidFactory;
-use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
-use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
+use App\Shared\Infrastructure\Factory\UlidTransformerFactory;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
-use App\Shared\Infrastructure\Validator\UlidValidator;
 use Doctrine\ODM\MongoDB\Types\Type;
 use MongoDB\BSON\Binary;
 
@@ -57,16 +53,7 @@ PHP;
 
     private function createTransformer(): UlidTransformer
     {
-        $ulidFactory = new UlidFactory();
-        return new UlidTransformer(
-            $ulidFactory,
-            new UlidValidator(),
-            new UlidValueTransformer(
-                $ulidFactory,
-                new UlidRepresentationTransformer(),
-                new SymfonyUlidBinaryTransformer()
-            )
-        );
+        return UlidTransformerFactory::create();
     }
 
     private function extractBinaryData(mixed $value): mixed

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Infrastructure\Resolver;
 
 use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Infrastructure\Collection\CustomerCacheTagCollection;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 
 final readonly class CustomerCacheTagResolver
@@ -14,31 +15,30 @@ final readonly class CustomerCacheTagResolver
     ) {
     }
 
-    /**
-     * @return list<string>
-     */
     public function resolveForDeletedCustomer(
         ?Customer $customer,
         ?string $deletedEmail = null,
         ?string $deletedId = null
-    ): array {
-        $tags = ['customer.collection'];
+    ): CustomerCacheTagCollection {
+        $tags = new CustomerCacheTagCollection('customer.collection');
 
         if ($customer instanceof Customer) {
-            $tags[] = 'customer.' . $customer->getUlid();
-            $tags[] = 'customer.email.' . $this->cacheKeyBuilder->hashEmail($customer->getEmail());
-
-            return $tags;
+            return $tags->with(
+                'customer.' . $customer->getUlid(),
+                'customer.email.' . $this->cacheKeyBuilder->hashEmail($customer->getEmail())
+            );
         }
 
         if ($deletedId !== null) {
-            $tags[] = 'customer.' . $deletedId;
+            $tags = $tags->with('customer.' . $deletedId);
         }
 
         if ($deletedEmail !== null) {
-            $tags[] = 'customer.email.' . $this->cacheKeyBuilder->hashEmail($deletedEmail);
+            $tags = $tags->with(
+                'customer.email.' . $this->cacheKeyBuilder->hashEmail($deletedEmail)
+            );
         }
 
-        return array_values(array_unique($tags));
+        return $tags;
     }
 }

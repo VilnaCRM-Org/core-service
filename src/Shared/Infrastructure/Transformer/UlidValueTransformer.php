@@ -21,7 +21,7 @@ final class UlidValueTransformer
     ) {
     }
 
-    public function toUlid(array|string|int|float|bool|object|null $value): Ulid
+    public function toUlid(mixed $value): Ulid
     {
         if ($value instanceof Ulid) {
             return $value;
