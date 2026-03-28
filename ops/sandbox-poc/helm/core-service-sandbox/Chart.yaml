@@ -1,0 +1,6 @@
+apiVersion: v2
+name: core-service-sandbox
+description: Namespace-scoped local Kubernetes sandbox for VilnaCRM core-service
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

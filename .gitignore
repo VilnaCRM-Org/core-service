@@ -49,3 +49,5 @@ venv
 # Infection
 infection.log
 summary.log
+.ralph/logs/
+_bmad-output/

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "core-service-sandbox.localstackServiceName" . }}
+  labels:
+    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "localstack") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "localstack") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "localstack") | nindent 8 }}
+    spec:
+      volumes:
+        - name: localstack-data
+          emptyDir: {}
+      containers:
+        - name: localstack
+          image: {{ printf "%s:%s" .Values.images.localstack.repository .Values.images.localstack.tag | quote }}
+          imagePullPolicy: {{ .Values.images.localstack.pullPolicy }}
+          env:
+            - name: SERVICES
+              value: {{ .Values.localstack.services | quote }}
+            - name: DEBUG
+              value: {{ .Values.localstack.debug | quote }}
+            - name: GATEWAY_LISTEN
+              value: {{ printf "0.0.0.0:%v" .Values.localstack.service.port | quote }}
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "core-service-sandbox.envSecretName" . }}
+                  key: AWS_SQS_REGION
+          ports:
+            - name: edge
+              containerPort: {{ .Values.localstack.service.port }}
+          volumeMounts:
+            - name: localstack-data
+              mountPath: /var/lib/localstack
+          readinessProbe:
+            httpGet:
+              path: /_localstack/health
+              port: edge
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /_localstack/health
+              port: edge
+            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 15 }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "core-service-sandbox.localstackServiceName" . }}
+  labels:
+    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "localstack") | nindent 4 }}
+spec:
+  selector:
+    {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "localstack") | nindent 4 }}
+  ports:
+    - name: edge
+      port: {{ .Values.localstack.service.port }}
+      targetPort: edge

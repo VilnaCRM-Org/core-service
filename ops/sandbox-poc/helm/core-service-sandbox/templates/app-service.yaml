@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "core-service-sandbox.httpServiceName" . }}
+  labels:
+    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "app") | nindent 4 }}
+spec:
+  type: {{ .Values.app.service.type }}
+  selector:
+    {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "app") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.app.service.port }}
+      targetPort: http

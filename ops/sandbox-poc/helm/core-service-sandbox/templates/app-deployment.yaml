@@ -1,0 +1,168 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "core-service-sandbox.fullname" . }}
+  labels:
+    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "app") | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "app") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "app") | nindent 8 }}
+    spec:
+      volumes:
+        - name: repo
+          emptyDir: {}
+        - name: php-socket
+          emptyDir: {}
+        - name: caddy-config
+          configMap:
+            name: {{ include "core-service-sandbox.fullname" . }}-caddy
+      initContainers:
+        - name: prepare-shared-volumes
+          image: {{ printf "%s:%s" .Values.images.workspace.repository .Values.images.workspace.tag | quote }}
+          imagePullPolicy: {{ .Values.images.workspace.pullPolicy }}
+          command:
+            - /bin/bash
+            - -lc
+          args:
+            - mkdir -p /shared-repo/{{ .Values.app.workspace.repoSubPath }} /shared-socket
+          volumeMounts:
+            - name: repo
+              mountPath: /shared-repo
+            - name: php-socket
+              mountPath: /shared-socket
+      containers:
+        - name: workspace
+          image: {{ printf "%s:%s" .Values.images.workspace.repository .Values.images.workspace.tag | quote }}
+          imagePullPolicy: {{ .Values.images.workspace.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "core-service-sandbox.envSecretName" . }}
+          workingDir: {{ .Values.app.workspace.repoDir | quote }}
+          command:
+            - /bin/bash
+            - -lc
+          args:
+            - |
+              mkdir -p {{ .Values.app.workspace.repoDir | quote }}
+              trap 'exit 0' TERM INT
+              sleep infinity &
+              wait
+          volumeMounts:
+            - name: repo
+              mountPath: {{ .Values.app.workspace.repoDir | quote }}
+              subPath: {{ .Values.app.workspace.repoSubPath | quote }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -lc
+                - test -d {{ .Values.app.workspace.repoDir | quote }}
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -lc
+                - test -d {{ .Values.app.workspace.repoDir | quote }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+        - name: php
+          image: {{ printf "%s:%s" .Values.images.php.repository .Values.images.php.tag | quote }}
+          imagePullPolicy: {{ .Values.images.php.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "core-service-sandbox.envSecretName" . }}
+          workingDir: {{ .Values.app.workingDir | quote }}
+          command:
+            - /bin/sh
+            - -lc
+          args:
+            - |
+              until [ -f {{ .Values.app.workingDir | quote }}/composer.json ]; do
+                echo "waiting for repo sync into {{ .Values.app.workingDir }}"
+                sleep 2
+              done
+              cd {{ .Values.app.workingDir | quote }}
+              exec docker-entrypoint php-fpm
+          volumeMounts:
+            - name: repo
+              mountPath: {{ .Values.app.workingDir | quote }}
+              subPath: {{ .Values.app.workspace.repoSubPath | quote }}
+            - name: php-socket
+              mountPath: /var/run/php
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -lc
+                - docker-healthcheck
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -lc
+                - docker-healthcheck
+            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 15 }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+        - name: caddy
+          image: {{ printf "%s:%s" .Values.images.caddy.repository .Values.images.caddy.tag | quote }}
+          imagePullPolicy: {{ .Values.images.caddy.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "core-service-sandbox.envSecretName" . }}
+          workingDir: {{ .Values.app.workingDir | quote }}
+          command:
+            - /bin/sh
+            - -lc
+          args:
+            - |
+              until [ -f {{ .Values.app.workingDir | quote }}/public/index.php ]; do
+                echo "waiting for repo sync into {{ .Values.app.workingDir }}/public"
+                sleep 2
+              done
+              cd {{ .Values.app.workingDir | quote }}
+              exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: repo
+              mountPath: {{ .Values.app.workingDir | quote }}
+              subPath: {{ .Values.app.workspace.repoSubPath | quote }}
+            - name: php-socket
+              mountPath: /var/run/php
+            - name: caddy-config
+              mountPath: /etc/caddy/Caddyfile
+              subPath: Caddyfile
+          readinessProbe:
+            httpGet:
+              path: /api/docs
+              port: http
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 15 }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
