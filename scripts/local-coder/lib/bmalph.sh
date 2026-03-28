@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
+#
+# Requires: cs_require_command from scripts/local-coder/lib/github-auth.sh
 
 cs_bmalph_load_defaults() {
     : "${BMALPH_NPM_PACKAGE:=bmalph}"

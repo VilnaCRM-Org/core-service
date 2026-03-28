@@ -85,7 +85,6 @@ Use workspace secrets or environment variables. Do not commit credentials.
 The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; when they are absent, the workspace bootstrap skips host secret or Codex auth sync gracefully.
 
 - `OPENAI_API_KEY`: API key for the Codex CLI
-- `ANTHROPIC_API_KEY`: API key for Claude Code when you want local Claude workflows
 - `GH_AUTOMATION_TOKEN`: GitHub token for non-interactive `gh` usage
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`

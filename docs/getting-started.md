@@ -118,7 +118,6 @@ make help
 For autonomous AI coding in a workspace, set workspace secrets:
 
 - `OPENAI_API_KEY`
-- `ANTHROPIC_API_KEY` for Claude Code if you use it locally or in the workspace
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
