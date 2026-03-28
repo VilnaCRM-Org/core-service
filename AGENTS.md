@@ -184,7 +184,10 @@ PHP 8.3+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation
 ## BMAD-METHOD Integration
 
 BMAD commands are available as Codex Skills. Use `$command-name` to invoke them
-(e.g., `$create-prd`, `$analyst`). See `_bmad/COMMANDS.md` for a full reference.
+(e.g., `$create-prd`, `$analyst`). To install the local BMAD/Ralph workspace,
+run `make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true` to preview and
+`make bmalph-setup` when you intentionally want the generated files in your
+workspace.
 
 ### Phases
 
@@ -198,5 +201,7 @@ BMAD commands are available as Codex Skills. Use `$command-name` to invoke them
 ### Workflow
 
 1. Work through Phases 1-3 using BMAD agents and workflows
-2. For PRD creation, use `_bmad/lite/create-prd.md` for single-turn generation
-3. Use the bmalph-implement transition to prepare Ralph format, then start Ralph
+2. Initialize BMALPH locally when you need the generated workflow files or
+   Ralph loop assets in your workspace
+3. Use the `create-prd` workflow or other BMAD skills, then transition into
+   Ralph when you intentionally want an autonomous loop

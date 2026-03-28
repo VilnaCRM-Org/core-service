@@ -153,9 +153,10 @@ make bmalph-setup
 make bmalph-setup BMALPH_PLATFORM=claude-code
 ```
 
-`bmalph init` writes BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
-platform-specific instruction files. Use the dry-run first, then initialize from
-a clean branch when you intentionally want to adopt those files.
+`bmalph init` writes local BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
+platform-specific instruction files. Those generated directories are ignored in
+git for this repository, so use the dry-run first and initialize locally only
+when you want the tooling available in your workspace.
 
 Notes:
 
