@@ -25,6 +25,55 @@ run_init=false
 dry_run=false
 skip_verify=false
 
+bmalph_project_assets_present() {
+    local target_dir="${1:?Missing project directory}"
+
+    [ -d "${target_dir}/_bmad" ] \
+        && [ -f "${target_dir}/_bmad/COMMANDS.md" ] \
+        && [ -f "${target_dir}/.ralph/ralph_loop.sh" ] \
+        && [ -d "${target_dir}/.ralph/lib" ]
+}
+
+git_tracked_dirty_files() {
+    local target_dir="${1:?Missing project directory}"
+
+    if ! git -C "${target_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        return 0
+    fi
+
+    {
+        git -C "${target_dir}" diff --name-only
+        git -C "${target_dir}" diff --name-only --cached
+    } | sort -u
+}
+
+restore_new_tracked_changes() {
+    local target_dir="${1:?Missing project directory}"
+    local before_dirty="${2-}"
+    local after_dirty
+    local before_file
+    local after_file
+
+    if ! git -C "${target_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        return 0
+    fi
+
+    after_dirty="$(git_tracked_dirty_files "${target_dir}")"
+    before_file="$(mktemp)"
+    after_file="$(mktemp)"
+
+    printf '%s\n' "${before_dirty}" | sed '/^$/d' | sort -u >"${before_file}"
+    printf '%s\n' "${after_dirty}" | sed '/^$/d' | sort -u >"${after_file}"
+
+    while IFS= read -r path; do
+        [ -n "${path}" ] || continue
+        echo "Restoring tracked file modified only by BMALPH setup: ${path}"
+        git -C "${target_dir}" restore --staged --worktree -- "${path}"
+    done < <(comm -13 "${before_file}" "${after_file}")
+
+    rm -f "${before_file}" "${after_file}"
+}
+
 # Print CLI usage for local BMALPH installation and optional init flows.
 usage() {
     cat <<'EOM'
@@ -139,6 +188,8 @@ if [ "${dry_run}" = true ] && [ "${run_init}" != true ]; then
 fi
 
 if [ "${run_init}" = true ]; then
+    tracked_dirty_before=""
+
     if [ ! -d "${project_dir}" ]; then
         echo "Error: --project-dir '${project_dir}' does not exist or is not a directory." >&2
         exit 1
@@ -148,6 +199,8 @@ if [ "${run_init}" = true ]; then
         echo "Error: --project-dir '${project_dir}' is not writable." >&2
         exit 1
     fi
+
+    tracked_dirty_before="$(git_tracked_dirty_files "${project_dir}")"
 
     echo "Running BMALPH init in '${project_dir}' for platform '${platform}'."
     init_cmd=(
@@ -164,6 +217,15 @@ if [ "${run_init}" = true ]; then
     fi
 
     "${init_cmd[@]}"
+
+    if [ "${dry_run}" != true ] && ! bmalph_project_assets_present "${project_dir}"; then
+        echo "BMALPH project assets are incomplete after init; running 'bmalph upgrade --force' to restore local files."
+        bmalph -C "${project_dir}" upgrade --force
+    fi
+
+    if [ "${dry_run}" != true ]; then
+        restore_new_tracked_changes "${project_dir}" "${tracked_dirty_before}"
+    fi
 else
     echo "BMALPH CLI is ready."
     echo "To preview project initialization, run:"

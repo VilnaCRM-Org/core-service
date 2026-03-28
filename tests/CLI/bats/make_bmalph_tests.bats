@@ -70,3 +70,63 @@ load 'bats-assert/load'
   after_status="$(git status --short --untracked-files=all)"
   [ "${before_status}" = "${after_status}" ]
 }
+
+@test "make bmalph-setup restores generated BMALPH assets in a fresh worktree" {
+  run bash -lc '
+    set -euo pipefail
+    repo_root="$(pwd)"
+    tmpdir="$(mktemp -d)"
+    doctor_output="$(mktemp)"
+    before_status=""
+    after_status=""
+    cleanup() {
+      git -C "$repo_root" worktree remove --force "$tmpdir" >/dev/null 2>&1 || true
+      rm -rf "$tmpdir" "$doctor_output"
+    }
+    trap cleanup EXIT
+
+    git -C "$repo_root" worktree add --detach "$tmpdir" HEAD >/dev/null
+    git -C "$repo_root" diff --binary HEAD | git -C "$tmpdir" apply --whitespace=nowarn
+    git -C "$tmpdir" config user.name "BMALPH Validation"
+    git -C "$tmpdir" config user.email "bmalph-validation@example.com"
+    if [ -n "$(git -C "$tmpdir" status --short --untracked-files=all)" ]; then
+      git -C "$tmpdir" add -A
+      git -C "$tmpdir" commit -m "Temporary validation snapshot" >/dev/null
+    fi
+    cd "$tmpdir"
+
+    [ ! -e _bmad ]
+    [ ! -e .ralph ]
+    before_status="$(git status --short --untracked-files=all)"
+
+    make bmalph-setup BMALPH_PLATFORM=codex
+    bmalph doctor >"$doctor_output"
+    cat "$doctor_output"
+    grep -F "all checks OK" "$doctor_output"
+    after_status="$(git status --short --untracked-files=all)"
+    [ "$before_status" = "$after_status" ]
+  '
+  assert_success
+  assert_output --partial "BMALPH project assets are incomplete after init; running 'bmalph upgrade --force' to restore local files."
+  assert_output --partial "Restoring tracked file modified only by BMALPH setup: AGENTS.md"
+  assert_output --partial "all checks OK"
+}
+
+@test "BMALPH generated paths stay ignored for local installs" {
+  run bash -lc 'grep -Fx ".ralph/" .gitignore && grep -Fx ".ralph/logs/" .gitignore && grep -Fx "_bmad/" .gitignore && grep -Fx "_bmad-output/" .gitignore'
+  assert_success
+}
+
+@test "BMALPH wrapper skills explain how to bootstrap missing local assets" {
+  run bash -lc '
+    missing=0
+    while IFS= read -r file; do
+      if grep -q "_bmad/" "$file" && ! grep -q "make bmalph-setup" "$file"; then
+        echo "$file"
+        missing=1
+      fi
+    done < <(find .agents/skills -name SKILL.md -print | sort)
+    exit "$missing"
+  '
+  assert_success
+}
