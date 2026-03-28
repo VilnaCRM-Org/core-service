@@ -1,7 +1,7 @@
 ---
 name: index-docs
 description: >
-  index docs. Use when the user asks about index docs.
+  Index and organize documentation files for search and retrieval. Use when the user asks about index docs.
 metadata:
   managed-by: bmalph
 ---

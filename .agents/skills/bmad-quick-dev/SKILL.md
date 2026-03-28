@@ -1,7 +1,7 @@
 ---
 name: quick-dev
 description: >
-  Quick one-off tasks small changes simple apps utilities without extensive planning - Do not suggest for potentially very complex things unless requested or if the user complains that they do not want to follow the extensive planning of the bmad method, unless the user is already working through the implementation phase and just requests a 1 off things not already in the plan. Use when the user asks about quick dev.
+  Use for quick one-off tasks, small changes, and simple apps or utilities without extensive planning. Avoid it for highly complex work unless the user explicitly asks to skip full BMAD planning. If the user is already in implementation, use it for ad-hoc tasks not already in the plan. Use when the user asks about quick dev.
 metadata:
   managed-by: bmalph
 ---

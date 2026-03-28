@@ -1,7 +1,7 @@
 ---
 name: edge-case-hunter
 description: >
-  edge case hunter. Use when the user asks about edge case hunter.
+  Identify edge cases, failure paths, and boundary-condition risks. Use when the user asks for edge-case analysis.
 metadata:
   managed-by: bmalph
 ---

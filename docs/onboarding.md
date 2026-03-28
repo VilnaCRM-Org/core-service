@@ -45,7 +45,7 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    ```bash
    make start
    ```
-4. If you plan to use BMALPH with Codex or Claude during development, install it and initialize the repository-local assets with:
+4. If you plan to use BMALPH with Codex or Claude during development, run these commands from the repository root in a login shell (for example, `bash -l`):
    ```bash
    make bmalph-codex
    # or

@@ -1,7 +1,7 @@
 ---
 name: create-story
 description: >
-  Story cycle start: Prepare first found story in the sprint plan that is next, or if the command is run with a specific epic and story designation with context. Once complete, then VS then DS then CR then back to DS if needed or next CS or ER. Use when the user asks about create story.
+  Trigger the story cycle for the next story in the sprint plan or a specified epic/story. Use when the user asks about create story.
 metadata:
   managed-by: bmalph
 ---

@@ -1,7 +1,7 @@
 ---
 name: sprint-planning
 description: >
-  Generate sprint plan for development tasks - this kicks off the implementation phase by producing a plan the implementation agents will follow in sequence for every story in the plan.. Use when the user asks about sprint planning.
+  Generate a sprint plan for development tasks. This kicks off the implementation phase by producing a sequence the implementation agents follow for each story. Use when the user asks about sprint planning.
 metadata:
   managed-by: bmalph
 ---

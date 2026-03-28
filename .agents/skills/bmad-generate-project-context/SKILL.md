@@ -1,7 +1,7 @@
 ---
 name: generate-project-context
 description: >
-  Scan existing codebase to generate a lean LLM-optimized project-context.md containing critical implementation rules patterns and conventions for AI agents. Essential for brownfield projects and quick-flow.. Use when the user asks about generate project context.
+  Scan the existing codebase to generate a lean, LLM-optimized `project-context.md` with critical implementation rules, patterns, and conventions for AI agents. Use this for brownfield projects and when the user asks about generate project context.
 metadata:
   managed-by: bmalph
 ---

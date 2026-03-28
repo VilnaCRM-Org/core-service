@@ -1,7 +1,7 @@
 ---
 name: tech-spec
 description: >
-  Do not suggest for potentially very complex things unless requested or if the user complains that they do not want to follow the extensive planning of the bmad method. Quick one-off tasks small changes simple apps brownfield additions to well established patterns utilities without extensive planning. Use when the user asks about tech spec.
+  Use for quick one-off tasks, small changes, brownfield additions, and utilities without extensive planning. Do not suggest it for highly complex work unless the user explicitly asks to skip full BMAD planning. Use when the user asks about tech spec.
 metadata:
   managed-by: bmalph
 ---

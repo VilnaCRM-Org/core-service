@@ -156,6 +156,7 @@ case "${platform}" in
 esac
 
 export CS_USER_NPM_GLOBAL_BIN="${CS_USER_NPM_GLOBAL_BIN:-${HOME}/.npm-global/bin}"
+CS_USER_NPM_GLOBAL_BIN="${CS_USER_NPM_GLOBAL_BIN%/}"
 CS_NPM_PREFIX="${CS_USER_NPM_GLOBAL_BIN%/bin}"
 export PATH="${CS_USER_NPM_GLOBAL_BIN}:${PATH}"
 
