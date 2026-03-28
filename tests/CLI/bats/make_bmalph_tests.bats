@@ -79,14 +79,18 @@ load 'bats-assert/load'
     doctor_output="$(mktemp)"
     before_status=""
     after_status=""
+    patch_file="$tmpdir.patch"
     cleanup() {
       git -C "$repo_root" worktree remove --force "$tmpdir" >/dev/null 2>&1 || true
-      rm -rf "$tmpdir" "$doctor_output"
+      rm -rf "$tmpdir" "$doctor_output" "$patch_file"
     }
     trap cleanup EXIT
 
     git -C "$repo_root" worktree add --detach "$tmpdir" HEAD >/dev/null
-    git -C "$repo_root" diff --binary HEAD | git -C "$tmpdir" apply --whitespace=nowarn
+    git -C "$repo_root" diff --binary HEAD >"$patch_file"
+    if [ -s "$patch_file" ]; then
+      git -C "$tmpdir" apply --whitespace=nowarn "$patch_file"
+    fi
     git -C "$tmpdir" config user.name "BMALPH Validation"
     git -C "$tmpdir" config user.email "bmalph-validation@example.com"
     if [ -n "$(git -C "$tmpdir" status --short --untracked-files=all)" ]; then
