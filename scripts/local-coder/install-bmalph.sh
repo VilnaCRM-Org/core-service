@@ -61,6 +61,7 @@ restore_new_tracked_changes() {
     after_dirty="$(git_tracked_dirty_files "${target_dir}")"
     before_file="$(mktemp)"
     after_file="$(mktemp)"
+    trap 'trap - RETURN; rm -f -- "${before_file}" "${after_file}"' RETURN
 
     printf '%s\n' "${before_dirty}" | sed '/^$/d' | sort -u >"${before_file}"
     printf '%s\n' "${after_dirty}" | sed '/^$/d' | sort -u >"${after_file}"
@@ -70,8 +71,6 @@ restore_new_tracked_changes() {
         echo "Restoring tracked file modified only by BMALPH setup: ${path}"
         git -C "${target_dir}" restore --staged --worktree -- "${path}"
     done < <(comm -13 "${before_file}" "${after_file}")
-
-    rm -f "${before_file}" "${after_file}"
 }
 
 # Print CLI usage for local BMALPH installation and optional init flows.

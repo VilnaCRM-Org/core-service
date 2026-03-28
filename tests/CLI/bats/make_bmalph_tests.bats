@@ -104,6 +104,7 @@ load 'bats-assert/load'
     before_status="$(git status --short --untracked-files=all)"
 
     make bmalph-setup BMALPH_PLATFORM=codex
+    export PATH="$(npm config get prefix)/bin:$PATH"
     bmalph doctor >"$doctor_output"
     cat "$doctor_output"
     grep -F "all checks OK" "$doctor_output"
