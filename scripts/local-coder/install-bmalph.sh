@@ -155,5 +155,7 @@ if [ "${run_init}" = true ]; then
 else
     echo "BMALPH CLI is ready."
     echo "To preview project initialization, run:"
+    echo "  make bmalph-init BMALPH_PLATFORM=${platform} BMALPH_DRY_RUN=true"
+    echo "  # or"
     echo "  bash scripts/local-coder/install-bmalph.sh --platform ${platform} --init --dry-run"
 fi

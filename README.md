@@ -93,7 +93,7 @@ The post-create step runs secure bootstrap automatically and then executes start
 
 ```bash
 bash scripts/local-coder/setup-secure-agent-env.sh
-bash scripts/local-coder/install-bmalph.sh --platform codex
+make bmalph-codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -125,22 +125,32 @@ What `verify-gh-codex.sh` checks:
 #### BMALPH for Codex and Claude
 
 The workspace bootstrap installs the `bmalph` CLI automatically so it is ready
-for Codex-based development in Coder CE. For local setup, use the helper script:
+for Codex-based development in Coder CE. For local setup, use the make targets:
 
 ```bash
-# Install and verify bmalph for Codex
-bash scripts/local-coder/install-bmalph.sh --platform codex
+# Install and verify BMALPH for Codex
+make bmalph-codex
 
-# Install and verify bmalph for Claude Code
-bash scripts/local-coder/install-bmalph.sh --platform claude-code
+# Install and verify BMALPH for Claude Code
+make bmalph-claude
+
+# Generic install target
+make bmalph-install BMALPH_PLATFORM=codex
 ```
 
 To preview how BMALPH would initialize this repository for a platform without
 changing any tracked files, run:
 
 ```bash
-bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run
-bash scripts/local-coder/install-bmalph.sh --platform claude-code --init --dry-run
+make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
+make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true
+```
+
+To install and initialize BMALPH for the current project in one command, run:
+
+```bash
+make bmalph-setup
+make bmalph-setup BMALPH_PLATFORM=claude-code
 ```
 
 `bmalph init` writes BMAD/Ralph files such as `_bmad/`, `.ralph/`, and

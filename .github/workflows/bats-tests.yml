@@ -2,6 +2,11 @@ name: CLI testing
 
 on:
   pull_request:
+    paths:
+      - '.github/workflows/bats-tests.yml'
+      - 'Makefile'
+      - 'scripts/**/*.sh'
+      - 'tests/CLI/bats/**'
 
 permissions:
   contents: read
@@ -34,6 +39,10 @@ jobs:
             path: tests/CLI/bats/make_coverage_tests.bats
             args: '--filter "(make integration-negative-tests command executes|make negative-tests-with-coverage command executes)"'
             needs_services: true
+          - name: bmalph
+            path: tests/CLI/bats/make_bmalph_tests.bats
+            args: ''
+            needs_services: false
           - name: database
             path: tests/CLI/bats/make_database_tests.bats
             args: ''

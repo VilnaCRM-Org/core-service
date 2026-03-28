@@ -141,7 +141,7 @@ gh auth setup-git
 Then run:
 
 ```bash
-bash scripts/local-coder/install-bmalph.sh --platform codex
+make bmalph-codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -165,17 +165,27 @@ root to install BMALPH locally:
 
 ```bash
 # Codex
-bash scripts/local-coder/install-bmalph.sh --platform codex
+make bmalph-codex
 
 # Claude Code
-bash scripts/local-coder/install-bmalph.sh --platform claude-code
+make bmalph-claude
+
+# Generic install target
+make bmalph-install BMALPH_PLATFORM=codex
 ```
 
 To preview project initialization without changing repository files:
 
 ```bash
-bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run
-bash scripts/local-coder/install-bmalph.sh --platform claude-code --init --dry-run
+make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
+make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true
+```
+
+To install and initialize BMALPH for the current project in one command:
+
+```bash
+make bmalph-setup
+make bmalph-setup BMALPH_PLATFORM=claude-code
 ```
 
 `bmalph init` writes BMAD/Ralph assets and platform-specific instruction files.

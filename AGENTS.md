@@ -57,8 +57,8 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 
 4. **Optional: Use BMALPH When Needed**
    - Coder CE bootstrap installs `bmalph` automatically for Codex and Claude-oriented workflows
-   - For local setup, run `bash scripts/local-coder/install-bmalph.sh --platform codex` or `bash scripts/local-coder/install-bmalph.sh --platform claude-code`
-   - To preview BMALPH repo initialization safely, use `bash scripts/local-coder/install-bmalph.sh --platform codex --init --dry-run` or `bash scripts/local-coder/install-bmalph.sh --platform claude-code --init --dry-run`
+   - For local setup, run `make bmalph-codex` or `make bmalph-claude`
+   - To preview BMALPH repo initialization safely, use `make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true` or `make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true`
 
 ### Quick Skill Guide
 
