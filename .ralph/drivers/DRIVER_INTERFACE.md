@@ -75,11 +75,11 @@ driver_build_command "$prompt_file" "$loop_context" "$session_id"
 
 Three string arguments:
 
-| Argument | Description |
-|----------|-------------|
-| `$1` prompt_file | Path to the prompt file (e.g., `.ralph/PROMPT.md`) |
+| Argument          | Description                                          |
+| ----------------- | ---------------------------------------------------- |
+| `$1` prompt_file  | Path to the prompt file (e.g., `.ralph/PROMPT.md`)   |
 | `$2` loop_context | Context string for session continuity (may be empty) |
-| `$3` session_id | Session ID for resume (empty string = new session) |
+| `$3` session_id   | Session ID for resume (empty string = new session)   |
 
 Must populate the global `CLAUDE_CMD_ARGS` array with the complete CLI command and
 arguments. Return `0` on success, `1` on failure (e.g., prompt file not found).
@@ -159,12 +159,12 @@ No arguments. Transform `CLAUDE_CMD_ARGS` into `LIVE_CMD_ARGS` for streaming mod
 
 **If not defined:** `LIVE_CMD_ARGS` is copied from `CLAUDE_CMD_ARGS` unchanged.
 
-| Driver | Behavior |
-|--------|----------|
+| Driver      | Behavior                                                                           |
+| ----------- | ---------------------------------------------------------------------------------- |
 | claude-code | Replaces `json` with `stream-json` and adds `--verbose --include-partial-messages` |
-| codex | Copies as-is (output is already suitable) |
-| opencode | Copies as-is (output is already suitable) |
-| cursor | Replaces `json` with `stream-json` |
+| codex       | Copies as-is (output is already suitable)                                          |
+| opencode    | Copies as-is (output is already suitable)                                          |
+| cursor      | Replaces `json` with `stream-json`                                                 |
 
 ### `driver_stream_filter()`
 
@@ -232,52 +232,52 @@ No arguments. Return `0` if the CLI binary is installed and reachable, `1` other
 
 ### Written by drivers
 
-| Variable             | Written by                       | Type  | Description                                          |
-|----------------------|----------------------------------|-------|------------------------------------------------------|
-| `VALID_TOOL_PATTERNS`| `driver_valid_tools()`           | array | Valid tool name patterns for allowlist validation     |
-| `CLAUDE_CMD_ARGS`    | `driver_build_command()`         | array | Complete CLI command with all arguments               |
-| `LIVE_CMD_ARGS`      | `driver_prepare_live_command()`  | array | Modified command for live streaming                   |
+| Variable              | Written by                      | Type  | Description                                       |
+| --------------------- | ------------------------------- | ----- | ------------------------------------------------- |
+| `VALID_TOOL_PATTERNS` | `driver_valid_tools()`          | array | Valid tool name patterns for allowlist validation |
+| `CLAUDE_CMD_ARGS`     | `driver_build_command()`        | array | Complete CLI command with all arguments           |
+| `LIVE_CMD_ARGS`       | `driver_prepare_live_command()` | array | Modified command for live streaming               |
 
 ### Read by drivers (set by ralph_loop.sh or .ralphrc)
 
-| Variable                | Used in                                    | Description                                    |
-|-------------------------|--------------------------------------------|------------------------------------------------|
-| `CLAUDE_OUTPUT_FORMAT`  | `driver_build_command()`                   | `"json"` or `"text"`                           |
-| `CLAUDE_PERMISSION_MODE`| `driver_build_command()` (claude-code)     | Permission mode flag, default `"bypassPermissions"` |
-| `CLAUDE_ALLOWED_TOOLS`  | `driver_build_command()` (claude-code)     | Comma-separated tool allowlist                 |
-| `CLAUDE_USE_CONTINUE`   | `driver_build_command()`                   | `"true"` or `"false"`, gates session resume    |
-| `RALPHRC_FILE`          | `driver_permission_denial_help()`          | Path to `.ralphrc` config file                 |
-| `DRIVER_DISPLAY_NAME`   | `driver_permission_denial_help()`          | Human-readable driver name                     |
+| Variable                 | Used in                                | Description                                         |
+| ------------------------ | -------------------------------------- | --------------------------------------------------- |
+| `CLAUDE_OUTPUT_FORMAT`   | `driver_build_command()`               | `"json"` or `"text"`                                |
+| `CLAUDE_PERMISSION_MODE` | `driver_build_command()` (claude-code) | Permission mode flag, default `"bypassPermissions"` |
+| `CLAUDE_ALLOWED_TOOLS`   | `driver_build_command()` (claude-code) | Comma-separated tool allowlist                      |
+| `CLAUDE_USE_CONTINUE`    | `driver_build_command()`               | `"true"` or `"false"`, gates session resume         |
+| `RALPHRC_FILE`           | `driver_permission_denial_help()`      | Path to `.ralphrc` config file                      |
+| `DRIVER_DISPLAY_NAME`    | `driver_permission_denial_help()`      | Human-readable driver name                          |
 
 ### Environment globals (cursor-specific)
 
-| Variable      | Used in                              | Description                         |
-|---------------|--------------------------------------|-------------------------------------|
-| `OS`, `OSTYPE`| `driver_running_on_windows()`        | OS detection                        |
-| `LOCALAPPDATA`| `driver_localappdata_cli_binary()`   | Windows local app data path         |
-| `PATH`        | `driver_find_windows_path_candidate()`| Manual PATH scanning on Windows    |
+| Variable       | Used in                                | Description                     |
+| -------------- | -------------------------------------- | ------------------------------- |
+| `OS`, `OSTYPE` | `driver_running_on_windows()`          | OS detection                    |
+| `LOCALAPPDATA` | `driver_localappdata_cli_binary()`     | Windows local app data path     |
+| `PATH`         | `driver_find_windows_path_candidate()` | Manual PATH scanning on Windows |
 
 ### Set by ralph_loop.sh from driver output
 
-| Variable             | Source                  | Description                   |
-|----------------------|-------------------------|-------------------------------|
-| `CLAUDE_CODE_CMD`    | `driver_cli_binary()`   | CLI binary name/path          |
-| `DRIVER_DISPLAY_NAME`| `driver_display_name()` | Human-readable display name   |
+| Variable              | Source                  | Description                 |
+| --------------------- | ----------------------- | --------------------------- |
+| `CLAUDE_CODE_CMD`     | `driver_cli_binary()`   | CLI binary name/path        |
+| `DRIVER_DISPLAY_NAME` | `driver_display_name()` | Human-readable display name |
 
 ---
 
 ## Capability Matrix
 
-| Capability                                              | claude-code | codex       | opencode    | copilot     | cursor      |
-|---------------------------------------------------------|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|
-| Tool allowlist (`driver_supports_tool_allowlist`)       | yes         | no          | no          | no          | no          |
-| Session continuity (`driver_supports_sessions`)         | yes         | yes         | yes         | no          | yes         |
-| Structured live output (`driver_supports_live_output`)  | yes         | yes         | yes         | no          | yes         |
-| Live command transform (`driver_prepare_live_command`)   | transform   | passthrough | passthrough | --          | transform   |
-| Stream filter (`driver_stream_filter`)                  | complex jq  | JSONL select| JSONL select| passthrough | complex jq  |
-| Custom session extraction (`driver_extract_session_id_from_output`) | --  | --    | yes         | --          | --          |
-| Fallback session lookup (`driver_fallback_session_id`)  | --          | --          | yes         | --          | --          |
-| Dynamic binary resolution (`driver_cli_binary`)         | static      | static      | static      | static      | dynamic     |
+| Capability                                                          | claude-code |    codex     |   opencode   |   copilot   |   cursor   |
+| ------------------------------------------------------------------- | :---------: | :----------: | :----------: | :---------: | :--------: |
+| Tool allowlist (`driver_supports_tool_allowlist`)                   |     yes     |      no      |      no      |     no      |     no     |
+| Session continuity (`driver_supports_sessions`)                     |     yes     |     yes      |     yes      |     no      |    yes     |
+| Structured live output (`driver_supports_live_output`)              |     yes     |     yes      |     yes      |     no      |    yes     |
+| Live command transform (`driver_prepare_live_command`)              |  transform  | passthrough  | passthrough  |     --      | transform  |
+| Stream filter (`driver_stream_filter`)                              | complex jq  | JSONL select | JSONL select | passthrough | complex jq |
+| Custom session extraction (`driver_extract_session_id_from_output`) |     --      |      --      |     yes      |     --      |     --     |
+| Fallback session lookup (`driver_fallback_session_id`)              |     --      |      --      |     yes      |     --      |     --     |
+| Dynamic binary resolution (`driver_cli_binary`)                     |   static    |    static    |    static    |   static    |  dynamic   |
 
 ---
 

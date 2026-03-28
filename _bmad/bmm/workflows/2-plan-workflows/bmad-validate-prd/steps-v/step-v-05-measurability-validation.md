@@ -62,6 +62,7 @@ Validate that all Functional Requirements (FRs) and Non-Functional Requirements 
 "Perform measurability validation on this PRD:
 
 **Functional Requirements (FRs):**
+
 1. Extract all FRs from Functional Requirements section
 2. Check each FR for:
    - '[Actor] can [capability]' format compliance
@@ -71,6 +72,7 @@ Validate that all Functional Requirements (FRs) and Non-Functional Requirements 
 3. Document violations with line numbers
 
 **Non-Functional Requirements (NFRs):**
+
 1. Extract all NFRs from Non-Functional Requirements section
 2. Check each NFR for:
    - Specific metrics with measurement methods
@@ -89,19 +91,23 @@ If Task tool unavailable, perform analysis directly:
 Extract all FRs and check each for:
 
 **Format compliance:**
+
 - Does it follow "[Actor] can [capability]" pattern?
 - Is actor clearly defined?
 - Is capability actionable and testable?
 
 **No subjective adjectives:**
+
 - Scan for: easy, fast, simple, intuitive, user-friendly, responsive, quick, efficient (without metrics)
 - Note line numbers
 
 **No vague quantifiers:**
+
 - Scan for: multiple, several, some, many, few, various, number of
 - Note line numbers
 
 **No implementation details:**
+
 - Scan for: React, Vue, Angular, PostgreSQL, MongoDB, AWS, Docker, Kubernetes, Redux, etc.
 - Unless capability-relevant (e.g., "API consumers can access...")
 - Note line numbers
@@ -111,10 +117,12 @@ Extract all FRs and check each for:
 Extract all NFRs and check each for:
 
 **Specific metrics:**
+
 - Is there a measurable criterion? (e.g., "response time < 200ms", not "fast response")
 - Can this be measured or tested?
 
 **Template compliance:**
+
 - Criterion defined?
 - Metric specified?
 - Measurement method included?
@@ -123,6 +131,7 @@ Extract all NFRs and check each for:
 ### 3. Tally Violations
 
 **FR Violations:**
+
 - Format violations: count
 - Subjective adjectives: count
 - Vague quantifiers: count
@@ -130,6 +139,7 @@ Extract all NFRs and check each for:
 - Total FR violations: sum
 
 **NFR Violations:**
+
 - Missing metrics: count
 - Incomplete template: count
 - Missing context: count

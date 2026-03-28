@@ -13,7 +13,6 @@
 1. Group remaining findings by category.
 
 2. Present to the user in this order (include a section only if findings exist in that category):
-
    - **Intent Gaps**: "These findings suggest the captured intent is incomplete. Consider clarifying intent before proceeding."
      - List each with title + detail.
 

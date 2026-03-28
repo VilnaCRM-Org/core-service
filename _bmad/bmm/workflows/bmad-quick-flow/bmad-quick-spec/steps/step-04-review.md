@@ -15,7 +15,7 @@ wipFile: '{implementation_artifacts}/tech-spec-wip.md'
 
 ## CONTEXT:
 
-- Requires `{wipFile}` from Step 3. 
+- Requires `{wipFile}` from Step 3.
 - MUST present COMPLETE spec content. Iterate until user is satisfied.
 - **Criteria**: The spec MUST meet the **READY FOR DEVELOPMENT** standard defined in `workflow.md`.
 
@@ -85,18 +85,19 @@ c) **If user has questions:**
 
 a) Update `{wipFile}` frontmatter:
 
-   ```yaml
-   ---
-   # ... existing values ...
-   status: 'ready-for-dev'
-   stepsCompleted: [1, 2, 3, 4]
-   ---
-   ```
+```yaml
+---
+# ... existing values ...
+status: 'ready-for-dev'
+stepsCompleted: [1, 2, 3, 4]
+---
+```
 
 b) **Rename WIP file to final filename:**
-   - Using the `slug` extracted in Section 1
-   - Rename `{wipFile}` → `{implementation_artifacts}/tech-spec-{slug}.md`
-   - Store this as `finalFile` for use in menus below
+
+- Using the `slug` extracted in Section 1
+- Rename `{wipFile}` → `{implementation_artifacts}/tech-spec-{slug}.md`
+- Store this as `finalFile` for use in menus below
 
 ### 4. Present Final Menu
 
@@ -149,19 +150,20 @@ b) **HALT and wait for user selection.**
 #### Adversarial Review [R] Process:
 
 1. **Invoke Adversarial Review Skill**:
-       > With `{finalFile}` constructed, invoke the `bmad-review-adversarial-general` skill. If possible, use information asymmetry: invoke the skill in a separate subagent or process with read access to the project, but no context except the `{finalFile}`.
-       > Pass `{finalFile}` as the content to review. The skill should return a list of findings.
 
-    2. **Process Findings**:
-       > Capture the findings from the skill output.
-       > **If zero findings:** HALT - this is suspicious. Re-analyze or request user guidance.
-       > Evaluate severity (Critical, High, Medium, Low) and validity (real, noise, undecided).
-       > DO NOT exclude findings based on severity or validity unless explicitly asked to do so.
-       > Order findings by severity.
-       > Number the ordered findings (F1, F2, F3, etc.).
-       > If TodoWrite or similar tool is available, turn each finding into a TODO, include ID, severity, validity, and description in the TODO; otherwise present findings as a table with columns: ID, Severity, Validity, Description
+   > With `{finalFile}` constructed, invoke the `bmad-review-adversarial-general` skill. If possible, use information asymmetry: invoke the skill in a separate subagent or process with read access to the project, but no context except the `{finalFile}`.
+   > Pass `{finalFile}` as the content to review. The skill should return a list of findings.
+   2. **Process Findings**:
 
-    3. Return here and redisplay menu.
+      > Capture the findings from the skill output.
+      > **If zero findings:** HALT - this is suspicious. Re-analyze or request user guidance.
+      > Evaluate severity (Critical, High, Medium, Low) and validity (real, noise, undecided).
+      > DO NOT exclude findings based on severity or validity unless explicitly asked to do so.
+      > Order findings by severity.
+      > Number the ordered findings (F1, F2, F3, etc.).
+      > If TodoWrite or similar tool is available, turn each finding into a TODO, include ID, severity, validity, and description in the TODO; otherwise present findings as a table with columns: ID, Severity, Validity, Description
+
+   3. Return here and redisplay menu.
 
 ### 5. Exit Workflow
 

@@ -20,18 +20,18 @@ In bmalph-managed projects, start Ralph with `bmalph run`. When you need direct 
 
 Ralph uses several files within the `.ralph/` directory, plus an optional legacy fallback config at the project root:
 
-| File | Purpose |
-|------|---------|
-| `.ralph/PROMPT.md` | Main prompt that drives each loop iteration |
-| `.ralph/@fix_plan.md` | Prioritized task list that Ralph follows |
-| `.ralph/@AGENT.md` | Build and run instructions maintained by Ralph |
-| `.ralph/status.json` | Real-time status tracking (JSON format) |
-| `.ralph/logs/` | Execution logs for each loop iteration |
-| `.ralph/.ralph_session` | Current session state |
-| `.ralph/.circuit_breaker_state` | Circuit breaker state |
-| `.ralph/live.log` | Live streaming output file for monitoring |
-| `.ralph/.loop_start_sha` | Git HEAD SHA captured at loop start for progress detection |
-| `.ralph/.ralphrc` | Project-specific configuration installed by bmalph |
+| File                                       | Purpose                                                          |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `.ralph/PROMPT.md`                         | Main prompt that drives each loop iteration                      |
+| `.ralph/@fix_plan.md`                      | Prioritized task list that Ralph follows                         |
+| `.ralph/@AGENT.md`                         | Build and run instructions maintained by Ralph                   |
+| `.ralph/status.json`                       | Real-time status tracking (JSON format)                          |
+| `.ralph/logs/`                             | Execution logs for each loop iteration                           |
+| `.ralph/.ralph_session`                    | Current session state                                            |
+| `.ralph/.circuit_breaker_state`            | Circuit breaker state                                            |
+| `.ralph/live.log`                          | Live streaming output file for monitoring                        |
+| `.ralph/.loop_start_sha`                   | Git HEAD SHA captured at loop start for progress detection       |
+| `.ralph/.ralphrc`                          | Project-specific configuration installed by bmalph               |
 | `.ralphrc` (project root, legacy fallback) | Optional legacy configuration for older standalone Ralph layouts |
 
 ### Rate Limiting
@@ -53,25 +53,25 @@ Environment variables > Ralph config file > script defaults
 
 ### Available Settings
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PROJECT_NAME` | `my-project` | Project name for prompts and logging |
-| `PROJECT_TYPE` | `unknown` | Project type (javascript, typescript, python, rust, go) |
-| `MAX_CALLS_PER_HOUR` | `100` | Rate limit for API calls |
-| `CLAUDE_TIMEOUT_MINUTES` | `15` | Timeout per loop driver invocation |
-| `CLAUDE_OUTPUT_FORMAT` | `json` | Output format (json or text) |
-| `ALLOWED_TOOLS` | `Write,Read,Edit,MultiEdit,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,EnterPlanMode,ExitPlanMode,NotebookEdit,Bash` | Claude Code only. Ignored by codex, cursor, and copilot |
-| `CLAUDE_PERMISSION_MODE` | `bypassPermissions` | Claude Code only. Prevents interactive approval workflows from blocking unattended loops without relying on beta headers |
-| `PERMISSION_DENIAL_MODE` | `continue` | How Ralph responds to permission denials: continue, halt, or threshold |
-| `SESSION_CONTINUITY` | `true` | Maintain context across loops |
-| `SESSION_EXPIRY_HOURS` | `24` | Session expiration time |
-| `RALPH_VERBOSE` | `false` | Enable verbose logging |
-| `CB_NO_PROGRESS_THRESHOLD` | `3` | Loops with no progress before circuit opens |
-| `CB_SAME_ERROR_THRESHOLD` | `5` | Loops with same error before circuit opens |
-| `CB_OUTPUT_DECLINE_THRESHOLD` | `70` | Output decline percentage threshold |
-| `CB_COOLDOWN_MINUTES` | `30` | Minutes before OPEN auto-recovers to HALF_OPEN |
-| `CB_AUTO_RESET` | `false` | Reset circuit to CLOSED on startup |
-| `TASK_SOURCES` | `local` | Where to import tasks from (local, beads, github) |
+| Variable                      | Default                                                                                                              | Description                                                                                                              |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `PROJECT_NAME`                | `my-project`                                                                                                         | Project name for prompts and logging                                                                                     |
+| `PROJECT_TYPE`                | `unknown`                                                                                                            | Project type (javascript, typescript, python, rust, go)                                                                  |
+| `MAX_CALLS_PER_HOUR`          | `100`                                                                                                                | Rate limit for API calls                                                                                                 |
+| `CLAUDE_TIMEOUT_MINUTES`      | `15`                                                                                                                 | Timeout per loop driver invocation                                                                                       |
+| `CLAUDE_OUTPUT_FORMAT`        | `json`                                                                                                               | Output format (json or text)                                                                                             |
+| `ALLOWED_TOOLS`               | `Write,Read,Edit,MultiEdit,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,EnterPlanMode,ExitPlanMode,NotebookEdit,Bash` | Claude Code only. Ignored by codex, cursor, and copilot                                                                  |
+| `CLAUDE_PERMISSION_MODE`      | `bypassPermissions`                                                                                                  | Claude Code only. Prevents interactive approval workflows from blocking unattended loops without relying on beta headers |
+| `PERMISSION_DENIAL_MODE`      | `continue`                                                                                                           | How Ralph responds to permission denials: continue, halt, or threshold                                                   |
+| `SESSION_CONTINUITY`          | `true`                                                                                                               | Maintain context across loops                                                                                            |
+| `SESSION_EXPIRY_HOURS`        | `24`                                                                                                                 | Session expiration time                                                                                                  |
+| `RALPH_VERBOSE`               | `false`                                                                                                              | Enable verbose logging                                                                                                   |
+| `CB_NO_PROGRESS_THRESHOLD`    | `3`                                                                                                                  | Loops with no progress before circuit opens                                                                              |
+| `CB_SAME_ERROR_THRESHOLD`     | `5`                                                                                                                  | Loops with same error before circuit opens                                                                               |
+| `CB_OUTPUT_DECLINE_THRESHOLD` | `70`                                                                                                                 | Output decline percentage threshold                                                                                      |
+| `CB_COOLDOWN_MINUTES`         | `30`                                                                                                                 | Minutes before OPEN auto-recovers to HALF_OPEN                                                                           |
+| `CB_AUTO_RESET`               | `false`                                                                                                              | Reset circuit to CLOSED on startup                                                                                       |
+| `TASK_SOURCES`                | `local`                                                                                                              | Where to import tasks from (local, beads, github)                                                                        |
 
 ### Generation
 
@@ -95,15 +95,16 @@ This applies to every driver that exposes resumable IDs today:
 
 ### Session Files
 
-| File | Purpose |
-|------|---------|
-| `.ralph/.ralph_session` | Current Ralph session state (active or reset/inactive) |
-| `.ralph/.ralph_session_history` | History of last 50 session transitions |
-| `.ralph/.claude_session_id` | Persisted driver session ID (shared filename for historical reasons; used by Claude Code, Codex, and Cursor) |
+| File                            | Purpose                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `.ralph/.ralph_session`         | Current Ralph session state (active or reset/inactive)                                                       |
+| `.ralph/.ralph_session_history` | History of last 50 session transitions                                                                       |
+| `.ralph/.claude_session_id`     | Persisted driver session ID (shared filename for historical reasons; used by Claude Code, Codex, and Cursor) |
 
 ### Session Lifecycle
 
 Sessions are automatically reset when:
+
 - Circuit breaker opens (stagnation detected)
 - Manual interrupt (Ctrl+C / SIGINT)
 - Project completion (graceful exit)
@@ -113,6 +114,7 @@ Sessions are automatically reset when:
 ### Session Expiration
 
 Sessions expire after 24 hours (configurable via `SESSION_EXPIRY_HOURS` in `.ralph/.ralphrc`). When expired:
+
 - A new session is created automatically
 - Previous context is not preserved
 - Session history records the transition
@@ -147,31 +149,33 @@ The circuit breaker prevents runaway loops by detecting stagnation.
 
 ### States
 
-| State | Description | Action |
-|-------|-------------|--------|
-| **CLOSED** | Normal operation | Loop continues |
+| State         | Description               | Action                    |
+| ------------- | ------------------------- | ------------------------- |
+| **CLOSED**    | Normal operation          | Loop continues            |
 | **HALF_OPEN** | Monitoring after recovery | Testing if issue resolved |
-| **OPEN** | Halted due to stagnation | Loop stops |
+| **OPEN**      | Halted due to stagnation  | Loop stops                |
 
 ### Thresholds
 
-| Threshold | Default | Description |
-|-----------|---------|-------------|
-| `CB_NO_PROGRESS_THRESHOLD` | 3 | Open circuit after N loops with no file changes |
-| `CB_SAME_ERROR_THRESHOLD` | 5 | Open circuit after N loops with repeated errors |
-| `CB_OUTPUT_DECLINE_THRESHOLD` | 70% | Open circuit if output declines by >N% |
-| `CB_PERMISSION_DENIAL_THRESHOLD` | 2 | Open circuit after N loops with permission denials |
-| `CB_COOLDOWN_MINUTES` | 30 | Minutes before OPEN auto-recovers to HALF_OPEN |
-| `CB_AUTO_RESET` | false | Reset to CLOSED on startup (bypasses cooldown) |
+| Threshold                        | Default | Description                                        |
+| -------------------------------- | ------- | -------------------------------------------------- |
+| `CB_NO_PROGRESS_THRESHOLD`       | 3       | Open circuit after N loops with no file changes    |
+| `CB_SAME_ERROR_THRESHOLD`        | 5       | Open circuit after N loops with repeated errors    |
+| `CB_OUTPUT_DECLINE_THRESHOLD`    | 70%     | Open circuit if output declines by >N%             |
+| `CB_PERMISSION_DENIAL_THRESHOLD` | 2       | Open circuit after N loops with permission denials |
+| `CB_COOLDOWN_MINUTES`            | 30      | Minutes before OPEN auto-recovers to HALF_OPEN     |
+| `CB_AUTO_RESET`                  | false   | Reset to CLOSED on startup (bypasses cooldown)     |
 
 ### Permission Denial Detection
 
 When the active driver is denied permission to execute commands, Ralph:
+
 1. Detects permission denials from the JSON output
 2. Applies `PERMISSION_DENIAL_MODE` from `.ralph/.ralphrc`
 3. Keeps `last_action: permission_denied` visible in the status file and dashboard
 
 `PERMISSION_DENIAL_MODE` behavior:
+
 - `continue` keeps looping and logs the denial
 - `halt` stops immediately with reason `permission_denied`
 - `threshold` keeps looping until `CB_PERMISSION_DENIAL_THRESHOLD` opens the circuit breaker
@@ -201,6 +205,7 @@ Set `CB_AUTO_RESET=true` in `.ralph/.ralphrc` to bypass cooldown entirely and re
 ### Recovery
 
 To reset the circuit breaker:
+
 ```bash
 bash .ralph/ralph_loop.sh --reset-circuit
 ```
@@ -213,23 +218,23 @@ Ralph uses multiple mechanisms to detect when to exit the loop.
 
 ### Exit Conditions
 
-| Condition | Threshold | Description |
-|-----------|-----------|-------------|
-| Consecutive done signals | 2 | Exit on repeated completion signals |
-| Test-only loops | 3 | Exit if too many test-only iterations |
-| Fix plan complete | All [x] | Exit when all tasks are marked complete |
-| EXIT_SIGNAL + completion_indicators | Both | Dual verification for project completion |
+| Condition                           | Threshold | Description                              |
+| ----------------------------------- | --------- | ---------------------------------------- |
+| Consecutive done signals            | 2         | Exit on repeated completion signals      |
+| Test-only loops                     | 3         | Exit if too many test-only iterations    |
+| Fix plan complete                   | All [x]   | Exit when all tasks are marked complete  |
+| EXIT_SIGNAL + completion_indicators | Both      | Dual verification for project completion |
 
 ### EXIT_SIGNAL Gate
 
 The `completion_indicators` exit condition requires dual verification:
 
-| completion_indicators | EXIT_SIGNAL | Result |
-|-----------------------|-------------|--------|
-| >= 2 | `true` | **Exit** ("project_complete") |
-| >= 2 | `false` | **Continue** (agent still working) |
-| >= 2 | missing | **Continue** (defaults to false) |
-| < 2 | `true` | **Continue** (threshold not met) |
+| completion_indicators | EXIT_SIGNAL | Result                             |
+| --------------------- | ----------- | ---------------------------------- |
+| >= 2                  | `true`      | **Exit** ("project_complete")      |
+| >= 2                  | `false`     | **Continue** (agent still working) |
+| >= 2                  | missing     | **Continue** (defaults to false)   |
+| < 2                   | `true`      | **Continue** (threshold not met)   |
 
 **Rationale:** Natural language patterns like "done" or "complete" can trigger false positives during productive work. By requiring an explicit `EXIT_SIGNAL` confirmation, Ralph avoids exiting mid-iteration.
 
@@ -254,6 +259,7 @@ RECOMMENDATION: <one line summary of what to do next>
 ### When to Set EXIT_SIGNAL: true
 
 Set EXIT_SIGNAL to **true** when ALL conditions are met:
+
 1. All items in `@fix_plan.md` are marked `[x]`
 2. All tests are passing (or no tests exist for valid reasons)
 3. No errors or warnings in the last execution
@@ -288,6 +294,7 @@ bash .ralph/ralph_loop.sh --monitor --live # Live streaming with tmux monitoring
 ### Monitoring Layout
 
 When using `--monitor` with `--live`, tmux creates a 3-pane layout:
+
 - **Left pane:** Ralph loop with live streaming
 - **Right-top pane:** `tail -f .ralph/live.log` (live driver output)
 - **Right-bottom pane:** status dashboard (`bmalph watch` when available)
@@ -303,11 +310,13 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** Loop stops before work is complete
 
 **Causes:**
+
 - EXIT_SIGNAL set to true prematurely
 - completion_indicators triggered by natural language
 - All `@fix_plan.md` items marked complete
 
 **Solutions:**
+
 1. Ensure EXIT_SIGNAL is only true when genuinely complete
 2. Add remaining tasks to `@fix_plan.md`
 3. Check `.ralph/.response_analysis` for exit reasons
@@ -317,11 +326,13 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** Loop continues with busywork
 
 **Causes:**
+
 - EXIT_SIGNAL not being set to true
 - `@fix_plan.md` has unmarked items
 - completion_indicators threshold not met
 
 **Solutions:**
+
 1. Ensure RALPH_STATUS block is included in responses
 2. Set EXIT_SIGNAL: true when all work is done
 3. Mark all completed items in `@fix_plan.md`
@@ -331,11 +342,13 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** "OPEN - stagnation detected" message
 
 **Causes:**
+
 - Same error recurring across loops
 - No file changes for multiple loops
 - Output volume declining significantly
 
 **Solutions:**
+
 1. Check `.ralph/logs/` for the recurring error
 2. Fix the underlying issue causing the error
 3. Reset circuit breaker: `bash .ralph/ralph_loop.sh --reset-circuit`
@@ -345,11 +358,13 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** "OPEN - permission_denied" message
 
 **Causes:**
+
 - The active driver denied permission to run commands
 - `ALLOWED_TOOLS` in `.ralph/.ralphrc` too restrictive for Claude Code
 - The active non-Claude driver rejected a tool under its native permission model
 
 **Solutions:**
+
 1. For Claude Code, update `ALLOWED_TOOLS` in `.ralph/.ralphrc` to include needed tools
 2. For Claude Code unattended loops, keep `CLAUDE_PERMISSION_MODE="bypassPermissions"` in `.ralph/.ralphrc`
 3. For codex, cursor, and copilot, review the driver's native permission settings; `ALLOWED_TOOLS` is ignored
@@ -361,10 +376,12 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** Context lost, session age > 24h
 
 **Causes:**
+
 - Long gaps between loop iterations
 - Session not being refreshed
 
 **Solutions:**
+
 1. Sessions are designed to expire after 24h (configurable via `SESSION_EXPIRY_HOURS`)
 2. Start a new session with `bash .ralph/ralph_loop.sh --reset-session`
 3. Context will be rebuilt from `@fix_plan.md` and `specs/`
@@ -374,11 +391,13 @@ When using `--monitor` with `--live`, tmux creates a 3-pane layout:
 **Symptoms:** `bmalph doctor` or `bmalph run --driver cursor` fails before the loop starts
 
 **Causes:**
+
 - `command -v jq` fails in the bash environment Ralph uses
 - `command -v cursor-agent` fails in that same bash environment
 - `cursor-agent status` reports an authentication problem
 
 **Solutions:**
+
 1. Run `command -v jq` in the same bash shell Ralph uses and install `jq` if missing
 2. Run `command -v cursor-agent` and ensure the official Cursor CLI is on the bash `PATH`
 3. Run `cursor-agent status` and sign in to Cursor before starting Ralph
@@ -411,6 +430,7 @@ bash .ralph/ralph_loop.sh --monitor --live
 ### Log Files
 
 Loop execution logs are stored in `.ralph/logs/`:
+
 - Each loop iteration creates a timestamped log file
 - Logs contain Claude's output and status information
 - Use logs to diagnose issues with specific iterations
@@ -418,6 +438,7 @@ Loop execution logs are stored in `.ralph/logs/`:
 ### Status File Structure
 
 `.ralph/status.json`:
+
 ```json
 {
   "timestamp": "ISO-timestamp",
@@ -440,16 +461,20 @@ Loop execution logs are stored in `.ralph/logs/`:
 Ralph uses two-stage error filtering to eliminate false positives.
 
 ### Stage 1: JSON Field Filtering
+
 Filters out JSON field patterns like `"is_error": false` that contain the word "error" but aren't actual errors.
 
 ### Stage 2: Actual Error Detection
+
 Detects real error messages:
+
 - Error prefixes: `Error:`, `ERROR:`, `error:`
 - Context-specific: `]: error`, `Link: error`
 - Occurrences: `Error occurred`, `failed with error`
 - Exceptions: `Exception`, `Fatal`, `FATAL`
 
 ### Multi-line Error Matching
+
 Ralph verifies ALL error lines appear in ALL recent history files before declaring a stuck loop, preventing false negatives when multiple distinct errors occur.
 
 ---

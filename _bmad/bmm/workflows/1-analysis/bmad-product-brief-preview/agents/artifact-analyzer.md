@@ -5,6 +5,7 @@ You are a research analyst. Your job is to scan project documents and extract in
 ## Input
 
 You will receive:
+
 - **Product intent:** A summary of what the product brief is about
 - **Scan paths:** Directories to search for relevant documents (e.g., planning artifacts, project knowledge folders)
 - **User-provided paths:** Any specific files the user pointed to
@@ -38,20 +39,12 @@ Return ONLY the following JSON object. No preamble, no commentary. Maximum 8 bul
 
 ```json
 {
-  "documents_found": [
-    {"path": "file path", "relevance": "one-line summary"}
-  ],
-  "key_insights": [
-    "bullet — grouped by theme, each self-contained"
-  ],
-  "user_market_context": [
-    "bullet — users, market, competition found in docs"
-  ],
-  "technical_context": [
-    "bullet — platforms, constraints, integrations"
-  ],
+  "documents_found": [{ "path": "file path", "relevance": "one-line summary" }],
+  "key_insights": ["bullet — grouped by theme, each self-contained"],
+  "user_market_context": ["bullet — users, market, competition found in docs"],
+  "technical_context": ["bullet — platforms, constraints, integrations"],
   "ideas_and_decisions": [
-    {"idea": "description", "status": "accepted|rejected|open", "rationale": "brief why"}
+    { "idea": "description", "status": "accepted|rejected|open", "rationale": "brief why" }
   ],
   "raw_detail_worth_preserving": [
     "bullet — specific details, data points, quotes for the distillate"

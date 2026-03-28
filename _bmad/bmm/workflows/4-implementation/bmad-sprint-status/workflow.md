@@ -24,9 +24,9 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 
 ### Input Files
 
-| Input | Path | Load Strategy |
-|-------|------|---------------|
-| Sprint status | `{sprint_status_file}` | FULL_LOAD |
+| Input         | Path                   | Load Strategy |
+| ------------- | ---------------------- | ------------- |
+| Sprint status | `{sprint_status_file}` | FULL_LOAD     |
 
 ### Context
 

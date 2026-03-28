@@ -11,6 +11,7 @@
 Use `../resources/brief-template.md` as a guide — adapt structure to fit the product's story.
 
 **Writing principles:**
+
 - **Executive audience** — persuasive, clear, concise. 1-2 pages.
 - **Lead with the problem** — make the reader feel the pain before presenting the solution
 - **Concrete over abstract** — specific examples, real scenarios, measurable outcomes
@@ -20,12 +21,13 @@ Use `../resources/brief-template.md` as a guide — adapt structure to fit the p
 **Create the output document at:** `{planning_artifacts}/product-brief-{project_name}.md`
 
 Include YAML frontmatter:
+
 ```yaml
 ---
-title: "Product Brief: {project_name}"
-status: "draft"
-created: "{timestamp}"
-updated: "{timestamp}"
+title: 'Product Brief: {project_name}'
+status: 'draft'
+created: '{timestamp}'
+updated: '{timestamp}'
 inputs: [list of input files used]
 ---
 ```
@@ -46,11 +48,12 @@ Before showing the draft to the user, run it through multiple review lenses in p
    - For marketplace: "Network effects and chicken-and-egg problem analyst"
    - For enterprise: "Procurement and organizational change management reviewer"
    - **When domain is unclear, default to:** "Go-to-market and launch risk reviewer" — examines distribution, pricing, and first-customer acquisition. Almost always valuable, frequently missed.
-   Describe the lens, run the review yourself inline.
+     Describe the lens, run the review yourself inline.
 
 ### Graceful Degradation
 
 If subagents are unavailable:
+
 - Perform all three review passes yourself, sequentially
 - Apply each lens deliberately — don't blend them into one generic review
 - The quality of review matters more than the parallelism

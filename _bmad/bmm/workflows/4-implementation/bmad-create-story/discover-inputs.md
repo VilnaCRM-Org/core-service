@@ -48,7 +48,7 @@ Load index.md, analyze the structure and description of each doc in the index, t
 2. Parse the table of contents, links, and section headers.
 3. Analyze the workflow's purpose and objective.
 4. Identify which linked/referenced documents are likely relevant.
-   - *Example:* If the workflow is about authentication and the index shows "Auth Overview", "Payment Setup", "Deployment" -- load the auth docs, consider deployment docs, skip payment.
+   - _Example:_ If the workflow is about authentication and the index shows "Auth Overview", "Payment Setup", "Deployment" -- load the auth docs, consider deployment docs, skip payment.
 5. Load all identified relevant documents.
 6. Store combined content in variable: `{pattern_name_content}`.
 

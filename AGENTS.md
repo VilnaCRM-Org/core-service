@@ -188,12 +188,12 @@ BMAD commands are available as Codex Skills. Use `$command-name` to invoke them
 
 ### Phases
 
-| Phase | Focus | Key Agents |
-|-------|-------|-----------|
-| 1. Analysis | Understand the problem | Analyst agent |
-| 2. Planning | Define the solution | Product Manager agent |
-| 3. Solutioning | Design the architecture | Architect agent |
-| 4. Implementation | Build it | Developer agent, then Ralph autonomous loop |
+| Phase             | Focus                   | Key Agents                                  |
+| ----------------- | ----------------------- | ------------------------------------------- |
+| 1. Analysis       | Understand the problem  | Analyst agent                               |
+| 2. Planning       | Define the solution     | Product Manager agent                       |
+| 3. Solutioning    | Design the architecture | Architect agent                             |
+| 4. Implementation | Build it                | Developer agent, then Ralph autonomous loop |
 
 ### Workflow
 

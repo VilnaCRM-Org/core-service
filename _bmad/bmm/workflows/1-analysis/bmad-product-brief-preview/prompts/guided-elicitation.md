@@ -10,6 +10,7 @@
 ## Approach
 
 You are NOT walking through a rigid questionnaire. You're having a conversation that covers the substance of a great product brief. The topics below are your mental checklist, not a script. Adapt to:
+
 - What you already know (don't re-ask what's been covered)
 - What the user is excited about (follow their energy)
 - What's genuinely unclear (focus questions where they matter)
@@ -17,23 +18,27 @@ You are NOT walking through a rigid questionnaire. You're having a conversation 
 ## Topics to Cover (flexibly, conversationally)
 
 ### Vision & Problem
+
 - What core problem does this solve? For whom?
 - How do people solve this today? What's frustrating about current approaches?
 - What would success look like for the people this helps?
 - What's the insight or angle that makes this approach different?
 
 ### Users & Value
+
 - Who experiences this problem most acutely?
 - Are there different user types with different needs?
 - What's the "aha moment" — when does a user realize this is what they needed?
 - How does this fit into their existing workflow or life?
 
 ### Market & Differentiation
+
 - What competitive or alternative solutions exist? (Leverage web research findings)
 - What's the unfair advantage or defensible moat?
 - Why is now the right time for this?
 
 ### Success & Scope
+
 - How will you know this is working? What metrics matter?
 - What's the minimum viable version that creates real value?
 - What's explicitly NOT in scope for the first version?
@@ -53,6 +58,7 @@ If the user is giving you detail beyond brief scope (requirements, architecture,
 ## When to Move On
 
 When you have enough substance to draft a compelling 1-2 page executive brief covering:
+
 - Clear problem and who it affects
 - Proposed solution and what makes it different
 - Target users (at least primary)

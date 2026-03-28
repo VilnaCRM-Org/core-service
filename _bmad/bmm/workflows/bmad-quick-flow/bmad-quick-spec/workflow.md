@@ -1,6 +1,5 @@
 ---
 main_config: '{project-root}/_bmad/bmm/config.yaml'
-
 ---
 
 # Quick-Spec Workflow

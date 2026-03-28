@@ -9,6 +9,7 @@
 ## Step 1: Polish and Save
 
 Update the product brief document at `{planning_artifacts}/product-brief-{project_name}.md`:
+
 - Update frontmatter `status` to `"complete"`
 - Update `updated` timestamp
 - Ensure formatting is clean and consistent
@@ -25,15 +26,16 @@ Throughout the discovery process, you likely captured detail that doesn't belong
 
 ```yaml
 ---
-title: "Product Brief Distillate: {project_name}"
+title: 'Product Brief Distillate: {project_name}'
 type: llm-distillate
-source: "product-brief-{project_name}.md"
-created: "{timestamp}"
-purpose: "Token-efficient context for downstream PRD creation"
+source: 'product-brief-{project_name}.md'
+created: '{timestamp}'
+purpose: 'Token-efficient context for downstream PRD creation'
 ---
 ```
 
 **Distillate content principles:**
+
 - Dense bullet points, not prose
 - Each bullet carries enough context to be understood standalone (don't assume the reader has the full brief loaded)
 - Group by theme, not by when it was mentioned
@@ -60,6 +62,7 @@ purpose: "Token-efficient context for downstream PRD creation"
 [If distillate created:] "The detail pack contains all the overflow context (requirements hints, rejected ideas, technical constraints) specifically structured for the PRD workflow to consume."
 
 **Headless mode:** Output the file paths as structured JSON and exit:
+
 ```json
 {
   "status": "complete",

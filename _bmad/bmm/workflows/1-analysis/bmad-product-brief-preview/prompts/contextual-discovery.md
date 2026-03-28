@@ -19,6 +19,7 @@ Now that you know what the brief is about, fan out subagents in parallel to gath
 ### Graceful Degradation
 
 If subagents are unavailable or fail:
+
 - Read only the most relevant 1-2 documents in the main context and summarize (don't full-read everything — limit context impact in degraded mode)
 - Do a few targeted web searches inline
 - Never block the workflow because a subagent feature is unavailable
@@ -34,6 +35,7 @@ Once subagent results return (or inline scanning completes):
 ## Mode-Specific Behavior
 
 **Guided mode:**
+
 - Present a concise summary of what you found: "Here's what I learned from your documents and web research..."
 - Highlight anything surprising or worth discussing
 - Share the gaps you've identified
@@ -41,11 +43,13 @@ Once subagent results return (or inline scanning completes):
 - Route to `guided-elicitation.md`
 
 **Yolo mode:**
+
 - Absorb all findings silently
 - Skip directly to `draft-and-review.md` — you have enough to draft
 - The user will refine later
 
 **Headless mode:**
+
 - Absorb all findings
 - Skip directly to `draft-and-review.md`
 - No interaction
@@ -53,5 +57,6 @@ Once subagent results return (or inline scanning completes):
 ## Stage Complete
 
 This stage is complete when subagent results (or inline scanning fallback) have returned and findings are merged with user context. Route per mode:
+
 - **Guided** → `guided-elicitation.md`
 - **Yolo / Headless** → `draft-and-review.md`

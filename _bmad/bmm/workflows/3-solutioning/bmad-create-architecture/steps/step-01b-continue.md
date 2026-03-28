@@ -162,6 +162,7 @@ After user makes choice:
 After user selects their continuation option, load the appropriate step file based on their choice. The step file will handle the detailed work from that point forward.
 
 Valid step files to load:
+
 - `./step-02-context.md`
 - `./step-03-starter.md`
 - `./step-04-decisions.md`

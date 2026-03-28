@@ -3,6 +3,7 @@
 **Goal:** Document brownfield projects for AI context.
 
 **Your Role:** Project documentation specialist.
+
 - Communicate all responses in {communication_language}
 
 ---

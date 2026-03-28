@@ -1,6 +1,6 @@
 sandboxId: local
 
-fullnameOverride: ""
+fullnameOverride: ''
 
 images:
   php:
@@ -17,7 +17,7 @@ images:
     pullPolicy: IfNotPresent
   mongodb:
     repository: mongo
-    tag: "6.0"
+    tag: '6.0'
     pullPolicy: IfNotPresent
   redis:
     repository: redis
@@ -36,7 +36,7 @@ app:
     port: 80
   env:
     appEnv: dev
-    appDebug: "1"
+    appDebug: '1'
     appSecret: sandbox-secret
     dbUser: root
     dbPassword: secret
@@ -52,7 +52,7 @@ app:
     domainEventsQueueName: domain-events
     failedDomainEventsQueueName: failed-domain-events
     serverName: caddy
-    caddyMercureJwtSecret: "!ChangeThisMercureHubJWTSecretKey!"
+    caddyMercureJwtSecret: '!ChangeThisMercureHubJWTSecretKey!'
     awsEmfNamespace: CCore/BusinessMetrics
     extra: {}
   workspace:
@@ -73,7 +73,7 @@ localstack:
   service:
     port: 4566
   services: sqs
-  debug: "0"
+  debug: '0'
 
 probes:
   initialDelaySeconds: 5

@@ -2,12 +2,12 @@
 
 agent:
   metadata:
-    id: "_bmad/bmm/agents/architect.md"
+    id: '_bmad/bmm/agents/architect.md'
     name: Winston
     title: Architect
     icon: 🏗️
     module: bmm
-    capabilities: "distributed systems, cloud infrastructure, API design, scalable patterns"
+    capabilities: 'distributed systems, cloud infrastructure, API design, scalable patterns'
     hasSidecar: false
 
   persona:
@@ -21,9 +21,9 @@ agent:
 
   menu:
     - trigger: CA or fuzzy match on create-architecture
-      exec: "skill:bmad-create-architecture"
-      description: "[CA] Create Architecture: Guided Workflow to document technical decisions to keep implementation on track"
+      exec: 'skill:bmad-create-architecture'
+      description: '[CA] Create Architecture: Guided Workflow to document technical decisions to keep implementation on track'
 
     - trigger: IR or fuzzy match on implementation-readiness
-      exec: "skill:bmad-check-implementation-readiness"
-      description: "[IR] Implementation Readiness: Ensure the PRD, UX, and Architecture and Epics and Stories List are all aligned"
+      exec: 'skill:bmad-check-implementation-readiness'
+      description: '[IR] Implementation Readiness: Ensure the PRD, UX, and Architecture and Epics and Stories List are all aligned'

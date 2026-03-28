@@ -66,27 +66,28 @@ Review the frontmatter to understand:
 
 Use the following ordered sequence to determine the next step from the last completed step:
 
-| Last Completed | Next Step |
-|---|---|
-| step-01-init.md | step-02-discovery.md |
-| step-02-discovery.md | step-02b-vision.md |
-| step-02b-vision.md | step-02c-executive-summary.md |
-| step-02c-executive-summary.md | step-03-success.md |
-| step-03-success.md | step-04-journeys.md |
-| step-04-journeys.md | step-05-domain.md |
-| step-05-domain.md | step-06-innovation.md |
-| step-06-innovation.md | step-07-project-type.md |
-| step-07-project-type.md | step-08-scoping.md |
-| step-08-scoping.md | step-09-functional.md |
-| step-09-functional.md | step-10-nonfunctional.md |
-| step-10-nonfunctional.md | step-11-polish.md |
-| step-11-polish.md | step-12-complete.md |
+| Last Completed                | Next Step                     |
+| ----------------------------- | ----------------------------- |
+| step-01-init.md               | step-02-discovery.md          |
+| step-02-discovery.md          | step-02b-vision.md            |
+| step-02b-vision.md            | step-02c-executive-summary.md |
+| step-02c-executive-summary.md | step-03-success.md            |
+| step-03-success.md            | step-04-journeys.md           |
+| step-04-journeys.md           | step-05-domain.md             |
+| step-05-domain.md             | step-06-innovation.md         |
+| step-06-innovation.md         | step-07-project-type.md       |
+| step-07-project-type.md       | step-08-scoping.md            |
+| step-08-scoping.md            | step-09-functional.md         |
+| step-09-functional.md         | step-10-nonfunctional.md      |
+| step-10-nonfunctional.md      | step-11-polish.md             |
+| step-11-polish.md             | step-12-complete.md           |
 
 1. Get the last element from the `stepsCompleted` array
 2. Look it up in the table above to find the next step
 3. That's the next step to load!
 
 **Example:**
+
 - If `stepsCompleted = ["step-01-init.md", "step-02-discovery.md", "step-03-success.md"]`
 - Last element is `"step-03-success.md"`
 - Table lookup → next step is `./step-04-journeys.md`
@@ -112,11 +113,13 @@ What would be most helpful?"
 "Welcome back {{user_name}}! I'm resuming our PRD collaboration for {{project_name}}.
 
 **Current Progress:**
+
 - Last completed: {last step filename from stepsCompleted array}
 - Next up: {next step from lookup table}
 - Context documents available: {len(inputDocuments)} files
 
 **Document Status:**
+
 - Current PRD document is ready with all completed sections
 - Ready to continue from where we left off
 

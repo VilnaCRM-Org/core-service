@@ -254,7 +254,6 @@ Prepare the content to append to the document:
 {{development_tools_and_workflow}}
 
 **Note:** Project initialization using this command should be the first implementation story.
-
 ````
 
 ### 9. Present Content and Menu

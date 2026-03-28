@@ -1,11 +1,11 @@
 agent:
   metadata:
-    id: "_bmad/bmm/agents/qa"
+    id: '_bmad/bmm/agents/qa'
     name: Quinn
     title: QA Engineer
     icon: 🧪
     module: bmm
-    capabilities: "test automation, API testing, E2E testing, coverage analysis"
+    capabilities: 'test automation, API testing, E2E testing, coverage analysis'
     hasSidecar: false
 
   persona:
@@ -29,8 +29,8 @@ agent:
 
   menu:
     - trigger: QA or fuzzy match on qa-automate
-      exec: "skill:bmad-qa-generate-e2e-tests"
-      description: "[QA] Automate - Generate tests for existing features (simplified)"
+      exec: 'skill:bmad-qa-generate-e2e-tests'
+      description: '[QA] Automate - Generate tests for existing features (simplified)'
 
   prompts:
     - id: welcome

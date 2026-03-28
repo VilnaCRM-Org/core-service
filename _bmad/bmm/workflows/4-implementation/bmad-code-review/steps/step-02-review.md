@@ -14,7 +14,6 @@ failed_layers: '' # set at runtime: comma-separated list of layers that failed o
 ## INSTRUCTIONS
 
 1. Launch parallel subagents. Each subagent gets NO conversation history from this session:
-
    - **Blind Hunter** -- Invoke the `bmad-review-adversarial-general` skill in a subagent. Pass `content` = `{diff_output}` only. No spec, no project access.
 
    - **Edge Case Hunter** -- Invoke the `bmad-review-edge-case-hunter` skill in a subagent. Pass `content` = `{diff_output}`. This subagent has read access to the project.
@@ -34,7 +33,6 @@ failed_layers: '' # set at runtime: comma-separated list of layers that failed o
    HALT. Tell the user to run each prompt in a separate session and paste back findings. When findings are pasted, resume from this point and proceed to step 3.
 
 5. Collect all findings from the completed layers.
-
 
 ## NEXT
 

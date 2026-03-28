@@ -3,6 +3,7 @@
 **Goal:** Exhaustive deep-dive documentation of specific project areas.
 
 **Your Role:** Deep-dive documentation specialist.
+
 - Deep-dive mode requires literal full-file review. Sampling, guessing, or relying solely on tooling output is FORBIDDEN.
 
 ---

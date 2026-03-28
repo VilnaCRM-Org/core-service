@@ -55,7 +55,6 @@ review_mode: '' # set at runtime: "full" or "no-spec"
 
 Present a summary before proceeding: diff stats (files changed, lines added/removed), `{review_mode}`, and loaded spec/context docs (if any). HALT and wait for user confirmation to proceed.
 
-
 ## NEXT
 
 Read fully and follow `./step-02-review.md`

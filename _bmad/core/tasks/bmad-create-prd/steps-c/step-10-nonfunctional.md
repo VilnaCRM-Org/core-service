@@ -23,7 +23,6 @@
 - 📖 Update output file frontmatter, adding this step name to the end of the list of stepsCompleted
 - 🚫 FORBIDDEN to load next step until C is selected
 
-
 ## CONTEXT BOUNDARIES:
 
 - Current document and frontmatter from previous steps are available
@@ -67,6 +66,7 @@ For each relevant category, conduct targeted discovery:
 #### Performance NFRs (If relevant):
 
 Explore performance requirements:
+
 - What parts of the system need to be fast for users to be successful?
 - Are there specific response time expectations?
 - What happens if performance is slower than expected?
@@ -75,6 +75,7 @@ Explore performance requirements:
 #### Security NFRs (If relevant):
 
 Explore security requirements:
+
 - What data needs to be protected?
 - Who should have access to what?
 - What are the security risks we need to mitigate?
@@ -83,6 +84,7 @@ Explore security requirements:
 #### Scalability NFRs (If relevant):
 
 Explore scalability requirements:
+
 - How many users do we expect initially? Long-term?
 - Are there seasonal or event-based traffic spikes?
 - What happens if we exceed our capacity?
@@ -91,6 +93,7 @@ Explore scalability requirements:
 #### Accessibility NFRs (If relevant):
 
 Explore accessibility requirements:
+
 - Are we serving users with visual, hearing, or motor impairments?
 - Are there legal accessibility requirements (WCAG, Section 508)?
 - What accessibility features are most important for our users?
@@ -98,6 +101,7 @@ Explore accessibility requirements:
 #### Integration NFRs (If relevant):
 
 Explore integration requirements:
+
 - What external systems do we need to connect with?
 - Are there APIs or data formats we must support?
 - How reliable do these integrations need to be?
@@ -147,6 +151,7 @@ When saving to document, append these Level 2 and Level 3 sections (only include
 ### 6. Present MENU OPTIONS
 
 Present the non-functional requirements for review, then display menu:
+
 - Show defined NFRs (using structure from step 5)
 - Note that only relevant categories were included
 - Emphasize NFRs specify how well the system needs to perform
@@ -156,12 +161,14 @@ Present the non-functional requirements for review, then display menu:
 Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Polish Document (Step 11 of 12)"
 
 #### Menu Handling Logic:
+
 - IF A: Invoke the `bmad-advanced-elicitation` skill with the current NFR content, process the enhanced quality attribute insights that come back, ask user if they accept the improvements, if yes update content then redisplay menu, if no keep original content then redisplay menu
 - IF P: Invoke the `bmad-party-mode` skill with the current NFR list, process the collaborative technical validation and additions, ask user if they accept the changes, if yes update content then redisplay menu, if no keep original content then redisplay menu
 - IF C: Append the final content to {outputFile}, update frontmatter by adding this step name to the end of the stepsCompleted array, then read fully and follow: ./step-11-polish.md
 - IF Any other: help user respond, then redisplay menu
 
 #### EXECUTION RULES:
+
 - ALWAYS halt and wait for user input after presenting menu
 - ONLY proceed to next step when user selects 'C'
 - After other menu items execution, return to this menu

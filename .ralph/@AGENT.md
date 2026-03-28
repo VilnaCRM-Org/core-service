@@ -1,6 +1,7 @@
 # Agent Build Instructions
 
 ## Project Setup
+
 ```bash
 # Install dependencies (example for Node.js project)
 npm install
@@ -8,11 +9,12 @@ npm install
 # Or for Python project
 pip install -r requirements.txt
 
-# Or for Rust project  
+# Or for Rust project
 cargo build
 ```
 
 ## Running Tests
+
 ```bash
 # Node.js
 npm test
@@ -25,6 +27,7 @@ cargo test
 ```
 
 ## Build Commands
+
 ```bash
 # Production build
 npm run build
@@ -33,6 +36,7 @@ cargo build --release
 ```
 
 ## Development Server
+
 ```bash
 # Start development server
 npm run dev
@@ -41,6 +45,7 @@ cargo run
 ```
 
 ## Key Learnings
+
 - Update this section when you learn new build optimizations
 - Document any gotchas or special setup requirements
 - Keep track of the fastest test/build cycle
@@ -72,18 +77,22 @@ cargo run
 Before moving to the next feature, ALL changes must be:
 
 1. **Committed with Clear Messages**:
+
    ```bash
    git add .
    git commit -m "feat(module): descriptive message following conventional commits"
    ```
+
    - Use conventional commit format: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, etc.
    - Include scope when applicable: `feat(api):`, `fix(ui):`, `test(auth):`
    - Write descriptive messages that explain WHAT changed and WHY
 
 2. **Pushed to Remote Repository**:
+
    ```bash
    git push origin <branch-name>
    ```
+
    - Never leave completed features uncommitted
    - Push regularly to maintain backup and enable collaboration
    - Ensure CI/CD pipelines pass before considering feature complete
@@ -148,6 +157,7 @@ Before marking ANY feature as complete, verify:
 ### Rationale
 
 These standards ensure:
+
 - **Quality**: High test coverage and pass rates prevent regressions
 - **Traceability**: Git commits and .ralph/@fix_plan.md provide clear history of changes
 - **Maintainability**: Current documentation reduces onboarding time and prevents knowledge loss

@@ -75,6 +75,7 @@ Return structured findings with counts and examples."
 If Task tool unavailable, perform analysis directly:
 
 **Scan for conversational filler patterns:**
+
 - "The system will allow users to..."
 - "It is important to note that..."
 - "In order to"
@@ -83,6 +84,7 @@ If Task tool unavailable, perform analysis directly:
 - Count occurrences and note line numbers
 
 **Scan for wordy phrases:**
+
 - "Due to the fact that" (use "because")
 - "In the event of" (use "if")
 - "At this point in time" (use "now")
@@ -90,6 +92,7 @@ If Task tool unavailable, perform analysis directly:
 - Count occurrences and note line numbers
 
 **Scan for redundant phrases:**
+
 - "Future plans" (just "plans")
 - "Past history" (just "history")
 - "Absolutely essential" (just "essential")
@@ -99,12 +102,14 @@ If Task tool unavailable, perform analysis directly:
 ### 3. Classify Severity
 
 **Calculate total violations:**
+
 - Conversational filler count
 - Wordy phrases count
 - Redundant phrases count
 - Total = sum of all categories
 
 **Determine severity:**
+
 - **Critical:** Total > 10 violations
 - **Warning:** Total 5-10 violations
 - **Pass:** Total < 5 violations

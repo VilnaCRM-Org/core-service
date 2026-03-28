@@ -1,45 +1,62 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "core-service-sandbox.mongodbServiceName" . }}
+  name: { { include "core-service-sandbox.mongodbServiceName" . } }
   labels:
-    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 4 }}
+    {
+      {
+        - include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 4,
+      },
+    }
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "mongodb") | nindent 6 }}
+      {
+        {
+          - include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "mongodb") | nindent 6,
+        },
+      }
   template:
     metadata:
       labels:
-        {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 8 }}
+        {
+          {
+            - include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 8,
+          },
+        }
     spec:
       volumes:
         - name: mongodb-data
           emptyDir: {}
       containers:
         - name: mongodb
-          image: {{ printf "%s:%s" .Values.images.mongodb.repository .Values.images.mongodb.tag | quote }}
-          imagePullPolicy: {{ .Values.images.mongodb.pullPolicy }}
+          image:
+            {
+              {
+                printf "%s:%s" .Values.images.mongodb.repository .Values.images.mongodb.tag | quote,
+              },
+            }
+          imagePullPolicy: { { .Values.images.mongodb.pullPolicy } }
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "core-service-sandbox.envSecretName" . }}
+                  name: { { include "core-service-sandbox.envSecretName" . } }
                   key: DB_USER
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "core-service-sandbox.envSecretName" . }}
+                  name: { { include "core-service-sandbox.envSecretName" . } }
                   key: DB_PASSWORD
             - name: MONGO_INITDB_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "core-service-sandbox.envSecretName" . }}
+                  name: { { include "core-service-sandbox.envSecretName" . } }
                   key: DB_NAME
           ports:
             - name: mongodb
-              containerPort: {{ .Values.mongodb.service.port }}
+              containerPort: { { .Values.mongodb.service.port } }
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db
@@ -49,31 +66,39 @@ spec:
                 - /bin/sh
                 - -lc
                 - "mongosh --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
-            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.periodSeconds }}
-            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
-            failureThreshold: {{ .Values.probes.failureThreshold }}
+            initialDelaySeconds: { { .Values.probes.initialDelaySeconds } }
+            periodSeconds: { { .Values.probes.periodSeconds } }
+            timeoutSeconds: { { .Values.probes.timeoutSeconds } }
+            failureThreshold: { { .Values.probes.failureThreshold } }
           livenessProbe:
             exec:
               command:
                 - /bin/sh
                 - -lc
                 - "mongosh --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
-            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 15 }}
-            periodSeconds: {{ .Values.probes.periodSeconds }}
-            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
-            failureThreshold: {{ .Values.probes.failureThreshold }}
+            initialDelaySeconds: { { add .Values.probes.initialDelaySeconds 15 } }
+            periodSeconds: { { .Values.probes.periodSeconds } }
+            timeoutSeconds: { { .Values.probes.timeoutSeconds } }
+            failureThreshold: { { .Values.probes.failureThreshold } }
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "core-service-sandbox.mongodbServiceName" . }}
+  name: { { include "core-service-sandbox.mongodbServiceName" . } }
   labels:
-    {{- include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 4 }}
+    {
+      {
+        - include "core-service-sandbox.componentLabels" (dict "root" . "component" "mongodb") | nindent 4,
+      },
+    }
 spec:
   selector:
-    {{- include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "mongodb") | nindent 4 }}
+    {
+      {
+        - include "core-service-sandbox.componentSelectorLabels" (dict "root" . "component" "mongodb") | nindent 4,
+      },
+    }
   ports:
     - name: mongodb
-      port: {{ .Values.mongodb.service.port }}
+      port: { { .Values.mongodb.service.port } }
       targetPort: mongodb

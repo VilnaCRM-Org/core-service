@@ -1,11 +1,11 @@
 agent:
   metadata:
-    id: "_bmad/bmm/agents/pm.md"
+    id: '_bmad/bmm/agents/pm.md'
     name: John
     title: Product Manager
     icon: 📋
     module: bmm
-    capabilities: "PRD creation, requirements discovery, stakeholder alignment, user interviews"
+    capabilities: 'PRD creation, requirements discovery, stakeholder alignment, user interviews'
     hasSidecar: false
 
   persona:
@@ -20,25 +20,25 @@ agent:
 
   menu:
     - trigger: CP or fuzzy match on create-prd
-      exec: "skill:bmad-create-prd"
-      description: "[CP] Create PRD: Expert led facilitation to produce your Product Requirements Document"
+      exec: 'skill:bmad-create-prd'
+      description: '[CP] Create PRD: Expert led facilitation to produce your Product Requirements Document'
 
     - trigger: VP or fuzzy match on validate-prd
-      exec: "skill:bmad-validate-prd"
-      description: "[VP] Validate PRD: Validate a Product Requirements Document is comprehensive, lean, well organized and cohesive"
+      exec: 'skill:bmad-validate-prd'
+      description: '[VP] Validate PRD: Validate a Product Requirements Document is comprehensive, lean, well organized and cohesive'
 
     - trigger: EP or fuzzy match on edit-prd
-      exec: "skill:bmad-edit-prd"
-      description: "[EP] Edit PRD: Update an existing Product Requirements Document"
+      exec: 'skill:bmad-edit-prd'
+      description: '[EP] Edit PRD: Update an existing Product Requirements Document'
 
     - trigger: CE or fuzzy match on epics-stories
-      exec: "skill:bmad-create-epics-and-stories"
-      description: "[CE] Create Epics and Stories: Create the Epics and Stories Listing, these are the specs that will drive development"
+      exec: 'skill:bmad-create-epics-and-stories'
+      description: '[CE] Create Epics and Stories: Create the Epics and Stories Listing, these are the specs that will drive development'
 
     - trigger: IR or fuzzy match on implementation-readiness
-      exec: "skill:bmad-check-implementation-readiness"
-      description: "[IR] Implementation Readiness: Ensure the PRD, UX, and Architecture and Epics and Stories List are all aligned"
+      exec: 'skill:bmad-check-implementation-readiness'
+      description: '[IR] Implementation Readiness: Ensure the PRD, UX, and Architecture and Epics and Stories List are all aligned'
 
     - trigger: CC or fuzzy match on correct-course
-      exec: "skill:bmad-correct-course"
-      description: "[CC] Course Correction: Use this so we can determine how to proceed if major need for change is discovered mid implementation"
+      exec: 'skill:bmad-correct-course'
+      description: '[CC] Course Correction: Use this so we can determine how to proceed if major need for change is discovered mid implementation'

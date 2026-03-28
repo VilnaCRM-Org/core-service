@@ -1,4 +1,3 @@
-
 # Technical Research Workflow
 
 **Goal:** Conduct comprehensive technical research using current web data and verified sources to produce complete research documents with compelling narratives and proper citations.
@@ -12,6 +11,7 @@
 ## CONFIGURATION
 
 Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+
 - `project_name`, `output_folder`, `planning_artifacts`, `user_name`
 - `communication_language`, `document_output_language`, `user_skill_level`
 - `date` as a system-generated value
@@ -23,6 +23,7 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 **What technology, tool, or technical area do you want to research?**
 
 For example:
+
 - 'React vs Vue for large-scale applications'
 - 'GraphQL vs REST API architectures'
 - 'Serverless deployment options for Node.js'
@@ -31,6 +32,7 @@ For example:
 ### Topic Clarification
 
 Based on the user's topic, briefly clarify:
+
 1. **Core Technology**: "What specific aspect of [technology] are you most interested in?"
 2. **Research Goals**: "What do you hope to achieve with this research?"
 3. **Scope**: "Should we focus broadly or dive deep into specific aspects?"

@@ -62,12 +62,14 @@ Analyze legacy PRD against BMAD standards, identify gaps, propose conversion str
 **Load the PRD and prd-purpose.md**
 
 **For each BMAD PRD section, analyze:**
+
 1. Does PRD have this section? (Executive Summary, Success Criteria, Product Scope, User Journeys, Functional Requirements, Non-Functional Requirements)
 2. If present: Is it complete and well-structured?
 3. If missing: What content exists that could migrate to this section?
 4. Effort to create/complete: Minimal / Moderate / Significant
 
 **Identify:**
+
 - Core sections present: {count}/6
 - Content gaps in each section
 - Overall conversion effort: Quick / Moderate / Substantial
@@ -76,6 +78,7 @@ Analyze legacy PRD against BMAD standards, identify gaps, propose conversion str
 Return conversion assessment with gap analysis and effort estimate."
 
 **Graceful degradation (if no Task tool):**
+
 - Manually check PRD for each BMAD section
 - Note what's present and what's missing
 - Estimate conversion effort
@@ -86,36 +89,43 @@ Return conversion assessment with gap analysis and effort estimate."
 **For each BMAD core section:**
 
 **Executive Summary:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **Success Criteria:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **Product Scope:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **User Journeys:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **Functional Requirements:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **Non-Functional Requirements:**
+
 - Present: [Yes/No/Partial]
 - Gap: [what's missing or incomplete]
 - Effort to Complete: [Minimal/Moderate/Significant]
 
 **Overall Assessment:**
+
 - Sections Present: {count}/6
 - Total Conversion Effort: [Quick/Moderate/Substantial]
 - Recommended: [Full restructuring / Targeted improvements]
@@ -127,8 +137,9 @@ Display:
 "**Legacy PRD Conversion Assessment**
 
 **Current PRD Structure:**
+
 - Core sections present: {count}/6
-{List which sections are present/missing}
+  {List which sections are present/missing}
 
 **Gap Analysis:**
 

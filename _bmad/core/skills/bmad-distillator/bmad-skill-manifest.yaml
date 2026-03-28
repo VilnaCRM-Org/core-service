@@ -3,7 +3,7 @@ module: core
 capabilities:
   - name: bmad-distillator
     menu-code: DSTL
-    description: "Produces lossless LLM-optimized distillate from source documents. Use after producing large human presentable documents that will be consumed later by LLMs"
+    description: 'Produces lossless LLM-optimized distillate from source documents. Use after producing large human presentable documents that will be consumed later by LLMs'
     supports-headless: true
     input: source documents
     args: output, validate

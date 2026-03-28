@@ -1,7 +1,7 @@
 ---
 # File references (ONLY variables used in this step)
 prdFile: '{prd_file_path}'
-validationReport: '{validation_report_path}'  # If provided
+validationReport: '{validation_report_path}' # If provided
 prdPurpose: '{project-root}/_bmad/bmm/workflows/2-plan-workflows/create-prd/data/prd-purpose.md'
 ---
 
@@ -64,12 +64,14 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 "Perform deep PRD review and change planning:
 
 **Context from step e-01:**
+
 - User's edit requirements: {user_requirements}
 - PRD format: {BMAD/legacy}
 - Validation report provided: {yes/no}
 - Conversion mode: {restructure/targeted/both} (if legacy)
 
 **IF validation report provided:**
+
 1. Extract all findings from validation report
 2. Map findings to specific PRD sections
 3. Prioritize by severity: Critical > Warning > Informational
@@ -77,6 +79,7 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 5. For user's manual edit goals: identify where in PRD to apply
 
 **IF no validation report:**
+
 1. Read entire PRD thoroughly
 2. Analyze against BMAD standards (from prd-purpose.md)
 3. Identify issues in:
@@ -89,6 +92,7 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 4. Map user's edit goals to specific sections
 
 **Output:**
+
 - Section-by-section analysis
 - Specific changes needed for each section
 - Prioritized action list
@@ -97,6 +101,7 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 Return detailed change plan with section breakdown."
 
 **Graceful degradation (if no Task tool):**
+
 - Manually read PRD sections
 - Manually analyze validation report findings (if provided)
 - Build section-by-section change plan
@@ -107,6 +112,7 @@ Return detailed change plan with section breakdown."
 **Organize by PRD section:**
 
 **For each section (in order):**
+
 - **Current State:** Brief description of what exists
 - **Issues Identified:** [List from validation report or manual analysis]
 - **Changes Needed:** [Specific changes required]
@@ -114,6 +120,7 @@ Return detailed change plan with section breakdown."
 - **User Requirements Met:** [Which user edit goals address this section]
 
 **Include:**
+
 - Sections to add (if missing)
 - Sections to update (if present but needs work)
 - Content to remove (if incorrect/leakage)
@@ -124,12 +131,14 @@ Return detailed change plan with section breakdown."
 **Summary sections:**
 
 **Changes by Type:**
+
 - **Additions:** {count} sections to add
 - **Updates:** {count} sections to update
 - **Removals:** {count} items to remove
 - **Restructuring:** {yes/no} if format conversion needed
 
 **Priority Distribution:**
+
 - **Critical:** {count} changes (must fix)
 - **High:** {count} changes (important)
 - **Medium:** {count} changes (nice to have)
@@ -160,6 +169,7 @@ Display:
 {Present section-by-section breakdown}
 
 **By Priority:**
+
 - Critical: {count} items
 - High: {count} items
 - Medium: {count} items
@@ -167,6 +177,7 @@ Display:
 **Estimated Effort:** {effort level}
 
 **Questions:**
+
 1. Does this change plan align with what you had in mind?
 2. Any sections I should add/remove/reprioritize?
 3. Any concerns before I proceed with edits?
@@ -178,11 +189,13 @@ Display:
 Wait for user to review and provide feedback.
 
 **If user wants adjustments:**
+
 - Discuss requested changes
 - Revise change plan accordingly
 - Represent for confirmation
 
 **If user approves:**
+
 - Note: "Change plan approved. Proceeding to edit step."
 - Continue to step 6
 
