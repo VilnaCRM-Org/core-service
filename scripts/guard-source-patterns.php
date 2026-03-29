@@ -17,6 +17,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 const BASELINE_PATH = __DIR__ . '/../config/static-analysis/source-pattern-baseline.json';
 const PROJECT_ROOT = __DIR__ . '/..';
+const NON_BASELINABLE_VIOLATION_TYPES = ['read_error', 'parse_error'];
 
 /**
  * @return list<array{
@@ -100,8 +101,11 @@ function collectViolations(string $rootPath): array
                     || $node instanceof Node\Expr\Closure
                     || $node instanceof Node\Expr\ArrowFunction
                     || $node instanceof Node\Stmt\Property
+                    || $node instanceof Node\Stmt\ClassConst
                 ) {
-                    $type = $node instanceof Node\Stmt\Property ? $node->type : $node->type ?? null;
+                    $type = $node instanceof Node\Stmt\Property || $node instanceof Node\Stmt\ClassConst
+                        ? $node->type
+                        : $node->type ?? null;
 
                     if ($node instanceof Node\Stmt\ClassMethod || $node instanceof Node\Stmt\Function_ || $node instanceof Node\Expr\Closure || $node instanceof Node\Expr\ArrowFunction) {
                         $type = $node->returnType;
@@ -245,10 +249,36 @@ function writeBaseline(string $path, array $keys): void
     }
 }
 
+function isNonBaselinableViolation(array $violation): bool
+{
+    return in_array($violation['type'], NON_BASELINABLE_VIOLATION_TYPES, true);
+}
+
 $violations = collectViolations(__DIR__ . '/../src');
-$keys = violationKeys($violations);
+$fatalViolations = array_values(array_filter($violations, static fn (array $violation): bool => isNonBaselinableViolation($violation)));
+$baselinableViolations = array_values(array_filter($violations, static fn (array $violation): bool => !isNonBaselinableViolation($violation)));
+$keys = violationKeys($baselinableViolations);
 
 if (($argv[1] ?? null) === '--generate-baseline') {
+    if ($fatalViolations !== []) {
+        fwrite(STDERR, "Refusing to generate a baseline while some files cannot be analyzed.\n");
+
+        foreach ($fatalViolations as $violation) {
+            fwrite(
+                STDERR,
+                sprintf(
+                    "- %s:%d [%s] %s\n",
+                    $violation['file'],
+                    $violation['line'],
+                    $violation['type'],
+                    $violation['message']
+                )
+            );
+        }
+
+        exit(1);
+    }
+
     writeBaseline(BASELINE_PATH, $keys);
     fwrite(STDOUT, sprintf("Generated baseline with %d violations.\n", count($keys)));
     exit(0);
@@ -258,7 +288,7 @@ $baseline = array_flip(readBaseline(BASELINE_PATH));
 $newViolations = array_values(
     array_filter(
         $violations,
-        static fn (array $violation): bool => !isset($baseline[
+        static fn (array $violation): bool => isNonBaselinableViolation($violation) || !isset($baseline[
             sprintf(
                 '%s:%d:%s:%s',
                 $violation['file'],

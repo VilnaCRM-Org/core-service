@@ -151,6 +151,62 @@ load 'bats-assert/load'
   assert_output --partial "Hardcoded new expression found"
 }
 
+@test "make source-pattern-guard should fail on typed class constants with array type declarations" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardTypedConstExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardTypedConstExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    make source-pattern-guard
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Source pattern guard found non-baselined violations:"
+  assert_output --partial "array_type_declaration"
+}
+
+@test "make source-pattern-guard baseline generation should fail on parse errors" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardParseErrorExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardParseErrorExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    docker compose exec php php -d display_errors=0 -d error_reporting='"'"'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'"'"' scripts/guard-source-patterns.php --generate-baseline
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Refusing to generate a baseline while some files cannot be analyzed."
+  assert_output --partial "[parse_error]"
+}
+
 @test "make phpinsights should fail when code quality is low" {
   run bash -lc '
     set -euo pipefail
