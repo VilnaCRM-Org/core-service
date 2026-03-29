@@ -1,5 +1,36 @@
+# Preserve environment-provided workspace port overrides before loading .env.test.
+HTTP_PORT_OVERRIDE := $(value HTTP_PORT)
+HTTPS_PORT_OVERRIDE := $(value HTTPS_PORT)
+HTTP3_PORT_OVERRIDE := $(value HTTP3_PORT)
+DB_PORT_OVERRIDE := $(value DB_PORT)
+REDIS_PORT_OVERRIDE := $(value REDIS_PORT)
+LOCALSTACK_PORT_OVERRIDE := $(value LOCALSTACK_PORT)
+STRUCTURIZR_PORT_OVERRIDE := $(value STRUCTURIZR_PORT)
+
 # Load environment variables from .env.test
 include .env.test
+
+ifneq ($(strip $(HTTP_PORT_OVERRIDE)),)
+HTTP_PORT := $(HTTP_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(HTTPS_PORT_OVERRIDE)),)
+HTTPS_PORT := $(HTTPS_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(HTTP3_PORT_OVERRIDE)),)
+HTTP3_PORT := $(HTTP3_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(DB_PORT_OVERRIDE)),)
+DB_PORT := $(DB_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(REDIS_PORT_OVERRIDE)),)
+REDIS_PORT := $(REDIS_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(LOCALSTACK_PORT_OVERRIDE)),)
+LOCALSTACK_PORT := $(LOCALSTACK_PORT_OVERRIDE)
+endif
+ifneq ($(strip $(STRUCTURIZR_PORT_OVERRIDE)),)
+STRUCTURIZR_PORT := $(STRUCTURIZR_PORT_OVERRIDE)
+endif
 
 # Parameters
 PROJECT       = core-service
@@ -69,6 +100,7 @@ else
 endif
 
 export SYMFONY
+export HTTP_PORT HTTPS_PORT HTTP3_PORT DB_PORT REDIS_PORT LOCALSTACK_PORT STRUCTURIZR_PORT
 
 help:
 	@printf "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m\n"

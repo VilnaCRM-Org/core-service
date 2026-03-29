@@ -12,6 +12,8 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 . "${ROOT_DIR}/scripts/local-coder/lib/workspace-secrets.sh"
 # shellcheck source=scripts/local-coder/lib/bmalph.sh
 . "${ROOT_DIR}/scripts/local-coder/lib/bmalph.sh"
+# shellcheck source=scripts/local-coder/lib/workspace-ports.sh
+. "${ROOT_DIR}/scripts/local-coder/lib/workspace-ports.sh"
 
 SETTINGS_FILE="${ROOT_DIR}/.devcontainer/workspace-settings.env"
 if [ -f "${SETTINGS_FILE}" ]; then
@@ -35,7 +37,7 @@ readonly USER_NPM_GLOBAL_BIN="${HOME}/.npm-global/bin"
 : "${CORE_SERVICE_BOOTSTRAP_STRICT:=false}"
 
 : "${GH_HOST:=github.com}"
-: "${GH_GIT_PROTOCOL:=ssh}"
+: "${GH_GIT_PROTOCOL:=https}"
 : "${GH_PROMPT:=disabled}"
 : "${WORKSPACE_GIT_IDENTITY_NAME:=vilnacrm ai bot}"
 : "${WORKSPACE_GIT_IDENTITY_EMAIL:=info@vilnacrm.com}"
@@ -57,6 +59,10 @@ if [ -f "${HOME}/.config/openclaw/agent-secrets.env" ]; then
 fi
 
 cs_load_host_workspace_secrets
+
+if cs_should_configure_workspace_ports; then
+    cs_configure_workspace_port_overrides
+fi
 
 cleanup_tmp_files() {
     local tmp_file
@@ -97,6 +103,27 @@ persist_agent_secrets_file() {
             printf 'export GITHUB_TOKEN=%q\n' "${GH_TOKEN}"
         elif [ -n "${GH_AUTOMATION_TOKEN:-}" ]; then
             printf 'export GITHUB_TOKEN=%q\n' "${GH_AUTOMATION_TOKEN}"
+        fi
+        if [ -n "${HTTP_PORT:-}" ]; then
+            printf 'export HTTP_PORT=%q\n' "${HTTP_PORT}"
+        fi
+        if [ -n "${HTTPS_PORT:-}" ]; then
+            printf 'export HTTPS_PORT=%q\n' "${HTTPS_PORT}"
+        fi
+        if [ -n "${HTTP3_PORT:-}" ]; then
+            printf 'export HTTP3_PORT=%q\n' "${HTTP3_PORT}"
+        fi
+        if [ -n "${DB_PORT:-}" ]; then
+            printf 'export DB_PORT=%q\n' "${DB_PORT}"
+        fi
+        if [ -n "${REDIS_PORT:-}" ]; then
+            printf 'export REDIS_PORT=%q\n' "${REDIS_PORT}"
+        fi
+        if [ -n "${LOCALSTACK_PORT:-}" ]; then
+            printf 'export LOCALSTACK_PORT=%q\n' "${LOCALSTACK_PORT}"
+        fi
+        if [ -n "${STRUCTURIZR_PORT:-}" ]; then
+            printf 'export STRUCTURIZR_PORT=%q\n' "${STRUCTURIZR_PORT}"
         fi
         printf 'export PATH=%q:$PATH\n' "${USER_NPM_GLOBAL_BIN}"
         # Persist only bootstrap-managed git identity to login shells.
@@ -282,6 +309,7 @@ ensure_shell_sources_agent_secrets
 # Persist repository-defined GH defaults for CLI behavior in each fresh workspace.
 gh config set git_protocol "${GH_GIT_PROTOCOL}" --host "${GH_HOST}" >/dev/null 2>&1 || true
 gh config set prompt "${GH_PROMPT}" >/dev/null 2>&1 || true
+cs_align_git_remote_protocol origin "${GH_HOST}" "${GH_GIT_PROTOCOL}" >/dev/null 2>&1 || true
 
 codex_version=""
 if [ "${codex_ready}" = true ]; then
@@ -315,4 +343,13 @@ if [ "${bmalph_ready}" = true ]; then
     echo "  - default platform: ${BMALPH_DEFAULT_PLATFORM}"
 else
     echo "BMALPH configured: unavailable."
+fi
+if cs_should_configure_workspace_ports; then
+    echo "Workspace host ports:"
+    echo "  - http: ${HTTP_PORT:-80}"
+    echo "  - https/http3: ${HTTPS_PORT:-443}"
+    echo "  - db: ${DB_PORT:-27017}"
+    echo "  - redis: ${REDIS_PORT:-6379}"
+    echo "  - localstack: ${LOCALSTACK_PORT:-4566}"
+    echo "  - structurizr: ${STRUCTURIZR_PORT:-8080}"
 fi

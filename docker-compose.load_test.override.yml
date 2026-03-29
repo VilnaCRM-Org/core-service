@@ -73,7 +73,6 @@ services:
 
   localstack:
     image: localstack/localstack:3.4.0
-    container_name: localstack
     ports:
       - '${LOCALSTACK_PORT}:4566'
     environment:

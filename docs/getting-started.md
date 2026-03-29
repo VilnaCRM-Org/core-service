@@ -121,7 +121,9 @@ For autonomous AI coding in a workspace, set workspace secrets:
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
-The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; if they are absent, the workspace bootstrap skips host secret and Codex auth sync gracefully.
+The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; the devcontainer `initializeCommand` creates those directories if needed so fresh workspaces start cleanly. If they stay empty, the workspace bootstrap still skips host secret and Codex auth sync gracefully.
+
+The workspace is mounted inside the devcontainer at the same absolute path used on the host. That keeps Docker bind mounts valid when `docker compose` runs against the host daemon from inside the workspace.
 
 The bootstrap persists those values into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the workspace.
 
@@ -137,6 +139,8 @@ If you prefer manual authentication in the workspace:
 gh auth login -h github.com -w
 gh auth setup-git
 ```
+
+Workspace bootstrap defaults GitHub remotes to HTTPS so token-based `gh` auth can read and push without requiring SSH keys inside the devcontainer. Override `GH_GIT_PROTOCOL=ssh` in your workspace environment only if you intentionally want SSH remotes there.
 
 Then run:
 
