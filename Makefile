@@ -351,6 +351,7 @@ validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate a
 	./scripts/validate-openapi-spec.sh
 
 aws-load-tests: ## Run load tests on AWS infrastructure
+	@if [ "$(LOCAL_MODE_ENV)" = "true" ]; then $(MAKE) ensure-test-services; fi
 	tests/Load/aws-execute-load-tests.sh
 
 aws-load-tests-cleanup: ## Cleanup AWS infrastructure after testing
