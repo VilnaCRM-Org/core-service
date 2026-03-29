@@ -3,6 +3,35 @@
 load 'bats-support/load'
 load 'bats-assert/load'
 
+setup_isolated_bmalph_env() {
+  if [ "${HOME+x}" = "x" ]; then
+    BMALPH_ORIGINAL_HOME="${HOME}"
+    BMALPH_ORIGINAL_HOME_SET=1
+  else
+    BMALPH_ORIGINAL_HOME=""
+    BMALPH_ORIGINAL_HOME_SET=0
+  fi
+
+  BMALPH_TEST_HOME="$(mktemp -d)"
+  export HOME="${BMALPH_TEST_HOME}"
+  export CS_USER_NPM_GLOBAL_BIN="${BMALPH_TEST_HOME}/.npm-global/bin"
+  mkdir -p "${CS_USER_NPM_GLOBAL_BIN}"
+}
+
+teardown() {
+  if [ -n "${BMALPH_TEST_HOME:-}" ] && [ -d "${BMALPH_TEST_HOME}" ]; then
+    rm -rf "${BMALPH_TEST_HOME}"
+  fi
+
+  if [ "${BMALPH_ORIGINAL_HOME_SET:-0}" = "1" ]; then
+    export HOME="${BMALPH_ORIGINAL_HOME}"
+  else
+    unset HOME
+  fi
+
+  unset BMALPH_ORIGINAL_HOME BMALPH_ORIGINAL_HOME_SET BMALPH_TEST_HOME CS_USER_NPM_GLOBAL_BIN
+}
+
 @test "make help lists BMALPH targets" {
   run make help
   assert_success
@@ -14,6 +43,7 @@ load 'bats-assert/load'
 }
 
 @test "make bmalph-install installs and verifies BMALPH for codex" {
+  setup_isolated_bmalph_env
   run make bmalph-install BMALPH_PLATFORM=codex
   assert_success
   assert_output --partial "BMALPH installed:"
@@ -22,6 +52,7 @@ load 'bats-assert/load'
 }
 
 @test "make bmalph-codex installs and verifies the Codex BMALPH flow" {
+  setup_isolated_bmalph_env
   run make bmalph-codex
   assert_success
   assert_output --partial 'install-bmalph.sh --platform "codex"'
@@ -29,6 +60,7 @@ load 'bats-assert/load'
 }
 
 @test "make bmalph-claude installs and verifies the Claude BMALPH flow" {
+  setup_isolated_bmalph_env
   run make bmalph-claude
   assert_success
   assert_output --partial 'install-bmalph.sh --platform "claude-code"'
@@ -38,6 +70,7 @@ load 'bats-assert/load'
 @test "make bmalph-init supports dry-run without changing tracked files" {
   local before_status after_status
 
+  setup_isolated_bmalph_env
   before_status="$(git status --short --untracked-files=all)"
 
   run make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
@@ -56,6 +89,7 @@ load 'bats-assert/load'
 @test "make bmalph-setup supports one-command dry-run without changing tracked files" {
   local before_status after_status
 
+  setup_isolated_bmalph_env
   before_status="$(git status --short --untracked-files=all)"
 
   run make bmalph-setup BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
@@ -72,6 +106,7 @@ load 'bats-assert/load'
 }
 
 @test "make bmalph-setup restores generated BMALPH assets in a fresh worktree" {
+  setup_isolated_bmalph_env
   run bash -lc '
     set -euo pipefail
     repo_root="$(pwd)"
@@ -122,6 +157,41 @@ load 'bats-assert/load'
   assert_success
 }
 
+@test "make bmalph-setup refuses to run init over dirty tracked files" {
+  setup_isolated_bmalph_env
+  run bash -lc '
+    set -euo pipefail
+    repo_root="$(pwd)"
+    tmpdir="$(mktemp -d)"
+    patch_file="$tmpdir.patch"
+    cleanup() {
+      git -C "$repo_root" worktree remove --force "$tmpdir" >/dev/null 2>&1 || true
+      rm -rf "$tmpdir" "$patch_file"
+    }
+    trap cleanup EXIT
+
+    git -C "$repo_root" worktree add --detach "$tmpdir" HEAD >/dev/null
+    git -C "$repo_root" diff --binary HEAD >"$patch_file"
+    if [ -s "$patch_file" ]; then
+      git -C "$tmpdir" apply --whitespace=nowarn "$patch_file"
+    fi
+
+    cd "$tmpdir"
+    printf "\n# dirty\n" >> README.md
+
+    set +e
+    output="$(make bmalph-setup BMALPH_PLATFORM=codex 2>&1)"
+    status=$?
+    set -e
+
+    printf "%s\n" "$output"
+    [ "$status" -ne 0 ]
+    grep -F "Error: refusing to run BMALPH init with existing tracked changes." <<<"$output"
+  '
+  assert_success
+  assert_output --partial "Error: refusing to run BMALPH init with existing tracked changes."
+}
+
 @test "workspace port helper auto-selects non-conflicting Docker host ports" {
   run bash -lc '
     set -euo pipefail
@@ -135,6 +205,34 @@ load 'bats-assert/load'
     [ "$REDIS_PORT" = "36379" ]
     [ "$LOCALSTACK_PORT" = "14566" ]
     [ "$STRUCTURIZR_PORT" = "18081" ]
+  '
+  assert_success
+}
+
+@test "workspace port helper mirrors single HTTPS or HTTP3 values into both env vars" {
+  run bash -lc '
+    set -euo pipefail
+    source scripts/local-coder/lib/workspace-ports.sh
+
+    unset HTTPS_PORT HTTP3_PORT
+    reserved_ports=""
+    HTTPS_PORT=9443
+    cs_ensure_workspace_https_ports reserved_ports
+    [ "$HTTPS_PORT" = "9443" ]
+    [ "$HTTP3_PORT" = "9443" ]
+    env | grep -Fx "HTTPS_PORT=9443"
+    env | grep -Fx "HTTP3_PORT=9443"
+    [ "$reserved_ports" = "9443" ]
+
+    unset HTTPS_PORT HTTP3_PORT
+    reserved_ports=""
+    HTTP3_PORT=10443
+    cs_ensure_workspace_https_ports reserved_ports
+    [ "$HTTPS_PORT" = "10443" ]
+    [ "$HTTP3_PORT" = "10443" ]
+    env | grep -Fx "HTTPS_PORT=10443"
+    env | grep -Fx "HTTP3_PORT=10443"
+    [ "$reserved_ports" = "10443" ]
   '
   assert_success
 }

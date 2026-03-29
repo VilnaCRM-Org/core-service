@@ -82,7 +82,15 @@ SECURITY_GROUP_NAME=${SECURITY_GROUP_NAME:-$DEFAULT_SECURITY_GROUP_NAME}
 LOCAL_MODE=${LOCAL_MODE_ENV:-$DEFAULT_LOCAL_MODE}
 
 if [[ "$LOCAL_MODE" == "true" ]]; then
-    export LOCALSTACK_PORT=$(resolve_localstack_port)
+    if ! LOCALSTACK_PORT="$(resolve_localstack_port)"; then
+        echo "Failed to resolve LocalStack port." >&2
+        exit 1
+    fi
+    if [[ -z "$LOCALSTACK_PORT" ]]; then
+        echo "Resolved LocalStack port is empty." >&2
+        exit 1
+    fi
+    export LOCALSTACK_PORT
     export ENDPOINT_URL=http://localhost:$LOCALSTACK_PORT
     export AWS_ACCESS_KEY_ID=$AWS_SQS_KEY
     export AWS_SECRET_ACCESS_KEY=$AWS_SQS_SECRET

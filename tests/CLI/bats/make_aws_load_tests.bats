@@ -54,8 +54,15 @@ EOF
 @test "localstack compose services define a readiness healthcheck" {
   run bash -lc '
     set -euo pipefail
-    grep -En "healthcheck:" docker-compose.override.yml docker-compose.load_test.override.yml
-    grep -En "_localstack/health" docker-compose.override.yml docker-compose.load_test.override.yml
+    for file in docker-compose.override.yml docker-compose.load_test.override.yml; do
+      block="$(awk "
+        /^  localstack:/ { in_block=1 }
+        in_block && /^  [[:alnum:]_-]+:/ && \$0 !~ /^  localstack:/ { exit }
+        in_block { print }
+      " "$file")"
+      grep -F "healthcheck:" <<<"$block"
+      grep -F "_localstack/health" <<<"$block"
+    done
   '
   assert_success
 }

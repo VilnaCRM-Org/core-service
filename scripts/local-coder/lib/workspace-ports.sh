@@ -11,16 +11,17 @@ cs_workspace_port_in_use() {
 cs_workspace_append_reserved_port() {
     local reserved_name="${1:?Missing reserved ports variable name}"
     local port="${2:?Missing port}"
-    local reserved_ports="${!reserved_name-}"
+    local -n reserved_ports_ref="${reserved_name}"
+    local current_reserved_ports="${reserved_ports_ref-}"
 
-    if cs_workspace_port_in_use "${port}" "${reserved_ports}"; then
+    if cs_workspace_port_in_use "${port}" "${current_reserved_ports}"; then
         return 0
     fi
 
-    if [ -n "${reserved_ports}" ]; then
-        printf -v "${reserved_name}" '%s %s' "${reserved_ports}" "${port}"
+    if [ -n "${current_reserved_ports}" ]; then
+        reserved_ports_ref="${current_reserved_ports} ${port}"
     else
-        printf -v "${reserved_name}" '%s' "${port}"
+        reserved_ports_ref="${port}"
     fi
 }
 
@@ -42,7 +43,7 @@ cs_ensure_workspace_port() {
     local fallback_port="${3:?Missing fallback port}"
     local reserved_name="${4:?Missing reserved ports variable name}"
     local current_value="${!variable_name-}"
-    local reserved_ports="${!reserved_name-}"
+    local current_reserved_ports="${!reserved_name-}"
     local chosen_port="${default_port}"
 
     if [ -n "${current_value}" ]; then
@@ -51,8 +52,8 @@ cs_ensure_workspace_port() {
         return 0
     fi
 
-    if cs_workspace_port_in_use "${chosen_port}" "${reserved_ports}"; then
-        chosen_port="$(cs_find_available_workspace_port "${fallback_port}" "${reserved_ports}")"
+    if cs_workspace_port_in_use "${chosen_port}" "${current_reserved_ports}"; then
+        chosen_port="$(cs_find_available_workspace_port "${fallback_port}" "${current_reserved_ports}")"
     fi
 
     printf -v "${variable_name}" '%s' "${chosen_port}"
@@ -62,21 +63,23 @@ cs_ensure_workspace_port() {
 
 cs_ensure_workspace_https_ports() {
     local reserved_name="${1:?Missing reserved ports variable name}"
-    local reserved_ports="${!reserved_name-}"
+    local current_reserved_ports="${!reserved_name-}"
     local https_port="${HTTPS_PORT-}"
     local http3_port="${HTTP3_PORT-}"
     local chosen_port="443"
 
     if [ -n "${https_port}" ] && [ -z "${http3_port}" ]; then
         HTTP3_PORT="${https_port}"
-        export HTTP3_PORT
+        HTTPS_PORT="${https_port}"
+        export HTTPS_PORT HTTP3_PORT
         cs_workspace_append_reserved_port "${reserved_name}" "${HTTPS_PORT}"
         return 0
     fi
 
     if [ -n "${http3_port}" ] && [ -z "${https_port}" ]; then
         HTTPS_PORT="${http3_port}"
-        export HTTPS_PORT
+        HTTP3_PORT="${http3_port}"
+        export HTTPS_PORT HTTP3_PORT
         cs_workspace_append_reserved_port "${reserved_name}" "${HTTP3_PORT}"
         return 0
     fi
@@ -88,8 +91,8 @@ cs_ensure_workspace_https_ports() {
         return 0
     fi
 
-    if cs_workspace_port_in_use "${chosen_port}" "${reserved_ports}"; then
-        chosen_port="$(cs_find_available_workspace_port "18443" "${reserved_ports}")"
+    if cs_workspace_port_in_use "${chosen_port}" "${current_reserved_ports}"; then
+        chosen_port="$(cs_find_available_workspace_port "18443" "${current_reserved_ports}")"
     fi
 
     HTTPS_PORT="${chosen_port}"

@@ -58,6 +58,14 @@ restore_new_tracked_changes() {
         return 0
     fi
 
+    if [ -n "${before_dirty}" ]; then
+        cat >&2 <<'EOM'
+Error: refusing to restore BMALPH-generated tracked changes over an already dirty worktree.
+Commit or stash tracked changes before running non-dry-run BMALPH init/setup.
+EOM
+        return 1
+    fi
+
     after_dirty="$(git_tracked_dirty_files "${target_dir}")"
     before_file="$(mktemp)"
     after_file="$(mktemp)"
@@ -201,6 +209,14 @@ if [ "${run_init}" = true ]; then
     fi
 
     tracked_dirty_before="$(git_tracked_dirty_files "${project_dir}")"
+
+    if [ "${dry_run}" != true ] && [ -n "${tracked_dirty_before}" ]; then
+        cat >&2 <<'EOM'
+Error: refusing to run BMALPH init with existing tracked changes.
+Commit or stash tracked files first, or use BMALPH_DRY_RUN=true to preview safely.
+EOM
+        exit 1
+    fi
 
     echo "Running BMALPH init in '${project_dir}' for platform '${platform}'."
     init_cmd=(
