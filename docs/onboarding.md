@@ -55,6 +55,12 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    # or for Claude Code
    make bmalph-setup BMALPH_PLATFORM=claude-code
    ```
+5. To generate specs only from a short task description in a fresh Codex session, use:
+   ```bash
+   make bmad-autonomous-plan \
+     PLAN_TASK="Plan a new feature" \
+     PLAN_VALIDATION_ROUNDS=2
+   ```
 
 ### Version Control Configuration
 

@@ -36,6 +36,7 @@ Quick Decision Tree:
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
+│   ├─ Full BMAD specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
 │   ├─ New API endpoint → api-platform-crud
 │   ├─ New load test → load-testing
@@ -103,7 +104,13 @@ Complex skills have multi-file structure:
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
 
-## Available Skills (14 Total)
+## Available Skills (15 Total)
+
+### 🤖 Autonomous Planning Skills
+
+| Skill | File | When to Use |
+| ----- | ---- | ----------- |
+| **Autonomous BMAD Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMAD research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
 
 ### 🔧 Workflow Skills
 

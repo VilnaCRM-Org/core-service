@@ -40,6 +40,7 @@ teardown() {
   assert_output --partial "bmalph-claude"
   assert_output --partial "bmalph-init"
   assert_output --partial "bmalph-setup"
+  assert_output --partial "bmad-autonomous-plan"
 }
 
 @test "make bmalph-install installs and verifies BMALPH for codex" {
@@ -434,4 +435,132 @@ EOF
     exit "$missing"
   '
   assert_success
+}
+
+@test "autonomous planning launcher dry-run resolves bundle metadata" {
+  rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan
+  run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
+    --task "Plan autonomous BMAD specs" \
+    --bundle-id test-autonomous-plan \
+    --max-validation-rounds 2 \
+    --issue-mode skip \
+    --pr-mode skip \
+    --dry-run
+  assert_success
+  assert_output --partial "Dry run only."
+  assert_output --partial "Bundle ID: test-autonomous-plan"
+  assert_output --partial "/.claude/skills/bmad-autonomous-planning/SKILL.md"
+  assert_output --partial "/scripts/local-coder/schemas/autonomous-bmad-planning-result.schema.json"
+}
+
+@test "autonomous planning launcher rejects invalid validation rounds" {
+  run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
+    --task "Plan autonomous BMAD specs" \
+    --max-validation-rounds 4 \
+    --dry-run
+  [ "$status" -ne 0 ]
+  assert_output --partial "validation rounds must be between 1 and 3"
+}
+
+@test "make bmad-autonomous-plan supports dry-run execution" {
+  rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-make
+  run make bmad-autonomous-plan \
+    PLAN_TASK="Plan autonomous BMAD specs" \
+    PLAN_BUNDLE_ID="test-autonomous-plan-make" \
+    PLAN_VALIDATION_ROUNDS=1 \
+    PLAN_DRY_RUN=true
+  assert_success
+  assert_output --partial "Dry run only."
+  assert_output --partial "Bundle ID: test-autonomous-plan-make"
+}
+
+@test "autonomous planning launcher invokes codex exec with skill prompt and schema" {
+  rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-codex
+  run bash -lc '
+    set -euo pipefail
+    repo_root="$(pwd)"
+    temp_home="$(mktemp -d)"
+    mock_bin="$(mktemp -d)"
+    codex_args="${temp_home}/codex-args.txt"
+    codex_prompt="${temp_home}/codex-prompt.txt"
+    cleanup() {
+      rm -rf "$temp_home" "$mock_bin"
+    }
+    trap cleanup EXIT
+
+    cat >"$mock_bin/codex" <<'"'"'EOF'"'"'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "${1-} ${2-}" = "login status" ]; then
+  exit 0
+fi
+
+args_file="${CODEX_ARGS_FILE:?missing CODEX_ARGS_FILE}"
+prompt_file="${CODEX_PROMPT_FILE:?missing CODEX_PROMPT_FILE}"
+printf "%s\n" "$@" >"$args_file"
+cat >"$prompt_file"
+
+output_last_message=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --output-last-message)
+      output_last_message="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+cat >"$output_last_message" <<'"'"'JSON'"'"'
+{"status":"complete","task":"Plan autonomous BMAD specs","bundle_id":"test-autonomous-plan-codex","bundle_dir":"/tmp/test-autonomous-plan-codex","artifacts":{"research":"/tmp/test-autonomous-plan-codex/research.md","brief":"/tmp/test-autonomous-plan-codex/product-brief.md","distillate":null,"prd":"/tmp/test-autonomous-plan-codex/prd.md","architecture":"/tmp/test-autonomous-plan-codex/architecture.md","epics":"/tmp/test-autonomous-plan-codex/epics.md","implementation_readiness":"/tmp/test-autonomous-plan-codex/implementation-readiness.md","run_summary":"/tmp/test-autonomous-plan-codex/run-summary.md"},"validation_rounds":{"research":1,"brief":1,"prd":1,"architecture":1,"epics":1,"stories":1},"open_questions":[],"warnings":[],"github":{"issue_status":"skipped","issue_number":null,"issue_url":null,"pr_status":"skipped","pr_number":null,"pr_url":null,"branch":null,"error":null}}
+JSON
+EOF
+
+    chmod +x "$mock_bin/codex"
+
+    env \
+      HOME="$temp_home" \
+      PATH="$mock_bin:/usr/bin:/bin" \
+      CODEX_ARGS_FILE="$codex_args" \
+      CODEX_PROMPT_FILE="$codex_prompt" \
+      bash scripts/local-coder/run-autonomous-bmad-planning.sh \
+        --task "Plan autonomous BMAD specs" \
+        --bundle-id "test-autonomous-plan-codex" \
+        --max-validation-rounds 1 \
+        --issue-mode create \
+        --pr-mode draft \
+        --repo "VilnaCRM-Org/core-service" \
+        --base-branch "main" \
+        --model "gpt-5.4-mini" \
+        --result-file "${temp_home}/result.json"
+
+    grep -Fx "exec" "$codex_args"
+    grep -Fx -- "--model" "$codex_args"
+    grep -Fx -- "gpt-5.4-mini" "$codex_args"
+    grep -F -- "--output-schema" "$codex_args"
+    grep -F -- "scripts/local-coder/schemas/autonomous-bmad-planning-result.schema.json" "$codex_args"
+    grep -F -- "--dangerously-bypass-approvals-and-sandbox" "$codex_args"
+    python3 - "$codex_args" <<'"'"'PY'"'"'
+import pathlib
+import sys
+
+args = pathlib.Path(sys.argv[1]).read_text().splitlines()
+assert args.index("--model") < args.index("-")
+assert args.index("gpt-5.4-mini") < args.index("-")
+PY
+    grep -F -- ".claude/skills/bmad-autonomous-planning/SKILL.md" "$codex_prompt"
+    grep -F -- "Initial repository paths to inspect first:" "$codex_prompt"
+    grep -F -- "- Makefile" "$codex_prompt"
+    grep -F -- "- scripts/local-coder/run-autonomous-bmad-planning.sh" "$codex_prompt"
+    grep -F -- "do not read .claude/skills/AI-AGENT-GUIDE.md or .claude/skills/SKILL-DECISION-GUIDE.md" "$codex_prompt"
+    grep -F -- "issue_mode: create" "$codex_prompt"
+    grep -F -- "pr_mode: draft" "$codex_prompt"
+    grep -F -- "Plan autonomous BMAD specs" "$codex_prompt"
+    test -s "${temp_home}/result.json"
+  '
+  assert_success
+  assert_output --partial "\"status\":\"complete\""
 }

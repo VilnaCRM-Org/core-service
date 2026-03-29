@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "task",
+    "bundle_id",
+    "bundle_dir",
+    "artifacts",
+    "validation_rounds",
+    "open_questions",
+    "warnings",
+    "github"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "complete-with-warnings",
+        "failed"
+      ]
+    },
+    "task": {
+      "type": "string"
+    },
+    "bundle_id": {
+      "type": "string"
+    },
+    "bundle_dir": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "research",
+        "brief",
+        "distillate",
+        "prd",
+        "architecture",
+        "epics",
+        "implementation_readiness",
+        "run_summary"
+      ],
+      "properties": {
+        "research": {
+          "type": "string"
+        },
+        "brief": {
+          "type": "string"
+        },
+        "distillate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prd": {
+          "type": "string"
+        },
+        "architecture": {
+          "type": "string"
+        },
+        "epics": {
+          "type": "string"
+        },
+        "implementation_readiness": {
+          "type": "string"
+        },
+        "run_summary": {
+          "type": "string"
+        }
+      }
+    },
+    "validation_rounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "research",
+        "brief",
+        "prd",
+        "architecture",
+        "epics",
+        "stories"
+      ],
+      "properties": {
+        "research": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "brief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "prd": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "architecture": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "epics": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "stories": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "github": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issue_status",
+        "issue_number",
+        "issue_url",
+        "pr_status",
+        "pr_number",
+        "pr_url",
+        "branch",
+        "error"
+      ],
+      "properties": {
+        "issue_status": {
+          "type": "string",
+          "enum": [
+            "skipped",
+            "created",
+            "failed"
+          ]
+        },
+        "issue_number": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "issue_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pr_status": {
+          "type": "string",
+          "enum": [
+            "skipped",
+            "created",
+            "failed"
+          ]
+        },
+        "pr_number": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pr_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

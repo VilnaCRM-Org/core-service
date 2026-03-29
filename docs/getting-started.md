@@ -192,6 +192,18 @@ make bmalph-setup
 make bmalph-setup BMALPH_PLATFORM=claude-code
 ```
 
+To run the repository's autonomous BMAD planner in a fresh Codex session:
+
+```bash
+make bmad-autonomous-plan \
+  PLAN_TASK="Plan API-level customer tagging" \
+  PLAN_VALIDATION_ROUNDS=2
+```
+
+Set `PLAN_DRY_RUN=true` to inspect the resolved bundle location, skill path,
+and schema without starting Codex. Claude-oriented workflows use the same
+planning instructions from `.claude/skills/bmad-autonomous-planning/SKILL.md`.
+
 `bmalph init` writes BMAD/Ralph assets and platform-specific instruction files.
 Run the dry-run first, then initialize only when you want those files in your
 working tree.

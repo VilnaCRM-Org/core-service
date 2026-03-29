@@ -17,6 +17,7 @@ What are you trying to do?
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
+│   ├─ Full BMAD specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
 │   ├─ New API endpoint → developing-openapi-specs
 │   ├─ New load test → load-testing
@@ -118,6 +119,19 @@ This skill systematically handles review feedback.
 This skill runs comprehensive CI checks.
 
 **NOT**: testing-workflow (that's specifically for tests)
+
+---
+
+### "I need BMAD specs created autonomously from a short task description"
+
+**Use**: [bmad-autonomous-planning](bmad-autonomous-planning/SKILL.md)
+
+This skill orchestrates research, brief, PRD, architecture, and epics/stories
+without stopping for interactive BMAD menus, and it can optionally create a
+GitHub issue or specs-only PR.
+
+**NOT**: create-prd (that assumes interactive workflow progression)
+**NOT**: sprint-planning (that only derives sprint status from existing epics)
 
 ---
 

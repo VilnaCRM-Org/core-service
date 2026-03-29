@@ -21,7 +21,27 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ## Available Skills
 
-### 1. CI Workflow (`ci-workflow/`)
+### 1. Autonomous BMAD Planning (`bmad-autonomous-planning/`)
+
+**Purpose**: Create BMAD planning artifacts fully autonomously from a short task description
+
+**When activated**:
+
+- User wants BMAD specs without step-by-step interaction
+- Need a product brief, PRD, architecture, and epics/stories bundle for later implementation
+- Need optional GitHub issue or specs-only PR output from a planning run
+
+**What it does**:
+
+- Creates a focused planning bundle with research, brief, PRD, architecture, and epics/stories
+- Uses repository-aware validation loops without blocking on BMAD approval menus
+- Returns machine-readable JSON for launcher scripts and automation
+
+**Key command**: `make bmad-autonomous-plan PLAN_TASK="Plan a new feature"`
+
+---
+
+### 2. CI Workflow (`ci-workflow/`)
 
 **Purpose**: Run comprehensive CI checks before committing changes
 
@@ -42,7 +62,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 2. Testing Workflow (`testing-workflow/`)
+### 3. Testing Workflow (`testing-workflow/`)
 
 **Purpose**: Run and manage different types of tests
 
@@ -64,7 +84,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 3. Code Review Workflow (`code-review/`)
+### 4. Code Review Workflow (`code-review/`)
 
 **Purpose**: Systematically retrieve and address PR code review comments
 
@@ -86,7 +106,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 4. Quality Standards (`quality-standards/`)
+### 5. Quality Standards (`quality-standards/`)
 
 **Purpose**: Overview of protected quality thresholds and quick reference for all quality tools
 
@@ -118,7 +138,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 5. Documentation Synchronization (`documentation-sync/`)
+### 6. Documentation Synchronization (`documentation-sync/`)
 
 **Purpose**: Keep `docs/` directory synchronized with code changes
 
@@ -143,7 +163,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 6. Documentation Creation (`documentation-creation/`)
+### 7. Documentation Creation (`documentation-creation/`)
 
 **Purpose**: Create comprehensive project documentation from scratch
 
@@ -180,7 +200,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 7. Database Migrations (`database-migrations/`)
+### 8. Database Migrations (`database-migrations/`)
 
 **Purpose**: Create and manage database migrations using Doctrine ODM for MongoDB
 
@@ -211,7 +231,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 8. Load Testing (`load-testing/`)
+### 9. Load Testing (`load-testing/`)
 
 **Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
 
