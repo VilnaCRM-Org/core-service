@@ -75,6 +75,7 @@ After startup, verify the environment:
 ```bash
 gh --version
 codex --version
+bmalph --version
 make help
 ```
 
@@ -88,10 +89,11 @@ The default devcontainer bind mounts look for host-side directories under `${HOM
 - bootstrap sets git identity for automated commits to:
   - `vilnacrm ai bot <info@vilnacrm.com>`
 
-The post-create step runs secure bootstrap automatically and then executes startup smoke tests when auth is available. You can also run scripts manually:
+The post-create step runs secure bootstrap automatically and then executes startup smoke tests when auth is available. Run the following commands from the repository root in a login shell (`bash -l`) so PATH and synced credentials are available:
 
 ```bash
 bash scripts/local-coder/setup-secure-agent-env.sh
+make bmalph-codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -101,6 +103,7 @@ What `startup-smoke-tests.sh` checks:
 - `gh` authentication is available
 - repository listing for `VilnaCRM-Org` works
 - `bats` CLI is available
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can execute one non-interactive task
 
 Repository-tracked defaults for workspace bootstrap are stored in:
@@ -115,8 +118,45 @@ What `verify-gh-codex.sh` checks:
 - repository listing for `VilnaCRM-Org` works
 - current PR checks can be queried via `gh`
 - current branch supports `git push --dry-run`
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can run basic non-interactive smoke tasks
 - tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`
+
+#### BMALPH for Codex and Claude
+
+The workspace bootstrap installs the `bmalph` CLI automatically so it is ready
+for Codex-based development in Coder CE. For local setup, use the make targets:
+
+```bash
+# Install and verify BMALPH for Codex
+make bmalph-codex
+
+# Install and verify BMALPH for Claude Code
+make bmalph-claude
+
+# Generic install target
+make bmalph-install BMALPH_PLATFORM=codex
+```
+
+To preview how BMALPH would initialize this repository for a platform without
+changing any tracked files, run:
+
+```bash
+make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
+make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true
+```
+
+To install and initialize BMALPH for the current project in one command, run:
+
+```bash
+make bmalph-setup
+make bmalph-setup BMALPH_PLATFORM=claude-code
+```
+
+`bmalph init` writes local BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
+platform-specific instruction files. Those generated directories are ignored in
+git for this repository, so use the dry-run first and initialize locally only
+when you want the tooling available in your workspace.
 
 Notes:
 
