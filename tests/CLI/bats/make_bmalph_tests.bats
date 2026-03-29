@@ -460,7 +460,7 @@ EOF
     wrapper=".agents/skills/bmad-autonomous-planning/SKILL.md"
     grep -F "repo-local bash" "$wrapper"
     grep -F "canonical planning contract" "$wrapper"
-    grep -F "Read \`_bmad/COMMANDS.md\` and the resolved BMAD config file first." "$wrapper"
+    grep -F "Read the local \`bmalph\` skill wrapper, \`_bmad/COMMANDS.md\`, and the resolved" "$wrapper"
     grep -F "Run each BMALPH planning stage in a dedicated subagent" "$wrapper"
     grep -F "the main agent must decide the next step" "$wrapper"
     grep -F ".claude/skills/bmad-autonomous-planning/SKILL.md" "$wrapper"
