@@ -129,7 +129,8 @@ This skill runs comprehensive CI checks.
 This skill orchestrates research, brief, PRD, architecture, and epics/stories
 through the repository's BMALPH wrapper surface without stopping for interactive
 BMAD menus. In Codex, start with `.agents/skills/bmad-autonomous-planning/SKILL.md`
-and run the flow in the current session with one focused subagent per BMALPH stage.
+and run the flow in the current session with one focused subagent per BMALPH
+stage, using `gpt-5.4` with `xhigh` reasoning for those subagents.
 
 **NOT**: create-prd (that assumes interactive workflow progression)
 **NOT**: sprint-planning (that only derives sprint status from existing epics)

@@ -114,7 +114,7 @@ Complex skills have multi-file structure:
 
 Preferred Codex trigger for this skill:
 
-`Use the bmad-autonomous-planning skill to plan a new feature. Work fully autonomously, run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents, and write the specs bundle under the configured planning artifacts directory.`
+`Use the bmad-autonomous-planning skill to plan a new feature. Work fully autonomously, run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents on gpt-5.4 with xhigh reasoning, and write the specs bundle under the configured planning artifacts directory.`
 
 ### 🔧 Workflow Skills
 
@@ -187,7 +187,7 @@ Preferred Codex trigger for this skill:
 
 1. **Identify skill**: Read `SKILL-DECISION-GUIDE.md` → Points to `bmad-autonomous-planning`
 2. **Use the Codex wrapper**: Open `.agents/skills/bmad-autonomous-planning/SKILL.md`
-3. **Execute in the current session**: Follow the skill and run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents
+3. **Execute in the current session**: Follow the skill and run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents using `gpt-5.4` with `xhigh` reasoning
 4. **Inspect outputs**: Review the generated bundle artifacts and unresolved questions
 5. **Validate**: Run `make ci` if you changed the skill docs, tests, or supporting guidance
 
