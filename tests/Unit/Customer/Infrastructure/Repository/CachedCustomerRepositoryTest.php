@@ -398,7 +398,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->innerRepository
             ->expects($this->once())
             ->method('find')
-            ->with($id)
+            ->with($id, 0, null)
             ->willThrowException(new \RuntimeException('Lookup failed'));
 
         $this->logger
