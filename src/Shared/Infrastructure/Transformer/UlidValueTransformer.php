@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use InvalidArgumentException;
 use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
@@ -27,9 +28,15 @@ final class UlidValueTransformer
             return $value;
         }
 
-        return $this->ulidFactory->create(
-            $this->representationTransformer->normalizeForUlidFactory($value)
-        );
+        $normalized = $this->representationTransformer->normalizeForUlidFactory($value);
+
+        if (!is_string($normalized)) {
+            throw new InvalidArgumentException(
+                sprintf('Expected string after normalization, got %s', get_debug_type($normalized))
+            );
+        }
+
+        return $this->ulidFactory->create($normalized);
     }
 
     public function fromBinary(Binary|string|SymfonyUlid $value): SymfonyUlid

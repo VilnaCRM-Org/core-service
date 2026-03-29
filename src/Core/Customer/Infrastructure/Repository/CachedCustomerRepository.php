@@ -241,8 +241,13 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             $deletedId
         );
 
-        $this->cache->invalidateTags(
-            iterator_to_array($tags)
-        );
+        try {
+            $this->cache->invalidateTags(iterator_to_array($tags));
+        } catch (\Throwable $e) {
+            $this->logger->warning('Cache invalidation failed after customer deletion', [
+                'operation' => 'cache.invalidation.error',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

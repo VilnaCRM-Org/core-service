@@ -120,11 +120,35 @@ load 'bats-assert/load'
   '
 
   assert_failure
+  assert_output --partial "NonExistentTrait"
+}
 
-  if [[ "$output" != *"Source pattern guard found non-baselined violations:"* ]] \
-    && [[ "$output" != *"does not exist"* ]]; then
-    fail "Expected source-pattern-guard or Psalm error output, but got neither"
-  fi
+@test "make source-pattern-guard should fail on non-baselined violations" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    make source-pattern-guard
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Source pattern guard found non-baselined violations:"
+  assert_output --partial "Hardcoded new expression found"
 }
 
 @test "make phpinsights should fail when code quality is low" {

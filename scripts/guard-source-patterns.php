@@ -104,14 +104,20 @@ function collectViolations(string $rootPath): array
                     }
                 }
 
-                if ($node instanceof Node\Expr\New_ && !$node->class instanceof Node\Stmt\Class_) {
+                if ($node instanceof Node\Expr\New_) {
+                    if ($node->class instanceof Node\Stmt\Class_) {
+                        return null;
+                    }
+
+                    if (!$node->class instanceof Node\Name) {
+                        return null;
+                    }
+
                     if (str_contains($this->file, '/Factory/')) {
                         return null;
                     }
 
-                    $className = $node->class instanceof Node\Name
-                        ? $node->class->toString()
-                        : 'dynamic-class';
+                    $className = $node->class->toString();
 
                     if (preg_match('/(?:Exception|Error)$/', $className) === 1) {
                         return null;

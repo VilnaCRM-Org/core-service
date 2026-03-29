@@ -262,6 +262,51 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->repository->deleteByEmail($email);
     }
 
+    public function testDeleteByEmailLogsWarningWhenCacheInvalidationFails(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willThrowException(new \RuntimeException('Cache backend unavailable'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Cache backend unavailable';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
     public function testDeleteByIdDelegatesToInnerRepository(): void
     {
         $id = (string) $this->faker->ulid();
