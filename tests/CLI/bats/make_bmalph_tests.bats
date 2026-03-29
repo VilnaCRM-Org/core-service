@@ -253,8 +253,8 @@ EOF
 @test "workspace compose files avoid fixed localstack names and parameterize redis host ports" {
   run bash -lc '
     set -euo pipefail
-    ! rg -n "container_name:\\s*localstack" docker-compose.override.yml docker-compose.load_test.override.yml
-    rg -n "\\$\\{REDIS_PORT:-6379\\}:6379" docker-compose.yml
+    ! grep -En "container_name:[[:space:]]*localstack" docker-compose.override.yml docker-compose.load_test.override.yml
+    grep -En "\\$\\{REDIS_PORT:-6379\\}:6379" docker-compose.yml
   '
   assert_success
 }
@@ -269,7 +269,7 @@ EOF
     [ -d "$temp_home/.openclaw-host-codex" ]
     [ "$(stat -c "%a" "$temp_home/.openclaw-host-secrets")" = "700" ]
     [ "$(stat -c "%a" "$temp_home/.openclaw-host-codex")" = "700" ]
-    rg -n "\"initializeCommand\": \"bash \\.devcontainer/initialize\\.sh\"" .devcontainer/devcontainer.json
+    grep -En "\"initializeCommand\": \"bash \\.devcontainer/initialize\\.sh\"" .devcontainer/devcontainer.json
   '
   assert_success
 }
@@ -277,8 +277,8 @@ EOF
 @test "devcontainer keeps workspace path host-visible for docker-outside-of-docker" {
   run bash -lc '
     set -euo pipefail
-    rg -n "\"workspaceMount\": \"source=\\$\\{localWorkspaceFolder\\},target=\\$\\{localWorkspaceFolder\\},type=bind\"" .devcontainer/devcontainer.json
-    rg -n "\"workspaceFolder\": \"\\$\\{localWorkspaceFolder\\}\"" .devcontainer/devcontainer.json
+    grep -En "\"workspaceMount\": \"source=\\$\\{localWorkspaceFolder\\},target=\\$\\{localWorkspaceFolder\\},type=bind\"" .devcontainer/devcontainer.json
+    grep -En "\"workspaceFolder\": \"\\$\\{localWorkspaceFolder\\}\"" .devcontainer/devcontainer.json
   '
   assert_success
 }
@@ -296,7 +296,7 @@ EOF
     cs_align_git_remote_protocol origin github.com https
     [ "$(git remote get-url origin)" = "https://github.com/VilnaCRM-Org/core-service.git" ]
     [ "$(git remote get-url --push origin)" = "https://github.com/VilnaCRM-Org/core-service.git" ]
-    rg -n "^GH_GIT_PROTOCOL=\"\\$\\{GH_GIT_PROTOCOL:-https\\}\"$" "$repo_root/.devcontainer/workspace-settings.env"
+    grep -En "^GH_GIT_PROTOCOL=\"\\$\\{GH_GIT_PROTOCOL:-https\\}\"$" "$repo_root/.devcontainer/workspace-settings.env"
   '
   assert_success
 }
