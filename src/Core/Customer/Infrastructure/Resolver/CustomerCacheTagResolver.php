@@ -23,7 +23,7 @@ final readonly class CustomerCacheTagResolver
         $tags = new CustomerCacheTagCollection('customer.collection');
 
         if ($customer instanceof Customer) {
-            return $tags->with(
+            $tags = $tags->with(
                 'customer.' . $customer->getUlid(),
                 'customer.email.' . $this->cacheKeyBuilder->hashEmail($customer->getEmail())
             );

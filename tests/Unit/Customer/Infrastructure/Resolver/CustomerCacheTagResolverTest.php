@@ -27,13 +27,51 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
             ->with('customer@example.com')
             ->willReturn('hashed-email');
 
+        $result = $resolver->resolveForDeletedCustomer($customer);
+
+        self::assertInstanceOf(CustomerCacheTagCollection::class, $result);
         self::assertSame(
             [
                 'customer.collection',
                 'customer.01ARZ3NDEKTSV4RRFFQ69G5FAV',
                 'customer.email.hashed-email',
             ],
-            iterator_to_array($resolver->resolveForDeletedCustomer($customer))
+            iterator_to_array($result)
+        );
+    }
+
+    public function testResolveForDeletedCustomerWithCustomerKeepsRawDeleteIdentifiers(): void
+    {
+        $cacheKeyBuilder = $this->createMock(CacheKeyBuilder::class);
+        $resolver = new CustomerCacheTagResolver($cacheKeyBuilder);
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            'getEmail' => 'customer@example.com',
+        ]);
+
+        $cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->willReturnMap([
+                ['customer@example.com', 'hashed-email'],
+                ['Customer@Example.com', 'raw-hashed-email'],
+            ]);
+
+        self::assertSame(
+            [
+                'customer.collection',
+                'customer.01ARZ3NDEKTSV4RRFFQ69G5FAV',
+                'customer.email.hashed-email',
+                'customer.duplicate-id',
+                'customer.email.raw-hashed-email',
+            ],
+            iterator_to_array(
+                $resolver->resolveForDeletedCustomer(
+                    customer: $customer,
+                    deletedEmail: 'Customer@Example.com',
+                    deletedId: 'duplicate-id'
+                )
+            )
         );
     }
 

@@ -212,7 +212,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->with($email);
 
         $this->cacheKeyBuilder
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('hashEmail')
             ->with($email)
             ->willReturn($emailHash);
@@ -328,7 +328,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->with($email);
 
         $this->cacheKeyBuilder
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('hashEmail')
             ->with($email)
             ->willReturn($emailHash);
@@ -387,6 +387,52 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer.' . $id,
                 'customer.email.' . $emailHash,
             ]);
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdLogsWarningWhenCacheInvalidationFails(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => $id,
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willThrowException(new \RuntimeException('Cache backend unavailable'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Cache backend unavailable';
+                })
+            );
 
         $this->repository->deleteById($id);
     }
