@@ -109,10 +109,14 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 
         $cachedCustomer = $this->repository->findByEmail($email);
         self::assertNotNull($cachedCustomer);
+        self::assertNotNull($this->repository->find($customer->getUlid()));
         self::assertTrue(
             $this->cachePool
                 ->getItem('customer.email.' . hash('sha256', strtolower($email)))
                 ->isHit()
+        );
+        self::assertTrue(
+            $this->cachePool->getItem('customer.' . $customer->getUlid())->isHit()
         );
 
         $this->repository->deleteByEmail($email);
@@ -125,6 +129,7 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         self::assertFalse(
             $this->cachePool->getItem('customer.' . $customer->getUlid())->isHit()
         );
+        self::assertNull($this->repository->find($customer->getUlid()));
         self::assertNull($this->repository->findByEmail($email));
     }
 
@@ -138,8 +143,14 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 
         $cachedCustomer = $this->repository->find($customerId);
         self::assertNotNull($cachedCustomer);
+        self::assertNotNull($this->repository->findByEmail($customer->getEmail()));
         self::assertTrue(
             $this->cachePool->getItem('customer.' . $customerId)->isHit()
+        );
+        self::assertTrue(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($customer->getEmail())))
+                ->isHit()
         );
 
         $this->repository->deleteById($customerId);
@@ -156,6 +167,7 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
                 ->isHit()
         );
         self::assertNull($this->repository->find($customerId));
+        self::assertNull($this->repository->findByEmail($customer->getEmail()));
     }
 
     public function testEmailCacheInvalidatedAfterEmailChange(): void

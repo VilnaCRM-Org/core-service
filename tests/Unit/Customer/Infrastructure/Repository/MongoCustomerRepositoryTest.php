@@ -10,8 +10,6 @@ use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\Query\Builder;
-use Doctrine\ODM\MongoDB\Query\Query;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
@@ -141,47 +139,48 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
-    public function testDeleteByEmailBuildsRemoveQuery(): void
+    public function testDeleteByEmailDeletesResolvedCustomer(): void
     {
         $email = 'test@example.com';
-        $builder = $this->createMock(Builder::class);
-        $query = $this->createMock(Query::class);
+        $customer = $this->createMock(Customer::class);
 
         $repository = $this->getMockBuilder(MongoCustomerRepository::class)
             ->setConstructorArgs([$this->registry])
-            ->onlyMethods(['createQueryBuilder'])
+            ->onlyMethods(['findByEmail', 'delete'])
             ->getMock();
 
         $repository
             ->expects($this->once())
-            ->method('createQueryBuilder')
-            ->willReturn($builder);
-
-        $builder
-            ->expects($this->once())
-            ->method('remove')
-            ->willReturnSelf();
-
-        $builder
-            ->expects($this->once())
-            ->method('field')
-            ->with('email')
-            ->willReturnSelf();
-
-        $builder
-            ->expects($this->once())
-            ->method('equals')
+            ->method('findByEmail')
             ->with($email)
-            ->willReturnSelf();
+            ->willReturn($customer);
 
-        $builder
+        $repository
             ->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($query);
+            ->method('delete')
+            ->with($customer);
 
-        $query
+        $repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailReturnsWhenCustomerDoesNotExist(): void
+    {
+        $email = 'test@example.com';
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findByEmail', 'delete'])
+            ->getMock();
+
+        $repository
             ->expects($this->once())
-            ->method('execute');
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn(null);
+
+        $repository
+            ->expects($this->never())
+            ->method('delete');
 
         $repository->deleteByEmail($email);
     }

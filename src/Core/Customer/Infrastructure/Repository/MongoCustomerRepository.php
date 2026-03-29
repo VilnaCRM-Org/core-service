@@ -59,11 +59,13 @@ final class MongoCustomerRepository extends BaseRepository implements
 
     public function deleteByEmail(string $email): void
     {
-        $this->createQueryBuilder()
-            ->remove()
-            ->field('email')->equals($email)
-            ->getQuery()
-            ->execute();
+        $customer = $this->findByEmail($email);
+
+        if (! $customer instanceof Customer) {
+            return;
+        }
+
+        $this->delete($customer);
     }
 
     public function deleteById(mixed $id): void
