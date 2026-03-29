@@ -4,17 +4,27 @@ load 'bats-support/load'
 load 'bats-assert/load'
 
 @test "make check-security should report vulnerabilities if present" {
-  cp composer.lock composer.lock.bak
+  run bash -lc '
+    set -euo pipefail
+    cleanup() {
+      if [ -f composer.lock.bak ]; then
+        mv composer.lock.bak composer.lock
+      fi
+    }
+    trap cleanup EXIT
 
-  original_content=$(cat composer.lock)
+    cp composer.lock composer.lock.bak
+    original_content=$(cat composer.lock)
+    modified_content=$(echo "$original_content" | jq '"'"'.packages += [{"name": "symfony/http-kernel", "version": "v4.4.0"}]'"'"')
+    echo "$modified_content" > composer.lock
 
-  modified_content=$(echo "$original_content" | jq '.packages += [{"name": "symfony/http-kernel", "version": "v4.4.0"}]')
+    set +e
+    make check-security
+    status=$?
+    set -e
 
-  echo "$modified_content" > composer.lock
-
-  run make check-security
-
-  mv composer.lock.bak composer.lock
+    exit "$status"
+  '
 
   assert_failure
   assert_output --partial "symfony/http-kernel (v4.4.0)"
@@ -22,57 +32,92 @@ load 'bats-assert/load'
 }
 
 @test "make infection should fail due to partly covered class" {
-  mv tests/CLI/bats/php/PartlyCoveredEventBus.php src/Shared/Infrastructure/Bus/Event/
-  mv tests/CLI/bats/php/PartlyCoveredEventBusTest.php tests/Unit/Shared/Infrastructure/Bus/Event/
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/PartlyCoveredEventBus.php"
+    target_path="src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php"
+    test_source_path="tests/CLI/bats/php/PartlyCoveredEventBusTest.php"
+    test_target_path="tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php"
 
-  cleanup() {
-    if [ -f src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php ]; then
-      mv src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php tests/CLI/bats/php/
-    fi
-    if [ -f tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php ]; then
-      mv tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php tests/CLI/bats/php/
-    fi
-  }
-  trap cleanup EXIT
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+      if [ -f "$test_target_path" ]; then
+        mv "$test_target_path" "$test_source_path"
+      fi
+    }
+    trap cleanup EXIT
 
-  composer dump-autoload
+    mv "$source_path" "$target_path"
+    mv "$test_source_path" "$test_target_path"
+    make ensure-test-services >/dev/null
+    docker compose exec php composer dump-autoload >/dev/null
+    make unit-tests >/dev/null 2>&1 || true
 
-  run make unit-tests
-  run make infection
+    set +e
+    make infection
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
-
   assert_output --partial "1 covered mutants were not detected"
 }
 
 @test "make behat should fail when scenarios fail" {
-  original_path="tests/Behat/CustomerContext/CustomerContext.php"
-  temp_path="tests/CustomerContext.php"
-  
-  cleanup() {
-    if [ -f "$temp_path" ]; then
-      mv "$temp_path" "$original_path"
-    fi
-  }
-  trap cleanup EXIT
-  
-  mv "$original_path" "$temp_path"
-  run make behat
-  
-  mv "$temp_path" "$original_path"
-  
+  run bash -lc '
+    set -euo pipefail
+    original_path="tests/Behat/CustomerContext/CustomerContext.php"
+    temp_path="tests/CustomerContext.php"
+
+    cleanup() {
+      if [ -f "$temp_path" ]; then
+        mv "$temp_path" "$original_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$original_path" "$temp_path"
+
+    set +e
+    make behat
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
 }
 
 @test "make psalm should fail when there are errors" {
-  mv tests/CLI/bats/php/PsalmErrorExample.php src/Shared/Application/
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/PsalmErrorExample.php"
+    target_path="src/Shared/Application/PsalmErrorExample.php"
 
-  # Regenerate autoloader and clear Psalm cache
-  composer dump-autoload
-  docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
 
-  run make psalm
+    mv "$source_path" "$target_path"
+    make ensure-test-services >/dev/null
+    docker compose exec php composer dump-autoload >/dev/null
+    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
 
-  mv src/Shared/Application/PsalmErrorExample.php tests/CLI/bats/php/
+    set +e
+    make psalm
+    status=$?
+    set -e
+
+    exit "$status"
+  '
 
   assert_failure
 
@@ -83,41 +128,100 @@ load 'bats-assert/load'
 }
 
 @test "make phpinsights should fail when code quality is low" {
-  mv tests/CLI/bats/php/temp_bad_code.php src/temp_bad_code.php
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/temp_bad_code.php"
+    target_path="src/temp_bad_code.php"
 
-  run make phpinsights
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
 
-  mv src/temp_bad_code.php tests/CLI/bats/php/
+    mv "$source_path" "$target_path"
+
+    set +e
+    make phpinsights
+    status=$?
+    set -e
+
+    exit "$status"
+  '
 
   assert_failure
   assert_output --partial "The method anotherBadMethod() has a Cyclomatic Complexity of 10"
 }
 
 @test "make unit-tests should fail if tests fail" {
-  mv tests/CLI/bats/php/FailingTest.php tests/Unit/
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/FailingTest.php"
+    target_path="tests/Unit/FailingTest.php"
 
-  run make unit-tests
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
 
-  mv tests/Unit/FailingTest.php tests/CLI/bats/php/
+    mv "$source_path" "$target_path"
+
+    set +e
+    make unit-tests
+    status=$?
+    set -e
+
+    exit "$status"
+  '
 
   assert_failure
   assert_output --partial "FAILURES!"
 }
 
 @test "PHP CS Fixer should report violations if present" {
-  echo "<?php \$foo = 'bar' ;  " > temp_file.php
-  run docker compose exec php ./vendor/bin/php-cs-fixer fix temp_file.php --dry-run --diff
-  rm temp_file.php
+  run bash -lc '
+    set -euo pipefail
+    cleanup() {
+      rm -f temp_file.php
+    }
+    trap cleanup EXIT
+
+    echo "<?php \$foo = '"'"'\'"'"''"'"'bar'"'"'\'"'"''"'"' ;  " > temp_file.php
+
+    set +e
+    docker compose exec php ./vendor/bin/php-cs-fixer fix temp_file.php --dry-run --diff
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
 }
 
 @test "make composer-validate should fail with invalid composer.json" {
-  mv composer.json composer.json.bak
-  echo "{" > composer.json
+  run bash -lc '
+    set -euo pipefail
+    cleanup() {
+      if [ -f composer.json.bak ]; then
+        mv composer.json.bak composer.json
+      fi
+    }
+    trap cleanup EXIT
 
-  run make composer-validate
+    mv composer.json composer.json.bak
+    echo "{" > composer.json
 
-  mv composer.json.bak composer.json
+    set +e
+    make composer-validate
+    status=$?
+    set -e
+
+    exit "$status"
+  '
 
   assert_failure
 }

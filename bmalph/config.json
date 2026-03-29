@@ -1,0 +1,9 @@
+{
+  "name": "core-service",
+  "description": "VilnaCRM core service",
+  "createdAt": "2026-03-28T21:01:11.712Z",
+  "platform": "codex",
+  "upstreamVersions": {
+    "bmadCommit": "d1163f85"
+  }
+}

@@ -45,6 +45,16 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    ```bash
    make start
    ```
+4. If you plan to use BMALPH with Codex or Claude during development, run these commands from the repository root in a login shell (for example, `bash -l`):
+   ```bash
+   make bmalph-codex
+   # or
+   make bmalph-claude
+   # then initialize the local _bmad/ and .ralph/ assets for this repo
+   make bmalph-setup
+   # or for Claude Code
+   make bmalph-setup BMALPH_PLATFORM=claude-code
+   ```
 
 ### Version Control Configuration
 

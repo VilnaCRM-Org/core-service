@@ -55,6 +55,11 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
    - Use a login shell (`bash -l`) before auth-dependent checks when the workspace was just created
    - Avoid non-login shells immediately after bootstrap because `~/.config/core-service/agent-secrets.env` is sourced from `~/.bashrc` and `~/.profile`
 
+4. **Optional: Use BMALPH When Needed**
+   - Coder CE bootstrap installs `bmalph` automatically for Codex and Claude-oriented workflows
+   - For local setup, run `make bmalph-codex` or `make bmalph-claude`
+   - To preview BMALPH repo initialization safely, use `make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true` or `make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true`
+
 ### Quick Skill Guide
 
 | Task Type                  | Skill                           | When to Use                                  |
@@ -175,3 +180,28 @@ PHP 8.4+, Symfony 7, API Platform 4, MongoDB, GraphQL. See project documentation
 ---
 
 **For detailed implementation patterns, workflows, and examples → See modular skills in `.claude/skills/` directory.**
+
+## BMAD-METHOD Integration
+
+BMAD commands are available as Codex Skills. Use `$command-name` to invoke them
+(e.g., `$create-prd`, `$analyst`). To install the local BMAD/Ralph workspace,
+run `make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true` to preview and
+`make bmalph-setup` when you intentionally want the generated files in your
+workspace.
+
+### Phases
+
+| Phase             | Focus                   | Key Agents                                  |
+| ----------------- | ----------------------- | ------------------------------------------- |
+| 1. Analysis       | Understand the problem  | Analyst agent                               |
+| 2. Planning       | Define the solution     | Product Manager agent                       |
+| 3. Solutioning    | Design the architecture | Architect agent                             |
+| 4. Implementation | Build it                | Developer agent, then Ralph autonomous loop |
+
+### Workflow
+
+1. Work through Phases 1-3 using BMAD agents and workflows
+2. Initialize BMALPH locally when you need the generated workflow files or
+   Ralph loop assets in your workspace
+3. Use the `create-prd` workflow or other BMAD skills, then transition into
+   Ralph when you intentionally want an autonomous loop
