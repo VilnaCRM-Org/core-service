@@ -112,6 +112,18 @@ Complex skills have multi-file structure:
 | ------------------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous BMALPH Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMALPH-wrapped research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
 
+Preferred Codex launcher for this skill:
+
+```bash
+make bmalph-autonomous-plan \
+  PLAN_TASK="Plan a new feature" \
+  PLAN_VALIDATION_ROUNDS=2
+```
+
+Use `PLAN_DRY_RUN=true` for a non-mutating preview, `PLAN_DEBUG=true` to stream
+a safe progress trace, and `PLAN_RESULT_FILE=/tmp/plan.json` when the final JSON
+should be inspected from disk after the run.
+
 ### 🔧 Workflow Skills
 
 | Skill                | File                        | When to Use                                      |
@@ -176,6 +188,16 @@ Complex skills have multi-file structure:
 2. **Read each skill** in order and execute steps
 
 3. **Use examples**: Check `.claude/skills/api-platform-crud/examples/complete-customer-crud.md` for full example
+
+### Example 2b: User asks to "plan a feature autonomously through BMALPH"
+
+**Your workflow:**
+
+1. **Identify skill**: Read `SKILL-DECISION-GUIDE.md` → Points to `bmad-autonomous-planning`
+2. **Use the Codex wrapper**: Open `.agents/skills/bmad-autonomous-planning/SKILL.md`
+3. **Launch the planner**: Run `make bmalph-autonomous-plan PLAN_TASK="..." PLAN_VALIDATION_ROUNDS=2`
+4. **Inspect outputs**: Read the returned JSON and the generated bundle artifacts
+5. **Validate**: Run `make ci` if you changed the launcher, skill docs, or related automation
 
 ### Example 3: User asks to "run tests"
 

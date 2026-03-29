@@ -130,6 +130,15 @@ This skill orchestrates research, brief, PRD, architecture, and epics/stories
 through the repository's BMALPH wrapper surface without stopping for interactive BMAD menus, and it can optionally create a
 GitHub issue or specs-only PR.
 
+For Codex in this repository, start with `.agents/skills/bmad-autonomous-planning/SKILL.md`
+and prefer the launcher command:
+
+```bash
+make bmalph-autonomous-plan \
+  PLAN_TASK="Plan a new feature" \
+  PLAN_VALIDATION_ROUNDS=2
+```
+
 **NOT**: create-prd (that assumes interactive workflow progression)
 **NOT**: sprint-planning (that only derives sprint status from existing epics)
 

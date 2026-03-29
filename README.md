@@ -157,7 +157,7 @@ To generate a specs-only planning bundle from a short feature description in a
 fresh Codex session, run:
 
 ```bash
-make bmad-autonomous-plan \
+make bmalph-autonomous-plan \
   PLAN_TASK="Plan customer tagging for the core service" \
   PLAN_VALIDATION_ROUNDS=2
 ```
@@ -166,6 +166,11 @@ Add `PLAN_DRY_RUN=true` to inspect the resolved bundle location, skill path,
 and JSON schema without launching Codex. The launcher uses the AI-agnostic
 planning instructions in `.claude/skills/bmad-autonomous-planning/` and the
 Codex wrapper at `.agents/skills/bmad-autonomous-planning/`.
+
+Add `PLAN_DEBUG=true` to stream a safe progress trace to `stderr` while the
+child Codex session runs. The trace shows BMALPH stage progress and explicit
+`TRACE:` updates, not hidden chain-of-thought, and the final JSON result stays
+on `stdout`.
 
 `bmalph init` writes local BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
 platform-specific instruction files. Those generated directories are ignored in

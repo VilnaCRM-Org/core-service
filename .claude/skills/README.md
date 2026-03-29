@@ -40,6 +40,12 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 **Key command**: `make bmalph-autonomous-plan PLAN_TASK="Plan a new feature"`
 
+**Codex trigger path**:
+
+- Use the Codex wrapper at `.agents/skills/bmad-autonomous-planning/SKILL.md`
+- Prefer the launcher over manual replay of the planning workflow
+- Add `PLAN_DRY_RUN=true` for a safe preview, `PLAN_DEBUG=true` for a safe trace, and `PLAN_RESULT_FILE=/tmp/plan.json` when the result JSON should be inspected after the run
+
 ---
 
 ### 2. CI Workflow (`ci-workflow/`)

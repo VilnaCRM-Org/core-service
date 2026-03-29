@@ -68,6 +68,9 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
      PLAN_VALIDATION_ROUNDS=2 \
      PLAN_DRY_RUN=true
    ```
+   To inspect live BMALPH progress during a real run, add `PLAN_DEBUG=true`.
+   That prints a safe trace to `stderr` with stage progress and `TRACE:`
+   updates while keeping the final JSON result on `stdout`.
 
 ### Version Control Configuration
 

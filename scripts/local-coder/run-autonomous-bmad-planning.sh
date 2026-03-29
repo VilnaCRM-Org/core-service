@@ -43,6 +43,7 @@ Options:
   --base-branch <branch>       Base branch for specs-only PRs (default: main)
   --model <model>              Optional Codex model override
   --result-file <path>         Write final JSON result to this file
+  --debug                      Stream a safe progress trace to stderr
   --dry-run                    Print the resolved run plan without launching Codex
   -h, --help                   Show this help text
 
@@ -66,6 +67,7 @@ repo_slug=""
 base_branch="main"
 model=""
 result_file=""
+debug_mode=false
 dry_run=false
 seed_paths=()
 tmp_issue_body=""
@@ -111,6 +113,10 @@ while [ $# -gt 0 ]; do
         --result-file)
             result_file="${2:?Missing value for --result-file}"
             shift 2
+            ;;
+        --debug)
+            debug_mode=true
+            shift
             ;;
         --dry-run)
             dry_run=true
@@ -215,6 +221,7 @@ if [ "${dry_run}" = true ]; then
     printf 'Repo: %s\n' "${repo_slug:-<none>}"
     printf 'Base branch: %s\n' "${base_branch}"
     printf 'Validation rounds: %s\n' "${max_validation_rounds}"
+    printf 'Debug mode: %s\n' "${debug_mode}"
     if [ "${#seed_paths[@]}" -gt 0 ]; then
         printf 'Seed paths:\n'
         printf '  - %s\n' "${seed_paths[@]}"
@@ -255,6 +262,86 @@ cleanup() {
     [ -n "${tmp_codex_home}" ] && rm -rf "${tmp_codex_home}"
 }
 trap cleanup EXIT
+
+debug_log() {
+    local message="${1:?Missing debug message}"
+
+    if [ "${debug_mode}" = true ]; then
+        printf '[debug] %s\n' "${message}" >&2
+    fi
+}
+
+debug_render_codex_event() {
+    local line="${1:-}"
+    local event_type=""
+    local thread_id=""
+    local input_tokens=""
+    local cached_input_tokens=""
+    local output_tokens=""
+    local item_type=""
+    local item_name=""
+    local trace_text=""
+
+    [ "${debug_mode}" = true ] || return 0
+    [ -n "${line}" ] || return 0
+
+    event_type="$(printf '%s\n' "${line}" | jq -r '.type // empty' 2>/dev/null || true)"
+    [ -n "${event_type}" ] || return 0
+
+    case "${event_type}" in
+        thread.started)
+            thread_id="$(printf '%s\n' "${line}" | jq -r '.thread_id // empty' 2>/dev/null || true)"
+            if [ -n "${thread_id}" ]; then
+                debug_log "thread started: ${thread_id}"
+            else
+                debug_log "thread started"
+            fi
+            ;;
+        turn.started)
+            debug_log "turn started"
+            ;;
+        turn.completed)
+            input_tokens="$(printf '%s\n' "${line}" | jq -r '.usage.input_tokens // empty' 2>/dev/null || true)"
+            cached_input_tokens="$(printf '%s\n' "${line}" | jq -r '.usage.cached_input_tokens // empty' 2>/dev/null || true)"
+            output_tokens="$(printf '%s\n' "${line}" | jq -r '.usage.output_tokens // empty' 2>/dev/null || true)"
+            if [ -n "${input_tokens}" ] || [ -n "${cached_input_tokens}" ] || [ -n "${output_tokens}" ]; then
+                debug_log "turn completed: input_tokens=${input_tokens:-0}, cached_input_tokens=${cached_input_tokens:-0}, output_tokens=${output_tokens:-0}"
+            else
+                debug_log "turn completed"
+            fi
+            ;;
+        item.started|item.completed)
+            item_type="$(printf '%s\n' "${line}" | jq -r '.item.type // empty' 2>/dev/null || true)"
+            case "${item_type}" in
+                agent_message)
+                    trace_text="$(printf '%s\n' "${line}" | jq -r '.item.text // empty' 2>/dev/null || true)"
+                    if [[ "${trace_text}" == TRACE:* ]]; then
+                        debug_log "${trace_text}"
+                    fi
+                    ;;
+                *)
+                    item_name="$(printf '%s\n' "${line}" | jq -r '.item.name // .item.call_id // .item.id // empty' 2>/dev/null || true)"
+                    if [ -n "${item_type}" ] && [ -n "${item_name}" ]; then
+                        debug_log "${event_type#item.}: ${item_type} ${item_name}"
+                    elif [ -n "${item_type}" ]; then
+                        debug_log "${event_type#item.}: ${item_type}"
+                    fi
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+capture_codex_output() {
+    local destination_file="${1:?Missing destination file}"
+    local line=""
+
+    : >"${destination_file}"
+    while IFS= read -r line || [ -n "${line}" ]; do
+        printf '%s\n' "${line}" >>"${destination_file}"
+        debug_render_codex_event "${line}"
+    done
+}
 
 write_markdown_list() {
     local heading="${1:?Missing heading}"
@@ -580,6 +667,13 @@ Hard requirements:
 - create ${bundle_dir}/run-summary.md with the reasoning trace, validation round counts, warnings, and open questions
 - do not create GitHub issues or PRs yourself in this child run; prepare the bundle and supporting summaries only
 - report github.issue_status and github.pr_status as skipped in the child JSON unless the launcher explicitly instructed you to do otherwise
+$(if [ "${debug_mode}" = true ]; then
+    cat <<'EODEBUG'
+- emit concise progress updates as standalone agent messages prefixed exactly with `TRACE:`
+- use `TRACE:` messages only for stage progress, evidence gathered, validation status, and next action
+- do not reveal hidden chain-of-thought, private reasoning, or secrets in `TRACE:` messages
+EODEBUG
+fi)
 
 Return JSON only and make sure it matches the provided output schema exactly.
 EOM
@@ -630,7 +724,10 @@ if [ -n "${CODEX_ENV_FILE:-}" ]; then
     sanitized_env+=(CODEX_ENV_FILE="${CODEX_ENV_FILE}")
 fi
 
-if ! "${sanitized_env[@]}" "${codex_cmd[@]}" <"${tmp_prompt_file}" >"${tmp_codex_output}" 2>&1; then
+debug_log "debug mode enabled; streaming safe BMALPH planning trace to stderr"
+debug_log "final JSON result remains on stdout"
+
+if ! "${sanitized_env[@]}" "${codex_cmd[@]}" <"${tmp_prompt_file}" 2>&1 | capture_codex_output "${tmp_codex_output}"; then
     echo "Error: autonomous BMAD planning run failed." >&2
     sed -n '1,160p' "${tmp_codex_output}" >&2
     exit 1

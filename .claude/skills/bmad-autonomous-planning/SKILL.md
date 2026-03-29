@@ -7,6 +7,12 @@ description: Create BMALPH-wrapped planning artifacts fully autonomously from a 
 
 Use this skill when the user wants BMALPH-style planning without the normal interactive menus.
 
+For top-level Codex orchestration in this repository, prefer the wrapper skill at
+`.agents/skills/bmad-autonomous-planning/SKILL.md`, which launches
+`make bmalph-autonomous-plan` and then hands this file to the fresh child Codex
+session. This file defines the child-session planning contract after the
+launcher has already selected the correct skill.
+
 ## Inputs
 
 Expect the caller to provide:

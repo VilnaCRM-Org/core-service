@@ -111,7 +111,6 @@ teardown() {
   assert_output --partial "bmalph-init"
   assert_output --partial "bmalph-setup"
   assert_output --partial "bmalph-autonomous-plan"
-  assert_output --partial "bmad-autonomous-plan"
 }
 
 @test "make bmalph-install installs and verifies BMALPH for codex" {
@@ -508,6 +507,20 @@ EOF
   assert_success
 }
 
+@test "autonomous planning wrapper skill documents the Codex launcher flow" {
+  run bash -lc '
+    set -euo pipefail
+    wrapper=".agents/skills/bmad-autonomous-planning/SKILL.md"
+    grep -F "prefer the launcher entrypoint instead of manually replaying the planning flow" "$wrapper"
+    grep -F "make bmalph-autonomous-plan \\" "$wrapper"
+    grep -F "PLAN_DRY_RUN=true" "$wrapper"
+    grep -F "PLAN_DEBUG=true" "$wrapper"
+    grep -F "PLAN_RESULT_FILE=\"\$(mktemp)\"" "$wrapper"
+    grep -F "Read the JSON result." "$wrapper"
+  '
+  assert_success
+}
+
 @test "autonomous planning launcher dry-run resolves bundle metadata" {
   setup_isolated_bmalph_env
   setup_autonomous_bmad_fixture
@@ -546,10 +559,12 @@ EOF
     PLAN_TASK="Plan autonomous BMALPH specs" \
     PLAN_BUNDLE_ID="test-autonomous-plan-make" \
     PLAN_VALIDATION_ROUNDS=1 \
+    PLAN_DEBUG=true \
     PLAN_DRY_RUN=true
   assert_success
   assert_output --partial "Dry run only."
   assert_output --partial "Bundle ID: test-autonomous-plan-make"
+  assert_output --partial "Debug mode: true"
 }
 
 @test "autonomous planning launcher invokes codex exec with bmalph wrapper prompt and schema" {
@@ -662,15 +677,81 @@ PY
   assert_output --partial "\"status\": \"complete-with-warnings\""
 }
 
-@test "make bmad-autonomous-plan alias forwards PLAN_REPO into dry-run output" {
-  setup_isolated_bmalph_env
+@test "autonomous planning launcher streams safe debug trace when enabled" {
   setup_autonomous_bmad_fixture
-  run make bmad-autonomous-plan \
-    PLAN_TASK="Plan autonomous BMALPH specs" \
-    PLAN_REPO="VilnaCRM-Org/core-service" \
-    PLAN_DRY_RUN=true
+  rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-debug
+  run bash -lc '
+    set -euo pipefail
+    repo_root="$(pwd)"
+    temp_home="$(mktemp -d)"
+    mock_bin="$(mktemp -d)"
+    codex_prompt="${temp_home}/codex-prompt.txt"
+    cleanup() {
+      rm -rf "$temp_home" "$mock_bin"
+    }
+    trap cleanup EXIT
+
+    cat >"$mock_bin/codex" <<'"'"'EOF'"'"'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "${1-} ${2-}" = "login status" ]; then
+  exit 0
+fi
+
+prompt_file="${CODEX_PROMPT_FILE:?missing CODEX_PROMPT_FILE}"
+cat >"$prompt_file"
+
+output_last_message=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --output-last-message)
+      output_last_message="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+cat <<'"'"'JSONL'"'"'
+{"type":"thread.started","thread_id":"debug-thread"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"trace_1","type":"agent_message","text":"TRACE: research started with Makefile and _bmad/COMMANDS.md"}}
+{"type":"item.completed","item":{"id":"trace_2","type":"agent_message","text":"TRACE: architecture validation complete; next action is epics alignment"}}
+{"type":"turn.completed","usage":{"input_tokens":10,"cached_input_tokens":2,"output_tokens":20}}
+JSONL
+
+cat >"$output_last_message" <<'"'"'JSON'"'"'
+{"status":"complete","task":"Plan autonomous BMALPH specs","bundle_id":"test-autonomous-plan-debug","bundle_dir":"/tmp/test-autonomous-plan-debug","artifacts":{"research":"/tmp/test-autonomous-plan-debug/research.md","brief":"/tmp/test-autonomous-plan-debug/product-brief.md","distillate":null,"prd":"/tmp/test-autonomous-plan-debug/prd.md","architecture":"/tmp/test-autonomous-plan-debug/architecture.md","epics":"/tmp/test-autonomous-plan-debug/epics.md","implementation_readiness":"/tmp/test-autonomous-plan-debug/implementation-readiness.md","run_summary":"/tmp/test-autonomous-plan-debug/run-summary.md"},"validation_rounds":{"research":1,"brief":1,"prd":1,"architecture":1,"epics":1,"stories":1},"open_questions":[],"warnings":[],"github":{"issue_status":"skipped","issue_number":null,"issue_url":null,"pr_status":"skipped","pr_number":null,"pr_url":null,"branch":null,"error":null}}
+JSON
+EOF
+
+    chmod +x "$mock_bin/codex"
+
+    env \
+      HOME="$temp_home" \
+      PATH="$mock_bin:/usr/bin:/bin" \
+      CODEX_PROMPT_FILE="$codex_prompt" \
+      bash scripts/local-coder/run-autonomous-bmad-planning.sh \
+        --task "Plan autonomous BMALPH specs" \
+        --bundle-id "test-autonomous-plan-debug" \
+        --max-validation-rounds 1 \
+        --issue-mode skip \
+        --pr-mode skip \
+        --debug
+
+    grep -F -- "emit concise progress updates as standalone agent messages prefixed exactly with \`TRACE:\`" "$codex_prompt"
+    grep -F -- "do not reveal hidden chain-of-thought, private reasoning, or secrets in \`TRACE:\` messages" "$codex_prompt"
+  '
   assert_success
-  assert_output --partial "Repo: VilnaCRM-Org/core-service"
+  assert_output --partial "[debug] debug mode enabled; streaming safe BMALPH planning trace to stderr"
+  assert_output --partial "[debug] thread started: debug-thread"
+  assert_output --partial "[debug] TRACE: research started with Makefile and _bmad/COMMANDS.md"
+  assert_output --partial "[debug] TRACE: architecture validation complete; next action is epics alignment"
+  assert_output --partial "[debug] turn completed: input_tokens=10, cached_input_tokens=2, output_tokens=20"
+  assert_output --partial "\"status\": \"complete\""
 }
 
 @test "autonomous planning repo slug strips remote credentials" {

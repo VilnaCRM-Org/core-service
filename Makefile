@@ -142,20 +142,8 @@ bmalph-autonomous-plan: ## Launch a fresh Codex session to generate autonomous B
 		--base-branch "$(PLAN_BASE_BRANCH)" \
 		$(if $(strip $(PLAN_MODEL)),--model "$(PLAN_MODEL)",) \
 		$(if $(strip $(PLAN_RESULT_FILE)),--result-file "$(PLAN_RESULT_FILE)",) \
+		$(if $(filter true TRUE 1 yes YES,$(PLAN_DEBUG)),--debug,) \
 		$(if $(filter true TRUE 1 yes YES,$(PLAN_DRY_RUN)),--dry-run,)
-
-bmad-autonomous-plan: ## Backward-compatible alias for bmalph-autonomous-plan
-	@$(MAKE) bmalph-autonomous-plan \
-		PLAN_TASK="$(PLAN_TASK)" \
-		PLAN_BUNDLE_ID="$(PLAN_BUNDLE_ID)" \
-		PLAN_VALIDATION_ROUNDS="$(PLAN_VALIDATION_ROUNDS)" \
-		PLAN_ISSUE_MODE="$(PLAN_ISSUE_MODE)" \
-		PLAN_PR_MODE="$(PLAN_PR_MODE)" \
-		PLAN_REPO="$(PLAN_REPO)" \
-		PLAN_BASE_BRANCH="$(PLAN_BASE_BRANCH)" \
-		PLAN_MODEL="$(PLAN_MODEL)" \
-		PLAN_RESULT_FILE="$(PLAN_RESULT_FILE)" \
-		PLAN_DRY_RUN="$(PLAN_DRY_RUN)"
 
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)

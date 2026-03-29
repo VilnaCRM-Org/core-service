@@ -205,6 +205,10 @@ path, skill path, and schema without starting Codex. Claude-oriented workflows
 use `_bmad/COMMANDS.md` plus the same planning instructions from
 `.claude/skills/bmad-autonomous-planning/SKILL.md`.
 
+Set `PLAN_DEBUG=true` to stream a safe progress trace to `stderr` during the
+run. This exposes BMALPH stage progress and explicit `TRACE:` updates from the
+child session while keeping the final JSON result on `stdout`.
+
 `bmalph init` writes BMAD/Ralph assets and platform-specific instruction files.
 Run the dry-run first, then initialize only when you want those files in your
 working tree.
