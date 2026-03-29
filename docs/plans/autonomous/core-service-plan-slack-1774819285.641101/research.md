@@ -49,7 +49,7 @@ Cross-cutting concerns are also unavoidable:
 
 ## Risks and Constraints
 
-- There is no current audit source of truth in the repository. The service has generic command and event infrastructure, but no existing audit domain or capture model.
+- There is no current audit-log bounded context in the repository, but the service already has a usable audit foundation through `src/Shared/Domain/Bus/Event/DomainEvent.php` and the event-publishing pattern in handlers such as `src/Core/Customer/Application/CommandHandler/CreateCustomerCommandHandler.php`. Domain events already carry `eventId` and `occurredOn`, so planning should prefer subscribing to that EventBus-driven stream for capture rather than assuming audit ingestion must start from zero.
 - The current resilient async event bus explicitly favors availability over consistency. Dispatch failures are logged and metriced, but they do not fail the main request. That is useful for non-critical side effects, but it may be too weak if audit capture must be loss-intolerant or compliance-grade.
 - Messenger routing is currently specific to `DomainEventEnvelope`. Long-running export generation is therefore not a drop-in fit unless the architecture deliberately models export work as event handling or introduces a separate async job/command transport.
 - No scheduler or recurring-job subsystem was found. Scheduled exports therefore require an explicit orchestration decision, not an assumption that the platform already has cron-like support inside this service.
@@ -71,7 +71,7 @@ Cross-cutting concerns are also unavoidable:
 
 1. Plan this as a dedicated bounded context, tentatively `Core/AuditLog`, instead of extending `Shared` or `Customer`.
 2. Split the planning work into four distinct concerns: audit capture, audit querying/filtering, export execution, and schedule orchestration.
-3. Make audit durability a first-class product and architecture decision. Do not assume the current AP-oriented resilient async event bus is sufficient for the authoritative audit record if event loss is unacceptable.
+3. Make audit durability a first-class product and architecture decision. Start from the existing DomainEvent/EventBus foundation for capture, but do not assume the current AP-oriented resilient async event bus is sufficient for the authoritative audit record if event loss is unacceptable.
 4. Model saved filters as persisted, named filter definitions that store normalized filter parameters aligned with existing API Platform filter conventions.
 5. Model exports as asynchronous jobs with persistent lifecycle states such as `requested`, `queued`, `processing`, `available`, `failed`, and `expired`.
 6. Decide the scheduling boundary early. Given current repo state, the lowest-friction default is an external scheduler triggering core-service-owned schedule execution, while core-service owns schedule definitions, idempotency, and run tracking.
