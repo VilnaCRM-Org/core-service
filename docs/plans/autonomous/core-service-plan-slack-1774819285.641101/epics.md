@@ -117,11 +117,11 @@ FR-10: Epic 5 delivers run tracking for scheduled executions.
 
 FR-11: Epic 5 delivers idempotent recurring execution behavior.
 
-FR-12: Epic 4 delivers authenticated retrieval, expiry, and revocation behavior.
+FR-12: Epic 4 delivers authenticated retrieval, expiry, and revocation behavior; Epic 6 reinforces expiry cleanup and defensible post-expiry metadata behavior.
 
 FR-13: Epics 1 through 5 enforce permissions and ownership checks across browse, filters, exports, schedules, runs, and artifacts.
 
-FR-14: Epics 3 and 5 expose non-sensitive failure visibility for exports and scheduled runs.
+FR-14: Epics 3 and 5 expose non-sensitive failure visibility for exports and scheduled runs; Epic 6 adds support-facing diagnostics and safe failure observability.
 
 FR-15: Epic 6 closes end-to-end self-auditing, with action capture requirements reinforced in Epics 2 through 5.
 
@@ -163,7 +163,7 @@ Authorized users can define recurring exports, trust their execution windows and
 
 Operations, compliance, and support teams can trust the feature in production because cleanup, telemetry, support-facing status, and self-auditing are complete and governable.
 
-**FRs covered:** FR-15  
+**FRs covered:** FR-12, FR-14, FR-15  
 **NFR focus:** NFR-3, NFR-5, NFR-7, NFR-8
 
 ## Epic 1: Governed Audit Browse Foundation

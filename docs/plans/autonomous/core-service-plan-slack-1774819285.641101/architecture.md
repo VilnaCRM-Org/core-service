@@ -272,7 +272,7 @@ The model may additionally support `revoked` for explicit administrative revocat
 
 ## 6. API Surface
 
-## 6.1 Public REST Resources
+### 6.1 Public REST Resources
 
 The public product surface should remain REST-first and explicit.
 

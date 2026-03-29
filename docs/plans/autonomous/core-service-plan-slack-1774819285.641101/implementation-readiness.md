@@ -16,7 +16,7 @@
 
 ## Executive Summary
 
-The planning artifacts are materially aligned on the feature goal, scope, architecture direction, and rollout sequence. They consistently describe a brownfield `Core/AuditLog` bounded context, a normalized audit filter model, REST-first lifecycle contracts, asynchronous export generation, controlled artifact retrieval, and externally triggered scheduled execution. PRD-to-epics traceability is complete for all 16 functional requirements.
+The planning artifacts are materially aligned on the feature goal, scope, architecture direction, and rollout sequence. They consistently describe a brownfield `Core/AuditLog` bounded context, a normalized audit filter model, REST-first lifecycle contracts, asynchronous export generation, controlled artifact retrieval, and externally triggered scheduled execution. PRD-to-epics traceability is mostly complete pending verification of the Epic 6 FR traceability corrections captured in `epics.md`.
 
 The feature is still not implementation-ready. Four decisions remain prerequisite rather than implementation detail:
 
@@ -43,7 +43,7 @@ Those unresolved items affect domain boundaries, permission checks, artifact del
 ## Strengths
 
 - Product brief, PRD, architecture, and epics describe the same feature and rollout sequence.
-- PRD functional requirement coverage in epics is complete.
+- PRD functional requirement coverage in epics is mostly complete pending verification of the Epic 6 traceability correction.
 - Bounded context, API direction, async lifecycle, and artifact-governance intent are aligned.
 - The architecture fits the repository’s documented DDD, CQRS, hexagonal, MongoDB, API Platform, and YAML resource-discovery patterns.
 - The bundle explicitly avoids implementation work and stays at planning level.
@@ -115,7 +115,7 @@ This blocks implementation because:
 ## Readiness Checklist
 
 - [x] Product brief, PRD, architecture, and epics describe the same feature and scope.
-- [x] PRD functional requirement coverage in epics is complete.
+- [ ] PRD functional requirement coverage in epics is mostly complete pending verification of the Epic 6 traceability correction.
 - [x] Bounded context, API direction, async lifecycle, and artifact-governance intent are aligned.
 - [x] MVP scope is consistent on owner-scope authenticated retrieval, not recipient-based delivery.
 - [ ] Authoritative audit source of truth is selected and documented.
