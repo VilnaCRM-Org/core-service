@@ -438,6 +438,7 @@ EOF
 }
 
 @test "autonomous planning launcher dry-run resolves bundle metadata" {
+  setup_isolated_bmalph_env
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
     --task "Plan autonomous BMAD specs" \
@@ -454,6 +455,7 @@ EOF
 }
 
 @test "autonomous planning launcher rejects invalid validation rounds" {
+  setup_isolated_bmalph_env
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
     --task "Plan autonomous BMAD specs" \
     --max-validation-rounds 4 \
@@ -463,6 +465,7 @@ EOF
 }
 
 @test "make bmad-autonomous-plan supports dry-run execution" {
+  setup_isolated_bmalph_env
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-make
   run make bmad-autonomous-plan \
     PLAN_TASK="Plan autonomous BMAD specs" \
@@ -483,6 +486,7 @@ EOF
     mock_bin="$(mktemp -d)"
     codex_args="${temp_home}/codex-args.txt"
     codex_prompt="${temp_home}/codex-prompt.txt"
+    codex_env="${temp_home}/codex-env.txt"
     cleanup() {
       rm -rf "$temp_home" "$mock_bin"
     }
@@ -498,8 +502,10 @@ fi
 
 args_file="${CODEX_ARGS_FILE:?missing CODEX_ARGS_FILE}"
 prompt_file="${CODEX_PROMPT_FILE:?missing CODEX_PROMPT_FILE}"
+env_file="${CODEX_ENV_FILE:?missing CODEX_ENV_FILE}"
 printf "%s\n" "$@" >"$args_file"
 cat >"$prompt_file"
+env | sort >"$env_file"
 
 output_last_message=""
 while [ $# -gt 0 ]; do
@@ -526,6 +532,7 @@ EOF
       PATH="$mock_bin:/usr/bin:/bin" \
       CODEX_ARGS_FILE="$codex_args" \
       CODEX_PROMPT_FILE="$codex_prompt" \
+      CODEX_ENV_FILE="$codex_env" \
       bash scripts/local-coder/run-autonomous-bmad-planning.sh \
         --task "Plan autonomous BMAD specs" \
         --bundle-id "test-autonomous-plan-codex" \
@@ -551,16 +558,55 @@ args = pathlib.Path(sys.argv[1]).read_text().splitlines()
 assert args.index("--model") < args.index("-")
 assert args.index("gpt-5.4-mini") < args.index("-")
 PY
+    grep -E "^HOME=" "$codex_env"
+    if grep -Eq "^HOME=${temp_home}$" "$codex_env"; then
+      echo "launcher should isolate Codex HOME" >&2
+      exit 1
+    fi
+    if grep -Eq "^(GH_TOKEN|GITHUB_TOKEN|GH_AUTOMATION_TOKEN)=" "$codex_env"; then
+      echo "launcher should not leak GitHub tokens into Codex env" >&2
+      exit 1
+    fi
     grep -F -- ".claude/skills/bmad-autonomous-planning/SKILL.md" "$codex_prompt"
     grep -F -- "Initial repository paths to inspect first:" "$codex_prompt"
     grep -F -- "- Makefile" "$codex_prompt"
     grep -F -- "- scripts/local-coder/run-autonomous-bmad-planning.sh" "$codex_prompt"
     grep -F -- "do not read .claude/skills/AI-AGENT-GUIDE.md or .claude/skills/SKILL-DECISION-GUIDE.md" "$codex_prompt"
+    grep -F -- "do not create GitHub issues or PRs yourself in this child run" "$codex_prompt"
     grep -F -- "issue_mode: create" "$codex_prompt"
     grep -F -- "pr_mode: draft" "$codex_prompt"
     grep -F -- "Plan autonomous BMAD specs" "$codex_prompt"
     test -s "${temp_home}/result.json"
   '
   assert_success
-  assert_output --partial "\"status\":\"complete\""
+  assert_output --partial "\"status\": \"complete-with-warnings\""
+}
+
+@test "make bmad-autonomous-plan forwards PLAN_REPO into dry-run output" {
+  setup_isolated_bmalph_env
+  run make bmad-autonomous-plan \
+    PLAN_TASK="Plan autonomous BMAD specs" \
+    PLAN_REPO="VilnaCRM-Org/core-service" \
+    PLAN_DRY_RUN=true
+  assert_success
+  assert_output --partial "Repo: VilnaCRM-Org/core-service"
+}
+
+@test "autonomous planning repo slug strips remote credentials" {
+  run bash -lc '
+    set -euo pipefail
+    temp_repo="$(mktemp -d)"
+    cleanup() {
+      rm -rf "$temp_repo"
+    }
+    trap cleanup EXIT
+
+    git init -q "$temp_repo"
+    git -C "$temp_repo" remote add origin "https://username:token@github.com/VilnaCRM-Org/core-service.git"
+
+    . scripts/local-coder/lib/autonomous-bmad-planning.sh
+    actual="$(cs_abp_default_repo_slug "$temp_repo")"
+    [ "$actual" = "VilnaCRM-Org/core-service" ]
+  '
+  assert_success
 }

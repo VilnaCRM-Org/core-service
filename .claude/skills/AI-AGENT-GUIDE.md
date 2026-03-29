@@ -245,6 +245,9 @@ Complex skills have multi-file structure:
 ├── SKILL-DECISION-GUIDE.md     # Decision tree for choosing skills
 ├── README.md                   # Skills overview
 │
+├── bmad-autonomous-planning/
+│   └── SKILL.md                # Autonomous BMAD planning workflow
+│
 ├── ci-workflow/
 │   └── SKILL.md                # Run comprehensive CI checks
 │

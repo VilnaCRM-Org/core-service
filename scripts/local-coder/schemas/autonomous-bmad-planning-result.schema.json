@@ -16,6 +16,7 @@
   "properties": {
     "status": {
       "type": "string",
+      "minLength": 1,
       "enum": [
         "complete",
         "complete-with-warnings",
@@ -23,13 +24,16 @@
       ]
     },
     "task": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "bundle_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "bundle_dir": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifacts": {
       "type": "object",
@@ -46,31 +50,39 @@
       ],
       "properties": {
         "research": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "brief": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "distillate": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "prd": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "architecture": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "epics": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "implementation_readiness": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "run_summary": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -121,13 +133,15 @@
     "open_questions": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       }
     },
     "warnings": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       }
     },
     "github": {
@@ -146,6 +160,7 @@
       "properties": {
         "issue_status": {
           "type": "string",
+          "minLength": 1,
           "enum": [
             "skipped",
             "created",
@@ -162,10 +177,12 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "pr_status": {
           "type": "string",
+          "minLength": 1,
           "enum": [
             "skipped",
             "created",
@@ -182,19 +199,22 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "branch": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         },
         "error": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "minLength": 1
         }
       }
     }

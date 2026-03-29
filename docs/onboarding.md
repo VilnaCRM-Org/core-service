@@ -61,6 +61,13 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
      PLAN_TASK="Plan a new feature" \
      PLAN_VALIDATION_ROUNDS=2
    ```
+   For a safe first-run preview that does not create bundle files or GitHub side effects, use:
+   ```bash
+   make bmad-autonomous-plan \
+     PLAN_TASK="Plan a new feature" \
+     PLAN_VALIDATION_ROUNDS=2 \
+     PLAN_DRY_RUN=true
+   ```
 
 ### Version Control Configuration
 

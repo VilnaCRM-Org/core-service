@@ -78,9 +78,13 @@ cs_abp_default_repo_slug() {
     fi
 
     remote_url="${remote_url%.git}"
-    remote_url="${remote_url#git@github.com:}"
-    remote_url="${remote_url#https://github.com/}"
-    remote_url="${remote_url#http://github.com/}"
+    remote_url="$(printf '%s' "${remote_url}" | sed -E \
+        -e 's#^git@([^:]+):#\1/#' \
+        -e 's#^https?://([^/@]+@)?([^/]+)/#\2/#')"
+
+    if [[ "${remote_url}" == github.com/* ]]; then
+        remote_url="${remote_url#github.com/}"
+    fi
 
     if [[ "${remote_url}" == */* ]]; then
         printf '%s\n' "${remote_url}"

@@ -270,6 +270,10 @@ This skill provides complete SWR implementation guide with background refresh pa
 ## Skill Relationship Map
 
 ```
+                    bmad-autonomous-planning
+                       (specs-first planning)
+                                 │
+                                 ▼
                           quality-standards
                          (overview & routing)
                                  │
@@ -306,6 +310,13 @@ This skill provides complete SWR implementation guide with background refresh pa
 ## Multiple Skills for One Task
 
 Some tasks benefit from multiple skills:
+
+### Autonomous planning before implementation:
+
+1. **bmad-autonomous-planning** - Generate the specs bundle without interactive BMAD menus
+2. **implementing-ddd-architecture** - Use during implementation to place code correctly
+3. **documentation-sync** - Update docs once implementation lands
+4. **ci-workflow** - Validate the eventual implementation before merge
 
 ### Creating a complete new feature:
 

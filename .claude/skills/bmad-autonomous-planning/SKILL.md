@@ -38,8 +38,8 @@ Your final response must be JSON matching `scripts/local-coder/schemas/autonomou
 
 Before planning, load only the sources you need:
 
-1. `_bmad/config.yaml`
-2. If `_bmad/bmm/config.yaml` exists, treat it as optional upstream context only. Do not fail if it is absent.
+1. The resolved BMAD config file: `_bmad/config.yaml` when present, otherwise `_bmad/bmm/config.yaml`.
+2. If both files exist, treat `_bmad/bmm/config.yaml` as optional upstream context only.
 3. The BMAD source workflows that inform the artifact you are creating:
    - product brief precedent: `_bmad/bmm/workflows/1-analysis/bmad-product-brief-preview/SKILL.md` and its prompt files
    - PRD validation precedent: `_bmad/bmm/workflows/2-plan-workflows/create-prd/workflow-validate-prd.md`
@@ -86,7 +86,7 @@ Do not implement production code in this run.
 ### 1. Preflight
 
 - Confirm the bundle directory exists or create it.
-- Read `_bmad/config.yaml` and resolve `planning_artifacts`, `implementation_artifacts`, and `project_knowledge`.
+- Read the resolved BMAD config file and resolve `planning_artifacts`, `implementation_artifacts`, and `project_knowledge`.
 - Infer the feature area from the task description first. Start with the 1-3
   most likely repository paths and expand only if the evidence is insufficient.
 - Inspect only the most relevant repository docs and code paths for the requested task.
@@ -174,6 +174,7 @@ Only do this when explicitly requested by the caller.
 ### Issue Mode `create`
 
 - Create a GitHub issue summarizing the task, bundle contents, recommended implementation plan, risks, and open questions.
+- When a trusted launcher is brokering GitHub side effects after the planning run, prepare the bundle and issue-ready summaries, then leave the `github` fields as `skipped` for the launcher to update.
 - Prefer GitHub app tools if they are available and authenticated.
 - If GitHub app tools are unavailable, use `gh` through a login shell, for example `bash -l -c 'gh issue create ...'`.
 - If issue creation fails, do not fail the planning run. Record the failure in the final JSON and `run-summary.md`.
@@ -183,6 +184,7 @@ Only do this when explicitly requested by the caller.
 - Create a specs-only branch, defaulting to `specs/<bundle-id>`.
 - Commit only the planning bundle and any minimal documentation needed to explain it.
 - Open a draft PR against the requested base branch.
+- When a trusted launcher is brokering GitHub side effects after the planning run, stop after producing the bundle and bundle summaries, then let the launcher create the branch and PR.
 - Prefer GitHub app tools if available; otherwise use `gh` in a login shell.
 - If PR creation fails, do not fail the planning run. Record the failure in the final JSON and `run-summary.md`.
 

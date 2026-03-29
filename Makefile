@@ -88,6 +88,7 @@ PLAN_BUNDLE_ID ?=
 PLAN_VALIDATION_ROUNDS ?= 3
 PLAN_ISSUE_MODE ?= skip
 PLAN_PR_MODE ?= skip
+PLAN_REPO ?=
 PLAN_BASE_BRANCH ?= main
 PLAN_MODEL ?=
 PLAN_RESULT_FILE ?=
@@ -137,6 +138,7 @@ bmad-autonomous-plan: ## Launch a fresh Codex session to generate autonomous BMA
 		--max-validation-rounds "$(PLAN_VALIDATION_ROUNDS)" \
 		--issue-mode "$(PLAN_ISSUE_MODE)" \
 		--pr-mode "$(PLAN_PR_MODE)" \
+		$(if $(strip $(PLAN_REPO)),--repo "$(PLAN_REPO)",) \
 		--base-branch "$(PLAN_BASE_BRANCH)" \
 		$(if $(strip $(PLAN_MODEL)),--model "$(PLAN_MODEL)",) \
 		$(if $(strip $(PLAN_RESULT_FILE)),--result-file "$(PLAN_RESULT_FILE)",) \
