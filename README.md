@@ -153,6 +153,15 @@ make bmalph-setup
 make bmalph-setup BMALPH_PLATFORM=claude-code
 ```
 
+To generate a specs-only BMALPH planning bundle from a short feature
+description, invoke the `bmad-autonomous-planning` skill from your current AI
+agent session. The canonical workflow lives in
+`.claude/skills/bmad-autonomous-planning/SKILL.md`, and Codex can start from
+`.agents/skills/bmad-autonomous-planning/SKILL.md`.
+
+Use a short task description and let the main agent orchestrate the BMALPH
+stages in subagents without repo-local launchers.
+
 `bmalph init` writes local BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
 platform-specific instruction files. Those generated directories are ignored in
 git for this repository, so use the dry-run first and initialize locally only

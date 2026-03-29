@@ -21,7 +21,34 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ## Available Skills
 
-### 1. CI Workflow (`ci-workflow/`)
+### 1. Autonomous BMALPH Planning (`bmad-autonomous-planning/`)
+
+**Purpose**: Create BMALPH-wrapped planning artifacts fully autonomously from a short task description
+
+**When activated**:
+
+- User wants BMAD specs without step-by-step interaction
+- Need a product brief, PRD, architecture, and epics/stories bundle for later implementation
+- Need optional GitHub issue or specs-only PR output from a planning run
+
+**What it does**:
+
+- Creates a focused planning bundle with research, brief, PRD, architecture, and epics/stories
+- Uses the repository's `bmalph` wrapper surface in `_bmad/COMMANDS.md` instead of dropping straight into raw workflow files
+- Runs each BMALPH planning stage through a dedicated subagent when subagents are available
+- Uses repository-aware validation loops without blocking on BMAD approval menus
+
+**Key trigger prompt**: `Use the bmad-autonomous-planning skill to plan a new feature and follow the repository's autonomous BMALPH planning workflow in the current session.`
+
+**Codex trigger path**:
+
+- Use the Codex wrapper at `.agents/skills/bmad-autonomous-planning/SKILL.md`
+- Run the planning flow in the current session
+- Do not rely on repo-local launcher scripts or `make` targets for this skill
+
+---
+
+### 2. CI Workflow (`ci-workflow/`)
 
 **Purpose**: Run comprehensive CI checks before committing changes
 
@@ -42,7 +69,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 2. Testing Workflow (`testing-workflow/`)
+### 3. Testing Workflow (`testing-workflow/`)
 
 **Purpose**: Run and manage different types of tests
 
@@ -64,7 +91,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 3. Code Review Workflow (`code-review/`)
+### 4. Code Review Workflow (`code-review/`)
 
 **Purpose**: Systematically retrieve and address PR code review comments
 
@@ -86,7 +113,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 4. Quality Standards (`quality-standards/`)
+### 5. Quality Standards (`quality-standards/`)
 
 **Purpose**: Overview of protected quality thresholds and quick reference for all quality tools
 
@@ -118,7 +145,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 5. Documentation Synchronization (`documentation-sync/`)
+### 6. Documentation Synchronization (`documentation-sync/`)
 
 **Purpose**: Keep `docs/` directory synchronized with code changes
 
@@ -143,7 +170,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 6. Documentation Creation (`documentation-creation/`)
+### 7. Documentation Creation (`documentation-creation/`)
 
 **Purpose**: Create comprehensive project documentation from scratch
 
@@ -180,7 +207,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 7. Database Migrations (`database-migrations/`)
+### 8. Database Migrations (`database-migrations/`)
 
 **Purpose**: Create and manage database migrations using Doctrine ODM for MongoDB
 
@@ -211,7 +238,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 8. Load Testing (`load-testing/`)
+### 9. Load Testing (`load-testing/`)
 
 **Purpose**: Create and manage K6 load tests for REST and GraphQL APIs
 
@@ -245,7 +272,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 9. Implementing DDD Architecture (`implementing-ddd-architecture/`)
+### 10. Implementing DDD Architecture (`implementing-ddd-architecture/`)
 
 **Purpose**: Design and implement DDD patterns (entities, value objects, aggregates, CQRS)
 
@@ -284,7 +311,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 10. Deptrac Fixer (`deptrac-fixer/`)
+### 11. Deptrac Fixer (`deptrac-fixer/`)
 
 **Purpose**: Diagnose and fix Deptrac architectural violations automatically
 
@@ -329,7 +356,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 11. Complexity Management (`complexity-management/`)
+### 12. Complexity Management (`complexity-management/`)
 
 **Purpose**: Maintain and improve code quality using PHPInsights without decreasing thresholds
 
@@ -360,7 +387,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 12. Developing OpenAPI Specs (`developing-openapi-specs/`)
+### 13. Developing OpenAPI Specs (`developing-openapi-specs/`)
 
 **Purpose**: Guide for contributing to the OpenAPI layer using processor pattern
 
@@ -382,7 +409,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 13. API Platform CRUD (`api-platform-crud/`)
+### 14. API Platform CRUD (`api-platform-crud/`)
 
 **Purpose**: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns
 
@@ -416,7 +443,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 14. Observability Instrumentation (`observability-instrumentation/`)
+### 15. Observability Instrumentation (`observability-instrumentation/`)
 
 **Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
 
@@ -465,7 +492,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 15. Query Performance Analysis (`query-performance-analysis/`)
+### 16. Query Performance Analysis (`query-performance-analysis/`)
 
 **Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
 
@@ -512,7 +539,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 16. Cache Management (`cache-management/`)
+### 17. Cache Management (`cache-management/`)
 
 **Purpose**: Implement production-grade caching with cache keys/TTLs/consistency classes, SWR (stale-while-revalidate), explicit invalidation, and comprehensive testing
 
@@ -560,7 +587,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 17. Code Organization (`code-organization/`)
+### 18. Code Organization (`code-organization/`)
 
 **Purpose**: Ensure proper code organization with class names, directories, namespaces, and naming consistency
 
@@ -597,7 +624,7 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ---
 
-### 18. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
+### 19. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
 
 **Purpose**: Maintain Structurizr C4 architecture diagrams in sync with code changes
 

@@ -426,12 +426,93 @@ EOF
   run bash -lc '
     missing=0
     while IFS= read -r file; do
-      if grep -q "_bmad/" "$file" && ! grep -q "make bmalph-setup" "$file"; then
+      if ! grep -q "_bmad/" "$file"; then
+        continue
+      fi
+      if grep -q "make bmalph-setup" "$file"; then
+        continue
+      fi
+      if grep -q "BMALPH assets must be initialized" "$file"; then
+        continue
+      fi
+      if grep -q "BMALPH assets must be initialized for the repository" "$file"; then
+        continue
+      fi
+      if grep -q "BMALPH assets must be initialized first" "$file"; then
+        continue
+      fi
+      if grep -q "If \`_bmad/\` is missing" "$file"; then
+        continue
+      fi
+      {
         echo "$file"
         missing=1
-      fi
+      }
     done < <(find .agents/skills -name SKILL.md -print | sort)
     exit "$missing"
+  '
+  assert_success
+}
+
+@test "autonomous planning wrapper skill documents the Codex subagent flow" {
+  run bash -lc '
+    set -euo pipefail
+    wrapper=".agents/skills/bmad-autonomous-planning/SKILL.md"
+    grep -F "repo-local bash" "$wrapper"
+    grep -F "canonical planning contract" "$wrapper"
+    grep -F "Read the local \`bmalph\` skill wrapper, \`_bmad/COMMANDS.md\`, and the resolved" "$wrapper"
+    grep -F "Run each BMALPH planning stage in a dedicated subagent" "$wrapper"
+    grep -F "the main agent must decide the next step" "$wrapper"
+    grep -F ".claude/skills/bmad-autonomous-planning/SKILL.md" "$wrapper"
+    grep -F "Minimal Codex trigger example:" "$wrapper"
+    ! grep -F "make bmalph-setup" "$wrapper"
+  '
+  assert_success
+}
+
+@test "autonomous planning skill contract is launcher-free and stage-oriented" {
+  run bash -lc '
+    set -euo pipefail
+    skill=".claude/skills/bmad-autonomous-planning/SKILL.md"
+    grep -F "Do not depend on repo-local" "$skill"
+    grep -F "Spawn one focused subagent per BMALPH planning stage" "$skill"
+    grep -F "The main agent is the user surrogate." "$skill"
+    grep -F "_bmad/bmm/agents/analyst.agent.yaml" "$skill"
+    grep -F "_bmad/core/tasks/bmad-create-prd/workflow.md" "$skill"
+    grep -F "_bmad/bmm/workflows/3-solutioning/bmad-create-architecture/workflow.md" "$skill"
+    grep -F "_bmad/bmm/workflows/3-solutioning/bmad-create-epics-and-stories/workflow.md" "$skill"
+    grep -F "_bmad/bmm/workflows/3-solutioning/bmad-check-implementation-readiness/workflow.md" "$skill"
+    grep -F "Subagent Execution Log" "$skill"
+    grep -F "Use \`1\` to \`3\` validation rounds per artifact." "$skill"
+  '
+  assert_success
+}
+
+@test "autonomous planning docs use prompt-based triggers instead of launcher commands" {
+  run bash -lc '
+    set -euo pipefail
+    guide=".claude/skills/AI-AGENT-GUIDE.md"
+    readme=".claude/skills/README.md"
+    decision=".claude/skills/SKILL-DECISION-GUIDE.md"
+    repo_readme="README.md"
+    onboarding="docs/onboarding.md"
+    getting_started="docs/getting-started.md"
+    agents_doc="AGENTS.md"
+
+    grep -F "Preferred Codex trigger for this skill:" "$guide"
+    grep -F "Use the bmad-autonomous-planning skill to plan a new feature." "$guide"
+    grep -F "**Key trigger prompt**" "$readme"
+    grep -F "run the flow in the current session" "$decision"
+    grep -F "bmad-autonomous-planning" "$repo_readme"
+    grep -F "current AI" "$repo_readme"
+    grep -F ".claude/skills/bmad-autonomous-planning/SKILL.md" "$repo_readme"
+    grep -F "\`bmad-autonomous-planning\` skill from the current AI agent session" "$onboarding"
+    grep -F ".claude/skills/bmad-autonomous-planning/SKILL.md" "$onboarding"
+    grep -F "autonomous BMALPH planner" "$getting_started"
+    grep -F ".claude/skills/bmad-autonomous-planning/SKILL.md" "$getting_started"
+    grep -F "without relying on repo-local launchers" "$agents_doc"
+    ! rg -n "make bmalph-autonomous-plan|run-autonomous-bmad-planning|PLAN_TASK=|PLAN_DEBUG=|PLAN_DRY_RUN=|PLAN_RESULT_FILE=" \
+      "$guide" "$readme" "$decision" "$repo_readme" "$onboarding" "$getting_started" "$agents_doc"
   '
   assert_success
 }
