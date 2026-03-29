@@ -11,6 +11,8 @@
 - `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/prd.md`
 - `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/architecture.md`
 - `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/epics.md`
+- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/research.md`
+- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/run-summary.md`
 
 ## Executive Summary
 
