@@ -30,7 +30,8 @@ usage() {
 Usage: bash scripts/local-coder/run-autonomous-bmad-planning.sh --task <description> [options]
 
 Launch a fresh non-interactive Codex session that reads the repository's
-autonomous BMAD planning skill and produces a specs-only planning bundle.
+BMALPH wrapper instructions plus the autonomous planning skill and produces a
+specs-only planning bundle.
 
 Options:
   --task <description>         Short task description to plan (required)
@@ -152,6 +153,7 @@ case "${pr_mode}" in
 esac
 
 config_file="$(cs_abp_resolve_config_file "${ROOT_DIR}")"
+bmalph_commands_path="$(cs_abp_resolve_bmalph_commands_file "${ROOT_DIR}")"
 planning_artifacts="$(cs_abp_read_config_value "${config_file}" "planning_artifacts")"
 planning_artifacts_dir="$(cs_abp_absolutize_path "${ROOT_DIR}" "${planning_artifacts}")"
 
@@ -204,6 +206,7 @@ if [ "${dry_run}" = true ]; then
     printf 'Task: %s\n' "${task}"
     printf 'Bundle ID: %s\n' "${bundle_id}"
     printf 'Bundle directory: %s\n' "${bundle_dir}"
+    printf 'BMALPH commands: %s\n' "${bmalph_commands_path}"
     printf 'Skill: %s\n' "${skill_path}"
     printf 'Wrapper: %s\n' "${wrapper_path}"
     printf 'Schema: %s\n' "${schema_path}"
@@ -347,7 +350,7 @@ write_github_pr_body() {
 
         printf '## Bundle\n\n'
         printf -- '- Bundle ID: `%s`\n' "${bundle_id_value}"
-        printf -- '- Generated via `make bmad-autonomous-plan`\n'
+        printf -- '- Generated via `make bmalph-autonomous-plan`\n'
         printf -- '- Production code was intentionally not changed\n\n'
 
         printf '## Validation Rounds\n\n'
@@ -533,11 +536,12 @@ tmp_final_message="$(mktemp)"
 tmp_codex_home="$(mktemp -d)"
 
 cat >"${tmp_prompt_file}" <<EOM
-Read and execute the repository skill at:
+Read and execute the repository wrapper and skill instructions at:
+- ${bmalph_commands_path}
 - ${wrapper_path}
 - ${skill_path}
 
-You are running a fully autonomous BMAD planning session. Do not pause for human confirmation.
+You are running a fully autonomous BMALPH planning session. Do not pause for human confirmation.
 
 Task description:
 ${task}
@@ -560,11 +564,13 @@ fi)
 Hard requirements:
 - generate specs only; do not implement production code
 - keep file writes scoped to ${bundle_dir}; GitHub side effects are brokered by the trusted launcher after the planning run
-- use the existing _bmad workflows and repository docs as process guidance, but do not let interactive menus block progress
+- use the existing BMALPH wrapper in ${bmalph_commands_path} as the canonical process guide, and only inspect raw _bmad workflow files when the wrapper instructions prove insufficient
+- start from the BMALPH wrapper surface and route the planning flow through the wrapper commands 'bmalph', 'analyst', 'create-brief', 'create-prd', 'create-architecture', 'create-epics-stories', and 'implementation-readiness'
+- do not let interactive menus or phase gates block progress
 - keep context intentionally small; do not bulk-scan the entire repository
 - do not read .claude/skills/AI-AGENT-GUIDE.md or .claude/skills/SKILL-DECISION-GUIDE.md in this child run; the launcher already selected the correct skill
 - do not reopen general repository meta-guides unless the planning skill explicitly needs them to unblock execution
-- read the named BMAD workflow files directly instead of broad searches through _bmad whenever possible
+- prefer the BMALPH wrapper command names over direct workflow paths in your reasoning and artifact traceability
 - inspect only the minimum relevant docs and code paths needed to justify the plan
 - infer the likely feature area from the task description and start with the 1-3 most likely paths
 - stop discovery once you have enough evidence to write the bundle; avoid marginal context gathering

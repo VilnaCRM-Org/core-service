@@ -17,7 +17,7 @@ What are you trying to do?
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
-│   ├─ Full BMAD specs from short prompt → bmad-autonomous-planning
+│   ├─ Full BMALPH specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
 │   ├─ New API endpoint → developing-openapi-specs
 │   ├─ New load test → load-testing
@@ -127,7 +127,7 @@ This skill runs comprehensive CI checks.
 **Use**: [bmad-autonomous-planning](bmad-autonomous-planning/SKILL.md)
 
 This skill orchestrates research, brief, PRD, architecture, and epics/stories
-without stopping for interactive BMAD menus, and it can optionally create a
+through the repository's BMALPH wrapper surface without stopping for interactive BMAD menus, and it can optionally create a
 GitHub issue or specs-only PR.
 
 **NOT**: create-prd (that assumes interactive workflow progression)
@@ -313,7 +313,7 @@ Some tasks benefit from multiple skills:
 
 ### Autonomous planning before implementation:
 
-1. **bmad-autonomous-planning** - Generate the specs bundle without interactive BMAD menus
+1. **bmad-autonomous-planning** - Generate the specs bundle through the BMALPH wrapper without interactive BMAD menus
 2. **implementing-ddd-architecture** - Use during implementation to place code correctly
 3. **documentation-sync** - Update docs once implementation lands
 4. **ci-workflow** - Validate the eventual implementation before merge

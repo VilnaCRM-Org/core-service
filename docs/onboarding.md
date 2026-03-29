@@ -57,13 +57,13 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    ```
 5. To generate specs only from a short task description in a fresh Codex session, use:
    ```bash
-   make bmad-autonomous-plan \
+   make bmalph-autonomous-plan \
      PLAN_TASK="Plan a new feature" \
      PLAN_VALIDATION_ROUNDS=2
    ```
    For a safe first-run preview that does not create bundle files or GitHub side effects, use:
    ```bash
-   make bmad-autonomous-plan \
+   make bmalph-autonomous-plan \
      PLAN_TASK="Plan a new feature" \
      PLAN_VALIDATION_ROUNDS=2 \
      PLAN_DRY_RUN=true

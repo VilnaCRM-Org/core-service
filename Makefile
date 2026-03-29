@@ -131,7 +131,7 @@ bmalph-init: ## Initialize BMALPH for current project; set BMALPH_DRY_RUN=true t
 bmalph-setup: ## Install and initialize BMALPH for current project; defaults to BMALPH_PLATFORM=codex
 	@$(MAKE) bmalph-init BMALPH_PLATFORM="$(BMALPH_PLATFORM)" BMALPH_DRY_RUN="$(BMALPH_DRY_RUN)"
 
-bmad-autonomous-plan: ## Launch a fresh Codex session to generate autonomous BMAD specs from PLAN_TASK
+bmalph-autonomous-plan: ## Launch a fresh Codex session to generate autonomous BMALPH specs from PLAN_TASK
 	bash scripts/local-coder/run-autonomous-bmad-planning.sh \
 		--task "$(PLAN_TASK)" \
 		$(if $(strip $(PLAN_BUNDLE_ID)),--bundle-id "$(PLAN_BUNDLE_ID)",) \
@@ -143,6 +143,19 @@ bmad-autonomous-plan: ## Launch a fresh Codex session to generate autonomous BMA
 		$(if $(strip $(PLAN_MODEL)),--model "$(PLAN_MODEL)",) \
 		$(if $(strip $(PLAN_RESULT_FILE)),--result-file "$(PLAN_RESULT_FILE)",) \
 		$(if $(filter true TRUE 1 yes YES,$(PLAN_DRY_RUN)),--dry-run,)
+
+bmad-autonomous-plan: ## Backward-compatible alias for bmalph-autonomous-plan
+	@$(MAKE) bmalph-autonomous-plan \
+		PLAN_TASK="$(PLAN_TASK)" \
+		PLAN_BUNDLE_ID="$(PLAN_BUNDLE_ID)" \
+		PLAN_VALIDATION_ROUNDS="$(PLAN_VALIDATION_ROUNDS)" \
+		PLAN_ISSUE_MODE="$(PLAN_ISSUE_MODE)" \
+		PLAN_PR_MODE="$(PLAN_PR_MODE)" \
+		PLAN_REPO="$(PLAN_REPO)" \
+		PLAN_BASE_BRANCH="$(PLAN_BASE_BRANCH)" \
+		PLAN_MODEL="$(PLAN_MODEL)" \
+		PLAN_RESULT_FILE="$(PLAN_RESULT_FILE)" \
+		PLAN_DRY_RUN="$(PLAN_DRY_RUN)"
 
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)

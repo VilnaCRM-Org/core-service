@@ -36,7 +36,7 @@ Quick Decision Tree:
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
-│   ├─ Full BMAD specs from short prompt → bmad-autonomous-planning
+│   ├─ Full BMALPH specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
 │   ├─ New API endpoint → api-platform-crud
 │   ├─ New load test → load-testing
@@ -110,7 +110,7 @@ Complex skills have multi-file structure:
 
 | Skill                        | File                                | When to Use                                                                                                               |
 | ---------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Autonomous BMAD Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMAD research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
+| **Autonomous BMALPH Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMALPH-wrapped research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
 
 ### 🔧 Workflow Skills
 
@@ -246,7 +246,7 @@ Complex skills have multi-file structure:
 ├── README.md                   # Skills overview
 │
 ├── bmad-autonomous-planning/
-│   └── SKILL.md                # Autonomous BMAD planning workflow
+│   └── SKILL.md                # Autonomous BMALPH planning workflow
 │
 ├── ci-workflow/
 │   └── SKILL.md                # Run comprehensive CI checks

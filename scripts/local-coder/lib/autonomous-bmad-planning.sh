@@ -21,6 +21,21 @@ EOM
     return 1
 }
 
+cs_abp_resolve_bmalph_commands_file() {
+    local root_dir="${1:?Missing root directory}"
+
+    if [ -f "${root_dir}/_bmad/COMMANDS.md" ]; then
+        printf '%s\n' "${root_dir}/_bmad/COMMANDS.md"
+        return 0
+    fi
+
+    cat >&2 <<'EOM'
+Error: unable to locate BMALPH command wrapper file. Expected '_bmad/COMMANDS.md'.
+Run 'make bmalph-setup' first if BMALPH assets are not initialized.
+EOM
+    return 1
+}
+
 cs_abp_read_config_value() {
     local config_file="${1:?Missing config file}"
     local key="${2:?Missing config key}"
@@ -113,6 +128,7 @@ cs_abp_seed_paths_from_task() {
     if [[ "${normalized_task}" == *cli* ]] || [[ "${normalized_task}" == *command* ]] || [[ "${normalized_task}" == *script* ]] || [[ "${normalized_task}" == *make* ]] || [[ "${normalized_task}" == *autonomous* ]] || [[ "${normalized_task}" == *bmad* ]] || [[ "${normalized_task}" == *bmalph* ]] || [[ "${normalized_task}" == *bundle* ]] || [[ "${normalized_task}" == *maintainer* ]]; then
         candidates+=(
             "Makefile"
+            "_bmad/COMMANDS.md"
             "scripts/local-coder/run-autonomous-bmad-planning.sh"
             "scripts/local-coder/lib/autonomous-bmad-planning.sh"
             ".claude/skills/bmad-autonomous-planning/SKILL.md"

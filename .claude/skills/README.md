@@ -21,9 +21,9 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 ## Available Skills
 
-### 1. Autonomous BMAD Planning (`bmad-autonomous-planning/`)
+### 1. Autonomous BMALPH Planning (`bmad-autonomous-planning/`)
 
-**Purpose**: Create BMAD planning artifacts fully autonomously from a short task description
+**Purpose**: Create BMALPH-wrapped planning artifacts fully autonomously from a short task description
 
 **When activated**:
 
@@ -34,10 +34,11 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 **What it does**:
 
 - Creates a focused planning bundle with research, brief, PRD, architecture, and epics/stories
+- Uses the repository's `bmalph` wrapper surface in `_bmad/COMMANDS.md` instead of dropping straight into raw workflow files
 - Uses repository-aware validation loops without blocking on BMAD approval menus
 - Returns machine-readable JSON for launcher scripts and automation
 
-**Key command**: `make bmad-autonomous-plan PLAN_TASK="Plan a new feature"`
+**Key command**: `make bmalph-autonomous-plan PLAN_TASK="Plan a new feature"`
 
 ---
 

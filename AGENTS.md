@@ -81,7 +81,7 @@ VilnaCRM Core Service is a PHP 8.3+ microservice built with Symfony 7, API Platf
 | **Optimize queries**       | `query-performance-analysis`    | N+1 detection, slow queries, missing indexes |
 | **Add observability**      | `observability-instrumentation` | Logs, metrics, traces for new features       |
 | **Implement caching**      | `cache-management`              | Cache policies, invalidation, SWR, testing   |
-| **Autonomous BMAD specs**  | `bmad-autonomous-planning`      | Headless BMAD planning from a short task     |
+| **Autonomous BMALPH specs** | `bmad-autonomous-planning`      | Headless BMALPH-wrapped planning from a short task |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
 
@@ -205,6 +205,6 @@ workspace.
 2. Initialize BMALPH locally when you need the generated workflow files or
    Ralph loop assets in your workspace
 3. For a non-interactive Codex planning run that generates specs only, use
-   `make bmad-autonomous-plan PLAN_TASK="Plan a new feature"`
+   `make bmalph-autonomous-plan PLAN_TASK="Plan a new feature"`
 4. Use the `create-prd` workflow or other BMAD skills, then transition into
    Ralph when you intentionally want an autonomous loop

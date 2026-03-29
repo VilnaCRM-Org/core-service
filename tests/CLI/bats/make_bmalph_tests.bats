@@ -62,6 +62,7 @@ teardown() {
   assert_output --partial "bmalph-claude"
   assert_output --partial "bmalph-init"
   assert_output --partial "bmalph-setup"
+  assert_output --partial "bmalph-autonomous-plan"
   assert_output --partial "bmad-autonomous-plan"
 }
 
@@ -464,7 +465,7 @@ EOF
   setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
-    --task "Plan autonomous BMAD specs" \
+    --task "Plan autonomous BMALPH specs" \
     --bundle-id test-autonomous-plan \
     --max-validation-rounds 2 \
     --issue-mode skip \
@@ -473,6 +474,7 @@ EOF
   assert_success
   assert_output --partial "Dry run only."
   assert_output --partial "Bundle ID: test-autonomous-plan"
+  assert_output --partial "/_bmad/COMMANDS.md"
   assert_output --partial "/.claude/skills/bmad-autonomous-planning/SKILL.md"
   assert_output --partial "/scripts/local-coder/schemas/autonomous-bmad-planning-result.schema.json"
 }
@@ -481,19 +483,19 @@ EOF
   setup_isolated_bmalph_env
   setup_autonomous_bmad_fixture
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
-    --task "Plan autonomous BMAD specs" \
+    --task "Plan autonomous BMALPH specs" \
     --max-validation-rounds 4 \
     --dry-run
   [ "$status" -ne 0 ]
   assert_output --partial "validation rounds must be between 1 and 3"
 }
 
-@test "make bmad-autonomous-plan supports dry-run execution" {
+@test "make bmalph-autonomous-plan supports dry-run execution" {
   setup_isolated_bmalph_env
   setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-make
-  run make bmad-autonomous-plan \
-    PLAN_TASK="Plan autonomous BMAD specs" \
+  run make bmalph-autonomous-plan \
+    PLAN_TASK="Plan autonomous BMALPH specs" \
     PLAN_BUNDLE_ID="test-autonomous-plan-make" \
     PLAN_VALIDATION_ROUNDS=1 \
     PLAN_DRY_RUN=true
@@ -502,7 +504,7 @@ EOF
   assert_output --partial "Bundle ID: test-autonomous-plan-make"
 }
 
-@test "autonomous planning launcher invokes codex exec with skill prompt and schema" {
+@test "autonomous planning launcher invokes codex exec with bmalph wrapper prompt and schema" {
   setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-codex
   run bash -lc '
@@ -547,7 +549,7 @@ while [ $# -gt 0 ]; do
 done
 
 cat >"$output_last_message" <<'"'"'JSON'"'"'
-{"status":"complete","task":"Plan autonomous BMAD specs","bundle_id":"test-autonomous-plan-codex","bundle_dir":"/tmp/test-autonomous-plan-codex","artifacts":{"research":"/tmp/test-autonomous-plan-codex/research.md","brief":"/tmp/test-autonomous-plan-codex/product-brief.md","distillate":null,"prd":"/tmp/test-autonomous-plan-codex/prd.md","architecture":"/tmp/test-autonomous-plan-codex/architecture.md","epics":"/tmp/test-autonomous-plan-codex/epics.md","implementation_readiness":"/tmp/test-autonomous-plan-codex/implementation-readiness.md","run_summary":"/tmp/test-autonomous-plan-codex/run-summary.md"},"validation_rounds":{"research":1,"brief":1,"prd":1,"architecture":1,"epics":1,"stories":1},"open_questions":[],"warnings":[],"github":{"issue_status":"skipped","issue_number":null,"issue_url":null,"pr_status":"skipped","pr_number":null,"pr_url":null,"branch":null,"error":null}}
+{"status":"complete","task":"Plan autonomous BMALPH specs","bundle_id":"test-autonomous-plan-codex","bundle_dir":"/tmp/test-autonomous-plan-codex","artifacts":{"research":"/tmp/test-autonomous-plan-codex/research.md","brief":"/tmp/test-autonomous-plan-codex/product-brief.md","distillate":null,"prd":"/tmp/test-autonomous-plan-codex/prd.md","architecture":"/tmp/test-autonomous-plan-codex/architecture.md","epics":"/tmp/test-autonomous-plan-codex/epics.md","implementation_readiness":"/tmp/test-autonomous-plan-codex/implementation-readiness.md","run_summary":"/tmp/test-autonomous-plan-codex/run-summary.md"},"validation_rounds":{"research":1,"brief":1,"prd":1,"architecture":1,"epics":1,"stories":1},"open_questions":[],"warnings":[],"github":{"issue_status":"skipped","issue_number":null,"issue_url":null,"pr_status":"skipped","pr_number":null,"pr_url":null,"branch":null,"error":null}}
 JSON
 EOF
 
@@ -560,7 +562,7 @@ EOF
       CODEX_PROMPT_FILE="$codex_prompt" \
       CODEX_ENV_FILE="$codex_env" \
       bash scripts/local-coder/run-autonomous-bmad-planning.sh \
-        --task "Plan autonomous BMAD specs" \
+        --task "Plan autonomous BMALPH specs" \
         --bundle-id "test-autonomous-plan-codex" \
         --max-validation-rounds 1 \
         --issue-mode create \
@@ -593,26 +595,30 @@ PY
       echo "launcher should not leak GitHub tokens into Codex env" >&2
       exit 1
     fi
+    grep -F -- "_bmad/COMMANDS.md" "$codex_prompt"
     grep -F -- ".claude/skills/bmad-autonomous-planning/SKILL.md" "$codex_prompt"
+    grep -F -- "use the existing BMALPH wrapper in" "$codex_prompt"
+    grep -F -- "route the planning flow through the wrapper commands '\''bmalph'\'', '\''analyst'\'', '\''create-brief'\'', '\''create-prd'\'', '\''create-architecture'\'', '\''create-epics-stories'\'', and '\''implementation-readiness'\''" "$codex_prompt"
     grep -F -- "Initial repository paths to inspect first:" "$codex_prompt"
     grep -F -- "- Makefile" "$codex_prompt"
+    grep -F -- "- _bmad/COMMANDS.md" "$codex_prompt"
     grep -F -- "- scripts/local-coder/run-autonomous-bmad-planning.sh" "$codex_prompt"
     grep -F -- "do not read .claude/skills/AI-AGENT-GUIDE.md or .claude/skills/SKILL-DECISION-GUIDE.md" "$codex_prompt"
     grep -F -- "do not create GitHub issues or PRs yourself in this child run" "$codex_prompt"
     grep -F -- "issue_mode: create" "$codex_prompt"
     grep -F -- "pr_mode: draft" "$codex_prompt"
-    grep -F -- "Plan autonomous BMAD specs" "$codex_prompt"
+    grep -F -- "Plan autonomous BMALPH specs" "$codex_prompt"
     test -s "${temp_home}/result.json"
   '
   assert_success
   assert_output --partial "\"status\": \"complete-with-warnings\""
 }
 
-@test "make bmad-autonomous-plan forwards PLAN_REPO into dry-run output" {
+@test "make bmad-autonomous-plan alias forwards PLAN_REPO into dry-run output" {
   setup_isolated_bmalph_env
   setup_autonomous_bmad_fixture
   run make bmad-autonomous-plan \
-    PLAN_TASK="Plan autonomous BMAD specs" \
+    PLAN_TASK="Plan autonomous BMALPH specs" \
     PLAN_REPO="VilnaCRM-Org/core-service" \
     PLAN_DRY_RUN=true
   assert_success

@@ -1,11 +1,11 @@
 ---
 name: bmad-autonomous-planning
-description: Create BMAD planning artifacts fully autonomously from a short task description. Use when the user wants research, product brief, PRD, architecture, epics, stories, and optional GitHub issue or specs-only PR outputs without human interaction.
+description: Create BMALPH-wrapped planning artifacts fully autonomously from a short task description. Use when the user wants research, product brief, PRD, architecture, epics, stories, and optional GitHub issue or specs-only PR outputs without human interaction.
 ---
 
-# BMAD Autonomous Planning
+# BMALPH Autonomous Planning
 
-Use this skill when the user wants BMAD/BMALPH-style planning without the normal interactive menus.
+Use this skill when the user wants BMALPH-style planning without the normal interactive menus.
 
 ## Inputs
 
@@ -38,28 +38,38 @@ Your final response must be JSON matching `scripts/local-coder/schemas/autonomou
 
 Before planning, load only the sources you need:
 
-1. The resolved BMAD config file: `_bmad/config.yaml` when present, otherwise `_bmad/bmm/config.yaml`.
-2. If both files exist, treat `_bmad/bmm/config.yaml` as optional upstream context only.
-3. The BMAD source workflows that inform the artifact you are creating:
+1. The BMALPH wrapper command catalog: `_bmad/COMMANDS.md`.
+2. The resolved BMAD config file: `_bmad/config.yaml` when present, otherwise `_bmad/bmm/config.yaml`.
+3. If both files exist, treat `_bmad/bmm/config.yaml` as optional upstream context only.
+4. The BMALPH command wrappers that inform the artifact you are creating:
+   - `analyst`
+   - `create-brief`
+   - `create-prd`
+   - `create-architecture`
+   - `create-epics-stories`
+   - `implementation-readiness`
+5. The underlying BMAD source workflows only when the wrapper command entry is insufficient:
    - product brief precedent: `_bmad/bmm/workflows/1-analysis/bmad-product-brief-preview/SKILL.md` and its prompt files
    - PRD validation precedent: `_bmad/bmm/workflows/2-plan-workflows/create-prd/workflow-validate-prd.md`
    - architecture precedent: `_bmad/bmm/workflows/3-solutioning/bmad-create-architecture/workflow.md`
    - epics/stories precedent: `_bmad/bmm/workflows/3-solutioning/bmad-create-epics-and-stories/workflow.md`
    - cross-artifact validation precedent: `_bmad/bmm/workflows/3-solutioning/bmad-check-implementation-readiness/workflow.md`
-4. Repository docs that constrain implementation, especially:
+6. Repository docs that constrain implementation, especially:
    - `AGENTS.md`
    - `docs/design-and-architecture.md`
    - `docs/getting-started.md`
    - `docs/onboarding.md`
    - `docs/developer-guide.md`
-5. Relevant code and docs for the requested feature area.
+7. Relevant code and docs for the requested feature area.
 
 Never bulk-scan the entire repository. Limit yourself to the smallest set of
 files and directories that can justify the resulting specs.
 
-Prefer direct reads of the exact files listed above. Do not run broad `rg`
-searches over `_bmad/`, `docs/`, or the whole repository unless you first have
-to identify one narrow feature-area path.
+Prefer direct reads of the exact wrapper and workflow files listed above. Start
+with `_bmad/COMMANDS.md` and only descend into the mapped workflow files when
+the wrapper entry does not give enough detail. Do not run broad `rg` searches
+over `_bmad/`, `docs/`, or the whole repository unless you first have to
+identify one narrow feature-area path.
 
 When a file is long, read only the relevant sections. Avoid dumping full large
 files into context if a focused excerpt is enough.
@@ -68,7 +78,10 @@ files into context if a focused excerpt is enough.
 
 You are the orchestrator and the user surrogate for this run.
 
-BMAD workflows may say "halt and wait for user input". Do not stop. Decide the next action yourself using the task description, repository context, and prior artifacts. Record unresolved items in `run-summary.md` and `open_questions` instead of blocking.
+BMALPH command wrappers and their underlying BMAD workflows may say "halt and
+wait for user input". Do not stop. Decide the next action yourself using the
+task description, repository context, and prior artifacts. Record unresolved
+items in `run-summary.md` and `open_questions` instead of blocking.
 
 ## Bundle Layout
 
@@ -86,6 +99,7 @@ Do not implement production code in this run.
 ### 1. Preflight
 
 - Confirm the bundle directory exists or create it.
+- Read `_bmad/COMMANDS.md` first and map the relevant BMALPH wrapper commands for the requested planning run.
 - Read the resolved BMAD config file and resolve `planning_artifacts`, `implementation_artifacts`, and `project_knowledge`.
 - Infer the feature area from the task description first. Start with the 1-3
   most likely repository paths and expand only if the evidence is insufficient.
@@ -118,7 +132,7 @@ Create `research.md` with:
 
 ### 3. Product Brief
 
-- Follow the spirit of `_bmad/bmm/workflows/1-analysis/bmad-product-brief-preview/`.
+- Follow the BMALPH `create-brief` wrapper first, then the underlying workflow only if needed.
 - Create `product-brief.md`.
 - Create `product-brief-distillate.md` whenever there is overflow context useful for downstream artifacts.
 - Validate and improve the brief for `1..max_validation_rounds` rounds.
@@ -126,7 +140,7 @@ Create `research.md` with:
 
 ### 4. PRD
 
-- Create `prd.md` from the brief, distillate, research, and repository constraints.
+- Create `prd.md` from the brief, distillate, research, and repository constraints using the BMALPH `create-prd` wrapper as the primary process guide.
 - Keep the PRD implementation-ready but not code-level.
 - Validate it using the BMAD PRD validation principles:
   - coverage
@@ -138,13 +152,13 @@ Create `research.md` with:
 
 ### 5. Architecture
 
-- Create `architecture.md` aligned with the repository’s actual Symfony/API Platform/DDD/hexagonal patterns.
+- Create `architecture.md` aligned with the repository’s actual Symfony/API Platform/DDD/hexagonal patterns using the BMALPH `create-architecture` wrapper as the primary process guide.
 - Use repository docs and existing code to avoid generic architecture.
 - Validate coherence, structure, decision compatibility, and implementation readiness for `1..max_validation_rounds` rounds.
 
 ### 6. Epics and Stories
 
-- Create `epics.md` with user-value epics and detailed stories.
+- Create `epics.md` with user-value epics and detailed stories using the BMALPH `create-epics-stories` wrapper as the primary process guide.
 - Stories must reference the task’s requirements, architecture constraints, and acceptance criteria.
 - Make dependencies strictly forward-safe: no story should depend on a future story.
 - Validate epics and stories for `1..max_validation_rounds` rounds.
@@ -152,14 +166,14 @@ Create `research.md` with:
 
 ### 7. Cross-Artifact Readiness
 
-- Create `implementation-readiness.md`.
+- Create `implementation-readiness.md` using the BMALPH `implementation-readiness` wrapper as the primary process guide.
 - Verify that brief, PRD, architecture, epics, and stories align.
 - Identify any remaining gaps, risks, or open questions.
 - Summarize the validation rounds actually used per artifact in `run-summary.md`.
 
 ## Decision Policy for Interactive Gates
 
-When a reused BMAD workflow would normally present a menu:
+When a reused BMALPH wrapper or underlying BMAD workflow would normally present a menu:
 
 - treat `A` as "run a deeper review round" when material uncertainty remains
 - treat `P` as "use additional subagent perspectives" when those perspectives are likely to change the outcome
