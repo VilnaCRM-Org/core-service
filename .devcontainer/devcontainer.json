@@ -24,6 +24,8 @@
     "GIT_AUTHOR_NAME": "${localEnv:GIT_AUTHOR_NAME}",
     "GIT_AUTHOR_EMAIL": "${localEnv:GIT_AUTHOR_EMAIL}"
   },
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+  "workspaceFolder": "${localWorkspaceFolder}",
   "secrets": {
     "OPENAI_API_KEY": {
       "description": "OpenAI API key used by Codex CLI."
@@ -32,6 +34,7 @@
       "description": "GitHub token for non-interactive gh CLI and git push in the workspace."
     }
   },
+  "initializeCommand": "bash .devcontainer/initialize.sh",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "mounts": [
     "source=${localEnv:HOME}/.openclaw-host-secrets,target=/run/openclaw-host-secrets,type=bind,readonly",
