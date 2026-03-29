@@ -184,15 +184,32 @@ load 'bats-assert/load'
     set -euo pipefail
     source_path="tests/CLI/bats/php/SourcePatternGuardParseErrorExample.php"
     target_path="src/Shared/Application/SourcePatternGuardParseErrorExample.php"
+    baseline_path="config/static-analysis/source-pattern-baseline.json"
+    baseline_backup=""
+    baseline_exists=0
+
+    if [ -f "$baseline_path" ]; then
+      baseline_exists=1
+      baseline_backup="$(mktemp)"
+      cp "$baseline_path" "$baseline_backup"
+    fi
 
     cleanup() {
       if [ -f "$target_path" ]; then
         mv "$target_path" "$source_path"
       fi
+      if [ "$baseline_exists" -eq 1 ] && [ -n "$baseline_backup" ] && [ -f "$baseline_backup" ]; then
+        cp "$baseline_backup" "$baseline_path"
+        rm -f "$baseline_backup"
+      fi
+      if [ "$baseline_exists" -eq 0 ] && [ -f "$baseline_path" ]; then
+        rm -f "$baseline_path"
+      fi
     }
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
+    make ensure-test-services >/dev/null
 
     set +e
     docker compose exec php php -d display_errors=0 -d error_reporting='"'"'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'"'"' scripts/guard-source-patterns.php --generate-baseline
