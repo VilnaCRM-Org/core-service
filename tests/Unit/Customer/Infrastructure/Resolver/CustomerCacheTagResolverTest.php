@@ -32,6 +32,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
         self::assertInstanceOf(CustomerCacheTagCollection::class, $result);
         self::assertSame(
             [
+                'customer',
                 'customer.collection',
                 'customer.01ARZ3NDEKTSV4RRFFQ69G5FAV',
                 'customer.email.hashed-email',
@@ -59,6 +60,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
 
         self::assertSame(
             [
+                'customer',
                 'customer.collection',
                 'customer.01ARZ3NDEKTSV4RRFFQ69G5FAV',
                 'customer.email.hashed-email',
@@ -88,6 +90,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
 
         self::assertSame(
             [
+                'customer',
                 'customer.collection',
                 'customer.duplicate-id',
                 'customer.email.duplicate-hash',
@@ -114,7 +117,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
             ->willReturn('hashed-email');
 
         self::assertCount(
-            3,
+            4,
             $resolver->resolveForDeletedCustomer(
                 customer: null,
                 deletedEmail: 'customer@example.com',
@@ -164,6 +167,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
 
         self::assertSame(
             [
+                'customer',
                 'customer.collection',
                 'customer.email.collection',
             ],

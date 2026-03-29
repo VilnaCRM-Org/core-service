@@ -237,7 +237,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         } catch (\Throwable $e) {
             $this->logger->warning('Customer lookup failed before deleteByEmail', [
                 'operation' => 'customer.delete.lookup_failed',
-                'email' => $email,
+                'email_hash' => $this->cacheKeyBuilder->hashEmail($email),
                 'error' => $e->getMessage(),
             ]);
 
@@ -252,7 +252,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         } catch (\Throwable $e) {
             $this->logger->warning('Customer lookup failed before deleteById', [
                 'operation' => 'customer.delete.lookup_failed',
-                'customer_id' => (string) $id,
+                'customer_id_hash' => hash('sha256', (string) $id),
                 'error' => $e->getMessage(),
             ]);
 

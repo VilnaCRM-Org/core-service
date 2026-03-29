@@ -221,6 +221,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.' . $customer->getUlid(),
                 'customer.email.' . $emailHash,
@@ -255,6 +256,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.email.' . $emailHash,
             ]);
@@ -278,9 +280,9 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Customer lookup failed before deleteByEmail',
-                $this->callback(static function (array $context) use ($email): bool {
+                $this->callback(static function (array $context) use ($emailHash): bool {
                     return $context['operation'] === 'customer.delete.lookup_failed'
-                        && $context['email'] === $email
+                        && $context['email_hash'] === $emailHash
                         && $context['error'] === 'Lookup failed';
                 })
             );
@@ -291,7 +293,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->with($email);
 
         $this->cacheKeyBuilder
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('hashEmail')
             ->with($email)
             ->willReturn($emailHash);
@@ -300,6 +302,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.email.' . $emailHash,
             ]);
@@ -383,6 +386,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.' . $id,
                 'customer.email.' . $emailHash,
@@ -454,7 +458,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'Customer lookup failed before deleteById',
                 $this->callback(static function (array $context) use ($id): bool {
                     return $context['operation'] === 'customer.delete.lookup_failed'
-                        && $context['customer_id'] === $id
+                        && $context['customer_id_hash'] === hash('sha256', $id)
                         && $context['error'] === 'Lookup failed';
                 })
             );
@@ -468,6 +472,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.' . $id,
             ]);
@@ -494,6 +499,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('invalidateTags')
             ->with([
+                'customer',
                 'customer.collection',
                 'customer.' . $id,
             ]);
