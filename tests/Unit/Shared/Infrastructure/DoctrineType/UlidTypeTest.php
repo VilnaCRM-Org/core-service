@@ -9,6 +9,7 @@ use App\Shared\Infrastructure\DoctrineType\UlidType;
 use App\Tests\Unit\UnitTestCase;
 use MongoDB\BSON\Binary;
 use ReflectionClass;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidTypeTest extends UnitTestCase
 {
@@ -30,10 +31,11 @@ final class UlidTypeTest extends UnitTestCase
     {
         $ulidType = $this->getUlidTypeInstance();
 
-        $dummyUlid = $this->createMock(Ulid::class);
+        $ulid = new Ulid((string) $this->faker->ulid());
 
-        $result = $ulidType->convertToDatabaseValue($dummyUlid);
+        $result = $ulidType->convertToDatabaseValue($ulid);
         $this->assertInstanceOf(Binary::class, $result);
+        $this->assertSame($ulid->toBinary(), $result->getData());
     }
 
     public function testConvertToDatabaseValueWithNull(): void
@@ -63,29 +65,26 @@ final class UlidTypeTest extends UnitTestCase
     {
         $ulidType = $this->getUlidTypeInstance();
 
-        $binaryData = 'some binary data';
-        $binary = new Binary($binaryData, Binary::TYPE_GENERIC);
+        $symfonyUlid = SymfonyUlid::fromString((string) $this->faker->ulid());
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
 
         $result = $ulidType->convertToPHPValue($binary);
 
-        if ($result !== null) {
-            $this->assertInstanceOf(Ulid::class, $result);
-        } else {
-            $this->markTestIncomplete(
-                'Ulid transformation logic not fully implemented for testing.'
-            );
-        }
+        $this->assertInstanceOf(Ulid::class, $result);
+        $this->assertSame((string) $symfonyUlid, (string) $result);
     }
 
     public function testConvertToPHPValueWithNonBinaryValue(): void
     {
         $ulidType = $this->getUlidTypeInstance();
 
-        $binaryString = hex2bin('0189a7e5d3f4e2a3b4c5d6e7f8901234');
+        $symfonyUlid = SymfonyUlid::fromString((string) $this->faker->ulid());
+        $binaryString = $symfonyUlid->toBinary();
 
         $result = $ulidType->convertToPHPValue($binaryString);
 
         $this->assertInstanceOf(Ulid::class, $result);
+        $this->assertSame((string) $symfonyUlid, (string) $result);
     }
 
     public function testClosureToMongo(): void
@@ -93,8 +92,8 @@ final class UlidTypeTest extends UnitTestCase
         $ulidType = $this->getUlidTypeInstance();
         $closureCode = $ulidType->closureToMongo();
 
-        $this->assertStringContainsString('\MongoDB\BSON\Binary', $closureCode);
-        $this->assertStringContainsString('toBinary()', $closureCode);
+        $this->assertStringContainsString('\Doctrine\ODM\MongoDB\Types\Type::getType(\'ulid\')', $closureCode);
+        $this->assertStringContainsString('convertToDatabaseValue', $closureCode);
     }
 
     public function testClosureToPHP(): void
@@ -102,14 +101,8 @@ final class UlidTypeTest extends UnitTestCase
         $ulidType = $this->getUlidTypeInstance();
         $closureCode = $ulidType->closureToPHP();
 
-        $this->assertStringContainsString(
-            'new \App\Shared\Infrastructure\Transformer\UlidTransformer',
-            $closureCode
-        );
-        $this->assertStringContainsString(
-            'transformFromSymfonyUlid',
-            $closureCode
-        );
+        $this->assertStringContainsString('\Doctrine\ODM\MongoDB\Types\Type::getType(\'ulid\')', $closureCode);
+        $this->assertStringContainsString('convertToPHPValue', $closureCode);
     }
 
     private function getUlidTypeInstance(): UlidType

@@ -38,10 +38,4 @@ final class AsyncEventDispatcherSpy implements AsyncEventDispatcherInterface
     {
         return $this->dispatched;
     }
-
-    public function clear(): void
-    {
-        $this->dispatched = [];
-        $this->shouldFail = false;
-    }
 }

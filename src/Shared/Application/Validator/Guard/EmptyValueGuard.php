@@ -13,9 +13,12 @@ final class EmptyValueGuard
         return $value === null || $value === '';
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function shouldSkip(
-        array|string|int|float|bool|null $value,
-        Constraint $constraint
+        mixed $value,
+        Constraint $_constraint
     ): bool {
         return $value === null;
     }

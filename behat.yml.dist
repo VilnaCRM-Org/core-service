@@ -6,7 +6,7 @@ default:
     '': "%paths.base%/tests/Acceptance"
   extensions:
     FriendsOfBehat\SymfonyExtension:
-      bootstrap: 'tests/bootstrap.php'
+      bootstrap: 'tests/behat_bootstrap.php'
       kernel:
         environment: test
         class: App\Shared\Kernel

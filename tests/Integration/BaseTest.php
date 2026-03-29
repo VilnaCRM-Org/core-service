@@ -59,6 +59,8 @@ abstract class BaseTest extends ApiTestCase
     /**
      * @param array<string, string> $payload
      * @param array<string, string> $responseData
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     protected function assertCreatedResponse(
         array $payload,

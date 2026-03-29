@@ -7,6 +7,9 @@ namespace App\Tests\Unit\Shared\Infrastructure\Bus\Stub;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use PHPUnit\Framework\Assert;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class TestOtherEventSubscriber implements DomainEventSubscriberInterface
 {
     public function __invoke(TestOtherEvent $event): void

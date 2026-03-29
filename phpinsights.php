@@ -16,6 +16,7 @@ return [
     'ide' => 'phpstorm',
     'exclude' => [
         'vendor',
+        'scripts',
         'CLI/bats/php',
         'src/Core/Customer/Application/DTO',
     ],

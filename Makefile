@@ -54,7 +54,7 @@ SYMFONY_TEST_ENV = $(EXEC_PHP_TEST_ENV) bin/console
 # Executables: vendors
 BEHAT         = ./vendor/bin/behat --stop-on-failure -n
 PHPUNIT       = ./vendor/bin/phpunit
-PSALM         = ./vendor/bin/psalm
+PSALM         = php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' ./vendor/bin/psalm
 PHP_CS_FIXER  = ./vendor/bin/php-cs-fixer
 DEPTRAC       = ./vendor/bin/deptrac
 INFECTION     = ./vendor/bin/infection
@@ -73,19 +73,20 @@ endif
 # Variables for environment and commands
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
-COVERAGE_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --coverage-text
+COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
-COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
+COVERAGE_INTERNAL_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --testsuite Negative --coverage-clover /coverage/coverage.xml
 BATS_BIN ?= bats
 BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
+DOCKER_TTY_FLAG = $(if $(CI),-T,)
 BMALPH_PLATFORM ?= codex
 BMALPH_DRY_RUN ?= false
 
 define DOCKER_EXEC_WITH_ENV
-$(DOCKER_COMPOSE) exec -e $(1) php $(2)
+$(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)
 endef
 
 # Conditional execution based on CI environment variable
@@ -136,7 +137,10 @@ check-requirements: ## Checks requirements for running Symfony and gives useful 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 	$(EXEC_ENV) $(SYMFONY_BIN) security:check
 
-psalm: ## A static analysis tool for finding errors in PHP applications
+source-pattern-guard: ## Guard src/ against banned native array types and hardcoded new expressions
+	$(EXEC_ENV) php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' scripts/guard-source-patterns.php
+
+psalm: source-pattern-guard ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
 
 psalm-security: ## Psalm security analysis
@@ -155,7 +159,8 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 
 unit-tests: ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
-	@tmpfile=$$(mktemp); \
+	@rm -f coverage.txt; \
+	tmpfile=$$(mktemp); \
 	script -qec "$(RUN_TESTS_COVERAGE) --testsuite=Unit" /dev/null > $$tmpfile 2>&1; \
 	test_status=$$?; \
 	cat $$tmpfile; \
@@ -169,8 +174,13 @@ unit-tests: ## Run unit tests with 100% coverage requirement
 		rm -f $$tmpfile; \
 		exit 1; \
 	fi; \
-	coverage=$$(perl -ne 's/\e\[[0-9;]*m//g; if (/^\s*Lines:\s+([0-9.]+)%/) { print "$$1\n"; exit 0 }' $$tmpfile); \
-	rm -f $$tmpfile; \
+	if [ ! -f coverage.txt ]; then \
+		echo "❌ ERROR: coverage.txt was not generated."; \
+		rm -f $$tmpfile; \
+		exit 1; \
+	fi; \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' coverage.txt | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	rm -f $$tmpfile coverage.txt; \
 	if [ -n "$$coverage" ]; then \
 		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
 			echo "❌ COVERAGE FAILURE: Line coverage is $$coverage%, but 100% is required. Please cover all lines of code and achieve the 100% code coverage"; \
@@ -191,7 +201,8 @@ deptrac-debug: ## Find files unassigned for Deptrac
 
 ensure-test-services: ## Ensure required Docker services for test suites are running
 	@attempt=1; \
-	max_attempts=3; \
+	max_attempts=$${DOCKER_COMPOSE_UP_RETRIES:-5}; \
+	retry_delay=$${DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5}; \
 	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
@@ -201,7 +212,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 		echo "⚠️  Failed to start required test services (attempt $$attempt/$$max_attempts). Retrying..."; \
 		$(DOCKER_COMPOSE) ps || true; \
 		attempt=$$((attempt + 1)); \
-		sleep 5; \
+		sleep $$retry_delay; \
 	done; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 

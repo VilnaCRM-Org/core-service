@@ -36,15 +36,21 @@ load 'bats-assert/load'
     set -euo pipefail
     source_path="tests/CLI/bats/php/PartlyCoveredEventBus.php"
     target_path="src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php"
+    test_source_path="tests/CLI/bats/php/PartlyCoveredEventBusTest.php"
+    test_target_path="tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php"
 
     cleanup() {
       if [ -f "$target_path" ]; then
         mv "$target_path" "$source_path"
       fi
+      if [ -f "$test_target_path" ]; then
+        mv "$test_target_path" "$test_source_path"
+      fi
     }
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
+    mv "$test_source_path" "$test_target_path"
     make ensure-test-services >/dev/null
     docker compose exec php composer dump-autoload >/dev/null
     make unit-tests >/dev/null 2>&1 || true
@@ -58,7 +64,7 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "8 mutants were not covered by tests"
+  assert_output --partial "1 covered mutants were not detected"
 }
 
 @test "make behat should fail when scenarios fail" {
@@ -114,7 +120,108 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "does not exist"
+  assert_output --partial "NonExistentTrait"
+}
+
+@test "make source-pattern-guard should fail on non-baselined violations" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    make source-pattern-guard
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Source pattern guard found non-baselined violations:"
+  assert_output --partial "Hardcoded new expression found"
+}
+
+@test "make source-pattern-guard should fail on typed class constants with array type declarations" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardTypedConstExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardTypedConstExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    make source-pattern-guard
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Source pattern guard found non-baselined violations:"
+  assert_output --partial "array_type_declaration"
+}
+
+@test "make source-pattern-guard baseline generation should fail on parse errors" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardParseErrorExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardParseErrorExample.php"
+    baseline_path="config/static-analysis/source-pattern-baseline.json"
+    baseline_backup=""
+    baseline_exists=0
+
+    if [ -f "$baseline_path" ]; then
+      baseline_exists=1
+      baseline_backup="$(mktemp)"
+      cp "$baseline_path" "$baseline_backup"
+    fi
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+      if [ "$baseline_exists" -eq 1 ] && [ -n "$baseline_backup" ] && [ -f "$baseline_backup" ]; then
+        cp "$baseline_backup" "$baseline_path"
+        rm -f "$baseline_backup"
+      fi
+      if [ "$baseline_exists" -eq 0 ] && [ -f "$baseline_path" ]; then
+        rm -f "$baseline_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    make ensure-test-services >/dev/null
+
+    set +e
+    docker compose exec php php -d display_errors=0 -d error_reporting='"'"'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'"'"' scripts/guard-source-patterns.php --generate-baseline
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Refusing to generate a baseline while some files cannot be analyzed."
+  assert_output --partial "[parse_error]"
 }
 
 @test "make phpinsights should fail when code quality is low" {

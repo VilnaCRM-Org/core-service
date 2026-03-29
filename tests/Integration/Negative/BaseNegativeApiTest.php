@@ -55,6 +55,9 @@ abstract class BaseNegativeApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame($expectedStatusCode);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     protected function requestAndAssertError(
         string $method,
         string $url,

@@ -35,6 +35,13 @@ load 'bats-assert/load'
   skip "Requires Docker - skipped in CI environment"
 }
 
+@test "make build-k6-docker builds k6 image directly" {
+  run sed -n '/^build-k6-docker:/,/^build-spectral-docker:/p' Makefile
+  assert_success
+  assert_output --partial 'build-k6-docker:'
+  assert_output --partial '$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .'
+}
+
 @test "make execute-load-tests-script with scenario parameter" {
   skip "Requires Docker - skipped in CI environment"
 }
@@ -46,4 +53,3 @@ load 'bats-assert/load'
 @test "make stop-prod-loadtest stops production environment" {
   skip "Requires Docker - skipped in CI environment"
 }
-
