@@ -34,6 +34,8 @@ final class NegativeKernel extends BaseKernel
 
     /**
      * @psalm-suppress PossiblyUnusedMethod
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function configureContainer(
         ContainerBuilder $_container,

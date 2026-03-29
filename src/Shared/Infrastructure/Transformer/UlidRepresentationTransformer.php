@@ -20,12 +20,15 @@ final class UlidRepresentationTransformer
             return (string) SymfonyUlid::fromBinary($value->getData());
         }
 
-        if (is_object($value)) {
-            throw new InvalidArgumentException(
-                sprintf('Unsupported object type: %s', $value::class)
-            );
+        if (is_scalar($value) || $value === null) {
+            return $value;
         }
 
-        return $value;
+        throw new InvalidArgumentException(
+            sprintf(
+                'normalizeForUlidFactory received unsupported value type: %s',
+                get_debug_type($value)
+            )
+        );
     }
 }

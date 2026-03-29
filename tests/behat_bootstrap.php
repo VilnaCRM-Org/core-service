@@ -18,12 +18,16 @@ if (! is_file($legacyI18nPath)) {
     $packageI18nPath = dirname(__DIR__).'/vendor/behat/gherkin/i18n.php';
 
     if (is_file($packageI18nPath)) {
-        set_error_handler(static fn (): bool => true);
+        $symlinkCreated = false;
 
-        try {
-            $symlinkCreated = symlink($packageI18nPath, $legacyI18nPath);
-        } finally {
-            restore_error_handler();
+        if (function_exists('symlink')) {
+            set_error_handler(static fn (): bool => true);
+
+            try {
+                $symlinkCreated = symlink($packageI18nPath, $legacyI18nPath);
+            } finally {
+                restore_error_handler();
+            }
         }
 
         if (! $symlinkCreated && ! is_file($legacyI18nPath)) {

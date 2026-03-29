@@ -133,9 +133,41 @@ final class UlidValueTransformerTest extends UnitTestCase
         $unsupportedObject = new \stdClass();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unsupported object type: stdClass');
+        $this->expectExceptionMessage(
+            'normalizeForUlidFactory received unsupported value type: stdClass'
+        );
 
         $this->converter->toUlid($unsupportedObject);
+    }
+
+    public function testToUlidWithArrayThrowsInvalidArgumentException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'normalizeForUlidFactory received unsupported value type: array'
+        );
+
+        $this->converter->toUlid(['not-a-ulid']);
+    }
+
+    public function testToUlidWithResourceThrowsInvalidArgumentException(): void
+    {
+        $stream = fopen('php://memory', 'rb');
+
+        if ($stream === false) {
+            self::fail('Failed to open php://memory stream.');
+        }
+
+        try {
+            $this->expectException(\InvalidArgumentException::class);
+            $this->expectExceptionMessage(
+                'normalizeForUlidFactory received unsupported value type: resource (stream)'
+            );
+
+            $this->converter->toUlid($stream);
+        } finally {
+            fclose($stream);
+        }
     }
 
     /**

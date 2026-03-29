@@ -31,17 +31,12 @@ return [
         ForbiddenSetterSniff::class,
         InlineDocCommentDeclarationSniff::class,
         UseSpacingSniff::class,
+        // Test fixtures intentionally exercise missing and mixed type-hint paths.
         DisallowMixedTypeHintSniff::class,
         ParameterTypeHintSniff::class,
         ReturnTypeHintSniff::class,
     ],
     'config' => [
-        ParameterTypeHintSniff::class => [
-            'exclude' => [
-                'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
-                'tests/Unit/Shared/Infrastructure/Bus/Stub/UntypedParameterSubscriber',
-            ],
-        ],
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',
