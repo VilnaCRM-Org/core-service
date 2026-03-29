@@ -132,8 +132,8 @@ BMAD menus. In Codex, start with `.agents/skills/bmad-autonomous-planning/SKILL.
 and run the flow in the current session with one focused subagent per BMALPH
 stage, using `gpt-5.4` with `xhigh` reasoning for those subagents.
 
-**NOT**: create-prd (that assumes interactive workflow progression)
-**NOT**: sprint-planning (that only derives sprint status from existing epics)
+**NOT**: the BMALPH `create-prd` flow (assumes interactive workflow progression)
+**NOT**: the BMALPH `sprint-planning` flow (only derives sprint status from existing epics)
 
 ---
 
