@@ -1,57 +1,52 @@
 ---
 name: bmad-autonomous-planning
 description: >
-  Fully autonomous BMALPH planning orchestration for Codex. Use when the user wants specs, validation rounds, and optional GitHub issue or specs-only PR outputs from a short task description without interaction.
+  Portable autonomous BMALPH planning for Codex. Use when the user wants specs
+  from a short task description and expects the current AI session to
+  orchestrate BMALPH subagents without human interaction.
 ---
 
-This wrapper expects local BMAD assets under `_bmad/`. If `_bmad/` is missing, run `make bmalph-setup` first.
+Use this skill from the current Codex session. Do not rely on repo-local bash
+wrappers, `make` targets, or other launcher automation for the planning flow.
 
-For top-level Codex work in this repository, prefer the launcher entrypoint instead of manually replaying the planning flow in the current session.
+The canonical planning contract lives in
+`.claude/skills/bmad-autonomous-planning/SKILL.md`. This wrapper is only the
+Codex-specific handoff.
 
-Primary command:
+If `_bmad/` is missing, stop and tell the user BMALPH assets must be initialized
+for the repository before this skill can run. Otherwise:
 
-```bash
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2
-```
+1. Read `_bmad/COMMANDS.md` and the resolved BMAD config file first.
+2. Read `.claude/skills/bmad-autonomous-planning/SKILL.md`.
+3. Resolve or create a bundle directory under the configured planning artifacts
+   folder, typically `autonomous/<timestamp>-<task-slug>/`.
+4. Run each BMALPH planning stage in a dedicated subagent:
+   - research and repository context
+   - product brief
+   - PRD
+   - architecture
+   - epics and stories
+   - implementation readiness
+5. After each subagent returns, the main agent must decide the next step,
+   answer workflow questions on the user's behalf, and only then hand the next
+   stage to another subagent.
+6. Validate and improve each artifact for up to three rounds without blocking on
+   BMALPH approval menus.
 
-Useful variants:
+Minimal Codex trigger example:
 
-```bash
-# Safe preview of paths, bundle id, and resolved inputs only
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2 \
-  PLAN_DRY_RUN=true
+`Use the bmad-autonomous-planning skill to plan customer tagging for the core service. Follow the repository's BMALPH autonomous planning skill, work in the current session, and keep the flow fully autonomous.`
 
-# Stream safe BMALPH progress trace to stderr during the live run
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2 \
-  PLAN_DEBUG=true
+The finished bundle should include:
 
-# Persist the final machine-readable JSON so Codex can inspect it after the run
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2 \
-  PLAN_RESULT_FILE="$(mktemp)"
-```
+- `research.md`
+- `product-brief.md`
+- `product-brief-distillate.md` when useful
+- `prd.md`
+- `architecture.md`
+- `epics.md`
+- `implementation-readiness.md`
+- `run-summary.md`
 
-Launcher contract:
-
-- `PLAN_TASK` is required.
-- `PLAN_VALIDATION_ROUNDS` accepts `1` to `3`.
-- `PLAN_DRY_RUN=true` performs a non-mutating preview.
-- `PLAN_DEBUG=true` streams a safe trace to `stderr`; the final JSON still goes to `stdout`.
-- `PLAN_RESULT_FILE=/abs/path.json` writes the same final JSON to disk for follow-up inspection.
-- `PLAN_ISSUE_MODE=create` and `PLAN_PR_MODE=draft` request trusted GitHub side effects after the planning run.
-- `PLAN_REPO`, `PLAN_BASE_BRANCH`, and `PLAN_MODEL` are optional overrides.
-
-After the launcher finishes:
-
-1. Read the JSON result.
-2. Review the bundle directory and listed artifacts.
-3. Only fall back to manual workflow execution if the user explicitly asks to bypass the launcher or the launcher cannot run in the current environment.
-
-When you do need the internal planning contract, start with `_bmad/COMMANDS.md` as the BMALPH wrapper surface, then read and execute `.claude/skills/bmad-autonomous-planning/SKILL.md`.
+Optional GitHub issue or specs-only PR work happens only after the planning
+bundle is complete and only when the user explicitly asks for it.

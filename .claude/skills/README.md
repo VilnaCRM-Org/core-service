@@ -35,16 +35,16 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 
 - Creates a focused planning bundle with research, brief, PRD, architecture, and epics/stories
 - Uses the repository's `bmalph` wrapper surface in `_bmad/COMMANDS.md` instead of dropping straight into raw workflow files
+- Runs each BMALPH planning stage through a dedicated subagent when subagents are available
 - Uses repository-aware validation loops without blocking on BMAD approval menus
-- Returns machine-readable JSON for launcher scripts and automation
 
-**Key command**: `make bmalph-autonomous-plan PLAN_TASK="Plan a new feature"`
+**Key trigger prompt**: `Use the bmad-autonomous-planning skill to plan a new feature and follow the repository's autonomous BMALPH planning workflow in the current session.`
 
 **Codex trigger path**:
 
 - Use the Codex wrapper at `.agents/skills/bmad-autonomous-planning/SKILL.md`
-- Prefer the launcher over manual replay of the planning workflow
-- Add `PLAN_DRY_RUN=true` for a safe preview, `PLAN_DEBUG=true` for a safe trace, and `PLAN_RESULT_FILE=/tmp/plan.json` when the result JSON should be inspected after the run
+- Run the planning flow in the current session
+- Do not rely on repo-local launcher scripts or `make` targets for this skill
 
 ---
 

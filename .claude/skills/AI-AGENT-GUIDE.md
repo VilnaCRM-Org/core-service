@@ -112,17 +112,9 @@ Complex skills have multi-file structure:
 | ------------------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous BMALPH Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMALPH-wrapped research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
 
-Preferred Codex launcher for this skill:
+Preferred Codex trigger for this skill:
 
-```bash
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2
-```
-
-Use `PLAN_DRY_RUN=true` for a non-mutating preview, `PLAN_DEBUG=true` to stream
-a safe progress trace, and `PLAN_RESULT_FILE=/tmp/plan.json` when the final JSON
-should be inspected from disk after the run.
+`Use the bmad-autonomous-planning skill to plan a new feature. Work fully autonomously, run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents, and write the specs bundle under the configured planning artifacts directory.`
 
 ### 🔧 Workflow Skills
 
@@ -195,9 +187,9 @@ should be inspected from disk after the run.
 
 1. **Identify skill**: Read `SKILL-DECISION-GUIDE.md` → Points to `bmad-autonomous-planning`
 2. **Use the Codex wrapper**: Open `.agents/skills/bmad-autonomous-planning/SKILL.md`
-3. **Launch the planner**: Run `make bmalph-autonomous-plan PLAN_TASK="..." PLAN_VALIDATION_ROUNDS=2`
-4. **Inspect outputs**: Read the returned JSON and the generated bundle artifacts
-5. **Validate**: Run `make ci` if you changed the launcher, skill docs, or related automation
+3. **Execute in the current session**: Follow the skill and run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents
+4. **Inspect outputs**: Review the generated bundle artifacts and unresolved questions
+5. **Validate**: Run `make ci` if you changed the skill docs, tests, or supporting guidance
 
 ### Example 3: User asks to "run tests"
 

@@ -55,22 +55,12 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    # or for Claude Code
    make bmalph-setup BMALPH_PLATFORM=claude-code
    ```
-5. To generate specs only from a short task description in a fresh Codex session, use:
-   ```bash
-   make bmalph-autonomous-plan \
-     PLAN_TASK="Plan a new feature" \
-     PLAN_VALIDATION_ROUNDS=2
-   ```
-   For a safe first-run preview that does not create bundle files or GitHub side effects, use:
-   ```bash
-   make bmalph-autonomous-plan \
-     PLAN_TASK="Plan a new feature" \
-     PLAN_VALIDATION_ROUNDS=2 \
-     PLAN_DRY_RUN=true
-   ```
-   To inspect live BMALPH progress during a real run, add `PLAN_DEBUG=true`.
-   That prints a safe trace to `stderr` with stage progress and `TRACE:`
-   updates while keeping the final JSON result on `stdout`.
+5. To generate specs only from a short task description, invoke the
+   `bmad-autonomous-planning` skill from the current AI agent session. The
+   canonical workflow lives in `.claude/skills/bmad-autonomous-planning/SKILL.md`,
+   and Codex can start from `.agents/skills/bmad-autonomous-planning/SKILL.md`.
+   Provide only a short task description and let the main agent orchestrate the
+   BMALPH stages autonomously.
 
 ### Version Control Configuration
 

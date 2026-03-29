@@ -83,16 +83,6 @@ BATS_FILES ?= tests/CLI/bats/
 BATS_ARGS ?=
 BMALPH_PLATFORM ?= codex
 BMALPH_DRY_RUN ?= false
-PLAN_TASK ?=
-PLAN_BUNDLE_ID ?=
-PLAN_VALIDATION_ROUNDS ?= 3
-PLAN_ISSUE_MODE ?= skip
-PLAN_PR_MODE ?= skip
-PLAN_REPO ?=
-PLAN_BASE_BRANCH ?= main
-PLAN_MODEL ?=
-PLAN_RESULT_FILE ?=
-PLAN_DRY_RUN ?= false
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec -e $(1) php $(2)
@@ -130,20 +120,6 @@ bmalph-init: ## Initialize BMALPH for current project; set BMALPH_DRY_RUN=true t
 
 bmalph-setup: ## Install and initialize BMALPH for current project; defaults to BMALPH_PLATFORM=codex
 	@$(MAKE) bmalph-init BMALPH_PLATFORM="$(BMALPH_PLATFORM)" BMALPH_DRY_RUN="$(BMALPH_DRY_RUN)"
-
-bmalph-autonomous-plan: ## Launch a fresh Codex session to generate autonomous BMALPH specs from PLAN_TASK
-	bash scripts/local-coder/run-autonomous-bmad-planning.sh \
-		--task "$(PLAN_TASK)" \
-		$(if $(strip $(PLAN_BUNDLE_ID)),--bundle-id "$(PLAN_BUNDLE_ID)",) \
-		--max-validation-rounds "$(PLAN_VALIDATION_ROUNDS)" \
-		--issue-mode "$(PLAN_ISSUE_MODE)" \
-		--pr-mode "$(PLAN_PR_MODE)" \
-		$(if $(strip $(PLAN_REPO)),--repo "$(PLAN_REPO)",) \
-		--base-branch "$(PLAN_BASE_BRANCH)" \
-		$(if $(strip $(PLAN_MODEL)),--model "$(PLAN_MODEL)",) \
-		$(if $(strip $(PLAN_RESULT_FILE)),--result-file "$(PLAN_RESULT_FILE)",) \
-		$(if $(filter true TRUE 1 yes YES,$(PLAN_DEBUG)),--debug,) \
-		$(if $(filter true TRUE 1 yes YES,$(PLAN_DRY_RUN)),--dry-run,)
 
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)

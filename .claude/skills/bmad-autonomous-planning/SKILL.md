@@ -1,33 +1,43 @@
 ---
 name: bmad-autonomous-planning
-description: Create BMALPH-wrapped planning artifacts fully autonomously from a short task description. Use when the user wants research, product brief, PRD, architecture, epics, stories, and optional GitHub issue or specs-only PR outputs without human interaction.
+description: Create BMALPH planning artifacts autonomously from a short task description by delegating each planning phase to a focused subagent and orchestrating the handoffs without human interaction.
 ---
 
 # BMALPH Autonomous Planning
 
-Use this skill when the user wants BMALPH-style planning without the normal interactive menus.
+Use this skill when the user wants BMALPH-style planning from a short prompt but
+does not want to walk through interactive menus step by step.
 
-For top-level Codex orchestration in this repository, prefer the wrapper skill at
-`.agents/skills/bmad-autonomous-planning/SKILL.md`, which launches
-`make bmalph-autonomous-plan` and then hands this file to the fresh child Codex
-session. This file defines the child-session planning contract after the
-launcher has already selected the correct skill.
+## Non-Negotiable Rules
+
+- Run the planning flow in the current AI session. Do not depend on repo-local
+  bash wrappers, `make` targets, or other launcher automation.
+- Use BMALPH as the primary process surface: start with `_bmad/COMMANDS.md`,
+  then descend into the specific wrapper workflow files only when the command
+  catalog is not enough.
+- Spawn one focused subagent per BMALPH planning stage when subagents are
+  available. Do not overload a single subagent with the whole planning flow.
+- The main agent is the user surrogate. If BMALPH asks for approval, choices, or
+  clarification, decide on the user's behalf, continue, and record open
+  questions instead of blocking.
+- Do not implement production code during this skill. Produce specs only.
 
 ## Inputs
 
 Expect the caller to provide:
 
 - a short task description
-- a bundle id
-- a target bundle directory
-- a maximum validation round count from `1` to `3`
-- GitHub issue mode: `skip` or `create`
-- GitHub PR mode: `skip` or `draft`
-- base branch and repo slug when GitHub output is requested
+- an optional bundle id or target bundle directory
+- an optional validation round limit from `1` to `3`
+- optional GitHub issue or specs-only PR output requirements
 
-## Output Contract
+If the caller does not provide a bundle directory, derive one under the
+configured planning artifacts path, for example
+`<planning_artifacts>/autonomous/<timestamp>-<task-slug>`.
 
-Create a planning bundle under the provided bundle directory with at least:
+## Output Bundle
+
+Create a planning bundle with at least:
 
 - `research.md`
 - `product-brief.md`
@@ -38,188 +48,231 @@ Create a planning bundle under the provided bundle directory with at least:
 - `implementation-readiness.md`
 - `run-summary.md`
 
-Your final response must be JSON matching `scripts/local-coder/schemas/autonomous-bmad-planning-result.schema.json`.
+`run-summary.md` must also contain:
+
+- the chosen bundle directory
+- a `Subagent Execution Log` section listing the phase, wrapper command, and
+  artifact owned by each subagent
+- the validation rounds used per artifact
+- open questions, warnings, blockers, and the recommended next step
+
+The final assistant response should summarize:
+
+- bundle directory
+- artifact paths
+- validation rounds used
+- remaining open questions or warnings
+- GitHub issue/PR status when requested
 
 ## Required Sources
 
-Before planning, load only the sources you need:
+Load only the minimum sources required for the current stage:
 
-1. The BMALPH wrapper command catalog: `_bmad/COMMANDS.md`.
-2. The resolved BMAD config file: `_bmad/config.yaml` when present, otherwise `_bmad/bmm/config.yaml`.
-3. If both files exist, treat `_bmad/bmm/config.yaml` as optional upstream context only.
-4. The BMALPH command wrappers that inform the artifact you are creating:
+1. `_bmad/COMMANDS.md`
+2. The resolved BMAD config file:
+   - `_bmad/config.yaml` when present
+   - otherwise `_bmad/bmm/config.yaml`
+   - if both exist, treat `_bmad/bmm/config.yaml` as optional upstream context
+3. The BMALPH wrapper entries and workflow files for:
    - `analyst`
+     - `_bmad/bmm/agents/analyst.agent.yaml`
    - `create-brief`
+     - `_bmad/bmm/workflows/1-analysis/bmad-create-product-brief/workflow.md`
+     - `_bmad/bmm/workflows/1-analysis/bmad-create-product-brief/steps/step-01-init.md`
    - `create-prd`
+     - `_bmad/bmm/agents/pm.agent.yaml`
+     - `_bmad/core/tasks/bmad-create-prd/workflow.md`
+     - `_bmad/core/tasks/bmad-create-prd/steps-c/step-01-init.md`
    - `create-architecture`
+     - `_bmad/bmm/agents/architect.agent.yaml`
+     - `_bmad/bmm/workflows/3-solutioning/bmad-create-architecture/workflow.md`
+     - `_bmad/bmm/workflows/3-solutioning/bmad-create-architecture/steps/step-01-init.md`
    - `create-epics-stories`
+     - `_bmad/bmm/workflows/3-solutioning/bmad-create-epics-and-stories/workflow.md`
+     - `_bmad/bmm/workflows/3-solutioning/bmad-create-epics-and-stories/steps/step-01-validate-prerequisites.md`
    - `implementation-readiness`
-5. The underlying BMAD source workflows only when the wrapper command entry is insufficient:
-   - product brief precedent: `_bmad/bmm/workflows/1-analysis/bmad-product-brief-preview/SKILL.md` and its prompt files
-   - PRD validation precedent: `_bmad/bmm/workflows/2-plan-workflows/create-prd/workflow-validate-prd.md`
-   - architecture precedent: `_bmad/bmm/workflows/3-solutioning/bmad-create-architecture/workflow.md`
-   - epics/stories precedent: `_bmad/bmm/workflows/3-solutioning/bmad-create-epics-and-stories/workflow.md`
-   - cross-artifact validation precedent: `_bmad/bmm/workflows/3-solutioning/bmad-check-implementation-readiness/workflow.md`
-6. Repository docs that constrain implementation, especially:
+     - `_bmad/bmm/workflows/3-solutioning/bmad-check-implementation-readiness/workflow.md`
+     - `_bmad/bmm/workflows/3-solutioning/bmad-check-implementation-readiness/steps/step-01-document-discovery.md`
+4. Repository guidance that constrains implementation, especially:
    - `AGENTS.md`
    - `docs/design-and-architecture.md`
    - `docs/getting-started.md`
    - `docs/onboarding.md`
    - `docs/developer-guide.md`
-7. Relevant code and docs for the requested feature area.
+5. Only the feature-area code and docs needed to justify the plan
 
-Never bulk-scan the entire repository. Limit yourself to the smallest set of
-files and directories that can justify the resulting specs.
+Never bulk-scan the whole repository when a narrow set of files will do.
 
-Prefer direct reads of the exact wrapper and workflow files listed above. Start
-with `_bmad/COMMANDS.md` and only descend into the mapped workflow files when
-the wrapper entry does not give enough detail. Do not run broad `rg` searches
-over `_bmad/`, `docs/`, or the whole repository unless you first have to
-identify one narrow feature-area path.
+## Main-Agent Responsibilities
 
-When a file is long, read only the relevant sections. Avoid dumping full large
-files into context if a focused excerpt is enough.
+The main agent owns orchestration and artifact quality. It must:
 
-## Core Rule
+1. Resolve the bundle path and initialize the planning run.
+2. Decide which repository files each subagent needs.
+3. Spawn the stage subagent with only the minimum context required.
+4. Review the returned draft before moving to the next stage.
+5. Answer workflow questions on behalf of the user.
+6. Decide whether another validation round is necessary.
+7. Maintain continuity across stages so the next subagent sees the correct
+   upstream artifact set.
+8. Update the `Subagent Execution Log` in `run-summary.md` after every phase.
 
-You are the orchestrator and the user surrogate for this run.
+## Subagent Contract
 
-BMALPH command wrappers and their underlying BMAD workflows may say "halt and
-wait for user input". Do not stop. Decide the next action yourself using the
-task description, repository context, and prior artifacts. Record unresolved
-items in `run-summary.md` and `open_questions` instead of blocking.
+For every BMALPH stage, the main agent should hand the subagent:
 
-## Bundle Layout
+- the specific BMALPH wrapper command(s) or workflow file(s) it must follow
+- the current task framing
+- only the upstream artifacts required for that stage
+- only the repository files needed for evidence
+- a clear output contract:
+  - artifact draft content
+  - key assumptions made
+  - unresolved questions
+  - validation findings or concerns
 
-Use the provided bundle directory directly. Create `validation/` inside it for intermediate review notes when useful.
-
-Keep changes scoped to:
-
-- the bundle directory
-- Git metadata and branch state only if GitHub issue or PR output was explicitly requested
-
-Do not implement production code in this run.
+Every subagent should return a draft plus findings, not a request to pause for a
+human.
 
 ## Workflow
 
 ### 1. Preflight
 
-- Confirm the bundle directory exists or create it.
-- Read `_bmad/COMMANDS.md` first and map the relevant BMALPH wrapper commands for the requested planning run.
-- Read the resolved BMAD config file and resolve `planning_artifacts`, `implementation_artifacts`, and `project_knowledge`.
-- Infer the feature area from the task description first. Start with the 1-3
-  most likely repository paths and expand only if the evidence is insufficient.
-- Inspect only the most relevant repository docs and code paths for the requested task.
-- Stop discovery once you have enough evidence to cite the repository patterns,
-  constraints, and likely implementation surface. Do not keep browsing for
-  marginal improvements.
-- Write a concise task framing section into `run-summary.md`.
+- Resolve the BMAD config and `planning_artifacts` directory.
+- Create the bundle directory if needed.
+- Read `_bmad/COMMANDS.md` and map the BMALPH stages relevant to this planning run.
+- Infer the most likely feature-area paths from the task description before any
+  broad discovery.
+- Write a short task framing section into `run-summary.md`.
 
-### 2. Context Gathering
+### 2. Research Stage
 
-Use subagents when available. Give each subagent only the minimum context it needs.
+Spawn a research subagent aligned to the `analyst` role.
 
-Prefer these sidecar roles:
+The research subagent should:
 
-- repository context analyst
-- product/research analyst
-- architecture reviewer
-- delivery-planning reviewer
+- inspect the most relevant docs and code paths
+- summarize current-state behavior and constraints
+- identify implementation risks and likely surface area
+- return a draft for `research.md`
 
-If subagents are unavailable, perform the same work sequentially yourself.
+The main agent then reviews the result, resolves open choices, and finalizes
+`research.md`.
 
-Create `research.md` with:
+### 3. Product Brief Stage
 
-- current-state summary of the repository area involved
-- user/problem framing
-- constraints and risks
-- relevant docs and code references
-- assumptions that the main orchestrator had to answer on behalf of the user
+Spawn a brief subagent aligned to `create-brief`.
 
-### 3. Product Brief
+Inputs:
 
-- Follow the BMALPH `create-brief` wrapper first, then the underlying workflow only if needed.
-- Create `product-brief.md`.
-- Create `product-brief-distillate.md` whenever there is overflow context useful for downstream artifacts.
-- Validate and improve the brief for `1..max_validation_rounds` rounds.
-- Use reviewer lenses similar to skeptic, opportunity, and contextual review.
+- task description
+- `research.md`
+- only the wrapper/workflow files needed for the product brief stage
 
-### 4. PRD
+Outputs:
 
-- Create `prd.md` from the brief, distillate, research, and repository constraints using the BMALPH `create-prd` wrapper as the primary process guide.
-- Keep the PRD implementation-ready but not code-level.
-- Validate it using the BMAD PRD validation principles:
-  - coverage
-  - measurability
-  - traceability
-  - implementation leakage
-  - completeness
-- Run between `1` and `max_validation_rounds` rounds, stopping early only when the remaining issues are minor or repetitive.
+- draft `product-brief.md`
+- optional `product-brief-distillate.md`
+- explicit gaps, risks, and questions
 
-### 5. Architecture
+The main agent must review the draft before moving on.
 
-- Create `architecture.md` aligned with the repository’s actual Symfony/API Platform/DDD/hexagonal patterns using the BMALPH `create-architecture` wrapper as the primary process guide.
-- Use repository docs and existing code to avoid generic architecture.
-- Validate coherence, structure, decision compatibility, and implementation readiness for `1..max_validation_rounds` rounds.
+### 4. PRD Stage
 
-### 6. Epics and Stories
+Spawn a PRD subagent aligned to `create-prd`.
 
-- Create `epics.md` with user-value epics and detailed stories using the BMALPH `create-epics-stories` wrapper as the primary process guide.
-- Stories must reference the task’s requirements, architecture constraints, and acceptance criteria.
-- Make dependencies strictly forward-safe: no story should depend on a future story.
-- Validate epics and stories for `1..max_validation_rounds` rounds.
-- Treat story quality as a separate check even if epics and stories live in the same file.
+Inputs:
 
-### 7. Cross-Artifact Readiness
+- `research.md`
+- `product-brief.md`
+- `product-brief-distillate.md` when present
 
-- Create `implementation-readiness.md` using the BMALPH `implementation-readiness` wrapper as the primary process guide.
-- Verify that brief, PRD, architecture, epics, and stories align.
-- Identify any remaining gaps, risks, or open questions.
-- Summarize the validation rounds actually used per artifact in `run-summary.md`.
+The PRD subagent should produce an implementation-ready but not code-level
+`prd.md`. The main agent validates coverage, measurability, traceability, and
+completeness before proceeding.
 
-## Decision Policy for Interactive Gates
+### 5. Architecture Stage
 
-When a reused BMALPH wrapper or underlying BMAD workflow would normally present a menu:
+Spawn an architecture subagent aligned to `create-architecture`.
 
-- treat `A` as "run a deeper review round" when material uncertainty remains
-- treat `P` as "use additional subagent perspectives" when those perspectives are likely to change the outcome
-- treat `C` as "accept the current artifact state and continue"
+Inputs:
 
-Do not loop forever. Hard-stop at the configured validation round limit.
+- `research.md`
+- `prd.md`
+- repository architecture guidance and relevant feature-area code
+
+The architecture must fit the repository's actual Symfony, API Platform, DDD,
+CQRS, and hexagonal patterns. The main agent validates compatibility and
+implementation readiness before moving on. If the PRD is not strong enough, do
+not improvise; send the flow back to PRD refinement first.
+
+### 6. Epics and Stories Stage
+
+Spawn an epics/stories subagent aligned to `create-epics-stories`.
+
+Inputs:
+
+- `prd.md`
+- `architecture.md`
+- relevant constraints from `research.md`
+
+The subagent should produce forward-safe epics and actionable stories in
+`epics.md`. The main agent separately reviews story quality, dependency order,
+and acceptance-criteria coverage.
+
+### 7. Cross-Artifact Readiness Stage
+
+Spawn a readiness subagent aligned to `implementation-readiness`.
+
+Inputs:
+
+- `product-brief.md`
+- `prd.md`
+- `architecture.md`
+- `epics.md`
+
+This subagent should identify gaps, inconsistencies, and unresolved planning
+risks in `implementation-readiness.md`. The main agent finalizes the readiness
+assessment and updates `run-summary.md`.
+
+## Validation Loop
+
+Use `1` to `3` validation rounds per artifact.
+
+For each artifact, the main agent may:
+
+- accept the draft
+- revise it directly
+- spawn a reviewer subagent for another pass
+
+Stop early when only minor or repetitive issues remain. Do not loop endlessly.
+
+## Decision Policy for Interactive BMALPH Gates
+
+If a BMALPH wrapper or workflow expects user input:
+
+- continue without asking the human
+- choose the best option based on task intent and repository evidence
+- prefer another review round when uncertainty is material
+- record unresolved concerns in `run-summary.md` and `implementation-readiness.md`
+
+If a phase is blocked by a genuinely missing prerequisite, stop only that phase,
+record the blocker explicitly, and do not fabricate the missing input.
+
+Use the BMALPH menu concepts as policy, not as a hard stop:
+
+- deeper review when the artifact is still weak
+- extra perspective when another subagent is likely to add signal
+- continue when the artifact is ready enough for the next stage
 
 ## GitHub Output
 
-Only do this when explicitly requested by the caller.
+Only create a GitHub issue or specs-only PR when the user explicitly asks.
 
-### Issue Mode `create`
+When requested:
 
-- Create a GitHub issue summarizing the task, bundle contents, recommended implementation plan, risks, and open questions.
-- When a trusted launcher is brokering GitHub side effects after the planning run, prepare the bundle and issue-ready summaries, then leave the `github` fields as `skipped` for the launcher to update.
-- Prefer GitHub app tools if they are available and authenticated.
-- If GitHub app tools are unavailable, use `gh` through a login shell, for example `bash -l -c 'gh issue create ...'`.
-- If issue creation fails, do not fail the planning run. Record the failure in the final JSON and `run-summary.md`.
-
-### PR Mode `draft`
-
-- Create a specs-only branch, defaulting to `specs/<bundle-id>`.
-- Commit only the planning bundle and any minimal documentation needed to explain it.
-- Open a draft PR against the requested base branch.
-- When a trusted launcher is brokering GitHub side effects after the planning run, stop after producing the bundle and bundle summaries, then let the launcher create the branch and PR.
-- Prefer GitHub app tools if available; otherwise use `gh` in a login shell.
-- If PR creation fails, do not fail the planning run. Record the failure in the final JSON and `run-summary.md`.
-
-## Final JSON
-
-Return JSON only. Populate:
-
-- status
-- task
-- bundle_id
-- bundle_dir
-- artifacts
-- validation_rounds
-- open_questions
-- warnings
-- github
-
-Use `complete-with-warnings` when planning succeeded but GitHub side effects failed or meaningful open questions remain.
+- finish the planning bundle first
+- create GitHub side effects only after the artifacts are stable
+- prefer GitHub app tools when available
+- fall back to `gh` only when necessary
+- record failures as warnings instead of discarding the planning bundle

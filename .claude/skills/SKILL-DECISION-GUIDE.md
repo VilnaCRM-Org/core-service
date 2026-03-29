@@ -127,17 +127,9 @@ This skill runs comprehensive CI checks.
 **Use**: [bmad-autonomous-planning](bmad-autonomous-planning/SKILL.md)
 
 This skill orchestrates research, brief, PRD, architecture, and epics/stories
-through the repository's BMALPH wrapper surface without stopping for interactive BMAD menus, and it can optionally create a
-GitHub issue or specs-only PR.
-
-For Codex in this repository, start with `.agents/skills/bmad-autonomous-planning/SKILL.md`
-and prefer the launcher command:
-
-```bash
-make bmalph-autonomous-plan \
-  PLAN_TASK="Plan a new feature" \
-  PLAN_VALIDATION_ROUNDS=2
-```
+through the repository's BMALPH wrapper surface without stopping for interactive
+BMAD menus. In Codex, start with `.agents/skills/bmad-autonomous-planning/SKILL.md`
+and run the flow in the current session with one focused subagent per BMALPH stage.
 
 **NOT**: create-prd (that assumes interactive workflow progression)
 **NOT**: sprint-planning (that only derives sprint status from existing epics)

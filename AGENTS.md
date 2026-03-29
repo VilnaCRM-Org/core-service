@@ -204,7 +204,8 @@ workspace.
 1. Work through Phases 1-3 using BMAD agents and workflows
 2. Initialize BMALPH locally when you need the generated workflow files or
    Ralph loop assets in your workspace
-3. For a non-interactive Codex planning run that generates specs only, use
-   `make bmalph-autonomous-plan PLAN_TASK="Plan a new feature"`
+3. For non-interactive planning from a short request, use the
+   `bmad-autonomous-planning` skill in the current AI session and let the main
+   agent orchestrate BMALPH subagents without relying on repo-local launchers
 4. Use the `create-prd` workflow or other BMAD skills, then transition into
    Ralph when you intentionally want an autonomous loop
