@@ -25,7 +25,7 @@ The core architectural decisions are:
 The repository already establishes several constraints that this design must respect:
 
 - Bounded contexts follow `Domain`, `Application`, and `Infrastructure` layers with no framework dependencies in `Domain`.
-- API Platform resource discovery is explicit through `config/packages/api_platform.yaml` and YAML resource files under `config/api_platform/resources`.
+- API Platform resource discovery is explicit through `config/api_platform.yaml` and YAML resource files under `config/api_platform/resources`.
 - Current write flows use DTOs plus API Platform processors that transform input and dispatch synchronous commands.
 - Current async processing in `config/packages/messenger.yaml` is specialized for `DomainEventEnvelope` and routed through a resilient, availability-first event bus.
 - Existing observability avoids logging payloads that may contain PII and already emits endpoint and async-failure metrics.
@@ -705,7 +705,7 @@ Any implementation should inherit the repository's existing CI expectations, inc
 
 Expected brownfield changes include:
 
-- `config/packages/api_platform.yaml` resource discovery update
+- `config/api_platform.yaml` resource discovery update
 - New YAML resource files under `config/api_platform/resources`
 - New service aliases, filters, and policy adapters in `config/services.yaml`
 - New Messenger transports and routing in `config/packages/messenger.yaml`
