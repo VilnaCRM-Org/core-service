@@ -55,6 +55,12 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    # or for Claude Code
    make bmalph-setup BMALPH_PLATFORM=claude-code
    ```
+5. To generate specs only from a short task description, invoke the
+   `bmad-autonomous-planning` skill from the current AI agent session. The
+   canonical workflow lives in `.claude/skills/bmad-autonomous-planning/SKILL.md`,
+   and Codex can start from `.agents/skills/bmad-autonomous-planning/SKILL.md`.
+   Provide only a short task description and let the main agent orchestrate the
+   BMALPH stages autonomously.
 
 ### Version Control Configuration
 
