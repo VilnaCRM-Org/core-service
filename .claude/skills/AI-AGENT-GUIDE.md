@@ -108,8 +108,8 @@ Complex skills have multi-file structure:
 
 ### 🤖 Autonomous Planning Skills
 
-| Skill                        | File                                | When to Use                                                                                                               |
-| ---------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Skill                          | File                                | When to Use                                                                                                                         |
+| ------------------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Autonomous BMALPH Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMALPH-wrapped research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
 
 ### 🔧 Workflow Skills
