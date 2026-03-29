@@ -45,8 +45,21 @@ function collectViolations(string $rootPath): array
         $filePath = $fileInfo->getPathname();
         $relativePath = ltrim(str_replace($projectRoot, '', $filePath), '/');
 
+        $fileContents = file_get_contents($filePath);
+
+        if ($fileContents === false) {
+            $violations[] = [
+                'type' => 'read_error',
+                'file' => $relativePath,
+                'line' => 0,
+                'message' => sprintf('Failed to read file "%s"', $filePath),
+            ];
+
+            continue;
+        }
+
         try {
-            $ast = $parser->parse(file_get_contents($filePath));
+            $ast = $parser->parse($fileContents);
         } catch (Error $error) {
             $violations[] = [
                 'type' => 'parse_error',

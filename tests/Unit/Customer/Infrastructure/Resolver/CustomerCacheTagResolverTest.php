@@ -36,7 +36,7 @@ final class CustomerCacheTagResolverTest extends UnitTestCase
         );
     }
 
-    public function testResolveForDeletedCustomerDeduplicatesTags(): void
+    public function testResolveForDeletedCustomerWithNullCustomerBuildsTagsFromParameters(): void
     {
         $cacheKeyBuilder = $this->createMock(CacheKeyBuilder::class);
         $resolver = new CustomerCacheTagResolver($cacheKeyBuilder);

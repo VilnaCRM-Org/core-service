@@ -28,8 +28,9 @@ final readonly class CustomerCreatedMetricsSubscriber implements DomainEventSubs
     ) {
     }
 
-    public function __invoke(CustomerCreatedEvent $_event): void
+    public function __invoke(CustomerCreatedEvent $event): void
     {
+        $event::class;
         $this->metricsEmitter->emit($this->metricFactory->create());
     }
 
