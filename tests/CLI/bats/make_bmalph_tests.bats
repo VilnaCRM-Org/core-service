@@ -18,7 +18,29 @@ setup_isolated_bmalph_env() {
   mkdir -p "${CS_USER_NPM_GLOBAL_BIN}"
 }
 
+setup_autonomous_bmad_fixture() {
+  local repo_root
+
+  repo_root="$(pwd)"
+
+  if [ -f "${repo_root}/_bmad/config.yaml" ] || [ -f "${repo_root}/_bmad/bmm/config.yaml" ]; then
+    BMAD_TEST_CREATED_CONFIG=0
+    return 0
+  fi
+
+  mkdir -p "${repo_root}/_bmad"
+  cat >"${repo_root}/_bmad/config.yaml" <<'EOF'
+planning_artifacts: _bmad-output/planning-artifacts
+EOF
+  BMAD_TEST_CREATED_CONFIG=1
+}
+
 teardown() {
+  if [ "${BMAD_TEST_CREATED_CONFIG:-0}" = "1" ] && [ -f "_bmad/config.yaml" ]; then
+    rm -f "_bmad/config.yaml"
+    rmdir "_bmad" >/dev/null 2>&1 || true
+  fi
+
   if [ -n "${BMALPH_TEST_HOME:-}" ] && [ -d "${BMALPH_TEST_HOME}" ]; then
     rm -rf "${BMALPH_TEST_HOME}"
   fi
@@ -29,7 +51,7 @@ teardown() {
     unset HOME
   fi
 
-  unset BMALPH_ORIGINAL_HOME BMALPH_ORIGINAL_HOME_SET BMALPH_TEST_HOME CS_USER_NPM_GLOBAL_BIN
+  unset BMAD_TEST_CREATED_CONFIG BMALPH_ORIGINAL_HOME BMALPH_ORIGINAL_HOME_SET BMALPH_TEST_HOME CS_USER_NPM_GLOBAL_BIN
 }
 
 @test "make help lists BMALPH targets" {
@@ -439,6 +461,7 @@ EOF
 
 @test "autonomous planning launcher dry-run resolves bundle metadata" {
   setup_isolated_bmalph_env
+  setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
     --task "Plan autonomous BMAD specs" \
@@ -456,6 +479,7 @@ EOF
 
 @test "autonomous planning launcher rejects invalid validation rounds" {
   setup_isolated_bmalph_env
+  setup_autonomous_bmad_fixture
   run bash scripts/local-coder/run-autonomous-bmad-planning.sh \
     --task "Plan autonomous BMAD specs" \
     --max-validation-rounds 4 \
@@ -466,6 +490,7 @@ EOF
 
 @test "make bmad-autonomous-plan supports dry-run execution" {
   setup_isolated_bmalph_env
+  setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-make
   run make bmad-autonomous-plan \
     PLAN_TASK="Plan autonomous BMAD specs" \
@@ -478,6 +503,7 @@ EOF
 }
 
 @test "autonomous planning launcher invokes codex exec with skill prompt and schema" {
+  setup_autonomous_bmad_fixture
   rm -rf _bmad-output/planning-artifacts/autonomous/test-autonomous-plan-codex
   run bash -lc '
     set -euo pipefail
@@ -584,6 +610,7 @@ PY
 
 @test "make bmad-autonomous-plan forwards PLAN_REPO into dry-run output" {
   setup_isolated_bmalph_env
+  setup_autonomous_bmad_fixture
   run make bmad-autonomous-plan \
     PLAN_TASK="Plan autonomous BMAD specs" \
     PLAN_REPO="VilnaCRM-Org/core-service" \
