@@ -122,7 +122,7 @@ This skill runs comprehensive CI checks.
 
 ---
 
-### "I need BMAD specs created autonomously from a short task description"
+### "I need BMALPH specs created autonomously from a short task description"
 
 **Use**: [bmad-autonomous-planning](bmad-autonomous-planning/SKILL.md)
 
