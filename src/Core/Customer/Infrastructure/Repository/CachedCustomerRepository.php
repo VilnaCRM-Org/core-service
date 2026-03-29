@@ -147,7 +147,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      */
     public function deleteByEmail(string $email): void
     {
-        $customer = $this->inner->findByEmail($email);
+        $customer = $this->findCustomerForDeleteByEmail($email);
 
         $this->inner->deleteByEmail($email);
 
@@ -161,12 +161,12 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      */
     public function deleteById(mixed $id): void
     {
-        $customer = $this->inner->find($id);
+        $customer = $this->findCustomerForDeleteById($id);
 
         $this->inner->deleteById($id);
 
         $this->invalidateTagsForDeletedCustomer(
-            $customer instanceof Customer ? $customer : null,
+            $customer,
             null,
             (string) $id
         );
@@ -228,6 +228,36 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             'error' => $e->getMessage(),
             'operation' => 'cache.error',
         ]);
+    }
+
+    private function findCustomerForDeleteByEmail(string $email): ?Customer
+    {
+        try {
+            return $this->inner->findByEmail($email);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Customer lookup failed before deleteByEmail', [
+                'operation' => 'customer.delete.lookup_failed',
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function findCustomerForDeleteById(mixed $id): ?Customer
+    {
+        try {
+            return $this->inner->find($id);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Customer lookup failed before deleteById', [
+                'operation' => 'customer.delete.lookup_failed',
+                'customer_id' => (string) $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     private function invalidateTagsForDeletedCustomer(

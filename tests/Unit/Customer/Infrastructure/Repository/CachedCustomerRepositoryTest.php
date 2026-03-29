@@ -262,6 +262,51 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->repository->deleteByEmail($email);
     }
 
+    public function testDeleteByEmailStillDeletesWhenCustomerLookupFails(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willThrowException(new \RuntimeException('Lookup failed'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Customer lookup failed before deleteByEmail',
+                $this->callback(static function (array $context) use ($email): bool {
+                    return $context['operation'] === 'customer.delete.lookup_failed'
+                        && $context['email'] === $email
+                        && $context['error'] === 'Lookup failed';
+                })
+            );
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.email.' . $emailHash,
+            ]);
+
+        $this->repository->deleteByEmail($email);
+    }
+
     public function testDeleteByEmailLogsWarningWhenCacheInvalidationFails(): void
     {
         $email = 'test@example.com';
@@ -341,6 +386,44 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer.collection',
                 'customer.' . $id,
                 'customer.email.' . $emailHash,
+            ]);
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdStillDeletesWhenCustomerLookupFails(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id)
+            ->willThrowException(new \RuntimeException('Lookup failed'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Customer lookup failed before deleteById',
+                $this->callback(static function (array $context) use ($id): bool {
+                    return $context['operation'] === 'customer.delete.lookup_failed'
+                        && $context['customer_id'] === $id
+                        && $context['error'] === 'Lookup failed';
+                })
+            );
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer.collection',
+                'customer.' . $id,
             ]);
 
         $this->repository->deleteById($id);

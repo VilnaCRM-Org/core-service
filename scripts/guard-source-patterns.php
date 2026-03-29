@@ -229,14 +229,20 @@ function readBaseline(string $path): array
 
 function writeBaseline(string $path, array $keys): void
 {
-    if (!is_dir(dirname($path))) {
-        mkdir(dirname($path), 0777, true);
+    $directory = dirname($path);
+
+    if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+        throw new \RuntimeException(sprintf('Failed to create baseline directory "%s".', $directory));
     }
 
-    file_put_contents(
-        $path,
-        json_encode(array_values(array_unique($keys)), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL
+    $json = json_encode(
+        array_values(array_unique($keys)),
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
     );
+
+    if (file_put_contents($path, $json . PHP_EOL) === false) {
+        throw new \RuntimeException(sprintf('Failed to write baseline file "%s".', $path));
+    }
 }
 
 $violations = collectViolations(__DIR__ . '/../src');

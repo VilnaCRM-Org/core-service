@@ -39,6 +39,7 @@ final class IriTransformerTest extends UnitTestCase
         self::assertSame($ulid, $result);
     }
 
+    /** Query strings in non-IRI identifiers must stay untouched by the early return path. */
     public function testTransformReturnsNonIriQueryStringAsIs(): void
     {
         $input = 'customer-id?include=type';
