@@ -62,10 +62,15 @@ final class UlidTest extends UnitTestCase
 
     public function testFromBinaryThrowsForInvalidLength(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('fromBinary expects a 16-byte binary string');
+        $binary = 'too-short';
 
-        Ulid::fromBinary('too-short');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf(
+            'fromBinary expects a 16-byte binary string, got %d bytes.',
+            strlen($binary)
+        ));
+
+        Ulid::fromBinary($binary);
     }
 
     public function testFromBinaryPreservesLeadingZeros(): void
