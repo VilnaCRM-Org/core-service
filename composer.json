@@ -21,7 +21,7 @@
     "doctrine/mongodb-odm": "^2.10",
     "doctrine/mongodb-odm-bundle": "^5.3",
     "dpauli/graphql-request-builder": "^1.8",
-    "mongodb/mongodb": "^1.21",
+    "mongodb/mongodb": "^2.2",
     "phpmailer/phpmailer": "^7.0",
     "sebastian/phpcpd": "^6.0",
     "symfony/asset": "7.2.*",
