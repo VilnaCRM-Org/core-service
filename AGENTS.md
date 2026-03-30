@@ -207,5 +207,6 @@ workspace.
 3. For non-interactive planning from a short request, use the
    `bmad-autonomous-planning` skill in the current AI session and let the main
    agent orchestrate BMALPH subagents without relying on repo-local launchers
+   and commit the final tracked planning bundle under `specs/autonomous/`
 4. Use the `create-prd` workflow or other BMAD skills, then transition into
    Ralph when you intentionally want an autonomous loop

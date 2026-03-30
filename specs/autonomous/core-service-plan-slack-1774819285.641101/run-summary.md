@@ -2,7 +2,7 @@
 
 ## Task Framing
 
-- Bundle directory: `docs/plans/autonomous/core-service-plan-slack-1774819285.641101`
+- Bundle directory: `specs/autonomous/core-service-plan-slack-1774819285.641101`
 - Issue: `#153`
 - Goal: plan an audit log export feature with saved filters and scheduled exports.
 - Constraints: planning only, no implementation; route stages through BMALPH commands from `_bmad/COMMANDS.md`; copy final artifacts from ignored BMALPH output paths into this tracked bundle.

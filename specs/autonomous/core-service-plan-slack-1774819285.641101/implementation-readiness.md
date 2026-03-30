@@ -7,12 +7,12 @@
 
 ## Documents Reviewed
 
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/product-brief.md`
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/prd.md`
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/architecture.md`
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/epics.md`
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/research.md`
-- `docs/plans/autonomous/core-service-plan-slack-1774819285.641101/run-summary.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/product-brief.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/prd.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/architecture.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/epics.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/research.md`
+- `specs/autonomous/core-service-plan-slack-1774819285.641101/run-summary.md`
 
 ## Executive Summary
 
