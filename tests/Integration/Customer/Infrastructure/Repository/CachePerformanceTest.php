@@ -172,26 +172,32 @@ final class CachePerformanceTest extends KernelTestCase
 
         $this->cachePool->clear();
 
-        $cacheMissStart = hrtime(true);
         $this->repository->findByEmail($email);
-        $cacheMissEnd = hrtime(true);
-        $cacheMissLatencyNs = $cacheMissEnd - $cacheMissStart;
-
-        $cacheHitStart = hrtime(true);
-        $this->repository->findByEmail($email);
-        $cacheHitEnd = hrtime(true);
-        $cacheHitLatencyNs = $cacheHitEnd - $cacheHitStart;
-
-        self::assertLessThan(
-            $cacheMissLatencyNs,
-            $cacheHitLatencyNs,
-            'Email lookup cache hit should be faster than cache miss'
-        );
 
         $emailHash = hash('sha256', strtolower($email));
         self::assertTrue(
             $this->cachePool->getItem('customer.email.' . $emailHash)->isHit(),
             'Email lookup should be cached after first query'
+        );
+
+        $totalLatencyNs = 0;
+        for ($i = 0; $i < self::PERFORMANCE_ITERATIONS; $i++) {
+            $start = hrtime(true);
+            $this->repository->findByEmail($email);
+            $end = hrtime(true);
+            $totalLatencyNs += $end - $start;
+        }
+
+        $averageLatencyMs = $totalLatencyNs / self::PERFORMANCE_ITERATIONS / 1_000_000;
+
+        self::assertLessThanOrEqual(
+            self::MAX_CACHE_HIT_LATENCY_MS,
+            $averageLatencyMs,
+            sprintf(
+                'Average cached email lookup latency (%.2fms) exceeds maximum allowed (%dms)',
+                $averageLatencyMs,
+                self::MAX_CACHE_HIT_LATENCY_MS
+            )
         );
     }
 

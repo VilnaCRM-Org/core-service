@@ -255,6 +255,8 @@ The design should enforce these invariants:
 - `failed`
 - `expired`
 
+The `failed` state should also cover enqueue failures once the request has been durably recorded together with a retryable failure summary, so exports do not remain indefinitely `requested`.
+
 The model may additionally support `revoked` for explicit administrative revocation without violating the PRD.
 
 `AuditExportSchedule` should expose at least:
@@ -315,6 +317,7 @@ The public query surface should feel similar to existing API Platform filters. T
 The write surface should follow these semantics:
 
 - `POST /api/audit-log/exports` returns a created export resource immediately in `requested` or `queued` state.
+- If queue dispatch fails after durable creation, the export should remain visible in `failed` state with a retryable failure summary rather than remaining `requested`.
 - `POST /api/audit-log/exports` may be based on ad hoc criteria, a saved filter id, or a previous export id for retry.
 - `PATCH /api/audit-log/export-schedules/{id}` should allow both schedule edits and explicit pause or resume intent.
 - `DELETE` on saved filters and schedules should be logical deletion so history remains auditable.
@@ -444,7 +447,7 @@ The export request path should be:
 2. Create and persist `AuditExport` with immutable filter snapshot and `requested` state.
 3. Dispatch a dedicated job message such as `GenerateAuditExportMessage`.
 4. If enqueue succeeds, transition the export to `queued`.
-5. If enqueue fails, keep the export durable and visible, record a retryable failure summary, and do not lose the request.
+5. If enqueue fails, keep the export durable and visible, transition it to `failed`, record a retryable failure summary, and do not lose the request.
 6. Worker transitions the export to `processing`, streams query results, writes CSV to artifact storage, and updates the aggregate to `available` or `failed`.
 
 This ensures that state transitions remain durable even when the queue or worker layer is impaired.
@@ -632,6 +635,7 @@ Common support scenarios should be diagnosable from product surfaces without dir
 
 - Stuck in `requested`
 - Stuck in `queued`
+- Enqueue failed and awaiting retry
 - Worker failure
 - Artifact expired
 - Artifact revoked
