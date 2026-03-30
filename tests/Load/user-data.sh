@@ -18,9 +18,9 @@ unzip awscliv2.zip
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
-git clone --branch "$BRANCH_NAME" https://github.com/VilnaCRM-Org/core-service.git
+git clone --branch "$BRANCH_NAME" https://github.com/VilnaCRM-Org/php-service-template.git
 
-cd core-service
+cd php-service-template
 
 cp .env .env.local
 sed -i 's/APP_ENV=dev/APP_ENV=prod/g' .env.local

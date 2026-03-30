@@ -2,6 +2,7 @@ name: Architecture static analysis tool
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   deptrac:
@@ -17,9 +18,6 @@ jobs:
 
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
-      - name: Start Application
-        run: make start
 
       - name: Run Deptrac
         run: make deptrac
