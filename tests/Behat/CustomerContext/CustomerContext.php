@@ -21,6 +21,7 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Closure;
 use Faker\Factory;
 use Faker\Generator;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
@@ -77,7 +78,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     /**
      * @AfterScenario
      */
-    public function cleanupCreatedCustomersAndEntities(AfterScenarioScope $scope): void
+    public function cleanupCreatedCustomersAndEntities(AfterScenarioScope $_scope): void
     {
         $this->dataCleaner->cleanupAll();
     }
@@ -176,7 +177,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $id = (string) $this->faker->ulid();
         $this->createCustomerWithBuilder(
             $id,
-            static fn ($builder) => $builder->withInitials($initials)
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withInitials($initials)
         );
     }
 
@@ -188,7 +189,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $id = (string) $this->faker->ulid();
         $this->createCustomerWithBuilder(
             $id,
-            static fn ($builder) => $builder->withEmail($email)->withLeadSource('defaultSource')
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withEmail($email)->withLeadSource('defaultSource')
         );
     }
 
@@ -199,7 +200,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     {
         $this->createCustomerWithBuilder(
             $id,
-            static fn ($builder) => $builder->withEmail($email)->withLeadSource('defaultSource')
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withEmail($email)->withLeadSource('defaultSource')
         );
     }
 
@@ -209,7 +210,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
     public function customerWithPhoneExists(string $phone): void
     {
         $id = (string) $this->faker->ulid();
-        $this->createCustomerWithBuilder($id, static fn ($builder) => $builder->withPhone($phone));
+        $this->createCustomerWithBuilder(
+            $id,
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withPhone($phone)
+        );
     }
 
     /**
@@ -220,7 +224,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $id = (string) $this->faker->ulid();
         $this->createCustomerWithBuilder(
             $id,
-            static fn ($builder) => $builder->withLeadSource($leadSource)
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withLeadSource($leadSource)
         );
     }
 
@@ -253,7 +257,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $isConfirmed = filter_var($confirmed, FILTER_VALIDATE_BOOLEAN);
         $this->createCustomerWithBuilder(
             $id,
-            static fn ($builder) => $builder->withConfirmed($isConfirmed)
+            static fn (CustomerTestDataBuilder $builder): CustomerTestDataBuilder => $builder->withConfirmed($isConfirmed)
         );
     }
 
@@ -398,7 +402,10 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         $this->dataCleaner->trackCustomer($id);
     }
 
-    private function createCustomerWithBuilder(string $id, callable $configurator): void
+    /**
+     * @param Closure(CustomerTestDataBuilder): CustomerTestDataBuilder $configurator
+     */
+    private function createCustomerWithBuilder(string $id, Closure $configurator): void
     {
         [$type, $status] = $this->entityFactory->createTypeAndStatus($id);
         $this->entityManager->saveType($type);

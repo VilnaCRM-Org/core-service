@@ -51,11 +51,6 @@ final readonly class EntityManager
         return $this->customerRepository->find($id);
     }
 
-    public function findCustomerByEmail(string $email): ?Customer
-    {
-        return $this->customerRepository->findByEmail($email);
-    }
-
     public function deleteCustomer(Customer $customer): void
     {
         $this->customerRepository->delete($customer);
@@ -64,11 +59,6 @@ final readonly class EntityManager
     public function deleteCustomerByEmail(string $email): void
     {
         $this->customerRepository->deleteByEmail($email);
-    }
-
-    public function deleteCustomerById(Ulid $id): void
-    {
-        $this->customerRepository->deleteById($id);
     }
 
     public function deleteType(CustomerType $type): void
