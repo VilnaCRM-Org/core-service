@@ -29,7 +29,7 @@ final readonly class CustomerDeletedMetricsSubscriber implements DomainEventSubs
     }
 
     /** @infection-ignore-all Event payload is not used to build this metric. */
-    public function __invoke(CustomerDeletedEvent $event): void
+    public function __invoke(CustomerDeletedEvent $_event): void
     {
         $this->metricsEmitter->emit($this->metricFactory->create());
     }
