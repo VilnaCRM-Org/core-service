@@ -28,9 +28,9 @@ final readonly class CustomerUpdatedMetricsSubscriber implements DomainEventSubs
     ) {
     }
 
+    /** @infection-ignore-all Event payload is not used to build this metric. */
     public function __invoke(CustomerUpdatedEvent $event): void
     {
-        $event::class;
         $this->metricsEmitter->emit($this->metricFactory->create());
     }
 

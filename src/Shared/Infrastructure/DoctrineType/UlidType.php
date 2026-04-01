@@ -14,6 +14,8 @@ final class UlidType extends Type
 {
     public const NAME = 'ulid';
 
+    private ?UlidTransformer $transformer = null;
+
     public function getName(): string
     {
         return self::NAME;
@@ -23,7 +25,7 @@ final class UlidType extends Type
     {
         return $value instanceof Binary
             ? $value
-            : $this->createTransformer()->toDatabaseValue($value);
+            : $this->getTransformer()->toDatabaseValue($value);
     }
 
     public function convertToPHPValue(mixed $value): ?Ulid
@@ -32,7 +34,7 @@ final class UlidType extends Type
             return $value;
         }
 
-        return $this->createTransformer()->toPhpValue(
+        return $this->getTransformer()->toPhpValue(
             $this->extractBinaryData($value)
         );
     }
@@ -51,9 +53,9 @@ $return = \Doctrine\ODM\MongoDB\Types\Type::getType('ulid')->convertToPHPValue($
 PHP;
     }
 
-    private function createTransformer(): UlidTransformer
+    private function getTransformer(): UlidTransformer
     {
-        return UlidTransformerFactory::create();
+        return $this->transformer ??= UlidTransformerFactory::create();
     }
 
     private function extractBinaryData(mixed $value): mixed

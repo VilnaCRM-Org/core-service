@@ -17,31 +17,31 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
     }
 
     public function shouldRetry(
-        AsyncContext $_context,
-        ?string $_responseContent,
-        ?TransportExceptionInterface $_exception
+        AsyncContext $context,
+        ?string $responseContent,
+        ?TransportExceptionInterface $exception
     ): ?bool {
         return true;
     }
 
     public function getDelay(
-        AsyncContext $_context,
-        ?string $_responseContent,
-        ?TransportExceptionInterface $_exception
+        AsyncContext $context,
+        ?string $responseContent,
+        ?TransportExceptionInterface $exception
     ): int {
         return $this->delayMs;
     }
 
     public function isRetryable(
-        Envelope $_message,
-        ?\Throwable $_throwable = null
+        Envelope $message,
+        ?\Throwable $throwable = null
     ): bool {
         return true;
     }
 
     public function getWaitingTime(
-        Envelope $_message,
-        ?\Throwable $_throwable = null
+        Envelope $message,
+        ?\Throwable $throwable = null
     ): int {
         return $this->delayMs;
     }

@@ -208,8 +208,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
 
         $this->innerRepository
             ->expects($this->once())
-            ->method('deleteByEmail')
-            ->with($email);
+            ->method('delete')
+            ->with($customer);
 
         $this->cacheKeyBuilder
             ->expects($this->exactly(2))
@@ -327,8 +327,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
 
         $this->innerRepository
             ->expects($this->once())
-            ->method('deleteByEmail')
-            ->with($email);
+            ->method('delete')
+            ->with($customer);
 
         $this->cacheKeyBuilder
             ->expects($this->exactly(2))
@@ -373,8 +373,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
 
         $this->innerRepository
             ->expects($this->once())
-            ->method('deleteById')
-            ->with($id);
+            ->method('delete')
+            ->with($customer);
 
         $this->cacheKeyBuilder
             ->expects($this->once())
@@ -413,8 +413,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
 
         $this->innerRepository
             ->expects($this->once())
-            ->method('deleteById')
-            ->with($id);
+            ->method('delete')
+            ->with($customer);
 
         $this->cacheKeyBuilder
             ->expects($this->once())
