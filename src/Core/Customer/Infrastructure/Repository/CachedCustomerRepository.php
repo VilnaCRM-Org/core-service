@@ -151,10 +151,12 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
         if ($customer instanceof Customer) {
             $this->inner->delete($customer);
-        } else {
-            $this->inner->deleteByEmail($email);
+            $this->invalidateTagsForDeletedCustomer($customer, $email);
+
+            return;
         }
 
+        $this->inner->deleteByEmail($email);
         $this->invalidateTagsForDeletedCustomer($customer, $email);
     }
 
@@ -169,10 +171,16 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
         if ($customer instanceof Customer) {
             $this->inner->delete($customer);
-        } else {
-            $this->inner->deleteById($id);
+            $this->invalidateTagsForDeletedCustomer(
+                $customer,
+                null,
+                (string) $id
+            );
+
+            return;
         }
 
+        $this->inner->deleteById($id);
         $this->invalidateTagsForDeletedCustomer(
             $customer,
             null,
