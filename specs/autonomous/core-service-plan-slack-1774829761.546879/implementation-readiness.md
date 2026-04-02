@@ -6,9 +6,9 @@ This readiness assessment evaluates the planning bundle at `specs/autonomous/cor
 
 Preserved assumptions for this stage:
 
-- The tracked bundle directory `specs/autonomous/core-service-plan-slack-1774829761.546879/` is the authoritative deliverable location for this planning run, even though `_bmad/config.yaml` points `planning_artifacts` to `_bmad-output/planning-artifacts`.
+- The tracked bundle directory `specs/autonomous/core-service-plan-slack-1774829761.546879/` is the authoritative deliverable location for this planning run, even though repo-supported local BMALPH setup can also materialize planning artifacts under `_bmad-output/planning-artifacts`.
 - This stage evaluates readiness for a future docs-only implementation effort, not immediate execution.
-- `_bmad/COMMANDS.md` and `_bmad/config.yaml` remain read-only reference surfaces for the future implementation described here.
+- Tracked BMALPH routing references stay grounded in `AGENTS.md`, `.claude/skills/**`, and `.agents/skills/**`, while optional local `_bmad/` assets remain out of scope for the future implementation described here.
 
 ## Readiness Summary
 
@@ -27,7 +27,7 @@ The current planning bundle is sufficiently complete and internally aligned for 
   - Earlier ambiguity about parity copy versus selective consolidation is resolved across `product-brief.md`, `prd.md`, `architecture.md`, and `epics.md` in favor of selective consolidation with `core-service` as the canonical baseline.
 - Scope discipline is consistent.
   - The planning artifacts repeatedly constrain the issue to documentation and skill-system migration only.
-  - Runtime code changes, infrastructure work, wholesale copying, and edits to `_bmad/COMMANDS.md` or `_bmad/config.yaml` are consistently ruled out.
+  - Runtime code changes, infrastructure work, wholesale copying, and edits to optional local `_bmad/` assets are consistently ruled out.
 - Architecture and execution sequencing are aligned.
   - `architecture.md` defines a governance-first control plane.
   - `epics.md` operationalizes that design by requiring Epic 1 control artifacts before any contributor-facing edits begin.
@@ -66,10 +66,10 @@ Execution gates that still matter before implementation begins:
   - Required planning inputs were available for this assessment: `research.md`, `product-brief.md`, `prd.md`, `architecture.md`, and `epics.md`.
 - Repository guidance inputs: present.
   - `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`, `.claude/skills/SKILL-DECISION-GUIDE.md`, `.claude/skills/README.md`, `README.md`, `docs/getting-started.md`, `docs/onboarding.md`, `docs/design-and-architecture.md`, and `docs/developer-guide.md` were available and align with the planning direction.
-- BMALPH command context: present.
-  - `_bmad/COMMANDS.md` exposes `implementation-readiness`.
-  - `_bmad/bmm/agents/architect.agent.yaml` provides the architect role backing for the command.
-  - The readiness workflow and step-01 discovery files exist and support the document-inventory-first approach.
+- BMALPH routing context: present in tracked repository surfaces.
+  - `AGENTS.md` documents BMALPH integration and the repository-supported setup flow.
+  - `.claude/skills/README.md` and `.agents/skills/bmad-bmalph/SKILL.md` provide the tracked BMALPH routing and wrapper guidance.
+  - `README.md`, `docs/getting-started.md`, and `docs/onboarding.md` point contributors to `make bmalph-setup` when local `_bmad/` assets are needed.
 - Core repository command support: verified.
   - The `Makefile` contains `make ci`, `make pr-comments`, `make generate-openapi-spec`, `make validate-openapi-spec`, and `make validate-configuration`.
 - Unsupported source command references: correctly treated as non-portable.
@@ -93,7 +93,7 @@ Execution gates that still matter before implementation begins:
 - PRD to Architecture: aligned.
   - The PRD disposition model (`adopt`, `adapt`, `defer`, `exclude`) is preserved in the architecture.
   - The PRD OpenAPI boundary is preserved in the architecture.
-  - Read-only treatment of `_bmad/COMMANDS.md` and `_bmad/config.yaml` is preserved.
+  - Out-of-scope treatment of optional local `_bmad/` assets is preserved.
 - Architecture to Epics: aligned.
   - Epic 1 operationalizes the architecture requirement to create the control artifacts first.
   - Later epics follow the architecture’s ordering: canonical routing docs, skill modules and examples, wrappers, mirrors, then validation.
@@ -125,7 +125,7 @@ This readiness stage does not require immediate implementation execution. For th
 3. Validate every adopted or adapted policy reference against actual `core-service` commands and workflows before editing the target files.
 4. Preserve the OpenAPI routing boundary consistently across canonical routing docs and skill-local docs.
 5. Adapt or exclude repo-specific examples; copy none verbatim from `user-service`.
-6. Keep `_bmad/COMMANDS.md` and `_bmad/config.yaml` unchanged throughout the implementation for this issue.
+6. Do not treat optional local `_bmad/` assets as edit targets during implementation for this issue.
 7. Capture a final migration package that summarizes adopted, adapted, deferred, and excluded outcomes and links them back to the delta inventory.
 8. Run `make ci` before closure of the future implementation effort and record the outcome in the implementation review package or `run-summary.md`.
 

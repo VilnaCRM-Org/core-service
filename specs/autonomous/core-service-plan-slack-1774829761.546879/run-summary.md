@@ -61,4 +61,4 @@
 
 ## Recommended Next Step
 
-The supervisor can use this bundle to prepare a draft implementation plan or docs-only PR strategy. Future implementation should start with Story `1.1` in [epics.md](/workspaces/core-service/specs/autonomous/core-service-plan-slack-1774829761.546879/epics.md), creating `migration-delta-inventory.md` and `migration-sync-checklist.md` in the tracked bundle before editing contributor-facing documentation.
+The supervisor can use this bundle to prepare a draft implementation plan or docs-only PR strategy. Future implementation should start with Story `1.1` in [epics.md](./epics.md), creating `migration-delta-inventory.md` and `migration-sync-checklist.md` in the tracked bundle before editing contributor-facing documentation.

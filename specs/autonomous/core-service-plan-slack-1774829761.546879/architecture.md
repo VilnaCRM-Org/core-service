@@ -33,7 +33,7 @@ Cross-cutting concerns:
 
 `core-service` already operates a layered documentation system for contributors and AI agents:
 
-- `_bmad/COMMANDS.md` and `_bmad/config.yaml` provide the canonical BMALPH command and configuration substrate.
+- Tracked BMALPH governance in this repo lives in `AGENTS.md`, `.claude/skills/**`, and `.agents/skills/**`; local `_bmad/` assets are optional workspace dependencies that are intentionally kept out of git.
 - `AGENTS.md` defines the repository-wide operating contract and points agents into `.claude/skills`.
 - `.claude/skills/AI-AGENT-GUIDE.md`, `.claude/skills/SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md` are the canonical routing and discovery surfaces for skill usage.
 - `.claude/skills/**` is the operational skill catalog, with `SKILL.md`, references, and examples.
@@ -131,7 +131,7 @@ No step may skip directly to broad file editing before the delta inventory exist
 - Generic examples belong to the owning skill. `code-review` may reference organization examples, but canonical organization examples should live under `code-organization`.
 - The PRD OpenAPI boundary is preserved. `developing-openapi-specs` is the default discovery path; `openapi-development` is the advanced implementation path; catalog consolidation is deferred unless a later issue is opened.
 - `.agents/skills` wrappers follow canonical routing docs; they do not define routing policy themselves.
-- `_bmad/COMMANDS.md` and `_bmad/config.yaml` are read-only reference surfaces for this issue unless a separate scope decision explicitly expands the work.
+- Tracked BMALPH routing changes for this issue belong in `AGENTS.md`, `.claude/skills/**`, and `.agents/skills/**`; optional local `_bmad/` assets remain read-only and out of scope unless a separate scope decision explicitly expands the work.
 - `docs/design-and-architecture.md` and `docs/developer-guide.md` remain correctness anchors and should stay unchanged unless the migration would otherwise make them inaccurate.
 
 ## Validation Architecture
