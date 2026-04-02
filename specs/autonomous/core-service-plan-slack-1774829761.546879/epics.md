@@ -64,32 +64,32 @@ None. No UX design specification was provided for this issue, and the work remai
 
 ### FR Coverage Map
 
-| Requirement | Covered By |
-| --- | --- |
-| FR-1 | 1.1, 1.2 |
-| FR-2 | 1.3, 2.1, 4.2 |
-| FR-3 | 1.2 |
-| FR-4 | 1.2, 2.1, 3.1, 3.4 |
-| FR-5 | 2.2, 3.3 |
-| FR-6 | 1.2, 3.2, 3.4 |
-| FR-7 | 1.1, 2.1, 4.1, 4.2 |
-| FR-8 | 4.3 |
-| FR-9 | 1.3, 4.3 |
-| NFR-1 | 1.2, 2.1, 3.1, 3.3, 4.2 |
-| NFR-2 | 2.1, 2.2, 3.3 |
-| NFR-3 | 1.1, 1.2, 4.3 |
-| NFR-4 | 1.2, 3.4 |
-| NFR-5 | 2.1, 3.2, 3.3 |
-| NFR-6 | 2.1, 3.3, 4.1, 4.2 |
+| Requirement | Covered By              |
+| ----------- | ----------------------- |
+| FR-1        | 1.1, 1.2                |
+| FR-2        | 1.3, 2.1, 4.2           |
+| FR-3        | 1.2                     |
+| FR-4        | 1.2, 2.1, 3.1, 3.4      |
+| FR-5        | 2.2, 3.3                |
+| FR-6        | 1.2, 3.2, 3.4           |
+| FR-7        | 1.1, 2.1, 4.1, 4.2      |
+| FR-8        | 4.3                     |
+| FR-9        | 1.3, 4.3                |
+| NFR-1       | 1.2, 2.1, 3.1, 3.3, 4.2 |
+| NFR-2       | 2.1, 2.2, 3.3           |
+| NFR-3       | 1.1, 1.2, 4.3           |
+| NFR-4       | 1.2, 3.4                |
+| NFR-5       | 2.1, 3.2, 3.3           |
+| NFR-6       | 2.1, 3.3, 4.1, 4.2      |
 
 ## Epic List
 
-| Epic | Title | Goal | Depends On |
-| --- | --- | --- | --- |
-| 1 | Governance and Control Baseline | Establish the tracked control artifacts, delta classification model, and scope guardrails before any contributor-facing doc edits begin. | None |
-| 2 | Canonical Routing and Policy Surfaces | Lock the repository’s high-visibility routing and policy language to the `core-service` baseline. | Epic 1 |
-| 3 | Skill Catalog and Example Reconciliation | Apply the settled policy to in-scope skills and examples, including OpenAPI boundary clarification and review workflow adaptation. | Epic 2 |
-| 4 | Wrapper, Mirror Docs, and Review Package | Mirror the final routing model across wrappers and onboarding docs, then close with validation and a reviewable package. | Epic 2 and Epic 3 |
+| Epic | Title                                    | Goal                                                                                                                                     | Depends On        |
+| ---- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| 1    | Governance and Control Baseline          | Establish the tracked control artifacts, delta classification model, and scope guardrails before any contributor-facing doc edits begin. | None              |
+| 2    | Canonical Routing and Policy Surfaces    | Lock the repository’s high-visibility routing and policy language to the `core-service` baseline.                                        | Epic 1            |
+| 3    | Skill Catalog and Example Reconciliation | Apply the settled policy to in-scope skills and examples, including OpenAPI boundary clarification and review workflow adaptation.       | Epic 2            |
+| 4    | Wrapper, Mirror Docs, and Review Package | Mirror the final routing model across wrappers and onboarding docs, then close with validation and a reviewable package.                 | Epic 2 and Epic 3 |
 
 ## Epic 1: Governance and Control Baseline
 

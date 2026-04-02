@@ -18,13 +18,13 @@ The target skill tree is already a superset in structure. Core-service has 109 f
 
 ## Source/Target Comparison
 
-| Dimension | core-service | user-service | Planning implication |
-| --- | --- | --- | --- |
-| Top-level skill dirs | 20 | 18 | core is already the structural superset |
-| Top-level dirs unique to target | `bmad-autonomous-planning`, `developing-openapi-specs` | none | preserve core-only additions |
-| Shared catalog size | 18 dirs | 18 dirs | migration is mostly content reconciliation |
-| Stack-specific performance guide | MongoDB profiler | MySQL slow query log | do not copy across unchanged |
-| Repo-specific doc example | `core-service-example.md` | `user-service-example.md` | examples must remain repo-specific |
+| Dimension                        | core-service                                           | user-service              | Planning implication                       |
+| -------------------------------- | ------------------------------------------------------ | ------------------------- | ------------------------------------------ |
+| Top-level skill dirs             | 20                                                     | 18                        | core is already the structural superset    |
+| Top-level dirs unique to target  | `bmad-autonomous-planning`, `developing-openapi-specs` | none                      | preserve core-only additions               |
+| Shared catalog size              | 18 dirs                                                | 18 dirs                   | migration is mostly content reconciliation |
+| Stack-specific performance guide | MongoDB profiler                                       | MySQL slow query log      | do not copy across unchanged               |
+| Repo-specific doc example        | `core-service-example.md`                              | `user-service-example.md` | examples must remain repo-specific         |
 
 ### High-signal shared-content deltas
 
@@ -42,11 +42,13 @@ The target skill tree is already a superset in structure. Core-service has 109 f
 Adopt only clearly missing, stack-neutral examples or policy text from user-service and leave the rest of core-service unchanged.
 
 Pros:
+
 - Lowest risk to existing BMALPH and MongoDB-specific guidance
 - Smallest documentation churn
 - Fastest to review
 
 Cons:
+
 - Leaves cross-repo wording and policy differences in place
 - Does not resolve overlapping OpenAPI skill naming
 
@@ -55,11 +57,13 @@ Cons:
 Treat core-service as the canonical target, keep its BMALPH and target-stack guidance, and selectively merge useful user-service material into the corresponding core skills and guide files after command and stack validation.
 
 Pros:
+
 - Preserves target-specific strengths
 - Can absorb valuable user-service policy improvements where they are valid
 - Avoids blind duplication
 
 Cons:
+
 - Requires judgment file by file
 - Needs an explicit taxonomy decision for OpenAPI-related skills
 
@@ -68,10 +72,12 @@ Cons:
 Attempt to make core-service match all meaningful user-service skill content, adapting repo-specific commands and technology references as needed.
 
 Pros:
+
 - Maximum cross-repo standardization
 - Fewer conceptual differences for contributors working across services
 
 Cons:
+
 - Highest effort and review burden
 - Highest risk of importing invalid commands or wrong-stack guidance
 - Likely duplicates or regresses existing core-service additions

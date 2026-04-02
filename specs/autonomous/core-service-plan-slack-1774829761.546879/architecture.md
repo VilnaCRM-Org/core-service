@@ -80,14 +80,14 @@ The OpenAPI boundary from the PRD is preserved:
 
 ## Component and File Groups
 
-| Group | Files | Role in migration |
-| --- | --- | --- |
-| Issue bundle control artifacts | `research.md`, `product-brief.md`, `prd.md`, `architecture.md`, future `migration-delta-inventory.md`, future `migration-sync-checklist.md`, `run-summary.md` | planning truth, delta inventory, dispositions, validation evidence, changed/unchanged checklist |
-| Canonical routing docs | `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`, `.claude/skills/SKILL-DECISION-GUIDE.md`, `.claude/skills/README.md` | authoritative task routing, policy portability decisions, taxonomy clarification |
-| Skill modules | selected `.claude/skills/**` directories, especially `code-review`, `code-organization`, `openapi-development`, `developing-openapi-specs`, `documentation-creation` | actual adopted or adapted workflow text, references, and examples |
-| Wrapper layer | `.agents/skills/bmad-autonomous-planning/SKILL.md`, `.agents/skills/bmad-bmalph/SKILL.md`, plus other wrappers only if routing text changes require it | Codex/BMALPH handoff alignment with canonical routing docs |
-| Repo-facing mirrors | `README.md`, `docs/getting-started.md`, `docs/onboarding.md` | contributor setup and onboarding sync after canonical docs settle |
-| Runtime reference docs | `docs/design-and-architecture.md`, `docs/developer-guide.md` | reference-only correctness anchors; touch only if terminology becomes inaccurate |
+| Group                          | Files                                                                                                                                                                | Role in migration                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Issue bundle control artifacts | `research.md`, `product-brief.md`, `prd.md`, `architecture.md`, future `migration-delta-inventory.md`, future `migration-sync-checklist.md`, `run-summary.md`        | planning truth, delta inventory, dispositions, validation evidence, changed/unchanged checklist |
+| Canonical routing docs         | `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`, `.claude/skills/SKILL-DECISION-GUIDE.md`, `.claude/skills/README.md`                                                | authoritative task routing, policy portability decisions, taxonomy clarification                |
+| Skill modules                  | selected `.claude/skills/**` directories, especially `code-review`, `code-organization`, `openapi-development`, `developing-openapi-specs`, `documentation-creation` | actual adopted or adapted workflow text, references, and examples                               |
+| Wrapper layer                  | `.agents/skills/bmad-autonomous-planning/SKILL.md`, `.agents/skills/bmad-bmalph/SKILL.md`, plus other wrappers only if routing text changes require it               | Codex/BMALPH handoff alignment with canonical routing docs                                      |
+| Repo-facing mirrors            | `README.md`, `docs/getting-started.md`, `docs/onboarding.md`                                                                                                         | contributor setup and onboarding sync after canonical docs settle                               |
+| Runtime reference docs         | `docs/design-and-architecture.md`, `docs/developer-guide.md`                                                                                                         | reference-only correctness anchors; touch only if terminology becomes inaccurate                |
 
 ## Control Concern Ownership
 
@@ -115,12 +115,12 @@ No step may skip directly to broad file editing before the delta inventory exist
 
 ### Disposition policy
 
-| Disposition | Meaning |
-| --- | --- |
-| `adopt` | content is already correct for `core-service` and can be brought in with no material semantic rewrite |
-| `adapt` | intent is useful, but commands, examples, paths, stack assumptions, or taxonomy wording must be rewritten |
-| `defer` | content is acknowledged but moved to a later focused issue because it would broaden scope or requires a larger design decision |
-| `exclude` | content is invalid, redundant, unsupported, or harmful for `core-service` |
+| Disposition | Meaning                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `adopt`     | content is already correct for `core-service` and can be brought in with no material semantic rewrite                          |
+| `adapt`     | intent is useful, but commands, examples, paths, stack assumptions, or taxonomy wording must be rewritten                      |
+| `defer`     | content is acknowledged but moved to a later focused issue because it would broaden scope or requires a larger design decision |
+| `exclude`   | content is invalid, redundant, unsupported, or harmful for `core-service`                                                      |
 
 ### Decision rules
 
@@ -136,14 +136,14 @@ No step may skip directly to broad file editing before the delta inventory exist
 
 ## Validation Architecture
 
-| Validation gate | What it checks | Pass condition | Evidence |
-| --- | --- | --- | --- |
-| Inventory completeness | all meaningful deltas are captured | every meaningful delta has source, target, type, disposition, rationale, and validation need | `migration-delta-inventory.md` |
-| Repository correctness | commands, stack assumptions, and BMALPH references are valid in `core-service` | no unsupported command or wrong-stack guidance remains in planned edits | inventory notes plus changed skill files |
-| Routing consistency | the same task routes the same way across canonical docs | `AGENTS.md`, `AI-AGENT-GUIDE.md`, `SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md` agree | `migration-sync-checklist.md` |
-| Skill correctness | examples, references, and workflow steps match `core-service` paths and conventions | no verbatim `user-service` example survives; OpenAPI boundary is explicit | updated skill directories |
-| Cross-doc sync | contributor mirrors reflect the settled routing model | changed and unchanged files are recorded with rationale | `migration-sync-checklist.md` |
-| Repository validation | the repo still passes required validation after doc edits | `make ci` passes with no scope creep into runtime code | CI output and review summary |
+| Validation gate        | What it checks                                                                      | Pass condition                                                                                    | Evidence                                 |
+| ---------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Inventory completeness | all meaningful deltas are captured                                                  | every meaningful delta has source, target, type, disposition, rationale, and validation need      | `migration-delta-inventory.md`           |
+| Repository correctness | commands, stack assumptions, and BMALPH references are valid in `core-service`      | no unsupported command or wrong-stack guidance remains in planned edits                           | inventory notes plus changed skill files |
+| Routing consistency    | the same task routes the same way across canonical docs                             | `AGENTS.md`, `AI-AGENT-GUIDE.md`, `SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md` agree | `migration-sync-checklist.md`            |
+| Skill correctness      | examples, references, and workflow steps match `core-service` paths and conventions | no verbatim `user-service` example survives; OpenAPI boundary is explicit                         | updated skill directories                |
+| Cross-doc sync         | contributor mirrors reflect the settled routing model                               | changed and unchanged files are recorded with rationale                                           | `migration-sync-checklist.md`            |
+| Repository validation  | the repo still passes required validation after doc edits                           | `make ci` passes with no scope creep into runtime code                                            | CI output and review summary             |
 
 ## Sequencing
 
@@ -158,15 +158,15 @@ No step may skip directly to broad file editing before the delta inventory exist
 
 ## Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| parity-copy mindset overrides selective consolidation | broken or diluted `core-service` guidance | freeze `core-service` as canonical baseline and require disposition per delta |
-| unsupported commands leak into target docs | contributors and agents follow invalid workflows | command portability gate before any adoption or adaptation |
-| OpenAPI overlap remains ambiguous | inconsistent skill routing and duplicated edits | settle canonical routing docs before editing deeper skill content |
-| repo-specific examples are copied too literally | wrong bounded contexts, commands, or stack assumptions | example-by-example review with adapt-or-exclude rule |
-| mirror docs drift from canonical docs | onboarding and setup become contradictory | dedicated cross-doc sync checklist and changed/unchanged record |
-| low-value churn consumes review time | slower reviews and weaker trust in docs changes | exclude wording-only churn and keep the inventory focused on meaningful deltas |
-| scope expands into `_bmad/` assets or runtime code | issue ceases to be documentation-only | read-only rule for BMALPH assets and explicit scope guardrails in review package |
+| Risk                                                  | Impact                                                 | Mitigation                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| parity-copy mindset overrides selective consolidation | broken or diluted `core-service` guidance              | freeze `core-service` as canonical baseline and require disposition per delta    |
+| unsupported commands leak into target docs            | contributors and agents follow invalid workflows       | command portability gate before any adoption or adaptation                       |
+| OpenAPI overlap remains ambiguous                     | inconsistent skill routing and duplicated edits        | settle canonical routing docs before editing deeper skill content                |
+| repo-specific examples are copied too literally       | wrong bounded contexts, commands, or stack assumptions | example-by-example review with adapt-or-exclude rule                             |
+| mirror docs drift from canonical docs                 | onboarding and setup become contradictory              | dedicated cross-doc sync checklist and changed/unchanged record                  |
+| low-value churn consumes review time                  | slower reviews and weaker trust in docs changes        | exclude wording-only churn and keep the inventory focused on meaningful deltas   |
+| scope expands into `_bmad/` assets or runtime code    | issue ceases to be documentation-only                  | read-only rule for BMALPH assets and explicit scope guardrails in review package |
 
 ## Architecture Readiness Assessment
 
