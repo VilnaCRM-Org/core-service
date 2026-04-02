@@ -6,7 +6,7 @@ namespace App\Tests\Integration\Negative;
 
 use Symfony\Component\HttpFoundation\Response;
 
-final class CustomerApiNegativeTest extends BaseNegativeApiTest
+final class CustomerApiNegativeTest extends BaseNegativeApiCase
 {
     public function testGetCustomersCollection500Error(): void
     {

@@ -26,7 +26,6 @@
         </testsuite>
         <testsuite name="Negative">
             <directory>tests/Integration/Negative</directory>
-            <exclude>tests/Integration/Negative/BaseNegativeApiTest.php</exclude>
         </testsuite>
     </testsuites>
 

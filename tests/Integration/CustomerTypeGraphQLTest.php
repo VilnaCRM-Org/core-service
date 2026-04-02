@@ -7,7 +7,7 @@ namespace App\Tests\Integration;
 /**
  * Integration tests for CustomerType GraphQL operations.
  */
-final class CustomerTypeGraphQLTest extends BaseGraphQLTest
+final class CustomerTypeGraphQLTest extends BaseGraphQLCase
 {
     public function testQuerySingleCustomerTypeSuccess(): void
     {

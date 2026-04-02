@@ -10,7 +10,7 @@ use App\Tests\Unit\UlidProvider;
 use Faker\Factory;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class BaseNegativeApiTest extends ApiTestCase
+abstract class BaseNegativeApiCase extends ApiTestCase
 {
     protected function setUp(): void
     {

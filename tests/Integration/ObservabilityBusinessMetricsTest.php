@@ -7,7 +7,7 @@ namespace App\Tests\Integration;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 
-final class ObservabilityBusinessMetricsTest extends BaseTest
+final class ObservabilityBusinessMetricsTest extends BaseApiCase
 {
     public function testDoesNotEmitBusinessMetricForHealthEndpoint(): void
     {

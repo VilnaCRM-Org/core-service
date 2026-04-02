@@ -10,7 +10,7 @@ namespace App\Tests\Integration;
  * Tests infrastructure classes that support the application but might not be
  * fully covered by domain-specific tests.
  */
-final class SharedInfrastructureIntegrationTest extends BaseTest
+final class SharedInfrastructureIntegrationTest extends BaseApiCase
 {
     public function testUlidFilterGreaterThan(): void
     {
