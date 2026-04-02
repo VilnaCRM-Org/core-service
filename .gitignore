@@ -1,6 +1,5 @@
 ###> symfony/framework-bundle ###
 /.idea
-/.env
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -45,3 +44,9 @@ venv
 # Infection
 infection.log
 summary.log
+.sandbox-poc/bin/
+/coverage/
+.ralph/
+.ralph/logs/
+_bmad/
+_bmad-output/

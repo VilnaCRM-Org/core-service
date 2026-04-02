@@ -36,6 +36,7 @@ Quick Decision Tree:
 │   └─ CI checks failing → ci-workflow
 │
 ├─ Create something new
+│   ├─ Full BMALPH specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
 │   ├─ New API endpoint → api-platform-crud
 │   ├─ New load test → load-testing
@@ -103,7 +104,17 @@ Complex skills have multi-file structure:
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
 
-## Available Skills (14 Total)
+## Available Skills (15 Total)
+
+### 🤖 Autonomous Planning Skills
+
+| Skill                          | File                                | When to Use                                                                                                                         |
+| ------------------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Autonomous BMALPH Planning** | `bmad-autonomous-planning/SKILL.md` | Create BMALPH-wrapped research, brief, PRD, architecture, and epics/stories from a short task description without human interaction |
+
+Preferred Codex trigger for this skill:
+
+`Use the bmad-autonomous-planning skill to plan a new feature. Work fully autonomously, run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents on gpt-5.4 with xhigh reasoning, and write the specs bundle under the configured planning artifacts directory.`
 
 ### 🔧 Workflow Skills
 
@@ -169,6 +180,16 @@ Complex skills have multi-file structure:
 2. **Read each skill** in order and execute steps
 
 3. **Use examples**: Check `.claude/skills/api-platform-crud/examples/complete-customer-crud.md` for full example
+
+### Example 2b: User asks to "plan a feature autonomously through BMALPH"
+
+**Your workflow:**
+
+1. **Identify skill**: Read `SKILL-DECISION-GUIDE.md` → Points to `bmad-autonomous-planning`
+2. **Use the Codex wrapper**: Open `.agents/skills/bmad-autonomous-planning/SKILL.md`
+3. **Execute in the current session**: Follow the skill and run analyst research, create-brief, create-prd, create-architecture, create-epics-stories, and implementation-readiness as separate subagents using `gpt-5.4` with `xhigh` reasoning
+4. **Inspect outputs**: Review the generated bundle artifacts and unresolved questions
+5. **Validate**: Run `make ci` if you changed the skill docs, tests, or supporting guidance
 
 ### Example 3: User asks to "run tests"
 
@@ -237,6 +258,9 @@ Complex skills have multi-file structure:
 ├── AI-AGENT-GUIDE.md           # This file - start here
 ├── SKILL-DECISION-GUIDE.md     # Decision tree for choosing skills
 ├── README.md                   # Skills overview
+│
+├── bmad-autonomous-planning/
+│   └── SKILL.md                # Autonomous BMALPH planning workflow
 │
 ├── ci-workflow/
 │   └── SKILL.md                # Run comprehensive CI checks

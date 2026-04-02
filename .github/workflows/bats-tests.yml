@@ -2,6 +2,15 @@ name: CLI testing
 
 on:
   pull_request:
+    paths:
+      - '.agents/skills/**'
+      - '.claude/skills/**'
+      - '.devcontainer/workspace-settings.env'
+      - '.github/workflows/bats-tests.yml'
+      - 'AGENTS.md'
+      - 'Makefile'
+      - 'scripts/**/*.sh'
+      - 'tests/CLI/bats/**'
 
 permissions:
   contents: read
@@ -34,6 +43,10 @@ jobs:
             path: tests/CLI/bats/make_coverage_tests.bats
             args: '--filter "(make integration-negative-tests command executes|make negative-tests-with-coverage command executes)"'
             needs_services: true
+          - name: bmalph
+            path: tests/CLI/bats/make_bmalph_tests.bats
+            args: ''
+            needs_services: false
           - name: database
             path: tests/CLI/bats/make_database_tests.bats
             args: ''
@@ -90,6 +103,8 @@ jobs:
         with:
           support-path: ${{ github.workspace }}/tests/CLI/bats/bats-support
           assert-path: ${{ github.workspace }}/tests/CLI/bats/bats-assert
+          detik-path: ${{ github.workspace }}/tests/CLI/bats/bats-detik
+          file-path: ${{ github.workspace }}/tests/CLI/bats/bats-file
 
       - name: Run Bats tests
         run: make bats BATS_FILES="${{ matrix.suite.path }}" BATS_ARGS='${{ matrix.suite.args }}'

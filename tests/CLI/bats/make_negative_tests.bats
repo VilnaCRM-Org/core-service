@@ -1,103 +1,229 @@
 #!/usr/bin/env bats
 
-# TODO: Track restoration of negative Make target tests in issue #142
-#       See: https://github.com/VilnaCRM-Org/core-service/issues/142
-#
-# Skipped tests checklist (restore each with proper fixture):
-# [ ] make check-security: Security vulnerability detection
-# [ ] make infection: Mutation score threshold (currently skipped pending fixture-based coverage)
-# [ ] make psalm: Static analysis error detection (currently skipped pending fixture-based coverage)
-# [ ] make phpinsights: Code quality threshold detection
-# [ ] phpunit: Test failure detection
-# [ ] PHP CS Fixer: Code style violation detection
+# Negative test coverage checklist:
+# [x] make check-security: Security vulnerability detection
+# [x] make infection: Mutation score threshold
+# [x] make psalm: Static analysis error detection
+# [x] make phpinsights: Code quality threshold detection
+# [x] make unit-tests: Test failure detection
+# [x] PHP CS Fixer: Code style violation detection
 # [x] make composer-validate: Invalid composer.json detection
-# [ ] make behat: E2E test failure detection
+# [x] make behat: E2E test failure detection
 
 load 'bats-support/load'
 load 'bats-assert/load'
 
-setup() {
-  export REPO_ROOT
-  REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../.." && pwd)"
-  cd "$REPO_ROOT"
-}
-
 @test "make check-security should report vulnerabilities if present" {
-  skip "Security check behavior may vary - requires known vulnerable package version"
+  run bash -lc '
+    set -euo pipefail
+    cleanup() {
+      if [ -f composer.lock.bak ]; then
+        mv composer.lock.bak composer.lock
+      fi
+    }
+    trap cleanup EXIT
+
+    cp composer.lock composer.lock.bak
+    original_content=$(cat composer.lock)
+    modified_content=$(echo "$original_content" | jq '"'"'.packages += [{"name": "symfony/http-kernel", "version": "v4.4.0"}]'"'"')
+    echo "$modified_content" > composer.lock
+
+    set +e
+    make check-security
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "symfony/http-kernel (v4.4.0)"
+  assert_output --partial "1 package has known vulnerabilities"
 }
 
-# Tech debt: Previous behavioral negative tests for infection (mutation score threshold)
-# and psalm (static analysis errors) remain skipped pending fixture-based coverage.
-# To restore: create fixture projects with known failures and test Make targets against them.
-@test "make infection should fail when mutation score is below threshold" {
-  skip "Error detection may vary in CI environment"
+@test "make infection should fail due to partly covered class" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/PartlyCoveredEventBus.php"
+    target_path="src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    make ensure-test-services >/dev/null
+    docker compose exec php composer dump-autoload >/dev/null
+    make unit-tests >/dev/null 2>&1 || true
+
+    set +e
+    make infection
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "8 mutants were not covered by tests"
 }
 
 @test "make behat should fail when scenarios fail" {
-  skip "Test relies on environment-specific behavior"
+  run bash -lc '
+    set -euo pipefail
+    original_path="tests/Behat/CustomerContext/CustomerContext.php"
+    temp_path="tests/CustomerContext.php"
+
+    cleanup() {
+      if [ -f "$temp_path" ]; then
+        mv "$temp_path" "$original_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$original_path" "$temp_path"
+
+    set +e
+    make behat
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
 }
 
-@test "make psalm should fail when static analysis errors are present" {
+@test "make psalm should fail when there are errors" {
   run bash -lc '
-    set -e
-    cd "$1"
-    target=src/Shared/Application/PsalmErrorExample.php
-    cp tests/CLI/bats/php/PsalmErrorExample.php "$target"
-    trap '\''rm -f "$target"; docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null 2>&1 || true'\'' EXIT
-    docker compose exec -T -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null 2>&1 || true
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/PsalmErrorExample.php"
+    target_path="src/Shared/Application/PsalmErrorExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    make ensure-test-services >/dev/null
+    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php composer dump-autoload >/dev/null
+
+    set +e
     make psalm
-  ' bash "$REPO_ROOT"
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
   [[ "$output" =~ does\ not\ exist|NonExistentTrait ]]
 }
 
 @test "make phpinsights should fail when code quality is low" {
   run bash -lc '
-    set -e
-    cd "$1"
-    target=src/temp_bad_code.php
-    cp tests/CLI/bats/php/temp_bad_code.php "$target"
-    trap '\''rm -f "$target"'\'' EXIT
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/temp_bad_code.php"
+    target_path="src/temp_bad_code.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
     make phpinsights
-  ' bash "$REPO_ROOT"
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
   assert_output --partial "Cyclomatic Complexity of 10"
 }
 
-@test "phpunit should fail if tests fail" {
+@test "make unit-tests should fail if tests fail" {
   run bash -lc '
-    set -e
-    cd "$1"
-    target=tests/Unit/FailingTest.php
-    cp tests/CLI/bats/php/FailingTest.php "$target"
-    trap '\''rm -f "$target"'\'' EXIT
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/FailingTest.php"
+    target_path="tests/Unit/FailingTest.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
     make unit-tests
-  ' bash "$REPO_ROOT"
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
   assert_failure
   assert_output --partial "FAILURES!"
 }
 
 @test "PHP CS Fixer should report violations if present" {
   run bash -lc '
+    set -euo pipefail
+    cleanup() {
+      rm -f temp_file.php
+    }
+    trap cleanup EXIT
+
+    echo "<?php \$foo = '"'"'bar'"'"' ;  " > temp_file.php
+
+    set +e
+    docker compose exec php ./vendor/bin/php-cs-fixer fix temp_file.php --dry-run --diff
+    status=$?
     set -e
-    cd "$1"
-    target=temp_file.php
-    printf "<?php \$foo = '\''bar'\'' ;\n" > "$target"
-    trap '\''rm -f "$target"'\'' EXIT
-    docker compose exec -T php ./vendor/bin/php-cs-fixer fix "$target" --allow-risky=yes --dry-run --diff
-  ' bash "$REPO_ROOT"
+
+    exit "$status"
+  '
+
   assert_failure
   assert_output --partial "begin diff"
 }
 
 @test "make composer-validate should fail with invalid composer.json" {
   run bash -lc '
-    backup=$(mktemp)
-    cp composer.json "$backup"
-    trap '\''mv "$backup" composer.json'\'' EXIT
-    printf "{ invalid json\n" > composer.json
+    set -euo pipefail
+    cleanup() {
+      if [ -f composer.json.bak ]; then
+        mv composer.json.bak composer.json
+      fi
+    }
+    trap cleanup EXIT
+
+    mv composer.json composer.json.bak
+    echo "{" > composer.json
+
+    set +e
     make composer-validate
+    status=$?
+    set -e
+
+    exit "$status"
   '
+
   assert_failure
   assert_output --partial "composer.json"
 }

@@ -45,6 +45,22 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    ```bash
    make start
    ```
+4. If you plan to use BMALPH with Codex or Claude during development, run these commands from the repository root in a login shell (for example, `bash -l`):
+   ```bash
+   make bmalph-codex
+   # or
+   make bmalph-claude
+   # then initialize the local _bmad/ and .ralph/ assets for this repo
+   make bmalph-setup
+   # or for Claude Code
+   make bmalph-setup BMALPH_PLATFORM=claude-code
+   ```
+5. To generate specs only from a short task description, invoke the
+   `bmad-autonomous-planning` skill from the current AI agent session. The
+   canonical workflow lives in `.claude/skills/bmad-autonomous-planning/SKILL.md`,
+   and Codex can start from `.agents/skills/bmad-autonomous-planning/SKILL.md`.
+   Provide only a short task description and let the main agent orchestrate the
+   BMALPH stages autonomously.
 
 ### Version Control Configuration
 

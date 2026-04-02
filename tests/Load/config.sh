@@ -1,7 +1,46 @@
 #!/bin/bash
 set -e
 
-export $(grep -v '^#' .env | xargs)
+load_dotenv_defaults() {
+  local line key
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ''|\#*)
+        continue
+        ;;
+    esac
+
+    key=${line%%=*}
+    if [ -n "${!key+x}" ]; then
+      continue
+    fi
+
+    eval "export ${line}"
+  done < .env
+}
+
+resolve_localstack_port() {
+  local default_port="${LOCALSTACK_PORT:-4566}"
+  local published_address published_port
+
+  if ! command -v docker >/dev/null 2>&1; then
+    printf '%s\n' "$default_port"
+    return 0
+  fi
+
+  published_address=$(docker compose port localstack 4566 2>/dev/null || true)
+  published_port=$(printf '%s\n' "$published_address" | awk -F: 'END {print $NF}' | tr -d '[:space:]')
+
+  if [ -n "$published_port" ]; then
+    printf '%s\n' "$published_port"
+    return 0
+  fi
+
+  printf '%s\n' "$default_port"
+}
+
+load_dotenv_defaults
 
 DEFAULT_REGION="us-east-1"
 DEFAULT_AMI_ID="ami-0e86e20dae9224db8"
@@ -80,6 +119,15 @@ SECURITY_GROUP_NAME=${SECURITY_GROUP_NAME:-$DEFAULT_SECURITY_GROUP_NAME}
 LOCAL_MODE=${LOCAL_MODE_ENV:-$DEFAULT_LOCAL_MODE}
 
 if [[ "$LOCAL_MODE" == "true" ]]; then
+    if ! LOCALSTACK_PORT="$(resolve_localstack_port)"; then
+        echo "Failed to resolve LocalStack port." >&2
+        exit 1
+    fi
+    if [[ -z "$LOCALSTACK_PORT" ]]; then
+        echo "Resolved LocalStack port is empty." >&2
+        exit 1
+    fi
+    export LOCALSTACK_PORT
     export ENDPOINT_URL=http://localhost:$LOCALSTACK_PORT
     export AWS_ACCESS_KEY_ID=$AWS_SQS_KEY
     export AWS_SECRET_ACCESS_KEY=$AWS_SQS_SECRET

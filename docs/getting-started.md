@@ -95,6 +95,7 @@ Bootstrap is handled through `scripts/local-coder/*`.
 - Docker support so the existing `make` commands continue to work
 - GitHub CLI (`gh`)
 - Codex CLI (`codex`) when workspace auth is available
+- BMALPH CLI (`bmalph`) for Codex and Claude development workflows
 - Bats CLI (`bats`) for `make bats`
 - Automatic bootstrap on create:
   - secure agent bootstrap (`scripts/local-coder/setup-secure-agent-env.sh`)
@@ -110,6 +111,7 @@ Bootstrap is handled through `scripts/local-coder/*`.
 ```bash
 gh --version
 codex --version
+bmalph --version
 make help
 ```
 
@@ -119,7 +121,9 @@ For autonomous AI coding in a workspace, set workspace secrets:
 - `GH_AUTOMATION_TOKEN`
 - bootstrap sets git identity for automated commits to `vilnacrm ai bot <info@vilnacrm.com>`
 
-The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; if they are absent, the workspace bootstrap skips host secret and Codex auth sync gracefully.
+The default devcontainer bind mounts look for host-side directories under `${HOME}/.openclaw-host-secrets` and `${HOME}/.openclaw-host-codex`; the devcontainer `initializeCommand` creates those directories if needed so fresh workspaces start cleanly. If they stay empty, the workspace bootstrap still skips host secret and Codex auth sync gracefully.
+
+The workspace is mounted inside the devcontainer at the same absolute path used on the host. That keeps Docker bind mounts valid when `docker compose` runs against the host daemon from inside the workspace.
 
 The bootstrap persists those values into `~/.config/core-service/agent-secrets.env` with `chmod 600` inside the workspace.
 
@@ -136,9 +140,12 @@ gh auth login -h github.com -w
 gh auth setup-git
 ```
 
+Workspace bootstrap defaults GitHub remotes to HTTPS so token-based `gh` auth can read and push without requiring SSH keys inside the devcontainer. Override `GH_GIT_PROTOCOL=ssh` in your workspace environment only if you intentionally want SSH remotes there.
+
 Then run:
 
 ```bash
+make bmalph-codex
 bash scripts/local-coder/startup-smoke-tests.sh VilnaCRM-Org
 bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 ```
@@ -148,10 +155,54 @@ bash scripts/local-coder/verify-gh-codex.sh VilnaCRM-Org
 - `gh` is authenticated
 - org repository listing works
 - `bats` CLI is available
+- `bmalph` is installed and its Codex dry-run init succeeds
 - `codex` can execute one non-interactive task
 
-`verify-gh-codex.sh` always runs the basic Codex smoke check.
+`verify-gh-codex.sh` also verifies that `bmalph` can run a non-destructive
+Codex initialization preview.
 Tool-calling smoke checks only run when `CODEX_TOOL_SMOKE_MODE` is not `skip`.
+
+### Local BMALPH setup for Codex or Claude
+
+If you are working outside Coder CE, use the helper below from the repository
+root to install BMALPH locally:
+
+```bash
+# Codex
+make bmalph-codex
+
+# Claude Code
+make bmalph-claude
+
+# Generic install target
+make bmalph-install BMALPH_PLATFORM=codex
+```
+
+To preview project initialization without changing repository files:
+
+```bash
+make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true
+make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true
+```
+
+To install and initialize BMALPH for the current project in one command:
+
+```bash
+make bmalph-setup
+make bmalph-setup BMALPH_PLATFORM=claude-code
+```
+
+To run the repository's autonomous BMALPH planner, use the skill from the
+current AI agent session. The canonical workflow lives in
+`.claude/skills/bmad-autonomous-planning/SKILL.md`, and Codex can start from
+`.agents/skills/bmad-autonomous-planning/SKILL.md`.
+
+Give the agent a short task description and let the main session orchestrate
+the BMALPH stages through dedicated subagents rather than repo-local launchers.
+
+`bmalph init` writes BMAD/Ralph assets and platform-specific instruction files.
+Run the dry-run first, then initialize only when you want those files in your
+working tree.
 
 ### Working in the workspace
 
