@@ -225,7 +225,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer.collection',
                 'customer.' . $customer->getUlid(),
                 'customer.email.' . $emailHash,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteByEmail($email);
     }
@@ -259,7 +260,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer',
                 'customer.collection',
                 'customer.email.' . $emailHash,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteByEmail($email);
     }
@@ -305,7 +307,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer',
                 'customer.collection',
                 'customer.email.' . $emailHash,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteByEmail($email);
     }
@@ -355,6 +358,94 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->repository->deleteByEmail($email);
     }
 
+    public function testDeleteByEmailLogsWarningWhenCacheInvalidationReturnsFalse(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willReturn(false);
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Tag invalidation returned false';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailLogsWarningWhenTagResolutionFails(): void
+    {
+        $email = 'test@example.com';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willThrowException(new \RuntimeException('Tag resolution failed'));
+
+        $this->cache
+            ->expects($this->never())
+            ->method('invalidateTags');
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Tag resolution failed';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
     public function testDeleteByIdDelegatesToInnerRepository(): void
     {
         $id = (string) $this->faker->ulid();
@@ -390,7 +481,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer.collection',
                 'customer.' . $id,
                 'customer.email.' . $emailHash,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteById($id);
     }
@@ -475,7 +567,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer',
                 'customer.collection',
                 'customer.' . $id,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteById($id);
     }
@@ -502,7 +595,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
                 'customer',
                 'customer.collection',
                 'customer.' . $id,
-            ]);
+            ])
+            ->willReturn(true);
 
         $this->repository->deleteById($id);
     }

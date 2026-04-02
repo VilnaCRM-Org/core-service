@@ -22,11 +22,15 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Integration">
-            <exclude>tests/Integration/Negative</exclude>
             <directory>tests/Integration</directory>
+            <exclude>tests/Integration/Negative</exclude>
+            <exclude>tests/Integration/BaseTest.php</exclude>
+            <exclude>tests/Integration/BaseGraphQLTest.php</exclude>
+            <exclude>tests/Integration/BaseGraphQLIntegrationTest.php</exclude>
         </testsuite>
         <testsuite name="Negative">
             <directory>tests/Integration/Negative</directory>
+            <exclude>tests/Integration/Negative/BaseNegativeApiTest.php</exclude>
         </testsuite>
     </testsuites>
 

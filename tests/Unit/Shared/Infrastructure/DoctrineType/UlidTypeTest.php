@@ -109,15 +109,16 @@ final class UlidTypeTest extends UnitTestCase
     {
         $ulidType = $this->getUlidTypeInstance();
         $symfonyUlid = SymfonyUlid::fromString((string) $this->faker->ulid());
-
-        $ulidType->convertToDatabaseValue(new Ulid((string) $symfonyUlid));
-        $ulidType->convertToPHPValue($symfonyUlid->toBinary());
-
         $reflection = new ReflectionClass($ulidType);
         $property = $reflection->getProperty('transformer');
+
+        $ulidType->convertToDatabaseValue(new Ulid((string) $symfonyUlid));
         $transformer = $property->getValue($ulidType);
 
         $this->assertNotNull($transformer);
+
+        $ulidType->convertToPHPValue($symfonyUlid->toBinary());
+
         $this->assertSame($transformer, $property->getValue($ulidType));
     }
 

@@ -281,19 +281,28 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         ?string $deletedEmail = null,
         ?string $deletedId = null
     ): void {
-        $tags = $this->cacheTagResolver->resolveForDeletedCustomer(
-            $customer,
-            $deletedEmail,
-            $deletedId
-        );
-
         try {
-            $this->cache->invalidateTags(iterator_to_array($tags));
+            $tags = iterator_to_array($this->cacheTagResolver->resolveForDeletedCustomer(
+                $customer,
+                $deletedEmail,
+                $deletedId
+            ));
+
+            if ($this->cache->invalidateTags($tags) === true) {
+                return;
+            }
+
+            $this->logCacheInvalidationFailure('Tag invalidation returned false');
         } catch (\Throwable $e) {
-            $this->logger->warning('Cache invalidation failed after customer deletion', [
-                'operation' => 'cache.invalidation.error',
-                'error' => $e->getMessage(),
-            ]);
+            $this->logCacheInvalidationFailure($e->getMessage());
         }
+    }
+
+    private function logCacheInvalidationFailure(string $error): void
+    {
+        $this->logger->warning('Cache invalidation failed after customer deletion', [
+            'operation' => 'cache.invalidation.error',
+            'error' => $error,
+        ]);
     }
 }
