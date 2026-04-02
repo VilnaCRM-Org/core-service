@@ -25,7 +25,7 @@ final class ConstraintViolationPayloadItemsProcessor implements OpenApiProcessor
             $schemas = $this->updateConstraintViolationSchemas($schemas, $changed);
 
             if ($changed) {
-                $updatedComponents = $components->withSchemas(new ArrayObject($schemas));
+                $updatedComponents = $components->withSchemas($this->createArrayObject($schemas));
 
                 return $openApi->withComponents($updatedComponents);
             }
@@ -68,7 +68,7 @@ final class ConstraintViolationPayloadItemsProcessor implements OpenApiProcessor
                 continue;
             }
 
-            $schemas[$key] = new ArrayObject($updated);
+            $schemas[$key] = $this->createArrayObject($updated);
             $changed = true;
         }
 
@@ -97,5 +97,13 @@ final class ConstraintViolationPayloadItemsProcessor implements OpenApiProcessor
             is_array($schema) => $schema,
             default => null,
         };
+    }
+
+    /**
+     * @param array<string, mixed> $items
+     */
+    private function createArrayObject(array $items): ArrayObject
+    {
+        return new ArrayObject($items);
     }
 }

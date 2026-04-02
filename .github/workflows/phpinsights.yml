@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Start application services
-        run: docker compose up --detach --wait php
+        run: make start
       - name: Run PHP Insights checks
         run: CI=1 make phpinsights

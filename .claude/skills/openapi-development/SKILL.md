@@ -34,6 +34,7 @@ src/Shared/Application/OpenApi/
 3. **Functional Programming**: Prefer `array_map`, `array_filter`, `array_combine` over loops
 4. **Match Expressions**: Use PHP 8 `match` instead of if-else chains for lower complexity
 5. **Early Returns**: Use guard clauses and early returns to reduce nesting
+6. **Factory Methods for Construction**: When a processor needs to materialize framework/library objects as part of orchestration, route that through a dedicated private factory method (or injected factory) instead of sprinkling inline `new` expressions through transformation logic
 
 **📖 For detailed patterns and techniques**, see [Processor Patterns Reference](reference/processor-patterns.md)
 

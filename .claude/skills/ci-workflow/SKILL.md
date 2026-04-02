@@ -19,6 +19,16 @@ Activate this skill when:
 
 ## Workflow Steps
 
+### 0. Preserve CI entrypoints through the Makefile
+
+When you touch GitHub Actions workflows, call the project through Makefile entrypoints instead of re-encoding raw `docker compose` or `vendor/bin/*` commands inside the workflow.
+
+- Prefer `make start` / `make up` for service startup
+- Prefer `make psalm`, `make deptrac`, `CI=1 make phpinsights`, etc. for quality jobs
+- Keep environment-specific command wiring centralized in `Makefile`
+
+This avoids workflow drift when the Makefile grows prerequisites like `phpmd`, service setup, or shared CI flags.
+
 ### 1. Run Comprehensive CI Command
 
 Execute the primary CI command that runs all quality checks:

@@ -34,3 +34,20 @@ load 'bats-assert/load'
   # deptrac debug:unassigned may return 2 when it finds uncovered files.
   [[ "$status" -eq 0 || "$status" -eq 2 ]]
 }
+
+@test "psalm workflow uses Makefile startup and analysis entrypoints" {
+  run sed -n '/Start application services/,/Upload Security Analysis results to GitHub/p' .github/workflows/psalm.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make psalm'
+  assert_output --partial 'run: make psalm-security-report'
+  refute_output --partial 'docker compose up --detach --wait php'
+}
+
+@test "phpinsights workflow uses Makefile startup and analysis entrypoints" {
+  run sed -n '/Start application services/,/Run PHP Insights checks/p' .github/workflows/phpinsights.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: CI=1 make phpinsights'
+  refute_output --partial 'docker compose up --detach --wait php'
+}
