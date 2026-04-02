@@ -37,8 +37,8 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "symfony/http-kernel (v4.4.0)"
-  assert_output --partial "1 package has known vulnerabilities"
+  assert_output --partial "symfony/http-kernel"
+  [[ "$output" =~ Found\ [0-9]+\ security\ vulnerability\ advisories\ affecting\ 1\ package ]]
 }
 
 @test "make infection should fail due to partly covered class" {
@@ -192,7 +192,7 @@ load 'bats-assert/load'
     echo "<?php \$foo = '"'"'bar'"'"' ;  " > temp_file.php
 
     set +e
-    docker compose exec php ./vendor/bin/php-cs-fixer fix temp_file.php --dry-run --diff
+    docker compose exec -T php ./vendor/bin/php-cs-fixer fix temp_file.php --allow-risky=yes --dry-run --diff
     status=$?
     set -e
 

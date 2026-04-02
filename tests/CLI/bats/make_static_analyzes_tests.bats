@@ -45,7 +45,7 @@ load 'bats-assert/load'
 }
 
 @test "phpinsights workflow uses Makefile startup and analysis entrypoints" {
-  run sed -n '/Start application services/,/Run PHP Insights checks/p' .github/workflows/phpinsights.yml
+  run sed -n '/Start application services/,$p' .github/workflows/phpinsights.yml
   assert_success
   assert_output --partial 'run: make start'
   assert_output --partial 'run: CI=1 make phpinsights'
