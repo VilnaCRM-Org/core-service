@@ -16,8 +16,33 @@
         </ignoreFiles>
     </projectFiles>
     <plugins>
+        <plugin filename="scripts/ArchitectureGuardPlugin.php" />
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin" />
         <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin" />
         <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin" />
     </plugins>
+    <issueHandlers>
+        <!-- Legacy architecture violations are tolerated in these directories for now;
+             the plugin prevents the same patterns from spreading elsewhere. -->
+        <ForbiddenCode>
+            <errorLevel type="suppress">
+                <directory name="src/Core/Customer/Application" />
+                <directory name="src/Core/Customer/Domain" />
+                <directory name="src/Core/Customer/Infrastructure" />
+                <directory name="src/Internal/HealthCheck/Application" />
+                <directory name="src/Shared/Application/Extractor" />
+                <directory name="src/Shared/Application/Observability" />
+                <directory name="src/Shared/Application/OpenApi" />
+                <directory name="src/Shared/Application/Validator" />
+                <directory name="src/Shared/Domain/Aggregate" />
+                <directory name="src/Shared/Domain/Bus" />
+                <directory name="src/Shared/Domain/ValueObject" />
+                <directory name="src/Shared/Infrastructure/Bus" />
+                <directory name="src/Shared/Infrastructure/Cache" />
+                <directory name="src/Shared/Infrastructure/Filter" />
+                <directory name="src/Shared/Infrastructure/Observability" />
+                <directory name="src/Shared/Infrastructure/Transformer" />
+            </errorLevel>
+        </ForbiddenCode>
+    </issueHandlers>
 </psalm>

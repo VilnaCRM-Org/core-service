@@ -137,10 +137,7 @@ check-requirements: ## Checks requirements for running Symfony and gives useful 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
 	$(EXEC_ENV) $(SYMFONY_BIN) security:check
 
-source-pattern-guard: ## Guard src/ against banned native array types and hardcoded new expressions
-	$(EXEC_ENV) php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' scripts/guard-source-patterns.php
-
-psalm: source-pattern-guard ## A static analysis tool for finding errors in PHP applications
+psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
 
 psalm-security: ## Psalm security analysis
