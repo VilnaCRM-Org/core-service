@@ -35,6 +35,14 @@ load 'bats-assert/load'
   [[ "$status" -eq 0 || "$status" -eq 2 ]]
 }
 
+@test "deptrac workflow uses Makefile startup and deptrac entrypoints" {
+  run sed -n '/Start Application/,/Run Deptrac/p' .github/workflows/deptrac.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make deptrac'
+  refute_output --partial 'docker compose up --detach --wait php'
+}
+
 @test "psalm workflow uses Makefile startup and analysis entrypoints" {
   run sed -n '/Start application services/,/Upload Security Analysis results to GitHub/p' .github/workflows/psalm.yml
   assert_success
