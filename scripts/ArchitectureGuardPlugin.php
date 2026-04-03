@@ -13,8 +13,10 @@ use Psalm\Issue\ForbiddenCode;
 use Psalm\IssueBuffer;
 use Psalm\Plugin\EventHandler\AfterExpressionAnalysisInterface;
 use Psalm\Plugin\EventHandler\AfterFunctionLikeAnalysisInterface;
+use Psalm\Plugin\EventHandler\AfterStatementAnalysisInterface;
 use Psalm\Plugin\EventHandler\Event\AfterExpressionAnalysisEvent;
 use Psalm\Plugin\EventHandler\Event\AfterFunctionLikeAnalysisEvent;
+use Psalm\Plugin\EventHandler\Event\AfterStatementAnalysisEvent;
 
 use function in_array;
 use function preg_match;
@@ -23,7 +25,8 @@ use function str_contains;
 
 final class ArchitectureGuardPlugin implements
     AfterExpressionAnalysisInterface,
-    AfterFunctionLikeAnalysisInterface
+    AfterFunctionLikeAnalysisInterface,
+    AfterStatementAnalysisInterface
 {
     private const SOURCE_DIRECTORY = DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
     private const FACTORY_DIRECTORY = DIRECTORY_SEPARATOR . 'Factory' . DIRECTORY_SEPARATOR;
@@ -70,7 +73,9 @@ final class ArchitectureGuardPlugin implements
         return null;
     }
 
-    public static function afterStatementAnalysis(AfterFunctionLikeAnalysisEvent $event): ?bool
+    public static function afterStatementAnalysis(
+        AfterFunctionLikeAnalysisEvent|AfterStatementAnalysisEvent $event
+    ): ?bool
     {
         $filePath = $event->getStatementsSource()->getFilePath();
 
@@ -78,6 +83,36 @@ final class ArchitectureGuardPlugin implements
             return null;
         }
 
+        if ($event instanceof AfterFunctionLikeAnalysisEvent) {
+            self::analyzeFunctionLikeStatement($event);
+
+            return null;
+        }
+
+        $statement = $event->getStmt();
+        if (
+            !$statement instanceof Node\Stmt\Property
+            && !$statement instanceof Node\Stmt\ClassConst
+        ) {
+            return null;
+        }
+
+        $type = $statement->type;
+        if ($type === null || !self::containsNativeArrayType($type)) {
+            return null;
+        }
+
+        self::reportStatementIssue(
+            $event,
+            $type,
+            self::NATIVE_ARRAY_MESSAGE
+        );
+
+        return null;
+    }
+
+    private static function analyzeFunctionLikeStatement(AfterFunctionLikeAnalysisEvent $event): void
+    {
         $statement = $event->getStmt();
 
         foreach ($statement->getParams() as $parameter) {
@@ -100,8 +135,6 @@ final class ArchitectureGuardPlugin implements
                 self::NATIVE_ARRAY_MESSAGE
             );
         }
-
-        return null;
     }
 
     private static function containsNativeArrayType(
@@ -176,6 +209,20 @@ final class ArchitectureGuardPlugin implements
                 new CodeLocation($event->getStatementsSource(), $node)
             ),
             $event->getFunctionlikeStorage()->suppressed_issues
+        );
+    }
+
+    private static function reportStatementIssue(
+        AfterStatementAnalysisEvent $event,
+        Node $node,
+        string $message,
+    ): void {
+        IssueBuffer::maybeAdd(
+            new ForbiddenCode(
+                $message,
+                new CodeLocation($event->getStatementsSource(), $node)
+            ),
+            $event->getStatementsSource()->getSuppressedIssues()
         );
     }
 

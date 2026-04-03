@@ -107,9 +107,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    make ensure-test-services >/dev/null
-    docker compose exec php composer dump-autoload >/dev/null
-    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
+    ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -123,7 +121,7 @@ load 'bats-assert/load'
   assert_output --partial "NonExistentTrait"
 }
 
-@test "make source-pattern-guard should fail on non-baselined violations" {
+@test "make psalm should fail on hardcoded new expressions in src" {
   run bash -lc '
     set -euo pipefail
     source_path="tests/CLI/bats/php/SourcePatternGuardExample.php"
@@ -137,9 +135,10 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
-    make source-pattern-guard
+    make psalm
     status=$?
     set -e
 
@@ -147,11 +146,11 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "Source pattern guard found non-baselined violations:"
-  assert_output --partial "Hardcoded new expression found"
+  assert_output --partial "ForbiddenCode"
+  assert_output --partial "Instantiate stdClass via a factory or dependency injection in production code."
 }
 
-@test "make source-pattern-guard should fail on typed class constants with array type declarations" {
+@test "make psalm should fail on typed class constants with native array declarations" {
   run bash -lc '
     set -euo pipefail
     source_path="tests/CLI/bats/php/SourcePatternGuardTypedConstExample.php"
@@ -165,9 +164,10 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
-    make source-pattern-guard
+    make psalm
     status=$?
     set -e
 
@@ -175,44 +175,28 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "Source pattern guard found non-baselined violations:"
-  assert_output --partial "array_type_declaration"
+  assert_output --partial "ForbiddenCode"
+  assert_output --partial "Use Psalm array shapes/docblocks or typed collections instead of native array declarations in src/."
 }
 
-@test "make source-pattern-guard baseline generation should fail on parse errors" {
+@test "make psalm should fail on parse errors in src" {
   run bash -lc '
     set -euo pipefail
     source_path="tests/CLI/bats/php/SourcePatternGuardParseErrorExample.php"
     target_path="src/Shared/Application/SourcePatternGuardParseErrorExample.php"
-    baseline_path="config/static-analysis/source-pattern-baseline.json"
-    baseline_backup=""
-    baseline_exists=0
-
-    if [ -f "$baseline_path" ]; then
-      baseline_exists=1
-      baseline_backup="$(mktemp)"
-      cp "$baseline_path" "$baseline_backup"
-    fi
 
     cleanup() {
       if [ -f "$target_path" ]; then
         mv "$target_path" "$source_path"
       fi
-      if [ "$baseline_exists" -eq 1 ] && [ -n "$baseline_backup" ] && [ -f "$baseline_backup" ]; then
-        cp "$baseline_backup" "$baseline_path"
-        rm -f "$baseline_backup"
-      fi
-      if [ "$baseline_exists" -eq 0 ] && [ -f "$baseline_path" ]; then
-        rm -f "$baseline_path"
-      fi
     }
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    make ensure-test-services >/dev/null
+    ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
-    docker compose exec php php -d display_errors=0 -d error_reporting='"'"'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'"'"' scripts/guard-source-patterns.php --generate-baseline
+    make psalm
     status=$?
     set -e
 
@@ -220,8 +204,8 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "Refusing to generate a baseline while some files cannot be analyzed."
-  assert_output --partial "[parse_error]"
+  assert_output --partial "ParseError"
+  assert_output --partial "SourcePatternGuardParseErrorExample.php"
 }
 
 @test "make phpinsights should fail when code quality is low" {
