@@ -177,7 +177,7 @@ final class ArchitectureGuardPlugin implements
             return true;
         }
 
-        if (preg_match('/(?:^|\\\\)(?:Exception|Error)$/', $className) === 1) {
+        if (preg_match('/(?:^|\\\\)[^\\\\]+(?:Exception|Error)$/', $className) === 1) {
             return true;
         }
 
