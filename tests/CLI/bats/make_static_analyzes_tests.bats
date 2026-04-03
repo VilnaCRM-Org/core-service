@@ -36,7 +36,7 @@ load 'bats-assert/load'
 }
 
 @test "deptrac workflow uses Makefile startup and deptrac entrypoints" {
-  run sed -n '/Start Application/,/Run Deptrac/p' .github/workflows/deptrac.yml
+  run sed -n '/Start Application/,/run: make deptrac/p' .github/workflows/deptrac.yml
   assert_success
   assert_output --partial 'run: make start'
   assert_output --partial 'run: make deptrac'
