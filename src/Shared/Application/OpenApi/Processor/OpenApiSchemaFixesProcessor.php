@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use ArrayObject;
+
 final class OpenApiSchemaFixesProcessor implements OpenApiProcessorInterface
 {
     public function __construct(

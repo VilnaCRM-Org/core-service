@@ -29,8 +29,7 @@ final class TagDescriptionProcessor implements OpenApiProcessorInterface
      */
     private function createOrUpdateTag(array $tags, string $tagName): Tag
     {
-        $tags += [$tagName => new Tag($tagName)];
-        $tag = $tags[$tagName];
+        $tag = $tags[$tagName] ?? new Tag($tagName);
         $description = TagDescriptionDictionary::descriptions()[$tagName];
 
         return (string) $tag->getDescription() === ''

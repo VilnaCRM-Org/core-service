@@ -206,9 +206,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = $this->createProcessor();
-
-        $this->assertSame($openApi, $processor->process($openApi));
+        $this->assertProcessLeavesSchemasUnchanged($schemas, $openApi);
     }
 
     public function testProcessReturnsOriginalWhenPayloadItemsAlreadyDefined(): void
@@ -231,9 +229,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = $this->createProcessor();
-
-        $this->assertSame($openApi, $processor->process($openApi));
+        $this->assertProcessLeavesSchemasUnchanged($schemas, $openApi);
     }
 
     public function testProcessSkipsConstraintViolationSchemasWithUnsupportedShape(): void
@@ -244,9 +240,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = $this->createProcessor();
-
-        $this->assertSame($openApi, $processor->process($openApi));
+        $this->assertProcessLeavesSchemasUnchanged($schemas, $openApi);
     }
 
     public function testProcessSkipsNonConstraintViolationSchemas(): void
@@ -261,11 +255,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = $this->createProcessor();
-        $result = $processor->process($openApi);
-
-        // Should return original since ConstraintViolation has no violations property to update
-        $this->assertSame($openApi, $result);
+        $this->assertProcessLeavesSchemasUnchanged($schemas, $openApi);
     }
 
     private function createProcessor(): ConstraintViolationPayloadItemsProcessor
@@ -273,5 +263,15 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         return new ConstraintViolationPayloadItemsProcessor(
             new ConstraintViolationSchemaUpdater()
         );
+    }
+
+    private function assertProcessLeavesSchemasUnchanged(ArrayObject $schemas, OpenApi $openApi): void
+    {
+        $before = unserialize(serialize($schemas));
+        $processor = $this->createProcessor();
+        $result = $processor->process($openApi);
+
+        $this->assertSame($openApi, $result);
+        $this->assertEquals($before, $schemas);
     }
 }

@@ -35,6 +35,16 @@ final class OpenApiMutationCoverageTest extends UnitTestCase
         ]));
     }
 
+    public function testArrayContentSchemaUpdaterIgnoresScalarSchemas(): void
+    {
+        $updater = new OpenApiArrayContentSchemaUpdater($this->createHydraCollectionSchemaFixer());
+
+        self::assertNull($updater->update([
+            'schema' => false,
+            'example' => ['type' => 'plain'],
+        ]));
+    }
+
     public function testMediaTypeSchemaFixerLeavesMediaTypesWithoutSchemaUntouched(): void
     {
         $fixer = new OpenApiMediaTypeSchemaFixer($this->createHydraCollectionSchemaFixer());

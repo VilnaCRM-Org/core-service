@@ -27,10 +27,10 @@ private function processPathItem(PathItem $pathItem): PathItem
 - Lower cyclomatic complexity
 - Easier to maintain
 
-## 2. Match Expressions Over If-Else
+## 2. Guard Clauses Over Nested Conditionals
 
-**Problem**: If-else chains increase cyclomatic complexity
-**Solution**: Use PHP 8's `match` expression
+**Problem**: Nested conditionals increase cyclomatic complexity
+**Solution**: Use early returns and guard clauses
 
 ```php
 // ❌ Bad: High complexity

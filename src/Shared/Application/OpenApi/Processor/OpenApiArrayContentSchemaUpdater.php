@@ -28,12 +28,17 @@ final class OpenApiArrayContentSchemaUpdater
             return null;
         }
 
-        $normalizedSchema = SchemaNormalizer::normalize($normalizedDefinition['schema']);
+        $schema = $normalizedDefinition['schema'];
+        if (! is_array($schema) && ! $schema instanceof ArrayObject) {
+            return null;
+        }
+
+        $normalizedSchema = SchemaNormalizer::normalize($schema);
         $updatedSchema = $this->hydraCollectionSchemaFixer->fixSchema($normalizedSchema);
 
         return match (true) {
             $updatedSchema !== null => ['schema' => $updatedSchema] + $normalizedDefinition,
-            $normalizedSchema === $normalizedDefinition['schema'] => null,
+            $normalizedSchema === $schema => null,
             default => ['schema' => $normalizedSchema] + $normalizedDefinition,
         };
     }

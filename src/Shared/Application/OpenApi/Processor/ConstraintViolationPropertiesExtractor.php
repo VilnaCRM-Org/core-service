@@ -22,11 +22,8 @@ final class ConstraintViolationPropertiesExtractor
         $violations = SchemaNormalizer::normalize($properties['violations'] ?? null);
         $items = SchemaNormalizer::normalize($violations['items'] ?? null);
 
-        return match (true) {
-            array_key_exists('properties', $items) => SchemaNormalizer::normalize(
-                $items['properties']
-            ),
-            default => null,
-        };
+        return array_key_exists('properties', $items)
+            ? SchemaNormalizer::normalize($items['properties'])
+            : null;
     }
 }

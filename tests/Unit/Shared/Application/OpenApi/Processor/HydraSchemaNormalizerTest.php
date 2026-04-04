@@ -78,4 +78,25 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
             $result
         );
     }
+
+    public function testNormalizeReplacesNullAllOfWithEmptyArray(): void
+    {
+        $normalizer = new HydraSchemaNormalizer();
+        $schemas = [
+            'HydraCollectionBaseSchema' => [
+                'allOf' => null,
+                'type' => 'object',
+            ],
+        ];
+
+        self::assertSame(
+            [
+                'HydraCollectionBaseSchema' => [
+                    'allOf' => [],
+                    'type' => 'object',
+                ],
+            ],
+            $normalizer->normalize($schemas)
+        );
+    }
 }
