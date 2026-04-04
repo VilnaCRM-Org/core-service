@@ -3314,9 +3314,9 @@ components:
                 type: string
                 description: 'The machine-readable violation code'
               payload:
-                type: array
                 items:
                   type: object
+                type: array
         detail:
           readOnly: true
           type: string
