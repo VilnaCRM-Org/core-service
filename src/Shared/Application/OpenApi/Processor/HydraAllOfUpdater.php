@@ -25,7 +25,7 @@ final class HydraAllOfUpdater
     {
         $validItems = array_filter(
             $allOf,
-            static fn ($item): bool => is_array($item) || $item instanceof ArrayObject
+            self::isUpdatableItem(...)
         );
 
         $hasChanges = false;
@@ -37,6 +37,15 @@ final class HydraAllOfUpdater
             }
         }
 
-        return $hasChanges ? $allOf : null;
+        return match ($hasChanges) {
+            true => $allOf,
+            default => null,
+        };
+    }
+
+    private static function isUpdatableItem(
+        array|bool|float|int|string|ArrayObject|null $item
+    ): bool {
+        return is_array($item) || $item instanceof ArrayObject;
     }
 }

@@ -16,14 +16,28 @@ final class HydraAtTypeExampleUpdater
      */
     public function update(array $example): ?array
     {
-        if (! array_key_exists('type', $example)) {
-            return null;
-        }
+        return match (true) {
+            ! self::hasKey($example, 'type') => null,
+            self::hasKey($example, '@type') => null,
+            default => self::withHydraType($example),
+        };
+    }
 
-        if (array_key_exists('@type', $example)) {
-            return null;
-        }
+    /**
+     * @param array<string, SchemaValue> $example
+     */
+    private static function hasKey(array $example, string $key): bool
+    {
+        return array_key_exists($key, $example);
+    }
 
+    /**
+     * @param array<string, SchemaValue> $example
+     *
+     * @return array<string, SchemaValue>
+     */
+    private static function withHydraType(array $example): array
+    {
         $example['@type'] = $example['type'];
         unset($example['type']);
 

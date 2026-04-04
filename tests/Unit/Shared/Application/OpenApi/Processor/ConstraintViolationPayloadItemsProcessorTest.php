@@ -9,6 +9,7 @@ use ApiPlatform\OpenApi\Model\Info;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Processor\ConstraintViolationPayloadItemsProcessor;
+use App\Shared\Application\OpenApi\Processor\ConstraintViolationSchemaUpdater;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -27,7 +28,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
             $components
         );
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $this->assertSame($openApi, $result);
@@ -37,7 +38,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
     {
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths());
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
 
         $this->assertSame($openApi, $processor->process($openApi));
     }
@@ -59,7 +60,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -90,7 +91,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -124,7 +125,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -153,7 +154,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -188,7 +189,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
@@ -205,7 +206,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
 
         $this->assertSame($openApi, $processor->process($openApi));
     }
@@ -230,7 +231,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
 
         $this->assertSame($openApi, $processor->process($openApi));
     }
@@ -243,7 +244,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
 
         $this->assertSame($openApi, $processor->process($openApi));
     }
@@ -260,10 +261,17 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
-        $processor = new ConstraintViolationPayloadItemsProcessor();
+        $processor = $this->createProcessor();
         $result = $processor->process($openApi);
 
         // Should return original since ConstraintViolation has no violations property to update
         $this->assertSame($openApi, $result);
+    }
+
+    private function createProcessor(): ConstraintViolationPayloadItemsProcessor
+    {
+        return new ConstraintViolationPayloadItemsProcessor(
+            new ConstraintViolationSchemaUpdater()
+        );
     }
 }

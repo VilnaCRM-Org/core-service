@@ -9,8 +9,8 @@ use ArrayObject;
 final class HydraCollectionSchemaFixer
 {
     public function __construct(
-        private HydraSchemaNormalizer $schemaNormalizer,
-        private HydraViewExampleUpdater $viewExampleUpdater
+        private HydraViewExampleUpdater $viewExampleUpdater,
+        private HydraCollectionSchemasUpdater $schemasUpdater
     ) {
     }
 
@@ -19,30 +19,7 @@ final class HydraCollectionSchemaFixer
      */
     public function apply(ArrayObject $schemas): ArrayObject
     {
-        $schemasArray = $schemas->getArrayCopy();
-        $normalized = $this->schemaNormalizer->normalize($schemasArray);
-        $normalizedSchemas = $schemasArray;
-        $hasChanges = false;
-
-        foreach ($normalized as $schemaName => $schema) {
-            $normalizedSchema = SchemaNormalizer::normalize($schema);
-            $updatedSchema = $this->viewExampleUpdater->update($normalizedSchema);
-            $schemaWasNormalized = array_key_exists($schemaName, $schemasArray)
-                && SchemaNormalizer::normalize($schemasArray[$schemaName]) !== $normalizedSchema;
-
-            if ($updatedSchema === null) {
-                if (! $schemaWasNormalized) {
-                    continue;
-                }
-
-                $updatedSchema = $normalizedSchema;
-            }
-
-            $normalizedSchemas[$schemaName] = new ArrayObject($updatedSchema);
-            $hasChanges = true;
-        }
-
-        return $hasChanges ? new ArrayObject($normalizedSchemas) : $schemas;
+        return $this->schemasUpdater->update($schemas);
     }
 
     /**

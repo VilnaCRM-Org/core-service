@@ -16,9 +16,17 @@ use App\Shared\Application\OpenApi\Processor\HydraAllOfItemUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraAllOfUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraAtTypeExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemasUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraDirectViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
+use App\Shared\Application\OpenApi\Processor\OpenApiArrayContentSchemaUpdater;
+use App\Shared\Application\OpenApi\Processor\OpenApiContentDefinitionUpdater;
+use App\Shared\Application\OpenApi\Processor\OpenApiMediaTypeSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\OpenApiOperationSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\OpenApiResponseContentUpdater;
+use App\Shared\Application\OpenApi\Processor\OpenApiResponseSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\OpenApiResponsesUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor;
 use App\Shared\Application\OpenApi\Processor\SchemaNormalizer;
 use App\Tests\Unit\UnitTestCase;
@@ -570,8 +578,21 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new HydraDirectViewExampleUpdater()
         );
         $schemaNormalizer = new HydraSchemaNormalizer();
-        $hydraFixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $hydraFixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
+        $definitionUpdater = new OpenApiContentDefinitionUpdater(
+            new OpenApiMediaTypeSchemaFixer($hydraFixer),
+            new OpenApiArrayContentSchemaUpdater($hydraFixer)
+        );
+        $contentUpdater = new OpenApiResponseContentUpdater($definitionUpdater);
+        $responseFixer = new OpenApiResponseSchemaFixer($contentUpdater);
+        $responsesUpdater = new OpenApiResponsesUpdater($responseFixer);
 
-        return new OpenApiSchemaFixesProcessor($hydraFixer);
+        return new OpenApiSchemaFixesProcessor(
+            $hydraFixer,
+            new OpenApiOperationSchemaFixer($responsesUpdater)
+        );
     }
 }

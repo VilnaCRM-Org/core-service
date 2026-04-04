@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
+use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemasUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Tests\Unit\UnitTestCase;
@@ -25,7 +26,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with([])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
         $schemas = new ArrayObject(['key' => 'value']);
 
         $result = $fixer->apply($schemas);
@@ -49,7 +53,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => null,
         ]);
@@ -81,7 +88,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
                     : null
             );
 
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
         $schemas = new ArrayObject(['key' => 'value']);
 
         $result = $fixer->apply($schemas);
@@ -109,7 +119,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(['allOf' => [], 'updated' => true]);
 
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
 
         self::assertSame(
             ['allOf' => [], 'updated' => true],
@@ -132,7 +145,10 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer($schemaNormalizer, $viewExampleUpdater);
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => new ArrayObject(['allOf' => []]),
         ]);

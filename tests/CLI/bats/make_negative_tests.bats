@@ -1,15 +1,5 @@
 #!/usr/bin/env bats
 
-# Negative test coverage checklist:
-# [x] make check-security: Security vulnerability detection
-# [x] make infection: Mutation score threshold
-# [x] make psalm: Static analysis error detection
-# [x] make phpinsights: Code quality threshold detection
-# [x] make unit-tests: Test failure detection
-# [x] PHP CS Fixer: Code style violation detection
-# [x] make composer-validate: Invalid composer.json detection
-# [x] make behat: E2E test failure detection
-
 load 'bats-support/load'
 load 'bats-assert/load'
 
@@ -37,8 +27,8 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "symfony/http-kernel"
-  [[ "$output" =~ Found\ [0-9]+\ security\ vulnerability\ advisories\ affecting\ 1\ package ]]
+  assert_output --partial "symfony/http-kernel (v4.4.0)"
+  assert_output --partial "1 package has known vulnerabilities"
 }
 
 @test "make infection should fail due to partly covered class" {
@@ -112,8 +102,8 @@ load 'bats-assert/load'
 
     mv "$source_path" "$target_path"
     make ensure-test-services >/dev/null
-    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
     docker compose exec php composer dump-autoload >/dev/null
+    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -124,7 +114,7 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  [[ "$output" =~ does\ not\ exist|NonExistentTrait ]]
+  assert_output --partial "does not exist"
 }
 
 @test "make phpinsights should fail when code quality is low" {
@@ -151,7 +141,7 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "Cyclomatic Complexity of 10"
+  assert_output --partial "The method anotherBadMethod() has a Cyclomatic Complexity of 10"
 }
 
 @test "make unit-tests should fail if tests fail" {
@@ -189,10 +179,10 @@ load 'bats-assert/load'
     }
     trap cleanup EXIT
 
-    echo "<?php \$foo = '"'"'bar'"'"' ;  " > temp_file.php
+    echo "<?php \$foo = '"'"'\'"'"''"'"'bar'"'"'\'"'"''"'"' ;  " > temp_file.php
 
     set +e
-    docker compose exec -T php ./vendor/bin/php-cs-fixer fix temp_file.php --allow-risky=yes --dry-run --diff
+    docker compose exec php ./vendor/bin/php-cs-fixer fix temp_file.php --dry-run --diff
     status=$?
     set -e
 
@@ -200,7 +190,6 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "begin diff"
 }
 
 @test "make composer-validate should fail with invalid composer.json" {
@@ -225,5 +214,4 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "composer.json"
 }

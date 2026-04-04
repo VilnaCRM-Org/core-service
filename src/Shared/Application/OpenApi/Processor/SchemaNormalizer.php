@@ -6,12 +6,17 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ArrayObject;
 
+/**
+ * @phpstan-type SchemaValue array|bool|float|int|object|string|null
+ */
 final class SchemaNormalizer
 {
     /**
-     * @return array<int|string, mixed>
+     * @param SchemaValue $schema
+     *
+     * @return array<int|string, SchemaValue>
      */
-    public static function normalize(mixed $schema): array
+    public static function normalize(object|array|string|int|float|bool|null $schema): array
     {
         return match (true) {
             $schema instanceof ArrayObject => $schema->getArrayCopy(),

@@ -6,21 +6,25 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ArrayObject;
 
+/**
+ * @phpstan-type SchemaValue array|bool|float|int|string|ArrayObject|null
+ */
 final class CustomerUlidRefReplacer
 {
     /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $schemas
+     * @param array<string, SchemaValue> $schemas
      *
-     * @return array<string, array|bool|float|int|string|ArrayObject|null>
+     * @return array<string, SchemaValue>
      */
     public function replace(array $schemas, string $schemaName): array
     {
         $schema = $this->toArray($schemas[$schemaName] ?? []);
         $properties = $this->toArray($schema['properties'] ?? []);
         $ulidProperty = $this->toArray($properties['ulid'] ?? []);
-        $ref = is_string($ulidProperty['$ref'] ?? null)
-            ? $ulidProperty['$ref']
-            : '';
+        $ref = match (true) {
+            is_string($ulidProperty['$ref'] ?? null) => $ulidProperty['$ref'],
+            default => '',
+        };
 
         if (! $this->isSupportedUlidReference($ref)) {
             return $schemas;
@@ -34,7 +38,9 @@ final class CustomerUlidRefReplacer
     }
 
     /**
-     * @return array<int|string, mixed>
+     * @param SchemaValue $value
+     *
+     * @return array<int|string, SchemaValue>
      */
     private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
