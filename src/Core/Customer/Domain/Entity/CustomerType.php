@@ -7,7 +7,7 @@ namespace App\Core\Customer\Domain\Entity;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
-final class CustomerType implements CustomerTypeInterface
+class CustomerType implements CustomerTypeInterface
 {
     public function __construct(
         private string $value,

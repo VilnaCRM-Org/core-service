@@ -7,7 +7,7 @@ namespace App\Core\Customer\Domain\Entity;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Shared\Domain\ValueObject\UlidInterface;
 
-final class CustomerStatus implements CustomerStatusInterface
+class CustomerStatus implements CustomerStatusInterface
 {
     public function __construct(
         private string $value,
