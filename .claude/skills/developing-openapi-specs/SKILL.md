@@ -43,7 +43,7 @@ src/Shared/Application/OpenApi/
 1. **Single Responsibility**: Each processor/factory handles ONE concern
 2. **Immutability**: Use `with*()` methods, never mutate directly
 3. **Functional Programming**: Prefer `array_map`, `array_filter` over loops
-4. **Match Expressions**: Use PHP 8 `match` instead of if-else chains
+4. **Flat Control Flow**: Prefer guard clauses, extracted helpers, and explicit branches
 5. **Early Returns**: Guard clauses reduce nesting and complexity
 
 ## Quick Pattern Reference
@@ -64,24 +64,19 @@ private function processPathItem(PathItem $pathItem): PathItem
 }
 ```
 
-### Pattern 2: Match Expression (Lower Complexity)
+### Pattern 2: Guard Clauses and Explicit Branches
 
 ```php
-// ✅ Complexity: 3
 private function processOperation(?Operation $operation): ?Operation
 {
-    return match (true) {
-        $operation === null => null,
-        $operation->getParameters() === [] => $operation,
-        default => $operation->withParameters(...),
-    };
-}
+    if ($operation === null) {
+        return null;
+    }
 
-// ❌ Complexity: 5
-private function processOperation(?Operation $operation): ?Operation
-{
-    if ($operation === null) return null;
-    if ($operation->getParameters() === []) return $operation;
+    if ($operation->getParameters() === []) {
+        return $operation;
+    }
+
     return $operation->withParameters(...);
 }
 ```
@@ -161,7 +156,7 @@ private function fixProperties(array $mediaTypeObject): ?array
 
 1. Create class in `src/Shared/Application/OpenApi/Processor/`
 2. Implement `OpenApiProcessorInterface`
-3. Use OPERATIONS constant, match expressions, functional style
+3. Use OPERATIONS constant, guard clauses, and functional style
 4. Tag the service with `app.openapi_processor` and an explicit priority
 5. Do not add a new dedicated constructor argument to `OpenApiFactory`
 
@@ -203,7 +198,7 @@ private function getParameterDescriptions(): array
 2. ❌ **Don't Use empty()**: Explicitly check `$array === []` or `$string === ''`
 3. ❌ **Don't Create God Classes**: Split into focused processors
 4. ❌ **Don't Repeat HTTP Methods**: Use OPERATIONS constant
-5. ❌ **Don't Use If-Else Chains**: Use match expressions
+5. ❌ **Don't Write Nested Branch Mazes**: flatten control flow with guard clauses and helper extraction
 
 ## Testing Your Changes
 
@@ -249,7 +244,7 @@ For comprehensive patterns, step-by-step guides, and examples:
 Before committing OpenAPI changes:
 
 - [ ] Used OPERATIONS constant for HTTP methods
-- [ ] Used match expressions (not if-else)
+- [ ] Kept branching flat with guard clauses or extracted helpers
 - [ ] Methods under 20 lines
 - [ ] Cyclomatic complexity under 10 per method
 - [ ] Used functional array operations
@@ -263,4 +258,4 @@ Before committing OpenAPI changes:
 
 ---
 
-**Remember**: Low complexity and high quality go hand-in-hand. Use functional programming, match expressions, and method extraction to keep code maintainable.
+**Remember**: Low complexity and high quality go hand-in-hand. Use functional programming, guard clauses, and method extraction to keep code maintainable.

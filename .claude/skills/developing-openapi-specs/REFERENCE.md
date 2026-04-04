@@ -21,7 +21,7 @@ src/Shared/Application/OpenApi/
 1. **Single Responsibility**: Each processor/factory handles ONE specific concern
 2. **Immutability**: Use `with*()` methods to create new instances instead of mutating
 3. **Functional Programming**: Prefer `array_map`, `array_filter`, `array_combine` over loops
-4. **Match Expressions**: Use PHP 8 `match` instead of if-else chains for lower complexity
+4. **Flat Control Flow**: Prefer guard clauses, extracted helpers, and explicit branches
 5. **Early Returns**: Use guard clauses and early returns to reduce nesting
 
 ## Directory Structure
@@ -152,22 +152,26 @@ private function processOperation(?Operation $operation): ?Operation
     return $operation->withParameters(...);
 }
 
-// ✅ Good: Lower complexity
+// ✅ Good: Clear flat branching
 private function processOperation(?Operation $operation): ?Operation
 {
-    return match (true) {
-        $operation === null => null,
-        $operation->getParameters() === [] => $operation,
-        default => $operation->withParameters(...),
-    };
+    if ($operation === null) {
+        return null;
+    }
+
+    if ($operation->getParameters() === []) {
+        return $operation;
+    }
+
+    return $operation->withParameters(...);
 }
 ```
 
 **Benefits**:
 
-- Each match branch counts as 1 complexity (vs 2+ for if-else)
-- More readable
-- Forces exhaustive handling
+- Keeps nesting flat
+- Makes exit paths obvious
+- Reads well in small processors
 
 ### 3. Functional Array Operations
 
@@ -221,11 +225,15 @@ private static function augmentParameter(mixed $parameter, array $descriptions):
     $description = $parameter->getDescription();
     $hasDescription = $description !== null && $description !== '';
 
-    return match (true) {
-        !isset($descriptions[$paramName]) => $parameter,
-        $hasDescription => $parameter,
-        default => $parameter->withDescription($descriptions[$paramName]),
-    };
+    if (!isset($descriptions[$paramName])) {
+        return $parameter;
+    }
+
+    if ($hasDescription) {
+        return $parameter;
+    }
+
+    return $parameter->withDescription($descriptions[$paramName]);
 }
 ```
 
@@ -395,11 +403,12 @@ final class YourProcessor
 
     private function processOperation(?Operation $operation): ?Operation
     {
-        return match (true) {
-            $operation === null => null,
-            // Add your conditions...
-            default => $operation,
-        };
+        if ($operation === null) {
+            return null;
+        }
+
+        // Add your conditions...
+        return $operation;
     }
 }
 ```
@@ -545,9 +554,9 @@ From PHPInsights configuration:
 
 ### Techniques to Reduce Complexity
 
-1. **Use Match Instead of If-Else**
-   - Each `match` case = 1 complexity
-   - Each `if` = +1, each `elseif` = +1
+1. **Flatten Branches Early**
+   - Prefer guard clauses and focused helper methods over nested branching
+   - Extract compound conditions into named variables before branching
 
 2. **Extract Conditions to Variables**
 
@@ -778,7 +787,7 @@ Key configuration:
 
 ### "Cyclomatic complexity too high"
 
-- Use match expressions instead of if-else
+- Flatten branching with guard clauses and focused helpers
 - Extract methods (keep each under 20 lines)
 - Replace loops with array functions
 - Extract conditions to variables
@@ -812,7 +821,7 @@ Key configuration:
 When contributing to OpenAPI layer:
 
 - [ ] Use OPERATIONS constant for HTTP methods
-- [ ] Use match expressions instead of if-else
+- [ ] Keep branching flat with guard clauses or extracted helpers
 - [ ] Keep methods under 20 lines
 - [ ] Keep cyclomatic complexity under 10
 - [ ] Use functional array operations
