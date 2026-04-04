@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\OpenApi\Processor;
+namespace App\Shared\Application\OpenApi\Serializer;
 
+use App\Shared\Application\OpenApi\Processor\SchemaNormalizer;
 use ArrayObject;
 
 final class HydraSchemaNormalizer

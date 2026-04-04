@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use App\Shared\Application\OpenApi\Updater\HydraDirectViewExampleUpdater;
+
 /**
  * @phpstan-type SchemaValue array|bool|float|int|string|\ArrayObject|null
  */

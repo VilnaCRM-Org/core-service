@@ -6,8 +6,8 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemasUpdater;
-use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
+use App\Shared\Application\OpenApi\Serializer\HydraSchemaNormalizer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 

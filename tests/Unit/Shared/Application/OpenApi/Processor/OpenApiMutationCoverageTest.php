@@ -11,8 +11,6 @@ use App\Shared\Application\OpenApi\Processor\HydraAllOfUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraAtTypeExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemaFixer;
 use App\Shared\Application\OpenApi\Processor\HydraCollectionSchemasUpdater;
-use App\Shared\Application\OpenApi\Processor\HydraDirectViewExampleUpdater;
-use App\Shared\Application\OpenApi\Processor\HydraSchemaNormalizer;
 use App\Shared\Application\OpenApi\Processor\HydraViewExampleUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiArrayContentSchemaUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiContentDefinitionUpdater;
@@ -20,6 +18,8 @@ use App\Shared\Application\OpenApi\Processor\OpenApiMediaTypeSchemaFixer;
 use App\Shared\Application\OpenApi\Processor\OpenApiResponseContentUpdater;
 use App\Shared\Application\OpenApi\Processor\OpenApiResponseSchemaFixer;
 use App\Shared\Application\OpenApi\Processor\OpenApiResponsesUpdater;
+use App\Shared\Application\OpenApi\Serializer\HydraSchemaNormalizer;
+use App\Shared\Application\OpenApi\Updater\HydraDirectViewExampleUpdater;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 

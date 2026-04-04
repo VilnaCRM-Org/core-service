@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
-use App\Shared\Application\OpenApi\Processor\HydraDirectViewExampleUpdater;
+use App\Shared\Application\OpenApi\Updater\HydraDirectViewExampleUpdater;
 use App\Tests\Unit\UnitTestCase;
 
 final class HydraDirectViewExampleUpdaterTest extends UnitTestCase
