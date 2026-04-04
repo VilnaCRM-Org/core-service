@@ -18,10 +18,11 @@ final class SpecExtensionPropertyApplier
     {
         $normalizedExtensionProperties = $this->normalize($extensionProperties);
 
-        return match ($normalizedExtensionProperties) {
-            [] => $openApi,
-            default => $this->withExtensionProperties($openApi, $normalizedExtensionProperties),
-        };
+        foreach ($normalizedExtensionProperties as $key => $value) {
+            $openApi = $openApi->withExtensionProperty($key, $value);
+        }
+
+        return $openApi;
     }
 
     /**
@@ -36,20 +37,5 @@ final class SpecExtensionPropertyApplier
             is_array($extensionProperties) => $extensionProperties,
             default => [],
         };
-    }
-
-    /**
-     * @param array<string, string|int|float|bool|array|null> $extensionProperties
-     */
-    private function withExtensionProperties(OpenApi $openApi, array $extensionProperties): OpenApi
-    {
-        return array_reduce(
-            array_keys($extensionProperties),
-            static fn (OpenApi $api, string $key): OpenApi => $api->withExtensionProperty(
-                $key,
-                $extensionProperties[$key]
-            ),
-            $openApi
-        );
     }
 }
