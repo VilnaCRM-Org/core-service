@@ -43,6 +43,14 @@ final class OpenApiMutationCoverageTest extends UnitTestCase
         self::assertSame($mediaType, $fixer->fix($mediaType));
     }
 
+    public function testMediaTypeSchemaFixerLeavesUnchangedArraySchemaUntouched(): void
+    {
+        $fixer = new OpenApiMediaTypeSchemaFixer($this->createHydraCollectionSchemaFixer());
+        $mediaType = new MediaType(new ArrayObject(['type' => 'object']));
+
+        self::assertSame($mediaType, $fixer->fix($mediaType));
+    }
+
     public function testResponseContentUpdaterContinuesPastUnchangedDefinitions(): void
     {
         $updater = new OpenApiResponseContentUpdater($this->createContentDefinitionUpdater());
