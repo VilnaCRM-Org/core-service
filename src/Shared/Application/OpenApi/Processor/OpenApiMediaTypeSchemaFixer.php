@@ -17,14 +17,17 @@ final class OpenApiMediaTypeSchemaFixer
     public function fix(MediaType $mediaType): MediaType
     {
         $schema = $mediaType->getSchema();
-        $normalizedSchema = $schema?->getArrayCopy() ?? [];
-        $updatedSchema = $schema === null
-            ? null
-            : $this->hydraCollectionSchemaFixer->fixSchema($normalizedSchema)
-        ;
+        $updatedSchema = match (true) {
+            $schema instanceof ArrayObject => $this->hydraCollectionSchemaFixer->fixSchema(
+                $schema->getArrayCopy()
+            ),
+            default => null,
+        };
 
-        return $updatedSchema === null
-            ? $mediaType
-            : $mediaType->withSchema(new ArrayObject($updatedSchema));
+        return match (true) {
+            ! ($schema instanceof ArrayObject) => $mediaType,
+            $updatedSchema === null => $mediaType,
+            default => $mediaType->withSchema(new ArrayObject($updatedSchema)),
+        };
     }
 }
