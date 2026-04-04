@@ -20,7 +20,7 @@ final readonly class CustomerCacheTagResolver
         ?string $deletedEmail = null,
         ?string $deletedId = null
     ): CustomerCacheTagCollection {
-        $tags = new CustomerCacheTagCollection('customer', 'customer.collection');
+        $tags = CustomerCacheTagCollection::forCustomerCache();
 
         if ($customer instanceof Customer) {
             $tags = $tags->with(
