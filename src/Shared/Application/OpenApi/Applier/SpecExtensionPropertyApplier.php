@@ -18,27 +18,31 @@ final class SpecExtensionPropertyApplier
     {
         $normalizedExtensionProperties = $this->normalize($extensionProperties);
 
-        if ($normalizedExtensionProperties === null) {
-            return $openApi;
-        }
-
-        return $this->withExtensionProperties($openApi, $normalizedExtensionProperties);
+        return ! $this->hasExtensionProperties($normalizedExtensionProperties)
+            ? $openApi
+            : $this->withExtensionProperties($openApi, $normalizedExtensionProperties);
     }
 
     /**
      * @param array<string, string|int|float|bool|array|null>|ArrayObject<string, string|int|float|bool|array|null>|null $extensionProperties
      *
-     * @return array<string, string|int|float|bool|array|null>|null
+     * @return array<string, string|int|float|bool|array|null>
      */
-    private function normalize(array|ArrayObject|null $extensionProperties): ?array
+    private function normalize(array|ArrayObject|null $extensionProperties): array
     {
-        $normalizedExtensionProperties = match (true) {
+        return match (true) {
             $extensionProperties instanceof ArrayObject => $extensionProperties->getArrayCopy(),
             is_array($extensionProperties) => $extensionProperties,
             default => [],
         };
+    }
 
-        return $normalizedExtensionProperties === [] ? null : $normalizedExtensionProperties;
+    /**
+     * @param array<string, string|int|float|bool|array|null> $extensionProperties
+     */
+    private function hasExtensionProperties(array $extensionProperties): bool
+    {
+        return $extensionProperties !== [];
     }
 
     /**

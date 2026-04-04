@@ -26,14 +26,12 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        /** @var CustomerStatus|null $existing */
         $existing = $context['previous_data'] ?? null;
 
-        if ($existing instanceof CustomerStatus) {
-            return $existing;
-        }
-
-        return $this->resolveFromIri($data->id, $context, $operation);
+        return match (true) {
+            $existing instanceof CustomerStatus => $existing,
+            default => $this->resolveFromIri($data->id, $context, $operation),
+        };
     }
 
     /**
@@ -51,6 +49,27 @@ final readonly class CustomerStatusResolver
         }
     }
 
+    private function requireIri(?string $iri): string
+    {
+        return $this->requireResolvedIri(trim($iri ?? ''));
+    }
+
+    private function requireResolvedIri(string $iri): string
+    {
+        return match ($iri) {
+            '' => throw new CustomerStatusNotFoundException(),
+            default => $iri,
+        };
+    }
+
+    private function assertStatus(string $iri, object $resource): CustomerStatus
+    {
+        return match (true) {
+            $resource instanceof CustomerStatus => $resource,
+            default => throw CustomerStatusNotFoundException::withIri($iri),
+        };
+    }
+
     /**
      * @param array<string, CustomerStatus|array|string|int|float|bool|null> $context
      */
@@ -59,19 +78,9 @@ final readonly class CustomerStatusResolver
         array $context,
         Operation $operation
     ): CustomerStatus {
-        $resolvedIri = trim($iri ?? '');
-        if ($resolvedIri === '') {
-            throw new CustomerStatusNotFoundException();
-        }
+        $resolvedIri = $this->requireIri($iri);
+        $resource = $this->fetchResource($resolvedIri, $context, $operation);
 
-        $resource = $this->fetchResource(
-            $resolvedIri,
-            $context,
-            $operation
-        );
-
-        return $resource instanceof CustomerStatus
-            ? $resource
-            : throw CustomerStatusNotFoundException::withIri($resolvedIri);
+        return $this->assertStatus($resolvedIri, $resource);
     }
 }
