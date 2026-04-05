@@ -20,6 +20,7 @@ final class ConstraintViolationPropertiesWriter
      */
     public static function write($constraintViolation, $properties)
     {
+        $constraintViolation = SchemaNormalizer::normalize($constraintViolation);
         $rootProperties = self::normalizedRootProperties($constraintViolation);
         $violations = self::normalizedViolations($rootProperties);
         $items = SchemaNormalizer::normalize($violations['items'] ?? null);

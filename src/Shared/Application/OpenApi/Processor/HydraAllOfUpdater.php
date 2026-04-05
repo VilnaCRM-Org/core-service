@@ -21,7 +21,7 @@ final class HydraAllOfUpdater
      *
      * @return array<int, SchemaValue>|null
      */
-    public function update(array $allOf): ?array
+    public function update($allOf)
     {
         $validItems = array_filter(
             $allOf,
@@ -44,7 +44,7 @@ final class HydraAllOfUpdater
     }
 
     private static function isUpdatableItem(
-        array|bool|float|int|string|ArrayObject|null $item
+        $item
     ): bool {
         return is_array($item) || $item instanceof ArrayObject;
     }

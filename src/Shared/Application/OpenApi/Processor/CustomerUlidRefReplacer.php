@@ -16,7 +16,7 @@ final class CustomerUlidRefReplacer
      *
      * @return array<string, SchemaValue>
      */
-    public function replace(array $schemas, string $schemaName): array
+    public function replace($schemas, string $schemaName)
     {
         $schema = $this->toArray($schemas[$schemaName] ?? []);
         $properties = $this->toArray($schema['properties'] ?? []);
@@ -42,7 +42,7 @@ final class CustomerUlidRefReplacer
      *
      * @return array<int|string, SchemaValue>
      */
-    private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
+    private function toArray($value)
     {
         return match (true) {
             $value instanceof ArrayObject => $value->getArrayCopy(),
