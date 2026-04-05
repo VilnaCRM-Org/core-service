@@ -134,7 +134,7 @@ namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\OpenApi;
 
-final class YourProcessor
+final class YourProcessor implements OpenApiProcessorInterface
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
@@ -172,17 +172,7 @@ final class YourProcessor
 }
 ```
 
-2. **Implement `OpenApiProcessorInterface` and tag it**:
-
-```php
-final class YourProcessor implements OpenApiProcessorInterface
-{
-    public function process(OpenApi $openApi): OpenApi
-    {
-        // ...
-    }
-}
-```
+2. **Tag the processor for auto-discovery**:
 
 ```yaml
 # config/services.yaml
