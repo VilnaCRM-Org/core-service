@@ -20,6 +20,7 @@ DOCKER_COMMAND=(
   run
   --rm
   --user "$(id -u):$(id -g)"
+  --network none
   -v "$OPENAPI_DIR:/workspace/openapi"
   -v "$RULESET_PATH:/workspace/.spectral.yaml"
   core-service-spectral

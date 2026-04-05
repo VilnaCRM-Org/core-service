@@ -380,6 +380,10 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Use arrays for structured data when typed classes would be more appropriate
 - Inject cross-cutting concerns (metrics, logging) directly into command handlers - use event subscribers instead
 - Create complex objects directly without factories in production code (use factories for maintainability)
+- Put OpenAPI schema-correctness logic in post-export patchers (fix the generation/runtime path instead)
+- Add suppression lines like `@infection-ignore-all` (write strict/good code instead)
+- Use the `+=` trick for arrays (use explicit code for readability)
+- Use short-circuit evaluation for imperative flow where readability suffers
 
 **ALWAYS**:
 
@@ -402,6 +406,10 @@ PR Comments → Categorize → Apply by Priority → Verify → Run CI → Done
 - Use collections (`MetricCollection`, `EntityCollection`) instead of arrays of objects
 - Add new features via new classes following Open/Closed principle (don't modify existing classes)
 - Use factories for creating objects with dependencies or complex construction (required in production, optional in tests)
+- Fix OpenAPI generation/runtime code for spec correctness; keep any export-time normalizer thin, idempotent, and parity-safe (for example, trimming stable timestamps or ordering keys without changing schema semantics)
+- Write strict, testable code instead of adding suppression annotations
+- Use explicit, readable code instead of array tricks like `+=`
+- Prefer explicit control flow over short-circuit evaluation for imperative operations
 
 ## Format (Output)
 

@@ -164,6 +164,8 @@ final class CustomerCreator
    return new PathItem();                        // ✅ OK
    ```
 
+**Important nuance**: in production services/processors, keep framework/library object construction behind a focused private factory method or dedicated factory service when that construction is part of orchestration logic or repeated in multiple branches. That keeps object creation centralized and prevents inline `new` calls from spreading through business-flow code.
+
 ## Testability Best Practices
 
 ### 1. Always Inject All Dependencies

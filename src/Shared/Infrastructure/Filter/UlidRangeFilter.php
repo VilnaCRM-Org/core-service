@@ -47,7 +47,7 @@ final class UlidRangeFilter extends AbstractFilter implements
         array &$context = []
     ): void {
         $denormProp = $this->denormalizePropertyName($property);
-        if (!$this->isFilterableProperty($denormProp, $resourceClass)) {
+        if (! $this->isFilterableProperty($denormProp, $resourceClass)) {
             return;
         }
 

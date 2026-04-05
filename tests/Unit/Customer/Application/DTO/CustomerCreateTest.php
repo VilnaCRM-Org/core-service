@@ -29,6 +29,20 @@ final class CustomerCreateTest extends UnitTestCase
         );
     }
 
+    public function testConstructWithNullableDefaults(): void
+    {
+        // Test constructor with no arguments (all nullable with defaults)
+        $dto = new CustomerCreate();
+
+        self::assertNull($dto->initials);
+        self::assertNull($dto->email);
+        self::assertNull($dto->phone);
+        self::assertNull($dto->leadSource);
+        self::assertNull($dto->type);
+        self::assertNull($dto->status);
+        self::assertNull($dto->confirmed);
+    }
+
     private function assertDto(
         string $initials,
         string $email,
@@ -38,14 +52,15 @@ final class CustomerCreateTest extends UnitTestCase
         string $status,
         bool $confirmed
     ): void {
-        $dto = new CustomerCreate();
-        $dto->initials = $initials;
-        $dto->email = $email;
-        $dto->phone = $phone;
-        $dto->leadSource = $leadSource;
-        $dto->type = $type;
-        $dto->status = $status;
-        $dto->confirmed = $confirmed;
+        $dto = new CustomerCreate(
+            initials: $initials,
+            email: $email,
+            phone: $phone,
+            leadSource: $leadSource,
+            type: $type,
+            status: $status,
+            confirmed: $confirmed,
+        );
 
         $this->assertEquals($initials, $dto->initials);
         $this->assertEquals($email, $dto->email);

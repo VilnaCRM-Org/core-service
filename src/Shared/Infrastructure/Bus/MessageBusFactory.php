@@ -47,7 +47,9 @@ final class MessageBusFactory
 
         $regularHandlers = array_filter(
             $callableArray,
-            static fn (object $handler): bool => !$handler instanceof DomainEventSubscriberInterface
+            static fn (
+                object $handler
+            ): bool => ! ($handler instanceof DomainEventSubscriberInterface)
         );
 
         // DomainEventSubscribers use subscribedTo() for routing

@@ -95,11 +95,19 @@ final class SpecCleanupProcessorTest extends UnitTestCase
     public function testProcessPreservesExistingWebhookCollection(): void
     {
         $webhooks = new ArrayObject(['test' => 'value']);
+        $externalDocs = [
+            'description' => 'OpenAPI docs',
+            'url' => 'https://example.com/docs',
+        ];
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
             [new Server('https://localhost')],
             new Paths(),
             new Components(),
+            [],
+            [],
+            $externalDocs,
+            'https://example.com/schema',
             webhooks: $webhooks
         );
 
@@ -108,6 +116,8 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             new SpecExtensionPropertyApplier()
         ))->process($openApi);
 
+        self::assertSame($externalDocs, $processed->getExternalDocs());
+        self::assertSame('https://example.com/schema', $processed->getJsonSchemaDialect());
         self::assertSame($webhooks, $processed->getWebhooks());
     }
 
@@ -147,6 +157,29 @@ final class SpecCleanupProcessorTest extends UnitTestCase
         $result = $method->invoke($processor, null, $openApi);
 
         self::assertSame($openApi, $result);
+    }
+
+    public function testApplyExtensionPropertiesHandlesArrayObjectValue(): void
+    {
+        $processor = new SpecCleanupProcessor(
+            new SpecMetadataCleaner(),
+            new SpecExtensionPropertyApplier()
+        );
+        $method = new ReflectionMethod(SpecCleanupProcessor::class, 'applyExtensionProperties');
+
+        $openApi = new OpenApi(
+            new Info('title', '1.0', ''),
+            [new Server('https://localhost')],
+            new Paths()
+        );
+
+        $result = $method->invoke(
+            $processor,
+            new ArrayObject(['x-build' => 'ci']),
+            $openApi
+        );
+
+        self::assertSame('ci', $result->getExtensionProperties()['x-build']);
     }
 
     public function testConstructorUsesProvidedCollaborators(): void

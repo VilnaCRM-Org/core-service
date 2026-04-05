@@ -91,7 +91,7 @@ Key configuration:
 
 ### "Cyclomatic complexity too high"
 
-- Use match expressions instead of if-else
+- Flatten branching with guard clauses and focused helpers
 - Extract methods (keep each under 20 lines)
 - Replace loops with array functions
 - Extract conditions to variables
@@ -127,7 +127,7 @@ Key configuration:
 When contributing to OpenAPI layer:
 
 - [ ] Use OPERATIONS constant for HTTP methods
-- [ ] Use match expressions instead of if-else
+- [ ] Keep branching flat with guard clauses or extracted helpers
 - [ ] Keep methods under 20 lines
 - [ ] Keep cyclomatic complexity under 10
 - [ ] Use functional array operations

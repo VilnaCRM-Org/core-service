@@ -46,15 +46,11 @@ final class ResponseBuilderTest extends UnitTestCase
 
     public function testBuildWithMinimalData(): void
     {
-        $this->contextBuilderMock->expects($this->once())
-            ->method('build')
-            ->with([])
-            ->willReturn(new \ArrayObject([]));
-
         $response = $this->builder->build($this->description, [], []);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals($this->description, $response->getDescription());
+        $this->assertNull($response->getContent());
         $this->assertEquals(new \ArrayObject([]), $response->getHeaders());
     }
 

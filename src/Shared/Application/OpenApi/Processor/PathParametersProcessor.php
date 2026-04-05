@@ -12,7 +12,7 @@ use App\Shared\Application\OpenApi\Cleaner\PathParameterCleanerInterface;
 use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 
-final class PathParametersProcessor
+final class PathParametersProcessor implements OpenApiProcessorInterface
 {
     private readonly PathParameterCleanerInterface $parameterCleaner;
 
@@ -42,11 +42,12 @@ final class PathParametersProcessor
     private function updateOperation(Operation $operation): Operation
     {
         $parameters = $operation->getParameters();
+        if (! \is_array($parameters) || $parameters === []) {
+            return $operation;
+        }
 
-        return is_array($parameters)
-            ? $operation->withParameters(
-                array_map($this->parameterCleaner->clean(...), $parameters)
-            )
-            : $operation;
+        return $operation->withParameters(
+            array_map($this->parameterCleaner->clean(...), $parameters)
+        );
     }
 }

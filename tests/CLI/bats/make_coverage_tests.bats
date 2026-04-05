@@ -31,4 +31,3 @@ load 'bats-assert/load'
   run make negative-tests-with-coverage
   assert_success
 }
-

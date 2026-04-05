@@ -43,13 +43,6 @@ export default function getCustomerStatuses(data) {
             ulid
           }
         }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        totalCount
       }
     }`;
 

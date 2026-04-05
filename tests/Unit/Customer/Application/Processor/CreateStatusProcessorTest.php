@@ -71,8 +71,6 @@ final class CreateStatusProcessorTest extends UnitTestCase
 
     private function createDto(): StatusCreate
     {
-        $dto = new StatusCreate();
-        $dto->value = $this->faker->word();
-        return $dto;
+        return new StatusCreate(value: $this->faker->word());
     }
 }

@@ -27,7 +27,7 @@ final class ResponseBuilder implements ResponseBuilderInterface
     ): Response {
         return new Response(
             description: $description,
-            content: $this->contextBuilder->build($params),
+            content: $params === [] ? null : $this->contextBuilder->build($params),
             headers: $this->buildHeadersArray($headers)
         );
     }

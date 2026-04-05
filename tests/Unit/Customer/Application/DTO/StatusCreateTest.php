@@ -12,8 +12,7 @@ final class StatusCreateTest extends UnitTestCase
     public function testConstruct(): void
     {
         $value = $this->faker->word();
-        $dto = new StatusCreate();
-        $dto->value = $value;
+        $dto = new StatusCreate(value: $value);
 
         $this->assertEquals($value, $dto->value);
     }

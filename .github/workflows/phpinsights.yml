@@ -12,5 +12,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
-      - run: composer install --prefer-dist --no-progress --no-suggest --no-scripts
-      - run: CI=1 make phpinsights
+      - name: Start application services
+        run: make start
+      - name: Run PHP Insights checks
+        run: CI=1 make phpinsights

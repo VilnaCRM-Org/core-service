@@ -55,7 +55,7 @@ final class ParameterNormalizer implements NormalizerInterface
         object $object,
         array|string|int|float|bool|\ArrayObject|null $data
     ): bool {
-        return !$object instanceof Parameter || !is_array($data);
+        return ! $object instanceof Parameter || ! is_array($data);
     }
 
     /**
