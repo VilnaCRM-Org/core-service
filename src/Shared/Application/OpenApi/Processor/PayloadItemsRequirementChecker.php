@@ -31,11 +31,7 @@ final class PayloadItemsRequirementChecker
      */
     private static function types(?array $payload): array
     {
-        if (! \is_array($payload)) {
-            return [];
-        }
-
-        $type = $payload['type'] ?? [];
+        $type = \is_array($payload) ? ($payload['type'] ?? []) : [];
 
         return \is_string($type) ? [$type] : SchemaNormalizer::normalize($type);
     }

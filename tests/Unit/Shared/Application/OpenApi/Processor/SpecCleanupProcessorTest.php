@@ -166,7 +166,6 @@ final class SpecCleanupProcessorTest extends UnitTestCase
             new SpecExtensionPropertyApplier()
         );
         $method = new ReflectionMethod(SpecCleanupProcessor::class, 'applyExtensionProperties');
-        $method->setAccessible(true);
 
         $openApi = new OpenApi(
             new Info('title', '1.0', ''),
