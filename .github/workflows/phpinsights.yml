@@ -9,6 +9,9 @@ jobs:
     name: PHP Insights checks
     steps:
       - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ vars.PHP_VERSION }}
       - name: Start application services
         run: make start
       - name: Run PHP Insights checks

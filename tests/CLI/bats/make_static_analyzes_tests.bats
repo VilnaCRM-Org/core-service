@@ -85,3 +85,10 @@ load 'bats-assert/load'
   refute_output --partial 'docker compose up --detach --wait php'
   refute_output --partial 'vendor/bin/phpinsights'
 }
+
+@test "phpinsights workflow configures the shared PHP version before host analysis" {
+  run sed -n '1,/Start application services/p' .github/workflows/phpinsights.yml
+  assert_success
+  assert_output --partial 'shivammathur/setup-php@v2'
+  assert_output --partial 'php-version: ${{ vars.PHP_VERSION }}'
+}
