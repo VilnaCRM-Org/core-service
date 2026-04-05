@@ -16,7 +16,7 @@ final class HydraDirectViewExampleUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public function update(array $normalized): ?array
+    public function update($normalized)
     {
         $properties = SchemaNormalizer::normalize($normalized['properties'] ?? null);
         $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
@@ -38,7 +38,7 @@ final class HydraDirectViewExampleUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    private function updatedExample(array $viewSchema): ?array
+    private function updatedExample($viewSchema)
     {
         $example = SchemaNormalizer::normalize($viewSchema['example'] ?? null);
 
