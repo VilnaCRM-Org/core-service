@@ -95,7 +95,10 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
 
     public function testUpdateReturnsUpdatedAllOfPayload(): void
     {
-        $normalized = ['allOf' => [['type' => 'object']]];
+        $normalized = [
+            'title' => 'Hydra collection',
+            'allOf' => [['type' => 'object']],
+        ];
         $updatedAllOf = [['type' => 'string']];
         $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
         $allOfUpdater->expects($this->once())
@@ -108,6 +111,12 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
             new HydraDirectViewExampleUpdater()
         );
 
-        $this->assertSame(['allOf' => $updatedAllOf], $updater->update($normalized));
+        $this->assertSame(
+            [
+                'title' => 'Hydra collection',
+                'allOf' => $updatedAllOf,
+            ],
+            $updater->update($normalized)
+        );
     }
 }
