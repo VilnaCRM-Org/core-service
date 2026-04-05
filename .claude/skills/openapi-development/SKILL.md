@@ -132,6 +132,8 @@ public function __invoke(array $context = []): OpenApi
 // src/Shared/Application/OpenApi/Processor/YourProcessor.php
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 
 final class YourProcessor implements OpenApiProcessorInterface
@@ -182,6 +184,7 @@ App\Shared\Application\OpenApi\Processor\YourProcessor:
 ```
 
 `OpenApiFactory` consumes `!tagged_iterator app.openapi_processor`, so new processors must be auto-discovered through the tag. Do not hardcode each processor as a separate constructor argument or service argument.
+Higher `priority` values run earlier in the processor pipeline, so choose the tag priority to match the stage you need instead of copying `100` blindly.
 
 ### Adding a New Endpoint Factory
 

@@ -111,7 +111,11 @@ load 'bats-assert/load'
 }
 
 @test "load test LocalStack healthcheck waits for SQS readiness" {
-  run sed -n '/^  localstack:/,/^  redis:/p' docker-compose.load_test.override.yml
+  run awk '
+    /^  localstack:/ {in_block=1}
+    in_block && /^  [[:alnum:]_-]+:/ && $0 !~ /^  localstack:/ {exit}
+    in_block {print}
+  ' docker-compose.load_test.override.yml
   assert_success
   assert_output --partial 'curl -fsS http://localhost:4566/_localstack/health'
   assert_output --partial 'grep -Eq "\"sqs\": \"(available|running)\""'

@@ -350,11 +350,10 @@ if ($description === null || $description === '') {
 **Solution**: Delegate to specialized classes
 
 ```php
-// ✅ Good: OpenApiFactory delegates to processors
-$this->parameterDescriptionAugmenter->augment($openApi);
-$openApi = $this->tagDescriptionAugmenter->augment($openApi);
-$this->iriReferenceTypeFixer->fix($openApi);
-$openApi = $this->pathParametersSanitizer->sanitize($openApi);
+// ✅ Good: OpenApiFactory delegates via the processor pipeline
+foreach ($this->processors as $processor) {
+    $openApi = $processor->process($openApi);
+}
 ```
 
 **Benefits**:
@@ -709,7 +708,7 @@ Expected: No violations
 Shows all key patterns:
 
 - OPERATIONS constant
-- Match expressions
+- Guard clauses / flat branching
 - Functional programming
 - Method extraction
 - Static pure functions
@@ -718,15 +717,15 @@ Shows all key patterns:
 
 **Key Methods**:
 
-- `augmentOperation()`: Uses match expression
-- `augmentParameters()`: Uses array_map
-- `augmentParameter()`: Static pure function
+- `processPathItem()`: Iterates OPERATIONS and delegates
+- `processOperation()`: Uses guard clauses and early returns
+- `processParameter()`: Static pure function
 
 ### Example 2: IriReferenceTypeProcessor
 
 Shows complexity reduction:
 
-- Match for null/empty checks
+- Guard clauses for null/empty checks
 - Extracted `fixProperties()` and `fixProperty()` methods
 - array_map for transformation
 
@@ -743,7 +742,7 @@ Shows delegation pattern:
 
 - Delegates to `PathParameterCleaner`
 - Uses OPERATIONS constant
-- Match expression for operation processing
+- Guard clauses for operation processing
 
 **Location**: `src/Shared/Application/OpenApi/Processor/PathParametersProcessor.php`
 

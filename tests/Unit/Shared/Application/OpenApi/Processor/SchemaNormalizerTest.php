@@ -10,6 +10,20 @@ use ArrayObject;
 
 final class SchemaNormalizerTest extends UnitTestCase
 {
+    /**
+     * @return iterable<string, array{0: mixed}>
+     */
+    public static function nonArrayInputsProvider(): iterable
+    {
+        yield 'null' => [null];
+        yield 'bool false' => [false];
+        yield 'bool true' => [true];
+        yield 'int' => [123];
+        yield 'float' => [1.5];
+        yield 'string' => ['foo'];
+        yield 'object' => [new \stdClass()];
+    }
+
     public function testNormalizeReturnsArrayCopyForArrayObject(): void
     {
         $schema = new ArrayObject(['foo' => 'bar']);
@@ -24,8 +38,11 @@ final class SchemaNormalizerTest extends UnitTestCase
         $this->assertSame(['foo' => 'bar'], SchemaNormalizer::normalize($schema));
     }
 
-    public function testNormalizeReturnsEmptyArrayForNonArrayInput(): void
+    /**
+     * @dataProvider nonArrayInputsProvider
+     */
+    public function testNormalizeReturnsEmptyArrayForNonArrayInput(mixed $input): void
     {
-        $this->assertSame([], SchemaNormalizer::normalize(null));
+        $this->assertSame([], SchemaNormalizer::normalize($input));
     }
 }

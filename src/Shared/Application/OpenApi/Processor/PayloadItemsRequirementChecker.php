@@ -9,7 +9,7 @@ use ArrayObject;
 final class PayloadItemsRequirementChecker
 {
     /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $payload
+     * @param array<string, array|bool|float|int|string|ArrayObject|null>|null $payload
      */
     public static function shouldAddItems(?array $payload): bool
     {
@@ -20,7 +20,7 @@ final class PayloadItemsRequirementChecker
     }
 
     /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $payload
+     * @param array<string, array|bool|float|int|string|ArrayObject|null>|null $payload
      */
     private static function isArrayPayload(?array $payload): bool
     {
@@ -28,7 +28,7 @@ final class PayloadItemsRequirementChecker
     }
 
     /**
-     * @param array<string, array|bool|float|int|string|ArrayObject|null> $payload
+     * @param array<string, array|bool|float|int|string|ArrayObject|null>|null $payload
      *
      * @return array<int|string, array|bool|float|int|string|ArrayObject|null>
      */

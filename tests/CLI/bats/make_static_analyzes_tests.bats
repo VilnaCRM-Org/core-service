@@ -41,6 +41,7 @@ load 'bats-assert/load'
   assert_output --partial 'run: make start'
   assert_output --partial 'run: make deptrac'
   refute_output --partial 'docker compose up --detach --wait php'
+  refute_output --partial 'vendor/bin/deptrac'
 }
 
 @test "psalm workflow uses Makefile startup and analysis entrypoints" {
@@ -50,6 +51,7 @@ load 'bats-assert/load'
   assert_output --partial 'run: make psalm'
   assert_output --partial 'run: make psalm-security-report'
   refute_output --partial 'docker compose up --detach --wait php'
+  refute_output --partial 'vendor/bin/psalm'
 }
 
 @test "phpinsights workflow uses Makefile startup and analysis entrypoints" {
@@ -58,4 +60,5 @@ load 'bats-assert/load'
   assert_output --partial 'run: make start'
   assert_output --partial 'run: CI=1 make phpinsights'
   refute_output --partial 'docker compose up --detach --wait php'
+  refute_output --partial 'vendor/bin/phpinsights'
 }

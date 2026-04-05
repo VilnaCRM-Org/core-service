@@ -75,7 +75,7 @@ import uuid
 print(uuid.uuid4())
 PY
 )" && [ -n "$output" ]; then
-      printf '%s' "$output"
+      printf '%s\n' "$output"
       return 0
     fi
   fi

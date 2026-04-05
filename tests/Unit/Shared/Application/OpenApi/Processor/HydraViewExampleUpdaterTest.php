@@ -62,6 +62,45 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
         );
     }
 
+    public function testUpdatePrefersDirectViewExampleWhenAllOfAlsoExists(): void
+    {
+        $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
+        $allOfUpdater->expects($this->never())
+            ->method('update');
+
+        $updater = new HydraViewExampleUpdater(
+            $allOfUpdater,
+            new HydraDirectViewExampleUpdater()
+        );
+
+        $normalized = [
+            'properties' => [
+                'view' => [
+                    'example' => [
+                        '@id' => '/api/customers?page=1',
+                        'type' => 'PartialCollectionView',
+                    ],
+                ],
+            ],
+            'allOf' => [['type' => 'object']],
+        ];
+
+        $this->assertSame(
+            [
+                'properties' => [
+                    'view' => [
+                        'example' => [
+                            '@id' => '/api/customers?page=1',
+                            '@type' => 'PartialCollectionView',
+                        ],
+                    ],
+                ],
+                'allOf' => [['type' => 'object']],
+            ],
+            $updater->update($normalized)
+        );
+    }
+
     public function testUpdateReturnsNullWhenAllOfIsExplicitlyNull(): void
     {
         $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);

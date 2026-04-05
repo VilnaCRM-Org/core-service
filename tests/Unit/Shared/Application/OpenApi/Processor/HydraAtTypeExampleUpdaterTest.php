@@ -9,6 +9,23 @@ use App\Tests\Unit\UnitTestCase;
 
 final class HydraAtTypeExampleUpdaterTest extends UnitTestCase
 {
+    public function testUpdatePreservesExistingHydraTypeWhenDifferentFromLegacyType(): void
+    {
+        $updater = new HydraAtTypeExampleUpdater();
+
+        self::assertSame(
+            [
+                '@type' => 'ExistingHydraType',
+                '@id' => '/api/customers?page=1',
+            ],
+            $updater->update([
+                'type' => 'LegacyType',
+                '@type' => 'ExistingHydraType',
+                '@id' => '/api/customers?page=1',
+            ])
+        );
+    }
+
     public function testUpdateRemovesLegacyTypeWhenHydraTypeAlreadyExists(): void
     {
         $updater = new HydraAtTypeExampleUpdater();
@@ -24,5 +41,12 @@ final class HydraAtTypeExampleUpdaterTest extends UnitTestCase
                 '@id' => '/api/customers?page=1',
             ])
         );
+    }
+
+    public function testUpdateReturnsNullWhenLegacyTypeIsMissing(): void
+    {
+        $updater = new HydraAtTypeExampleUpdater();
+
+        self::assertNull($updater->update(['@id' => '/api/customers?page=1']));
     }
 }
