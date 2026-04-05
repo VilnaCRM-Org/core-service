@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\MediaType;
 use ArrayObject;
 
 final class OpenApiResponseContentUpdater
@@ -29,9 +30,9 @@ final class OpenApiResponseContentUpdater
     }
 
     /**
-     * @param array<int|string, array|object> $contentItems
+     * @param array<int|string, array|MediaType> $contentItems
      *
-     * @return array<int|string, array|object>
+     * @return array<int|string, array|MediaType>
      */
     private function updatedContentItems(array $contentItems): array
     {
@@ -41,7 +42,7 @@ final class OpenApiResponseContentUpdater
         );
     }
 
-    private function updatedDefinition(array|object $definition): array|object
+    private function updatedDefinition(array|MediaType $definition): array|MediaType
     {
         return $this->definitionUpdater->update($definition) ?? $definition;
     }
