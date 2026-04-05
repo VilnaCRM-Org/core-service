@@ -32,8 +32,9 @@ src/Shared/Application/OpenApi/
 1. **Single Responsibility**: Each processor/factory handles ONE specific concern
 2. **Immutability**: Use `with*()` methods to create new instances instead of mutating
 3. **Functional Programming**: Prefer `array_map`, `array_filter`, `array_combine` over loops
-4. **Match Expressions**: Use PHP 8 `match` instead of if-else chains for lower complexity
+4. **Flat Control Flow**: Prefer guard clauses, extracted helpers, and explicit branches
 5. **Early Returns**: Use guard clauses and early returns to reduce nesting
+6. **Factory Methods for Construction**: When a processor needs to materialize framework/library objects as part of orchestration, route that through a dedicated private factory method (or injected factory) instead of sprinkling inline `new` expressions through transformation logic
 
 **📖 For detailed patterns and techniques**, see [Processor Patterns Reference](reference/processor-patterns.md)
 
@@ -91,17 +92,18 @@ URI parameter factories build path parameters:
 
 ### Processor/
 
-Processors transform the generated OpenAPI spec:
+Processors transform the generated OpenAPI spec. The inventory below is illustrative rather than exhaustive; the current runtime pipeline also includes later payload/schema/ULID fixup stages.
 
-- **`ParameterDescriptionAugmenter`**: Adds descriptions to query/filter parameters
-- **`PathParametersSanitizer`**: Cleans path parameters
+- **`ParameterDescriptionProcessor`**: Adds descriptions to query/filter parameters
+- **`PathParametersProcessor`**: Cleans path parameters
 - **`PathParameterCleaner`**: Removes deprecated properties from path parameters
-- **`IriReferenceTypeFixer`**: Fixes IRI reference types (iri-reference → string with format)
-- **`TagDescriptionAugmenter`**: Adds descriptions to OpenAPI tags
+- **`IriReferenceTypeProcessor`**: Fixes IRI reference types (iri-reference → string with format)
+- **`TagDescriptionProcessor`**: Adds descriptions to OpenAPI tags
+- **Additional fixup processors**: payload, schema, and ULID processors may run later in the tagged pipeline depending on the current service wiring
 
 ### OpenApiFactory.php
 
-Main coordinator that orchestrates all factories and processors:
+Main coordinator that orchestrates endpoint factories plus the tagged processor pipeline:
 
 ```php
 public function __invoke(array $context = []): OpenApi
@@ -112,10 +114,9 @@ public function __invoke(array $context = []): OpenApi
         $endpointFactory->createEndpoint($openApi);
     }
 
-    $this->parameterDescriptionAugmenter->augment($openApi);
-    $openApi = $this->tagDescriptionAugmenter->augment($openApi);
-    $this->iriReferenceTypeFixer->fix($openApi);
-    $openApi = $this->pathParametersSanitizer->sanitize($openApi);
+    foreach ($this->processors as $processor) {
+        $openApi = $processor->process($openApi);
+    }
 
     return $openApi;
 }
@@ -131,9 +132,11 @@ public function __invoke(array $context = []): OpenApi
 // src/Shared/Application/OpenApi/Processor/YourProcessor.php
 namespace App\Shared\Application\OpenApi\Processor;
 
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
 
-final class YourProcessor
+final class YourProcessor implements OpenApiProcessorInterface
 {
     private const OPERATIONS = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 
@@ -161,38 +164,27 @@ final class YourProcessor
 
     private function processOperation(?Operation $operation): ?Operation
     {
-        return match (true) {
-            $operation === null => null,
-            // Add your conditions...
-            default => $operation,
-        };
+        if ($operation === null) {
+            return null;
+        }
+
+        // Add your conditions...
+        return $operation;
     }
 }
 ```
 
-2. **Inject it into OpenApiFactory**:
+2. **Tag the processor for auto-discovery**:
 
-```php
-// src/Shared/Application/OpenApi/OpenApiFactory.php
-public function __construct(
-    private OpenApiFactoryInterface $decorated,
-    private iterable $endpointFactories,
-    private PathParametersSanitizer $pathParametersSanitizer
-        = new PathParametersSanitizer(),
-    private YourProcessor $yourProcessor = new YourProcessor(),  // Add here
-    // ...
-) {}
-
-public function __invoke(array $context = []): OpenApi
-{
-    $openApi = $this->decorated->__invoke($context);
-
-    // ...
-    $openApi = $this->yourProcessor->process($openApi);  // Add here
-
-    return $openApi;
-}
+```yaml
+# config/services.yaml
+App\Shared\Application\OpenApi\Processor\YourProcessor:
+  tags:
+    - { name: 'app.openapi_processor', priority: 100 }
 ```
+
+`OpenApiFactory` consumes `!tagged_iterator app.openapi_processor`, so new processors must be auto-discovered through the tag. Do not hardcode each processor as a separate constructor argument or service argument.
+Higher `priority` values run earlier in the processor pipeline, so choose the tag priority to match the stage you need instead of copying `100` blindly.
 
 ### Adding a New Endpoint Factory
 
@@ -250,10 +242,10 @@ The factory will be auto-discovered and injected into `OpenApiFactory`.
 
 ### Adding Parameter Descriptions
 
-1. **Add to ParameterDescriptionAugmenter**:
+1. **Add a focused provider to `ParameterDescriptionProcessor`**:
 
 ```php
-// src/Shared/Application/OpenApi/Processor/ParameterDescriptionAugmenter.php
+// src/Shared/Application/OpenApi/Processor/ParameterDescriptionProcessor.php
 
 private function getYourFilterDescriptions(): array
 {
@@ -269,8 +261,7 @@ private function getParameterDescriptions(): array
     return array_merge(
         $this->getOrderDescriptions(),
         $this->getFilterDescriptions(),
-        $this->getYourFilterDescriptions(),  // Add here
-        // ...
+        $this->getYourFilterDescriptions(),
     );
 }
 ```
@@ -314,7 +305,7 @@ From PHPInsights configuration:
 
 ### Quick Tips
 
-1. **Use Match Instead of If-Else** - Each `match` case = 1 complexity vs each `if`/`elseif` = +1
+1. **Flatten Branches Early** - use guard clauses and helper extraction before complexity snowballs
 2. **Extract Conditions to Variables** - Reduce boolean complexity
 3. **Use Early Returns** - Avoid nested conditionals
 4. **Replace Loops with array_map/array_filter** - More declarative, lower complexity
@@ -383,34 +374,40 @@ Expected: No violations
 
 ---
 
-- `augmentOperation()`: Uses match expression
+### Example 1: ParameterDescriptionProcessor
+
+Shows flat parameter augmentation:
+
+- `augmentOperation()`: Keeps branching shallow
 - `augmentParameters()`: Uses array_map
 - `augmentParameter()`: Static pure function
 
-### Example 2: IriReferenceTypeFixer
+**Location**: `src/Shared/Application/OpenApi/Processor/ParameterDescriptionProcessor.php`
+
+### Example 2: IriReferenceTypeProcessor
 
 Shows complexity reduction:
 
-- Match for null/empty checks
+- Guard clauses for null/empty checks
 - Extracted `fixProperties()` and `fixProperty()` methods
 - array_map for transformation
 
-**Location**: `src/Shared/Application/OpenApi/Processor/IriReferenceTypeFixer.php`
+**Location**: `src/Shared/Application/OpenApi/Processor/IriReferenceTypeProcessor.php`
 
 **Complexity Journey**:
 
 - Original: 12 cyclomatic complexity
 - After refactoring: 8 cyclomatic complexity
 
-### Example 3: PathParametersSanitizer
+### Example 3: PathParametersProcessor
 
 Shows delegation pattern:
 
 - Delegates to `PathParameterCleaner`
 - Uses OPERATIONS constant
-- Match expression for operation processing
+- Flat operation processing with guard clauses
 
-**Location**: `src/Shared/Application/OpenApi/Processor/PathParametersSanitizer.php`
+**Location**: `src/Shared/Application/OpenApi/Processor/PathParametersProcessor.php`
 
 ## Configuration Files
 
@@ -452,7 +449,7 @@ Key configuration:
 
 ### "Cyclomatic complexity too high"
 
-- Use match expressions instead of if-else
+- Flatten branching with guard clauses and focused helpers
 - Extract methods (keep each under 20 lines)
 - Replace loops with array functions
 - Extract conditions to variables
@@ -486,7 +483,7 @@ Key configuration:
 When contributing to OpenAPI layer:
 
 - [ ] Use OPERATIONS constant for HTTP methods
-- [ ] Use match expressions instead of if-else
+- [ ] Keep branching flat with guard clauses or extracted helpers
 - [ ] Keep methods under 20 lines
 - [ ] Keep cyclomatic complexity under 10
 - [ ] Use functional array operations

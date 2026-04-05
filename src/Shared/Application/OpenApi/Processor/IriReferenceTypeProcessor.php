@@ -14,7 +14,7 @@ use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformerInt
 use App\Shared\Application\OpenApi\ValueObject\IriReferenceOperationContext;
 use ArrayObject;
 
-final class IriReferenceTypeProcessor
+final class IriReferenceTypeProcessor implements OpenApiProcessorInterface
 {
     public function __construct(
         private readonly IriReferenceContentTransformerInterface $contentTransformer,

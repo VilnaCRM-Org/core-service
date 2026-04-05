@@ -15,7 +15,7 @@ final class UlidFilterProcessor
         string|array|int|float|bool|null $rawValue,
         Builder $builder
     ): void {
-        if (!$this->canProcess($property, $rawValue)) {
+        if (! $this->canProcess($property, $rawValue)) {
             return;
         }
 
@@ -26,7 +26,7 @@ final class UlidFilterProcessor
 
     private function canProcess(string $property, string|array|int|float|bool|null $rawValue): bool
     {
-        if (!$this->isUlidProperty($property)) {
+        if (! $this->isUlidProperty($property)) {
             return false;
         }
 

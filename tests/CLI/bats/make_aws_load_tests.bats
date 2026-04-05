@@ -67,7 +67,27 @@ EOF
   assert_success
 }
 
+@test "load-tests workflow waits for localstack explicitly" {
+  run sed -n '/Start application/,/Run sharded smoke load tests/p' .github/workflows/load-tests.yml
+  assert_success
+  assert_output --partial 'up -d --wait database redis localstack php caddy'
+}
+
+@test "cache-performance workflow waits for localstack explicitly" {
+  run sed -n '/Start application/,/Run Cache Performance Load Tests/p' .github/workflows/cache-performance-tests.yml
+  assert_success
+  assert_output --partial 'up -d --wait database redis localstack php caddy'
+}
+
 @test "make aws-load-tests works correctly" {
+  if ! command -v aws >/dev/null 2>&1; then
+    run sed -n '/^aws-load-tests:/,/^aws-load-tests-cleanup:/p' Makefile
+    assert_success
+    assert_output --partial "tests/Load/aws-execute-load-tests.sh"
+    assert [ -x "tests/Load/aws-execute-load-tests.sh" ]
+    return
+  fi
+
   run bash -lc '
     set -euo pipefail
     cleanup() {

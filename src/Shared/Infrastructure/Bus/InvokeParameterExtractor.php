@@ -15,13 +15,13 @@ final class InvokeParameterExtractor
     {
         $reflector = new ReflectionClass($class);
 
-        if (!$reflector->hasMethod('__invoke')) {
+        if (! $reflector->hasMethod('__invoke')) {
             return null;
         }
 
         $method = $reflector->getMethod('__invoke');
 
-        if (!$this->hasOnlyOneParameter($method)) {
+        if (! $this->hasOnlyOneParameter($method)) {
             return null;
         }
 
@@ -39,7 +39,7 @@ final class InvokeParameterExtractor
         }
 
         // Union types (e.g., TypeA|TypeB) don't have getName() - return null
-        if (!$firstParameterType instanceof ReflectionNamedType) {
+        if (! $firstParameterType instanceof ReflectionNamedType) {
             return null;
         }
 

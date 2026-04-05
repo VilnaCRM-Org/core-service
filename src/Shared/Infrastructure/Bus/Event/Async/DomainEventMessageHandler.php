@@ -41,7 +41,7 @@ final readonly class DomainEventMessageHandler
         ]);
 
         foreach ($this->subscribers as $subscriber) {
-            if (!$this->subscriberHandlesEvent($subscriber, $eventClass)) {
+            if (! $this->subscriberHandlesEvent($subscriber, $eventClass)) {
                 continue;
             }
 

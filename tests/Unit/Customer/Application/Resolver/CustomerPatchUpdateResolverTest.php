@@ -33,14 +33,16 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
 
     public function testBuildUsesTransformedValues(): void
     {
-        $dto = new CustomerPatch();
-        $dto->initials = 'JD';
-        $dto->email = 'john@example.com';
-        $dto->phone = '+100000';
-        $dto->leadSource = 'Referral';
-        $dto->type = '/types/alpha';
-        $dto->status = '/statuses/active';
-        $dto->confirmed = true;
+        $dto = new CustomerPatch(
+            id: null,
+            initials: 'JD',
+            email: 'john@example.com',
+            phone: '+100000',
+            leadSource: 'Referral',
+            type: '/types/alpha',
+            status: '/statuses/active',
+            confirmed: true,
+        );
 
         $customer = $this->createConfiguredMock(Customer::class, [
             'getInitials' => 'OLD',
@@ -78,8 +80,16 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
 
     public function testBuildThrowsWhenTypeIriIsInvalid(): void
     {
-        $dto = new CustomerPatch();
-        $dto->type = '/types/broken';
+        $dto = new CustomerPatch(
+            id: null,
+            initials: null,
+            email: null,
+            phone: null,
+            leadSource: null,
+            type: '/types/broken',
+            status: null,
+            confirmed: null,
+        );
 
         $customer = $this->createConfiguredMock(Customer::class, [
             'getInitials' => 'OLD',

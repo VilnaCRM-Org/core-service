@@ -64,7 +64,7 @@ final readonly class CustomerRelationTransformer implements
         $resolvedIri = $iri ?? $this->iriConverter->getIriFromResource($default);
         $resource = $this->iriConverter->getResourceFromIri($resolvedIri);
 
-        if (!$resource instanceof $expectedClass) {
+        if (! $resource instanceof $expectedClass) {
             throw $exceptionFactory($resolvedIri);
         }
 
