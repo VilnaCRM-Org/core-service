@@ -16,7 +16,7 @@ final class ConstraintViolationPayloadItemsCleaner
      *
      * @return array<string, SchemaValue>
      */
-    public static function clean($payload)
+    public static function clean(array $payload): array
     {
         return match (true) {
             ! self::shouldRemoveItems($payload) => $payload,
@@ -27,7 +27,7 @@ final class ConstraintViolationPayloadItemsCleaner
     /**
      * @param array<string, SchemaValue> $payload
      */
-    private static function shouldRemoveItems($payload): bool
+    private static function shouldRemoveItems(array $payload): bool
     {
         return match (true) {
             ! self::isArrayPayload($payload) => false,
@@ -39,7 +39,7 @@ final class ConstraintViolationPayloadItemsCleaner
     /**
      * @param array<string, SchemaValue> $payload
      */
-    private static function isArrayPayload($payload): bool
+    private static function isArrayPayload(array $payload): bool
     {
         $type = $payload['type'] ?? null;
         $types = match (true) {

@@ -13,7 +13,7 @@ final class UlidInterfaceSchemaNormalizer
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    public function normalize($schemas)
+    public function normalize(array $schemas): array
     {
         $ulidInterface = $this->toArray($schemas['UlidInterface.jsonld-output'] ?? []);
         $properties = $this->toArray($ulidInterface['properties'] ?? []);
@@ -32,7 +32,7 @@ final class UlidInterfaceSchemaNormalizer
     /**
      * @return array<string, array|bool|float|int|string|null>
      */
-    private function toArray(ArrayObject|array|string|int|float|bool|null $value)
+    private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
         return SchemaNormalizer::normalize($value);
     }

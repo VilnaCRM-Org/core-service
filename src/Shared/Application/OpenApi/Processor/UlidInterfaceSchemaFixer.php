@@ -42,9 +42,9 @@ final class UlidInterfaceSchemaFixer implements OpenApiProcessorInterface
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
     private function replaceCustomerSchemaUlids(
-        $schemas,
+        array $schemas,
         CustomerUlidRefReplacer $replacer,
-    ) {
+    ): array {
         foreach (self::CUSTOMER_SCHEMAS as $schemaName) {
             $schemas = $replacer->replace($schemas, $schemaName);
         }

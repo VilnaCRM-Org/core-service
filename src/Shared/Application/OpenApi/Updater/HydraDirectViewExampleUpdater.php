@@ -16,16 +16,52 @@ final class HydraDirectViewExampleUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public function update($normalized)
+    public function update(array $normalized): ?array
     {
-        $properties = SchemaNormalizer::normalize($normalized['properties'] ?? null);
-        $viewSchema = SchemaNormalizer::normalize($properties['view'] ?? null);
+        $properties = $this->normalizedSchemaValue($normalized, 'properties');
+        $viewSchema = $this->normalizedSchemaValue($properties, 'view');
         $updatedExample = $this->updatedExample($viewSchema);
 
-        if ($updatedExample === null) {
-            return null;
-        }
+        return match (true) {
+            $updatedExample === null => null,
+            default => $this->updatedNormalized(
+                $normalized,
+                $properties,
+                $viewSchema,
+                $updatedExample
+            ),
+        };
+    }
 
+    /**
+     * @param array<string, SchemaValue> $viewSchema
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function updatedExample(array $viewSchema): ?array
+    {
+        $example = $this->normalizedSchemaValue($viewSchema, 'example');
+
+        return match (true) {
+            ! array_key_exists('type', $example) => null,
+            default => $this->updatedTypeExample($example),
+        };
+    }
+
+    /**
+     * @param array<string, SchemaValue> $normalized
+     * @param array<string, SchemaValue> $properties
+     * @param array<string, SchemaValue> $viewSchema
+     * @param array<string, SchemaValue> $updatedExample
+     *
+     * @return array<string, SchemaValue>
+     */
+    private function updatedNormalized(
+        array $normalized,
+        array $properties,
+        array $viewSchema,
+        array $updatedExample
+    ): array {
         $viewSchema['example'] = $updatedExample;
         $properties['view'] = $viewSchema;
         $normalized['properties'] = $properties;
@@ -34,21 +70,28 @@ final class HydraDirectViewExampleUpdater
     }
 
     /**
-     * @param array<string, SchemaValue> $viewSchema
+     * @param array<string, SchemaValue> $example
      *
-     * @return array<string, SchemaValue>|null
+     * @return array<string, SchemaValue>
      */
-    private function updatedExample($viewSchema)
+    private function updatedTypeExample(array $example): array
     {
-        $example = SchemaNormalizer::normalize($viewSchema['example'] ?? null);
-
-        if (! array_key_exists('type', $example)) {
-            return null;
-        }
-
         $example['@type'] ??= $example['type'];
         unset($example['type']);
 
         return $example;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     *
+     * @return array<string, SchemaValue>
+     */
+    private function normalizedSchemaValue(array $schema, string $key): array
+    {
+        return match (true) {
+            array_key_exists($key, $schema) => SchemaNormalizer::normalize($schema[$key]),
+            default => [],
+        };
     }
 }

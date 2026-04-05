@@ -16,7 +16,7 @@ final class HydraSchemaNormalizer
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    public function normalize($schemas)
+    public function normalize(array $schemas): array
     {
         $schemas[self::HYDRA_COLLECTION_SCHEMA] = $this->normalizedHydraCollectionSchema($schemas);
 
@@ -28,7 +28,7 @@ final class HydraSchemaNormalizer
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>
      */
-    private function normalizedHydraCollectionSchema($schemas)
+    private function normalizedHydraCollectionSchema(array $schemas): array
     {
         $schema = SchemaNormalizer::normalize($schemas[self::HYDRA_COLLECTION_SCHEMA] ?? null);
         $schema['allOf'] = SchemaNormalizer::normalize($schema['allOf'] ?? null);

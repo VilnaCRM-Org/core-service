@@ -18,7 +18,7 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    public static function write($constraintViolation, $properties)
+    public static function write(array $constraintViolation, array $properties): array
     {
         $constraintViolation = SchemaNormalizer::normalize($constraintViolation);
         $rootProperties = self::normalizedRootProperties($constraintViolation);
@@ -37,7 +37,7 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedRootProperties($constraintViolation)
+    private static function normalizedRootProperties(array $constraintViolation): array
     {
         return SchemaNormalizer::normalize($constraintViolation['properties'] ?? null);
     }
@@ -47,7 +47,7 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedViolations($rootProperties)
+    private static function normalizedViolations(array $rootProperties): array
     {
         return SchemaNormalizer::normalize($rootProperties['violations'] ?? null);
     }

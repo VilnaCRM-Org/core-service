@@ -21,25 +21,29 @@ final class OpenApiArrayContentSchemaUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public function update($definition)
+    public function update(?array $definition): ?array
     {
         $normalizedDefinition = SchemaNormalizer::normalize($definition);
-        if (! array_key_exists('schema', $normalizedDefinition)) {
-            return null;
-        }
-
-        $schema = $normalizedDefinition['schema'];
-        if (! is_array($schema) && ! $schema instanceof ArrayObject) {
-            return null;
-        }
-
+        $schema = $this->schemaValue($normalizedDefinition);
         $normalizedSchema = SchemaNormalizer::normalize($schema);
         $updatedSchema = $this->hydraCollectionSchemaFixer->fixSchema($normalizedSchema);
 
         return match (true) {
+            $normalizedSchema === [] => null,
             $updatedSchema !== null => ['schema' => $updatedSchema] + $normalizedDefinition,
             $normalizedSchema === $schema => null,
             default => ['schema' => $normalizedSchema] + $normalizedDefinition,
+        };
+    }
+
+    /**
+     * @param array<string, SchemaValue> $definition
+     */
+    private function schemaValue(array $definition): ArrayObject|array|string|int|float|bool|null
+    {
+        return match (true) {
+            array_key_exists('schema', $definition) => $definition['schema'],
+            default => null,
         };
     }
 }

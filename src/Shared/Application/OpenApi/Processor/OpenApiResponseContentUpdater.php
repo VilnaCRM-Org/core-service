@@ -29,7 +29,7 @@ final class OpenApiResponseContentUpdater
      *
      * @return array<int|string, array|object>
      */
-    private function updatedContentItems($contentItems)
+    private function updatedContentItems(array $contentItems): array
     {
         foreach ($contentItems as $mediaType => $definition) {
             $updatedDefinition = $this->definitionUpdater->update($definition);

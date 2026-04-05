@@ -22,7 +22,7 @@ final class HydraViewExampleUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public function update($normalized)
+    public function update(array $normalized): ?array
     {
         $updatedViewSchema = $this->directViewExampleUpdater->update($normalized);
 
@@ -38,7 +38,7 @@ final class HydraViewExampleUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    private function updateAllOf($normalized)
+    private function updateAllOf(array $normalized): ?array
     {
         $updatedAllOf = $this->allOfUpdater->update(
             SchemaNormalizer::normalize($normalized['allOf'])

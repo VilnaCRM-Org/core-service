@@ -19,7 +19,7 @@ final class HydraAllOfItemUpdater
     /**
      * @param ArrayObject<string, SchemaValue>|array<string, SchemaValue> $item
      */
-    public function update($item): ?ArrayObject
+    public function update(ArrayObject|array $item): ?ArrayObject
     {
         $normalizedItem = SchemaNormalizer::normalize($item);
         $properties = $this->extractAndNormalizeProperties($normalizedItem);
@@ -42,7 +42,7 @@ final class HydraAllOfItemUpdater
      *
      * @return array<string, SchemaValue>
      */
-    private function extractAndNormalizeProperties($normalizedItem)
+    private function extractAndNormalizeProperties(array $normalizedItem): array
     {
         return self::normalizedEntry($normalizedItem, 'properties');
     }
@@ -52,7 +52,7 @@ final class HydraAllOfItemUpdater
      *
      * @return array<string, SchemaValue>
      */
-    private function extractAndNormalizeView($properties)
+    private function extractAndNormalizeView(array $properties): array
     {
         return self::normalizedEntry($properties, 'view');
     }
@@ -62,7 +62,7 @@ final class HydraAllOfItemUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    private function extractAndUpdateExample($viewSchema)
+    private function extractAndUpdateExample(array $viewSchema): ?array
     {
         return $this->exampleUpdater->update(
             self::normalizedEntry($viewSchema, 'example')
@@ -74,7 +74,7 @@ final class HydraAllOfItemUpdater
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedEntry($source, string $key)
+    private static function normalizedEntry(array $source, string $key): array
     {
         return SchemaNormalizer::normalize($source[$key] ?? null);
     }

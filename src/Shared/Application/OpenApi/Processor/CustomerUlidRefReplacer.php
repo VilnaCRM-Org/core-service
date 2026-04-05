@@ -16,15 +16,11 @@ final class CustomerUlidRefReplacer
      *
      * @return array<string, SchemaValue>
      */
-    public function replace($schemas, string $schemaName)
+    public function replace(array $schemas, string $schemaName): array
     {
         $schema = $this->toArray($schemas[$schemaName] ?? []);
-        $properties = $this->toArray($schema['properties'] ?? []);
-        $ulidProperty = $this->toArray($properties['ulid'] ?? []);
-        $ref = match (true) {
-            is_string($ulidProperty['$ref'] ?? null) => $ulidProperty['$ref'],
-            default => '',
-        };
+        $properties = $this->properties($schema);
+        $ref = $this->reference($properties);
 
         if (! $this->isSupportedUlidReference($ref)) {
             return $schemas;
@@ -38,17 +34,43 @@ final class CustomerUlidRefReplacer
     }
 
     /**
+     * @param array<int|string, SchemaValue> $schema
+     *
+     * @return array<int|string, SchemaValue>
+     */
+    private function properties(array $schema): array
+    {
+        return $this->toArray($schema['properties'] ?? null);
+    }
+
+    /**
+     * @param array<int|string, SchemaValue> $properties
+     */
+    private function reference(array $properties): string
+    {
+        $ref = $this->ulidProperty($properties)['$ref'] ?? null;
+
+        return is_string($ref) ? $ref : '';
+    }
+
+    /**
+     * @param array<int|string, SchemaValue> $properties
+     *
+     * @return array<int|string, SchemaValue>
+     */
+    private function ulidProperty(array $properties): array
+    {
+        return $this->toArray($properties['ulid'] ?? null);
+    }
+
+    /**
      * @param SchemaValue $value
      *
      * @return array<int|string, SchemaValue>
      */
-    private function toArray($value)
+    private function toArray($value): array
     {
-        return match (true) {
-            $value instanceof ArrayObject => $value->getArrayCopy(),
-            is_array($value) => $value,
-            default => [],
-        };
+        return SchemaNormalizer::normalize($value);
     }
 
     private function isSupportedUlidReference(string $ref): bool
