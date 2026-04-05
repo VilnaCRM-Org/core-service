@@ -17,7 +17,7 @@ final class ConstraintViolationPayloadItemsUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function update(array $constraintViolation): ?array
+    public static function update($constraintViolation)
     {
         $properties = ConstraintViolationPropertiesExtractor::extract($constraintViolation);
         $updatedProperties = match ($properties) {

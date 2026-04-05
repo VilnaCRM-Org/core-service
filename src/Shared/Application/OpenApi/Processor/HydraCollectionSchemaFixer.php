@@ -27,7 +27,7 @@ final class HydraCollectionSchemaFixer
      *
      * @return array<string, array|bool|float|int|string|ArrayObject|null>|null
      */
-    public function fixSchema(array $schema): ?array
+    public function fixSchema($schema)
     {
         return $this->viewExampleUpdater->update(
             SchemaNormalizer::normalize($schema)

@@ -44,7 +44,7 @@ final class ConstraintViolationSchemaUpdater
      *
      * @return array<string, SchemaValue>
      */
-    private function matchingSchemas(array $schemas): array
+    private function matchingSchemas($schemas)
     {
         return array_filter(
             $schemas,

@@ -21,7 +21,7 @@ final class OpenApiArrayContentSchemaUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public function update(?array $definition): ?array
+    public function update($definition)
     {
         $normalizedDefinition = SchemaNormalizer::normalize($definition);
         if (! array_key_exists('schema', $normalizedDefinition)) {

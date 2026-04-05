@@ -16,7 +16,7 @@ final class ConstraintViolationPropertiesExtractor
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function extract(array $constraintViolation): ?array
+    public static function extract($constraintViolation)
     {
         $items = self::normalizedItems($constraintViolation);
 
@@ -30,7 +30,7 @@ final class ConstraintViolationPropertiesExtractor
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedItems(array $constraintViolation): array
+    private static function normalizedItems($constraintViolation)
     {
         $properties = SchemaNormalizer::normalize($constraintViolation['properties'] ?? null);
         $violations = SchemaNormalizer::normalize($properties['violations'] ?? null);

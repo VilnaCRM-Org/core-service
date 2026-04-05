@@ -381,9 +381,15 @@ Expected: No violations
 
 ---
 
+### Example 1: ParameterDescriptionProcessor
+
+Shows flat parameter augmentation:
+
 - `augmentOperation()`: Keeps branching shallow
 - `augmentParameters()`: Uses array_map
 - `augmentParameter()`: Static pure function
+
+**Location**: `src/Shared/Application/OpenApi/Processor/ParameterDescriptionProcessor.php`
 
 ### Example 2: IriReferenceTypeProcessor
 

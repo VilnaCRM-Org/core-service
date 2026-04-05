@@ -10,6 +10,11 @@ use ArrayObject;
 
 final class PayloadItemsRequirementCheckerTest extends UnitTestCase
 {
+    public function testShouldAddItemsReturnsFalseWhenPayloadIsNotArray(): void
+    {
+        $this->assertFalse(PayloadItemsRequirementChecker::shouldAddItems(null));
+    }
+
     public function testShouldAddItemsReturnsFalseWhenNotArrayType(): void
     {
         $payload = ['type' => 'string'];

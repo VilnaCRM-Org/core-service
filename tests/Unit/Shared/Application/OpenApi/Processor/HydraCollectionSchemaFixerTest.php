@@ -107,6 +107,74 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         self::assertSame('value', $result['key']);
     }
 
+    public function testApplyKeepsNormalizedSchemasWhenSiblingSchemaIsUpdated(): void
+    {
+        $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
+        $schemaNormalizer->expects(self::once())
+            ->method('normalize')
+            ->willReturn([
+                'HydraCollectionBaseSchema' => ['allOf' => []],
+                'HydraCollectionPagedSchema' => [
+                    'view' => [
+                        'example' => [
+                            '@id' => '/api/customers?page=1',
+                            'type' => 'PartialCollectionView',
+                        ],
+                    ],
+                ],
+            ]);
+
+        $viewExampleUpdater = $this->createMock(HydraViewExampleUpdater::class);
+        $viewExampleUpdater->expects(self::exactly(2))
+            ->method('update')
+            ->willReturnCallback(
+                static fn (array $schema): ?array => array_key_exists('view', $schema)
+                    ? [
+                        'view' => [
+                            'example' => [
+                                '@id' => '/api/customers?page=1',
+                                '@type' => 'PartialCollectionView',
+                            ],
+                        ],
+                    ]
+                    : null
+            );
+
+        $fixer = new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
+        $schemas = new ArrayObject([
+            'HydraCollectionPagedSchema' => [
+                'view' => [
+                    'example' => [
+                        '@id' => '/api/customers?page=1',
+                        'type' => 'PartialCollectionView',
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = $fixer->apply($schemas);
+
+        self::assertNotSame($schemas, $result);
+        self::assertArrayHasKey('HydraCollectionBaseSchema', $result);
+        self::assertSame(['allOf' => []], $result['HydraCollectionBaseSchema']);
+        self::assertArrayHasKey('HydraCollectionPagedSchema', $result);
+        self::assertInstanceOf(ArrayObject::class, $result['HydraCollectionPagedSchema']);
+        self::assertSame(
+            [
+                'view' => [
+                    'example' => [
+                        '@id' => '/api/customers?page=1',
+                        '@type' => 'PartialCollectionView',
+                    ],
+                ],
+            ],
+            $result['HydraCollectionPagedSchema']->getArrayCopy()
+        );
+    }
+
     public function testFixSchemaDelegatesToViewExampleUpdater(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);

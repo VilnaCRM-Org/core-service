@@ -24,10 +24,10 @@ final class HydraCollectionSchemasUpdater
     public function update(ArrayObject $schemas): ArrayObject
     {
         $schemasArray = $schemas->getArrayCopy();
-        $normalizedSchemas = $schemasArray;
+        $normalizedSchemas = $this->schemaNormalizer->normalize($schemasArray);
         $hasChanges = false;
 
-        foreach ($this->schemaNormalizer->normalize($schemasArray) as $schemaName => $schema) {
+        foreach ($normalizedSchemas as $schemaName => $schema) {
             $updatedSchema = HydraCollectionSchemaCandidateResolver::resolve(
                 $schemasArray,
                 (string) $schemaName,
