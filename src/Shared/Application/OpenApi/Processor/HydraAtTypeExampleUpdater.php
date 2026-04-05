@@ -18,7 +18,6 @@ final class HydraAtTypeExampleUpdater
     {
         return match (true) {
             ! self::hasKey($example, 'type') => null,
-            self::hasKey($example, '@type') => null,
             default => self::withHydraType($example),
         };
     }
@@ -38,7 +37,10 @@ final class HydraAtTypeExampleUpdater
      */
     private static function withHydraType(array $example): array
     {
-        $example['@type'] = $example['type'];
+        if (! self::hasKey($example, '@type')) {
+            $example['@type'] = $example['type'];
+        }
+
         unset($example['type']);
 
         return $example;

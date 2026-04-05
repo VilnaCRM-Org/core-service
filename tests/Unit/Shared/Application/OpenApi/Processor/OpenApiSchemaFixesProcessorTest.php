@@ -189,7 +189,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertArrayNotHasKey('type', $example);
     }
 
-    public function testProcessLeavesHydraExampleWhenAtTypeAlreadySet(): void
+    public function testProcessRemovesLegacyTypeWhenHydraExampleAlreadyHasAtType(): void
     {
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => new ArrayObject([
@@ -229,7 +229,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $example = $viewSchema['example'];
 
         $this->assertSame('Collection', $example['@type']);
-        $this->assertSame('Collection', $example['type']);
+        $this->assertArrayNotHasKey('type', $example);
     }
 
     public function testProcessUpdatesNonBaseHydraCollectionSchemas(): void
