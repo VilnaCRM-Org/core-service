@@ -36,8 +36,8 @@ Expect the caller to provide:
 - optional GitHub issue or specs-only PR output requirements
 
 If the caller does not provide a bundle directory, derive one under the
-configured planning artifacts path, for example
-`<planning_artifacts>/autonomous/<timestamp>-<task-slug>`.
+configured planning artifacts path rooted at the repository `specs/` directory,
+for example `specs/autonomous/<timestamp>-<task-slug>`.
 
 ## Output Bundle
 
@@ -169,7 +169,8 @@ command it is following.
 
 ### 1. Preflight
 
-- Resolve the BMAD config and `planning_artifacts` directory.
+- Resolve the BMAD config and `planning_artifacts` directory, defaulting to the
+  repository `specs/` tree when the config does not provide a tracked path.
 - Create the bundle directory if needed.
 - Read the local `bmalph` skill wrapper and `_bmad/COMMANDS.md`, then map the
   BMALPH stage commands relevant to this planning run.
