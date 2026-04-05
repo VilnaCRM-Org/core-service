@@ -6,8 +6,11 @@ namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Tests\Unit\UnitTestCase;
+use MongoDB\BSON\Binary;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidValueTransformerTest extends UnitTestCase
@@ -19,7 +22,11 @@ final class UlidValueTransformerTest extends UnitTestCase
     {
         parent::setUp();
         $this->ulidFactory = $this->createMock(UlidFactory::class);
-        $this->converter = new UlidValueTransformer($this->ulidFactory);
+        $this->converter = new UlidValueTransformer(
+            $this->ulidFactory,
+            new UlidRepresentationTransformer(),
+            new SymfonyUlidBinaryTransformer()
+        );
     }
 
     public function testToUlidWithUlidInstance(): void
@@ -47,6 +54,39 @@ final class UlidValueTransformerTest extends UnitTestCase
         $this->assertSame($expectedUlid, $result);
     }
 
+    public function testToUlidWithSymfonyUlidInstance(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $expectedUlid = new Ulid((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($expectedUlid);
+
+        $result = $this->converter->toUlid($symfonyUlid);
+
+        $this->assertSame($expectedUlid, $result);
+    }
+
+    public function testToUlidWithBinary(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
+        $expectedUlid = new Ulid((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($expectedUlid);
+
+        $result = $this->converter->toUlid($binary);
+
+        $this->assertSame($expectedUlid, $result);
+    }
+
     public function testFromBinaryWithSymfonyUlidInstance(): void
     {
         $symfonyUlid = new SymfonyUlid();
@@ -65,5 +105,92 @@ final class UlidValueTransformerTest extends UnitTestCase
 
         $this->assertInstanceOf(SymfonyUlid::class, $result);
         $this->assertEquals((string) $symfonyUlid, (string) $result);
+    }
+
+    public function testFromBinaryWithCanonicalUlidString(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+
+        $result = $this->converter->fromBinary((string) $symfonyUlid);
+
+        $this->assertInstanceOf(SymfonyUlid::class, $result);
+        $this->assertEquals((string) $symfonyUlid, (string) $result);
+    }
+
+    public function testFromBinaryWithBinary(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
+
+        $result = $this->converter->fromBinary($binary);
+
+        $this->assertInstanceOf(SymfonyUlid::class, $result);
+        $this->assertEquals((string) $symfonyUlid, (string) $result);
+    }
+
+    public function testToUlidWithUnsupportedObjectType(): void
+    {
+        $unsupportedObject = new \stdClass();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'normalizeForUlidFactory received unsupported value type: stdClass'
+        );
+
+        $this->converter->toUlid($unsupportedObject);
+    }
+
+    public function testToUlidWithArrayThrowsInvalidArgumentException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'normalizeForUlidFactory received unsupported value type: array'
+        );
+
+        $this->converter->toUlid(['not-a-ulid']);
+    }
+
+    public function testToUlidWithResourceThrowsInvalidArgumentException(): void
+    {
+        $stream = fopen('php://memory', 'rb');
+
+        if ($stream === false) {
+            self::fail('Failed to open php://memory stream.');
+        }
+
+        try {
+            $this->expectException(\InvalidArgumentException::class);
+            $this->expectExceptionMessage(
+                'normalizeForUlidFactory received unsupported value type: resource (stream)'
+            );
+
+            $this->converter->toUlid($stream);
+        } finally {
+            fclose($stream);
+        }
+    }
+
+    /**
+     * @dataProvider invalidPrimitiveValueProvider
+     */
+    public function testToUlidWithInvalidPrimitiveValueThrowsInvalidArgumentException(mixed $value): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Expected string after normalization, got .+/');
+
+        $this->converter->toUlid($value);
+    }
+
+    /**
+     * @return array<string, array{0: mixed}>
+     */
+    public static function invalidPrimitiveValueProvider(): array
+    {
+        return [
+            'null' => [null],
+            'bool' => [true],
+            'int' => [123],
+            'float' => [1.23],
+        ];
     }
 }

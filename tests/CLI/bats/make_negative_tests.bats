@@ -36,15 +36,21 @@ load 'bats-assert/load'
     set -euo pipefail
     source_path="tests/CLI/bats/php/PartlyCoveredEventBus.php"
     target_path="src/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBus.php"
+    test_source_path="tests/CLI/bats/php/PartlyCoveredEventBusTest.php"
+    test_target_path="tests/Unit/Shared/Infrastructure/Bus/Event/PartlyCoveredEventBusTest.php"
 
     cleanup() {
       if [ -f "$target_path" ]; then
         mv "$target_path" "$source_path"
       fi
+      if [ -f "$test_target_path" ]; then
+        mv "$test_target_path" "$test_source_path"
+      fi
     }
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
+    mv "$test_source_path" "$test_target_path"
     make ensure-test-services >/dev/null
     docker compose exec php composer dump-autoload >/dev/null
     make unit-tests >/dev/null 2>&1 || true
@@ -58,7 +64,7 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "8 mutants were not covered by tests"
+  assert_output --partial "1 covered mutants were not detected"
 }
 
 @test "make behat should fail when scenarios fail" {
@@ -101,9 +107,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    make ensure-test-services >/dev/null
-    docker compose exec php composer dump-autoload >/dev/null
-    docker compose exec -e APP_ENV=test php ./vendor/bin/psalm --clear-cache >/dev/null
+    ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -114,7 +118,94 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "does not exist"
+  assert_output --partial "NonExistentTrait"
+}
+
+@test "make psalm should fail on hardcoded new expressions in src" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
+
+    set +e
+    make psalm
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "ForbiddenCode"
+  assert_output --partial "Instantiate stdClass via a factory or dependency injection in production code."
+}
+
+@test "make psalm should fail on typed class constants with native array declarations" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardTypedConstExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardTypedConstExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
+
+    set +e
+    make psalm
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "ForbiddenCode"
+  assert_output --partial "Use Psalm array shapes/docblocks or typed collections instead of native array declarations in src/."
+}
+
+@test "make psalm should fail on parse errors in src" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardParseErrorExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardParseErrorExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
+
+    set +e
+    make psalm
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "ParseError"
+  assert_output --partial "SourcePatternGuardParseErrorExample.php"
 }
 
 @test "make phpinsights should fail when code quality is low" {

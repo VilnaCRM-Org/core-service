@@ -250,6 +250,7 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
         $handler($envelope);
 
         // The loop must CONTINUE (not break) to reach the matching subscriber
+        self::assertCount(0, $nonMatchingSubscriber->handled());
         self::assertCount(1, $matchingSubscriber->handled());
         self::assertSame('event-456', $matchingSubscriber->handled()[0]->eventId());
     }

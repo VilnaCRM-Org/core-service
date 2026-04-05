@@ -11,7 +11,6 @@ use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
 use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
-use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
 
 return [
     'preset' => 'symfony',
@@ -29,12 +28,6 @@ return [
         UseSpacingSniff::class,
     ],
     'config' => [
-        ParameterTypeHintSniff::class => [
-            'exclude' => [
-                'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
-                'tests/Unit/Shared/Infrastructure/Bus/Stub/UntypedParameterSubscriber',
-            ],
-        ],
         LineLengthSniff::class => [
             'exclude' => [
                 'phpinsights',

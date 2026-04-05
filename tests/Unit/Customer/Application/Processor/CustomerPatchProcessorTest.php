@@ -442,7 +442,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         CustomerType $type,
         CustomerStatus $status,
         Customer $customer
-    ): UpdateCustomerCommand {
+    ): void {
         $command = $this->createMock(UpdateCustomerCommand::class);
         $this->factory->expects($this->once())
             ->method('create')
@@ -462,6 +462,5 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->commandBus->expects($this->once())
             ->method('dispatch')
             ->with($command);
-        return $command;
     }
 }

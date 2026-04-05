@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-final class CustomerTypeApiTest extends BaseTest
+final class CustomerTypeApiTest extends BaseApiCase
 {
     public function testCreateCustomerTypeWithExtraFields(): void
     {
@@ -313,9 +313,9 @@ final class CustomerTypeApiTest extends BaseTest
         return ['value' => $value];
     }
 
-    private function createCustomerType(): string
+    private function createCustomerType(): void
     {
-        return $this->createEntity(
+        $this->createEntity(
             '/api/customer_types',
             $this->getTypePayload()
         );

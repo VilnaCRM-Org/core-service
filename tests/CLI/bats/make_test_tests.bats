@@ -11,6 +11,6 @@ load 'bats-assert/load'
 
 @test "make tests-with-coverage command executes" {
   run make tests-with-coverage
-  assert_output --partial 'Testing'
+  assert_output --partial 'PHPUnit'
   assert_success
 }

@@ -11,7 +11,7 @@ use Symfony\Component\Cache\Exception\CacheException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 
-final class HealthCheckTest extends BaseTest
+final class HealthCheckTest extends BaseApiCase
 {
     public function testNormalHealthCheck(): void
     {

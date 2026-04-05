@@ -8,7 +8,6 @@ use App\Core\Customer\Application\EventSubscriber\CustomerDeletedMetricsSubscrib
 use App\Core\Customer\Application\Factory\CustomersDeletedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 
@@ -23,11 +22,9 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
 
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
 
-        $dimensionsFactory = new MetricDimensionsFactory();
-
         $this->subscriber = new CustomerDeletedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new CustomersDeletedMetricFactory($dimensionsFactory)
+            new CustomersDeletedMetricFactory()
         );
     }
 
@@ -76,11 +73,9 @@ final class CustomerDeletedMetricsSubscriberTest extends UnitTestCase
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));
 
-        $dimensionsFactory = new MetricDimensionsFactory();
-
         $subscriber = new CustomerDeletedMetricsSubscriber(
             $failingEmitter,
-            new CustomersDeletedMetricFactory($dimensionsFactory)
+            new CustomersDeletedMetricFactory()
         );
 
         $this->expectException(\RuntimeException::class);

@@ -17,6 +17,8 @@ use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
@@ -50,7 +52,11 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $this->ulidTransformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
-            new UlidValueTransformer($ulidFactory)
+            new UlidValueTransformer(
+                $ulidFactory,
+                new UlidRepresentationTransformer(),
+                new SymfonyUlidBinaryTransformer()
+            )
         );
         $this->processor = new CustomerPutProcessor(
             $this->repository,

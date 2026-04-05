@@ -137,4 +137,96 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
 
         self::assertSame($customer, $result);
     }
+
+    public function testDeleteByEmailDeletesResolvedCustomer(): void
+    {
+        $email = 'test@example.com';
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findByEmail', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $repository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailReturnsWhenCustomerDoesNotExist(): void
+    {
+        $email = 'test@example.com';
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findByEmail', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn(null);
+
+        $repository
+            ->expects($this->never())
+            ->method('delete');
+
+        $repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByIdDeletesResolvedCustomer(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id)
+            ->willReturn($customer);
+
+        $repository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $repository->deleteById($id);
+    }
+
+    public function testDeleteByIdReturnsWhenCustomerDoesNotExist(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id)
+            ->willReturn(null);
+
+        $repository
+            ->expects($this->never())
+            ->method('delete');
+
+        $repository->deleteById($id);
+    }
 }
