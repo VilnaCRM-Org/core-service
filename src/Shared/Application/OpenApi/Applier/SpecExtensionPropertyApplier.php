@@ -14,7 +14,7 @@ final class SpecExtensionPropertyApplier
     /**
      * @param array<string, string|int|float|bool|array|null>|ArrayObject<string, string|int|float|bool|array|null>|null $extensionProperties
      */
-    public function apply(array|ArrayObject|null $extensionProperties, OpenApi $openApi): OpenApi
+    public function apply($extensionProperties, OpenApi $openApi): OpenApi
     {
         $normalizedExtensionProperties = $this->normalize($extensionProperties);
 
@@ -28,7 +28,7 @@ final class SpecExtensionPropertyApplier
      *
      * @return array<string, string|int|float|bool|array|null>
      */
-    private function normalize(array|ArrayObject|null $extensionProperties): array
+    private function normalize($extensionProperties)
     {
         return match (true) {
             $extensionProperties instanceof ArrayObject => $extensionProperties->getArrayCopy(),
@@ -40,7 +40,7 @@ final class SpecExtensionPropertyApplier
     /**
      * @param array<string, string|int|float|bool|array|null> $extensionProperties
      */
-    private function hasExtensionProperties(array $extensionProperties): bool
+    private function hasExtensionProperties($extensionProperties): bool
     {
         return $extensionProperties !== [];
     }
@@ -48,7 +48,7 @@ final class SpecExtensionPropertyApplier
     /**
      * @param array<string, string|int|float|bool|array|null> $extensionProperties
      */
-    private function withExtensionProperties(OpenApi $openApi, array $extensionProperties): OpenApi
+    private function withExtensionProperties(OpenApi $openApi, $extensionProperties): OpenApi
     {
         return array_reduce(
             array_keys($extensionProperties),

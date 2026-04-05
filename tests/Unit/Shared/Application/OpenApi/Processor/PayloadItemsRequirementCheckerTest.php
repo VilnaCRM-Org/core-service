@@ -50,6 +50,13 @@ final class PayloadItemsRequirementCheckerTest extends UnitTestCase
         $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
     }
 
+    public function testShouldAddItemsReturnsTrueWhenTypeIsArrayObjectAndItemsMissing(): void
+    {
+        $payload = ['type' => new ArrayObject(['array'])];
+
+        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+    }
+
     public function testShouldAddItemsReturnsFalseWhenTypeIsArrayObjectWithItems(): void
     {
         $payload = ['type' => new ArrayObject(['array']), 'items' => ['type' => 'string']];

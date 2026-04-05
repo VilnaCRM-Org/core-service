@@ -87,7 +87,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
                 ],
             ],
         ];
-        $schemas = new ArrayObject(['ConstraintViolation' => $constraintViolation]);
+        $schemas = new ArrayObject(['ConstraintViolation-json' => $constraintViolation]);
         $components = new Components($schemas);
         $openApi = new OpenApi(new Info('Test', '1.0.0'), [], new Paths(), $components);
 
@@ -96,7 +96,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
 
         $resultSchemas = $result->getComponents()->getSchemas();
         $this->assertInstanceOf(ArrayObject::class, $resultSchemas);
-        $updatedSchema = $resultSchemas['ConstraintViolation'];
+        $updatedSchema = $resultSchemas['ConstraintViolation-json'];
         $this->assertInstanceOf(ArrayObject::class, $updatedSchema);
 
         $schemaData = $updatedSchema->getArrayCopy();

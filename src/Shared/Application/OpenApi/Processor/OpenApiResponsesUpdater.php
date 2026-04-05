@@ -18,7 +18,7 @@ final class OpenApiResponsesUpdater
      *
      * @return array<int|string, Response|array>|null
      */
-    public function update(?array $responses): ?array
+    public function update($responses)
     {
         return match (true) {
             $responses === null => null,
@@ -32,7 +32,7 @@ final class OpenApiResponsesUpdater
      *
      * @return array<int|string, Response|array>
      */
-    private function updatedResponses(array $responses): array
+    private function updatedResponses($responses)
     {
         foreach ($responses as $statusCode => $response) {
             $updatedResponse = $this->responseSchemaFixer->fix($response);
