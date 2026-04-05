@@ -34,15 +34,9 @@ final class OpenApiResponsesUpdater
      */
     private function updatedResponses(array $responses): array
     {
-        foreach ($responses as $statusCode => $response) {
-            $updatedResponse = $this->responseSchemaFixer->fix($response);
-            if ($updatedResponse === $response) {
-                continue;
-            }
-
-            $responses[$statusCode] = $updatedResponse;
-        }
-
-        return $responses;
+        return array_map(
+            $this->responseSchemaFixer->fix(...),
+            $responses
+        );
     }
 }

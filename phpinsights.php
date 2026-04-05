@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use NunoMaduro\PhpInsights\Domain\Insights\CyclomaticComplexityIsHigh;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenNormalClasses;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterNotSniff;
@@ -56,16 +55,6 @@ return [
                 'src/Shared/Infrastructure/Bus/Command/InMemorySymfonyCommandBus',
                 'src/Shared/Infrastructure/Bus/Event/InMemorySymfonyEventBus',
                 'src/Core/Customer/Domain/Entity/Customer',
-            ],
-        ],
-        CyclomaticComplexityIsHigh::class => [
-            'exclude' => [
-                // These OpenAPI fixers still need broader redesign; keep the PR scoped.
-                'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsProcessor',
-                'src/Shared/Application/OpenApi/Processor/ConstraintViolationPayloadItemsUpdater',
-                'src/Shared/Application/OpenApi/Processor/OpenApiSchemaFixesProcessor',
-                'src/Shared/Application/OpenApi/Processor/HydraAllOfUpdater',
-                'src/Shared/Application/OpenApi/Processor/PayloadItemsRequirementChecker',
             ],
         ],
     ],

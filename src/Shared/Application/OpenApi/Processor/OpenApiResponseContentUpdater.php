@@ -31,15 +31,14 @@ final class OpenApiResponseContentUpdater
      */
     private function updatedContentItems(array $contentItems): array
     {
-        foreach ($contentItems as $mediaType => $definition) {
-            $updatedDefinition = $this->definitionUpdater->update($definition);
-            if ($updatedDefinition === null || $updatedDefinition === $definition) {
-                continue;
-            }
+        return array_map(
+            $this->updatedDefinition(...),
+            $contentItems
+        );
+    }
 
-            $contentItems[$mediaType] = $updatedDefinition;
-        }
-
-        return $contentItems;
+    private function updatedDefinition(array|object $definition): array|object
+    {
+        return $this->definitionUpdater->update($definition) ?? $definition;
     }
 }

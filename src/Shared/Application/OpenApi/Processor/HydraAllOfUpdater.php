@@ -23,21 +23,26 @@ final class HydraAllOfUpdater
      */
     public function update(array $allOf): ?array
     {
-        $validItems = array_filter(
-            $allOf,
-            self::isUpdatableItem(...)
+        $updatedAllOf = array_map(
+            $this->updatedItem(...),
+            $allOf
         );
 
-        $hasChanges = false;
-        foreach ($validItems as $index => $item) {
-            $updatedItem = $this->itemUpdater->update($item);
-            if ($updatedItem !== null) {
-                $allOf[$index] = $updatedItem;
-                $hasChanges = true;
-            }
+        return $updatedAllOf === $allOf ? null : $updatedAllOf;
+    }
+
+    /**
+     * @param SchemaValue $item
+     *
+     * @return SchemaValue
+     */
+    private function updatedItem(mixed $item): mixed
+    {
+        if (! self::isUpdatableItem($item)) {
+            return $item;
         }
 
-        return $hasChanges ? $allOf : null;
+        return $this->itemUpdater->update($item) ?? $item;
     }
 
     private static function isUpdatableItem(mixed $item): bool
