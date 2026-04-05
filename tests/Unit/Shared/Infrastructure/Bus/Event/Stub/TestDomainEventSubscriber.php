@@ -7,6 +7,9 @@ namespace App\Tests\Unit\Shared\Infrastructure\Bus\Event\Stub;
 use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final readonly class TestDomainEventSubscriber implements DomainEventSubscriberInterface
 {
     public function __construct(private ?\Closure $handler = null)

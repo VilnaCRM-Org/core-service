@@ -6,6 +6,9 @@ namespace App\Shared\Infrastructure\Filter;
 
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class Gt implements OperatorStrategyInterface
 {
     public function apply(

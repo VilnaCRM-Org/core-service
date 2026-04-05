@@ -53,10 +53,7 @@ final class TestDataCleaner
     {
         foreach ($this->customerIds as $id) {
             $ulid = $this->ulidFactory->create($id);
-            $customer = $this->customerRepository->find($ulid);
-            if ($customer !== null) {
-                $this->customerRepository->delete($customer);
-            }
+            $this->customerRepository->deleteById($ulid);
         }
         $this->customerIds = [];
     }

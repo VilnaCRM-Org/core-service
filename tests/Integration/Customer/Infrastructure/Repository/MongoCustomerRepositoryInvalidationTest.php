@@ -17,7 +17,6 @@ use App\Shared\Domain\ValueObject\Ulid;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 {
@@ -26,7 +25,6 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private CacheItemPoolInterface $cachePool;
-    private TagAwareCacheInterface $tagCache;
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
 
@@ -39,7 +37,6 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cachePool = self::getContainer()->get('cache.customer');
-        $this->tagCache = self::getContainer()->get('cache.customer');
 
         $this->cachePool->clear();
         $this->ensureDefaultTypeAndStatus();
@@ -103,6 +100,74 @@ final class MongoCustomerRepositoryInvalidationTest extends KernelTestCase
 
         $result2 = $this->repository->find($customerId);
         self::assertNull($result2);
+    }
+
+    public function testCacheInvalidatedAfterDirectDeleteByEmail(): void
+    {
+        $email = sprintf('john+%s@example.com', (string) $this->generateUlid());
+        $customer = $this->createTestCustomer('John Doe', $email);
+
+        $cachedCustomer = $this->repository->findByEmail($email);
+        self::assertNotNull($cachedCustomer);
+        self::assertNotNull($this->repository->find($customer->getUlid()));
+        self::assertTrue(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($email)))
+                ->isHit()
+        );
+        self::assertTrue(
+            $this->cachePool->getItem('customer.' . $customer->getUlid())->isHit()
+        );
+
+        $this->repository->deleteByEmail($email);
+
+        self::assertFalse(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($email)))
+                ->isHit()
+        );
+        self::assertFalse(
+            $this->cachePool->getItem('customer.' . $customer->getUlid())->isHit()
+        );
+        self::assertNull($this->repository->find($customer->getUlid()));
+        self::assertNull($this->repository->findByEmail($email));
+    }
+
+    public function testCacheInvalidatedAfterDirectDeleteById(): void
+    {
+        $customer = $this->createTestCustomer(
+            'John Doe',
+            sprintf('john+%s@example.com', (string) $this->generateUlid())
+        );
+        $customerId = $customer->getUlid();
+
+        $cachedCustomer = $this->repository->find($customerId);
+        self::assertNotNull($cachedCustomer);
+        self::assertNotNull($this->repository->findByEmail($customer->getEmail()));
+        self::assertTrue(
+            $this->cachePool->getItem('customer.' . $customerId)->isHit()
+        );
+        self::assertTrue(
+            $this->cachePool
+                ->getItem('customer.email.' . hash('sha256', strtolower($customer->getEmail())))
+                ->isHit()
+        );
+
+        $this->repository->deleteById($customerId);
+
+        self::assertFalse(
+            $this->cachePool->getItem('customer.' . $customerId)->isHit()
+        );
+        self::assertFalse(
+            $this->cachePool
+                ->getItem(
+                    'customer.email.' .
+                    hash('sha256', strtolower($customer->getEmail()))
+                )
+                ->isHit()
+        );
+        self::assertNull($this->repository->find($customerId));
+        self::assertNull($this->repository->findByEmail($customer->getEmail()));
     }
 
     public function testEmailCacheInvalidatedAfterEmailChange(): void

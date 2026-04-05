@@ -33,7 +33,6 @@ final readonly class CreateStatusMutationResolver implements MutationResolver
      */
     public function __invoke(?object $item, array $context): CustomerStatus
     {
-        /** @var array{value: string} $input */
         $input = $context['args']['input'];
         $mutationInput = $this->inputs->transform($input);
         $this->validator->validate($mutationInput);

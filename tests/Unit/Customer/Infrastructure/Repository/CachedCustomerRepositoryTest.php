@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Customer\Infrastructure\Repository;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository;
+use App\Core\Customer\Infrastructure\Resolver\CustomerCacheTagResolver;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -35,6 +36,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             $this->innerRepository,
             $this->cache,
             $this->cacheKeyBuilder,
+            new CustomerCacheTagResolver($this->cacheKeyBuilder),
             $this->logger
         );
     }
@@ -189,6 +191,416 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         $this->repository->delete($customer);
     }
 
+    public function testDeleteByEmailDelegatesToInnerRepository(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.' . $customer->getUlid(),
+                'customer.email.' . $emailHash,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailInvalidatesFallbackTagsWhenCustomerLookupMisses(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn(null);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.email.' . $emailHash,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailStillDeletesWhenCustomerLookupFails(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willThrowException(new \RuntimeException('Lookup failed'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Customer lookup failed before deleteByEmail',
+                $this->callback(static function (array $context) use ($emailHash): bool {
+                    return $context['operation'] === 'customer.delete.lookup_failed'
+                        && $context['email_hash'] === $emailHash
+                        && $context['error'] === 'Lookup failed';
+                })
+            );
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteByEmail')
+            ->with($email);
+
+        $this->cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.email.' . $emailHash,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailLogsWarningWhenCacheInvalidationFails(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willThrowException(new \RuntimeException('Cache backend unavailable'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Cache backend unavailable';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailLogsWarningWhenCacheInvalidationReturnsFalse(): void
+    {
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->exactly(2))
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willReturn(false);
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Tag invalidation returned false';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByEmailLogsWarningWhenTagResolutionFails(): void
+    {
+        $email = 'test@example.com';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willThrowException(new \RuntimeException('Tag resolution failed'));
+
+        $this->cache
+            ->expects($this->never())
+            ->method('invalidateTags');
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Tag resolution failed';
+                })
+            );
+
+        $this->repository->deleteByEmail($email);
+    }
+
+    public function testDeleteByIdDelegatesToInnerRepository(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => $id,
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.' . $id,
+                'customer.email.' . $emailHash,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdLogsWarningWhenCacheInvalidationFails(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $email = 'test@example.com';
+        $emailHash = 'email_hash_123';
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getUlid' => $id,
+            'getEmail' => $email,
+        ]);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn($customer);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $this->cacheKeyBuilder
+            ->expects($this->once())
+            ->method('hashEmail')
+            ->with($email)
+            ->willReturn($emailHash);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->willThrowException(new \RuntimeException('Cache backend unavailable'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Cache invalidation failed after customer deletion',
+                $this->callback(static function (array $context): bool {
+                    return $context['operation'] === 'cache.invalidation.error'
+                        && $context['error'] === 'Cache backend unavailable';
+                })
+            );
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdStillDeletesWhenCustomerLookupFails(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willThrowException(new \RuntimeException('Lookup failed'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with(
+                'Customer lookup failed before deleteById',
+                $this->callback(static function (array $context) use ($id): bool {
+                    return $context['operation'] === 'customer.delete.lookup_failed'
+                        && $context['customer_id_hash'] === hash('sha256', $id)
+                        && $context['error'] === 'Lookup failed';
+                })
+            );
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.' . $id,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteById($id);
+    }
+
+    public function testDeleteByIdInvalidatesFallbackTagsWhenCustomerLookupMisses(): void
+    {
+        $id = (string) $this->faker->ulid();
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn(null);
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('deleteById')
+            ->with($id);
+
+        $this->cache
+            ->expects($this->once())
+            ->method('invalidateTags')
+            ->with([
+                'customer',
+                'customer.collection',
+                'customer.' . $id,
+            ])
+            ->willReturn(true);
+
+        $this->repository->deleteById($id);
+    }
+
     public function testFindCacheMissLoadsFromDatabase(): void
     {
         $customerId = (string) $this->faker->ulid();
@@ -318,6 +730,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             $innerRepo,
             $cache,
             $cacheKeyBuilder,
+            new CustomerCacheTagResolver($cacheKeyBuilder),
             $logger
         );
 

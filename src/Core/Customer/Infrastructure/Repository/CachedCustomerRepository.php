@@ -6,6 +6,7 @@ namespace App\Core\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Infrastructure\Resolver\CustomerCacheTagResolver;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -28,7 +29,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  *
  * Cache Invalidation:
  * - Handled by CustomerCacheInvalidationSubscriber via domain events
- * - This class only reads from cache, never invalidates
+ * - Direct deleteByEmail/deleteById cleanup paths invalidate cache explicitly
  */
 final class CachedCustomerRepository implements CustomerRepositoryInterface
 {
@@ -36,6 +37,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         private CustomerRepositoryInterface $inner,
         private TagAwareCacheInterface $cache,
         private CacheKeyBuilder $cacheKeyBuilder,
+        private CustomerCacheTagResolver $cacheTagResolver,
         private LoggerInterface $logger
     ) {
     }
@@ -139,6 +141,54 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
+     * Direct deletion by email bypasses domain events, so cache invalidation
+     * must happen here to keep test cleanup and other raw-delete callers
+     * consistent with the normal event-driven delete path.
+     */
+    public function deleteByEmail(string $email): void
+    {
+        $customer = $this->findCustomerForDeleteByEmail($email);
+
+        if ($customer instanceof Customer) {
+            $this->inner->delete($customer);
+            $this->invalidateTagsForDeletedCustomer($customer, $email);
+
+            return;
+        }
+
+        $this->inner->deleteByEmail($email);
+        $this->invalidateTagsForDeletedCustomer($customer, $email);
+    }
+
+    /**
+     * Direct deletion by ID bypasses domain events, so cache invalidation
+     * must happen here to keep test cleanup and other raw-delete callers
+     * consistent with the normal event-driven delete path.
+     */
+    public function deleteById(mixed $id): void
+    {
+        $customer = $this->findCustomerForDeleteById($id);
+
+        if ($customer instanceof Customer) {
+            $this->inner->delete($customer);
+            $this->invalidateTagsForDeletedCustomer(
+                $customer,
+                null,
+                (string) $id
+            );
+
+            return;
+        }
+
+        $this->inner->deleteById($id);
+        $this->invalidateTagsForDeletedCustomer(
+            $customer,
+            null,
+            (string) $id
+        );
+    }
+
+    /**
      * Load customer from database and configure cache item
      */
     private function loadCustomerFromDb(
@@ -193,6 +243,66 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             'cache_key' => $cacheKey,
             'error' => $e->getMessage(),
             'operation' => 'cache.error',
+        ]);
+    }
+
+    private function findCustomerForDeleteByEmail(string $email): ?Customer
+    {
+        try {
+            return $this->inner->findByEmail($email);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Customer lookup failed before deleteByEmail', [
+                'operation' => 'customer.delete.lookup_failed',
+                'email_hash' => $this->cacheKeyBuilder->hashEmail($email),
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function findCustomerForDeleteById(mixed $id): ?Customer
+    {
+        try {
+            return $this->inner->find($id);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Customer lookup failed before deleteById', [
+                'operation' => 'customer.delete.lookup_failed',
+                'customer_id_hash' => hash('sha256', (string) $id),
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function invalidateTagsForDeletedCustomer(
+        ?Customer $customer,
+        ?string $deletedEmail = null,
+        ?string $deletedId = null
+    ): void {
+        try {
+            $tags = iterator_to_array($this->cacheTagResolver->resolveForDeletedCustomer(
+                $customer,
+                $deletedEmail,
+                $deletedId
+            ));
+
+            if ($this->cache->invalidateTags($tags) === true) {
+                return;
+            }
+
+            $this->logCacheInvalidationFailure('Tag invalidation returned false');
+        } catch (\Throwable $e) {
+            $this->logCacheInvalidationFailure($e->getMessage());
+        }
+    }
+
+    private function logCacheInvalidationFailure(string $error): void
+    {
+        $this->logger->warning('Cache invalidation failed after customer deletion', [
+            'operation' => 'cache.invalidation.error',
+            'error' => $error,
         ]);
     }
 }

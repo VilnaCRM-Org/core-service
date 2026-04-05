@@ -12,7 +12,7 @@ use Symfony\Component\Uid\Ulid as SymfonyUlid;
  */
 final class UlidValidator
 {
-    public function isValid(array|string|int|float|bool|object|null $value): bool
+    public function isValid(mixed $value): bool
     {
         // Domain Ulid objects and SymfonyUlid objects are already valid
         return ($value instanceof Ulid || $value instanceof SymfonyUlid)

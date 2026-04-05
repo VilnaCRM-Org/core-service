@@ -139,6 +139,8 @@ namespace App\Shared\Infrastructure\Transformer;  // Mismatch!
 - ✅ Inject ALL dependencies (no default instantiation)
 - ✅ Use `readonly` when appropriate
 - ✅ Use `final` for classes that shouldn't be extended
+- ✅ In `src/`, prefer factories/DI over hardcoded `new` expressions; if an exception is unavoidable, document it and keep it rare
+- ✅ In `src/`, prefer typed collections/value objects over native `array` type declarations in method/property signatures
 - ❌ NO "Helper" or "Util" classes (code smell - extract specific responsibilities)
 
 **E. Factory Pattern (Maintainability & Flexibility)**:

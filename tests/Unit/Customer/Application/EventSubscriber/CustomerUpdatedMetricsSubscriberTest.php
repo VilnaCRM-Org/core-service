@@ -8,7 +8,6 @@ use App\Core\Customer\Application\EventSubscriber\CustomerUpdatedMetricsSubscrib
 use App\Core\Customer\Application\Factory\CustomersUpdatedMetricFactory;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 
@@ -23,11 +22,9 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
 
         $this->metricsEmitterSpy = new BusinessMetricsEmitterSpy();
 
-        $dimensionsFactory = new MetricDimensionsFactory();
-
         $this->subscriber = new CustomerUpdatedMetricsSubscriber(
             $this->metricsEmitterSpy,
-            new CustomersUpdatedMetricFactory($dimensionsFactory)
+            new CustomersUpdatedMetricFactory()
         );
     }
 
@@ -76,11 +73,9 @@ final class CustomerUpdatedMetricsSubscriberTest extends UnitTestCase
             ->method('emit')
             ->willThrowException(new \RuntimeException('Connection failed'));
 
-        $dimensionsFactory = new MetricDimensionsFactory();
-
         $subscriber = new CustomerUpdatedMetricsSubscriber(
             $failingEmitter,
-            new CustomersUpdatedMetricFactory($dimensionsFactory)
+            new CustomersUpdatedMetricFactory()
         );
 
         $this->expectException(\RuntimeException::class);

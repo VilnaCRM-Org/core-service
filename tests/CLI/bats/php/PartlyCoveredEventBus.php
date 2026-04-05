@@ -4,34 +4,22 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Bus\Event;
 
-use App\Shared\Domain\Bus\Event\DomainEvent;
-use App\Shared\Domain\Bus\Event\EventBusInterface;
-use Symfony\Component\Messenger\MessageBus;
-
-final class PartlyCoveredEventBus implements EventBusInterface
+final class PartlyCoveredEventBus
 {
-    private MessageBus $bus;
+    private array $events = [];
 
-    public function __construct(MessageBus $bus)
+    public function addEvent(string $event): void
     {
-        $this->bus = $bus;
+        $this->events[] = $event;
     }
 
-    public function publish(DomainEvent ...$events): void
+    public function getEventCount(): int
     {
-        foreach ($events as $event) {
-            $this->bus->dispatch($event);
-        }
+        return count($this->events);
     }
 
-    public function getEventCount(array $events): int
+    public function hasEvents(): bool
     {
-        $count = 0;
-        foreach ($events as $event) {
-            if ($event instanceof DomainEvent) {
-                $count++;
-            }
-        }
-        return $count;
+        return !empty($this->events);
     }
 }
