@@ -6,10 +6,10 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use App\Tests\Integration\BaseTest;
+use App\Tests\Integration\BaseApiCase;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-final class DBCheckSubscriberTest extends BaseTest
+final class DBCheckSubscriberTest extends BaseApiCase
 {
     private DocumentManager $documentManager;
     private DBCheckSubscriber $subscriber;

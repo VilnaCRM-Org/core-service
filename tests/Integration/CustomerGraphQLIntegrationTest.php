@@ -14,7 +14,7 @@ namespace App\Tests\Integration;
  * - Update customer mutation
  * - Delete customer mutation
  */
-final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationTest
+final class CustomerGraphQLIntegrationTest extends BaseGraphQLIntegrationCase
 {
     public function testQuerySingleCustomerSuccess(): void
     {

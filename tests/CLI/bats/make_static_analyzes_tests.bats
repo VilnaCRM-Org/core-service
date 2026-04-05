@@ -15,6 +15,29 @@ load 'bats-assert/load'
   assert_output --partial 'No errors found!'
 }
 
+@test "make psalm allows concrete exception instantiation in src" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardAllowedExceptionExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardAllowedExceptionExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+    ./vendor/bin/psalm --clear-cache >/dev/null
+
+    make psalm
+  '
+
+  assert_success
+  assert_output --partial 'No errors found!'
+}
+
 @test "make psalm-security command executes and reports no errors" {
   run make psalm-security
   assert_success

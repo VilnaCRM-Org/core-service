@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-final class CustomerStatusApiTest extends BaseTest
+final class CustomerStatusApiTest extends BaseApiCase
 {
     public function testGetCustomerStatusesCollection(): void
     {
@@ -274,9 +274,9 @@ final class CustomerStatusApiTest extends BaseTest
         return ['value' => $value];
     }
 
-    private function createCustomerStatus(): string
+    private function createCustomerStatus(): void
     {
-        return $this->createEntity(
+        $this->createEntity(
             '/api/customer_statuses',
             $this->getStatusPayload()
         );

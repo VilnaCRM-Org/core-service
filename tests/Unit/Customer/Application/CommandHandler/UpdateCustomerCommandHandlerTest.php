@@ -14,6 +14,8 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Domain\Bus\Event\EventBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
@@ -38,7 +40,11 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         $this->ulidTransformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
-            new UlidValueTransformer($ulidFactory)
+            new UlidValueTransformer(
+                $ulidFactory,
+                new UlidRepresentationTransformer(),
+                new SymfonyUlidBinaryTransformer()
+            )
         );
         $this->handler = new UpdateCustomerCommandHandler($this->repository, $this->eventBus);
     }

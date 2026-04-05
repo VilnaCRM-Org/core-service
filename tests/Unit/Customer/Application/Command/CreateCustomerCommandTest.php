@@ -11,6 +11,8 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Factory\CustomerFactory;
 use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
@@ -30,7 +32,11 @@ final class CreateCustomerCommandTest extends UnitTestCase
         $this->transformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
-            new UlidValueTransformer($ulidFactory)
+            new UlidValueTransformer(
+                $ulidFactory,
+                new UlidRepresentationTransformer(),
+                new SymfonyUlidBinaryTransformer()
+            )
         );
     }
 

@@ -8,6 +8,8 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
@@ -24,7 +26,11 @@ final class CustomerStatusTest extends UnitTestCase
         $ulidTransformer = new UlidTransformer(
             $ulidFactory,
             new UlidValidator(),
-            new UlidValueTransformer($ulidFactory)
+            new UlidValueTransformer(
+                $ulidFactory,
+                new UlidRepresentationTransformer(),
+                new SymfonyUlidBinaryTransformer()
+            )
         );
         $ulid = $ulidTransformer->transformFromSymfonyUlid($expectedUlid);
 

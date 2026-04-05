@@ -6,6 +6,8 @@ namespace App\Shared\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InitialsValidator extends ConstraintValidator
@@ -17,8 +19,16 @@ final class InitialsValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if ($this->shouldSkipValidation($value, $constraint)) {
+        if (!$constraint instanceof Initials) {
+            throw new UnexpectedTypeException($constraint, Initials::class);
+        }
+
+        if ($this->shouldSkipValidation($value)) {
             return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
         }
 
         if ($this->isOnlyWhitespace($value)) {
@@ -26,7 +36,7 @@ final class InitialsValidator extends ConstraintValidator
         }
     }
 
-    private function shouldSkipValidation(mixed $value, Constraint $constraint): bool
+    private function shouldSkipValidation(mixed $value): bool
     {
         return $value === null;
     }
