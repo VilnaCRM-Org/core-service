@@ -214,7 +214,6 @@ final class AwsEmfBusinessMetricsEmitterTest extends UnitTestCase
                 $decoded = json_decode(rtrim($message, "\n"), true);
                 self::assertIsArray($decoded);
 
-                /** @var array<string, mixed> $decoded */
                 $this->capturedContext = $decoded;
 
                 return true;

@@ -5,34 +5,36 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Info;
+use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
 use App\Shared\Application\OpenApi\OpenApiFactory;
-use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
-use App\Shared\Application\OpenApi\Processor\ParameterDescriptionProcessor;
-use App\Shared\Application\OpenApi\Processor\PathParametersProcessor;
-use App\Shared\Application\OpenApi\Processor\TagDescriptionProcessor;
+use App\Shared\Application\OpenApi\Processor\OpenApiProcessorInterface;
 use App\Tests\Unit\UnitTestCase;
 use ArrayIterator;
 use ArrayObject;
 
 final class OpenApiFactoryTest extends UnitTestCase
 {
+    public function testOpenApiProcessorInterfaceExists(): void
+    {
+        $this->assertTrue(interface_exists(OpenApiProcessorInterface::class));
+    }
+
     public function testConstructor(): void
     {
         $decoratedFactory = $this->createMock(OpenApiFactoryInterface::class);
         $endpointFactory = $this->createMock(EndpointFactoryInterface::class);
+        $processor = $this->createMock(OpenApiProcessorInterface::class);
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
             [$endpointFactory],
-            $this->createMock(PathParametersProcessor::class),
-            $this->createMock(ParameterDescriptionProcessor::class),
-            $this->createMock(IriReferenceTypeProcessor::class),
-            $this->createMock(TagDescriptionProcessor::class),
+            new ArrayIterator([$processor]),
             $this->createMock(OpenApiExtensionsApplier::class)
         );
 
@@ -42,7 +44,11 @@ final class OpenApiFactoryTest extends UnitTestCase
     public function testInvoke(): void
     {
         $context = ['key' => 'value'];
-        $openApi = $this->createMock(OpenApi::class);
+        $openApi = new OpenApi(
+            new Info('Test', '1.0.0'),
+            [],
+            new Paths()
+        );
 
         $decoratedFactory = $this->createMock(OpenApiFactoryInterface::class);
         $decoratedFactory->expects($this->once())
@@ -52,19 +58,120 @@ final class OpenApiFactoryTest extends UnitTestCase
 
         $endpointFactories = $this->createEndpointFactories($openApi);
 
+        $payloadOutput = new OpenApi(
+            new Info('Payload', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $parameterOutput = new OpenApi(
+            new Info('Parameters', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $tagOutput = new OpenApi(
+            new Info('Tags', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $iriOutput = new OpenApi(
+            new Info('Iri', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $pathOutput = new OpenApi(
+            new Info('Paths', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $schemaFixesOutput = new OpenApi(
+            new Info('Schema fixes', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $components = new Components(
+            new ArrayObject([
+                'CustomerUlid' => ['type' => 'string'],
+            ])
+        );
+        $ulidOutput = (new OpenApi(
+            new Info('Ulid', '1.0.0'),
+            [],
+            new Paths(),
+            $components
+        ))->withExtensionProperty('x-stage', 'ulid');
+        $finalOpenApi = new OpenApi(
+            new Info('Final', '1.0.0'),
+            [],
+            new Paths()
+        );
+        $parameterProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $parameterProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->callback(static function (OpenApi $processedOpenApi) use ($openApi): bool {
+                return $processedOpenApi === $openApi
+                    && $processedOpenApi->getPaths()->getPath('/from-endpoint-factory') instanceof PathItem;
+            }))
+            ->willReturn($parameterOutput);
+        $tagProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $tagProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($parameterOutput))
+            ->willReturn($tagOutput);
+        $iriProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $iriProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($tagOutput))
+            ->willReturn($iriOutput);
+        $pathProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $pathProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($iriOutput))
+            ->willReturn($pathOutput);
+        $payloadProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $payloadProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($pathOutput))
+            ->willReturn($payloadOutput);
+        $schemaFixesProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $schemaFixesProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($payloadOutput))
+            ->willReturn($schemaFixesOutput);
+        $ulidFixer = $this->createMock(OpenApiProcessorInterface::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($schemaFixesOutput))
+            ->willReturn($ulidOutput);
+        $extensionsApplier = $this->createMock(OpenApiExtensionsApplier::class);
+        $extensionsApplier->expects($this->once())
+            ->method('apply')
+            ->with(
+                $this->callback(static fn (OpenApi $normalizedOpenApi): bool => $normalizedOpenApi !== $ulidOutput
+                    && $normalizedOpenApi->getInfo() === $ulidOutput->getInfo()
+                    && $normalizedOpenApi->getPaths() === $ulidOutput->getPaths()
+                    && $normalizedOpenApi->getComponents() === $ulidOutput->getComponents()),
+                $this->identicalTo(['x-stage' => 'ulid'])
+            )
+            ->willReturn($finalOpenApi);
+
         $factory = new OpenApiFactory(
             $decoratedFactory,
             $endpointFactories,
-            $this->createMock(PathParametersProcessor::class),
-            $this->createMock(ParameterDescriptionProcessor::class),
-            $this->createMock(IriReferenceTypeProcessor::class),
-            $this->createMock(TagDescriptionProcessor::class),
-            $this->createMock(OpenApiExtensionsApplier::class)
+            [
+                $parameterProcessor,
+                $tagProcessor,
+                $iriProcessor,
+                $pathProcessor,
+                $payloadProcessor,
+                $schemaFixesProcessor,
+                $ulidFixer,
+            ],
+            $extensionsApplier
         );
 
         $result = $factory->__invoke($context);
 
-        $this->assertInstanceOf(OpenApi::class, $result);
+        $this->assertSame($finalOpenApi, $result);
     }
 
     public function testInvokeNormalizesWebhooksAndExtensions(): void
@@ -90,29 +197,60 @@ final class OpenApiFactoryTest extends UnitTestCase
         $endpointFactory = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory->expects($this->once())
             ->method('createEndpoint')
-            ->with($this->isInstanceOf(OpenApi::class));
+            ->with($this->identicalTo($openApi));
 
-        $pathProcessor = $this->createMock(PathParametersProcessor::class);
-        $pathProcessor->method('process')->willReturnArgument(0);
+        $pathProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $pathProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
-        $paramProcessor->method('process')->willReturnArgument(0);
+        $paramProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $paramProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
-        $iriProcessor->method('process')->willReturnArgument(0);
+        $iriProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $iriProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
-        $tagProcessor->method('process')->willReturnArgument(0);
+        $tagProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $tagProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
+
+        $payloadProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $payloadProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
+        $schemaFixesProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $schemaFixesProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
+        $ulidFixer = $this->createMock(OpenApiProcessorInterface::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
             new ArrayIterator([$endpointFactory]),
-            $pathProcessor,
-            $paramProcessor,
-            $iriProcessor,
-            $tagProcessor,
+            [
+                $paramProcessor,
+                $tagProcessor,
+                $iriProcessor,
+                $pathProcessor,
+                $payloadProcessor,
+                $schemaFixesProcessor,
+                $ulidFixer,
+            ],
             $extensionsApplier
         );
 
@@ -148,27 +286,58 @@ final class OpenApiFactoryTest extends UnitTestCase
             ->with([])
             ->willReturn($openApi);
 
-        $pathProcessor = $this->createMock(PathParametersProcessor::class);
-        $pathProcessor->method('process')->willReturnArgument(0);
+        $pathProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $pathProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $paramProcessor = $this->createMock(ParameterDescriptionProcessor::class);
-        $paramProcessor->method('process')->willReturnArgument(0);
+        $paramProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $paramProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $iriProcessor = $this->createMock(IriReferenceTypeProcessor::class);
-        $iriProcessor->method('process')->willReturnArgument(0);
+        $iriProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $iriProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
 
-        $tagProcessor = $this->createMock(TagDescriptionProcessor::class);
-        $tagProcessor->method('process')->willReturnArgument(0);
+        $tagProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $tagProcessor->expects($this->once())
+            ->method('process')
+            ->willReturnArgument(0);
+
+        $payloadProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $payloadProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
+        $schemaFixesProcessor = $this->createMock(OpenApiProcessorInterface::class);
+        $schemaFixesProcessor->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
+
+        $ulidFixer = $this->createMock(OpenApiProcessorInterface::class);
+        $ulidFixer->expects($this->once())
+            ->method('process')
+            ->with($this->identicalTo($openApi))
+            ->willReturn($openApi);
 
         $extensionsApplier = new OpenApiExtensionsApplier();
 
         $factory = new OpenApiFactory(
             $decoratedFactory,
             [],
-            $pathProcessor,
-            $paramProcessor,
-            $iriProcessor,
-            $tagProcessor,
+            [
+                $paramProcessor,
+                $tagProcessor,
+                $iriProcessor,
+                $pathProcessor,
+                $payloadProcessor,
+                $schemaFixesProcessor,
+                $ulidFixer,
+            ],
             $extensionsApplier
         );
 
@@ -185,12 +354,18 @@ final class OpenApiFactoryTest extends UnitTestCase
         $endpointFactory1 = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory1->expects($this->once())
             ->method('createEndpoint')
-            ->with($openApi);
+            ->with($openApi)
+            ->willReturnCallback(static function (OpenApi $openApi): void {
+                $openApi->getPaths()->addPath('/from-endpoint-factory', new PathItem());
+            });
 
         $endpointFactory2 = $this->createMock(EndpointFactoryInterface::class);
         $endpointFactory2->expects($this->once())
             ->method('createEndpoint')
-            ->with($openApi);
+            ->with($openApi)
+            ->willReturnCallback(static function (OpenApi $openApi): void {
+                self::assertInstanceOf(PathItem::class, $openApi->getPaths()->getPath('/from-endpoint-factory'));
+            });
 
         return [$endpointFactory1, $endpointFactory2];
     }

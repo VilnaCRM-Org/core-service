@@ -31,7 +31,7 @@ final readonly class CustomerDeleteProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = [],
     ): null {
-        if (!$data instanceof Customer) {
+        if (! $data instanceof Customer) {
             throw new InvalidArgumentException('Expected instance of Customer');
         }
 

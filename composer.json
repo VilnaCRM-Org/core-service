@@ -11,17 +11,15 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-mbstring": "*",
-    "ext-mongodb": "*",
+    "ext-mongodb": "^2.1",
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "4.1.*",
-    "api-platform/doctrine-odm": "4.1.*",
     "aws/aws-sdk-php": "^3.317.1",
     "cfpinto/graphql": "^2.0",
     "doctrine/mongodb-odm": "^2.10",
     "doctrine/mongodb-odm-bundle": "^5.3",
     "dpauli/graphql-request-builder": "^1.8",
-    "mongodb/mongodb": "^1.21",
     "phpmailer/phpmailer": "^7.0",
     "symfony/asset": "7.2.*",
     "symfony/cache": "7.2.*",
@@ -38,7 +36,8 @@
     "symfony/uid": "7.2.*",
     "symfony/validator": "7.2.*",
     "symfony/yaml": "7.2.*",
-    "webonyx/graphql-php": "^15.14"
+    "webonyx/graphql-php": "^15.14",
+    "mongodb/mongodb": "~2.1.0"
   },
   "config": {
     "allow-plugins": {
@@ -55,7 +54,7 @@
     "sort-packages": true,
     "platform": {
       "php": "8.4.3",
-      "ext-mongodb": "1.21.1"
+      "ext-mongodb": "2.1.8"
     }
   },
   "autoload": {

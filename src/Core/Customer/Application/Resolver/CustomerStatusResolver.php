@@ -28,9 +28,10 @@ final readonly class CustomerStatusResolver
     ): CustomerStatus {
         $existing = $context['previous_data'] ?? null;
 
-        return $existing instanceof CustomerStatus
-            ? $existing
-            : $this->resolveFromIri($data->id, $context, $operation);
+        return match (true) {
+            $existing instanceof CustomerStatus => $existing,
+            default => $this->resolveFromIri($data->id, $context, $operation),
+        };
     }
 
     /**
@@ -50,14 +51,23 @@ final readonly class CustomerStatusResolver
 
     private function requireIri(?string $iri): string
     {
-        return $iri ?? throw new CustomerStatusNotFoundException();
+        return $this->requireResolvedIri(trim($iri ?? ''));
+    }
+
+    private function requireResolvedIri(string $iri): string
+    {
+        return match ($iri) {
+            '' => throw new CustomerStatusNotFoundException(),
+            default => $iri,
+        };
     }
 
     private function assertStatus(string $iri, object $resource): CustomerStatus
     {
-        return $resource instanceof CustomerStatus
-            ? $resource
-            : throw CustomerStatusNotFoundException::withIri($iri);
+        return match (true) {
+            $resource instanceof CustomerStatus => $resource,
+            default => throw CustomerStatusNotFoundException::withIri($iri),
+        };
     }
 
     /**

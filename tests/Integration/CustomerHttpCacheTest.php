@@ -18,6 +18,8 @@ use Symfony\Component\Uid\Ulid as SymfonyUlid;
  */
 final class CustomerHttpCacheTest extends ApiTestCase
 {
+    protected static ?bool $alwaysBootKernel = true;
+
     private string $baseUrl = '/api/customers';
 
     public function testGetCustomerReturnsCacheControlHeaders(): void

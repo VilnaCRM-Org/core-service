@@ -7,64 +7,64 @@ parameters:
   layers:
     - name: Application
       collectors:
-        - type: className
-          regex: '.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message|Metric).*'
-        - type: className
-          regex: '.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*'
-        - type: className
-          regex: '.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor|Bus).*'
-        - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject).*'
-        - type: className
-          regex: '.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)'
-        - type: className
-          regex: '.*\\Shared\\Application\\Observability\\(Metric|Emitter|Factory|Collection|ValueObject).*'
+        - type: classNameRegex
+          value: '#.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message|Metric).*#'
+        - type: classNameRegex
+          value: '#.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor|Bus).*#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject|Serializer|Updater|Writer).*#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Application\\Observability\\(Metric|Emitter|Factory|Collection|ValueObject).*#'
 
     - name: Domain
       collectors:
-        - type: className
-          regex: '.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*'
-        - type: className
-          regex: '.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|Event|Exception|Factory|Repository|Collection).*'
-        - type: className
-          regex: '.*\\Shared\\Domain\\Bus\\(Command|Event).*'
+        - type: classNameRegex
+          value: '#.*\\Domain\\(Aggregate|Entity|ValueObject|Event|Exception|Factory|Repository|Collection).*#'
+        - type: classNameRegex
+          value: '#.*\\Internal\\HealthCheck\\Domain\\(Aggregate|Entity|Event|Exception|Factory|Repository|Collection).*#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Domain\\Bus\\(Command|Event).*#'
 
     - name: Infrastructure
       collectors:
-        - type: className
-          regex: '.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*'
-        - type: className
-          regex: '.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor|InvokeParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher|RetryStrategy).*'
+        - type: classNameRegex
+          value: '#.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*#'
+        - type: classNameRegex
+          value: '#.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor|InvokeParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher|RetryStrategy).*#'
 
     - name: Symfony
       collectors:
-        - type: className
-          regex: '.*Symfony\\.*'
+        - type: classNameRegex
+          value: '#.*Symfony\\.*#'
 
     - name: Doctrine
       collectors:
-        - type: className
-          regex: '.*Doctrine\\.*'
+        - type: classNameRegex
+          value: '#.*Doctrine\\.*#'
 
     - name: ApiPlatform
       collectors:
-        - type: className
-          regex: '.*ApiPlatform\\.*'
+        - type: classNameRegex
+          value: '#.*ApiPlatform\\.*#'
 
     - name: Logging
       collectors:
-        - type: className
-          regex: '.*Psr\\Log\\.*'
+        - type: classNameRegex
+          value: '#.*Psr\\Log\\.*#'
 
     - name: GraphQl
       collectors:
-        - type: className
-          regex: '.*GraphQL\\.*'
+        - type: classNameRegex
+          value: '#.*GraphQL\\.*#'
 
     - name: BSON
       collectors:
-        - type: className
-          regex: 'MongoDB\\BSON\\.*'
+        - type: classNameRegex
+          value: '#MongoDB\\BSON\\.*#'
 
   ruleset:
     Application:

@@ -132,14 +132,16 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessWithPartialData(): void
     {
-        $partial = new CustomerPatch();
-        $partial->initials = 'New Name';
-        $partial->email = null;
-        $partial->phone = null;
-        $partial->leadSource = 'New Source';
-        $partial->type = null;
-        $partial->status = null;
-        $partial->confirmed = null;
+        $partial = new CustomerPatch(
+            id: null,
+            initials: 'New Name',
+            email: null,
+            phone: null,
+            leadSource: 'New Source',
+            type: null,
+            status: null,
+            confirmed: null,
+        );
 
         $exData = [
             'initials' => 'Original Name',
@@ -175,15 +177,21 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     {
         $ulidStr = (string) $this->faker->ulid();
         $iri = sprintf('/api/customers/%s', $ulidStr);
-        $dto = new CustomerPatch();
-        $dto->id = $iri;
-        $dto->initials = $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']);
-        $dto->email = $this->faker->email();
-        $dto->phone = $this->faker->phoneNumber();
-        $dto->leadSource = $this->faker->word();
-        $dto->type = null;
-        $dto->status = null;
-        $dto->confirmed = $this->faker->boolean();
+        $initials = $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']);
+        $email = $this->faker->email();
+        $phone = $this->faker->phoneNumber();
+        $leadSource = $this->faker->word();
+        $confirmed = $this->faker->boolean();
+        $dto = new CustomerPatch(
+            id: $iri,
+            initials: $initials,
+            email: $email,
+            phone: $phone,
+            leadSource: $leadSource,
+            type: null,
+            status: null,
+            confirmed: $confirmed,
+        );
 
         $operation = $this->createMock(Operation::class);
         $customer = $this->createMock(Customer::class);
@@ -195,11 +203,11 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->setupRepository($ulid, $customer);
         $this->setupCustomer(
             $customer,
-            $dto->initials,
-            $dto->email,
-            $dto->phone,
-            $dto->leadSource,
-            $dto->confirmed,
+            $initials,
+            $email,
+            $phone,
+            $leadSource,
+            $confirmed,
             $customerType,
             $customerStatus
         );
@@ -218,15 +226,16 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     public function testProcessThrowsExceptionWhenNoUlidProvided(): void
     {
-        $dto = new CustomerPatch();
-        $dto->id = null;
-        $dto->initials = $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']);
-        $dto->email = $this->faker->email();
-        $dto->phone = $this->faker->phoneNumber();
-        $dto->leadSource = $this->faker->word();
-        $dto->type = null;
-        $dto->status = null;
-        $dto->confirmed = $this->faker->boolean();
+        $dto = new CustomerPatch(
+            id: null,
+            initials: $this->faker->randomElement(['Mr', 'Ms', 'Mrs', 'Dr']),
+            email: $this->faker->email(),
+            phone: $this->faker->phoneNumber(),
+            leadSource: $this->faker->word(),
+            type: null,
+            status: null,
+            confirmed: $this->faker->boolean(),
+        );
 
         $operation = $this->createMock(Operation::class);
 
@@ -325,28 +334,30 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     private function createDto(): CustomerPatch
     {
-        $dto = new CustomerPatch();
-        $dto->initials = $this->faker->name();
-        $dto->email = $this->faker->email();
-        $dto->phone = $this->faker->phoneNumber();
-        $dto->leadSource = $this->faker->word();
-        $dto->type = '/api/customer_types/' . $this->faker->ulid();
-        $dto->status = '/api/customer_statuses/' . $this->faker->ulid();
-        $dto->confirmed = $this->faker->boolean();
-        return $dto;
+        return new CustomerPatch(
+            id: null,
+            initials: $this->faker->name(),
+            email: $this->faker->email(),
+            phone: $this->faker->phoneNumber(),
+            leadSource: $this->faker->word(),
+            type: '/api/customer_types/' . $this->faker->ulid(),
+            status: '/api/customer_statuses/' . $this->faker->ulid(),
+            confirmed: $this->faker->boolean(),
+        );
     }
 
     private function createEmptyDto(): CustomerPatch
     {
-        $dto = new CustomerPatch();
-        $dto->initials = null;
-        $dto->email = null;
-        $dto->phone = null;
-        $dto->leadSource = null;
-        $dto->type = null;
-        $dto->status = null;
-        $dto->confirmed = null;
-        return $dto;
+        return new CustomerPatch(
+            id: null,
+            initials: null,
+            email: null,
+            phone: null,
+            leadSource: null,
+            type: null,
+            status: null,
+            confirmed: null,
+        );
     }
 
     /**

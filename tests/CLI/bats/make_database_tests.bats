@@ -23,4 +23,3 @@ load 'bats-assert/load'
   run make fixtures-load
   assert_success
 }
-

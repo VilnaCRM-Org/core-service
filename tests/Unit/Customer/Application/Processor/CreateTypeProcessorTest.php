@@ -41,8 +41,8 @@ final class CreateTypeProcessorTest extends UnitTestCase
     {
         $dto = $this->createDto();
         $operation = $this->createMock(Operation::class);
-        $command = $this->createMock(CreateTypeCommand::class);
         $customerType = $this->createMock(CustomerType::class);
+        $command = new CreateTypeCommand($customerType);
 
         $this->transformer->expects($this->once())
             ->method('transform')
@@ -65,8 +65,6 @@ final class CreateTypeProcessorTest extends UnitTestCase
 
     private function createDto(): TypeCreate
     {
-        $dto = new TypeCreate();
-        $dto->value = $this->faker->word();
-        return $dto;
+        return new TypeCreate(value: $this->faker->word());
     }
 }

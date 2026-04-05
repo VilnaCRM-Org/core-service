@@ -19,6 +19,7 @@ final class DBCheckSubscriber extends BaseHealthCheckSubscriber
     public function onHealthCheck(HealthCheckEvent $event): void
     {
         $client = $this->documentManager->getClient();
-        $client->listDatabases();
+        // Force cursor iteration so the health check performs an actual round-trip.
+        iterator_to_array($client->listDatabases());
     }
 }
