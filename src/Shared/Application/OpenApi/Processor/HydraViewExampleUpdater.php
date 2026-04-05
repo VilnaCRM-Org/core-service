@@ -44,9 +44,12 @@ final class HydraViewExampleUpdater
             SchemaNormalizer::normalize($normalized['allOf'])
         );
 
-        return match ($updatedAllOf) {
-            null => null,
-            default => ['allOf' => $updatedAllOf] + $normalized,
-        };
+        if ($updatedAllOf === null) {
+            return null;
+        }
+
+        $normalized['allOf'] = $updatedAllOf;
+
+        return $normalized;
     }
 }
