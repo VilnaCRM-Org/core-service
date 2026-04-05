@@ -43,7 +43,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.ref }}
           path: base
       - name: Run OpenAPI Diff (from HEAD revision)
-        uses: docker://openapitools/openapi-diff:latest
+        uses: docker://openapitools/openapi-diff@sha256:82291446e5554742d9c0725d7b315d18e93958c5526f9a663e8885227bdd6cb6
         with:
           args: '/github/workspace/head/.github/openapi-spec/spec.yaml /github/workspace/base/.github/openapi-spec/spec.yaml'
       - uses: actions/upload-artifact@v4

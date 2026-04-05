@@ -101,7 +101,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $this->assertCount(0, $resultSchemas);
     }
 
-    public function testProcessCreatesComponentsWhenMissing(): void
+    public function testProcessCreatesSchemasWhenMissing(): void
     {
         $openApi = new OpenApi(
             new Info('Test', '1.0.0'),
@@ -109,6 +109,7 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
             new Paths(),
             null
         );
+        $this->assertNull($openApi->getComponents()->getSchemas());
 
         $processor = $this->createProcessor();
         $result = $processor->process($openApi);

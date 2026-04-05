@@ -41,9 +41,15 @@ final class ConstraintViolationPayloadItemsCleaner
      */
     private static function isArrayPayload(array $payload): bool
     {
+        $type = $payload['type'] ?? null;
+        $types = match (true) {
+            \is_string($type) => [$type],
+            default => SchemaNormalizer::normalize($type),
+        };
+
         return in_array(
             'array',
-            SchemaNormalizer::normalize($payload['type'] ?? null),
+            $types,
             true
         );
     }

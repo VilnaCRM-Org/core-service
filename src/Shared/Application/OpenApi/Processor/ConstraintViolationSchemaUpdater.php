@@ -48,11 +48,11 @@ final class ConstraintViolationSchemaUpdater
     {
         return array_filter(
             $schemas,
-            static fn ($schema, string $schemaName): bool => str_starts_with(
+            static fn (string $schemaName): bool => str_starts_with(
                 $schemaName,
                 self::SCHEMA_KEY_PREFIX
             ),
-            ARRAY_FILTER_USE_BOTH
+            ARRAY_FILTER_USE_KEY
         );
     }
 }

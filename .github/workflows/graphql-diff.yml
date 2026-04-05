@@ -52,7 +52,7 @@ jobs:
           message: 'feat(#${{ github.event.number }}): generate graphql spec'
 
       - name: GraphQL Inspector
-        uses: kamilkisiela/graphql-inspector@release-1701263349990
+        uses: kamilkisiela/graphql-inspector@91cefc9d934ccac1b4be9f26f44b6f533c300247
         with:
           schema: '${{ github.base_ref }}:.github/graphql-spec/spec'
         env:
