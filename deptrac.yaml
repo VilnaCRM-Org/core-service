@@ -14,7 +14,7 @@ parameters:
         - type: classNameRegex
           value: '#.*\\Shared\\Application\\(Validator|Transformer|ErrorProvider|DomainExceptionNormalizer|NotFoundExceptionNormalizer|Extractor|Bus).*#'
         - type: classNameRegex
-          value: '#.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject).*#'
+          value: '#.*\\Shared\\Application\\OpenApi\\(Factory|Builder|OpenApiFactory|Processor|Cleaner|Transformer|Resolver|Applier|Mapper|ValueObject|Serializer|Updater|Writer).*#'
         - type: classNameRegex
           value: '#.*\\Shared\\Application\\OpenApi\\(ParameterDescriptionDictionary|TagDescriptionDictionary)#'
         - type: classNameRegex

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
 use App\Shared\Application\OpenApi\Serializer\HydraSchemaNormalizer;
 use App\Tests\Unit\UnitTestCase;
+use ArrayObject;
 
 final class HydraSchemaNormalizerTest extends UnitTestCase
 {
@@ -94,6 +95,29 @@ final class HydraSchemaNormalizerTest extends UnitTestCase
                 'HydraCollectionBaseSchema' => [
                     'allOf' => [],
                     'type' => 'object',
+                ],
+            ],
+            $normalizer->normalize($schemas)
+        );
+    }
+
+    public function testNormalizeConvertsArrayObjectAllOfToArray(): void
+    {
+        $normalizer = new HydraSchemaNormalizer();
+        $schemas = [
+            'HydraCollectionBaseSchema' => [
+                'allOf' => new ArrayObject([
+                    ['existing' => 'value'],
+                ]),
+            ],
+        ];
+
+        self::assertSame(
+            [
+                'HydraCollectionBaseSchema' => [
+                    'allOf' => [
+                        ['existing' => 'value'],
+                    ],
                 ],
             ],
             $normalizer->normalize($schemas)
