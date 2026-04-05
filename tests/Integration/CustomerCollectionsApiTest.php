@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
-final class CustomerCollectionsApiTest extends BaseTest
+final class CustomerCollectionsApiTest extends BaseApiCase
 {
     public function testGetCustomersCollection(): void
     {

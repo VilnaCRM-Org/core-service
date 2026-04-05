@@ -11,7 +11,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class BaseTest extends ApiTestCase
+abstract class BaseApiCase extends ApiTestCase
 {
     protected Generator $faker;
 
@@ -59,6 +59,8 @@ abstract class BaseTest extends ApiTestCase
     /**
      * @param array<string, string> $payload
      * @param array<string, string> $responseData
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     protected function assertCreatedResponse(
         array $payload,

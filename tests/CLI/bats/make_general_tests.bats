@@ -107,5 +107,21 @@ load 'bats-assert/load'
   run sed -n '/^ensure-test-services:/,/^setup-test-db:/p' Makefile
   assert_success
   assert_output --partial 'ensure-test-services'
+  assert_output --partial 'DOCKER_COMPOSE_UP_RETRIES:-5'
+  assert_output --partial 'DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5'
   assert_output --partial 'up --detach --wait database redis php caddy localstack'
+}
+
+@test "make uses conditional docker exec tty flag" {
+  run sed -n '/^DOCKER_TTY_FLAG/,/^endef/p' Makefile
+  assert_success
+  assert_output --partial 'DOCKER_TTY_FLAG = $(if $(CI),-T,)'
+  assert_output --partial '$(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)'
+}
+
+@test "make build-spectral-docker builds spectral image directly" {
+  run sed -n '/^build-spectral-docker:/,/^infection:/p' Makefile
+  assert_success
+  assert_output --partial 'build-spectral-docker:'
+  assert_output --partial '$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
 }

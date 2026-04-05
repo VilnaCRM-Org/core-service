@@ -42,10 +42,4 @@ final class TestDomainEventSubscriber implements DomainEventSubscriberInterface
     {
         return $this->handled;
     }
-
-    public function clear(): void
-    {
-        $this->handled = [];
-        $this->shouldFail = false;
-    }
 }

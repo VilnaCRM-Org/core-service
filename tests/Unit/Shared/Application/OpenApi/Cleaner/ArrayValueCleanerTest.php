@@ -77,7 +77,7 @@ final class ArrayValueCleanerTest extends UnitTestCase
             'item' => null,
         ];
 
-        $recursiveCleaner = static fn (array $data): array => []; // Cleaner returns empty array
+        $recursiveCleaner = static fn (array $data): array => array_slice($data, 0, 0);
 
         $result = $this->processor->clean('responses', $data, $recursiveCleaner);
 

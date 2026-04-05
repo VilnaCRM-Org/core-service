@@ -229,13 +229,15 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
             new MetricDimensionsFactory()
         );
 
-        $request = Request::create('/api/health', 'GET');
+        $request = Request::create('/api/customers', 'GET');
+        $request->attributes->set('_api_resource_class', 'App\\Core\\Customer\\Domain\\Entity\\Customer');
+        $request->attributes->set('_api_operation_name', '_api_/customers_get_collection');
 
         $event = new ResponseEvent(
             $this->createMock(HttpKernelInterface::class),
             $request,
             HttpKernelInterface::SUB_REQUEST,
-            new Response('', 204)
+            new Response('', 200)
         );
 
         $subscriber->onResponse($event);
