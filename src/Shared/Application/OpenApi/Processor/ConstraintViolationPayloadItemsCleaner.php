@@ -18,10 +18,9 @@ final class ConstraintViolationPayloadItemsCleaner
      */
     public static function clean(array $payload): array
     {
-        return match (true) {
-            ! self::shouldRemoveItems($payload) => $payload,
-            default => array_diff_key($payload, ['items' => true]),
-        };
+        return self::shouldRemoveItems($payload)
+            ? array_diff_key($payload, ['items' => true])
+            : $payload;
     }
 
     /**
@@ -29,11 +28,9 @@ final class ConstraintViolationPayloadItemsCleaner
      */
     private static function shouldRemoveItems(array $payload): bool
     {
-        return match (true) {
-            ! self::isArrayPayload($payload) => false,
-            ! array_key_exists('items', $payload) => false,
-            default => $payload['items'] === null,
-        };
+        return self::isArrayPayload($payload)
+            && array_key_exists('items', $payload)
+            && $payload['items'] === null;
     }
 
     /**

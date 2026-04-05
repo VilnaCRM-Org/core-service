@@ -20,12 +20,9 @@ final class ConstraintViolationPropertiesExtractor
     {
         $items = self::normalizedItems($constraintViolation);
 
-        return match (true) {
-            array_key_exists('properties', $items) => SchemaNormalizer::normalize(
-                $items['properties']
-            ),
-            default => null,
-        };
+        return array_key_exists('properties', $items)
+            ? SchemaNormalizer::normalize($items['properties'])
+            : null;
     }
 
     /**

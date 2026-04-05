@@ -18,10 +18,9 @@ final class OpenApiResponseContentUpdater
         $contentItems = $content->getArrayCopy();
         $updatedContentItems = $this->updatedContentItems($contentItems);
 
-        return match (true) {
-            $updatedContentItems === $contentItems => null,
-            default => new ArrayObject($updatedContentItems),
-        };
+        return $updatedContentItems === $contentItems
+            ? null
+            : new ArrayObject($updatedContentItems);
     }
 
     /**

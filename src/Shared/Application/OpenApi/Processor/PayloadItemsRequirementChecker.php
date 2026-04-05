@@ -13,10 +13,7 @@ final class PayloadItemsRequirementChecker
      */
     public static function shouldAddItems(?array $payload): bool
     {
-        return match (true) {
-            ! self::isArrayPayload($payload) => false,
-            default => ($payload['items'] ?? null) === null,
-        };
+        return self::isArrayPayload($payload) && ($payload['items'] ?? null) === null;
     }
 
     /**
@@ -40,9 +37,6 @@ final class PayloadItemsRequirementChecker
 
         $type = $payload['type'] ?? [];
 
-        return match (true) {
-            \is_string($type) => [$type],
-            default => SchemaNormalizer::normalize($type),
-        };
+        return \is_string($type) ? [$type] : SchemaNormalizer::normalize($type);
     }
 }

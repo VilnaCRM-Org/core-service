@@ -15,11 +15,21 @@ final class ConstraintViolationPayloadItemsProcessor implements OpenApiProcessor
 
     public function process(OpenApi $openApi): OpenApi
     {
-        return match (true) {
-            ($components = $openApi->getComponents()) === null => $openApi,
-            ($schemas = $components->getSchemas()) === null => $openApi,
-            ($updatedSchemas = $this->schemaUpdater->update($schemas)) === null => $openApi,
-            default => $openApi->withComponents($components->withSchemas($updatedSchemas)),
-        };
+        $components = $openApi->getComponents();
+        if ($components === null) {
+            return $openApi;
+        }
+
+        $schemas = $components->getSchemas();
+        if ($schemas === null) {
+            return $openApi;
+        }
+
+        $updatedSchemas = $this->schemaUpdater->update($schemas);
+        if ($updatedSchemas === null) {
+            return $openApi;
+        }
+
+        return $openApi->withComponents($components->withSchemas($updatedSchemas));
     }
 }

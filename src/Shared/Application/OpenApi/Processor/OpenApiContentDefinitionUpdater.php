@@ -16,9 +16,8 @@ final class OpenApiContentDefinitionUpdater
 
     public function update(array|MediaType $definition): array|MediaType|null
     {
-        return match (true) {
-            $definition instanceof MediaType => $this->mediaTypeSchemaFixer->fix($definition),
-            default => $this->arrayContentSchemaUpdater->update($definition),
-        };
+        return $definition instanceof MediaType
+            ? $this->mediaTypeSchemaFixer->fix($definition)
+            : $this->arrayContentSchemaUpdater->update($definition);
     }
 }

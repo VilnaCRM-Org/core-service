@@ -20,11 +20,13 @@ final class OpenApiResponsesUpdater
      */
     public function update(?array $responses): ?array
     {
-        return match (true) {
-            $responses === null => null,
-            ($updatedResponses = $this->updatedResponses($responses)) === $responses => null,
-            default => $updatedResponses,
-        };
+        if ($responses === null) {
+            return null;
+        }
+
+        $updatedResponses = $this->updatedResponses($responses);
+
+        return $updatedResponses === $responses ? null : $updatedResponses;
     }
 
     /**

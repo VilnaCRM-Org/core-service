@@ -22,9 +22,8 @@ final class ConstraintViolationPayloadBuilder
             SchemaNormalizer::normalize($properties['payload'] ?? ['type' => 'array'])
         );
 
-        return match (true) {
-            ! PayloadItemsRequirementChecker::shouldAddItems($payload) => null,
-            default => ['items' => ['type' => 'object']] + $payload,
-        };
+        return PayloadItemsRequirementChecker::shouldAddItems($payload)
+            ? ['items' => ['type' => 'object']] + $payload
+            : null;
     }
 }

@@ -15,11 +15,20 @@ final class OpenApiResponseSchemaFixer
 
     public function fix(Response|array $response): Response|array
     {
-        return match (true) {
-            ! $response instanceof Response => $response,
-            ($content = $response->getContent()) === null => $response,
-            ($updatedContent = $this->contentUpdater->update($content)) === null => $response,
-            default => $response->withContent($updatedContent),
-        };
+        if (! $response instanceof Response) {
+            return $response;
+        }
+
+        $content = $response->getContent();
+        if ($content === null) {
+            return $response;
+        }
+
+        $updatedContent = $this->contentUpdater->update($content);
+        if ($updatedContent === null) {
+            return $response;
+        }
+
+        return $response->withContent($updatedContent);
     }
 }
