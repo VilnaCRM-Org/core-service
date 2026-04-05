@@ -37,7 +37,7 @@
     "symfony/validator": "7.2.*",
     "symfony/yaml": "7.2.*",
     "webonyx/graphql-php": "^15.14",
-    "mongodb/mongodb": "~2.2.0"
+    "mongodb/mongodb": "~2.1.0"
   },
   "config": {
     "allow-plugins": {
