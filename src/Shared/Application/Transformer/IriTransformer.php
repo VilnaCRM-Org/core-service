@@ -8,7 +8,7 @@ final readonly class IriTransformer implements IriTransformerInterface
 {
     public function transform(string $idOrIri): string
     {
-        if (!str_starts_with($idOrIri, '/')) {
+        if (! str_starts_with($idOrIri, '/')) {
             return $idOrIri;
         }
 

@@ -54,9 +54,10 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     private function retrieveCustomer(string $customerId): Customer
     {
         $customer = $this->customerRepository->find($customerId);
-        if (!$customer) {
+        if (! $customer instanceof Customer) {
             throw new CustomerNotFoundException();
         }
+
         return $customer;
     }
 

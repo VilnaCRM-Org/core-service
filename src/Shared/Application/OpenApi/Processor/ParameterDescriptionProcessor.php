@@ -11,7 +11,7 @@ use App\Shared\Application\OpenApi\Mapper\PathItemOperationMapper;
 use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 use App\Shared\Application\OpenApi\ParameterDescriptionDictionary;
 
-final class ParameterDescriptionProcessor
+final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
 {
     public function process(OpenApi $openApi): OpenApi
     {
@@ -62,7 +62,7 @@ final class ParameterDescriptionProcessor
         $paramName = $parameter->getName();
 
         return match (true) {
-            !isset($descriptions[$paramName]) => $parameter,
+            ! isset($descriptions[$paramName]) => $parameter,
             self::hasDescription($parameter) => $parameter,
             default => $parameter->withDescription($descriptions[$paramName]),
         };
@@ -70,11 +70,11 @@ final class ParameterDescriptionProcessor
 
     private static function hasDescription(Parameter $parameter): bool
     {
-        return !self::isDescriptionEmpty($parameter->getDescription());
+        return ! self::isDescriptionEmpty($parameter->getDescription());
     }
 
     private static function isDescriptionEmpty(?string $description): bool
     {
-        return ($description ?? '') === '';
+        return $description === null || $description === '';
     }
 }

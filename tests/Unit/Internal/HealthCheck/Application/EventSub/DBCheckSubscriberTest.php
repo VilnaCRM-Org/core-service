@@ -8,6 +8,7 @@ use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Iterator;
 use MongoDB\Client;
 use MongoDB\Driver\Exception\ConnectionException;
 
@@ -28,9 +29,13 @@ final class DBCheckSubscriberTest extends UnitTestCase
     public function testOnHealthCheckSuccess(): void
     {
         $clientMock = $this->createMock(Client::class);
+        $databaseIterator = $this->createMock(Iterator::class);
+        $databaseIterator->expects($this->once())
+            ->method('rewind');
+
         $clientMock->expects($this->once())
             ->method('listDatabases')
-            ->willReturn(new \ArrayIterator([]));
+            ->willReturn($databaseIterator);
 
         $this->documentManager->expects($this->once())
             ->method('getClient')

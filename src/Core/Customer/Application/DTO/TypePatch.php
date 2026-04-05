@@ -10,8 +10,10 @@ final class TypePatch
 
     public ?string $id = null;
 
-    public function __construct(?string $value = null, ?string $id = null)
-    {
+    public function __construct(
+        ?string $value = null,
+        ?string $id = null
+    ) {
         $this->value = $value;
         $this->id = $id;
     }

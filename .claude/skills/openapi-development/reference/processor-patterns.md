@@ -27,40 +27,46 @@ private function processPathItem(PathItem $pathItem): PathItem
 - Lower cyclomatic complexity
 - Easier to maintain
 
-## 2. Match Expressions Over If-Else
+## 2. Guard Clauses Over Nested Conditionals
 
-**Problem**: If-else chains increase cyclomatic complexity
-**Solution**: Use PHP 8's `match` expression
+**Problem**: Nested conditionals increase cyclomatic complexity
+**Solution**: Use early returns and guard clauses
 
 ```php
 // ❌ Bad: High complexity
 private function processOperation(?Operation $operation): ?Operation
 {
+    if ($operation !== null) {
+        if ($operation->getParameters() !== []) {
+            return $operation->withParameters(...);
+        }
+
+        return $operation;
+    }
+
+    return null;
+}
+
+// ✅ Good: Clear flat branching
+private function processOperation(?Operation $operation): ?Operation
+{
     if ($operation === null) {
         return null;
     }
+
     if ($operation->getParameters() === []) {
         return $operation;
     }
-    return $operation->withParameters(...);
-}
 
-// ✅ Good: Lower complexity
-private function processOperation(?Operation $operation): ?Operation
-{
-    return match (true) {
-        $operation === null => null,
-        $operation->getParameters() === [] => $operation,
-        default => $operation->withParameters(...),
-    };
+    return $operation->withParameters(...);
 }
 ```
 
 **Benefits**:
 
-- Each match branch counts as 1 complexity (vs 2+ for if-else)
-- More readable
-- Forces exhaustive handling
+- Keeps nesting flat
+- Makes exit paths obvious
+- Reads well in small processors
 
 ## 3. Functional Array Operations
 
@@ -114,11 +120,15 @@ private static function augmentParameter(mixed $parameter, array $descriptions):
     $description = $parameter->getDescription();
     $hasDescription = $description !== null && $description !== '';
 
-    return match (true) {
-        !isset($descriptions[$paramName]) => $parameter,
-        $hasDescription => $parameter,
-        default => $parameter->withDescription($descriptions[$paramName]),
-    };
+    if (!isset($descriptions[$paramName])) {
+        return $parameter;
+    }
+
+    if ($hasDescription) {
+        return $parameter;
+    }
+
+    return $parameter->withDescription($descriptions[$paramName]);
 }
 ```
 

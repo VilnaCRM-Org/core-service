@@ -54,7 +54,7 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         self::assertSame($customer->getUlid(), $result->getUlid());
         self::assertSame('John Doe', $result->getInitials());
 
-        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey($customer->getUlid());
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
         self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
     }
 
@@ -74,7 +74,7 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         self::assertNotNull($result2);
         self::assertSame($result1->getUlid(), $result2->getUlid());
 
-        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey($customer->getUlid());
+        $cacheKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
         self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
     }
 

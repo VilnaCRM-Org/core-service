@@ -21,7 +21,7 @@ final readonly class UlidTransformer
 
     public function toDatabaseValue(null|Ulid|string|SymfonyUlid $value): ?Binary
     {
-        if (!$this->validator->isValid($value)) {
+        if (! $this->validator->isValid($value)) {
             return null;
         }
 
