@@ -28,18 +28,17 @@ final class HydraCollectionSchemasUpdater
         $hasChanges = false;
 
         foreach ($normalizedSchemas as $schemaName => $schema) {
-            $updatedSchema = HydraCollectionSchemaCandidateResolver::resolve(
+            $updatedSchema = $this->resolvedSchemaCandidate(
                 $schemasArray,
                 (string) $schemaName,
-                SchemaNormalizer::normalize($schema),
-                $this->viewExampleUpdater
+                $schema
             );
 
             if ($updatedSchema === null) {
                 continue;
             }
 
-            $normalizedSchemas[$schemaName] = new ArrayObject($updatedSchema);
+            $normalizedSchemas[$schemaName] = $this->wrappedUpdatedSchema($updatedSchema);
             $hasChanges = true;
         }
 
@@ -47,5 +46,32 @@ final class HydraCollectionSchemasUpdater
             true => new ArrayObject($normalizedSchemas),
             default => $schemas,
         };
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schemas
+     * @param SchemaValue $schema
+     *
+     * @return array<int|string, SchemaValue>|null
+     */
+    private function resolvedSchemaCandidate(
+        array $schemas,
+        string $schemaName,
+        array|bool|float|int|string|ArrayObject|null $schema
+    ): ?array {
+        return HydraCollectionSchemaCandidateResolver::resolve(
+            $schemas,
+            $schemaName,
+            SchemaNormalizer::normalize($schema),
+            $this->viewExampleUpdater
+        );
+    }
+
+    /**
+     * @param array<int|string, SchemaValue> $schema
+     */
+    private function wrappedUpdatedSchema(array $schema): ArrayObject
+    {
+        return new ArrayObject($schema);
     }
 }

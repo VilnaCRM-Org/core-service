@@ -7,7 +7,7 @@ namespace App\Shared\Application\OpenApi\Processor;
 use ArrayObject;
 
 /**
- * @phpstan-type SchemaValue array|bool|float|int|string|ArrayObject|null
+ * @phpstan-type SchemaValue array|bool|float|int|object|string|null
  */
 final class ConstraintViolationSchemaUpdater
 {
@@ -22,14 +22,12 @@ final class ConstraintViolationSchemaUpdater
         $hasChanges = false;
 
         foreach ($this->matchingSchemas($updatedSchemas) as $schemaName => $schema) {
-            $updatedSchema = ConstraintViolationPayloadItemsUpdater::update(
-                SchemaNormalizer::normalize($schema)
-            );
+            $updatedSchema = $this->updatedConstraintViolationSchema($schema);
             if ($updatedSchema === null) {
                 continue;
             }
 
-            $updatedSchemas[$schemaName] = new ArrayObject($updatedSchema);
+            $updatedSchemas[$schemaName] = $this->wrappedUpdatedSchema($updatedSchema);
             $hasChanges = true;
         }
 
@@ -54,5 +52,26 @@ final class ConstraintViolationSchemaUpdater
             ),
             ARRAY_FILTER_USE_KEY
         );
+    }
+
+    /**
+     * @param SchemaValue $schema
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function updatedConstraintViolationSchema(
+        object|array|bool|float|int|string|null $schema
+    ): ?array {
+        return ConstraintViolationPayloadItemsUpdater::update(
+            SchemaNormalizer::normalize($schema)
+        );
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     */
+    private function wrappedUpdatedSchema(array $schema): ArrayObject
+    {
+        return new ArrayObject($schema);
     }
 }

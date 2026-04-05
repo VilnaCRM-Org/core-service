@@ -42,7 +42,7 @@ final class HydraViewExampleUpdater
         }
 
         $updatedAllOf = $this->allOfUpdater->update(
-            SchemaNormalizer::normalize($normalized['allOf'])
+            $this->normalizedAllOf($normalized)
         );
 
         if ($updatedAllOf === null) {
@@ -52,5 +52,15 @@ final class HydraViewExampleUpdater
         $normalized['allOf'] = $updatedAllOf;
 
         return $normalized;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $normalized
+     *
+     * @return array<int|string, SchemaValue>
+     */
+    private function normalizedAllOf(array $normalized): array
+    {
+        return SchemaNormalizer::normalize($normalized['allOf']);
     }
 }

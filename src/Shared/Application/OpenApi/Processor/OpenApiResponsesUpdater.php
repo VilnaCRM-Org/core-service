@@ -20,13 +20,10 @@ final class OpenApiResponsesUpdater
      */
     public function update(?array $responses): ?array
     {
-        if ($responses === null) {
-            return null;
-        }
-
-        $updatedResponses = $this->updatedResponses($responses);
-
-        return $updatedResponses === $responses ? null : $updatedResponses;
+        return match ($responses) {
+            null => null,
+            default => $this->updatedResponsesOrNull($responses),
+        };
     }
 
     /**
@@ -40,5 +37,29 @@ final class OpenApiResponsesUpdater
             $this->responseSchemaFixer->fix(...),
             $responses
         );
+    }
+
+    /**
+     * @param array<int|string, Response|array> $responses
+     *
+     * @return array<int|string, Response|array>|null
+     */
+    private function updatedResponsesOrNull(array $responses): ?array
+    {
+        $updatedResponses = $this->updatedResponses($responses);
+
+        return match ($this->responsesChanged($responses, $updatedResponses)) {
+            true => $updatedResponses,
+            default => null,
+        };
+    }
+
+    /**
+     * @param array<int|string, Response|array> $responses
+     * @param array<int|string, Response|array> $updatedResponses
+     */
+    private function responsesChanged(array $responses, array $updatedResponses): bool
+    {
+        return $updatedResponses !== $responses;
     }
 }

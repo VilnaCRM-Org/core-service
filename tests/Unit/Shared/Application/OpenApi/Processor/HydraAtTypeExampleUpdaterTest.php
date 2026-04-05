@@ -9,6 +9,22 @@ use App\Tests\Unit\UnitTestCase;
 
 final class HydraAtTypeExampleUpdaterTest extends UnitTestCase
 {
+    public function testUpdateMapsLegacyTypeToHydraTypeWhenMissing(): void
+    {
+        $updater = new HydraAtTypeExampleUpdater();
+
+        self::assertSame(
+            [
+                '@id' => '/api/customers?page=1',
+                '@type' => 'PartialCollectionView',
+            ],
+            $updater->update([
+                'type' => 'PartialCollectionView',
+                '@id' => '/api/customers?page=1',
+            ])
+        );
+    }
+
     public function testUpdatePreservesExistingHydraTypeWhenDifferentFromLegacyType(): void
     {
         $updater = new HydraAtTypeExampleUpdater();

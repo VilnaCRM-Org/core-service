@@ -13,14 +13,19 @@ final class OpenApiResponseContentUpdater
     ) {
     }
 
-    public function update(ArrayObject $content): ?ArrayObject
+    public function update(?ArrayObject $content): ?ArrayObject
     {
+        if ($content === null) {
+            return null;
+        }
+
         $contentItems = $content->getArrayCopy();
         $updatedContentItems = $this->updatedContentItems($contentItems);
 
-        return $updatedContentItems === $contentItems
-            ? null
-            : new ArrayObject($updatedContentItems);
+        return match ($updatedContentItems === $contentItems) {
+            true => $content,
+            default => new ArrayObject($updatedContentItems),
+        };
     }
 
     /**

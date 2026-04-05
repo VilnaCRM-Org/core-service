@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Processor;
 
-use ApiPlatform\OpenApi\Model\Components;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
@@ -22,7 +21,7 @@ final class OpenApiSchemaFixesProcessor implements OpenApiProcessorInterface
 
     public function process(OpenApi $openApi): OpenApi
     {
-        $components = $openApi->getComponents() ?? new Components(new ArrayObject());
+        $components = $openApi->getComponents();
         $schemas = $components->getSchemas() ?? new ArrayObject();
 
         $schemas = $this->hydraCollectionSchemaFixer->apply($schemas);

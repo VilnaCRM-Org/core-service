@@ -19,27 +19,46 @@ final class OpenApiMediaTypeSchemaFixer
 
     public function fix(MediaType $mediaType): MediaType
     {
-        $updatedSchema = $this->updatedSchema($mediaType->getSchema());
+        $schema = $mediaType->getSchema();
 
-        if ($updatedSchema === null) {
-            return $mediaType;
-        }
-
-        return $mediaType->withSchema(new ArrayObject($updatedSchema));
+        return $this->fixedMediaType($mediaType, $schema);
     }
 
     /**
-     * @param ArrayObject<int|string, SchemaValue>|array<int|string, SchemaValue>|bool|float|int|string|null $schema
+     * @param ArrayObject<int|string, SchemaValue>|null $schema
      *
-     * @return array<int|string, SchemaValue>|null
+     * @return ArrayObject<int|string, SchemaValue>|null
      */
-    private function updatedSchema(
-        ArrayObject|array|string|int|float|bool|null $schema
-    ): ?array {
-        if (! $schema instanceof ArrayObject) {
-            return null;
-        }
+    private function updatedSchema(?ArrayObject $schema): ?ArrayObject
+    {
+        return match ($schema) {
+            null => null,
+            default => $this->fixedSchema($schema),
+        };
+    }
 
-        return $this->hydraCollectionSchemaFixer->fixSchema($schema->getArrayCopy());
+    private function fixedMediaType(
+        MediaType $mediaType,
+        ?ArrayObject $schema
+    ): MediaType {
+        $updatedSchema = $this->updatedSchema($schema);
+
+        return match ($updatedSchema === $schema) {
+            true => $mediaType,
+            default => $mediaType->withSchema($updatedSchema),
+        };
+    }
+
+    /**
+     * @param ArrayObject<int|string, SchemaValue> $schema
+     */
+    private function fixedSchema(ArrayObject $schema): ArrayObject
+    {
+        $updatedSchema = $this->hydraCollectionSchemaFixer->fixSchema($schema->getArrayCopy());
+
+        return match ($updatedSchema) {
+            null => $schema,
+            default => new ArrayObject($updatedSchema),
+        };
     }
 }

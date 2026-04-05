@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\Model\Response;
+use ArrayObject;
 
 final class OpenApiResponseSchemaFixer
 {
@@ -15,20 +16,24 @@ final class OpenApiResponseSchemaFixer
 
     public function fix(Response|array $response): Response|array
     {
-        if (! $response instanceof Response) {
-            return $response;
-        }
+        return match (true) {
+            ! $response instanceof Response => $response,
+            default => $this->fixedResponse($response),
+        };
+    }
 
-        $content = $response->getContent();
-        if ($content === null) {
-            return $response;
-        }
+    private function updatedContent(Response $response): ?ArrayObject
+    {
+        return $this->contentUpdater->update($response->getContent());
+    }
 
-        $updatedContent = $this->contentUpdater->update($content);
-        if ($updatedContent === null) {
-            return $response;
-        }
+    private function fixedResponse(Response $response): Response
+    {
+        $updatedContent = $this->updatedContent($response);
 
-        return $response->withContent($updatedContent);
+        return match ($updatedContent === $response->getContent()) {
+            true => $response,
+            default => $response->withContent($updatedContent),
+        };
     }
 }
