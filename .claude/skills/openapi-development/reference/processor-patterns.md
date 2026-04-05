@@ -36,13 +36,15 @@ private function processPathItem(PathItem $pathItem): PathItem
 // ❌ Bad: High complexity
 private function processOperation(?Operation $operation): ?Operation
 {
-    if ($operation === null) {
-        return null;
-    }
-    if ($operation->getParameters() === []) {
+    if ($operation !== null) {
+        if ($operation->getParameters() !== []) {
+            return $operation->withParameters(...);
+        }
+
         return $operation;
     }
-    return $operation->withParameters(...);
+
+    return null;
 }
 
 // ✅ Good: Clear flat branching

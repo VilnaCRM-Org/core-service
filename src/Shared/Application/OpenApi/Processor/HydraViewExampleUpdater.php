@@ -25,12 +25,9 @@ final class HydraViewExampleUpdater
     public function update(array $normalized): ?array
     {
         $updatedViewSchema = $this->directViewExampleUpdater->update($normalized);
+        $updatedAllOf = $this->updateAllOf($updatedViewSchema ?? $normalized);
 
-        return match (true) {
-            $updatedViewSchema !== null => $updatedViewSchema,
-            ! isset($normalized['allOf']) => null,
-            default => $this->updateAllOf($normalized),
-        };
+        return $updatedAllOf ?? $updatedViewSchema;
     }
 
     /**
@@ -40,6 +37,10 @@ final class HydraViewExampleUpdater
      */
     private function updateAllOf(array $normalized): ?array
     {
+        if (! isset($normalized['allOf'])) {
+            return null;
+        }
+
         $updatedAllOf = $this->allOfUpdater->update(
             SchemaNormalizer::normalize($normalized['allOf'])
         );

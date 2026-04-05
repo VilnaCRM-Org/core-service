@@ -62,11 +62,14 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
         );
     }
 
-    public function testUpdatePrefersDirectViewExampleWhenAllOfAlsoExists(): void
+    public function testUpdateAppliesDirectViewExampleAndAllOfUpdatesWhenBothExist(): void
     {
+        $updatedAllOf = [['type' => 'string']];
         $allOfUpdater = $this->createMock(HydraAllOfUpdater::class);
-        $allOfUpdater->expects($this->never())
-            ->method('update');
+        $allOfUpdater->expects($this->once())
+            ->method('update')
+            ->with([['type' => 'object']])
+            ->willReturn($updatedAllOf);
 
         $updater = new HydraViewExampleUpdater(
             $allOfUpdater,
@@ -82,7 +85,9 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
                     ],
                 ],
             ],
-            'allOf' => [['type' => 'object']],
+            'allOf' => [
+                ['type' => 'object'],
+            ],
         ];
 
         $this->assertSame(
@@ -95,7 +100,7 @@ final class HydraViewExampleUpdaterTest extends UnitTestCase
                         ],
                     ],
                 ],
-                'allOf' => [['type' => 'object']],
+                'allOf' => $updatedAllOf,
             ],
             $updater->update($normalized)
         );
