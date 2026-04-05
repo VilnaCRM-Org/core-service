@@ -6,4 +6,5 @@ namespace App\Shared\Domain\ValueObject;
 
 interface UlidInterface
 {
+    public function __toString(): string;
 }

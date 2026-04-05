@@ -11,7 +11,7 @@ class CustomerStatus implements CustomerStatusInterface
 {
     public function __construct(
         private string $value,
-        private UlidInterface $ulid
+        private UlidInterface $ulid,
     ) {
     }
 

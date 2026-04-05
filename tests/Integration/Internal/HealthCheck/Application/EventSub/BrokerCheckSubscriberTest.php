@@ -6,10 +6,10 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Application\EventSub\BrokerCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
-use App\Tests\Integration\BaseTest;
+use App\Tests\Integration\BaseApiCase;
 use Aws\Sqs\SqsClient;
 
-final class BrokerCheckSubscriberTest extends BaseTest
+final class BrokerCheckSubscriberTest extends BaseApiCase
 {
     private SqsClient $sqsClient;
     private string $testQueueName = 'test-queue';

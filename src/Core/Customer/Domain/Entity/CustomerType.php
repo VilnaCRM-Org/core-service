@@ -11,7 +11,7 @@ class CustomerType implements CustomerTypeInterface
 {
     public function __construct(
         private string $value,
-        private UlidInterface $ulid
+        private UlidInterface $ulid,
     ) {
     }
 

@@ -20,6 +20,8 @@ final class UntypedParameterSubscriber implements DomainEventSubscriberInterface
      * Intentionally untyped to test exception for missing type hint.
      *
      * @param object $someClass
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      */
     public function __invoke($someClass): void
     {

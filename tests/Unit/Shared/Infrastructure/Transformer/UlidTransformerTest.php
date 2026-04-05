@@ -6,6 +6,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\Transformer;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use App\Shared\Infrastructure\Transformer\SymfonyUlidBinaryTransformer;
+use App\Shared\Infrastructure\Transformer\UlidRepresentationTransformer;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use App\Shared\Infrastructure\Transformer\UlidValueTransformer;
 use App\Shared\Infrastructure\Validator\UlidValidator;
@@ -23,7 +25,11 @@ final class UlidTransformerTest extends UnitTestCase
         parent::setUp();
         $this->ulidFactory = $this->createMock(UlidFactory::class);
         $validator = new UlidValidator();
-        $converter = new UlidValueTransformer($this->ulidFactory);
+        $converter = new UlidValueTransformer(
+            $this->ulidFactory,
+            new UlidRepresentationTransformer(),
+            new SymfonyUlidBinaryTransformer()
+        );
         $this->ulidTransformer = new UlidTransformer($this->ulidFactory, $validator, $converter);
     }
 
@@ -76,6 +82,42 @@ final class UlidTransformerTest extends UnitTestCase
         $result = $this->ulidTransformer->toPhpValue($binaryData);
 
         $this->assertInstanceOf(Ulid::class, $result);
+    }
+
+    public function testToPhpValueWithCanonicalUlidString(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $ulidMock = $this->createMock(Ulid::class);
+        $ulidMock->method('__toString')->willReturn((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($ulidMock);
+
+        $result = $this->ulidTransformer->toPhpValue((string) $symfonyUlid);
+
+        $this->assertSame($ulidMock, $result);
+    }
+
+    public function testToPhpValueWithBinaryObject(): void
+    {
+        $symfonyUlid = new SymfonyUlid();
+        $binary = new Binary($symfonyUlid->toBinary(), Binary::TYPE_GENERIC);
+
+        $ulidMock = $this->createMock(Ulid::class);
+        $ulidMock->method('__toString')->willReturn((string) $symfonyUlid);
+
+        $this->ulidFactory
+            ->expects($this->once())
+            ->method('create')
+            ->with((string) $symfonyUlid)
+            ->willReturn($ulidMock);
+
+        $result = $this->ulidTransformer->toPhpValue($binary);
+
+        $this->assertSame($ulidMock, $result);
     }
 
     public function testToPhpValueWithSymfonyUlidInstance(): void

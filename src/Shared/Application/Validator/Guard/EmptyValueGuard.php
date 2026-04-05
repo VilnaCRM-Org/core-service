@@ -14,8 +14,8 @@ final class EmptyValueGuard
     }
 
     public function shouldSkip(
-        array|string|int|float|bool|null $value,
-        Constraint $constraint
+        mixed $value,
+        Constraint $_constraint
     ): bool {
         return $value === null;
     }

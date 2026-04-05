@@ -56,4 +56,26 @@ final class MongoCustomerRepository extends BaseRepository implements
 
         parent::delete($managedCustomer);
     }
+
+    public function deleteByEmail(string $email): void
+    {
+        $customer = $this->findByEmail($email);
+
+        if (! $customer instanceof Customer) {
+            return;
+        }
+
+        $this->delete($customer);
+    }
+
+    public function deleteById(mixed $id): void
+    {
+        $customer = $this->find($id);
+
+        if (! $customer instanceof Customer) {
+            return;
+        }
+
+        $this->delete($customer);
+    }
 }
