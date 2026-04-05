@@ -13,6 +13,16 @@ use ArrayObject;
 
 final class HydraCollectionSchemaFixerTest extends UnitTestCase
 {
+    private function createFixer(
+        HydraSchemaNormalizer $schemaNormalizer,
+        HydraViewExampleUpdater $viewExampleUpdater
+    ): HydraCollectionSchemaFixer {
+        return new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
+    }
+
     public function testApplyReturnsOriginalSchemasWhenNothingChanges(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
@@ -26,10 +36,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with([])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject(['key' => 'value']);
 
         $result = $fixer->apply($schemas);
@@ -53,10 +60,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => null,
         ]);
@@ -88,10 +92,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
                     : null
             );
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject(['key' => 'value']);
 
         $result = $fixer->apply($schemas);
@@ -140,10 +141,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
                     : null
             );
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject([
             'HydraCollectionPagedSchema' => [
                 'view' => [
@@ -187,10 +185,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(['allOf' => [], 'updated' => true]);
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
 
         self::assertSame(
             ['allOf' => [], 'updated' => true],
@@ -213,10 +208,7 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
             ->with(['allOf' => []])
             ->willReturn(null);
 
-        $fixer = new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
+        $fixer = $this->createFixer($schemaNormalizer, $viewExampleUpdater);
         $schemas = new ArrayObject([
             'HydraCollectionBaseSchema' => new ArrayObject(['allOf' => []]),
         ]);
