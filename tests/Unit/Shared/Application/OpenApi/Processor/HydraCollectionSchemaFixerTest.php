@@ -13,16 +13,6 @@ use ArrayObject;
 
 final class HydraCollectionSchemaFixerTest extends UnitTestCase
 {
-    private function createFixer(
-        HydraSchemaNormalizer $schemaNormalizer,
-        HydraViewExampleUpdater $viewExampleUpdater
-    ): HydraCollectionSchemaFixer {
-        return new HydraCollectionSchemaFixer(
-            $viewExampleUpdater,
-            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
-        );
-    }
-
     public function testApplyReturnsOriginalSchemasWhenNothingChanges(): void
     {
         $schemaNormalizer = $this->createMock(HydraSchemaNormalizer::class);
@@ -214,5 +204,15 @@ final class HydraCollectionSchemaFixerTest extends UnitTestCase
         ]);
 
         self::assertSame($schemas, $fixer->apply($schemas));
+    }
+
+    private function createFixer(
+        HydraSchemaNormalizer $schemaNormalizer,
+        HydraViewExampleUpdater $viewExampleUpdater
+    ): HydraCollectionSchemaFixer {
+        return new HydraCollectionSchemaFixer(
+            $viewExampleUpdater,
+            new HydraCollectionSchemasUpdater($schemaNormalizer, $viewExampleUpdater)
+        );
     }
 }
