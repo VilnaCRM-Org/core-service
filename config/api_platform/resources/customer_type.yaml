@@ -56,7 +56,7 @@ App\Core\Customer\Domain\Entity\CustomerType:
       input: App\Core\Customer\Application\DTO\TypePatch
       processor: App\Core\Customer\Application\Processor\CustomerTypePatchProcessor
       denormalizationContext:
-        allow_extra_attributes: false
+        allow_extra_attributes: true
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
       name: delete
       normalizationContext:
