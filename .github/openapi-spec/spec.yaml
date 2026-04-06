@@ -3353,14 +3353,20 @@ components:
             status:
               $ref: '#/components/schemas/CustomerStatus.jsonld-output'
             confirmed:
-              type: boolean
+              type:
+                - boolean
+                - 'null'
             ulid:
               $ref: '#/components/schemas/UlidInterface.jsonld-output'
             createdAt:
-              type: string
+              type:
+                - string
+                - 'null'
               format: date-time
             updatedAt:
-              type: string
+              type:
+                - string
+                - 'null'
               format: date-time
     CustomerStatus.StatusCreate:
       type: object
@@ -3407,7 +3413,7 @@ components:
             value:
               type: string
             ulid:
-              type: string
+              $ref: '#/components/schemas/UlidInterface.jsonld-output'
     CustomerType.TypeCreate:
       type: object
       required:
