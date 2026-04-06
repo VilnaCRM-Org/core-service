@@ -6,8 +6,13 @@ namespace App\Psalm;
 
 use const DIRECTORY_SEPARATOR;
 
+use function in_array;
+
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+
+use function preg_match;
+
 use Psalm\CodeLocation;
 use Psalm\Issue\ForbiddenCode;
 use Psalm\IssueBuffer;
@@ -18,8 +23,6 @@ use Psalm\Plugin\EventHandler\Event\AfterExpressionAnalysisEvent;
 use Psalm\Plugin\EventHandler\Event\AfterFunctionLikeAnalysisEvent;
 use Psalm\Plugin\EventHandler\Event\AfterStatementAnalysisEvent;
 
-use function in_array;
-use function preg_match;
 use function sprintf;
 use function str_contains;
 
@@ -75,8 +78,7 @@ final class ArchitectureGuardPlugin implements
 
     public static function afterStatementAnalysis(
         AfterFunctionLikeAnalysisEvent|AfterStatementAnalysisEvent $event
-    ): ?bool
-    {
+    ): ?bool {
         $filePath = $event->getStatementsSource()->getFilePath();
 
         if (!self::isProductionSource($filePath)) {
