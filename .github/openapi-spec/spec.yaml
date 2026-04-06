@@ -3353,20 +3353,14 @@ components:
             status:
               $ref: '#/components/schemas/CustomerStatus.jsonld-output'
             confirmed:
-              type:
-                - boolean
-                - 'null'
+              type: boolean
             ulid:
               $ref: '#/components/schemas/UlidInterface.jsonld-output'
             createdAt:
-              type:
-                - string
-                - 'null'
+              type: string
               format: date-time
             updatedAt:
-              type:
-                - string
-                - 'null'
+              type: string
               format: date-time
     CustomerStatus.StatusCreate:
       type: object
@@ -3413,7 +3407,7 @@ components:
             value:
               type: string
             ulid:
-              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+              type: string
     CustomerType.TypeCreate:
       type: object
       required:
@@ -3601,3 +3595,4 @@ tags:
     name: HealthCheck
     description: "Resource 'HealthCheck' operations."
 webhooks: {  }
+
