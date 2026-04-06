@@ -2,6 +2,7 @@ name: checks
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   symfony-checks:
@@ -10,10 +11,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ vars.PHP_VERSION }}
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
+      - uses: actions/checkout@v3
       - name: Copy .env.test.local
         run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
       - name: Cache Composer packages
@@ -22,6 +20,8 @@ jobs:
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Install Symfony CLI

@@ -19,8 +19,6 @@ services:
   caddy:
     command:
       ['caddy', 'run', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile', '--watch']
-    environment:
-      SERVER_NAME: caddy
     volumes:
       - ./public:/srv/app/public:ro
       - ./infrastructure/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
@@ -34,22 +32,14 @@ services:
 
   localstack:
     image: localstack/localstack:3.4.0
+    container_name: localstack
     ports:
       - '${LOCALSTACK_PORT}:4566'
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -fsS http://localhost:4566/_localstack/health | grep -Eq "\"sqs\": \"(available|running)\""',
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
     environment:
       - SERVICES=sqs,ec2,s3,iam,sts
       - DEBUG=1
     volumes:
       - localstack_data:/var/lib/localstack
-
+      - ./infrastructure/docker/php/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
 volumes:
   localstack_data:
