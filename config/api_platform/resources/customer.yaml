@@ -84,6 +84,9 @@ App\Core\Customer\Domain\Entity\Customer:
       name: update
       input: App\Core\Customer\Application\DTO\CustomerPatch
       processor: App\Core\Customer\Application\Processor\CustomerPatchProcessor
+      # Keep denormalizationContext.allow_extra_attributes enabled for GraphQL update:
+      # CustomerPatchUpdateResolver only consumes the supported CustomerPatch fields here,
+      # while REST PATCH keeps allow_extra_attributes: false for stricter request validation.
       denormalizationContext:
         allow_extra_attributes: true
     ApiPlatform\Metadata\GraphQl\DeleteMutation:
