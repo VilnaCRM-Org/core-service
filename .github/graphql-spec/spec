@@ -98,9 +98,9 @@ type Customer implements Node {
   leadSource: String!
   type: CustomerType!
   status: CustomerStatus!
-  confirmed: Boolean!
-  createdAt: String!
-  updatedAt: String!
+  confirmed: Boolean
+  createdAt: String
+  updatedAt: String
 }
 
 type CustomerType implements Node {
@@ -111,7 +111,6 @@ type CustomerType implements Node {
 type CustomerStatus implements Node {
   id: ID!
   value: String!
-  ulid: String!
 }
 
 input CustomerFilter_order {
