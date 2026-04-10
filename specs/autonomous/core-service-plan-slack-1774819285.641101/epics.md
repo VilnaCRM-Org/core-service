@@ -480,10 +480,10 @@ So that recurring audit obligations can be controlled without losing traceabilit
    **Then** prior run and export history remains visible for auditability  
    **And** future execution behavior changes only according to the new schedule status.
 
-### Story 5.3: Execute Due Schedules Idempotently Through an Internal Trigger
+### Story 5.3: Execute Due Schedules Idempotently via External Scheduler Invocation of the Internal Execution Endpoint
 
 As an operations lead,  
-I want due schedules to create exactly one run per execution window,  
+I want due schedules to create exactly one run per execution window when an external scheduler calls the internal execution endpoint,
 So that recurring evidence generation is trustworthy even if the trigger fires more than once.
 
 **FRs:** FR-9, FR-10, FR-11, FR-16  
@@ -491,7 +491,7 @@ So that recurring evidence generation is trustworthy even if the trigger fires m
 
 **Acceptance Criteria:**
 
-1. **Given** an operational trigger invokes due-schedule execution for a point in time  
+1. **Given** an external scheduler invokes the internal due-schedule execution endpoint for a point in time
    **When** the system resolves schedules that are due  
    **Then** it creates run records with the resolved execution window, trigger timestamp, and linked export reference  
    **And** it advances next-run tracking according to cadence and timezone rules  

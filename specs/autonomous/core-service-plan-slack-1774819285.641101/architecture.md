@@ -477,7 +477,8 @@ For each due schedule, the application service should:
 4. If the run already exists, skip it safely.
 5. If the run is new, create a linked export record from the schedule snapshot.
 6. Enqueue export generation.
-7. Advance `nextRunAt`.
+   - If enqueue fails, transition the linked `AuditExport` to `failed` with a retryable failure summary, transition the `AuditExportRun` to `failed` with `failedAt` and correlated failure details, persist both updates durably, emit failure telemetry, and still continue to next-run advancement so the schedule is not left stuck.
+7. Advance `nextRunAt` once the enqueue outcome is durably recorded.
 
 This model keeps the scheduler external but keeps execution semantics, idempotency, and history inside the service.
 
