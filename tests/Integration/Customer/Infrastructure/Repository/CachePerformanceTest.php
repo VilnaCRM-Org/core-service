@@ -172,6 +172,16 @@ final class CachePerformanceTest extends KernelTestCase
 
         $this->cachePool->clear();
 
+        $cacheMissStart = hrtime(true);
+        $this->repository->findByEmail($email);
+        $cacheMissLatencyNs = hrtime(true) - $cacheMissStart;
+
+        $this->cachePool->clear();
+        self::assertFalse(
+            $this->cachePool->getItem('customer.email.' . hash('sha256', strtolower($email)))->isHit(),
+            'Email lookup cache should be empty before warmup'
+        );
+
         $this->repository->findByEmail($email);
 
         $emailHash = hash('sha256', strtolower($email));
@@ -189,6 +199,7 @@ final class CachePerformanceTest extends KernelTestCase
         }
 
         $averageLatencyMs = $totalLatencyNs / self::PERFORMANCE_ITERATIONS / 1_000_000;
+        $cacheMissLatencyMs = $cacheMissLatencyNs / 1_000_000;
 
         self::assertLessThanOrEqual(
             self::MAX_CACHE_HIT_LATENCY_MS,
@@ -199,6 +210,31 @@ final class CachePerformanceTest extends KernelTestCase
                 self::MAX_CACHE_HIT_LATENCY_MS
             )
         );
+
+        self::assertLessThan(
+            $cacheMissLatencyMs,
+            $averageLatencyMs,
+            sprintf(
+                'Cached email lookup average (%.2fms) should be faster than cache miss (%.2fms)',
+                $averageLatencyMs,
+                $cacheMissLatencyMs
+            )
+        );
+
+        if ($cacheMissLatencyMs > 0) {
+            $speedupFactor = $cacheMissLatencyMs / max($averageLatencyMs, 0.001);
+            self::assertGreaterThanOrEqual(
+                self::MIN_SPEEDUP_FACTOR,
+                $speedupFactor,
+                sprintf(
+                    'Cached email lookups should provide at least %.1fx speedup, got %.1fx (miss: %.2fms, average hit: %.2fms)',
+                    self::MIN_SPEEDUP_FACTOR,
+                    $speedupFactor,
+                    $cacheMissLatencyMs,
+                    $averageLatencyMs
+                )
+            );
+        }
     }
 
     public function testCacheRecoveryAfterInvalidation(): void

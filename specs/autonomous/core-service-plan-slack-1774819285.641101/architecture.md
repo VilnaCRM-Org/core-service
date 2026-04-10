@@ -449,6 +449,9 @@ The export request path should be:
 4. If enqueue succeeds, transition the export to `queued`.
 5. If enqueue fails, keep the export durable and visible, transition it to `failed`, record a retryable failure summary, and do not lose the request.
 6. Worker transitions the export to `processing`, streams query results, writes CSV to artifact storage, and updates the aggregate to `available` or `failed`.
+   - If artifact storage write or post-write verification fails, transition the export to `failed`, record a retryable failure summary with the latest retry metadata, emit storage-failure telemetry, and never leave the export in `processing`.
+   - Partial or temporary artifact bytes should be deleted when possible and otherwise treated as abandoned so they are never exposed as retrievable artifacts.
+   - Storage failures should flow through the dedicated failure transport and retry policy rather than requiring manual re-dispatch for the first recovery attempt.
 
 This ensures that state transitions remain durable even when the queue or worker layer is impaired.
 
@@ -490,6 +493,8 @@ Artifact expiry should be enforced in two places:
 - Asynchronously by a cleanup use case that deletes or revokes expired objects in storage and marks export metadata accordingly
 
 The cleanup use case can be invoked by the same external scheduler pattern. That avoids introducing an internal cron subsystem.
+
+Cleanup invocations should be idempotent for the same expiry window by re-checking `expiresAt`, `revokedAt`, and current artifact metadata before mutating state. Long-running sweeps should persist continuation progress so a partial failure can resume from the last processed artifact instead of restarting the entire window. Cleanup failures and resumed sweeps should emit the same operational telemetry family as export-job failures so they remain visible in dashboards and alerting.
 
 ## 9. Artifact Delivery Model
 
