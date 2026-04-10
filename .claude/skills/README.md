@@ -19,6 +19,21 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 3. Follow the execution steps
 4. Check supporting files (`reference/`, `examples/`) as needed
 
+## Issue #155 Migration Baseline
+
+Issue `#155` is a documentation- and skill-guidance migration only. It does not
+authorize runtime feature work.
+
+- `core-service` remains authoritative for BMALPH usage, autonomous-planning
+  flow, MongoDB-specific correctness, the current onboarding path, and
+  repository-supported commands.
+- Keep the canonical routing aligned: documentation updates route to
+  `documentation-sync`, PR feedback routes to `code-review` using
+  `make pr-comments` plus `make ci`, and autonomous planning from a short task
+  routes to `bmad-autonomous-planning`.
+- Unsupported references from other repositories must be adapted or excluded
+  rather than copied into `core-service`.
+
 ## Available Skills
 
 ### 1. Autonomous BMALPH Planning (`bmad-autonomous-planning/`)

@@ -29,10 +29,10 @@ Story `1.1` initializes the required evaluation targets. Final changed-or-unchan
 
 | Path or pattern | Group | Edit target | Final status | Rationale or notes |
 | --- | --- | --- | --- | --- |
-| `AGENTS.md` | Canonical routing docs | `yes` | `pending` | High-visibility repository routing guidance; evaluate during the canonical-routing stories. |
-| `.claude/skills/AI-AGENT-GUIDE.md` | Canonical routing docs | `yes` | `pending` | AI-agent baseline guide; must stay aligned with repository routing policy. |
-| `.claude/skills/SKILL-DECISION-GUIDE.md` | Canonical routing docs | `yes` | `pending` | Skill routing decision surface; evaluate for policy and taxonomy alignment. |
-| `.claude/skills/README.md` | Canonical routing docs | `yes` | `pending` | Contributor-facing skill catalog mirror; evaluate after canonical routing settles. |
+| `AGENTS.md` | Canonical routing docs | `yes` | `changed` | Story `2.1`: clarified the docs-only scope for issue `#155`, preserved the `core-service` source-of-truth baseline, and restated the default routing for docs, review, and autonomous planning. |
+| `.claude/skills/AI-AGENT-GUIDE.md` | Canonical routing docs | `yes` | `changed` | Story `2.1`: aligned the AI-agent guide with the `core-service` baseline, docs-only scope, and the canonical routing defaults for docs, review, and autonomous planning. |
+| `.claude/skills/SKILL-DECISION-GUIDE.md` | Canonical routing docs | `yes` | `changed` | Story `2.1`: aligned the routing decision surface with the `core-service` source-of-truth policy, docs-only scope, and the same default routes used by the other canonical docs. |
+| `.claude/skills/README.md` | Canonical routing docs | `yes` | `changed` | Story `2.1`: aligned the contributor-facing catalog mirror with the `core-service` baseline and the explicit default routing for docs, review, and autonomous planning. |
 | `.agents/skills/**` | Wrapper layer | `conditional` | `pending` | Evaluate wrappers only where canonical routing language or BMALPH handoff wording changes; unchanged wrappers must still be recorded with rationale. |
 | `README.md` | Repo-facing mirrors | `yes` | `pending` | Repo-facing contributor guide; sync after canonical routing and skill guidance settle. |
 | `docs/getting-started.md` | Repo-facing mirrors | `yes` | `pending` | Setup and onboarding mirror; sync after canonical routing and skill guidance settle. |
