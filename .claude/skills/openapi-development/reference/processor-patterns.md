@@ -1,6 +1,6 @@
 # Processor Patterns for OpenAPI Development
 
-Key patterns and techniques used in core-service to maintain low complexity in OpenAPI processors. Historical cross-repo comparisons are optional background only; the local `src/Shared/Application/OpenApi/` implementation is authoritative for this skill.
+Key patterns and techniques adopted from the user-service repository for maintaining low complexity in OpenAPI processors.
 
 ## 1. Constants for HTTP Operations
 

@@ -44,8 +44,6 @@ make pr-comments FORMAT=json  # JSON output
 
 For any code changes (suggestions, prompts, or new files), **MANDATORY** verification:
 
-Ownership note: review-specific organization examples live in [`examples/organization-fixes.md`](examples/organization-fixes.md). Keep the broader refactoring catalog in [`../code-organization/examples/refactoring-examples.md`](../code-organization/examples/refactoring-examples.md) so the two skills do not compete for the same example surface.
-
 **A. Code Organization Principle** (see `code-organization` skill):
 
 > **Directory X contains ONLY class type X**

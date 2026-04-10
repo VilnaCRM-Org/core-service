@@ -34,12 +34,21 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
 - Skills are **regularly updated** with correct patterns
 - Following skills ensures **consistency** with the codebase
 
-## Core-Service Baseline
+## Issue #155 Scope Guardrail
 
-- `core-service` is authoritative for BMALPH usage, autonomous planning, MongoDB-specific correctness, contributor onboarding, and supported commands.
-- Keep default routing aligned across the canonical docs: `documentation-sync` for documentation changes, `code-review` for PR feedback, and `bmad-autonomous-planning` for autonomous BMALPH specs planning.
-- When `user-service` guidance diverges, adapt only the intent that maps to existing `core-service` workflows. Do not import unsupported commands such as `make ai-review-loop` or `make schemathesis-validate`.
-- Issue `#155` is a documentation-only migration. These guide updates do not authorize runtime feature, configuration, or `_bmad/` behavior changes.
+Issue `#155` is a documentation- and skill-guidance migration only. It does not
+authorize runtime feature work, behavior changes, or edits to unsupported
+workflow surfaces.
+
+- `core-service` remains authoritative for BMALPH usage, autonomous-planning
+  flow, MongoDB-specific correctness, the current onboarding path, and
+  repository-supported commands.
+- Keep the default routing aligned across discovery docs: documentation updates
+  route to `documentation-sync`, PR feedback routes to `code-review` using
+  `make pr-comments` plus `make ci`, and autonomous planning from a short task
+  routes to `bmad-autonomous-planning`.
+- Unsupported references from other repositories must be adapted or excluded
+  rather than copied into `core-service`.
 
 ## Quick Reference
 
@@ -91,8 +100,6 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
 | **Autonomous BMALPH specs** | `bmad-autonomous-planning`      | Headless BMALPH-wrapped planning from a short task |
 
 > **📋 Detailed Guide**: See `.claude/skills/SKILL-DECISION-GUIDE.md` for decision trees and scenarios.
-
-OpenAPI routing: use `developing-openapi-specs` as the default entrypoint for endpoint documentation and spec work. Use `openapi-development` only for advanced processor or layer-development guidance. Any broader consolidation stays deferred beyond issue `#155`.
 
 ### Protected Quality Thresholds
 

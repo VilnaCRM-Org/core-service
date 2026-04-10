@@ -162,15 +162,6 @@ agent session. The canonical workflow lives in
 Use a short task description and let the main agent orchestrate the BMALPH
 stages in subagents without repo-local launchers.
 
-For AI-agent routing, treat `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`,
-`.claude/skills/SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md` as
-the canonical discovery surfaces. The default paths are:
-
-- `bmad-autonomous-planning` for specs-only BMALPH planning from a short request
-- `developing-openapi-specs` for endpoint documentation and OpenAPI spec work
-- `openapi-development` only for advanced processor or layer-development changes
-- `code-review` for PR feedback, backed by `make pr-comments` and `make ci`
-
 `bmalph init` writes local BMAD/Ralph files such as `_bmad/`, `.ralph/`, and
 platform-specific instruction files. Those generated directories are ignored in
 git for this repository, so use the dry-run first and initialize locally only
