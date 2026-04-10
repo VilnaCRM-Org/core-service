@@ -215,11 +215,11 @@ core-service shall expose REST-first product contracts for export creation, expo
 ### Success Metrics
 
 - Median time from export request to artifact availability is <= 15 minutes for exports up to 100,000 rows over a rolling 30-day window.
-- >= 99% of export requests complete without manual intervention over a rolling 30-day window.
+- > = 99% of export requests complete without manual intervention over a rolling 30-day window.
 - Within 90 days of rollout, >= 60% of recurring audit exports are initiated from saved filters or schedules over each rolling 30-day window.
 - Within 90 days of rollout, engineering- or support-assisted audit export requests decrease by >= 50% versus the 90-day pre-rollout baseline.
 - Scheduled export success rate is >= 99.5% and missed-run rate is <= 0.5% over each rolling 30-day window.
-- >= 85% of generated artifacts are retrieved before expiry over each rolling 30-day window.
+- > = 85% of generated artifacts are retrieved before expiry over each rolling 30-day window.
 - Security, privacy, and redaction incidents related to exports remain at 0 Sev1/Sev2 incidents and <= 1 Sev3 incident over each rolling 90-day window.
 
 ## Assumptions Made
