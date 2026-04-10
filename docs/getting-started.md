@@ -204,6 +204,22 @@ the BMALPH stages through dedicated subagents rather than repo-local launchers.
 Run the dry-run first, then initialize only when you want those files in your
 working tree.
 
+### AI agent routing
+
+Use the repository routing docs as the source of truth for autonomous work:
+
+- `AGENTS.md`
+- `.claude/skills/AI-AGENT-GUIDE.md`
+- `.claude/skills/SKILL-DECISION-GUIDE.md`
+- `.claude/skills/README.md`
+
+The default paths are:
+
+- `bmad-autonomous-planning` for specs-only BMALPH planning
+- `developing-openapi-specs` for endpoint documentation and OpenAPI spec work
+- `openapi-development` only for advanced processor or layer-development changes
+- `code-review` for PR feedback, backed by `make pr-comments` and `make ci`
+
 ### Working in the workspace
 
 All project operations remain the same as local usage:

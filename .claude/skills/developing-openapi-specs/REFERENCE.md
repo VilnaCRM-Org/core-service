@@ -107,7 +107,7 @@ public function __invoke(array $context = []): OpenApi
 }
 ```
 
-## Key Patterns from user-service
+## Key Patterns for core-service
 
 ### 1. Constants for HTTP Operations
 
@@ -777,7 +777,8 @@ Key configuration:
 
 ## Resources
 
-- **User-Service Reference**: https://github.com/VilnaCRM-Org/user-service/tree/copilot/fix-45
+- **Core-service OpenAPI layer**: `src/Shared/Application/OpenApi/`
+- **Core-service service wiring**: `config/services.yaml`
 - **API Platform Docs**: https://api-platform.com/docs/
 - **OpenAPI 3.1 Spec**: https://spec.openapis.org/oas/v3.1.0
 - **Spectral Validation**: https://stoplight.io/open-source/spectral

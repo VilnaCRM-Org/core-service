@@ -2,6 +2,13 @@
 
 **Choose the right skill for your task based on what you're trying to accomplish.**
 
+## Core-Service Baseline
+
+- `core-service` remains authoritative for BMALPH usage, autonomous planning, MongoDB-specific correctness, contributor onboarding, and supported commands.
+- Keep default routing aligned with the other canonical docs: `documentation-sync` for documentation changes, `code-review` for PR feedback, and `bmad-autonomous-planning` for autonomous BMALPH specs planning.
+- If related `user-service` guidance suggests unsupported workflows, adapt the intent to real `core-service` commands or exclude it. Do not import commands such as `make ai-review-loop` or `make schemathesis-validate`.
+- Issue `#155` is a documentation-only migration and does not widen scope to runtime feature, configuration, or `_bmad/` behavior changes.
+
 ## Quick Decision Tree
 
 ```
@@ -19,7 +26,9 @@ What are you trying to do?
 ├─ Create something new
 │   ├─ Full BMALPH specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
-│   ├─ New API endpoint → developing-openapi-specs
+│   ├─ OpenAPI docs/spec work → developing-openapi-specs
+│   ├─ OpenAPI processor/layer work → openapi-development
+│   ├─ New API resource/CRUD → api-platform-crud
 │   ├─ New load test → load-testing
 │   ├─ New database entity → database-migrations
 │   ├─ New database indexes → query-performance-analysis
@@ -36,21 +45,6 @@ What are you trying to do?
     ├─ General docs → documentation-sync
     └─ Architecture diagrams → structurizr-architecture-sync
 ```
-
-## Issue #155 Migration Baseline
-
-Issue `#155` is a documentation- and skill-guidance migration only. Do not use
-it to justify runtime feature work or unsupported workflow changes.
-
-- `core-service` remains authoritative for BMALPH usage, autonomous-planning
-  flow, MongoDB-specific correctness, the current onboarding path, and
-  repository-supported commands.
-- Default routing must stay consistent across the canonical discovery docs:
-  documentation updates route to `documentation-sync`, PR feedback routes to
-  `code-review` using `make pr-comments` plus `make ci`, and autonomous
-  planning from a short task routes to `bmad-autonomous-planning`.
-- Unsupported references from other repositories must be adapted or excluded
-  rather than copied into `core-service`.
 
 ## Scenario-Based Guide
 
@@ -186,7 +180,21 @@ This skill guides entity modification with Doctrine ODM.
 
 **Use**: [developing-openapi-specs](developing-openapi-specs/SKILL.md)
 
-This skill covers processor patterns for OpenAPI.
+This is the default entrypoint for endpoint documentation and OpenAPI-spec work.
+
+**Advanced path**: Use [openapi-development](openapi-development/SKILL.md) only when you need to change processors or the OpenAPI layer itself.
+
+**NOT**: api-platform-crud (that's for full API resource implementation)
+
+---
+
+### "I need to change OpenAPI processors or the OpenAPI layer itself"
+
+**Use**: [openapi-development](openapi-development/SKILL.md)
+
+This is the advanced path for processor or layer-development patterns inside the OpenAPI layer.
+
+**NOT**: developing-openapi-specs (that remains the default entrypoint for endpoint documentation and spec work)
 
 ---
 

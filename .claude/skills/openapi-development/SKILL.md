@@ -2,18 +2,20 @@
 
 ## Description
 
-Guide for contributing to the OpenAPI layer at `src/Shared/Application/OpenApi/`. This skill covers architecture patterns, best practices, and complexity management techniques adopted from the user-service repository.
+Advanced guidance for contributing to the OpenAPI layer at `src/Shared/Application/OpenApi/`. This skill covers processor-pattern architecture, best practices, and complexity-management techniques already used in core-service.
+
+Use [developing-openapi-specs](../developing-openapi-specs/SKILL.md) first for endpoint documentation and spec work. Stay in this skill only when the task changes processors, the tagged OpenAPI pipeline, or the layer's internal architecture.
 
 ## When to Use This Skill
 
 Use this skill when:
 
-- Adding new OpenAPI endpoint factories
 - Creating new processors for spec transformation
-- Adding parameter descriptions or validation
-- Modifying OpenAPI generation logic
-- Fixing OpenAPI validation errors
-- Reducing cyclomatic complexity in OpenAPI code
+- Refactoring tagged OpenAPI processors or factory orchestration
+- Modifying OpenAPI generation logic across the layer
+- Fixing OpenAPI validation errors that require processor or layer changes
+- Reducing cyclomatic complexity in OpenAPI internals
+- Updating the OpenAPI pipeline under `src/Shared/Application/OpenApi/`
 
 ## Architecture Overview
 
@@ -440,7 +442,8 @@ Key configuration:
 
 ## Resources
 
-- **User-Service Reference**: https://github.com/VilnaCRM-Org/user-service/tree/copilot/fix-45
+- **Core-service OpenAPI layer**: `src/Shared/Application/OpenApi/`
+- **Core-service service wiring**: `config/services.yaml`
 - **API Platform Docs**: https://api-platform.com/docs/
 - **OpenAPI 3.1 Spec**: https://spec.openapis.org/oas/v3.1.0
 - **Spectral Validation**: https://stoplight.io/open-source/spectral

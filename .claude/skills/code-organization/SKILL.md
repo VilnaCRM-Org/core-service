@@ -7,6 +7,8 @@ description: Ensure proper code organization with class names, directories, name
 
 This skill ensures proper code organization following the core principle: **Directory X contains ONLY class type X**.
 
+Review-specific organization examples live in [`../code-review/examples/organization-fixes.md`](../code-review/examples/organization-fixes.md). This skill owns the broader refactoring and directory-structure guidance, while PR-thread fixes should reference the code-review example surface when the issue comes from reviewer feedback.
+
 ## When to Use This Skill
 
 Activate this skill when:

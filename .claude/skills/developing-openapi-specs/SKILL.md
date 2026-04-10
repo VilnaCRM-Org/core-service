@@ -1,26 +1,26 @@
 ---
 name: developing-openapi-specs
-description: Guide for contributing to the OpenAPI layer using processor pattern, complexity management, and functional programming. Use when adding endpoint factories, processors, parameter descriptions, reducing cyclomatic complexity, or fixing OpenAPI validation errors. Covers architecture patterns from user-service repository.
+description: Default entrypoint for endpoint documentation and OpenAPI-spec work in core-service. Use when adding endpoint factories, parameter descriptions, request or response schema details, or fixing OpenAPI validation errors without refactoring the OpenAPI layer itself.
 ---
 
 # Developing OpenAPI Specs
 
-**Guide for contributing to the OpenAPI layer** at `src/Shared/Application/OpenApi/`.
+**Default entrypoint for endpoint documentation and OpenAPI-spec work** at `src/Shared/Application/OpenApi/`.
 
-This skill covers architecture patterns, complexity management techniques, and best practices for maintaining OpenAPI specifications while keeping code quality high.
+This skill covers the core-service patterns, complexity-management techniques, and validation steps used to maintain OpenAPI specifications while keeping code quality high. If the task shifts into processor refactoring or deeper OpenAPI layer-development work, move to [openapi-development](../openapi-development/SKILL.md).
 
 **Related Skills**:
 
 - [implementing-ddd-architecture](../implementing-ddd-architecture/SKILL.md) - Domain layer must stay pure; OpenAPI code belongs in Application layer
+- [openapi-development](../openapi-development/SKILL.md) - Advanced path for processor and OpenAPI-layer refactoring
 
 ## When to Use This Skill
 
-- Adding new OpenAPI endpoint factories
-- Creating processors for spec transformation
+- Adding or refining endpoint factories for documentation-facing changes
 - Adding parameter descriptions or validation
-- Modifying OpenAPI generation logic
+- Updating request or response schema details
 - Fixing OpenAPI validation errors
-- Reducing cyclomatic complexity in OpenAPI code
+- Addressing documentation-facing OpenAPI generation regressions without redesigning the processor pipeline
 
 ## Architecture Overview
 
@@ -255,6 +255,7 @@ Before committing OpenAPI changes:
 - [ ] `make validate-openapi-spec` passes
 - [ ] `make phpinsights` meets thresholds
 - [ ] `make unit-tests` pass with 100% coverage
+- [ ] Switched to `openapi-development` if the task became processor or layer-development work
 
 ---
 

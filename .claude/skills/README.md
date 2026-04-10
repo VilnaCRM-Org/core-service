@@ -19,20 +19,13 @@ Skills are automatically discovered and invoked when relevant. You don't need to
 3. Follow the execution steps
 4. Check supporting files (`reference/`, `examples/`) as needed
 
-## Issue #155 Migration Baseline
+## Core-Service Baseline
 
-Issue `#155` is a documentation- and skill-guidance migration only. It does not
-authorize runtime feature work.
-
-- `core-service` remains authoritative for BMALPH usage, autonomous-planning
-  flow, MongoDB-specific correctness, the current onboarding path, and
-  repository-supported commands.
-- Keep the canonical routing aligned: documentation updates route to
-  `documentation-sync`, PR feedback routes to `code-review` using
-  `make pr-comments` plus `make ci`, and autonomous planning from a short task
-  routes to `bmad-autonomous-planning`.
-- Unsupported references from other repositories must be adapted or excluded
-  rather than copied into `core-service`.
+- This catalog follows the `core-service` repository baseline for BMALPH usage, autonomous planning, MongoDB-specific correctness, contributor onboarding, and supported commands.
+- Default routing stays aligned with the canonical docs: `documentation-sync` for documentation changes, `code-review` for PR feedback, and `bmad-autonomous-planning` for autonomous BMALPH specs planning.
+- OpenAPI routing stays explicit: `developing-openapi-specs` is the default entrypoint for endpoint documentation and spec work, while `openapi-development` is the advanced path for processor or layer-development guidance.
+- If `user-service` wording suggests unsupported workflows, adapt only the portable intent that maps to real `core-service` commands. Do not import commands such as `make ai-review-loop` or `make schemathesis-validate`.
+- Issue `#155` is a documentation-only migration, so catalog updates here do not imply runtime feature, configuration, or `_bmad/` behavior changes.
 
 ## Available Skills
 
@@ -404,7 +397,7 @@ authorize runtime feature work.
 
 ### 13. Developing OpenAPI Specs (`developing-openapi-specs/`)
 
-**Purpose**: Guide for contributing to the OpenAPI layer using processor pattern
+**Purpose**: Default entrypoint for endpoint documentation and OpenAPI spec work
 
 **When activated**:
 
@@ -420,11 +413,34 @@ authorize runtime feature work.
 - Covers endpoint factories and builders
 - Ensures OpenAPI spec validation passes
 
+**Advanced path**: Use [`openapi-development/SKILL.md`](openapi-development/SKILL.md) only when you need processor or layer-development guidance. Broader consolidation of the two skills stays deferred beyond issue `#155`.
+
 **Key commands**: `make generate-openapi-spec`, `./scripts/validate-openapi-spec.sh`
 
 ---
 
-### 14. API Platform CRUD (`api-platform-crud/`)
+### 14. OpenAPI Development (`openapi-development/`)
+
+**Purpose**: Advanced guidance for OpenAPI processors and layer-development patterns
+
+**When activated**:
+
+- Refactoring OpenAPI processors or factory orchestration
+- Changing OpenAPI layer internals under `src/Shared/Application/OpenApi/`
+- Applying advanced complexity-management patterns inside the OpenAPI layer
+- Extending processor-pattern architecture beyond endpoint documentation changes
+
+**What it does**:
+
+- Guides processor and factory architecture in the OpenAPI layer
+- Covers advanced complexity-management techniques for OpenAPI internals
+- Documents layer-level refactoring patterns adopted for `core-service`
+
+**Default path reminder**: If the task is endpoint documentation or spec work, start with [`developing-openapi-specs/SKILL.md`](developing-openapi-specs/SKILL.md) instead.
+
+---
+
+### 15. API Platform CRUD (`api-platform-crud/`)
 
 **Purpose**: Create complete REST API CRUD operations using API Platform 4 with DDD and CQRS patterns
 
@@ -458,7 +474,7 @@ authorize runtime feature work.
 
 ---
 
-### 15. Observability Instrumentation (`observability-instrumentation/`)
+### 16. Observability Instrumentation (`observability-instrumentation/`)
 
 **Purpose**: Add comprehensive observability to new code with structured logs, metrics, and traces
 
@@ -507,7 +523,7 @@ authorize runtime feature work.
 
 ---
 
-### 16. Query Performance Analysis (`query-performance-analysis/`)
+### 17. Query Performance Analysis (`query-performance-analysis/`)
 
 **Purpose**: Detect N+1 queries, analyze slow queries, identify missing indexes, and ensure safe index migrations
 
@@ -554,7 +570,7 @@ authorize runtime feature work.
 
 ---
 
-### 17. Cache Management (`cache-management/`)
+### 18. Cache Management (`cache-management/`)
 
 **Purpose**: Implement production-grade caching with cache keys/TTLs/consistency classes, SWR (stale-while-revalidate), explicit invalidation, and comprehensive testing
 
@@ -602,7 +618,7 @@ authorize runtime feature work.
 
 ---
 
-### 18. Code Organization (`code-organization/`)
+### 19. Code Organization (`code-organization/`)
 
 **Purpose**: Ensure proper code organization with class names, directories, namespaces, and naming consistency
 
@@ -639,7 +655,7 @@ authorize runtime feature work.
 
 ---
 
-### 19. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
+### 20. Structurizr Architecture Sync (`structurizr-architecture-sync/`)
 
 **Purpose**: Maintain Structurizr C4 architecture diagrams in sync with code changes
 

@@ -62,6 +62,17 @@ Also, please install the [Coderabbit AI Plugin](https://www.coderabbit.ai/blog/w
    Provide only a short task description and let the main agent orchestrate the
    BMALPH stages autonomously.
 
+### AI agent routing for Codex and Claude
+
+Use `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`,
+`.claude/skills/SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md` as
+the canonical routing surfaces for AI-assisted work.
+
+- Use `bmad-autonomous-planning` for specs-only BMALPH planning from a short request.
+- Use `developing-openapi-specs` for endpoint documentation and OpenAPI spec work.
+- Use `openapi-development` only for advanced processor or OpenAPI-layer changes.
+- Use `code-review` for PR feedback, then verify the branch with `make pr-comments` and `make ci`.
+
 ### Version Control Configuration
 
 - We use **Git** with a standard **branching strategy** (e.g., feature branches, main/master as the production branch).

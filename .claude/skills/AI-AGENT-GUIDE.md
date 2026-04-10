@@ -6,6 +6,13 @@
 
 This repository uses a modular **Skills system** originally designed for Claude Code but structured to be **AI-agnostic**. All skills are pure markdown files that any AI agent can read and execute.
 
+## Core-Service Baseline
+
+- Treat `core-service` as the source of truth for BMALPH usage, autonomous planning, MongoDB-specific correctness, contributor onboarding, and supported commands.
+- Keep default routing aligned with the other canonical docs: `documentation-sync` for documentation changes, `code-review` for PR feedback, and `bmad-autonomous-planning` for autonomous BMALPH specs planning.
+- When related `user-service` guidance differs, adapt only the portable intent that maps to existing `core-service` workflows. Exclude unsupported commands such as `make ai-review-loop` and `make schemathesis-validate`.
+- Issue `#155` is a documentation-only migration, so these routing docs should not be used to justify runtime feature, configuration, or `_bmad/` behavior changes.
+
 ## How This Works
 
 ### For Claude Code
@@ -38,7 +45,8 @@ Quick Decision Tree:
 ├─ Create something new
 │   ├─ Full BMALPH specs from short prompt → bmad-autonomous-planning
 │   ├─ New entity/value object → implementing-ddd-architecture
-│   ├─ New API endpoint → api-platform-crud
+│   ├─ OpenAPI docs/spec work → developing-openapi-specs
+│   ├─ New API resource/CRUD → api-platform-crud
 │   ├─ New load test → load-testing
 │   └─ New database entity → database-migrations
 │
@@ -104,22 +112,7 @@ Complex skills have multi-file structure:
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
 
-## Issue #155 Source-of-Truth Rules
-
-Issue `#155` is a documentation- and skill-guidance migration only. Do not
-treat it as runtime feature work.
-
-- `core-service` remains authoritative for BMALPH usage, autonomous-planning
-  flow, MongoDB-specific correctness, the current onboarding path, and
-  repository-supported commands.
-- Keep the default routing aligned across the discovery surfaces: documentation
-  updates route to `documentation-sync`, PR feedback routes to `code-review`
-  using `make pr-comments` plus `make ci`, and autonomous planning from a short
-  task routes to `bmad-autonomous-planning`.
-- Unsupported references from other repositories must be adapted or excluded
-  rather than copied into `core-service`.
-
-## Available Skills (15 Total)
+## Available Skills
 
 ### 🤖 Autonomous Planning Skills
 
@@ -147,7 +140,10 @@ Preferred Codex trigger for this skill:
 | **Deptrac Fixer**         | `deptrac-fixer/SKILL.md`                 | Fix architectural boundary violations            |
 | **Quality Standards**     | `quality-standards/SKILL.md`             | Overview of protected quality thresholds         |
 | **Complexity Management** | `complexity-management/SKILL.md`         | Reduce cyclomatic complexity in code             |
-| **OpenAPI Specs**         | `developing-openapi-specs/SKILL.md`      | Add OpenAPI documentation with processor pattern |
+| **OpenAPI Specs**         | `developing-openapi-specs/SKILL.md`      | Default entrypoint for endpoint documentation and OpenAPI spec work |
+| **OpenAPI Development**   | `openapi-development/SKILL.md`           | Advanced guidance for OpenAPI processors and layer-development patterns |
+
+OpenAPI routing note: start with `developing-openapi-specs` for endpoint documentation and spec work. Use `openapi-development` only for advanced processor or layer-development guidance. Keep any broader consolidation as a later follow-up rather than part of issue `#155`.
 
 ### 💾 Database & Documentation Skills
 
