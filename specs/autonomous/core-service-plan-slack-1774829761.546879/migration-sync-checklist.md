@@ -10,6 +10,21 @@ Story `1.1` initializes the required evaluation targets. Final changed-or-unchan
 - `unchanged`: evaluated and intentionally left as-is
 - `read-only reference`: consulted only and never edited in this issue
 
+## Required Execution Order
+
+1. Canonical routing docs first: `AGENTS.md`, `.claude/skills/AI-AGENT-GUIDE.md`, `.claude/skills/SKILL-DECISION-GUIDE.md`, and `.claude/skills/README.md`.
+2. Skill modules second: only the in-scope `.claude/skills/**` modules and examples governed by `migration-delta-inventory.md`.
+3. Wrappers third if needed: `.agents/skills/**` mirrors only when canonical routing language or BMALPH handoff wording actually changed.
+4. Repo-facing mirrors fourth: `README.md`, `docs/getting-started.md`, and `docs/onboarding.md` after canonical routing and skill wording settle.
+5. Validation last: finalize changed-or-unchanged outcomes, explicitly evaluate the runtime reference docs, and run repository validation before closure.
+
+## Scope Guardrails
+
+- This issue stays documentation-only. No runtime code changes, infrastructure work, or behavior changes are in scope.
+- The migration stays selective. No wholesale copy strategy from `user-service` is allowed; only classified deltas may be adopted or adapted.
+- `_bmad/COMMANDS.md` and `_bmad/config.yaml` remain read-only references throughout this issue.
+- `docs/design-and-architecture.md` and `docs/developer-guide.md` require an explicit changed-or-unchanged rationale before closure.
+
 ## Evaluation Targets
 
 | Path or pattern | Group | Edit target | Final status | Rationale or notes |
