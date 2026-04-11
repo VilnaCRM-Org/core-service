@@ -22,6 +22,7 @@ load 'bats-assert/load'
 @test "make schemathesis-validate command runs bounded example validation" {
   run sed -n '/schemathesis-validate:/,/^$/p' Makefile
   assert_success
+  assert_output --partial 'chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"'
   assert_output --partial 'app:seed-schemathesis-data'
   assert_output --partial '--phases=examples'
   assert_output --partial '--max-failures 1'

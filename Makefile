@@ -371,6 +371,7 @@ validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate a
 schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Run a bounded Schemathesis validation against the live API
 	@rm -rf "$(SCHEMATHESIS_REPORT_DIR)"
 	@mkdir -p "$(SCHEMATHESIS_REPORT_DIR)"
+	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	$(DOCKER) run --rm --network=host \
 		-v "$(CURDIR)/.github/openapi-spec:/schema" \
