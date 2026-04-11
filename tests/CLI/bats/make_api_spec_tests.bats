@@ -19,14 +19,19 @@ load 'bats-assert/load'
   skip "Requires Docker - skipped in CI environment"
 }
 
-@test "make schemathesis-validate command runs bounded example validation" {
-  run sed -n '/schemathesis-validate:/,/^$/p' Makefile
+@test "make schemathesis-validate command runs multi-phase contract validation" {
+  run sed -n '40,60p; /schemathesis-validate:/,/^$/p' Makefile
   assert_success
+  assert_output --partial 'SCHEMATHESIS_PHASES ?= examples,coverage,fuzzing'
+  assert_output --partial 'SCHEMATHESIS_REPORT_FORMATS ?= junit,har,ndjson'
+  assert_output --partial 'SCHEMATHESIS_MAX_EXAMPLES ?= 5'
   assert_output --partial 'chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"'
   assert_output --partial 'app:seed-schemathesis-data'
-  assert_output --partial '--phases=examples'
-  assert_output --partial '--max-failures 1'
-  refute_output --partial '--phases=coverage'
+  assert_output --partial 'links:'
+  assert_output --partial '--mode all'
+  assert_output --partial '--coverage-format html,markdown'
+  assert_output --partial '--report "$(SCHEMATHESIS_REPORT_FORMATS)"'
+  refute_output --partial '--phases=examples'
 }
 
 @test "graphql-diff workflow uses GraphQL Inspector action" {
@@ -66,9 +71,13 @@ load 'bats-assert/load'
   refute_output --partial 'working-directory: base'
 }
 
-@test "schemathesis workflow runs the dedicated make target" {
-  run sed -n '/Run Schemathesis Validation/,/Upload Schemathesis Report/p' .github/workflows/schemathesis.yml
+@test "schemathesis workflow starts the app and uses make targets only" {
+  run cat .github/workflows/schemathesis.yml
   assert_success
+  assert_output --partial 'run: make start'
   assert_output --partial 'run: make schemathesis-validate'
   assert_output --partial 'Upload Schemathesis Report'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
 }
