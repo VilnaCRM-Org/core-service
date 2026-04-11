@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\UriParameter;
 
 use ApiPlatform\OpenApi\Model\Parameter;
+use App\Shared\Application\Fixture\SchemathesisFixtures;
 use App\Shared\Application\OpenApi\Builder\UriParameterBuilder;
 use App\Shared\Application\OpenApi\Factory\UriParameter\CustomerStatusUlidParameterFactory;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +42,7 @@ final class CustomerStatusFactoryTest extends TestCase
             false,
             false,
             [
-                'default' => '01JKX8XGHVDZ46MWYMZT94YPQ2',
+                'default' => SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
                 'type' => 'string',
             ]
         );
@@ -55,7 +56,7 @@ final class CustomerStatusFactoryTest extends TestCase
                 'ulid',
                 'CustomerStatus identifier',
                 true,
-                '01JKX8XGHVDZ46MWYMZT94YPQ2',
+                SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
                 'string'
             )
             ->willReturn($this->expectedParameter);

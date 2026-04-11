@@ -25,8 +25,9 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:${DB_PORT}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      # Use container-network addresses here so published host port overrides don't break in-container services.
+      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
+      REDIS_URL: redis://redis:6379/0
 
   caddy:
     build:

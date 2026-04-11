@@ -29,7 +29,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php php ./vendor/bin/psalm --clear-cache >/dev/null
 
     make psalm
   '

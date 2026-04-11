@@ -19,6 +19,16 @@ load 'bats-assert/load'
   skip "Requires Docker - skipped in CI environment"
 }
 
+@test "make schemathesis-validate command runs bounded example validation" {
+  run sed -n '/schemathesis-validate:/,/^$/p' Makefile
+  assert_success
+  assert_output --partial 'chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"'
+  assert_output --partial 'app:seed-schemathesis-data'
+  assert_output --partial '--phases=examples'
+  assert_output --partial '--max-failures 1'
+  refute_output --partial '--phases=coverage'
+}
+
 @test "graphql-diff workflow uses GraphQL Inspector action" {
   run sed -n '/GraphQL Inspector/,$p' .github/workflows/graphql-diff.yml
   assert_success
@@ -54,4 +64,11 @@ load 'bats-assert/load'
   assert_output --partial "args: '/github/workspace/head/.github/openapi-spec/spec.yaml /github/workspace/base/.github/openapi-spec/spec.yaml'"
   refute_output --partial 'Generate openapi spec for base'
   refute_output --partial 'working-directory: base'
+}
+
+@test "schemathesis workflow runs the dedicated make target" {
+  run sed -n '/Run Schemathesis Validation/,/Upload Schemathesis Report/p' .github/workflows/schemathesis.yml
+  assert_success
+  assert_output --partial 'run: make schemathesis-validate'
+  assert_output --partial 'Upload Schemathesis Report'
 }

@@ -114,6 +114,14 @@ services:
       $inner: '@App\Shared\Application\Validator\LoggingMutationInputValidator.inner'
       $logger: '@logger'
 
+  App\Shared\Application\Command\SeedSchemathesisDataCommand:
+    tags:
+      - {
+          name: 'console.command',
+          command: 'app:seed-schemathesis-data',
+          description: 'Seed schemathesis reference data.',
+        }
+
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
     public: true

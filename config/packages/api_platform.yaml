@@ -27,9 +27,6 @@ api_platform:
   error_formats:
     jsonproblem: ['application/problem+json']
 
-  # Preserve the pre-4.3 documentation UI instead of enabling Scalar by default.
-  enable_scalar: false
-
   # Enable GraphQL support
   graphql:
     enabled: true

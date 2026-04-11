@@ -107,7 +107,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php php ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -135,7 +135,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php php ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -164,7 +164,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php php ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm
@@ -193,7 +193,7 @@ load 'bats-assert/load'
     trap cleanup EXIT
 
     mv "$source_path" "$target_path"
-    ./vendor/bin/psalm --clear-cache >/dev/null
+    docker compose exec php php ./vendor/bin/psalm --clear-cache >/dev/null
 
     set +e
     make psalm

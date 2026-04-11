@@ -40,6 +40,10 @@ GIT_AUTHOR    = Kravalg
 SYMFONY_BIN   = symfony
 DOCKER        = docker
 DOCKER_COMPOSE = docker compose
+SCHEMATHESIS_VERSION ?= 4.15.1
+SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
+SCHEMATHESIS_API_URL ?= http://localhost$(if $(strip $(HTTP_PORT)),:$(HTTP_PORT),)
+SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
 
 # Executables
 EXEC_PHP      = $(DOCKER_COMPOSE) exec php
@@ -87,6 +91,12 @@ BMALPH_DRY_RUN ?= false
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)
+endef
+
+define RUN_SCHEMA_CREATE_TOLERANT
+output=$$($(1) doctrine:mongodb:schema:create 2>&1); status=$$?; \
+printf '%s\n' "$$output"; \
+if [ $$status -ne 0 ] && ! printf '%s' "$$output" | grep -q 'already exists'; then exit $$status; fi
 endef
 
 # Conditional execution based on CI environment variable
@@ -216,7 +226,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
-	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:create
+	@$(call RUN_SCHEMA_CREATE_TOLERANT,$(SYMFONY_TEST_ENV))
 
 behat: setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
@@ -286,15 +296,15 @@ analyze-complexity-json: ## Export complexity analysis as JSON using PHPMetrics
 analyze-complexity-csv: ## Export complexity analysis as CSV using PHPMetrics
 	@bash scripts/analyze-complexity.sh csv $(if $(N),$(N),20)
 
-reset-db: ## Recreate the database schema for ephemeral test runs
+reset-db: ensure-test-services ## Recreate the database schema for ephemeral test runs
 	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
 	-@$(SYMFONY) doctrine:mongodb:schema:drop
-	@$(SYMFONY) doctrine:mongodb:schema:create
+	@$(call RUN_SCHEMA_CREATE_TOLERANT,$(SYMFONY))
 
 load-fixtures: ## Build the DB, control the schema validity, and load fixtures
 	@$(SYMFONY) doctrine:mongodb:cache:clear-metadata
 	-@$(SYMFONY) doctrine:mongodb:schema:drop
-	@$(SYMFONY) doctrine:mongodb:schema:create
+	@$(call RUN_SCHEMA_CREATE_TOLERANT,$(SYMFONY))
 	@$(EXEC_PHP) php bin/console doctrine:mongodb:fixtures:load --no-interaction || true
 
 cache-clear: ## Clears and warms up the application cache for a given environment and debug mode
@@ -357,6 +367,26 @@ generate-graphql-spec: ## Generate GraphQL specification
 
 validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
 	./scripts/validate-openapi-spec.sh
+
+schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Run a bounded Schemathesis validation against the live API
+	@rm -rf "$(SCHEMATHESIS_REPORT_DIR)"
+	@mkdir -p "$(SCHEMATHESIS_REPORT_DIR)"
+	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
+	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	$(DOCKER) run --rm --network=host \
+		-v "$(CURDIR)/.github/openapi-spec:/schema" \
+		-v "$(SCHEMATHESIS_REPORT_DIR):/reports" \
+		$(SCHEMATHESIS_IMAGE) run /schema/spec.yaml \
+		--url "$(SCHEMATHESIS_API_URL)" \
+		--checks all \
+		--phases=examples \
+		--workers 1 \
+		--generation-database none \
+		--max-failures 1 \
+		--request-timeout 10 \
+		--request-retries 2 \
+		--report-junit-path /reports/junit.xml \
+		--header "X-Schemathesis-Test: cleanup-customers"
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	@if [ "$(LOCAL_MODE_ENV)" = "true" ]; then $(MAKE) ensure-test-services; fi
