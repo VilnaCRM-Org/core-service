@@ -11,6 +11,7 @@ use App\Shared\Infrastructure\Database\DatabaseCleaner;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use MongoDB\Collection;
+use MongoDB\Database;
 
 final class DatabaseCleanerTest extends UnitTestCase
 {
@@ -27,12 +28,26 @@ final class DatabaseCleanerTest extends UnitTestCase
     public function testDropCollectionsSuccessfully(): void
     {
         $collection = $this->createMock(Collection::class);
+        $database = $this->createMock(Database::class);
+
+        $collection->expects($this->exactly(3))->method('getCollectionName')->willReturn('customers');
         $collection->expects($this->exactly(3))->method('drop');
 
         $this->documentManager
             ->expects($this->exactly(3))
             ->method('getDocumentCollection')
             ->willReturn($collection);
+
+        $this->documentManager
+            ->expects($this->exactly(3))
+            ->method('getDocumentDatabase')
+            ->willReturn($database);
+
+        $database
+            ->expects($this->exactly(3))
+            ->method('listCollectionNames')
+            ->with(['filter' => ['name' => 'customers']])
+            ->willReturn(new \ArrayIterator(['customers']));
 
         $this->documentManager
             ->expects($this->once())
@@ -43,18 +58,38 @@ final class DatabaseCleanerTest extends UnitTestCase
 
     public function testDropCollectionsHandlesExceptions(): void
     {
+        $collection = $this->createMock(Collection::class);
+        $database = $this->createMock(Database::class);
+
         $this->documentManager
             ->expects($this->exactly(2))
             ->method('getDocumentCollection')
-            ->willThrowException(new \RuntimeException('Collection does not exist'));
+            ->willReturn($collection);
+
+        $this->documentManager
+            ->expects($this->exactly(2))
+            ->method('getDocumentDatabase')
+            ->willReturn($database);
+
+        $collection
+            ->expects($this->exactly(2))
+            ->method('getCollectionName')
+            ->willReturn('missing_collection');
+
+        $collection
+            ->expects($this->never())
+            ->method('drop');
+
+        $database
+            ->expects($this->exactly(2))
+            ->method('listCollectionNames')
+            ->with(['filter' => ['name' => 'missing_collection']])
+            ->willReturn(new \ArrayIterator([]));
 
         $this->documentManager
             ->expects($this->once())
             ->method('clear');
 
-        // Should not throw exception
         $this->cleaner->dropCollections('NonExistent1', 'NonExistent2');
-
-        $this->assertTrue(true);
     }
 }

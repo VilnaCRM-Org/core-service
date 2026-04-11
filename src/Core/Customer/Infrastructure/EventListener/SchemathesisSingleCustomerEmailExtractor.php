@@ -7,7 +7,7 @@ namespace App\Core\Customer\Infrastructure\EventListener;
 final class SchemathesisSingleCustomerEmailExtractor
 {
     /**
-     * @param array{email?: string|null} $payload
+     * @param array<string, string|int|float|bool|array|null> $payload
      *
      * @return list<string>
      */

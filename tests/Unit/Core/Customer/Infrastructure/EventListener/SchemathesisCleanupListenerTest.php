@@ -106,11 +106,13 @@ final class SchemathesisCleanupListenerTest extends UnitTestCase
         $this->evaluator
             ->expects($this->once())
             ->method('shouldCleanup')
+            ->with($request, $response)
             ->willReturn(true);
 
         $this->emailExtractor
             ->expects($this->once())
             ->method('extract')
+            ->with($request)
             ->willReturn($emails);
 
         $this->customerRepository

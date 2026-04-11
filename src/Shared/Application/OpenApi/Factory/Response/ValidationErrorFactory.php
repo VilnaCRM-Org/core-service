@@ -93,7 +93,7 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
     }
 
     /**
-     * @return array<string, array<string, array<int, string>|string>>
+     * @return array<string, array<string, array<int, string>|array<string, string>|string>>
      */
     private function getViolationProperties(): array
     {

@@ -33,7 +33,8 @@ final class UpdateFactoryTest extends UnitTestCase
                     $indexed[$parameter->name] = $parameter->example;
                 }
 
-                return $indexed['email'] === SchemathesisFixtures::UPDATE_CUSTOMER_EMAIL
+                return isset($indexed['email'], $indexed['type'], $indexed['status'])
+                    && $indexed['email'] === SchemathesisFixtures::UPDATE_CUSTOMER_EMAIL
                     && $indexed['type'] === '/api/customer_types/' . SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID
                     && $indexed['status'] === '/api/customer_statuses/' . SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID;
             }))

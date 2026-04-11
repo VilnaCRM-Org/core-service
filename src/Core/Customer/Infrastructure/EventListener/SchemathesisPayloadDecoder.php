@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class SchemathesisPayloadDecoder
 {
     /**
-     * @return array{email?: string|null}
+     * @return array<string, string|int|float|bool|array|null>
      */
     public function decode(Request $request): array
     {
@@ -18,7 +18,7 @@ final class SchemathesisPayloadDecoder
     }
 
     /**
-     * @return array{email?: string|null}
+     * @return array<string, string|int|float|bool|array|null>
      */
     private function decodeContent(string $content): array
     {

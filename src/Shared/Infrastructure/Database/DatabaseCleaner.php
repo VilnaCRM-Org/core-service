@@ -24,11 +24,18 @@ final readonly class DatabaseCleaner
 
     private function dropCollection(string $collection): void
     {
-        try {
-            $this->documentManager->getDocumentCollection($collection)->drop();
-        } catch (\Throwable $exception) {
-            unset($exception);
-            // Collection might not exist yet, that's okay - silently ignore
+        $documentCollection = $this->documentManager->getDocumentCollection($collection);
+        $database = $this->documentManager->getDocumentDatabase($collection);
+        $existingCollections = iterator_to_array(
+            $database->listCollectionNames([
+                'filter' => ['name' => $documentCollection->getCollectionName()],
+            ])
+        );
+
+        if ($existingCollections === []) {
+            return;
         }
+
+        $documentCollection->drop();
     }
 }

@@ -43,7 +43,7 @@ DOCKER_COMPOSE = docker compose
 SCHEMATHESIS_VERSION ?= 4.15.1
 SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
 SCHEMATHESIS_API_URL ?= http://localhost$(if $(strip $(HTTP_PORT)),:$(HTTP_PORT),)
-SCHEMATHESIS_REPORT_DIR ?= $(CURDIR)/var/reports/schemathesis
+SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
 
 # Executables
 EXEC_PHP      = $(DOCKER_COMPOSE) exec php

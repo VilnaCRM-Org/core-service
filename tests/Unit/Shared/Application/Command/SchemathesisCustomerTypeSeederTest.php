@@ -83,5 +83,9 @@ final class SchemathesisCustomerTypeSeederTest extends UnitTestCase
         $result = $this->seeder->seedTypes();
 
         $this->assertCount(3, $result);
+        $this->assertArrayHasKey('default', $result);
+        $this->assertArrayHasKey('update', $result);
+        $this->assertArrayHasKey('delete', $result);
+        $this->assertContainsOnlyInstancesOf(CustomerType::class, $result);
     }
 }

@@ -31,5 +31,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: schemathesis-report
-          path: var/reports/schemathesis
+          path: /tmp/core-service-schemathesis-report
           if-no-files-found: ignore

@@ -33,7 +33,8 @@ final class CreateFactoryTest extends UnitTestCase
                     $indexed[$parameter->name] = $parameter->example;
                 }
 
-                return $indexed['email'] === SchemathesisFixtures::CREATE_REQUEST_CUSTOMER_EMAIL
+                return isset($indexed['email'], $indexed['type'], $indexed['status'])
+                    && $indexed['email'] === SchemathesisFixtures::CREATE_REQUEST_CUSTOMER_EMAIL
                     && $indexed['type'] === '/api/customer_types/' . SchemathesisFixtures::CUSTOMER_TYPE_ID
                     && $indexed['status'] === '/api/customer_statuses/' . SchemathesisFixtures::CUSTOMER_STATUS_ID;
             }))

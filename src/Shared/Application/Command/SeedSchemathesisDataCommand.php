@@ -14,8 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class SeedSchemathesisDataCommand extends Command
 {
-    private const COMMAND_DESCRIPTION = 'Seed schemathesis reference data.';
-
     private const COLLECTIONS_TO_DROP = [
         Customer::class,
         CustomerType::class,
