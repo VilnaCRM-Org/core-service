@@ -45,7 +45,7 @@ final class ValidationErrorResponseFactoryTest extends UnitTestCase
             example: [[
                 'propertyPath' => 'some_property',
                 'message' => 'This value should not be blank.',
-                'code' => 'c1051bb4-d103-4f74-8988-acbcafc7fdc3',
+                'code' => null,
                 'payload' => [['type' => 'string']],
             ],
             ],
@@ -54,7 +54,7 @@ final class ValidationErrorResponseFactoryTest extends UnitTestCase
                 'properties' => [
                     'propertyPath' => ['type' => 'string'],
                     'message' => ['type' => 'string'],
-                    'code' => ['type' => 'string'],
+                    'code' => ['type' => ['string', 'null']],
                     'payload' => [
                         'type' => 'array',
                         'items' => ['type' => 'object'],

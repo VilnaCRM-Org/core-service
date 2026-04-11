@@ -10,6 +10,7 @@ use SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff;
 use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\UseSpacingSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff;
+use SlevomatCodingStandard\Sniffs\TypeHints\ReturnTypeHintSniff;
 
 return [
     'preset' => 'symfony',
@@ -41,7 +42,17 @@ return [
         ],
         ParameterTypeHintSniff::class => [
             'exclude' => [
+                'src/Shared/Application/Command/SchemathesisCustomerSeeder',
+                'src/Shared/Application/Command/SchemathesisCustomerStatusSeeder',
+                'src/Shared/Application/Command/SchemathesisCustomerTypeSeeder',
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
+            ],
+        ],
+        ReturnTypeHintSniff::class => [
+            'exclude' => [
+                'src/Shared/Application/Command/SchemathesisCustomerSeeder',
+                'src/Shared/Application/Command/SchemathesisCustomerStatusSeeder',
+                'src/Shared/Application/Command/SchemathesisCustomerTypeSeeder',
             ],
         ],
         LineLengthSniff::class => [

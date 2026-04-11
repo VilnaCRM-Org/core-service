@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Shared\Application\Fixture\SchemathesisFixtures;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\Factory\Request\RequestFactoryInterface;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
 
 abstract class CustomerRequestFactory implements RequestFactoryInterface
 {
-    private const DEFAULT_CUSTOMER_TYPE_ID = '768e998b-31cb-419d-a02c-6ae9d5b4f447';
-    private const DEFAULT_CUSTOMER_STATUS_ID = 'c27f0884-8b6f-45db-858d-9a987a1d20d7';
+    private const DEFAULT_CUSTOMER_TYPE_ID = SchemathesisFixtures::CUSTOMER_TYPE_ID;
+    private const DEFAULT_CUSTOMER_STATUS_ID = SchemathesisFixtures::CUSTOMER_STATUS_ID;
 
     public function getRequest(): RequestBody
     {
@@ -49,7 +50,7 @@ abstract class CustomerRequestFactory implements RequestFactoryInterface
         return new Parameter(
             'email',
             'string',
-            'customer@example.com',
+            SchemathesisFixtures::CREATE_REQUEST_CUSTOMER_EMAIL,
             255,
             'email'
         );

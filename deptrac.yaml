@@ -8,7 +8,7 @@ parameters:
     - name: Application
       collectors:
         - type: classNameRegex
-          value: '#.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message|Metric).*#'
+          value: '#.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|Fixture|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message|Metric).*#'
         - type: classNameRegex
           value: '#.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*#'
         - type: classNameRegex
@@ -34,7 +34,7 @@ parameters:
         - type: classNameRegex
           value: '#.*\\Internal\\HealthCheck\\Infrastructure\\(Factory|Repository).*#'
         - type: classNameRegex
-          value: '#.*\\Shared\\Infrastructure\\(Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor|InvokeParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher|RetryStrategy).*#'
+          value: '#.*\\Infrastructure\\(Repository|Resolver|EventListener|Bus\\(Command|Event|MessageBusFactory|CallableFirstParameterExtractor|InvokeParameterExtractor)|Transformer|Factory|Validator|Cache|Observability|EventDispatcher|RetryStrategy|Database|DoctrineType|Filter|Collection).*#'
 
     - name: Symfony
       collectors:
@@ -80,6 +80,7 @@ parameters:
       - Application
       - Symfony
       - Doctrine
+      - ApiPlatform
       - Logging
       - BSON
     Domain: []

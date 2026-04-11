@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Factory\Request\Customer;
 
+use App\Shared\Application\Fixture\SchemathesisFixtures;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
 
@@ -32,7 +33,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         return Parameter::optional(
             'email',
             'string',
-            'customer@example.com',
+            SchemathesisFixtures::UPDATE_CUSTOMER_EMAIL,
             255,
             'email'
         );
@@ -63,7 +64,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         return Parameter::optional(
             'type',
             'iri-reference',
-            '/api/customer_types/768e998b-31cb-419d-a02c-6ae9d5b4f447',
+            '/api/customer_types/' . SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
             255
         );
     }
@@ -73,7 +74,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         return Parameter::optional(
             'status',
             'iri-reference',
-            '/api/customer_statuses/c27f0884-8b6f-45db-858d-9a987a1d20d7',
+            '/api/customer_statuses/' . SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
             255
         );
     }

@@ -141,6 +141,35 @@ final class UlidInterfaceSchemaFixerTest extends UnitTestCase
         self::assertSame(['type' => 'string'], $customerType['properties']['ulid']);
     }
 
+    public function testReplacesUlidRefWithStringTypeInCustomerTypeAllOfSchema(): void
+    {
+        $schemas = new ArrayObject([
+            'UlidInterface.jsonld-output' => [
+                'type' => 'object',
+                'properties' => [],
+            ],
+            'CustomerType.jsonld-output' => [
+                'allOf' => [
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'value' => ['type' => 'string'],
+                            'ulid' => ['$ref' => '#/components/schemas/UlidInterface.jsonld-output'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $openApi = $this->createOpenApi($schemas);
+        $result = $this->fixer->process($openApi);
+
+        $resultSchemas = $result->getComponents()->getSchemas();
+        $customerType = $resultSchemas['CustomerType.jsonld-output'];
+
+        self::assertSame(['type' => 'string'], $customerType['allOf'][0]['properties']['ulid']);
+    }
+
     public function testDoesNotReplaceNonUlidRef(): void
     {
         $schemas = new ArrayObject([

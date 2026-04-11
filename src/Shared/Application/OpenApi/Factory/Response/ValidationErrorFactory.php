@@ -80,27 +80,27 @@ final class ValidationErrorFactory implements ResponseFactoryInterface
     }
 
     /**
-     * @return array<string, array<int, array<string, string>>|string>
+     * @return array<string, array<int, array<string, string>>|string|null>
      */
     private function getViolationExample(): array
     {
         return [
             'propertyPath' => 'some_property',
             'message' => 'This value should not be blank.',
-            'code' => 'c1051bb4-d103-4f74-8988-acbcafc7fdc3',
+            'code' => null,
             'payload' => [['type' => 'string']],
         ];
     }
 
     /**
-     * @return array<string, array<string, array<string, string>|string>>
+     * @return array<string, array<string, array<int, string>|string>>
      */
     private function getViolationProperties(): array
     {
         return [
             'propertyPath' => ['type' => 'string'],
             'message' => ['type' => 'string'],
-            'code' => ['type' => 'string'],
+            'code' => ['type' => ['string', 'null']],
             'payload' => [
                 'type' => 'array',
                 'items' => ['type' => 'object'],

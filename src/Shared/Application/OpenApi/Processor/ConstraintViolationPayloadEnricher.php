@@ -30,12 +30,12 @@ final class ConstraintViolationPayloadEnricher
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, array<int, string>|string>
      */
     private static function defaultCodeProperty(): array
     {
         return [
-            'type' => 'string',
+            'type' => ['string', 'null'],
             'description' => 'The machine-readable violation code',
         ];
     }

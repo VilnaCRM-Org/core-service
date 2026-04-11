@@ -162,7 +162,7 @@ final class ConstraintViolationPayloadItemsProcessorTest extends UnitTestCase
         $schemaData = $updatedSchema->getArrayCopy();
         $payload = $schemaData['properties']['violations']['items']['properties']['payload'];
         $code = $schemaData['properties']['violations']['items']['properties']['code'];
-        $this->assertSame('string', $code['type']);
+        $this->assertSame(['string', 'null'], $code['type']);
         $this->assertSame('The machine-readable violation code', $code['description']);
         $this->assertSame('array', $payload['type']);
         $this->assertSame(['type' => 'object'], $payload['items']);
