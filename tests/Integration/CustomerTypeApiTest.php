@@ -13,17 +13,20 @@ final class CustomerTypeApiTest extends BaseApiCase
             $this->getTypePayload($value),
             ['unexpected' => 'value']
         );
-        $iri = $this->createEntity('/api/customer_types', $payload);
         $client = self::createClient();
-        $response = $client->request('GET', $iri);
-        $data = $response->toArray();
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertArrayHasKey('@id', $data);
-        $this->assertSame($value, $data['value']);
-        $this->assertArrayNotHasKey(
-            'unexpected',
-            $data,
-            'Unexpected field should not be persisted or returned'
+        $client->request(
+            'POST',
+            '/api/customer_types',
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode($payload),
+            ]
+        );
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            'Extra attributes are not allowed',
+            $error['detail']
         );
     }
 

@@ -44,6 +44,13 @@ SCHEMATHESIS_VERSION ?= 4.15.1
 SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
 SCHEMATHESIS_API_URL ?= http://localhost$(if $(strip $(HTTP_PORT)),:$(HTTP_PORT),)
 SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
+SCHEMATHESIS_PHASES ?= examples,coverage,fuzzing
+SCHEMATHESIS_REPORT_FORMATS ?= junit,har,ndjson
+SCHEMATHESIS_MAX_EXAMPLES ?= 5
+SCHEMATHESIS_MAX_FAILURES ?= 20
+SCHEMATHESIS_REQUEST_TIMEOUT ?= 10
+SCHEMATHESIS_REQUEST_RETRIES ?= 2
+SCHEMATHESIS_EXCLUDED_CHECKS ?= negative_data_rejection,positive_data_acceptance
 
 # Executables
 EXEC_PHP      = $(DOCKER_COMPOSE) exec php
@@ -368,24 +375,43 @@ generate-graphql-spec: ## Generate GraphQL specification
 validate-openapi-spec: generate-openapi-spec build-spectral-docker ## Generate and lint the OpenAPI spec with Spectral
 	./scripts/validate-openapi-spec.sh
 
-schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Run a bounded Schemathesis validation against the live API
+schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Run Schemathesis contract validation against the live API
 	@rm -rf "$(SCHEMATHESIS_REPORT_DIR)"
 	@mkdir -p "$(SCHEMATHESIS_REPORT_DIR)"
 	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
+	@phases="$(SCHEMATHESIS_PHASES)"; \
+	if grep -Eq '^[[:space:]]+links:' .github/openapi-spec/spec.yaml; then \
+		phases="$$phases,stateful"; \
+		echo "OpenAPI links detected; enabling Schemathesis stateful phase."; \
+	else \
+		echo "No OpenAPI links detected; skipping Schemathesis stateful phase."; \
+	fi; \
 	$(DOCKER) run --rm --network=host \
 		-v "$(CURDIR)/.github/openapi-spec:/schema" \
 		-v "$(SCHEMATHESIS_REPORT_DIR):/reports" \
 		$(SCHEMATHESIS_IMAGE) run /schema/spec.yaml \
 		--url "$(SCHEMATHESIS_API_URL)" \
 		--checks all \
-		--phases=examples \
+		--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)" \
+		--phases="$$phases" \
 		--workers 1 \
-		--generation-database none \
-		--max-failures 1 \
-		--request-timeout 10 \
-		--request-retries 2 \
+		--mode all \
+		--max-examples "$(SCHEMATHESIS_MAX_EXAMPLES)" \
+		--generation-deterministic \
+		--generation-unique-inputs \
+		--max-failures "$(SCHEMATHESIS_MAX_FAILURES)" \
+		--request-timeout "$(SCHEMATHESIS_REQUEST_TIMEOUT)" \
+		--request-retries "$(SCHEMATHESIS_REQUEST_RETRIES)" \
+		--report "$(SCHEMATHESIS_REPORT_FORMATS)" \
+		--report-dir /reports \
 		--report-junit-path /reports/junit.xml \
+		--report-har-path /reports/har.json \
+		--report-ndjson-path /reports/events.ndjson \
+		--coverage-format html,markdown \
+		--coverage-report-html-path /reports/schema-coverage.html \
+		--coverage-report-markdown-path /reports/schema-coverage.md \
+		--coverage-show-missing parameters \
 		--header "X-Schemathesis-Test: cleanup-customers"
 
 aws-load-tests: ## Run load tests on AWS infrastructure

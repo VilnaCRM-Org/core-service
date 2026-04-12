@@ -7,6 +7,7 @@ This document provides an overview of the testing strategies employed in the Cor
 - [Prerequisites](#prerequisites)
 - [Unit Testing](#unit-testing)
 - [Integration Testing](#integration-testing)
+- [API Contract Validation](#api-contract-validation)
 - [Mutation Testing](#mutation-testing)
 - [Load Testing](#load-testing)
 - [End-to-End (E2E) Testing](#end-to-end-e2e-testing)
@@ -66,6 +67,33 @@ For integration testing, we use PHPUnit in conjunction with real database connec
 ### Execution:
 
 Run `make integration-tests` to execute the integration tests. This command ensures that all dependencies are correctly set up and that the tests are run against the configured test database and external services.
+
+## API Contract Validation
+
+We validate the generated OpenAPI specification against the live application with **Schemathesis**. This gives us a contract-level regression check that runs real HTTP traffic against the Dockerized service instead of validating examples in isolation.
+
+### Workflow
+
+Run `make start` first so the application and its supporting services boot through Docker, then execute `make schemathesis-validate`.
+
+The Schemathesis target:
+
+- seeds deterministic reference data before the run,
+- exercises the `examples`, `coverage`, and `fuzzing` phases by default,
+- auto-enables the `stateful` phase only when the generated OpenAPI specification contains `links`,
+- keeps the conformance and server-error checks enabled while skipping the two acceptance heuristics that currently over-report on undocumented validation constraints and ignored extra query parameters,
+- writes JUnit, HAR, NDJSON, and coverage reports under `/tmp/core-service-schemathesis-report/`.
+
+### Execution
+
+Use the following commands for local validation:
+
+```bash
+make start
+make schemathesis-validate
+```
+
+In GitHub Actions, the dedicated Schemathesis workflow follows the same Docker-first path by starting the application with `make start` before invoking the validation target.
 
 ## Mutation Testing
 

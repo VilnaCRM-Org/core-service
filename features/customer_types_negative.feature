@@ -59,6 +59,20 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     And the response should be valid according to the operation id "api_customer_types_post"
     And the JSON node "detail" should contain "value: This value should not be blank"
 
+  Scenario: Fail to create a customer type resource with malformed extra attribute name
+    When I send a POST request to "/api/customer_types" with body:
+"""
+    {
+      "value": "Prospect",
+      "bad[key": {}
+    }
+    """
+    Then the response status code should be equal to 400
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customer_types_post"
+    And the JSON node "detail" should contain "Extra attributes are not allowed"
+
   Scenario: Fail to create a customer type resource with too long value and check error message
     When I send a POST request to "/api/customer_types" with body:
 """

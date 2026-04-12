@@ -24,6 +24,7 @@ App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput:
     status:
       - NotBlank: { message: 'not.blank' }
     confirmed:
+      - NotNull: { message: 'This value should not be null.' }
       - Type: { type: 'bool', message: 'This value should be a boolean.' }
 
 App\Core\Customer\Application\MutationInput\UpdateCustomerMutationInput:
