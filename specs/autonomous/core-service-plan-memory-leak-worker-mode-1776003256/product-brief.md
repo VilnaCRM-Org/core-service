@@ -59,12 +59,13 @@ assumptions are no longer sufficient.
 
 - Rewriting the existing BMAD planning bundle so FrankenPHP worker mode is the
   target architecture.
-- Defining the worker request lifecycle, cleanup requirements, and restart fuse.
-- Auditing mutable services and specifying `ResetInterface` requirements.
-- Defining an endpoint-wide memory-safety test layer for all current REST and
+- Specify the worker request lifecycle, cleanup requirements, and restart fuse.
+- Audit mutable services and define `ResetInterface` requirements.
+- Establish an endpoint-wide memory-safety test layer for all current REST and
   GraphQL operations.
-- Defining supporting `KernelTestCase` leak checks for high-risk service flows.
-- Defining CI, staging soak, rollout, and rollback policy for the migration.
+- Add supporting `KernelTestCase` leak checks for high-risk shared-service and
+  async flows.
+- Define CI, staging soak, rollout, and rollback policy for the migration.
 
 ## Out of Scope
 
@@ -75,13 +76,22 @@ assumptions are no longer sufficient.
 
 ## Success Metrics
 
-- The BMAD bundle makes FrankenPHP worker mode a first-class architectural
-  constraint instead of a future afterthought.
-- The plan defines how every documented endpoint will be exercised under
-  same-kernel repeated-request tests.
-- The plan defines a concrete reset strategy for mutable services.
-- The plan defines CI/staging signals that can detect retained state before
-  production rollout.
+- FrankenPHP worker mode remains blocked until the BMAD bundle defines it as a
+  first-class architectural constraint, not a future afterthought.
+- Worker mode remains blocked until every documented REST endpoint and GraphQL
+  operation is covered by same-kernel repeated-request tests, and those tests
+  pass using project-specific thresholds derived from baseline calibration
+  rather than invented values.
+- Worker mode remains blocked until supporting high-risk leak checks for shared
+  services and async-style execution paths, including
+  `DomainEventMessageHandler` happy and failure flows when present, are defined
+  as co-blocking signals and pass in CI.
+- Worker mode remains blocked until mutable services have a concrete reset
+  strategy, and the audit defines how that strategy is verified in CI and
+  staging.
+- Worker mode remains blocked until CI and staging expose green memory-regression
+  signals for retained objects, cross-request state bleed, and worker-restart
+  stability using baseline-derived thresholds established during calibration.
 - The plan gives engineers enough structure to implement the migration without
   inventing the memory-safety strategy from scratch.
 
@@ -115,7 +125,7 @@ The plan should move in this order:
 1. rewrite the specs around FrankenPHP worker mode as the target runtime,
 2. audit mutable services and define reset responsibilities,
 3. add endpoint-wide same-kernel memory-safety tests using Symfony/PHPUnit,
-4. add high-risk service-level leak tests,
+4. add co-blocking high-risk service-level and async/shared-service leak tests,
 5. verify the design in staging with conservative worker restarts,
 6. then enable worker mode in production with rollback guardrails.
 
