@@ -67,7 +67,9 @@ abstract class BaseApiCase extends ApiTestCase
             'Content-Type' => 'application/ld+json',
         ];
         $headers = array_merge($defaultHeaders, $headers);
-        $body = count($payload) === 0 ? null : json_encode($payload);
+        $body = count($payload) === 0
+            ? null
+            : json_encode($payload, JSON_THROW_ON_ERROR);
 
         $response = $client->request($method, $uri, [
             'headers' => $headers,
