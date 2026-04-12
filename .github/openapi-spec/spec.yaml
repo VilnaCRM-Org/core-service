@@ -3411,6 +3411,7 @@ components:
               type: string
     CustomerType.TypeCreate:
       type: object
+      additionalProperties: false
       required:
         - value
       properties:

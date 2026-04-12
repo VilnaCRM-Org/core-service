@@ -381,7 +381,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	@phases="$(SCHEMATHESIS_PHASES)"; \
-	if grep -Eq '^[[:space:]]*links:' .github/openapi-spec/spec.yaml; then \
+	if grep -Eq '^[[:space:]]+links:' .github/openapi-spec/spec.yaml; then \
 		phases="$$phases,stateful"; \
 		echo "OpenAPI links detected; enabling Schemathesis stateful phase."; \
 	else \
