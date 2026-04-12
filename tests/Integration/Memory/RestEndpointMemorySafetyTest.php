@@ -63,8 +63,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
         $handlers = $this->restScenarioHandlers();
 
         if (isset($handlers[$scenario])) {
-            $handler = $handlers[$scenario];
-            $this->{$handler}($client);
+            $handlers[$scenario]($client);
             return;
         }
 
@@ -72,31 +71,31 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, \Closure(Client): void>
      */
     private function restScenarioHandlers(): array
     {
         return [
-            'health_get' => 'exerciseHealthGet',
-            'customers_get_collection' => 'exerciseCustomersGetCollection',
-            'customers_get_item' => 'exerciseCustomersGetItem',
-            'customers_post' => 'exerciseCustomersPost',
-            'customers_put' => 'exerciseCustomersPut',
-            'customers_patch' => 'exerciseCustomersPatch',
-            'customers_delete' => 'exerciseCustomersDelete',
-            'customers_get_missing' => 'exerciseCustomersGetMissing',
-            'customer_statuses_get_collection' => 'exerciseCustomerStatusesGetCollection',
-            'customer_statuses_get_item' => 'exerciseCustomerStatusesGetItem',
-            'customer_statuses_post' => 'exerciseCustomerStatusesPost',
-            'customer_statuses_put' => 'exerciseCustomerStatusesPut',
-            'customer_statuses_patch' => 'exerciseCustomerStatusesPatch',
-            'customer_statuses_delete' => 'exerciseCustomerStatusesDelete',
-            'customer_types_get_collection' => 'exerciseCustomerTypesGetCollection',
-            'customer_types_get_item' => 'exerciseCustomerTypesGetItem',
-            'customer_types_post' => 'exerciseCustomerTypesPost',
-            'customer_types_put' => 'exerciseCustomerTypesPut',
-            'customer_types_patch' => 'exerciseCustomerTypesPatch',
-            'customer_types_delete' => 'exerciseCustomerTypesDelete',
+            'health_get' => $this->exerciseHealthGet(...),
+            'customers_get_collection' => $this->exerciseCustomersGetCollection(...),
+            'customers_get_item' => $this->exerciseCustomersGetItem(...),
+            'customers_post' => $this->exerciseCustomersPost(...),
+            'customers_put' => $this->exerciseCustomersPut(...),
+            'customers_patch' => $this->exerciseCustomersPatch(...),
+            'customers_delete' => $this->exerciseCustomersDelete(...),
+            'customers_get_missing' => $this->exerciseCustomersGetMissing(...),
+            'customer_statuses_get_collection' => $this->exerciseCustomerStatusesGetCollection(...),
+            'customer_statuses_get_item' => $this->exerciseCustomerStatusesGetItem(...),
+            'customer_statuses_post' => $this->exerciseCustomerStatusesPost(...),
+            'customer_statuses_put' => $this->exerciseCustomerStatusesPut(...),
+            'customer_statuses_patch' => $this->exerciseCustomerStatusesPatch(...),
+            'customer_statuses_delete' => $this->exerciseCustomerStatusesDelete(...),
+            'customer_types_get_collection' => $this->exerciseCustomerTypesGetCollection(...),
+            'customer_types_get_item' => $this->exerciseCustomerTypesGetItem(...),
+            'customer_types_post' => $this->exerciseCustomerTypesPost(...),
+            'customer_types_put' => $this->exerciseCustomerTypesPut(...),
+            'customer_types_patch' => $this->exerciseCustomerTypesPatch(...),
+            'customer_types_delete' => $this->exerciseCustomerTypesDelete(...),
         ];
     }
 

@@ -59,8 +59,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
         $handlers = $this->graphQlScenarioHandlers();
 
         if (isset($handlers[$scenario])) {
-            $handler = $handlers[$scenario];
-            $this->{$handler}($client);
+            $handlers[$scenario]($client);
             return;
         }
 
@@ -68,27 +67,27 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, \Closure(Client): void>
      */
     private function graphQlScenarioHandlers(): array
     {
         return [
-            'customer_query' => 'exerciseCustomerQuery',
-            'customer_query_collection' => 'exerciseCustomerQueryCollection',
-            'customer_create_mutation' => 'exerciseCustomerCreateMutation',
-            'customer_update_mutation' => 'exerciseCustomerUpdateMutation',
-            'customer_delete_mutation' => 'exerciseCustomerDeleteMutation',
-            'customer_status_query' => 'exerciseCustomerStatusQuery',
-            'customer_status_query_collection' => 'exerciseCustomerStatusQueryCollection',
-            'customer_status_create_mutation' => 'exerciseCustomerStatusCreateMutation',
-            'customer_status_update_mutation' => 'exerciseCustomerStatusUpdateMutation',
-            'customer_status_delete_mutation' => 'exerciseCustomerStatusDeleteMutation',
-            'customer_type_query' => 'exerciseCustomerTypeQuery',
-            'customer_type_query_collection' => 'exerciseCustomerTypeQueryCollection',
-            'customer_type_create_mutation' => 'exerciseCustomerTypeCreateMutation',
-            'customer_type_update_mutation' => 'exerciseCustomerTypeUpdateMutation',
-            'customer_type_delete_mutation' => 'exerciseCustomerTypeDeleteMutation',
-            'customer_type_delete_missing' => 'exerciseCustomerTypeDeleteMissing',
+            'customer_query' => $this->exerciseCustomerQuery(...),
+            'customer_query_collection' => $this->exerciseCustomerQueryCollection(...),
+            'customer_create_mutation' => $this->exerciseCustomerCreateMutation(...),
+            'customer_update_mutation' => $this->exerciseCustomerUpdateMutation(...),
+            'customer_delete_mutation' => $this->exerciseCustomerDeleteMutation(...),
+            'customer_status_query' => $this->exerciseCustomerStatusQuery(...),
+            'customer_status_query_collection' => $this->exerciseCustomerStatusQueryCollection(...),
+            'customer_status_create_mutation' => $this->exerciseCustomerStatusCreateMutation(...),
+            'customer_status_update_mutation' => $this->exerciseCustomerStatusUpdateMutation(...),
+            'customer_status_delete_mutation' => $this->exerciseCustomerStatusDeleteMutation(...),
+            'customer_type_query' => $this->exerciseCustomerTypeQuery(...),
+            'customer_type_query_collection' => $this->exerciseCustomerTypeQueryCollection(...),
+            'customer_type_create_mutation' => $this->exerciseCustomerTypeCreateMutation(...),
+            'customer_type_update_mutation' => $this->exerciseCustomerTypeUpdateMutation(...),
+            'customer_type_delete_mutation' => $this->exerciseCustomerTypeDeleteMutation(...),
+            'customer_type_delete_missing' => $this->exerciseCustomerTypeDeleteMissing(...),
         ];
     }
 
