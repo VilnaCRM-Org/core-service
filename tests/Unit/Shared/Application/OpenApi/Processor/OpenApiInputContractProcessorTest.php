@@ -80,6 +80,12 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                             'confirmed' => ['type' => ['boolean', 'null']],
                         ],
                     ],
+                    'CustomerType.TypeCreate' => [
+                        'required' => ['value'],
+                        'properties' => [
+                            'value' => ['type' => 'string'],
+                        ],
+                    ],
                 ])
             )
         );
@@ -104,6 +110,14 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                 SchemaNormalizer::normalize(
                     SchemaNormalizer::normalize($schemas['Customer.CustomerCreate'])['properties']
                 )['confirmed']
+            )['type']
+        );
+        self::assertSame(
+            'string',
+            SchemaNormalizer::normalize(
+                SchemaNormalizer::normalize(
+                    SchemaNormalizer::normalize($schemas['CustomerType.TypeCreate'])['properties']
+                )['value']
             )['type']
         );
         self::assertInstanceOf(ArrayObject::class, $customerTypeContent);
