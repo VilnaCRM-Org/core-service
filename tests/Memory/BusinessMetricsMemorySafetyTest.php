@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Integration\Memory;
+namespace App\Tests\Memory;
 
 use App\Tests\Integration\BaseApiCase;
 use App\Tests\Support\Memory\ObjectDeallocationWatcher;

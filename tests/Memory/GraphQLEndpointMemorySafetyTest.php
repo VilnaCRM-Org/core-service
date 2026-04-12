@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Integration\Memory;
+namespace App\Tests\Memory;
 
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Tests\Integration\BaseGraphQLCase;

@@ -85,6 +85,9 @@ endif
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
 COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
+MEMORY_COVERAGE_TEXT_FILE = memory-coverage.txt
+MEMORY_COVERAGE_XML_FILE = coverage/memory-coverage.xml
+MEMORY_COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --configuration phpunit.memory.xml.dist --coverage-text=$(MEMORY_COVERAGE_TEXT_FILE) --coverage-clover $(MEMORY_COVERAGE_XML_FILE) --colors=never
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
@@ -110,10 +113,12 @@ endef
 ifeq ($(CI),1)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
+    RUN_MEMORY_TESTS_COVERAGE = XDEBUG_MODE=coverage $(MEMORY_COVERAGE_CMD)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
+    RUN_MEMORY_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(MEMORY_COVERAGE_CMD))
     RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
 endif
 
@@ -241,6 +246,48 @@ behat: setup-test-db ## A php framework for autotesting business expectations
 integration-tests: setup-test-db ## Run integration tests
 	$(RUN_TESTS_COVERAGE) --testsuite=Integration
 
+memory-tests: setup-test-db ## Run memory-safety tests with 100% coverage requirement for memory-support helpers
+	@echo "Running memory tests with coverage requirement of 100%..."
+	@mkdir -p coverage
+	@rm -f $(MEMORY_COVERAGE_TEXT_FILE) $(MEMORY_COVERAGE_XML_FILE); \
+	tmpfile=$$(mktemp); \
+	script -qec "$(RUN_MEMORY_TESTS_COVERAGE)" /dev/null > $$tmpfile 2>&1; \
+	test_status=$$?; \
+	cat $$tmpfile; \
+	if [ $$test_status -ne 0 ]; then \
+		echo "❌ TEST FAILURE: Memory tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit $$test_status; \
+	fi; \
+	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+		echo "❌ TEST FAILURE: Memory tests reported failures, errors, or incomplete tests."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit 1; \
+	fi; \
+	if [ ! -f $(MEMORY_COVERAGE_TEXT_FILE) ]; then \
+		echo "❌ ERROR: $(MEMORY_COVERAGE_TEXT_FILE) was not generated."; \
+		rm -f $$tmpfile; \
+		exit 1; \
+	fi; \
+	if [ ! -f $(MEMORY_COVERAGE_XML_FILE) ]; then \
+		echo "❌ ERROR: $(MEMORY_COVERAGE_XML_FILE) was not generated."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit 1; \
+	fi; \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $(MEMORY_COVERAGE_TEXT_FILE) | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+	if [ -n "$$coverage" ]; then \
+		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
+			echo "❌ COVERAGE FAILURE: Memory-support helper coverage is $$coverage%, but 100% is required."; \
+			exit 1; \
+		else \
+			echo "✅ COVERAGE SUCCESS: Memory-support helper coverage is $$coverage%"; \
+		fi; \
+	else \
+		echo "❌ ERROR: Could not parse coverage from memory test output"; \
+		exit 1; \
+	fi
+
 integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
 
@@ -253,7 +300,7 @@ tests-with-coverage: ## Run tests with coverage
 negative-tests-with-coverage: ## Run negative tests with coverage reporting
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
-all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
+all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
 
 prepare-test-data: build-k6-docker ## Prepare test data for load tests
 	tests/Load/prepare-test-data.sh
@@ -451,9 +498,10 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
 	echo "🔟  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
+	echo "1️⃣1️⃣ Running complete test suite (unit, integration, memory, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
+	if ! make memory-tests; then failed_checks="$$failed_checks\n❌ memory tests"; fi; \
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \

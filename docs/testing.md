@@ -71,7 +71,7 @@ Run `make integration-tests` to execute the integration tests. This command ensu
 
 ## Memory-Safety Testing
 
-FrankenPHP worker mode keeps the Symfony kernel and container alive across requests, so the repository now includes a dedicated same-kernel memory-safety layer under `tests/Integration/Memory`.
+FrankenPHP worker mode keeps the Symfony kernel and container alive across requests, so the repository now includes a dedicated same-kernel memory-safety layer under `tests/Memory`.
 
 ### What This Covers
 
@@ -98,12 +98,14 @@ FrankenPHP worker mode keeps the Symfony kernel and container alive across reque
 
 ### Execution
 
-Run the standard integration or CI entrypoints:
+Run the dedicated memory suite locally or through the standalone GitHub Actions workflow:
 
 ```bash
-make integration-tests
+make memory-tests
 make ci
 ```
+
+GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as the separate `Memory leak tests` check. That workflow fails if the memory-support helper coverage drops below 100%.
 
 ## API Contract Validation
 
