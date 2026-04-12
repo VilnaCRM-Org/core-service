@@ -114,6 +114,15 @@ Required endpoint matrix:
 This layer complements the endpoint matrix with tighter object-deallocation
 checks around specific shared-service flows.
 
+Shared memory-test support for Layers A and B must:
+
+- collect `memory_get_usage(true)` and `memory_get_peak_usage(true)` at stable
+  checkpoints,
+- record warm-up versus measured iteration boundaries,
+- format readable diagnostics that stay free of business payloads and customer
+  PII, matching the redaction posture already used by
+  `DomainEventMessageHandler`.
+
 Primary candidates:
 
 - `DomainEventMessageHandler` repeated happy path

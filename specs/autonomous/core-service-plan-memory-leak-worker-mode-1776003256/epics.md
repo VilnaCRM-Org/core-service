@@ -74,7 +74,8 @@ Acceptance criteria:
 - `shipmonk/memory-scanner` is the planned primary dev dependency.
 - Test support is designed around `ObjectDeallocationCheckerKernelTestCaseTrait`
   for Symfony/PHPUnit usage where applicable.
-- Failure diagnostics are redacted and CI-friendly.
+- Failure diagnostics are redacted and CI-friendly, with no business payloads or
+  customer PII in assertion output or stored artifacts.
 - Baseline measurement is explicitly separated from hard threshold enforcement.
 
 ### Story 2.2: Add Same-Kernel Repeated-Request Coverage for All REST and GraphQL Endpoints
