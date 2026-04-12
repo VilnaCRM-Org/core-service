@@ -142,18 +142,6 @@ abstract class BaseApiCase extends ApiTestCase
     /**
      * @return array<string, string|bool>
      */
-    protected function getCustomerPayload(?string $initials = null): array
-    {
-        return $this->getCustomerPayloadWithRelations(
-            $this->createCustomerTypeEntity(),
-            $this->createCustomerStatusEntity(),
-            $initials
-        );
-    }
-
-    /**
-     * @return array<string, string|bool>
-     */
     protected function getCustomerPayloadWithClient(
         Client $client,
         ?string $initials = null
