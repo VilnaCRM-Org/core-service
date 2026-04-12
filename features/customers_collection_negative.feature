@@ -129,6 +129,26 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be valid according to the operation id "api_customers_post"
     And the JSON node "detail" should contain "The input data is misformatted"
 
+  Scenario: Fail to create a customer resource with missing confirmed field
+    And create status with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    And create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
+    When I send a POST request to "/api/customers" with body:
+"""
+    {
+      "email": "missing-confirmed@example.com",
+      "phone": "0123456789",
+      "initials": "Name Surname",
+      "leadSource": "Google",
+      "type": "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4",
+      "status": "/api/customer_statuses/01JKX8XGHVDZ46MWYMZT94YER4"
+    }
+    """
+    Then the response status code should be equal to 422
+    And the response should be in JSON
+    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
+    And the response should be valid according to the operation id "api_customers_post"
+    And the JSON node "detail" should contain "confirmed: This value should not be null."
+
   Scenario: Fail to create a customer resource with too long phone number and check error message
     When I send a POST request to "/api/customers" with body:
 """

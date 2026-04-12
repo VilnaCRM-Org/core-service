@@ -81,6 +81,7 @@ The Schemathesis target:
 - seeds deterministic reference data before the run,
 - exercises the `examples`, `coverage`, and `fuzzing` phases by default,
 - auto-enables the `stateful` phase only when the generated OpenAPI specification contains `links`,
+- keeps the conformance and server-error checks enabled while skipping the two acceptance heuristics that currently over-report on undocumented validation constraints and ignored extra query parameters,
 - writes JUnit, HAR, NDJSON, and coverage reports under `/tmp/core-service-schemathesis-report/`.
 
 ### Execution

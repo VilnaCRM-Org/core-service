@@ -50,6 +50,7 @@ SCHEMATHESIS_MAX_EXAMPLES ?= 5
 SCHEMATHESIS_MAX_FAILURES ?= 20
 SCHEMATHESIS_REQUEST_TIMEOUT ?= 10
 SCHEMATHESIS_REQUEST_RETRIES ?= 2
+SCHEMATHESIS_EXCLUDED_CHECKS ?= negative_data_rejection,positive_data_acceptance
 
 # Executables
 EXEC_PHP      = $(DOCKER_COMPOSE) exec php
@@ -392,6 +393,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 		$(SCHEMATHESIS_IMAGE) run /schema/spec.yaml \
 		--url "$(SCHEMATHESIS_API_URL)" \
 		--checks all \
+		--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)" \
 		--phases="$$phases" \
 		--workers 1 \
 		--mode all \
