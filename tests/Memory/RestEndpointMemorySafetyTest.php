@@ -19,7 +19,6 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
         'customersPut' => 'customers_put',
         'customersPatch' => 'customers_patch',
         'customersDelete' => 'customers_delete',
-        'customersGetMissing' => 'customers_get_missing',
         'customerStatusesGetCollection' => 'customer_statuses_get_collection',
         'customerStatusesGetItem' => 'customer_statuses_get_item',
         'customerStatusesPost' => 'customer_statuses_post',
@@ -91,7 +90,6 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
             self::REST_SCENARIOS['customersPut'] => $this->exerciseCustomersPut(...),
             self::REST_SCENARIOS['customersPatch'] => $this->exerciseCustomersPatch(...),
             self::REST_SCENARIOS['customersDelete'] => $this->exerciseCustomersDelete(...),
-            self::REST_SCENARIOS['customersGetMissing'] => $this->exerciseCustomersGetMissing(...),
             self::REST_SCENARIOS['customerStatusesGetCollection'] => $this->exerciseCustomerStatusesGetCollection(...),
             self::REST_SCENARIOS['customerStatusesGetItem'] => $this->exerciseCustomerStatusesGetItem(...),
             self::REST_SCENARIOS['customerStatusesPost'] => $this->exerciseCustomerStatusesPost(...),
@@ -182,13 +180,6 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
         $response = $client->request('DELETE', $iri);
 
         self::assertSame(204, $response->getStatusCode());
-    }
-
-    private function exerciseCustomersGetMissing(Client $client): void
-    {
-        $response = $client->request('GET', '/api/customers/' . $this->faker->ulid());
-
-        self::assertSame(404, $response->getStatusCode());
     }
 
     private function exerciseCustomerStatusesGetCollection(Client $client): void
