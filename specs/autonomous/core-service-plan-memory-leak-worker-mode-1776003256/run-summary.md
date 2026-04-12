@@ -63,4 +63,4 @@
 
 ## Recommended Next Step
 
-Create the GitHub issue from this bundle, link the planning-only PR to that issue, and use Story `1.1` in [epics.md](./epics.md) as the first implementation entrypoint once the issue and PR are reviewed.
+Link or update the existing GitHub issue (`#166`) with this bundle, keep the planning-only PR attached to that issue, and use Story `1.1` in [epics.md](./epics.md) as the first implementation entrypoint once the issue and PR are reviewed.

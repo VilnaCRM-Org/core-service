@@ -53,7 +53,7 @@ Introduce a small test-support layer responsible for:
 - collecting `memory_get_usage(true)` and `memory_get_peak_usage(true)`,
 - recording per-batch checkpoints,
 - running controlled GC checkpoints during calibration,
-- and formatting assertion failures with readable diagnostics.
+- and formatting assertion failures with readable, redacted diagnostics that exclude business payloads and customer PII.
 
 **Likely future location**
 

@@ -2,7 +2,7 @@
 
 ## Requirements Coverage Map
 
-- `FR1`, `FR4`, `FR5`, `NFR1`, `NFR3`, `NFR4` → Epic 1
+- `FR1`, `FR4`, `FR5`, `FR6`, `NFR1`, `NFR3`, `NFR4` → Epic 1
 - `FR2`, `FR3`, `NFR2`, `NFR6`, `NFR7` → Epic 2
 - `FR7`, `FR8`, `FR9`, `NFR5`, `NFR8` → Epic 3
 
@@ -103,8 +103,8 @@ Acceptance criteria:
 
 - Blocking and informational jobs are separated by purpose.
 - The blocking async-worker suite fits the repository's CI duration budget.
-- The plan defines what memory evidence should be stored or logged on failure.
-- The policy states when calibration runs are required and how thresholds are updated safely.
+- The plan defines a minimum failure-evidence schema captured as JSON or NDJSON artifacts, optionally gzip-compressed when large, containing at least: timestamp, job name, git commit, worker or process identifier, test case id, scenario name, warm-up and measured iteration counts, baseline memory bytes, post-warmup memory bytes, final retained memory bytes, peak memory bytes, short failure reason, reproduction command, linked logs path, and calibration policy version; any optional allocator stats, heap snapshot paths, or core-dump references must also remain free of business payloads and customer PII.
+- The policy states when calibration runs are required, how thresholds are updated safely, and that failure artifacts are uploaded under a stable CI prefix such as `artifacts/memory-regression/<job>/<scenario>/` with a 14-day retention period.
 
 ### Story 3.3: Define the Worker-Mode Rollout Gate
 
