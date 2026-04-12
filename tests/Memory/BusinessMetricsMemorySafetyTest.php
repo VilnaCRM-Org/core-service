@@ -33,6 +33,7 @@ final class BusinessMetricsMemorySafetyTest extends BaseApiCase
         unset($metric);
 
         $firstMetricCount = count($firstMetrics);
+        unset($firstMetrics);
 
         $client->request('GET', '/api/customers');
         self::assertResponseIsSuccessful();
@@ -45,7 +46,7 @@ final class BusinessMetricsMemorySafetyTest extends BaseApiCase
 
         $spy->clear();
 
-        unset($firstMetrics, $secondMetrics, $spy);
+        unset($secondMetrics, $spy);
 
         $watcher->assertAllReleased($this);
     }

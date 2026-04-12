@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: ['main']
 
+permissions:
+  contents: read
+
 jobs:
   memory-tests:
     name: Memory leak tests
@@ -17,7 +20,7 @@ jobs:
           php-version: ${{ vars.PHP_VERSION }}
 
       - name: Install dependencies
-        run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
+        run: composer self-update && composer install --no-scripts --no-progress && composer dump-autoload
 
       - name: Start required services
         run: make ensure-test-services
