@@ -3208,6 +3208,7 @@ components:
         - leadSource
         - type
         - status
+        - confirmed
       properties:
         initials:
           maxLength: 255
