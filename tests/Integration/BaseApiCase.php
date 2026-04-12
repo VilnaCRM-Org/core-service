@@ -175,15 +175,6 @@ abstract class BaseApiCase extends ApiTestCase
         ];
     }
 
-    protected function createCustomerTypeEntity(?string $value = null): string
-    {
-        return $this->createLookupEntity(
-            '/api/customer_types',
-            $value,
-            $this->getCustomerTypePayload(...)
-        );
-    }
-
     protected function createCustomerTypeEntityWithClient(
         Client $client,
         ?string $value = null
@@ -193,15 +184,6 @@ abstract class BaseApiCase extends ApiTestCase
             '/api/customer_types',
             $value,
             $this->getCustomerTypePayload(...)
-        );
-    }
-
-    protected function createCustomerStatusEntity(?string $value = null): string
-    {
-        return $this->createLookupEntity(
-            '/api/customer_statuses',
-            $value,
-            $this->getCustomerStatusPayload(...)
         );
     }
 
@@ -234,17 +216,6 @@ abstract class BaseApiCase extends ApiTestCase
             'status' => $status,
             'confirmed' => $this->faker->boolean(),
         ];
-    }
-
-    /**
-     * @param callable(?string): array{value: string} $payloadProvider
-     */
-    private function createLookupEntity(
-        string $uri,
-        ?string $value,
-        callable $payloadProvider
-    ): string {
-        return $this->createEntity($uri, $payloadProvider($value));
     }
 
     /**
