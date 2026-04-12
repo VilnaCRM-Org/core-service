@@ -15,6 +15,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
         'healthGet' => 'health_get',
         'customersGetCollection' => 'customers_get_collection',
         'customersGetItem' => 'customers_get_item',
+        'customersGetMissing' => 'customers_get_missing',
         'customersPost' => 'customers_post',
         'customersPut' => 'customers_put',
         'customersPatch' => 'customers_patch',
@@ -86,6 +87,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
             self::REST_SCENARIOS['healthGet'] => $this->exerciseHealthGet(...),
             self::REST_SCENARIOS['customersGetCollection'] => $this->exerciseCustomersGetCollection(...),
             self::REST_SCENARIOS['customersGetItem'] => $this->exerciseCustomersGetItem(...),
+            self::REST_SCENARIOS['customersGetMissing'] => $this->exerciseCustomersGetMissing(...),
             self::REST_SCENARIOS['customersPost'] => $this->exerciseCustomersPost(...),
             self::REST_SCENARIOS['customersPut'] => $this->exerciseCustomersPut(...),
             self::REST_SCENARIOS['customersPatch'] => $this->exerciseCustomersPatch(...),
@@ -133,6 +135,18 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame($payload['email'], $data['email']);
+    }
+
+    private function exerciseCustomersGetMissing(Client $client): void
+    {
+        $response = $client->request('GET', '/api/customers/' . $this->faker->ulid());
+        $error = $response->toArray(false);
+
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame('An error occurred', $error['title']);
+        self::assertSame('Not Found', $error['detail']);
+        self::assertSame(404, $error['status']);
+        self::assertSame('/errors/404', $error['type']);
     }
 
     private function exerciseCustomersPost(Client $client): void

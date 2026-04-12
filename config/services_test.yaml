@@ -3,6 +3,10 @@ services:
     autowire: true
     autoconfigure: true
 
+  Psr\Log\NullLogger: ~
+
+  logger: '@Psr\Log\NullLogger'
+
   Symfony\Contracts\Cache\CacheInterface:
     public: true
     class: Symfony\Component\Cache\Adapter\ArrayAdapter

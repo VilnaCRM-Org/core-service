@@ -105,6 +105,10 @@ services:
     arguments:
       $delayMs: '%env(int:MESSENGER_RETRY_DELAY_MS)%'
 
+  App\Shared\Infrastructure\EventListener\ApiNotFoundProblemListener:
+    tags:
+      - { name: 'kernel.event_listener', event: 'kernel.exception', method: 'onKernelException', priority: 255 }
+
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 

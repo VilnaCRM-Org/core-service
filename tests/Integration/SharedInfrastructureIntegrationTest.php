@@ -68,6 +68,28 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    public function testUnmatchedApiRouteReturnsProblemJson(): void
+    {
+        $client = self::createClient();
+        $client->request('PATCH', '/api/customers/.%C2%99', [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode(['email' => $this->faker->unique()->safeEmail()], JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertResponseStatusCodeSame(404);
+        $this->assertResponseHeaderSame(
+            'content-type',
+            'application/problem+json; charset=utf-8'
+        );
+
+        $error = $client->getResponse()->toArray(false);
+
+        $this->assertSame('An error occurred', $error['title']);
+        $this->assertSame('Not Found', $error['detail']);
+        $this->assertSame(404, $error['status']);
+        $this->assertSame('/errors/404', $error['type']);
+    }
+
     public function testDoctrineUlidTypeConversion(): void
     {
         $customerIri = $this->createEntity('/api/customers', $this->getCustomer('ULID Type Test'));
