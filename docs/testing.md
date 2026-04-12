@@ -7,6 +7,7 @@ This document provides an overview of the testing strategies employed in the Cor
 - [Prerequisites](#prerequisites)
 - [Unit Testing](#unit-testing)
 - [Integration Testing](#integration-testing)
+- [Memory-Safety Testing](#memory-safety-testing)
 - [API Contract Validation](#api-contract-validation)
 - [Mutation Testing](#mutation-testing)
 - [Load Testing](#load-testing)

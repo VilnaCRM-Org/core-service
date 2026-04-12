@@ -187,9 +187,10 @@ abstract class BaseApiCase extends ApiTestCase
 
     protected function createCustomerTypeEntity(?string $value = null): string
     {
-        return $this->createEntity(
+        return $this->createLookupEntity(
             '/api/customer_types',
-            $this->getCustomerTypePayload($value)
+            $value,
+            $this->getCustomerTypePayload(...)
         );
     }
 
@@ -197,18 +198,20 @@ abstract class BaseApiCase extends ApiTestCase
         Client $client,
         ?string $value = null
     ): string {
-        return $this->createEntityWithClient(
+        return $this->createLookupEntityWithClient(
             $client,
             '/api/customer_types',
-            $this->getCustomerTypePayload($value)
+            $value,
+            $this->getCustomerTypePayload(...)
         );
     }
 
     protected function createCustomerStatusEntity(?string $value = null): string
     {
-        return $this->createEntity(
+        return $this->createLookupEntity(
             '/api/customer_statuses',
-            $this->getCustomerStatusPayload($value)
+            $value,
+            $this->getCustomerStatusPayload(...)
         );
     }
 
@@ -216,10 +219,11 @@ abstract class BaseApiCase extends ApiTestCase
         Client $client,
         ?string $value = null
     ): string {
-        return $this->createEntityWithClient(
+        return $this->createLookupEntityWithClient(
             $client,
             '/api/customer_statuses',
-            $this->getCustomerStatusPayload($value)
+            $value,
+            $this->getCustomerStatusPayload(...)
         );
     }
 
@@ -240,5 +244,28 @@ abstract class BaseApiCase extends ApiTestCase
             'status' => $status,
             'confirmed' => $this->faker->boolean(),
         ];
+    }
+
+    /**
+     * @param callable(?string): array{value: string} $payloadProvider
+     */
+    private function createLookupEntity(
+        string $uri,
+        ?string $value,
+        callable $payloadProvider
+    ): string {
+        return $this->createEntity($uri, $payloadProvider($value));
+    }
+
+    /**
+     * @param callable(?string): array{value: string} $payloadProvider
+     */
+    private function createLookupEntityWithClient(
+        Client $client,
+        string $uri,
+        ?string $value,
+        callable $payloadProvider
+    ): string {
+        return $this->createEntityWithClient($client, $uri, $payloadProvider($value));
     }
 }

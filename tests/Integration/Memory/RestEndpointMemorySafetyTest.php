@@ -11,6 +11,29 @@ use InvalidArgumentException;
 
 final class RestEndpointMemorySafetyTest extends BaseApiCase
 {
+    private const REST_SCENARIOS = [
+        'healthGet' => 'health_get',
+        'customersGetCollection' => 'customers_get_collection',
+        'customersGetItem' => 'customers_get_item',
+        'customersPost' => 'customers_post',
+        'customersPut' => 'customers_put',
+        'customersPatch' => 'customers_patch',
+        'customersDelete' => 'customers_delete',
+        'customersGetMissing' => 'customers_get_missing',
+        'customerStatusesGetCollection' => 'customer_statuses_get_collection',
+        'customerStatusesGetItem' => 'customer_statuses_get_item',
+        'customerStatusesPost' => 'customer_statuses_post',
+        'customerStatusesPut' => 'customer_statuses_put',
+        'customerStatusesPatch' => 'customer_statuses_patch',
+        'customerStatusesDelete' => 'customer_statuses_delete',
+        'customerTypesGetCollection' => 'customer_types_get_collection',
+        'customerTypesGetItem' => 'customer_types_get_item',
+        'customerTypesPost' => 'customer_types_post',
+        'customerTypesPut' => 'customer_types_put',
+        'customerTypesPatch' => 'customer_types_patch',
+        'customerTypesDelete' => 'customer_types_delete',
+    ];
+
     /**
      * @dataProvider restScenarioProvider
      */
@@ -34,28 +57,13 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
      */
     public static function restScenarioProvider(): array
     {
-        return [
-            'health_get' => ['health_get'],
-            'customers_get_collection' => ['customers_get_collection'],
-            'customers_get_item' => ['customers_get_item'],
-            'customers_post' => ['customers_post'],
-            'customers_put' => ['customers_put'],
-            'customers_patch' => ['customers_patch'],
-            'customers_delete' => ['customers_delete'],
-            'customers_get_missing' => ['customers_get_missing'],
-            'customer_statuses_get_collection' => ['customer_statuses_get_collection'],
-            'customer_statuses_get_item' => ['customer_statuses_get_item'],
-            'customer_statuses_post' => ['customer_statuses_post'],
-            'customer_statuses_put' => ['customer_statuses_put'],
-            'customer_statuses_patch' => ['customer_statuses_patch'],
-            'customer_statuses_delete' => ['customer_statuses_delete'],
-            'customer_types_get_collection' => ['customer_types_get_collection'],
-            'customer_types_get_item' => ['customer_types_get_item'],
-            'customer_types_post' => ['customer_types_post'],
-            'customer_types_put' => ['customer_types_put'],
-            'customer_types_patch' => ['customer_types_patch'],
-            'customer_types_delete' => ['customer_types_delete'],
-        ];
+        return array_combine(
+            array_values(self::REST_SCENARIOS),
+            array_map(
+                static fn (string $scenario): array => [$scenario],
+                array_values(self::REST_SCENARIOS)
+            )
+        );
     }
 
     private function exerciseRestScenario(string $scenario, Client $client): void
@@ -76,26 +84,26 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
     private function restScenarioHandlers(): array
     {
         return [
-            'health_get' => $this->exerciseHealthGet(...),
-            'customers_get_collection' => $this->exerciseCustomersGetCollection(...),
-            'customers_get_item' => $this->exerciseCustomersGetItem(...),
-            'customers_post' => $this->exerciseCustomersPost(...),
-            'customers_put' => $this->exerciseCustomersPut(...),
-            'customers_patch' => $this->exerciseCustomersPatch(...),
-            'customers_delete' => $this->exerciseCustomersDelete(...),
-            'customers_get_missing' => $this->exerciseCustomersGetMissing(...),
-            'customer_statuses_get_collection' => $this->exerciseCustomerStatusesGetCollection(...),
-            'customer_statuses_get_item' => $this->exerciseCustomerStatusesGetItem(...),
-            'customer_statuses_post' => $this->exerciseCustomerStatusesPost(...),
-            'customer_statuses_put' => $this->exerciseCustomerStatusesPut(...),
-            'customer_statuses_patch' => $this->exerciseCustomerStatusesPatch(...),
-            'customer_statuses_delete' => $this->exerciseCustomerStatusesDelete(...),
-            'customer_types_get_collection' => $this->exerciseCustomerTypesGetCollection(...),
-            'customer_types_get_item' => $this->exerciseCustomerTypesGetItem(...),
-            'customer_types_post' => $this->exerciseCustomerTypesPost(...),
-            'customer_types_put' => $this->exerciseCustomerTypesPut(...),
-            'customer_types_patch' => $this->exerciseCustomerTypesPatch(...),
-            'customer_types_delete' => $this->exerciseCustomerTypesDelete(...),
+            self::REST_SCENARIOS['healthGet'] => $this->exerciseHealthGet(...),
+            self::REST_SCENARIOS['customersGetCollection'] => $this->exerciseCustomersGetCollection(...),
+            self::REST_SCENARIOS['customersGetItem'] => $this->exerciseCustomersGetItem(...),
+            self::REST_SCENARIOS['customersPost'] => $this->exerciseCustomersPost(...),
+            self::REST_SCENARIOS['customersPut'] => $this->exerciseCustomersPut(...),
+            self::REST_SCENARIOS['customersPatch'] => $this->exerciseCustomersPatch(...),
+            self::REST_SCENARIOS['customersDelete'] => $this->exerciseCustomersDelete(...),
+            self::REST_SCENARIOS['customersGetMissing'] => $this->exerciseCustomersGetMissing(...),
+            self::REST_SCENARIOS['customerStatusesGetCollection'] => $this->exerciseCustomerStatusesGetCollection(...),
+            self::REST_SCENARIOS['customerStatusesGetItem'] => $this->exerciseCustomerStatusesGetItem(...),
+            self::REST_SCENARIOS['customerStatusesPost'] => $this->exerciseCustomerStatusesPost(...),
+            self::REST_SCENARIOS['customerStatusesPut'] => $this->exerciseCustomerStatusesPut(...),
+            self::REST_SCENARIOS['customerStatusesPatch'] => $this->exerciseCustomerStatusesPatch(...),
+            self::REST_SCENARIOS['customerStatusesDelete'] => $this->exerciseCustomerStatusesDelete(...),
+            self::REST_SCENARIOS['customerTypesGetCollection'] => $this->exerciseCustomerTypesGetCollection(...),
+            self::REST_SCENARIOS['customerTypesGetItem'] => $this->exerciseCustomerTypesGetItem(...),
+            self::REST_SCENARIOS['customerTypesPost'] => $this->exerciseCustomerTypesPost(...),
+            self::REST_SCENARIOS['customerTypesPut'] => $this->exerciseCustomerTypesPut(...),
+            self::REST_SCENARIOS['customerTypesPatch'] => $this->exerciseCustomerTypesPatch(...),
+            self::REST_SCENARIOS['customerTypesDelete'] => $this->exerciseCustomerTypesDelete(...),
         ];
     }
 

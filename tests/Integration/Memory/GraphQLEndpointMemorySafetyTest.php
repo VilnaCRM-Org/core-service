@@ -11,6 +11,25 @@ use InvalidArgumentException;
 
 final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 {
+    private const GRAPHQL_SCENARIOS = [
+        'customerQuery' => 'customer_query',
+        'customerQueryCollection' => 'customer_query_collection',
+        'customerCreateMutation' => 'customer_create_mutation',
+        'customerUpdateMutation' => 'customer_update_mutation',
+        'customerDeleteMutation' => 'customer_delete_mutation',
+        'customerStatusQuery' => 'customer_status_query',
+        'customerStatusQueryCollection' => 'customer_status_query_collection',
+        'customerStatusCreateMutation' => 'customer_status_create_mutation',
+        'customerStatusUpdateMutation' => 'customer_status_update_mutation',
+        'customerStatusDeleteMutation' => 'customer_status_delete_mutation',
+        'customerTypeQuery' => 'customer_type_query',
+        'customerTypeQueryCollection' => 'customer_type_query_collection',
+        'customerTypeCreateMutation' => 'customer_type_create_mutation',
+        'customerTypeUpdateMutation' => 'customer_type_update_mutation',
+        'customerTypeDeleteMutation' => 'customer_type_delete_mutation',
+        'customerTypeDeleteMissing' => 'customer_type_delete_missing',
+    ];
+
     /**
      * @dataProvider graphQlScenarioProvider
      */
@@ -34,24 +53,13 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
      */
     public static function graphQlScenarioProvider(): array
     {
-        return [
-            'customer_query' => ['customer_query'],
-            'customer_query_collection' => ['customer_query_collection'],
-            'customer_create_mutation' => ['customer_create_mutation'],
-            'customer_update_mutation' => ['customer_update_mutation'],
-            'customer_delete_mutation' => ['customer_delete_mutation'],
-            'customer_status_query' => ['customer_status_query'],
-            'customer_status_query_collection' => ['customer_status_query_collection'],
-            'customer_status_create_mutation' => ['customer_status_create_mutation'],
-            'customer_status_update_mutation' => ['customer_status_update_mutation'],
-            'customer_status_delete_mutation' => ['customer_status_delete_mutation'],
-            'customer_type_query' => ['customer_type_query'],
-            'customer_type_query_collection' => ['customer_type_query_collection'],
-            'customer_type_create_mutation' => ['customer_type_create_mutation'],
-            'customer_type_update_mutation' => ['customer_type_update_mutation'],
-            'customer_type_delete_mutation' => ['customer_type_delete_mutation'],
-            'customer_type_delete_missing' => ['customer_type_delete_missing'],
-        ];
+        return array_combine(
+            array_values(self::GRAPHQL_SCENARIOS),
+            array_map(
+                static fn (string $scenario): array => [$scenario],
+                array_values(self::GRAPHQL_SCENARIOS)
+            )
+        );
     }
 
     private function exerciseGraphQlScenario(string $scenario, Client $client): void
@@ -72,22 +80,22 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
     private function graphQlScenarioHandlers(): array
     {
         return [
-            'customer_query' => $this->exerciseCustomerQuery(...),
-            'customer_query_collection' => $this->exerciseCustomerQueryCollection(...),
-            'customer_create_mutation' => $this->exerciseCustomerCreateMutation(...),
-            'customer_update_mutation' => $this->exerciseCustomerUpdateMutation(...),
-            'customer_delete_mutation' => $this->exerciseCustomerDeleteMutation(...),
-            'customer_status_query' => $this->exerciseCustomerStatusQuery(...),
-            'customer_status_query_collection' => $this->exerciseCustomerStatusQueryCollection(...),
-            'customer_status_create_mutation' => $this->exerciseCustomerStatusCreateMutation(...),
-            'customer_status_update_mutation' => $this->exerciseCustomerStatusUpdateMutation(...),
-            'customer_status_delete_mutation' => $this->exerciseCustomerStatusDeleteMutation(...),
-            'customer_type_query' => $this->exerciseCustomerTypeQuery(...),
-            'customer_type_query_collection' => $this->exerciseCustomerTypeQueryCollection(...),
-            'customer_type_create_mutation' => $this->exerciseCustomerTypeCreateMutation(...),
-            'customer_type_update_mutation' => $this->exerciseCustomerTypeUpdateMutation(...),
-            'customer_type_delete_mutation' => $this->exerciseCustomerTypeDeleteMutation(...),
-            'customer_type_delete_missing' => $this->exerciseCustomerTypeDeleteMissing(...),
+            self::GRAPHQL_SCENARIOS['customerQuery'] => $this->exerciseCustomerQuery(...),
+            self::GRAPHQL_SCENARIOS['customerQueryCollection'] => $this->exerciseCustomerQueryCollection(...),
+            self::GRAPHQL_SCENARIOS['customerCreateMutation'] => $this->exerciseCustomerCreateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerUpdateMutation'] => $this->exerciseCustomerUpdateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerDeleteMutation'] => $this->exerciseCustomerDeleteMutation(...),
+            self::GRAPHQL_SCENARIOS['customerStatusQuery'] => $this->exerciseCustomerStatusQuery(...),
+            self::GRAPHQL_SCENARIOS['customerStatusQueryCollection'] => $this->exerciseCustomerStatusQueryCollection(...),
+            self::GRAPHQL_SCENARIOS['customerStatusCreateMutation'] => $this->exerciseCustomerStatusCreateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerStatusUpdateMutation'] => $this->exerciseCustomerStatusUpdateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerStatusDeleteMutation'] => $this->exerciseCustomerStatusDeleteMutation(...),
+            self::GRAPHQL_SCENARIOS['customerTypeQuery'] => $this->exerciseCustomerTypeQuery(...),
+            self::GRAPHQL_SCENARIOS['customerTypeQueryCollection'] => $this->exerciseCustomerTypeQueryCollection(...),
+            self::GRAPHQL_SCENARIOS['customerTypeCreateMutation'] => $this->exerciseCustomerTypeCreateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerTypeUpdateMutation'] => $this->exerciseCustomerTypeUpdateMutation(...),
+            self::GRAPHQL_SCENARIOS['customerTypeDeleteMutation'] => $this->exerciseCustomerTypeDeleteMutation(...),
+            self::GRAPHQL_SCENARIOS['customerTypeDeleteMissing'] => $this->exerciseCustomerTypeDeleteMissing(...),
         ];
     }
 
