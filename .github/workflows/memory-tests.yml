@@ -1,0 +1,39 @@
+name: Memory safety testing
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  memory-tests:
+    name: Memory leak tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ vars.PHP_VERSION }}
+
+      - name: Install dependencies
+        run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
+
+      - name: Start required services
+        run: make ensure-test-services
+
+      - name: Execute memory tests with coverage
+        run: make memory-tests
+
+      - name: Copy memory coverage report to host
+        run: docker compose cp php:/srv/app/coverage/memory-coverage.xml /tmp/memory-coverage.xml
+
+      - name: Upload memory coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: /tmp/memory-coverage.xml
+          flags: memory-tests
+          name: codecov-memory
+          fail_ci_if_error: true
+          verbose: true
