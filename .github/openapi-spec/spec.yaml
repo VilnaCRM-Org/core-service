@@ -2570,13 +2570,7 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerType.TypeCreate'
             example:
               value: Prospect
         required: true
@@ -3242,9 +3236,7 @@ components:
             - string
             - 'null'
         confirmed:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
     Customer.CustomerPatch.jsonMergePatch:
       type: object
       additionalProperties: false
@@ -3417,9 +3409,7 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
     CustomerType.TypePatch.jsonMergePatch:
       type: object
       properties:

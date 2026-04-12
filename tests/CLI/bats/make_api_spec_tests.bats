@@ -7,6 +7,14 @@ load 'bats-assert/load'
   run make generate-openapi-spec
   assert_success
   assert [ -f ".github/openapi-spec/spec.yaml" ]
+
+  run sed -n "/^    Customer.CustomerCreate:/,/^    Customer.CustomerPatch.jsonMergePatch:/p" .github/openapi-spec/spec.yaml
+  assert_success
+  assert_output --partial $'confirmed:\n          type: boolean'
+
+  run sed -n "/^  \\/api\\/customer_types:/,/^  '\\/api\\/customer_types\\/{ulid}':/p" .github/openapi-spec/spec.yaml
+  assert_success
+  assert_output --partial "\$ref: '#/components/schemas/CustomerType.TypeCreate'"
 }
 
 @test "make generate-graphql-spec command creates spec files" {

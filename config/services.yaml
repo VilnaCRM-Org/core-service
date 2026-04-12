@@ -236,6 +236,10 @@ services:
     tags:
       - { name: 'app.openapi_processor', priority: 300 }
 
+  App\Shared\Application\OpenApi\Processor\OpenApiInputContractProcessor:
+    tags:
+      - { name: 'app.openapi_processor', priority: 250 }
+
   App\Shared\Application\OpenApi\Processor\OpenApiSchemaFixesProcessor:
     tags:
       - { name: 'app.openapi_processor', priority: 200 }
