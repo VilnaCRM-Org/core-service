@@ -31,12 +31,12 @@ FrankenPHP worker mode changes the memory model: application services and userla
 
 ## Proposed Research Matrix
 
-| Scenario | Harness | Signal | Research value |
-| --- | --- | --- | --- |
-| Repeated happy-path async event handling | PHPUnit | heap delta, post-warmup slope, peak memory | Highest-fidelity current proxy for long-lived Symfony services |
-| Repeated async failure path | PHPUnit | growth under repeated exceptions and metric-failure handling | Validates resilience paths do not accumulate leaked state |
-| Low-noise request loop such as `/api/health` | K6 + external sampler | worker or container RSS trend | Establishes black-box HTTP baseline with minimal domain noise |
-| Mixed request loop using existing customer scenarios | K6 + external sampler | RSS trend under serializer, cache, and logging churn | Reuses current workload assets for future FrankenPHP comparison |
+| Scenario                                             | Harness               | Signal                                                       | Research value                                                  |
+| ---------------------------------------------------- | --------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
+| Repeated happy-path async event handling             | PHPUnit               | heap delta, post-warmup slope, peak memory                   | Highest-fidelity current proxy for long-lived Symfony services  |
+| Repeated async failure path                          | PHPUnit               | growth under repeated exceptions and metric-failure handling | Validates resilience paths do not accumulate leaked state       |
+| Low-noise request loop such as `/api/health`         | K6 + external sampler | worker or container RSS trend                                | Establishes black-box HTTP baseline with minimal domain noise   |
+| Mixed request loop using existing customer scenarios | K6 + external sampler | RSS trend under serializer, cache, and logging churn         | Reuses current workload assets for future FrankenPHP comparison |
 
 ## Measurement Principles
 
