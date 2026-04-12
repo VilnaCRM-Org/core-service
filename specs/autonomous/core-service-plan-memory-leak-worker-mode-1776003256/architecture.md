@@ -1,164 +1,251 @@
-# Architecture: Memory-Leak Regression Coverage for Worker-Mode Readiness
+# Architecture: FrankenPHP Worker Mode With Endpoint-Wide Memory-Safety Coverage
 
 ## Architecture Goal
 
-Design a repository-native testing strategy that detects memory-retention regressions in long-lived execution paths before FrankenPHP worker mode is enabled, while staying compatible with the current Symfony and `php-fpm` architecture.
+Define a safe migration path from `php-fpm` to FrankenPHP worker mode for this
+Symfony service, with memory-safety rules strong enough that long-running
+workers do not introduce request-to-request state contamination or unbounded
+memory growth.
 
 ## Current-State Alignment
 
-- Runtime today: `php-fpm` + Caddy, not FrankenPHP.
-- Highest-fidelity current proxy for long-lived state reuse: async domain-event processing in Symfony Messenger worker-style execution.
-- Existing automation surfaces: PHPUnit, Behat, Bats, K6, GitHub Actions, and `make ci`.
-- Existing risk hotspots already visible in code: `DomainEventMessageHandler`, customer event subscribers, and their shared-service interactions for cache invalidation, logging, and metrics emission.
+- Runtime today: `php-fpm` behind Caddy.
+- Test primitives today: PHPUnit 10.5, Symfony `KernelTestCase`,
+  API Platform `ApiTestCase`, BrowserKit client reuse with `disableReboot()`,
+  Behat, Schemathesis, K6, and GitHub Actions.
+- Data layer today: Doctrine MongoDB ODM.
+- Risk hotspots already visible in code:
+  cache-backed repositories, OpenAPI/serializer helpers, observability emitters,
+  `DomainEventMessageHandler`, and customer event subscribers.
 
-## Key Architectural Decisions
+## Target Runtime Model
 
-### 1. Use a Two-Layer Testing Strategy
+### Worker-Mode Request Lifecycle
 
-- **Layer A: deterministic async-worker memory regression**
-  This becomes the first blocking signal because it exercises a real long-lived execution path that already exists in the repository.
-- **Layer B: HTTP memory evidence for future worker mode**
-  This remains informational until FrankenPHP worker mode exists locally and in CI.
+FrankenPHP worker mode should be treated as:
 
-### 2. Keep the First Blocking Signal Inside PHPUnit
+1. boot Symfony once,
+2. keep the kernel and service container resident,
+3. handle many HTTP requests in the same worker,
+4. perform explicit post-request cleanup,
+5. call `gc_collect_cycles()` after each handled request,
+6. increment the handled-request counter,
+7. terminate and restart the worker when the MAX_REQUESTS-style fuse is reached
+   or when worker health checks fail.
 
-The first regression suite should live in the repository's PHP test stack so it can:
+This lifecycle is materially different from `php-fpm`, where process memory is
+discarded at the end of the request.
 
-- run in a single process,
-- sample memory directly with low orchestration overhead,
-- reuse existing test fixtures and stubs,
-- and integrate with current CI entrypoints without introducing a new critical dependency.
+### Worker-Loop Operational Requirements
 
-### 3. Treat K6 as a Workload Driver, Not a Leak Detector
+- The worker must finish request handling cleanly before cleanup runs.
+- Cleanup must not rely on process exit.
+- `gc_collect_cycles()` must run after each handled request in the worker loop.
+- A MAX_REQUESTS-style restart fuse must be configured conservatively for
+  staging and early production.
+- Worker restarts must be observable so the team can distinguish healthy fuse
+  behavior from instability caused by leaks.
 
-K6 is valuable for repeated request workloads, but it cannot prove PHP worker memory retention by itself. It should be paired with external worker or container memory sampling and should begin as supporting evidence rather than the primary blocker.
+## Service Design Rules
 
-### 4. Calibrate Before Enforcing
+Any service that survives across requests must follow these rules:
 
-The implementation must separate:
+- no unbounded request data retained in service properties,
+- no static caches without strict bounds and a reset strategy,
+- no user, session, request, response, entity, or document objects lingering in
+  singleton-like services,
+- no memoization without both bounds and explicit reset behavior,
+- no callbacks or closures that capture request-scoped objects unless their
+  lifetime is strictly bounded to the request.
 
-- scenario construction,
-- measurement mechanics,
-- baseline calibration,
-- and final blocking thresholds.
+## Symfony-Specific Design Constraints
 
-That avoids brittle CI and lets the team validate noise levels before converting evidence into a gate.
+### Reset Strategy
 
-## Proposed Solution Components
+- Services that may accumulate state between requests must implement
+  `ResetInterface`.
+- Their `reset()` method must clear all accumulated mutable state.
+- They must be wired so Symfony resets them between same-kernel requests through
+  the `kernel.reset` mechanism.
 
-### A. Memory Sampling Utilities
+### Risk Categories That Must Be Audited
 
-Introduce a small test-support layer responsible for:
+- custom caches and memoizers
+- serializer-heavy helpers and normalizers
+- Doctrine ODM state holders and helpers around `DocumentManager`
+- security and context helpers
+- long-lived SDK or infrastructure clients that can capture request-derived data
+- static registries
+- observability collectors or spies that accumulate arrays on properties
 
-- collecting `memory_get_usage(true)` and `memory_get_peak_usage(true)`,
-- recording per-batch checkpoints,
-- running controlled GC checkpoints during calibration,
-- and formatting assertion failures with readable, redacted diagnostics that exclude business payloads and customer PII.
+### Required Service-Audit Checklist
 
-**Likely future location**
+For every risky service:
 
-- `tests/Integration/Memory/Support/` or a similarly isolated integration-test support namespace.
+1. identify mutable properties,
+2. classify each property as per-request data, bounded cache, or leaked state,
+3. redesign the service or implement `reset()`,
+4. add leak-focused tests that prove the state is cleared.
 
-### B. Async Worker-Path Regression Scenarios
+## Test Architecture
 
-Implement deterministic loop-based scenarios around `DomainEventMessageHandler` with representative subscribers.
+### Layer A: Endpoint-Wide Same-Kernel HTTP Memory-Safety Suite
 
-**Initial coverage set**
+This is the primary CI safety net because FrankenPHP worker mode reuses the same
+application kernel across requests.
 
-1. Happy-path event processing with cache invalidation and metrics emission.
-2. Failure-path subscriber execution that triggers logging and metric-failure handling.
-3. Metric-emission failure path to ensure resilience logic does not accumulate retained state.
+Implementation shape:
 
-### C. HTTP-Oriented Memory Evidence
+- use `WebTestCase`-compatible clients (`ApiTestCase` in this repo),
+- call `disableReboot()` so the same kernel handles repeated requests,
+- cover the full documented REST and GraphQL inventory through a matrix-driven
+  suite,
+- assert that targeted flows do not retain unexpected objects or show
+  unexplained post-warmup growth.
 
-Reuse existing request workloads later through:
+Required endpoint matrix:
 
-- a low-noise endpoint such as health check for baseline sampling,
-- and one mixed customer workload for serializer, cache, and logging churn.
+- all documented REST endpoints,
+- all documented GraphQL queries,
+- all documented GraphQL mutations.
 
-These scenarios should run only once a reliable worker or container memory sampler is defined for the target runtime path.
+### Layer B: High-Risk Kernel-Level Leak Checks
 
-### D. Makefile and CI Integration
+This layer complements the endpoint matrix with tighter object-deallocation
+checks around specific shared-service flows.
 
-The future implementation should expose:
+Primary candidates:
 
-- a dedicated Make target for the blocking async-worker memory suite,
-- an optional Make target for informational HTTP memory evidence,
-- and a GitHub Actions job strategy that keeps blocking and informational signals separate.
+- `DomainEventMessageHandler` repeated happy path
+- subscriber failure path
+- metrics-emission failure path
+- cache-backed repository interactions
+- serializer or normalization-heavy helpers
 
-## Scenario Design
+This layer should use `KernelTestCase` together with
+`ObjectDeallocationCheckerKernelTestCaseTrait`.
 
-### Blocking Scenario Group 1: Async Happy Path
+### Layer C: Deep Forensics
 
-- Repeatedly invoke `DomainEventMessageHandler` with representative event envelopes.
-- Use stable fixtures and identical iteration counts.
-- Assert that post-warmup retained memory growth stays within calibrated limits.
+`arnaud-lb/memprof` is the escalation path for:
 
-### Blocking Scenario Group 2: Async Failure Path
+- CI failures that are not well explained by object-retention assertions,
+- suspected native allocations,
+- staging or local runs where detailed heap forensics are required.
 
-- Repeatedly execute scenarios that throw inside subscribers.
-- Repeatedly execute scenarios where metric emission fails after subscriber failure.
-- Validate that failure-path allocations do not produce monotonic retained growth.
+`memprof` is intentionally optional/manual unless the repository later adds a
+dedicated workflow for it.
 
-### Informational Scenario Group 3: HTTP Baseline
+## Endpoint Scenario Design
 
-- Drive repeated health-check requests.
-- Later add repeated mixed customer request sequences from existing K6 assets.
-- Sample worker or container RSS externally and compare against the async baseline and future FrankenPHP runs.
+The endpoint-wide suite must include targeted repeated-request scenarios for:
 
-## Measurement Model
+- simple read endpoint,
+- authenticated endpoint,
+- Doctrine-heavy write endpoint,
+- serializer or normalization-heavy endpoint,
+- error or exception path,
+- endpoint using custom caches or shared services.
 
-Every scenario should define:
+Because the repo does not obviously commit security firewall config today, the
+authenticated scenario remains a required implementation item with an explicit
+repo-level open question on which protected route should be used.
 
-- warm-up iterations,
-- measured iterations,
-- sample interval,
-- memory metrics captured,
-- and assertion rule.
+## `disableReboot()` Design Notes
 
-### Recommended Signal Shape
+- `disableReboot()` is required because reboot-per-request tests do not model a
+  reused kernel.
+- In this mode Symfony resets services tagged with `kernel.reset` instead of
+  rebuilding the whole container.
+- The test suite must therefore account for:
+  security token storage reset behavior,
+  Doctrine ODM identity/unit-of-work behavior,
+  any service whose correctness currently depends on full kernel reboot.
 
-- Baseline memory before warm-up
-- Memory after warm-up
-- Periodic retained-memory checkpoints
-- Final retained memory delta
-- Peak memory during run
+The design must prefer deliberate test-environment adjustments over naive reuse
+of existing functional tests.
 
-### Recommended Assertion Style
+## Tooling Choices
 
-Prefer rules such as:
+- Primary leak-testing package:
+  `shipmonk/memory-scanner`
+- Primary Symfony/PHPUnit integration:
+  `KernelTestCase` and `WebTestCase` plus
+  `ObjectDeallocationCheckerKernelTestCaseTrait`
+- Optional deep forensic tool:
+  `arnaud-lb/memprof`
+- Non-primary option:
+  `roave/no-leaks` is not the migration anchor
 
-- retained delta after warm-up stays below a calibrated ceiling,
-- no sustained upward slope beyond a calibrated tolerance,
-- and peak memory does not exceed a scenario-specific budget without returning to steady state.
+## Observability Requirements
 
-## Candidate Repository Touchpoints
+The runtime and rollout plan must observe:
 
-- `tests/Integration/` for the blocking memory-regression harness
-- `tests/Load/` for informational HTTP memory evidence reuse
-- `Makefile` for execution entrypoints
-- `.github/workflows/` for CI integration
-- `docs/` for developer execution and rollout guidance
+- per-worker RSS or equivalent process memory trend over repeated requests,
+- handled request counts per worker,
+- worker restart count and restart reason,
+- distinction between normal warm-up and unbounded growth.
+
+Interpretation rules:
+
+- warm-up is an initial increase that later plateaus,
+- problematic growth is continued upward slope after warm-up,
+- repeated early restarts caused by MAX_REQUESTS or instability are rollout
+  blockers until explained.
+
+## CI and Rollout Architecture
+
+### CI
+
+- Memory-safety tests are part of the FrankenPHP migration track.
+- CI must fail on confirmed retained-object leaks in targeted tests.
+- Failure artifacts must be redacted and structured.
+- Deep `memprof` runs stay optional/manual unless the repo later promotes them.
+
+### Staged Rollout Path
+
+1. spec rewrite
+2. service audit
+3. leak-focused test implementation
+4. staging soak and repeated-request verification
+5. production rollout with conservative MAX_REQUESTS
+6. tuning after evidence
+
+### Rollback Path
+
+If leak indicators appear, rollback must allow:
+
+- disabling worker mode,
+- falling back to non-worker execution or safer runtime configuration,
+- raising conservatism around restart settings only as a temporary safety fuse.
 
 ## Risks and Mitigations
 
-- **Risk:** CI flakiness from noisy absolute thresholds
-  **Mitigation:** calibrate first; prefer steady-state growth rules over one-shot numbers.
+- **Risk:** worker mode enabled before reset audit is complete
+  **Mitigation:** rollout is blocked until service audit and endpoint-wide leak
+  suite exist.
 
-- **Risk:** over-scoping the first implementation
-  **Mitigation:** make async-worker regression the only initial blocker and keep HTTP evidence informational.
+- **Risk:** false confidence from reboot-per-request tests
+  **Mitigation:** same-kernel tests must use `disableReboot()`.
 
-- **Risk:** false confidence from `php-fpm` request loops
-  **Mitigation:** explicitly document that HTTP baselines are comparison evidence, not sufficient proof of worker-mode readiness.
+- **Risk:** legacy or third-party leaks remain after initial fixes
+  **Mitigation:** conservative MAX_REQUESTS fuse plus staged rollout plus
+  rollback path.
 
-- **Risk:** documentation drift around event-driven architecture
-  **Mitigation:** treat implementation code and tests as the source of truth during execution and update docs alongside the future implementation.
+- **Risk:** diagnostics leak payload or customer data
+  **Mitigation:** mirror the existing `DomainEventMessageHandler` policy and keep
+  failure evidence redacted.
 
-## Recommended First Implementation Boundary
+- **Risk:** numeric limits are invented before stable baselines exist
+  **Mitigation:** baseline measurement comes before any hard threshold.
 
-The first implementation should end when the repository has:
+## Recommended Implementation Boundary
 
-1. a blocking async-worker memory-regression suite,
-2. a documented measurement policy and calibration approach,
-3. Make and CI entrypoints for the blocking suite,
-4. and a defined informational path for future HTTP and FrankenPHP comparison.
+The first implementation phase is complete only when the repository has:
+
+1. a documented worker-loop cleanup contract,
+2. a mutable-service audit with reset decisions,
+3. a matrix-driven endpoint-wide same-kernel memory-safety suite design,
+4. supporting `KernelTestCase` leak checks for high-risk flows,
+5. CI/staging rollout rules, rollback rules, and restart observability
+   requirements.

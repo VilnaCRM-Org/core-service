@@ -1,76 +1,183 @@
-# Research: Memory-Leak Regression Baseline for Worker-Mode Readiness
+# Research: FrankenPHP Worker-Mode Adoption and Memory-Safety Baseline
 
 ## Goal
 
-Define the research baseline for adding memory-leak regression tests before a future FrankenPHP worker-mode rollout. This document stays at research stage only. It does not define final implementation, CI policy, or hard thresholds.
+Define a repository-grounded baseline for moving core-service from `php-fpm` to
+FrankenPHP worker mode and for adding endpoint-wide memory-safety coverage that
+can detect retained state and memory leaks before rollout.
 
-## Current Evidence
+## Current Evidence From This Repository
 
-- The current runtime is `php-fpm` on PHP 8.4 Alpine with a separate Caddy image; the container entrypoint still ends with `CMD ["php-fpm"]`, so the service is not running FrankenPHP today.
-- The service uses DDD, CQRS, and event-driven patterns, so long-lived-process risk is not limited to HTTP request handling.
-- Two relevant harnesses already exist: PHPUnit in CI and K6 for REST load scenarios.
-- `DomainEventMessageHandler` and the `CustomerCreated*Subscriber` classes explicitly describe Symfony Messenger worker execution, making them the closest existing proxy for long-lived service reuse.
-- Current unit coverage for `DomainEventMessageHandler` validates behavior, continuation on failure, and logging/metrics paths, but it does not validate repeat-invocation memory stability.
+- The committed runtime is still `php-fpm` behind Caddy:
+  `Dockerfile` ends with `CMD ["php-fpm"]`, the container entrypoint defaults
+  to `php-fpm`, and `infrastructure/docker/caddy/Caddyfile` routes requests to
+  `php_fastcgi`.
+- No FrankenPHP bootstrap or worker loop is currently committed.
+- The repository uses Symfony 7.4, API Platform test tooling, and PHPUnit 10.5.
+- `tests/Integration/ObservabilityBusinessMetricsTest.php` already uses
+  `disableReboot()`, which proves the repo has a same-kernel BrowserKit test
+  primitive available today.
+- The service uses Doctrine MongoDB ODM, Redis-backed cache pools, Symfony
+  Messenger, serializer-heavy API Platform flows, and custom OpenAPI
+  normalizers. All of these are long-lived-state risk surfaces once the kernel
+  is reused across requests.
+- `src/Shared/Infrastructure/Bus/Event/Async/DomainEventMessageHandler.php`
+  already models worker-style processing and explicitly avoids logging payloads
+  because of PII concerns.
+- Repository scan did not find committed `ResetInterface` implementations or
+  app-level `kernel.reset` tags yet.
+- Repository scan did not find existing `shipmonk/memory-scanner`,
+  `arnaud-lb/memprof`, or `roave/no-leaks` dependencies.
+- The current public API surface is documented in `docs/api-endpoints.md` and
+  load-tested in `docs/performance.md`.
 
-## Why This Matters Before FrankenPHP
+## Why FrankenPHP Worker Mode Changes the Design
 
-FrankenPHP worker mode changes the memory model: application services and userland state can survive across requests. Current `php-fpm` request loops are only a partial proxy because they do not preserve the Symfony kernel/service lifecycle in the same way. Existing Messenger workers are a better near-term proxy because they already reuse process state across many messages.
+`php-fpm` resets process memory between requests. FrankenPHP worker mode does
+not. The Symfony kernel, service container, static state, caches, Doctrine ODM
+objects, serializer state, and request-derived references can survive from one
+request to the next.
 
-## Candidate Leak-Risk Surfaces
+That means the migration cannot be treated as a simple web-server swap. The
+application must be treated as a long-running process with explicit cleanup
+rules, worker restart safeguards, and tests that intentionally reuse the same
+kernel across multiple requests.
 
-1. Repeated async event handling in `DomainEventMessageHandler`, especially when the same handler and subscriber instances process many envelopes.
-2. Event subscribers that interact with shared services such as cache, logging, and metrics emission, including `CustomerCreatedCacheInvalidationSubscriber` and `CustomerCreatedMetricsSubscriber`.
-3. Repeated HTTP request handling under a future persistent worker runtime.
-4. Failure paths that allocate exceptions, logging context arrays, or metric objects on every iteration.
+Traditional request-isolated assumptions are therefore insufficient for this
+migration.
 
-## Baseline Research Position
+## Source Facts That Must Drive the Plan
 
-- PHPUnit should be the primary first-generation leak-regression harness because it can run deterministic loops in one PHP process and measure memory directly.
-- K6 should be the secondary harness for request-shaped workloads, but only when paired with external worker or container memory sampling; K6 alone is not a leak detector.
-- The first regression candidates should target async worker-style execution before HTTP worker-mode execution, because that path already exists today and is closer to long-lived application-state reuse than `php-fpm` request execution.
+1. Worker mode keeps the application booted and in memory across requests.
+2. The design must include explicit post-request cleanup and
+   `gc_collect_cycles()` in the worker loop.
+3. The rollout must include a MAX_REQUESTS-style restart fuse for legacy or
+   third-party leaks.
+4. Services that may retain mutable state between requests must implement
+   `ResetInterface` and clear state in `reset()`.
+5. Symfony functional tests can simulate same-process multi-request behavior
+   with `disableReboot()`.
+6. In `disableReboot()` mode Symfony resets `kernel.reset` services instead of
+   rebuilding the container, and this can affect security token storage and
+   Doctrine behavior.
+7. `shipmonk/memory-scanner` is the primary leak-testing package for this
+   migration.
+8. `KernelTestCase` and `WebTestCase` leak checks should use
+   `ObjectDeallocationCheckerKernelTestCaseTrait` where applicable.
+9. `arnaud-lb/memprof` is the optional deep-forensics tool for difficult cases.
+10. `roave/no-leaks` is not the primary solution for this migration.
 
-## Proposed Research Matrix
+## Endpoint Inventory That the Plan Must Cover
 
-| Scenario                                             | Harness               | Signal                                                       | Research value                                                  |
-| ---------------------------------------------------- | --------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
-| Repeated happy-path async event handling             | PHPUnit               | heap delta, post-warmup slope, peak memory                   | Highest-fidelity current proxy for long-lived Symfony services  |
-| Repeated async failure path                          | PHPUnit               | growth under repeated exceptions and metric-failure handling | Validates resilience paths do not accumulate leaked state       |
-| Low-noise request loop such as `/api/health`         | K6 + external sampler | worker or container RSS trend                                | Establishes black-box HTTP baseline with minimal domain noise   |
-| Mixed request loop using existing customer scenarios | K6 + external sampler | RSS trend under serializer, cache, and logging churn         | Reuses current workload assets for future FrankenPHP comparison |
+### REST Endpoints
 
-## Measurement Principles
+Current documentation exposes nineteen REST routes:
 
-- Separate warm-up from measurement; first-use allocations, autoloading, and cache priming must not be treated as leaks.
-- Prefer steady-state criteria over a single absolute memory number.
-- Record memory in batches, not only at the end: initial, post-warmup, every N iterations, final, and peak.
-- For PHPUnit research, use in-process measures such as `memory_get_usage(true)` and `memory_get_peak_usage(true)` and force periodic GC during calibration to distinguish retained memory from collector lag.
-- For K6 research, measure PHP worker or container RSS externally; latency and throughput are supporting context, not pass or fail criteria.
+- `GET /api/health`
+- `GET /api/customers`
+- `POST /api/customers`
+- `GET /api/customers/{id}`
+- `PUT /api/customers/{id}`
+- `PATCH /api/customers/{id}`
+- `DELETE /api/customers/{id}`
+- `GET /api/customer_types`
+- `POST /api/customer_types`
+- `GET /api/customer_types/{id}`
+- `PUT /api/customer_types/{id}`
+- `PATCH /api/customer_types/{id}`
+- `DELETE /api/customer_types/{id}`
+- `GET /api/customer_statuses`
+- `POST /api/customer_statuses`
+- `GET /api/customer_statuses/{id}`
+- `PUT /api/customer_statuses/{id}`
+- `PATCH /api/customer_statuses/{id}`
+- `DELETE /api/customer_statuses/{id}`
 
-## Initial Research Hypotheses
+### GraphQL Operations
 
-1. The async domain-event path is the best first leak-regression target because it already runs in long-lived Symfony Messenger workers.
-2. Cache invalidation and metrics emission subscribers are representative starter cases because they exercise shared services rather than pure domain logic.
-3. Current `php-fpm` request-loop measurements can provide a useful baseline, but they are insufficient to prove readiness for FrankenPHP worker mode on their own.
-4. Leak thresholds should be calibrated empirically on stable runners before becoming blocking CI gates.
+Current documentation exposes fifteen GraphQL operations:
 
-## Known Gaps From Current Evidence
+- Queries:
+  `customer`, `customers`, `customerType`, `customerTypes`, `customerStatus`,
+  `customerStatuses`
+- Mutations:
+  `createCustomer`, `updateCustomer`, `deleteCustomer`,
+  `createCustomerType`, `updateCustomerType`, `deleteCustomerType`,
+  `createCustomerStatus`, `updateCustomerStatus`, `deleteCustomerStatus`
 
-- The architecture docs appear incomplete for current domain-event usage; code shows `CustomerCreatedEvent` subscribers while the design doc only lists a health-check event.
-- The K6 README documents workload execution, not worker-memory capture or leak-specific acceptance criteria.
-- Current GitHub workflows show PHPUnit and Symfony checks, but no leak-specific job or load-test job.
+The plan should treat this documented inventory as the baseline matrix for
+endpoint-wide memory-safety testing.
 
-## Recommended Output for the Next Phase
+## Highest-Risk Stateful Surfaces
 
-The next artifact set should decide:
+- Same-kernel HTTP request handling across the full REST and GraphQL surface
+- API Platform normalization and collection rendering
+- Doctrine ODM `DocumentManager` state across repeated reads and writes
+- Cache-backed repositories and tag invalidation logic
+- Long-lived SDK or infrastructure clients that may capture request-derived data
+- Observability emitters and log-context assembly
+- Messenger/domain-event subscriber chains using shared services
+- Static registries, memoizers, or arrays that can grow without bounds
 
-- which exact async scenarios become the first PHPUnit leak baselines,
-- how memory growth is sampled and normalized,
-- whether early K6 memory runs are informational or gating,
-- and what runner or environment contract is required before CI enforcement is credible.
+## Testing Implications for Symfony
 
-## Out of Scope
+- Endpoint-wide memory tests should use `WebTestCase`-compatible clients
+  (`ApiTestCase` in this repo) with `disableReboot()` so multiple requests reuse
+  the same kernel.
+- Service-level and message-level leak tests should use `KernelTestCase` with
+  `ObjectDeallocationCheckerKernelTestCaseTrait`.
+- `disableReboot()` is useful specifically because it approximates the same
+  application-kernel reuse that FrankenPHP worker mode introduces.
+- Because `disableReboot()` triggers resets instead of full container rebuilds,
+  leak tests must not assume that security token storage, Doctrine ODM unit of
+  work, or cached service state behave the same way they do in reboot-per-
+  request tests.
+- Test-environment adjustments will likely be required instead of naive
+  copy-paste from existing functional tests.
 
-- Implementing tests
-- Adopting FrankenPHP
-- Defining final thresholds
-- General performance benchmarking unrelated to memory retention
+## Tooling Position
+
+- Primary CI leak-testing package:
+  `shipmonk/memory-scanner`
+- Primary integration approach:
+  `KernelTestCase` and `WebTestCase` suites with
+  `ObjectDeallocationCheckerKernelTestCaseTrait`
+- Primary endpoint strategy:
+  repeated-request suites that cover the full documented REST and GraphQL
+  endpoint matrix
+- Secondary supporting suite:
+  high-risk service and async-worker flows such as `DomainEventMessageHandler`
+- Optional deep-debug path:
+  `arnaud-lb/memprof` in local or staging forensic runs
+- Explicit non-primary option:
+  do not anchor the migration on `roave/no-leaks`
+
+## Research Conclusion
+
+- The plan must treat FrankenPHP worker mode as the architectural destination,
+  not as a distant comparison target.
+- Endpoint-wide same-kernel repeated-request testing is the primary safety net,
+  because the migration risk is request-to-request retained state under a reused
+  Symfony kernel.
+- Async domain-event handling remains a valuable supporting suite because it
+  exercises long-lived shared-service behavior outside the HTTP entrypoint.
+- The rollout must be staged: spec rewrite, service audit, leak-focused test
+  implementation, staging soak, conservative worker rollout, then tuning from
+  measured evidence.
+
+## Assumptions / Open Questions
+
+- No FrankenPHP bootstrap was found in the repository. The exact worker
+  front-controller and loop structure still need confirmation during
+  implementation.
+- The repository uses PHPUnit 10.5 and Symfony 7.4 today, but
+  `shipmonk/memory-scanner` compatibility is still an implementation-time
+  check.
+- The repo scan did not find committed security firewall configuration, even
+  though OpenAPI factories model `401` responses. The authenticated endpoint
+  required by the test strategy still needs to be identified or introduced in a
+  test-safe way.
+- The repository documents K6 load testing but does not obviously document a
+  dedicated long-running-worker soak environment.
+- A service audit has not yet identified the hottest mutable services; that work
+  is part of the implementation backlog, not completed in this research phase.

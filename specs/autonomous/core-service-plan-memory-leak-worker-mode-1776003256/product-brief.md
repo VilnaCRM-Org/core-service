@@ -1,70 +1,142 @@
-# Product Brief: Memory-Leak Regression Coverage Before FrankenPHP Worker Mode
+# Product Brief: Move Core Service From PHP-FPM to FrankenPHP Worker Mode Safely
 
 ## Opportunity
 
-The core-service team wants to enable FrankenPHP worker mode in the future, but worker mode changes request lifecycle assumptions and increases the risk that retained state, caches, or service references leak memory across iterations. The repository already validates correctness through PHPUnit, Behat, and K6, yet it has no regression coverage for memory stability in long-lived execution paths.
+Core Service can reduce bootstrap overhead and improve request efficiency by
+migrating from `php-fpm` to FrankenPHP worker mode. The value proposition is
+clear: keep the Symfony application booted, reuse the container, and stop paying
+full bootstrap cost on every request.
+
+The risk is equally clear: a reused Symfony kernel turns the application into a
+long-running PHP process. Mutable service state, Doctrine ODM references,
+serializer caches, log context, or third-party client state can leak across
+requests or grow without bound unless the migration is designed explicitly for
+worker semantics.
 
 ## Problem Statement
 
-Today, the service still runs on `php-fpm`, so memory is naturally reset between requests. That makes current HTTP correctness tests insufficient as a readiness signal for a persistent worker runtime. The repository does contain an existing long-lived execution proxy in Symfony Messenger workers, particularly in `DomainEventMessageHandler` and customer event subscribers, but the current tests only prove behavior and resilience, not steady-state memory usage.
+The current runtime model assumes request isolation because the application runs
+behind `php-fpm`. That assumption breaks under FrankenPHP worker mode.
 
-Without explicit regression coverage, worker mode could be enabled with hidden memory-retention defects that only appear under sustained traffic, increasing restart frequency, degrading throughput, and making rollback decisions reactive instead of evidence-driven.
+We therefore have two linked problems to solve in the same plan:
+
+1. adopt FrankenPHP worker mode as the target runtime model, and
+2. add endpoint-wide memory-safety coverage so request-to-request state
+   contamination and memory growth are caught before rollout.
+
+Correctness tests alone are not enough. Traditional request-isolated PHP
+assumptions are no longer sufficient.
+
+## Goals
+
+- Safely adopt FrankenPHP worker mode for this Symfony application.
+- Prevent request-to-request state contamination in long-lived workers.
+- Detect memory leaks and retained objects early in CI and staging.
+- Cover the full documented REST and GraphQL endpoint inventory with
+  repeated-request memory-safety tests.
+- Define operational safeguards for imperfect legacy code and third-party
+  dependencies.
+- Keep the design compatible with the repository's current Symfony, PHPUnit,
+  Docker, Make, and GitHub Actions workflows.
+
+## Non-Goals
+
+- Guarantee mathematically perfect zero memory growth in every dependency.
+- Rewrite the whole application before the migration.
+- Treat MAX_REQUESTS as the only solution to memory leaks.
+- Rely only on ad hoc manual profiling.
+- Make `roave/no-leaks` the primary worker-mode safety strategy.
 
 ## Target Audience
 
-- Backend maintainers who will implement and own worker-mode readiness.
-- Platform and release owners who need a merge and rollout gate before enabling FrankenPHP worker mode.
-- Reviewers and operators who need credible, repeatable evidence that memory behavior is stable enough to proceed.
-
-## Desired Outcomes
-
-1. Establish a repository-native way to detect memory-retention regressions in long-lived execution paths.
-2. Cover the highest-risk current proxy path first: repeated async domain-event processing in worker-style execution.
-3. Prepare an HTTP-oriented comparison path that can later be used against FrankenPHP worker mode without requiring the migration in the first implementation.
-4. Define how the memory-regression evidence becomes runnable locally, visible in CI, and usable as a worker-mode rollout gate.
+- Backend maintainers implementing the runtime migration and reset strategy
+- Platform and release owners deciding when worker mode is safe to enable
+- Reviewers who need concrete acceptance criteria before approving rollout
+- Operators who need observability and rollback criteria during staging and
+  production rollout
 
 ## In Scope
 
-- Planning the deterministic test harnesses and scenarios needed for memory-regression coverage.
-- Defining measurement rules for warm-up, sampling cadence, and leak-detection assertions.
-- Selecting the first gating scenarios from current repository behavior.
-- Defining Makefile, CI, and reporting expectations for the future implementation.
+- Rewriting the existing BMAD planning bundle so FrankenPHP worker mode is the
+  target architecture.
+- Defining the worker request lifecycle, cleanup requirements, and restart fuse.
+- Auditing mutable services and specifying `ResetInterface` requirements.
+- Defining an endpoint-wide memory-safety test layer for all current REST and
+  GraphQL operations.
+- Defining supporting `KernelTestCase` leak checks for high-risk service flows.
+- Defining CI, staging soak, rollout, and rollback policy for the migration.
 
 ## Out of Scope
 
-- Enabling FrankenPHP worker mode.
-- Replacing the current `php-fpm` runtime.
-- General performance optimization unrelated to memory retention.
-- Broad load-testing redesign outside the needs of memory-regression evidence.
+- Implementing the runtime migration in this change set
+- Rewriting unrelated application areas that are not needed for worker safety
+- Locking numeric leak thresholds before baseline measurements exist
+- Broad performance tuning unrelated to long-running-worker safety
 
 ## Success Metrics
 
-- The repository has a defined, repeatable memory-regression test strategy for long-lived execution paths before worker mode is introduced.
-- The first implementation plan covers at least one happy-path async scenario and one failure-path async scenario.
-- The team can run the same memory-regression suite locally and in CI with consistent measurement rules.
-- Future FrankenPHP rollout decisions can rely on an explicit evidence bundle instead of ad hoc debugging.
+- The BMAD bundle makes FrankenPHP worker mode a first-class architectural
+  constraint instead of a future afterthought.
+- The plan defines how every documented endpoint will be exercised under
+  same-kernel repeated-request tests.
+- The plan defines a concrete reset strategy for mutable services.
+- The plan defines CI/staging signals that can detect retained state before
+  production rollout.
+- The plan gives engineers enough structure to implement the migration without
+  inventing the memory-safety strategy from scratch.
 
 ## Constraints
 
-- The current repo does not yet run FrankenPHP, so the first gating signal must come from a high-fidelity proxy rather than the target runtime itself.
-- CI duration and flake budget must remain reasonable; heavyweight black-box memory testing cannot become a blind extension of the default test pipeline.
-- The project enforces strict CI and test-quality standards, so the future implementation must integrate without weakening thresholds.
-- Existing architecture docs lag behind code in some event-driven areas, so the plan should treat the running code and current tests as the primary source of truth.
+- The committed runtime is still `php-fpm` plus Caddy; FrankenPHP bootstrap is
+  not yet present.
+- The repository enforces strict quality gates, so the migration plan cannot
+  lower existing CI standards.
+- Endpoint-wide coverage must stay maintainable, which implies matrix-driven
+  test generation rather than bespoke one-off tests for every route.
+- Some repo-specific worker-mode details are still unresolved, especially the
+  concrete authenticated endpoint and the final worker bootstrap shape.
 
 ## Risks
 
-- Choosing only `php-fpm` request loops as the first signal would underrepresent worker-mode risk.
-- Treating K6 alone as a leak detector would produce noisy evidence without direct memory sampling.
-- Hard-coding thresholds before calibration would create brittle CI and false positives.
-- Adding a memory test plan that is too broad initially could delay adoption and reduce trust in the signal.
+- Migrating runtime before leak coverage exists would make production the first
+  long-running-process test.
+- Adding worker mode without a reset audit could allow cross-request bleed in
+  caches, Doctrine state, or serializer-heavy services.
+- Using only MAX_REQUESTS could hide real leaks until load increases.
+- Using only manual profiling would make regression detection inconsistent and
+  reviewer-dependent.
+- Treating K6 alone as the leak detector would miss object-retention issues that
+  require PHP-level assertions.
 
 ## Product Decision
 
-The plan should intentionally ship in two layers:
+The plan should move in this order:
 
-1. A deterministic, PHPUnit-based memory-regression harness for the existing async worker-style path as the first blocking safety net.
-2. An HTTP-oriented memory evidence path for future FrankenPHP comparison, initially informational until the target runtime exists in the repository.
+1. rewrite the specs around FrankenPHP worker mode as the target runtime,
+2. audit mutable services and define reset responsibilities,
+3. add endpoint-wide same-kernel memory-safety tests using Symfony/PHPUnit,
+4. add high-risk service-level leak tests,
+5. verify the design in staging with conservative worker restarts,
+6. then enable worker mode in production with rollback guardrails.
+
+This is intentionally not a "flip the runtime and hope the tests hold" plan.
+
+## Assumptions / Open Questions
+
+- No committed FrankenPHP bootstrap exists yet.
+- The current documented HTTP surface is comprehensive enough to use as the
+  initial endpoint matrix.
+- The concrete authenticated endpoint still needs confirmation because the repo
+  does not obviously commit security firewall configuration.
+- The existence of a dedicated soak environment for long-running workers is not
+  yet obvious from the repository.
+- `shipmonk/memory-scanner` compatibility with the current PHPUnit/Symfony stack
+  still needs confirmation during implementation.
 
 ## Why Now
 
-Adding the regression coverage first de-risks the eventual worker-mode rollout and creates a stable baseline while the service is still on `php-fpm`. That makes the future runtime migration a controlled change with evidence, rather than a combined runtime-and-testing leap.
+Worker mode changes the application's failure modes. The cheapest time to define
+cleanup semantics, service reset rules, endpoint-wide repeated-request tests,
+and rollout guardrails is before the runtime switch is implemented. Doing this
+spec rewrite now turns the future migration into an evidence-driven change
+instead of a runtime gamble.
