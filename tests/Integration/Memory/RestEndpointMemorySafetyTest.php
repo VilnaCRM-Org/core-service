@@ -193,7 +193,11 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesGetCollection(Client $client): void
     {
-        $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Active'));
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Active'))
+        );
 
         $data = $client->request('GET', '/api/customer_statuses')->toArray();
 
@@ -203,7 +207,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesGetItem(Client $client): void
     {
-        $payload = $this->getCustomerStatusPayload('Pending');
+        $payload = $this->getCustomerStatusPayload($this->uniqueLookupValue('Pending'));
         $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $payload);
 
         $response = $client->request('GET', $iri);
@@ -215,7 +219,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesPost(Client $client): void
     {
-        $payload = $this->getCustomerStatusPayload('Prospect');
+        $payload = $this->getCustomerStatusPayload($this->uniqueLookupValue('Prospect'));
 
         $data = $this->jsonRequestWithClient($client, 'POST', '/api/customer_statuses', $payload);
 
@@ -225,8 +229,12 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesPut(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Active'));
-        $payload = $this->getCustomerStatusPayload('Inactive');
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Active'))
+        );
+        $payload = $this->getCustomerStatusPayload($this->uniqueLookupValue('Inactive'));
 
         $data = $this->jsonRequestWithClient($client, 'PUT', $iri, $payload);
 
@@ -236,8 +244,12 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesPatch(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Active'));
-        $patch = ['value' => 'Pending'];
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Active'))
+        );
+        $patch = ['value' => $this->uniqueLookupValue('Pending')];
 
         $data = $this->jsonRequestWithClient(
             $client,
@@ -253,7 +265,11 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerStatusesDelete(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Delete'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Delete'))
+        );
 
         $response = $client->request('DELETE', $iri);
 
@@ -262,7 +278,11 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesGetCollection(Client $client): void
     {
-        $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Retail'));
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Retail'))
+        );
 
         $data = $client->request('GET', '/api/customer_types')->toArray();
 
@@ -272,7 +292,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesGetItem(Client $client): void
     {
-        $payload = $this->getCustomerTypePayload('Wholesale');
+        $payload = $this->getCustomerTypePayload($this->uniqueLookupValue('Wholesale'));
         $iri = $this->createEntityWithClient($client, '/api/customer_types', $payload);
 
         $response = $client->request('GET', $iri);
@@ -284,7 +304,7 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesPost(Client $client): void
     {
-        $payload = $this->getCustomerTypePayload('Partner');
+        $payload = $this->getCustomerTypePayload($this->uniqueLookupValue('Partner'));
 
         $data = $this->jsonRequestWithClient($client, 'POST', '/api/customer_types', $payload);
 
@@ -294,8 +314,12 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesPut(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Lead'));
-        $payload = $this->getCustomerTypePayload('Client');
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Lead'))
+        );
+        $payload = $this->getCustomerTypePayload($this->uniqueLookupValue('Client'));
 
         $data = $this->jsonRequestWithClient($client, 'PUT', $iri, $payload);
 
@@ -305,8 +329,12 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesPatch(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Lead'));
-        $patch = ['value' => 'VIP'];
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Lead'))
+        );
+        $patch = ['value' => $this->uniqueLookupValue('VIP')];
 
         $data = $this->jsonRequestWithClient(
             $client,
@@ -322,10 +350,19 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
 
     private function exerciseCustomerTypesDelete(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Delete'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Delete'))
+        );
 
         $response = $client->request('DELETE', $iri);
 
         self::assertSame(204, $response->getStatusCode());
+    }
+
+    private function uniqueLookupValue(string $prefix): string
+    {
+        return sprintf('%s-%s', $prefix, $this->faker->ulid());
     }
 }

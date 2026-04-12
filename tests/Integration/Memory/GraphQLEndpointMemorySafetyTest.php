@@ -166,7 +166,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerStatusQuery(Client $client): void
     {
-        $payload = $this->getCustomerStatusPayload('GraphQL Status');
+        $payload = $this->getCustomerStatusPayload($this->uniqueLookupValue('GraphQL Status'));
         $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $payload);
 
         $response = $this->graphqlRequestWithClient($client, $this->getCustomerStatusQuery(), ['id' => $iri]);
@@ -177,8 +177,16 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerStatusQueryCollection(Client $client): void
     {
-        $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Active'));
-        $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Pending'));
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Active'))
+        );
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Pending'))
+        );
 
         $response = $this->graphqlRequestWithClient($client, $this->getCustomerStatusCollectionQuery(), ['first' => 10]);
 
@@ -188,7 +196,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerStatusCreateMutation(Client $client): void
     {
-        $payload = $this->getCustomerStatusPayload('Created Status');
+        $payload = $this->getCustomerStatusPayload($this->uniqueLookupValue('Created Status'));
 
         $response = $this->graphqlMutationWithClient(
             $client,
@@ -202,24 +210,36 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerStatusUpdateMutation(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Before Update'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Before Update'))
+        );
+        $updatedValue = $this->uniqueLookupValue('After Update');
 
         $response = $this->graphqlMutationWithClient(
             $client,
             $this->getUpdateCustomerStatusMutation(),
             [
                 'id' => $iri,
-                'value' => 'After Update',
+                'value' => $updatedValue,
             ]
         );
 
         $this->assertGraphQLSuccess($response);
-        self::assertSame('After Update', $this->getGraphQLDataField($response, 'updateCustomerStatus.customerStatus.value'));
+        self::assertSame(
+            $updatedValue,
+            $this->getGraphQLDataField($response, 'updateCustomerStatus.customerStatus.value')
+        );
     }
 
     private function exerciseCustomerStatusDeleteMutation(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_statuses', $this->getCustomerStatusPayload('Delete Status'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_statuses',
+            $this->getCustomerStatusPayload($this->uniqueLookupValue('Delete Status'))
+        );
 
         $response = $this->graphqlMutationWithClient(
             $client,
@@ -233,7 +253,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerTypeQuery(Client $client): void
     {
-        $payload = $this->getCustomerTypePayload('GraphQL Type');
+        $payload = $this->getCustomerTypePayload($this->uniqueLookupValue('GraphQL Type'));
         $iri = $this->createEntityWithClient($client, '/api/customer_types', $payload);
 
         $response = $this->graphqlRequestWithClient($client, $this->getCustomerTypeQuery(), ['id' => $iri]);
@@ -244,8 +264,16 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerTypeQueryCollection(Client $client): void
     {
-        $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Retail'));
-        $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('VIP'));
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Retail'))
+        );
+        $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('VIP'))
+        );
 
         $response = $this->graphqlRequestWithClient($client, $this->getCustomerTypeCollectionQuery(), ['first' => 10]);
 
@@ -255,7 +283,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerTypeCreateMutation(Client $client): void
     {
-        $payload = $this->getCustomerTypePayload('Created Type');
+        $payload = $this->getCustomerTypePayload($this->uniqueLookupValue('Created Type'));
 
         $response = $this->graphqlMutationWithClient(
             $client,
@@ -269,24 +297,36 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 
     private function exerciseCustomerTypeUpdateMutation(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Before Update'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Before Update'))
+        );
+        $updatedValue = $this->uniqueLookupValue('After Update');
 
         $response = $this->graphqlMutationWithClient(
             $client,
             $this->getUpdateCustomerTypeMutation(),
             [
                 'id' => $iri,
-                'value' => 'After Update',
+                'value' => $updatedValue,
             ]
         );
 
         $this->assertGraphQLSuccess($response);
-        self::assertSame('After Update', $this->getGraphQLDataField($response, 'updateCustomerType.customerType.value'));
+        self::assertSame(
+            $updatedValue,
+            $this->getGraphQLDataField($response, 'updateCustomerType.customerType.value')
+        );
     }
 
     private function exerciseCustomerTypeDeleteMutation(Client $client): void
     {
-        $iri = $this->createEntityWithClient($client, '/api/customer_types', $this->getCustomerTypePayload('Delete Type'));
+        $iri = $this->createEntityWithClient(
+            $client,
+            '/api/customer_types',
+            $this->getCustomerTypePayload($this->uniqueLookupValue('Delete Type'))
+        );
 
         $response = $this->graphqlMutationWithClient(
             $client,
@@ -307,6 +347,11 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
         );
 
         $this->assertGraphQLError($response);
+    }
+
+    private function uniqueLookupValue(string $prefix): string
+    {
+        return sprintf('%s-%s', $prefix, $this->faker->ulid());
     }
 
     private function getCustomerQuery(): string
