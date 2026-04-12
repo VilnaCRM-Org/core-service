@@ -8,8 +8,9 @@ use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface
 use App\Shared\Application\Observability\Metric\BusinessMetric;
 use App\Shared\Application\Observability\Metric\Collection\MetricCollection;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
+use Symfony\Contracts\Service\ResetInterface;
 
-final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
+final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface, ResetInterface
 {
     /** @var array<int, BusinessMetric> */
     private array $emitted = [];
@@ -39,6 +40,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     public function clear(): void
     {
         $this->emitted = [];
+        $this->shouldFail = false;
     }
 
     public function count(): int
@@ -46,9 +48,22 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
         return count($this->emitted);
     }
 
+    /**
+     * @return array<int, BusinessMetric>
+     */
+    public function emittedRaw(): array
+    {
+        return $this->emitted;
+    }
+
     public function emitted(): MetricCollection
     {
         return new MetricCollection(...$this->emitted);
+    }
+
+    public function reset(): void
+    {
+        $this->clear();
     }
 
     public function assertEmittedWithDimensions(string $metricName, MetricDimension ...$dimensions): void

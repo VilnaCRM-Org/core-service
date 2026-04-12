@@ -12,6 +12,11 @@ services:
   App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
     public: true
 
+  App\Tests\Support\Memory\TrackedRequestHolder:
+    public: true
+
+  App\Tests\Support\Memory\TrackedRequestSubscriber: ~
+
   App\Tests\Behat\:
     resource: '../tests/Behat/*'
 

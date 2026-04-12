@@ -28,6 +28,14 @@ We run performance tests locally using the repository Docker Compose setup (not 
 - **Database:** MongoDB 6.0
 - **Cache:** Redis (docker-compose service `redis`, image `redis:8.0.0-alpine`)
 
+## Worker-Mode Memory Safety
+
+FrankenPHP worker mode is the target runtime direction, but it remains blocked until the same-kernel memory-safety suite stays green in CI and staging.
+
+The current safety net uses Symfony integration tests with `disableReboot()` plus `shipmonk/memory-scanner` to detect retained request objects and reset failures before the runtime switch happens. This gives the team a worker-mode proxy while the production runtime still uses `php-fpm`.
+
+For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
+
 ## Benchmarks
 
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.

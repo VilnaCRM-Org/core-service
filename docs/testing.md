@@ -68,6 +68,42 @@ For integration testing, we use PHPUnit in conjunction with real database connec
 
 Run `make integration-tests` to execute the integration tests. This command ensures that all dependencies are correctly set up and that the tests are run against the configured test database and external services.
 
+## Memory-Safety Testing
+
+FrankenPHP worker mode keeps the Symfony kernel and container alive across requests, so the repository now includes a dedicated same-kernel memory-safety layer under `tests/Integration/Memory`.
+
+### What This Covers
+
+- Repeated same-kernel REST requests for:
+  - `/api/health`
+  - `/api/customers`
+  - `/api/customer_statuses`
+  - `/api/customer_types`
+- Repeated same-kernel GraphQL requests for the committed `/api/graphql` operations for customers, customer statuses, and customer types.
+- A reset-aware observability check that proves test-only metric objects do not accumulate across repeated requests.
+
+### How It Works
+
+- The suite uses `shipmonk/memory-scanner` as the primary retained-object detector for the FrankenPHP migration track.
+- Tests use BrowserKit clients with `disableReboot()` so multiple requests reuse the same kernel instead of rebuilding the full container on every request.
+- A test-only request subscriber records the Symfony main `Request` object for each handled request. The suite verifies that the previous request object is deallocated before or during the next same-kernel request cycle.
+- `BusinessMetricsEmitterSpy` now implements `ResetInterface`, so Symfony resets it through `kernel.reset` when same-kernel tests call `disableReboot()`.
+
+### Current Limitations
+
+- The production runtime is still `php-fpm` plus Caddy. These tests model worker-mode reuse before the runtime switch; they do not enable FrankenPHP on their own.
+- The current PHPUnit stack is `10.5`, while the upstream `ObjectDeallocationCheckerKernelTestCaseTrait` from `shipmonk/memory-scanner` targets PHPUnit 11+. The repository therefore uses a local manual bridge around `ObjectDeallocationChecker` until PHPUnit is upgraded.
+- The committed repository still lacks a real authenticated route and firewall configuration, so authenticated same-kernel memory coverage remains blocked on a follow-up implementation.
+
+### Execution
+
+Run the standard integration or CI entrypoints:
+
+```bash
+make integration-tests
+make ci
+```
+
 ## API Contract Validation
 
 We validate the generated OpenAPI specification against the live application with **Schemathesis**. This gives us a contract-level regression check that runs real HTTP traffic against the Dockerized service instead of validating examples in isolation.

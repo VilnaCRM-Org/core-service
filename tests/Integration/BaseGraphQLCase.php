@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
+
 /**
  * Base class for GraphQL integration tests.
  *
@@ -27,8 +29,28 @@ abstract class BaseGraphQLCase extends BaseApiCase
         array $variables = [],
         array $headers = []
     ): array {
-        $client = self::createClient();
+        return $this->graphqlRequestWithClient(
+            self::createClient(),
+            $query,
+            $variables,
+            $headers
+        );
+    }
 
+    /**
+     * Execute a GraphQL query or mutation with a persistent client.
+     *
+     * @param array<string, string|int|float|bool|array|null> $variables
+     * @param array<string, string> $headers
+     *
+     * @return array<string, string|int|float|bool|array|null>
+     */
+    protected function graphqlRequestWithClient(
+        Client $client,
+        string $query,
+        array $variables = [],
+        array $headers = []
+    ): array {
         $defaultHeaders = [
             'Content-Type' => 'application/json',
         ];
@@ -60,7 +82,34 @@ abstract class BaseGraphQLCase extends BaseApiCase
         array $input,
         array $headers = []
     ): array {
-        return $this->graphqlRequest($mutation, ['input' => $input], $headers);
+        return $this->graphqlMutationWithClient(
+            self::createClient(),
+            $mutation,
+            $input,
+            $headers
+        );
+    }
+
+    /**
+     * Execute a GraphQL mutation with a persistent client.
+     *
+     * @param array<string, string|int|float|bool|array|null> $input
+     * @param array<string, string> $headers
+     *
+     * @return array<string, string|int|float|bool|array|null>
+     */
+    protected function graphqlMutationWithClient(
+        Client $client,
+        string $mutation,
+        array $input,
+        array $headers = []
+    ): array {
+        return $this->graphqlRequestWithClient(
+            $client,
+            $mutation,
+            ['input' => $input],
+            $headers
+        );
     }
 
     /**
