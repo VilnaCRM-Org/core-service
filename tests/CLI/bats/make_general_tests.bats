@@ -140,10 +140,12 @@ load 'bats-assert/load'
   assert_output --partial 'Memory leak tests (dev env)'
   assert_output --partial 'Memory leak tests (test env)'
   assert_output --partial 'Memory leak tests (prod env)'
+  assert_output --partial "app_env: dev"
+  assert_output --partial "app_debug: '1'"
+  assert_output --partial "frankenphp_site_config: ''"
+  assert_output --partial "frankenphp_worker_config: ''"
   assert_output --partial 'compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
   assert_output --partial 'compose_file: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml'
-  assert_output --partial 'frankenphp_site_config: hot_reload'
-  assert_output --partial 'frankenphp_worker_config: watch'
   assert_output --partial 'APP_ENV: ${{ matrix.app_env }}'
   assert_output --partial 'FRANKENPHP_SITE_CONFIG: ${{ matrix.frankenphp_site_config }}'
   assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ${{ matrix.frankenphp_worker_config }}'

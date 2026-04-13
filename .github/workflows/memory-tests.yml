@@ -20,8 +20,8 @@ jobs:
             compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
             app_env: dev
             app_debug: '1'
-            frankenphp_site_config: hot_reload
-            frankenphp_worker_config: watch
+            frankenphp_site_config: ''
+            frankenphp_worker_config: ''
             soak_iterations: '2'
             run_memory_suite: false
           - job_name: Memory leak tests (test env)
