@@ -55,8 +55,16 @@ load 'bats-assert/load'
 @test "worker memory verification disables K6 latency thresholds but keeps smoke traffic" {
   run sed -n '1,220p' tests/Load/verify-frankenphp-worker-memory.sh
   assert_success
+  assert_output --partial 'LOAD_TEST_SCENARIOS="$soak_scenarios"'
   assert_output --partial 'K6_SKIP_DURATION_THRESHOLDS="${K6_SKIP_DURATION_THRESHOLDS:-1}"'
   assert_output --partial 'make smoke-load-tests-no-build'
+}
+
+@test "load-test scenario discovery supports explicit scenario overrides" {
+  run sed -n '1,120p' tests/Load/get-load-test-scenarios.sh
+  assert_success
+  assert_output --partial 'SCENARIO_OVERRIDE=${LOAD_TEST_SCENARIOS:-}'
+  assert_output --partial "tr ', ' '\\n'"
 }
 
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {

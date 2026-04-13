@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_ROOT="./tests/Load/scripts"
+SCENARIO_OVERRIDE=${LOAD_TEST_SCENARIOS:-}
 EXCLUDED_FILES=(
   "cleanupCustomers.js"
   "prepareCustomers.js"
@@ -23,6 +24,14 @@ contains_excluded_file() {
 if [[ ! -d "$SCRIPT_ROOT" ]]; then
   echo "Error: $SCRIPT_ROOT not found" >&2
   exit 1
+fi
+
+if [[ -n "$SCENARIO_OVERRIDE" ]]; then
+  printf '%s\n' "$SCENARIO_OVERRIDE" |
+    tr ', ' '\n' |
+    sed '/^$/d' |
+    sort -u
+  exit 0
 fi
 
 find "$SCRIPT_ROOT" -type f -name "*.js" -print0 |
