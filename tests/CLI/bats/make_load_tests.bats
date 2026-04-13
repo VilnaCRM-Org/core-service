@@ -73,6 +73,22 @@ load 'bats-assert/load'
   assert_output --partial '-e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"'
 }
 
+@test "customer dependency bootstrap tolerates empty collection responses in worker-mode smoke setup" {
+  run sed -n '1,220p' tests/Load/utils/insertCustomersUtils.js
+  assert_success
+  assert_output --partial 'parseCollectionResponse(response, resourceName)'
+  assert_output --partial 'Received an empty ${resourceName} collection response'
+  assert_output --partial 'Falling back to seed creation.'
+}
+
+@test "customer dependency bootstrap fetches full collections with JSON-LD accept headers" {
+  run sed -n '1,220p' tests/Load/utils/utils.js
+  assert_success
+  assert_output --partial "Accept: 'application/ld+json'"
+  assert_output --partial 'customer_types?itemsPerPage=100'
+  assert_output --partial 'customer_statuses?itemsPerPage=100'
+}
+
 @test "make execute-load-tests-script with scenario parameter" {
   skip "Requires Docker - skipped in CI environment"
 }

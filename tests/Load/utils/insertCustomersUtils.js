@@ -113,16 +113,41 @@ export default class InsertCustomersUtils {
     return customers;
   }
 
+  parseCollectionResponse(response, resourceName) {
+    if (response.status !== 200) {
+      console.warn(
+        `Unable to fetch existing ${resourceName}. Status: ${response.status}. Falling back to seed creation.`
+      );
+      return [];
+    }
+
+    const bodyText = `${response.body ?? ''}`.trim();
+
+    if (bodyText === '') {
+      console.warn(
+        `Received an empty ${resourceName} collection response. Falling back to seed creation.`
+      );
+      return [];
+    }
+
+    try {
+      const body = JSON.parse(bodyText);
+      return body['hydra:member'] || body.member || body || [];
+    } catch (error) {
+      console.warn(
+        `Failed to parse ${resourceName} collection response: ${error.message}. Falling back to seed creation.`
+      );
+      return [];
+    }
+  }
+
   insertCustomerTypes() {
     // Try to fetch existing types first
     const getResponse = this.utils.getCustomerTypes();
-    if (getResponse.status === 200) {
-      const body = JSON.parse(getResponse.body);
-      // API Platform returns hydra:member array
-      const existingTypes = body['hydra:member'] || body;
-      if (existingTypes && existingTypes.length > 0) {
-        return existingTypes;
-      }
+
+    const existingTypes = this.parseCollectionResponse(getResponse, 'customer types');
+    if (existingTypes.length > 0) {
+      return existingTypes;
     }
 
     // If no existing types, create them
@@ -138,7 +163,11 @@ export default class InsertCustomersUtils {
     for (const typeData of types) {
       const response = this.utils.createCustomerType(typeData);
       if (response.status === 201) {
-        createdTypes.push(JSON.parse(response.body));
+        try {
+          createdTypes.push(JSON.parse(response.body));
+        } catch (error) {
+          console.warn(`Failed to parse created customer type response: ${error.message}`);
+        }
       }
     }
 
@@ -148,13 +177,10 @@ export default class InsertCustomersUtils {
   insertCustomerStatuses() {
     // Try to fetch existing statuses first
     const getResponse = this.utils.getCustomerStatuses();
-    if (getResponse.status === 200) {
-      const body = JSON.parse(getResponse.body);
-      // API Platform returns hydra:member array
-      const existingStatuses = body['hydra:member'] || body;
-      if (existingStatuses && existingStatuses.length > 0) {
-        return existingStatuses;
-      }
+
+    const existingStatuses = this.parseCollectionResponse(getResponse, 'customer statuses');
+    if (existingStatuses.length > 0) {
+      return existingStatuses;
     }
 
     // If no existing statuses, create them
@@ -170,7 +196,11 @@ export default class InsertCustomersUtils {
     for (const statusData of statuses) {
       const response = this.utils.createCustomerStatus(statusData);
       if (response.status === 201) {
-        createdStatuses.push(JSON.parse(response.body));
+        try {
+          createdStatuses.push(JSON.parse(response.body));
+        } catch (error) {
+          console.warn(`Failed to parse created customer status response: ${error.message}`);
+        }
       }
     }
 

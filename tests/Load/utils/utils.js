@@ -56,6 +56,7 @@ export default class Utils {
   getJsonHeader() {
     return {
       headers: {
+        Accept: 'application/ld+json',
         'Content-Type': 'application/ld+json',
       },
     };
@@ -185,11 +186,11 @@ export default class Utils {
   }
 
   getCustomerTypes() {
-    return http.get(`${this.baseUrl}/customer_types`, this.getJsonHeader());
+    return http.get(`${this.baseUrl}/customer_types?itemsPerPage=100`, this.getJsonHeader());
   }
 
   getCustomerStatuses() {
-    return http.get(`${this.baseUrl}/customer_statuses`, this.getJsonHeader());
+    return http.get(`${this.baseUrl}/customer_statuses?itemsPerPage=100`, this.getJsonHeader());
   }
 
   executeGraphQL(query) {
