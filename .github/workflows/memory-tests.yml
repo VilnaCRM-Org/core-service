@@ -34,7 +34,7 @@ jobs:
         run: make export-memory-coverage
 
       - name: Upload memory coverage to Codecov
-        if: ${{ always() && secrets.CODECOV_TOKEN != '' }}
+        if: ${{ always() && github.repository == github.event.pull_request.head.repo.full_name }}
         timeout-minutes: 10
         uses: codecov/codecov-action@v4
         with:
