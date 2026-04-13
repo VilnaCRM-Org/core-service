@@ -63,6 +63,17 @@ load 'bats-assert/load'
   assert_output --partial 'make smoke-load-tests-no-build'
 }
 
+@test "worker memory verification uses a post-warmup baseline and only fails on sustained growth" {
+  run sed -n '1,260p' tests/Load/verify-frankenphp-worker-memory.sh
+  assert_success
+  assert_output --partial 'cold_baseline_sample=$(measure_memory)'
+  assert_output --partial 'run_soak_iteration "warmup"'
+  assert_output --partial 'post_warmup_baseline_rss='
+  assert_output --partial 'cold_to_final_delta_mib='
+  assert_output --partial '[ "$monotonic_growth" = true ]'
+  assert_output --partial 'treating this as warmup/transient growth'
+}
+
 @test "load-test scenario discovery supports explicit scenario overrides" {
   run sed -n '1,120p' tests/Load/get-load-test-scenarios.sh
   assert_success

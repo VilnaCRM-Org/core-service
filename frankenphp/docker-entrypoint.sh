@@ -19,6 +19,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			composer_flags="$composer_flags --no-dev"
 		fi
 
+		# shellcheck disable=SC2086 # composer expects flags as separate arguments
 		composer install $composer_flags
 	fi
 
