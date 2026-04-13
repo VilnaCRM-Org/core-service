@@ -20,8 +20,8 @@ load 'bats-assert/load'
 @test "make check-requirements command executes and passes" {
   run make check-requirements
   assert_success
-  assert_output --partial "Symfony Requirements Checker"
-  assert_output --partial "Your system is ready to run Symfony projects"
+  assert_output --partial "docker compose exec php composer check-platform-reqs"
+  assert_output --partial "Checking platform requirements for packages in the vendor dir"
 }
 
 @test "make phpinsights command executes and completes analysis" {
@@ -33,8 +33,8 @@ load 'bats-assert/load'
 @test "make check-security command executes and reports no vulnerabilities" {
   run make check-security
   assert_success
-  assert_output --partial "Symfony Security Check Report"
-  assert_output --partial "No packages have known vulnerabilities."
+  assert_output --partial "docker compose exec php composer audit --locked --no-interaction --abandoned=ignore"
+  assert_output --partial "No security vulnerability advisories found."
 }
 
 @test "make infection command executes" {

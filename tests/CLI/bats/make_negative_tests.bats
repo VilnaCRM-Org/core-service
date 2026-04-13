@@ -27,8 +27,8 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "symfony/http-kernel (v4.4.0)"
-  assert_output --partial "1 package has known vulnerabilities"
+  assert_output --partial "symfony/http-kernel"
+  assert_output --partial "security vulnerability advisory"
 }
 
 @test "make infection should fail due to partly covered class" {

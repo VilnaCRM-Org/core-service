@@ -162,7 +162,7 @@ check-requirements: ## Checks requirements for running Symfony and gives useful 
 	$(COMPOSER) check-platform-reqs
 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(COMPOSER) audit --no-interaction --abandoned=ignore
+	$(COMPOSER) audit --locked --no-interaction --abandoned=ignore
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
