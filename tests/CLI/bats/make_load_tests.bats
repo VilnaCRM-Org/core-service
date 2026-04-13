@@ -52,8 +52,11 @@ load 'bats-assert/load'
 }
 
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {
-  run rg -n 'localhost:80' tests/Load/scripts/rest-api/getCustomerStatus.js tests/Load/scripts/rest-api/updateCustomerStatus.js tests/Load/scripts/rest-api/updateCustomerType.js
-  [ "$status" -eq 1 ]
+  run bash -lc "! grep -n 'localhost:80' \
+    tests/Load/scripts/rest-api/getCustomerStatus.js \
+    tests/Load/scripts/rest-api/updateCustomerStatus.js \
+    tests/Load/scripts/rest-api/updateCustomerType.js"
+  assert_success
 }
 
 @test "make execute-load-tests-script with scenario parameter" {
