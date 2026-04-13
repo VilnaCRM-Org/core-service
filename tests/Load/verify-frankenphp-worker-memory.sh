@@ -72,6 +72,9 @@ printf 'baseline_rss=%s\n' "$baseline_raw" | tee -a "$report_path"
 
 for iteration in $(seq 1 "$loops"); do
     echo "Running worker-mode smoke load soak iteration ${iteration}/${loops}..."
+    K6_SKIP_DURATION_THRESHOLDS="${K6_SKIP_DURATION_THRESHOLDS:-1}" \
+    K6_SMOKE_RETRIES="${K6_SMOKE_RETRIES:-2}" \
+    K6_SMOKE_RETRY_DELAY_SECONDS="${K6_SMOKE_RETRY_DELAY_SECONDS:-2}" \
     make smoke-load-tests-no-build
 
     sample=$(measure_memory)

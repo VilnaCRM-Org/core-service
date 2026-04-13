@@ -47,6 +47,8 @@ make export-memory-coverage
 
 That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=5`. The HTTP traffic is therefore always served by FrankenPHP worker mode while the PHPUnit suite still runs inside the Dockerized `php` container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
 
+During the repeated smoke-load soak, the K6 scripts still execute the endpoint checks for every REST and GraphQL smoke scenario, but the dedicated memory workflow disables the standalone latency thresholds. That separation is intentional: the memory job should fail on response-integrity regressions or sustained RSS growth, while latency budgets remain enforced by the separate `Load testing` workflow.
+
 For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
 
 ## Benchmarks

@@ -52,6 +52,13 @@ load 'bats-assert/load'
   assert_output --partial 'WORKER_MEMORY_SERVICE'
 }
 
+@test "worker memory verification disables K6 latency thresholds but keeps smoke traffic" {
+  run sed -n '1,220p' tests/Load/verify-frankenphp-worker-memory.sh
+  assert_success
+  assert_output --partial 'K6_SKIP_DURATION_THRESHOLDS="${K6_SKIP_DURATION_THRESHOLDS:-1}"'
+  assert_output --partial 'make smoke-load-tests-no-build'
+}
+
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {
   run grep -n 'localhost:80' \
     tests/Load/scripts/rest-api/getCustomerStatus.js \

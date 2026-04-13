@@ -1,12 +1,6 @@
 # Load tests environment override
 services:
   php:
-    build:
-      context: .
-      target: frankenphp_dev
-      args:
-        SYMFONY_VERSION: ${SYMFONY_VERSION:-}
-        STABILITY: ${STABILITY:-stable}
     depends_on:
       database:
         condition: service_healthy
@@ -22,26 +16,8 @@ services:
       DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
-    volumes:
-      - ./:/srv/app
-      - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
     extra_hosts:
       - host.docker.internal:host-gateway
-
-  database:
-    image: mongo:6.0
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - '${DB_PORT}:27017'
-    volumes:
-      - db_data:/data/db
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', 'db.runCommand({ ping: 1 }).ok']
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   localstack:
     image: localstack/localstack:3.4.0
@@ -63,11 +39,5 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
 
-  redis:
-    image: redis:8.0.0-alpine
-    ports:
-      - '${REDIS_PORT:-6379}:6379'
-
 volumes:
-  db_data:
   localstack_data:
