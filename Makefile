@@ -159,10 +159,10 @@ composer-validate: ## The validate command validates a given composer.json and c
 	$(COMPOSER) validate
 
 check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
-	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
+	$(COMPOSER) check-platform-reqs
 
 check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(EXEC_ENV) $(SYMFONY_BIN) security:check
+	$(COMPOSER) audit --no-interaction
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
