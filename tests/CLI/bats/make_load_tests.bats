@@ -55,8 +55,11 @@ load 'bats-assert/load'
 @test "worker memory verification disables K6 latency thresholds but keeps smoke traffic" {
   run sed -n '1,220p' tests/Load/verify-frankenphp-worker-memory.sh
   assert_success
+  assert_output --partial 'soak_scenarios=${WORKER_MEMORY_SOAK_SCENARIOS:-health,graphql/graphQLCreateCustomer,graphql/graphQLCreateCustomerType,rest-api/createCustomer,rest-api/createCustomerType}'
   assert_output --partial 'LOAD_TEST_SCENARIOS="$soak_scenarios"'
   assert_output --partial 'K6_SKIP_DURATION_THRESHOLDS="${K6_SKIP_DURATION_THRESHOLDS:-1}"'
+  assert_output --partial 'K6_SMOKE_RETRIES="${K6_SMOKE_RETRIES:-1}"'
+  refute_output --partial 'rest-api/cachePerformance'
   assert_output --partial 'make smoke-load-tests-no-build'
 }
 
