@@ -178,7 +178,9 @@ export default class InsertCustomersUtils {
         try {
           createdTypes.push(JSON.parse(response.body));
         } catch (error) {
-          console.warn(`Failed to parse created customer type response: ${error.message}`);
+          throw new Error(
+            `Failed to parse created customer type response. Status: ${response.status}, Body: ${response.body}, Error: ${error.message}`
+          );
         }
       }
     }
@@ -211,7 +213,9 @@ export default class InsertCustomersUtils {
         try {
           createdStatuses.push(JSON.parse(response.body));
         } catch (error) {
-          console.warn(`Failed to parse created customer status response: ${error.message}`);
+          throw new Error(
+            `Failed to parse created customer status response. Status: ${response.status}, Body: ${response.body}, Error: ${error.message}`
+          );
         }
       }
     }
