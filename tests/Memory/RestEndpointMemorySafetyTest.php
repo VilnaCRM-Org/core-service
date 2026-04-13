@@ -11,27 +11,27 @@ use InvalidArgumentException;
 
 final class RestEndpointMemorySafetyTest extends BaseApiCase
 {
-    private const REST_SCENARIO_METHODS = [
-        'health_get' => 'exerciseHealthGet',
-        'customers_get_collection' => 'exerciseCustomersGetCollection',
-        'customers_get_item' => 'exerciseCustomersGetItem',
-        'customers_get_missing' => 'exerciseCustomersGetMissing',
-        'customers_post' => 'exerciseCustomersPost',
-        'customers_put' => 'exerciseCustomersPut',
-        'customers_patch' => 'exerciseCustomersPatch',
-        'customers_delete' => 'exerciseCustomersDelete',
-        'customer_statuses_get_collection' => 'exerciseCustomerStatusesGetCollection',
-        'customer_statuses_get_item' => 'exerciseCustomerStatusesGetItem',
-        'customer_statuses_post' => 'exerciseCustomerStatusesPost',
-        'customer_statuses_put' => 'exerciseCustomerStatusesPut',
-        'customer_statuses_patch' => 'exerciseCustomerStatusesPatch',
-        'customer_statuses_delete' => 'exerciseCustomerStatusesDelete',
-        'customer_types_get_collection' => 'exerciseCustomerTypesGetCollection',
-        'customer_types_get_item' => 'exerciseCustomerTypesGetItem',
-        'customer_types_post' => 'exerciseCustomerTypesPost',
-        'customer_types_put' => 'exerciseCustomerTypesPut',
-        'customer_types_patch' => 'exerciseCustomerTypesPatch',
-        'customer_types_delete' => 'exerciseCustomerTypesDelete',
+    private const REST_SCENARIOS = [
+        'healthGet' => 'health_get',
+        'customersGetCollection' => 'customers_get_collection',
+        'customersGetItem' => 'customers_get_item',
+        'customersGetMissing' => 'customers_get_missing',
+        'customersPost' => 'customers_post',
+        'customersPut' => 'customers_put',
+        'customersPatch' => 'customers_patch',
+        'customersDelete' => 'customers_delete',
+        'customerStatusesGetCollection' => 'customer_statuses_get_collection',
+        'customerStatusesGetItem' => 'customer_statuses_get_item',
+        'customerStatusesPost' => 'customer_statuses_post',
+        'customerStatusesPut' => 'customer_statuses_put',
+        'customerStatusesPatch' => 'customer_statuses_patch',
+        'customerStatusesDelete' => 'customer_statuses_delete',
+        'customerTypesGetCollection' => 'customer_types_get_collection',
+        'customerTypesGetItem' => 'customer_types_get_item',
+        'customerTypesPost' => 'customer_types_post',
+        'customerTypesPut' => 'customer_types_put',
+        'customerTypesPatch' => 'customer_types_patch',
+        'customerTypesDelete' => 'customer_types_delete',
     ];
 
     /**
@@ -57,39 +57,40 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
      */
     public static function restScenarioProvider(): array
     {
-        $provider = [];
-
-        foreach (array_keys(self::REST_SCENARIO_METHODS) as $scenario) {
-            $provider[$scenario] = [$scenario];
-        }
-
-        return $provider;
+        return array_combine(
+            array_values(self::REST_SCENARIOS),
+            array_map(
+                static fn (string $scenario): array => [$scenario],
+                array_values(self::REST_SCENARIOS)
+            )
+        );
     }
 
     private function exerciseRestScenario(string $scenario, Client $client): void
     {
-        $handlers = $this->restScenarioHandlers();
-
-        if (isset($handlers[$scenario])) {
-            $handlers[$scenario]($client);
-            return;
-        }
-
-        throw new InvalidArgumentException("Unknown REST memory scenario '{$scenario}'.");
-    }
-
-    /**
-     * @return array<string, \Closure(Client): void>
-     */
-    private function restScenarioHandlers(): array
-    {
-        $handlers = [];
-
-        foreach (self::REST_SCENARIO_METHODS as $scenario => $method) {
-            $handlers[$scenario] = \Closure::fromCallable([$this, $method]);
-        }
-
-        return $handlers;
+        match ($scenario) {
+            self::REST_SCENARIOS['healthGet'] => $this->exerciseHealthGet($client),
+            self::REST_SCENARIOS['customersGetCollection'] => $this->exerciseCustomersGetCollection($client),
+            self::REST_SCENARIOS['customersGetItem'] => $this->exerciseCustomersGetItem($client),
+            self::REST_SCENARIOS['customersGetMissing'] => $this->exerciseCustomersGetMissing($client),
+            self::REST_SCENARIOS['customersPost'] => $this->exerciseCustomersPost($client),
+            self::REST_SCENARIOS['customersPut'] => $this->exerciseCustomersPut($client),
+            self::REST_SCENARIOS['customersPatch'] => $this->exerciseCustomersPatch($client),
+            self::REST_SCENARIOS['customersDelete'] => $this->exerciseCustomersDelete($client),
+            self::REST_SCENARIOS['customerStatusesGetCollection'] => $this->exerciseCustomerStatusesGetCollection($client),
+            self::REST_SCENARIOS['customerStatusesGetItem'] => $this->exerciseCustomerStatusesGetItem($client),
+            self::REST_SCENARIOS['customerStatusesPost'] => $this->exerciseCustomerStatusesPost($client),
+            self::REST_SCENARIOS['customerStatusesPut'] => $this->exerciseCustomerStatusesPut($client),
+            self::REST_SCENARIOS['customerStatusesPatch'] => $this->exerciseCustomerStatusesPatch($client),
+            self::REST_SCENARIOS['customerStatusesDelete'] => $this->exerciseCustomerStatusesDelete($client),
+            self::REST_SCENARIOS['customerTypesGetCollection'] => $this->exerciseCustomerTypesGetCollection($client),
+            self::REST_SCENARIOS['customerTypesGetItem'] => $this->exerciseCustomerTypesGetItem($client),
+            self::REST_SCENARIOS['customerTypesPost'] => $this->exerciseCustomerTypesPost($client),
+            self::REST_SCENARIOS['customerTypesPut'] => $this->exerciseCustomerTypesPut($client),
+            self::REST_SCENARIOS['customerTypesPatch'] => $this->exerciseCustomerTypesPatch($client),
+            self::REST_SCENARIOS['customerTypesDelete'] => $this->exerciseCustomerTypesDelete($client),
+            default => throw new InvalidArgumentException("Unknown REST memory scenario '{$scenario}'."),
+        };
     }
 
     private function exerciseHealthGet(Client $client): void
