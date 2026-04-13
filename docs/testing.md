@@ -173,7 +173,8 @@ There is a wide range of customizable options, starting with a global setting fo
 ```json
 {
   "apiHost": "localhost",
-  "apiPort": "80",
+  "apiPort": "443",
+  "apiScheme": "https",
   "delayBetweenScenarios": 60,
   "batchSize": 50,
   "resultsDirectory": "results",
@@ -182,7 +183,7 @@ There is a wide range of customizable options, starting with a global setting fo
 }
 ```
 
-**Note:** Update `apiHost` with your actual domain when running load tests against production or staging environments.
+**Note:** Update `apiHost` with your actual domain when running load tests against production or staging environments. Local FrankenPHP runs use HTTPS with the self-signed development certificate, so the bundled K6 scenarios keep TLS verification disabled for that local-only path.
 
 Also, you can customize plenty of options for each separate script, and even for each load type. Here is an example:
 

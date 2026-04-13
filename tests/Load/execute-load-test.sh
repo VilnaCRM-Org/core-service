@@ -55,8 +55,9 @@ K6=(
     --net=host
     --rm
     -e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"
+    -e "LOAD_TEST_API_SCHEME=${LOAD_TEST_API_SCHEME:-https}"
     -e "LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost}"
-    -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-80}"
+    -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-443}"
     k6 run
     "--summary-trend-stats=avg,min,med,max,p(95),p(99)"
     --out "web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html"

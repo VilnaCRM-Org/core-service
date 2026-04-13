@@ -4,10 +4,11 @@ import http from 'k6/http';
 export default class Utils {
   constructor() {
     const config = this.getConfig();
+    const scheme = __ENV.LOAD_TEST_API_SCHEME || config.apiScheme || 'http';
     const host = __ENV.LOAD_TEST_API_HOST || config.apiHost;
     const port = __ENV.LOAD_TEST_API_PORT || config.apiPort;
 
-    this.baseDomain = `http://${host}:${port}`;
+    this.baseDomain = `${scheme}://${host}:${port}`;
     this.baseUrl = `${this.baseDomain}/api`;
     this.baseHttpUrl = this.baseUrl + '/customers';
     this.baseGraphQLUrl = this.baseUrl + '/graphql';

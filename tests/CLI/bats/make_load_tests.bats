@@ -71,6 +71,7 @@ load 'bats-assert/load'
   run sed -n '1,120p' tests/Load/execute-load-test.sh
   assert_success
   assert_output --partial '-e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"'
+  assert_output --partial '-e "LOAD_TEST_API_SCHEME=${LOAD_TEST_API_SCHEME:-https}"'
 }
 
 @test "customer dependency bootstrap tolerates empty collection responses in worker-mode smoke setup" {
@@ -87,6 +88,14 @@ load 'bats-assert/load'
   assert_output --partial "Accept: 'application/ld+json'"
   assert_output --partial 'customer_types?itemsPerPage=100'
   assert_output --partial 'customer_statuses?itemsPerPage=100'
+  assert_output --partial "config.apiScheme || 'http'"
+}
+
+@test "worker-mode verification targets the HTTPS listener used by official FrankenPHP Docker" {
+  run sed -n '/^worker-mode-verification:/,/^export-memory-coverage:/p' Makefile
+  assert_success
+  assert_output --partial 'LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}"'
+  assert_output --partial 'LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTPS_PORT)),$(HTTPS_PORT),443)}"'
 }
 
 @test "make execute-load-tests-script with scenario parameter" {

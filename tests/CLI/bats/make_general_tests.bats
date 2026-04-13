@@ -157,9 +157,12 @@ load 'bats-assert/load'
   assert_output --partial 'grep -Eq "\"sqs\": \"(available|running)\""'
 }
 
-@test "dev and load-test FrankenPHP overrides disable automatic HTTPS redirects" {
+@test "dev and load-test FrankenPHP overrides keep the official automatic HTTPS flow" {
   run grep -n 'CADDY_GLOBAL_OPTIONS: auto_https off' docker-compose.override.yml docker-compose.load_test.override.yml
+  assert_equal "$status" "1"
+}
+
+@test "Behat targets the FrankenPHP HTTPS endpoint" {
+  run grep -n 'base_url: "https://localhost"' behat.yml.dist
   assert_success
-  assert_output --partial 'docker-compose.override.yml'
-  assert_output --partial 'docker-compose.load_test.override.yml'
 }

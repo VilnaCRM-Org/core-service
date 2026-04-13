@@ -42,7 +42,7 @@ DOCKER        = docker
 DOCKER_COMPOSE = docker compose
 SCHEMATHESIS_VERSION ?= 4.15.1
 SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
-SCHEMATHESIS_API_URL ?= http://localhost$(if $(strip $(HTTP_PORT)),:$(HTTP_PORT),)
+SCHEMATHESIS_API_URL ?= https://localhost$(if $(strip $(HTTPS_PORT)),:$(HTTPS_PORT),)
 SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
 SCHEMATHESIS_PHASES ?= examples,coverage,fuzzing
 SCHEMATHESIS_REPORT_FORMATS ?= junit,har,ndjson
@@ -308,8 +308,9 @@ negative-tests-with-coverage: ## Run negative tests with coverage reporting
 all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
 
 worker-mode-verification: memory-tests build-k6-docker ## Run same-kernel memory tests and repeated smoke load tests against FrankenPHP worker mode
-	@LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
-	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTP_PORT)),$(HTTP_PORT),80)}" \
+	@LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}" \
+	LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
+	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTPS_PORT)),$(HTTPS_PORT),443)}" \
 	SOAK_ITERATIONS="$(SOAK_ITERATIONS)" \
 	WORKER_MEMORY_SERVICE="$(WORKER_MEMORY_SERVICE)" \
 	WORKER_MEMORY_REPORT="$(WORKER_MEMORY_REPORT)" \
@@ -467,6 +468,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 		-v "$(SCHEMATHESIS_REPORT_DIR):/reports" \
 		$(SCHEMATHESIS_IMAGE) run /schema/spec.yaml \
 		--url "$(SCHEMATHESIS_API_URL)" \
+		--tls-verify false \
 		--checks all \
 		--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)" \
 		--phases="$$phases" \

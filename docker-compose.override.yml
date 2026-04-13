@@ -5,7 +5,6 @@ services:
       target: frankenphp_dev
     environment:
       APP_ENV: ${APP_ENV:-dev}
-      CADDY_GLOBAL_OPTIONS: auto_https off
       FRANKENPHP_SITE_CONFIG: hot_reload
       FRANKENPHP_WORKER_CONFIG: watch
       XDEBUG_MODE: '${XDEBUG_MODE:-off}'
