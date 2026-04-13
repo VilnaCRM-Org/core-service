@@ -2,7 +2,7 @@
 set -euo pipefail
 
 loops=${SOAK_ITERATIONS:-3}
-service=${WORKER_MEMORY_SERVICE:-caddy}
+service=${WORKER_MEMORY_SERVICE:-php}
 report_path=${WORKER_MEMORY_REPORT:-tests/Load/results/frankenphp-worker-memory.txt}
 allowed_growth_mib=${WORKER_MEMORY_ALLOWED_GROWTH_MIB:-32}
 

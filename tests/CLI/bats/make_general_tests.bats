@@ -109,7 +109,7 @@ load 'bats-assert/load'
   assert_output --partial 'ensure-test-services'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRIES:-5'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5'
-  assert_output --partial 'up --detach --wait database redis php caddy localstack'
+  assert_output --partial 'up --detach --wait database redis php localstack'
 }
 
 @test "make start waits for required services before building k6" {
@@ -136,7 +136,7 @@ load 'bats-assert/load'
 @test "memory-tests workflow uses make-only FrankenPHP worker entrypoints" {
   run cat .github/workflows/memory-tests.yml
   assert_success
-  assert_output --partial 'COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml'
+  assert_output --partial 'COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
   refute_output --partial 'composer install'
   refute_output --partial 'setup-php'
   refute_output --partial 'docker compose cp'

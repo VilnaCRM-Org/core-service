@@ -70,13 +70,20 @@ EOF
 @test "load-tests workflow waits for localstack explicitly" {
   run sed -n '/Start application/,/Run sharded smoke load tests/p' .github/workflows/load-tests.yml
   assert_success
-  assert_output --partial 'up -d --wait database redis localstack php caddy'
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make smoke-load-tests'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
 }
 
 @test "cache-performance workflow waits for localstack explicitly" {
-  run sed -n '/Start application/,/Run Cache Performance Load Tests/p' .github/workflows/cache-performance-tests.yml
+  run sed -n '/Start application for load tests/,/Stop application/p' .github/workflows/cache-performance-tests.yml
   assert_success
-  assert_output --partial 'up -d --wait database redis localstack php caddy'
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make cache-performance-load-tests'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
 }
 
 @test "make aws-load-tests works correctly" {

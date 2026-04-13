@@ -189,7 +189,7 @@ aws-load-tests               Execute load tests on AWS
 aws-load-tests-cleanup       Clean up AWS resources
 bats                         Bats is a TAP-compliant testing framework for Bash
 behat                        A php framework for autotesting business expectations
-build                        Builds the images (PHP, caddy)
+build                        Builds the images (FrankenPHP and support services)
 cache-clear                  Clears and warms up the application cache for a given environment and debug mode
 cache-warmup                 Warmup the Symfony cache
 changelog-generate           Generate changelog from a project's commit messages
@@ -212,7 +212,7 @@ purge                        Purge cache and logs
 sh                           Log to the docker container
 start                        Start docker
 stop                         Stop docker and the Symfony binary server
-up                           Start the docker hub (PHP, caddy)
+up                           Start the docker hub (FrankenPHP, database, redis, support services)
 ```
 
 ## Documentation

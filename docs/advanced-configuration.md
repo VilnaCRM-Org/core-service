@@ -24,7 +24,7 @@ The Core Service utilizes environment variables for configuration to ensure that
 - `LOCALSTACK_PORT`: The port on which Localstack is running.
 - `MESSENGER_TRANSPORT_DSN`: The DSN (Data Source Name) for the messenger transport, configured to use Amazon SQS via Localstack for sending emails.
 - `STRUCTURIZR_PORT`: The port on which Structurizr is running (for architecture diagrams).
-- `CADDY_MERCURE_JWT_SECRET`: The JWT secret for Caddy Mercure integration.
+- `CADDY_MERCURE_JWT_SECRET`: The JWT secret for the FrankenPHP/Caddy Mercure integration.
 - `SERVER_NAME`: The server name for the application.
 
 Learn more about [Symfony Environment Variables](https://symfony.com/doc/current/configuration.html#configuring-environment-variables-in-env-files)

@@ -30,14 +30,14 @@ We run performance tests locally using the repository Docker Compose setup (not 
 
 ## Worker-Mode Memory Safety
 
-FrankenPHP worker mode is now exercised directly in CI through the dedicated memory workflow, while the default developer stack still uses `php-fpm` plus Caddy for day-to-day iteration.
+FrankenPHP worker mode is now the default Docker runtime for the service and is exercised directly in CI through the dedicated memory workflow.
 
 The safety net combines two layers:
 
 - Symfony same-kernel memory tests using `disableReboot()` plus `shipmonk/memory-scanner` to catch retained request objects and reset failures with object-level precision.
 - Repeated K6 smoke-load passes against a live FrankenPHP worker-mode container, with a coarse RSS growth guardrail to flag sustained container-memory growth after warmup.
 
-For focused local reruns, use `make memory-tests` for the object-level `disableReboot()` plus `shipmonk/memory-scanner` suite, or boot the worker-mode override and run `make worker-mode-verification` for the combined CI path. In GitHub Actions, the separate `Memory leak tests` job in `.github/workflows/memory-tests.yml` executes only make targets:
+For focused local reruns, use `make memory-tests` for the object-level `disableReboot()` plus `shipmonk/memory-scanner` suite, or run `make worker-mode-verification` for the combined CI path. In GitHub Actions, the separate `Memory leak tests` job in `.github/workflows/memory-tests.yml` executes only make targets:
 
 ```bash
 make start
@@ -45,7 +45,7 @@ make worker-mode-verification
 make export-memory-coverage
 ```
 
-That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=5`. The HTTP traffic is therefore served by FrankenPHP worker mode while the PHPUnit suite still runs inside the Dockerized PHP container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
+That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=5`. The HTTP traffic is therefore always served by FrankenPHP worker mode while the PHPUnit suite still runs inside the Dockerized `php` container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
 
 For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
 

@@ -90,7 +90,7 @@ MEMORY_COVERAGE_XML_FILE = coverage/memory-coverage.xml
 MEMORY_COVERAGE_HOST_FILE ?= /tmp/memory-coverage.xml
 MEMORY_COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --configuration phpunit.memory.xml.dist --coverage-text=$(MEMORY_COVERAGE_TEXT_FILE) --coverage-clover $(MEMORY_COVERAGE_XML_FILE) --colors=never
 SOAK_ITERATIONS ?= 3
-WORKER_MEMORY_SERVICE ?= caddy
+WORKER_MEMORY_SERVICE ?= php
 WORKER_MEMORY_REPORT ?= tests/Load/results/frankenphp-worker-memory.txt
 WORKER_MEMORY_ALLOWED_GROWTH_MIB ?= 32
 
@@ -227,7 +227,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	@attempt=1; \
 	max_attempts=$${DOCKER_COMPOSE_UP_RETRIES:-5}; \
 	retry_delay=$${DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5}; \
-	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php localstack; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
 			$(DOCKER_COMPOSE) ps || true; \
@@ -404,10 +404,10 @@ cache-warmup: ## Warmup the Symfony cache
 purge: ## Purge cache and logs
 	@rm -rf var/cache/* var/logs/*
 
-up: ## Start the docker hub (PHP, caddy)
+up: ## Start the docker hub (FrankenPHP, database, redis, support services)
 	$(DOCKER_COMPOSE) up --detach
 
-build: ## Builds the images (PHP, caddy)
+build: ## Builds the images (FrankenPHP and support services)
 	$(DOCKER_COMPOSE) build --pull --no-cache
 
 down: ## Stop the docker hub

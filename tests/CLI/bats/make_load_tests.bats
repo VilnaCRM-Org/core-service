@@ -49,6 +49,7 @@ load 'bats-assert/load'
   assert_output --partial 'verify-frankenphp-worker-memory.sh'
   assert_output --partial 'SOAK_ITERATIONS'
   assert_output --partial 'WORKER_MEMORY_ALLOWED_GROWTH_MIB'
+  assert_output --partial 'WORKER_MEMORY_SERVICE'
 }
 
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {

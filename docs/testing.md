@@ -92,7 +92,7 @@ FrankenPHP worker mode keeps the Symfony kernel and container alive across reque
 
 ### Current Limitations
 
-- The default developer stack still boots the `php-fpm` plus Caddy pairing. Actual FrankenPHP worker mode is enabled for the dedicated memory GitHub workflow through `docker-compose.frankenphp.worker.override.yml`, while the PHPUnit memory suite itself remains the primary retained-object detector.
+- The application now runs through FrankenPHP worker mode in the default Docker stack, but the PHPUnit suite itself remains the primary retained-object detector because it can pinpoint specific leaked objects and reset failures.
 - The current PHPUnit stack is `10.5`, while the upstream `ObjectDeallocationCheckerKernelTestCaseTrait` from `shipmonk/memory-scanner` targets PHPUnit 11+. The repository therefore uses a local manual bridge around `ObjectDeallocationChecker` until PHPUnit is upgraded.
 - The committed repository still lacks a real authenticated route and firewall configuration, so authenticated same-kernel memory coverage remains blocked on a follow-up implementation.
 
@@ -105,7 +105,7 @@ make memory-tests
 make ci
 ```
 
-GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as the separate `Memory leak tests` check. The workflow boots the Docker stack in FrankenPHP worker mode, executes `make worker-mode-verification`, reruns the K6 smoke suite several times against the live worker, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
+GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as the separate `Memory leak tests` check. The workflow boots the default FrankenPHP worker stack, executes `make worker-mode-verification`, reruns the K6 smoke suite several times against the live worker, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
 
 ## API Contract Validation
 
