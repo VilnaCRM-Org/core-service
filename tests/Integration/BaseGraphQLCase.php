@@ -63,7 +63,7 @@ abstract class BaseGraphQLCase extends BaseApiCase
 
         $response = $client->request('POST', self::GRAPHQL_ENDPOINT, [
             'headers' => $headers,
-            'body' => json_encode($payload),
+            'body' => json_encode($payload, JSON_THROW_ON_ERROR),
         ]);
 
         return $response->toArray();

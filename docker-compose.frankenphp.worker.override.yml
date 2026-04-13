@@ -19,7 +19,7 @@ services:
       FRANKENPHP_LOOP_MAX: ${FRANKENPHP_LOOP_MAX:-500}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
+      DB_URL: mongodb://${DB_USER:-root}:${DB_PASSWORD:-secret}@database:27017
       REDIS_URL: redis://redis:6379/0
       APP_SECRET: ${APP_SECRET:-frankenphp-worker-mode-check}
       APP_ENV: prod
@@ -34,3 +34,26 @@ services:
       - ./infrastructure/docker/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+
+  localstack:
+    image: localstack/localstack:3.4.0
+    ports:
+      - '${LOCALSTACK_PORT}:4566'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsS http://localhost:4566/_localstack/health | grep -Eq "\"sqs\": \"(available|running)\""',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    environment:
+      - SERVICES=sqs
+      - DEBUG=0
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+volumes:
+  localstack_data:

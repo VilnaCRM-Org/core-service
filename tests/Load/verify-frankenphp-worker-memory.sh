@@ -104,7 +104,7 @@ done
     printf 'monotonic_growth=%s\n' "$monotonic_growth"
 } | tee -a "$report_path"
 
-if [[ "$monotonic_growth" == "true" ]] && awk "BEGIN { exit !(${delta} > ${allowed_growth_mib}) }"; then
+if awk "BEGIN { exit !(${delta} > ${allowed_growth_mib}) }"; then
     echo "Detected sustained FrankenPHP worker memory growth: delta ${delta} MiB exceeds ${allowed_growth_mib} MiB." >&2
     exit 1
 fi

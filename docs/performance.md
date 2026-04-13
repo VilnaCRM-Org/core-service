@@ -45,7 +45,7 @@ make worker-mode-verification
 make export-memory-coverage
 ```
 
-That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=3`. The HTTP traffic is therefore served by FrankenPHP worker mode while the PHPUnit suite still runs inside the Dockerized PHP container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
+That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=5`. The HTTP traffic is therefore served by FrankenPHP worker mode while the PHPUnit suite still runs inside the Dockerized PHP container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
 
 For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
 

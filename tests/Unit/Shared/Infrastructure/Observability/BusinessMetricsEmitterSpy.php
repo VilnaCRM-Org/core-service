@@ -40,7 +40,6 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     public function clear(): void
     {
         $this->emitted = [];
-        $this->shouldFail = false;
     }
 
     public function count(): int
@@ -64,6 +63,7 @@ final class BusinessMetricsEmitterSpy implements BusinessMetricsEmitterInterface
     public function reset(): void
     {
         $this->clear();
+        $this->shouldFail = false;
     }
 
     public function assertEmittedWithDimensions(string $metricName, MetricDimension ...$dimensions): void

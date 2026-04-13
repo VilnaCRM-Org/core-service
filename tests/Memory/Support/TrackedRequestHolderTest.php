@@ -35,6 +35,7 @@ final class TrackedRequestHolderTest extends TestCase
         $holder->clear();
 
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Expected a tracked main request, but none was recorded.');
         $holder->requireTrackedRequest();
     }
 }
