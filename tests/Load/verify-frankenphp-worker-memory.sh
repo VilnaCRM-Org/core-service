@@ -5,7 +5,12 @@ loops=${SOAK_ITERATIONS:-3}
 service=${WORKER_MEMORY_SERVICE:-php}
 report_path=${WORKER_MEMORY_REPORT:-tests/Load/results/frankenphp-worker-memory.txt}
 allowed_growth_mib=${WORKER_MEMORY_ALLOWED_GROWTH_MIB:-32}
-soak_scenarios=${WORKER_MEMORY_SOAK_SCENARIOS:-health,graphql/graphQLCreateCustomer,graphql/graphQLCreateCustomerType,rest-api/createCustomer,rest-api/createCustomerType}
+
+if [[ -n "${WORKER_MEMORY_SOAK_SCENARIOS:-}" ]]; then
+    soak_scenarios=${WORKER_MEMORY_SOAK_SCENARIOS}
+else
+    soak_scenarios=$(./tests/Load/get-load-test-scenarios.sh | paste -sd, -)
+fi
 
 if ! [[ "$loops" =~ ^[1-9][0-9]*$ ]]; then
     echo "SOAK_ITERATIONS must be a positive integer. Received: '$loops'." >&2
@@ -54,10 +59,9 @@ run_soak_iteration() {
     local label=$1
 
     echo "Running worker-mode smoke load soak ${label}..."
-    # Endpoint-wide memory coverage is enforced by the dedicated PHPUnit memory suite.
-    # The soak run intentionally uses a bounded, representative mix so the worker-mode
-    # regression gate stays deterministic and fits the CI time budget. The dedicated
-    # cache-performance workflow already exercises the heavier cache warmup path.
+    # The same-kernel PHPUnit suite gives object-level leak detection while this soak
+    # verifies that the live worker survives the full endpoint inventory repeatedly
+    # without sustained RSS growth.
     LOAD_TEST_SCENARIOS="$soak_scenarios" \
     K6_SKIP_DURATION_THRESHOLDS="${K6_SKIP_DURATION_THRESHOLDS:-1}" \
     K6_SMOKE_RETRIES="${K6_SMOKE_RETRIES:-1}" \

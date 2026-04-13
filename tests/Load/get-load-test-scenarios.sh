@@ -7,7 +7,6 @@ EXCLUDED_FILES=(
   "cleanupCustomers.js"
   "prepareCustomers.js"
   "insertCustomers.js"
-  "getCustomers.js" # temporarily excluded – see README for context
 )
 
 contains_excluded_file() {

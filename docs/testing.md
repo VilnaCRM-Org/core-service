@@ -105,7 +105,7 @@ make memory-tests
 make ci
 ```
 
-GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as the separate `Memory leak tests` check. The workflow boots the default FrankenPHP worker stack, executes `make worker-mode-verification`, reruns the K6 smoke suite several times against the live worker, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
+GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as separate `Memory leak tests (dev env)`, `Memory leak tests (test env)`, and `Memory leak tests (prod env)` checks. The workflow boots the FrankenPHP worker stack for each environment using only `make` entrypoints, executes the object-level PHPUnit memory suite in the test-environment job, reruns the K6 smoke suite several times against the live worker in every environment, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
 
 ## API Contract Validation
 

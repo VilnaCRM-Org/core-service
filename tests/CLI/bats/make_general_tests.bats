@@ -136,11 +136,17 @@ load 'bats-assert/load'
 @test "memory-tests workflow uses make-only FrankenPHP worker entrypoints" {
   run cat .github/workflows/memory-tests.yml
   assert_success
-  assert_output --partial 'COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
-  assert_output --partial 'APP_ENV: test'
-  assert_output --partial 'APP_DEBUG: 0'
-  assert_output --partial 'FRANKENPHP_SITE_CONFIG:'
-  assert_output --partial "FRANKENPHP_WORKER_CONFIG:"
+  assert_output --partial 'name: ${{ matrix.job_name }}'
+  assert_output --partial 'Memory leak tests (dev env)'
+  assert_output --partial 'Memory leak tests (test env)'
+  assert_output --partial 'Memory leak tests (prod env)'
+  assert_output --partial 'compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
+  assert_output --partial 'compose_file: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml'
+  assert_output --partial 'frankenphp_site_config: hot_reload'
+  assert_output --partial 'frankenphp_worker_config: watch'
+  assert_output --partial 'APP_ENV: ${{ matrix.app_env }}'
+  assert_output --partial 'FRANKENPHP_SITE_CONFIG: ${{ matrix.frankenphp_site_config }}'
+  assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ${{ matrix.frankenphp_worker_config }}'
   refute_output --partial 'composer install'
   refute_output --partial 'setup-php'
   refute_output --partial 'docker compose cp'

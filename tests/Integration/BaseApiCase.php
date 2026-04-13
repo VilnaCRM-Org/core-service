@@ -199,6 +199,11 @@ abstract class BaseApiCase extends ApiTestCase
         );
     }
 
+    protected function generateUniqueEmailAddress(string $prefix = 'customer'): string
+    {
+        return sprintf('%s-%s@example.test', strtolower($prefix), strtolower((string) $this->faker->ulid()));
+    }
+
     /**
      * @return array<string, string|bool>
      */
@@ -216,11 +221,6 @@ abstract class BaseApiCase extends ApiTestCase
             'status' => $status,
             'confirmed' => $this->faker->boolean(),
         ];
-    }
-
-    protected function generateUniqueEmailAddress(string $prefix = 'customer'): string
-    {
-        return sprintf('%s-%s@example.test', strtolower($prefix), strtolower((string) $this->faker->ulid()));
     }
 
     /**

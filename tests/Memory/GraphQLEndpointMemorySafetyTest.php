@@ -62,29 +62,6 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
         );
     }
 
-    private function exerciseGraphQlScenario(string $scenario, Client $client): void
-    {
-        match ($scenario) {
-            self::GRAPHQL_SCENARIOS['customerQuery'] => $this->exerciseCustomerQuery($client),
-            self::GRAPHQL_SCENARIOS['customerQueryCollection'] => $this->exerciseCustomerQueryCollection($client),
-            self::GRAPHQL_SCENARIOS['customerCreateMutation'] => $this->exerciseCustomerCreateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerUpdateMutation'] => $this->exerciseCustomerUpdateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerDeleteMutation'] => $this->exerciseCustomerDeleteMutation($client),
-            self::GRAPHQL_SCENARIOS['customerStatusQuery'] => $this->exerciseCustomerStatusQuery($client),
-            self::GRAPHQL_SCENARIOS['customerStatusQueryCollection'] => $this->exerciseCustomerStatusQueryCollection($client),
-            self::GRAPHQL_SCENARIOS['customerStatusCreateMutation'] => $this->exerciseCustomerStatusCreateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerStatusUpdateMutation'] => $this->exerciseCustomerStatusUpdateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerStatusDeleteMutation'] => $this->exerciseCustomerStatusDeleteMutation($client),
-            self::GRAPHQL_SCENARIOS['customerTypeQuery'] => $this->exerciseCustomerTypeQuery($client),
-            self::GRAPHQL_SCENARIOS['customerTypeQueryCollection'] => $this->exerciseCustomerTypeQueryCollection($client),
-            self::GRAPHQL_SCENARIOS['customerTypeCreateMutation'] => $this->exerciseCustomerTypeCreateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerTypeUpdateMutation'] => $this->exerciseCustomerTypeUpdateMutation($client),
-            self::GRAPHQL_SCENARIOS['customerTypeDeleteMutation'] => $this->exerciseCustomerTypeDeleteMutation($client),
-            self::GRAPHQL_SCENARIOS['customerTypeDeleteMissing'] => $this->exerciseCustomerTypeDeleteMissing($client),
-            default => throw new InvalidArgumentException("Unknown GraphQL memory scenario '{$scenario}'."),
-        };
-    }
-
     protected function exerciseCustomerQuery(Client $client): void
     {
         $payload = $this->getCustomerPayloadWithClient($client, 'GraphQL Query');
@@ -333,6 +310,29 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
         );
 
         $this->assertGraphQLError($response);
+    }
+
+    private function exerciseGraphQlScenario(string $scenario, Client $client): void
+    {
+        match ($scenario) {
+            self::GRAPHQL_SCENARIOS['customerQuery'] => $this->exerciseCustomerQuery($client),
+            self::GRAPHQL_SCENARIOS['customerQueryCollection'] => $this->exerciseCustomerQueryCollection($client),
+            self::GRAPHQL_SCENARIOS['customerCreateMutation'] => $this->exerciseCustomerCreateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerUpdateMutation'] => $this->exerciseCustomerUpdateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerDeleteMutation'] => $this->exerciseCustomerDeleteMutation($client),
+            self::GRAPHQL_SCENARIOS['customerStatusQuery'] => $this->exerciseCustomerStatusQuery($client),
+            self::GRAPHQL_SCENARIOS['customerStatusQueryCollection'] => $this->exerciseCustomerStatusQueryCollection($client),
+            self::GRAPHQL_SCENARIOS['customerStatusCreateMutation'] => $this->exerciseCustomerStatusCreateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerStatusUpdateMutation'] => $this->exerciseCustomerStatusUpdateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerStatusDeleteMutation'] => $this->exerciseCustomerStatusDeleteMutation($client),
+            self::GRAPHQL_SCENARIOS['customerTypeQuery'] => $this->exerciseCustomerTypeQuery($client),
+            self::GRAPHQL_SCENARIOS['customerTypeQueryCollection'] => $this->exerciseCustomerTypeQueryCollection($client),
+            self::GRAPHQL_SCENARIOS['customerTypeCreateMutation'] => $this->exerciseCustomerTypeCreateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerTypeUpdateMutation'] => $this->exerciseCustomerTypeUpdateMutation($client),
+            self::GRAPHQL_SCENARIOS['customerTypeDeleteMutation'] => $this->exerciseCustomerTypeDeleteMutation($client),
+            self::GRAPHQL_SCENARIOS['customerTypeDeleteMissing'] => $this->exerciseCustomerTypeDeleteMissing($client),
+            default => throw new InvalidArgumentException("Unknown GraphQL memory scenario '{$scenario}'."),
+        };
     }
 
     private function uniqueLookupValue(string $prefix): string

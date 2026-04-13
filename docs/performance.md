@@ -37,17 +37,20 @@ The runtime itself follows the official Symfony + FrankenPHP integration path fo
 The safety net combines two layers:
 
 - Symfony same-kernel memory tests using `disableReboot()` plus `shipmonk/memory-scanner` to catch retained request objects and reset failures with object-level precision.
-- Repeated K6 smoke-load passes against a live FrankenPHP worker-mode container, with a coarse RSS growth guardrail to flag sustained container-memory growth after warmup.
+- Repeated K6 smoke-load passes against a live FrankenPHP worker-mode container, using the full discovered REST and GraphQL endpoint inventory with a coarse RSS growth guardrail to flag sustained container-memory growth after warmup.
 
-For focused local reruns, use `make memory-tests` for the object-level `disableReboot()` plus `shipmonk/memory-scanner` suite, or run `make worker-mode-verification` for the combined CI path. In GitHub Actions, the separate `Memory leak tests` job in `.github/workflows/memory-tests.yml` executes only make targets:
+For focused local reruns, use `make memory-tests` for the object-level `disableReboot()` plus `shipmonk/memory-scanner` suite, or run `make worker-mode-verification` for the combined CI path. In GitHub Actions, `.github/workflows/memory-tests.yml` executes only make targets and fans out across dev, test, and prod worker-mode checks:
 
 ```bash
 make start
+make memory-tests   # test-environment job only
 make worker-mode-verification
-make export-memory-coverage
+make export-memory-coverage   # test-environment job only
 ```
 
-That workflow sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=3`. The API traffic is therefore always served by FrankenPHP worker mode over the default local HTTPS listener while the PHPUnit suite still runs inside the Dockerized `php` container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`.
+The test-environment job sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `APP_ENV=test`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=3`. The dev-environment job uses the same Docker stack with `APP_ENV=dev`, `FRANKENPHP_SITE_CONFIG=hot_reload`, and `FRANKENPHP_WORKER_CONFIG=watch`, so the workflow verifies the actual development worker defaults instead of a simplified simulation. The prod-environment job switches to `COMPOSE_FILE=docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml` so the soak runs against the production image and settings. In all three cases, API traffic is served by FrankenPHP worker mode over the default local HTTPS listener.
+
+The standalone PHPUnit suite still runs only in the test-environment job, inside the Dockerized `php` container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`. The worker soak derives its default scenario list from `tests/Load/get-load-test-scenarios.sh`, so every committed load-test endpoint participates in the repeated RSS-growth check unless it is explicitly excluded as test-support scaffolding.
 
 During the repeated smoke-load soak, the K6 scripts still execute the endpoint checks for every REST and GraphQL smoke scenario, but the dedicated memory workflow disables the standalone latency thresholds. The RSS guardrail now measures from a post-warmup baseline and only fails when growth both exceeds the configured delta and stays monotonic across the measured iterations. That separation is intentional: the memory job should fail on response-integrity regressions or sustained RSS growth, while latency budgets remain enforced by the separate `Load testing` workflow.
 
