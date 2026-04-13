@@ -163,6 +163,27 @@ load 'bats-assert/load'
 }
 
 @test "Behat targets the FrankenPHP HTTPS endpoint" {
-  run grep -n 'base_url: "https://localhost"' behat.yml.dist
+  run sed -n '1,40p' behat.yml.dist
   assert_success
+  assert_output --partial 'base_url: "https://localhost"'
+  assert_output --partial 'verify_host: false'
+  assert_output --partial 'verify_peer: false'
+}
+
+@test ".env.test aligns BASE_URL with the FrankenPHP HTTPS listener" {
+  run sed -n '1,20p' .env.test
+  assert_success
+  assert_output --partial 'BASE_URL=https://localhost'
+}
+
+@test "symfony checks workflow uses make-only Docker entrypoints" {
+  run cat .github/workflows/symfony.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make composer-validate'
+  assert_output --partial 'run: make check-requirements'
+  assert_output --partial 'run: make check-security'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
 }

@@ -8,7 +8,13 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	fi
 
 	if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
-		composer install --prefer-dist --no-progress --no-interaction
+		composer_flags='--prefer-dist --no-progress --no-interaction'
+
+		if [ "${APP_ENV:-dev}" = 'prod' ]; then
+			composer_flags="$composer_flags --no-dev"
+		fi
+
+		composer install $composer_flags
 	fi
 
 	php bin/console -V

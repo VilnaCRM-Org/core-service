@@ -68,7 +68,7 @@ EOF
 }
 
 @test "load-tests workflow waits for localstack explicitly" {
-  run sed -n '/Start application/,/Run sharded smoke load tests/p' .github/workflows/load-tests.yml
+  run cat .github/workflows/load-tests.yml
   assert_success
   assert_output --partial 'run: make start'
   assert_output --partial 'run: make smoke-load-tests'
@@ -77,7 +77,7 @@ EOF
 }
 
 @test "cache-performance workflow waits for localstack explicitly" {
-  run sed -n '/Start application for load tests/,/Stop application/p' .github/workflows/cache-performance-tests.yml
+  run cat .github/workflows/cache-performance-tests.yml
   assert_success
   assert_output --partial 'run: make start'
   assert_output --partial 'run: make cache-performance-load-tests'

@@ -132,7 +132,19 @@ export default class InsertCustomersUtils {
 
     try {
       const body = JSON.parse(bodyText);
-      return body['hydra:member'] || body.member || body || [];
+      if (Array.isArray(body['hydra:member'])) {
+        return body['hydra:member'];
+      }
+
+      if (Array.isArray(body.member)) {
+        return body.member;
+      }
+
+      if (Array.isArray(body)) {
+        return body;
+      }
+
+      return [];
     } catch (error) {
       console.warn(
         `Failed to parse ${resourceName} collection response: ${error.message}. Falling back to seed creation.`

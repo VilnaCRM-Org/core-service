@@ -16,7 +16,10 @@ default:
       base_url: "https://localhost"
       sessions:
         default:
-          browserkit_http: ~
+          browserkit_http:
+            http_client_parameters:
+              verify_host: false
+              verify_peer: false
   suites:
     default:
       contexts:

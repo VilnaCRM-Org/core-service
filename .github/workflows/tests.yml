@@ -10,14 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install dependencies
-        run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
+        uses: actions/checkout@v4
 
       - name: Start application
         run: make start
@@ -25,15 +18,16 @@ jobs:
       - name: Execute all tests with coverage
         run: make coverage-xml
 
-      - name: Copy coverage report to host
-        run: docker compose cp php:/srv/app/coverage/coverage.xml /tmp/coverage.xml
-
       - name: Upload code coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: /tmp/coverage.xml
+          files: coverage/coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
+
+      - name: Stop application
+        if: always()
+        run: make down

@@ -13,12 +13,12 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Start Application
+        run: make start
 
       - name: Run infection
-        run: CI=1 make infection
+        run: make infection
+
+      - name: Stop Application
+        if: always()
+        run: make down
