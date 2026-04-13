@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Filter;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidFilterProcessor
 {
@@ -20,6 +21,9 @@ final class UlidFilterProcessor
         }
 
         $parsedValue = $this->parseUlidValue($rawValue);
+        if ($parsedValue === null) {
+            return;
+        }
 
         $this->applyOperator($operator, $parsedValue, $property, $builder);
     }
@@ -42,10 +46,24 @@ final class UlidFilterProcessor
     {
         if (str_contains($value, '..')) {
             $parts = explode('..', $value, 2);
-            $min = new Ulid(trim($parts[0]));
-            $max = new Ulid(trim($parts[1]));
+            $min = $this->createUlidIfValid(trim($parts[0]));
+            $max = $this->createUlidIfValid(trim($parts[1]));
+            if (! $min instanceof Ulid || ! $max instanceof Ulid) {
+                return null;
+            }
+
             return [$min, $max];
         }
+
+        return $this->createUlidIfValid(trim($value));
+    }
+
+    private function createUlidIfValid(string $value): ?Ulid
+    {
+        if ($value === '' || ! SymfonyUlid::isValid($value)) {
+            return null;
+        }
+
         return new Ulid($value);
     }
 

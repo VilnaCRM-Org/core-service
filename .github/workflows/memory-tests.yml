@@ -15,7 +15,7 @@ jobs:
     env:
       COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml
       FRANKENPHP_LOOP_MAX: 500
-      SOAK_ITERATIONS: 3
+      SOAK_ITERATIONS: 5
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

@@ -90,6 +90,24 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $this->assertSame('/errors/404', $error['type']);
     }
 
+    public function testInvalidUlidFilterDoesNotCrashCustomerStatusCollection(): void
+    {
+        $validUlid = basename($this->createEntity('/api/customer_statuses', [
+            'value' => $this->faker->word(),
+        ]));
+
+        $this->assertInvalidUlidCollectionFilterIsIgnored('/api/customer_statuses', $validUlid);
+    }
+
+    public function testInvalidUlidFilterDoesNotCrashCustomerTypeCollection(): void
+    {
+        $validUlid = basename($this->createEntity('/api/customer_types', [
+            'value' => $this->faker->word(),
+        ]));
+
+        $this->assertInvalidUlidCollectionFilterIsIgnored('/api/customer_types', $validUlid);
+    }
+
     public function testDoctrineUlidTypeConversion(): void
     {
         $customerIri = $this->createEntity('/api/customers', $this->getCustomer('ULID Type Test'));
@@ -213,7 +231,7 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $this->assertArrayHasKey('@id', $data);
         $this->assertSame($expectedIri, $data['@id']);
         $this->assertMatchesRegularExpression(
-            '/^\/(?:api)\/customers\/[0-9A-HJKMNP-TV-Z]{26}$/',
+            '/^\\/(?:api)\\/customers\\/[0-9A-HJKMNP-TV-Z]{26}$/',
             $data['@id']
         );
     }
@@ -237,6 +255,22 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $client = self::createClient();
         $client->request('GET', '/api/customers', ['query' => $query]);
         $this->assertResponseIsSuccessful();
+    }
+
+    private function assertInvalidUlidCollectionFilterIsIgnored(
+        string $resourcePath,
+        string $validUlid
+    ): void {
+        $client = self::createClient();
+        $response = $client->request('GET', $resourcePath, [
+            'query' => [
+                'ulid[lte]' => $validUlid,
+                'ulid[lt]' => '😍',
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseHasHydraOrType($response->toArray());
     }
 
     /**
