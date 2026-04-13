@@ -14,6 +14,10 @@ jobs:
     timeout-minutes: 60
     env:
       COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+      APP_ENV: test
+      APP_DEBUG: 0
+      FRANKENPHP_SITE_CONFIG: ""
+      FRANKENPHP_WORKER_CONFIG: ""
       FRANKENPHP_LOOP_MAX: 500
       SOAK_ITERATIONS: 3
     steps:

@@ -137,6 +137,10 @@ load 'bats-assert/load'
   run cat .github/workflows/memory-tests.yml
   assert_success
   assert_output --partial 'COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
+  assert_output --partial 'APP_ENV: test'
+  assert_output --partial 'APP_DEBUG: 0'
+  assert_output --partial 'FRANKENPHP_SITE_CONFIG: ""'
+  assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ""'
   refute_output --partial 'composer install'
   refute_output --partial 'setup-php'
   refute_output --partial 'docker compose cp'
@@ -160,6 +164,14 @@ load 'bats-assert/load'
 @test "dev and load-test FrankenPHP overrides keep the official automatic HTTPS flow" {
   run grep -n 'CADDY_GLOBAL_OPTIONS: auto_https off' docker-compose.override.yml docker-compose.load_test.override.yml
   assert_equal "$status" "1"
+}
+
+@test "dev FrankenPHP override keeps hot reload defaults but allows CI to disable them" {
+  run sed -n '/^services:/,/^  structurizr:/p' docker-compose.override.yml
+  assert_success
+  assert_output --partial 'APP_DEBUG: ${APP_DEBUG:-1}'
+  assert_output --partial 'FRANKENPHP_SITE_CONFIG: ${FRANKENPHP_SITE_CONFIG-hot_reload}'
+  assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ${FRANKENPHP_WORKER_CONFIG-watch}'
 }
 
 @test "Behat targets the FrankenPHP HTTPS endpoint" {
