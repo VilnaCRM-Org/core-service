@@ -3,7 +3,7 @@ services:
   php:
     build:
       context: .
-      target: app_php
+      target: app_php_dev
       args:
         SYMFONY_VERSION: ${SYMFONY_VERSION:-}
         STABILITY: ${STABILITY:-stable}
@@ -27,8 +27,9 @@ services:
     environment:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME}/.well-known/mercure
-      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:${DB_PORT}
+      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
 
   caddy:
     build:
@@ -96,7 +97,7 @@ services:
   redis:
     image: redis:8.0.0-alpine
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT:-6379}:6379'
 
 volumes:
   php_socket:

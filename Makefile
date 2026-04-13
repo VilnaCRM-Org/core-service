@@ -87,7 +87,12 @@ PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclud
 COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
 MEMORY_COVERAGE_TEXT_FILE = memory-coverage.txt
 MEMORY_COVERAGE_XML_FILE = coverage/memory-coverage.xml
+MEMORY_COVERAGE_HOST_FILE ?= /tmp/memory-coverage.xml
 MEMORY_COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --configuration phpunit.memory.xml.dist --coverage-text=$(MEMORY_COVERAGE_TEXT_FILE) --coverage-clover $(MEMORY_COVERAGE_XML_FILE) --colors=never
+SOAK_ITERATIONS ?= 3
+WORKER_MEMORY_SERVICE ?= caddy
+WORKER_MEMORY_REPORT ?= tests/Load/results/frankenphp-worker-memory.txt
+WORKER_MEMORY_ALLOWED_GROWTH_MIB ?= 32
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
@@ -302,6 +307,19 @@ negative-tests-with-coverage: ## Run negative tests with coverage reporting
 
 all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
 
+worker-mode-verification: memory-tests ## Run same-kernel memory tests and repeated smoke load tests against FrankenPHP worker mode
+	@LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
+	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTP_PORT)),$(HTTP_PORT),80)}" \
+	SOAK_ITERATIONS="$(SOAK_ITERATIONS)" \
+	WORKER_MEMORY_SERVICE="$(WORKER_MEMORY_SERVICE)" \
+	WORKER_MEMORY_REPORT="$(WORKER_MEMORY_REPORT)" \
+	WORKER_MEMORY_ALLOWED_GROWTH_MIB="$(WORKER_MEMORY_ALLOWED_GROWTH_MIB)" \
+	bash tests/Load/verify-frankenphp-worker-memory.sh
+
+export-memory-coverage: ## Copy the memory-suite coverage report from the PHP container to the host
+	@mkdir -p "$(dir $(MEMORY_COVERAGE_HOST_FILE))"
+	$(DOCKER_COMPOSE) cp php:/srv/app/$(MEMORY_COVERAGE_XML_FILE) $(MEMORY_COVERAGE_HOST_FILE)
+
 prepare-test-data: build-k6-docker ## Prepare test data for load tests
 	tests/Load/prepare-test-data.sh
 
@@ -396,7 +414,7 @@ new-logs: ## Show live logs
 	@$(DOCKER_COMPOSE) logs --tail=0 --follow
 
 .PHONY: start
-start: up build-k6-docker ## Start docker with k6
+start: ensure-test-services build-k6-docker ## Start docker, wait for required services, and build k6
 
 ps: ## Check docker containers
 	$(DOCKER_COMPOSE) ps

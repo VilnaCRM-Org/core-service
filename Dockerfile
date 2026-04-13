@@ -135,6 +135,42 @@ RUN git config --global --add safe.directory /srv/app
 
 RUN rm -f .env.local.php
 
+# FrankenPHP image used for worker-mode verification.
+FROM dunglas/frankenphp:1-php8.4-bookworm AS app_frankenphp
+
+ENV APP_ENV=prod
+
+WORKDIR /srv/app
+
+COPY --from=php_extension_installer --link /usr/bin/install-php-extensions /usr/local/bin/
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        acl \
+        curl \
+        file \
+        gettext \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    install-php-extensions \
+        intl \
+        zip \
+        apcu \
+        opcache \
+        redis \
+        xsl \
+        mongodb-2.1.8 \
+    ;
+
+COPY --link infrastructure/docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
+COPY --link infrastructure/docker/php/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
+COPY --link infrastructure/docker/frankenphp/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
+RUN chmod +x /usr/local/bin/docker-healthcheck
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
+
 # Caddy image
 FROM caddy:2.11-alpine AS app_caddy
 

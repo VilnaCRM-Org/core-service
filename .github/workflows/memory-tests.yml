@@ -11,27 +11,27 @@ jobs:
   memory-tests:
     name: Memory leak tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml:docker-compose.frankenphp.worker.override.yml
+      FRANKENPHP_LOOP_MAX: 500
+      SOAK_ITERATIONS: 3
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
+      - name: Start worker-mode stack
+        run: make start
 
-      - name: Install dependencies
-        run: composer self-update && composer install --no-scripts --no-progress && composer dump-autoload
-
-      - name: Start required services
-        run: make ensure-test-services
-
-      - name: Execute memory tests with coverage
-        run: make memory-tests
+      - name: Execute worker-mode verification
+        run: make worker-mode-verification
 
       - name: Copy memory coverage report to host
-        run: docker compose cp php:/srv/app/coverage/memory-coverage.xml /tmp/memory-coverage.xml
+        if: always()
+        run: make export-memory-coverage
 
       - name: Upload memory coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -40,3 +40,7 @@ jobs:
           name: codecov-memory
           fail_ci_if_error: true
           verbose: true
+
+      - name: Stop worker-mode stack
+        if: always()
+        run: make down

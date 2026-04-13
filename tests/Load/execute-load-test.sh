@@ -49,6 +49,8 @@ if [ -z "$RESULTS_DIR" ]; then
 fi
 
 K6="docker run --user $(id -u):$(id -g) -v ./tests/Load:/loadTests --net=host --rm \
+    -e LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost} \
+    -e LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-80} \
     k6 run --summary-trend-stats='avg,min,med,max,p(95),p(99)' \
     --out 'web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html'"
 

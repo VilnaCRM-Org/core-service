@@ -19,7 +19,13 @@
     }
 
     vulcain
-    php_fastcgi unix//var/run/php/php-fpm.sock
+
+    php_server {
+        root /srv/app/public
+        worker /srv/app/public/index.php {
+            match *
+        }
+    }
+
     encode zstd gzip
-    file_server
 }

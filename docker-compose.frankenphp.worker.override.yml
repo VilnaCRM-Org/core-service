@@ -1,0 +1,37 @@
+# FrankenPHP worker-mode override for load and memory verification.
+services:
+  caddy:
+    build:
+      context: .
+      target: app_frankenphp
+    command:
+      ['/srv/app/infrastructure/docker/frankenphp/start-worker.sh']
+    depends_on:
+      php:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      localstack:
+        condition: service_healthy
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+      FRANKENPHP_LOOP_MAX: ${FRANKENPHP_LOOP_MAX:-500}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
+      REDIS_URL: redis://redis:6379/0
+      APP_SECRET: ${APP_SECRET:-frankenphp-worker-mode-check}
+      APP_ENV: prod
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1/api/health >/dev/null || exit 1']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - ./:/srv/app
+      - ./infrastructure/docker/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config

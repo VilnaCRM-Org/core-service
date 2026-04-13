@@ -54,7 +54,7 @@ export default function updateCustomerType(data) {
     value: `${typeNames[Math.floor(Math.random() * typeNames.length)]}_Updated_${randomString(6)}`,
   };
 
-  const response = http.patch(`http://localhost:80${type['@id']}`, JSON.stringify(updateData), {
+  const response = http.patch(`${utils.getBaseDomain()}${type['@id']}`, JSON.stringify(updateData), {
     headers: { 'Content-Type': 'application/merge-patch+json' },
   });
 

@@ -35,7 +35,7 @@ export default function getCustomerStatus(data) {
   // Use counter to select different status for each iteration
   const status = data.statuses[counter.up() % data.totalStatuses];
 
-  const response = http.get(`http://localhost:80${status['@id']}`);
+  const response = http.get(`${utils.getBaseDomain()}${status['@id']}`);
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

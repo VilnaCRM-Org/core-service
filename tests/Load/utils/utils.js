@@ -3,8 +3,9 @@ import http from 'k6/http';
 
 export default class Utils {
   constructor() {
-    const host = this.getConfig().apiHost;
-    const port = this.getConfig().apiPort;
+    const config = this.getConfig();
+    const host = __ENV.LOAD_TEST_API_HOST || config.apiHost;
+    const port = __ENV.LOAD_TEST_API_PORT || config.apiPort;
 
     this.baseDomain = `http://${host}:${port}`;
     this.baseUrl = `${this.baseDomain}/api`;

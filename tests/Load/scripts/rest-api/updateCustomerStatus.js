@@ -46,7 +46,7 @@ export default function updateCustomerStatus(data) {
     value: `${statusNames[Math.floor(Math.random() * statusNames.length)]}_Updated_${randomString(6)}`,
   };
 
-  const response = http.patch(`http://localhost:80${status['@id']}`, JSON.stringify(updateData), {
+  const response = http.patch(`${utils.getBaseDomain()}${status['@id']}`, JSON.stringify(updateData), {
     headers: { 'Content-Type': 'application/merge-patch+json' },
   });
 
