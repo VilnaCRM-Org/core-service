@@ -31,7 +31,7 @@ final class UlidFilterProcessorTest extends UnitTestCase
         $this->processor->process(
             'email',
             'lt',
-            $this->faker->email(),
+            (string) $this->faker->ulid(),
             $this->builder
         );
     }
