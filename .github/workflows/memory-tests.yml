@@ -28,6 +28,10 @@ jobs:
         timeout-minutes: 15
         run: make start
 
+      - name: Execute same-kernel memory suite
+        timeout-minutes: 20
+        run: make memory-tests
+
       - name: Execute worker-mode verification
         timeout-minutes: 35
         run: make worker-mode-verification

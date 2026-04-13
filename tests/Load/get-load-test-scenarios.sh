@@ -27,10 +27,27 @@ if [[ ! -d "$SCRIPT_ROOT" ]]; then
 fi
 
 if [[ -n "$SCENARIO_OVERRIDE" ]]; then
-  printf '%s\n' "$SCENARIO_OVERRIDE" |
-    tr ', ' '\n' |
-    sed '/^$/d' |
-    sort -u
+  mapfile -t override_scenarios < <(
+    printf '%s\n' "$SCENARIO_OVERRIDE" |
+      sed -E 's/[[:space:],]+/\n/g' |
+      sed '/^$/d' |
+      sort -u
+  )
+
+  missing_scenarios=()
+  for scenario in "${override_scenarios[@]}"; do
+    if [[ ! -f "$SCRIPT_ROOT/${scenario}.js" ]]; then
+      missing_scenarios+=("$SCRIPT_ROOT/${scenario}.js")
+    fi
+  done
+
+  if (( ${#missing_scenarios[@]} > 0 )); then
+    printf 'Error: Unknown load test scenario override(s):\n' >&2
+    printf ' - %s\n' "${missing_scenarios[@]}" >&2
+    exit 1
+  fi
+
+  printf '%s\n' "${override_scenarios[@]}"
   exit 0
 fi
 

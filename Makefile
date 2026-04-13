@@ -307,10 +307,11 @@ negative-tests-with-coverage: ## Run negative tests with coverage reporting
 
 all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
 
-worker-mode-verification: memory-tests build-k6-docker ## Run same-kernel memory tests and repeated smoke load tests against FrankenPHP worker mode
-	@LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}" \
+worker-mode-verification: ## Run repeated smoke load tests against the running FrankenPHP worker mode stack
+	@default_load_test_port=$$(if [ "$${LOAD_TEST_API_SCHEME:-https}" = "http" ]; then printf '%s' "$${HTTP_PORT:-80}"; else printf '%s' "$${HTTPS_PORT:-443}"; fi); \
+	LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}" \
 	LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
-	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTPS_PORT)),$(HTTPS_PORT),443)}" \
+	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$$default_load_test_port}" \
 	SOAK_ITERATIONS="$(SOAK_ITERATIONS)" \
 	WORKER_MEMORY_SERVICE="$(WORKER_MEMORY_SERVICE)" \
 	WORKER_MEMORY_REPORT="$(WORKER_MEMORY_REPORT)" \

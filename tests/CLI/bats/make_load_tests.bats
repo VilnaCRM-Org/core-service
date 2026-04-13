@@ -45,8 +45,9 @@ load 'bats-assert/load'
 @test "worker-mode verification target runs repeated smoke tests with a memory guardrail" {
   run sed -n '/^worker-mode-verification:/,/^prepare-test-data:/p' Makefile
   assert_success
-  assert_output --partial 'worker-mode-verification: memory-tests build-k6-docker'
+  assert_output --partial 'worker-mode-verification: ## Run repeated smoke load tests against the running FrankenPHP worker mode stack'
   assert_output --partial 'verify-frankenphp-worker-memory.sh'
+  assert_output --partial 'default_load_test_port='
   assert_output --partial 'SOAK_ITERATIONS'
   assert_output --partial 'WORKER_MEMORY_ALLOWED_GROWTH_MIB'
   assert_output --partial 'WORKER_MEMORY_SERVICE'
@@ -78,7 +79,15 @@ load 'bats-assert/load'
   run sed -n '1,120p' tests/Load/get-load-test-scenarios.sh
   assert_success
   assert_output --partial 'SCENARIO_OVERRIDE=${LOAD_TEST_SCENARIOS:-}'
-  assert_output --partial "tr ', ' '\\n'"
+  assert_output --partial "sed -E 's/[[:space:],]+/\\n/g'"
+  assert_output --partial 'missing_scenarios'
+}
+
+@test "load-test scenario discovery rejects invalid override scenarios early" {
+  run env LOAD_TEST_SCENARIOS='health missing-scenario' bash tests/Load/get-load-test-scenarios.sh
+  assert_failure
+  assert_output --partial 'Error: Unknown load test scenario override(s):'
+  assert_output --partial './tests/Load/scripts/missing-scenario.js'
 }
 
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {
@@ -117,7 +126,8 @@ load 'bats-assert/load'
   run sed -n '/^worker-mode-verification:/,/^export-memory-coverage:/p' Makefile
   assert_success
   assert_output --partial 'LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}"'
-  assert_output --partial 'LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTPS_PORT)),$(HTTPS_PORT),443)}"'
+  assert_output --partial 'if [ "$${LOAD_TEST_API_SCHEME:-https}" = "http" ]'
+  assert_output --partial 'LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$$default_load_test_port}"'
 }
 
 @test "make execute-load-tests-script with scenario parameter" {

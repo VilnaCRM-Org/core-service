@@ -147,7 +147,7 @@ load 'bats-assert/load'
 
   run awk '/^[[:space:]]*run:[[:space:]]+make[[:space:]]+/ { sub(/^[[:space:]]*/, "", $0); print }' .github/workflows/memory-tests.yml
   assert_success
-  assert_output $'run: make start\nrun: make worker-mode-verification\nrun: make export-memory-coverage\nrun: make down'
+  assert_output $'run: make start\nrun: make memory-tests\nrun: make worker-mode-verification\nrun: make export-memory-coverage\nrun: make down'
 }
 
 @test "load test LocalStack healthcheck waits for SQS readiness" {
