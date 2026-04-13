@@ -54,6 +54,7 @@ K6=(
     -v "./tests/Load:/loadTests"
     --net=host
     --rm
+    -e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"
     -e "LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost}"
     -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-80}"
     k6 run

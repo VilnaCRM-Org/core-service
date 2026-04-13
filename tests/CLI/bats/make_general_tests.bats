@@ -156,3 +156,10 @@ load 'bats-assert/load'
   assert_output --partial 'curl -fsS http://localhost:4566/_localstack/health'
   assert_output --partial 'grep -Eq "\"sqs\": \"(available|running)\""'
 }
+
+@test "dev and load-test FrankenPHP overrides disable automatic HTTPS redirects" {
+  run grep -n 'CADDY_GLOBAL_OPTIONS: auto_https off' docker-compose.override.yml docker-compose.load_test.override.yml
+  assert_success
+  assert_output --partial 'docker-compose.override.yml'
+  assert_output --partial 'docker-compose.load_test.override.yml'
+}

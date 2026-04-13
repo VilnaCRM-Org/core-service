@@ -67,6 +67,12 @@ load 'bats-assert/load'
   assert_equal "$status" "1"
 }
 
+@test "execute-load-test forwards the memory-soak threshold override into k6" {
+  run sed -n '1,120p' tests/Load/execute-load-test.sh
+  assert_success
+  assert_output --partial '-e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"'
+}
+
 @test "make execute-load-tests-script with scenario parameter" {
   skip "Requires Docker - skipped in CI environment"
 }

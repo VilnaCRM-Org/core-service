@@ -10,6 +10,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
+      CADDY_GLOBAL_OPTIONS: auto_https off
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://localhost/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
