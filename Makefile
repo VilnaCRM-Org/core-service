@@ -318,7 +318,14 @@ worker-mode-verification: memory-tests build-k6-docker ## Run same-kernel memory
 
 export-memory-coverage: ## Copy the memory-suite coverage report from the PHP container to the host
 	@mkdir -p "$(dir $(MEMORY_COVERAGE_HOST_FILE))"
-	$(DOCKER_COMPOSE) cp php:/srv/app/$(MEMORY_COVERAGE_XML_FILE) $(MEMORY_COVERAGE_HOST_FILE)
+	@if [ "$(CI)" = "1" ] && [ -f "$(MEMORY_COVERAGE_XML_FILE)" ]; then \
+		cp "$(MEMORY_COVERAGE_XML_FILE)" "$(MEMORY_COVERAGE_HOST_FILE)"; \
+		echo "✅ Copied host memory coverage report to $(MEMORY_COVERAGE_HOST_FILE)"; \
+	elif [ -f "$(MEMORY_COVERAGE_HOST_FILE)" ]; then \
+		echo "✅ Memory coverage report already available at $(MEMORY_COVERAGE_HOST_FILE)"; \
+	else \
+		$(DOCKER_COMPOSE) cp php:/srv/app/$(MEMORY_COVERAGE_XML_FILE) $(MEMORY_COVERAGE_HOST_FILE); \
+	fi
 
 prepare-test-data: build-k6-docker ## Prepare test data for load tests
 	tests/Load/prepare-test-data.sh

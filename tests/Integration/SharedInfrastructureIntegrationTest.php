@@ -71,7 +71,7 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
     public function testUnmatchedApiRouteReturnsProblemJson(): void
     {
         $client = self::createClient();
-        $client->request('PATCH', '/api/customers/.%C2%99', [
+        $client->request('PATCH', '/api/__missing_route__', [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'body' => json_encode(['email' => $this->faker->unique()->safeEmail()], JSON_THROW_ON_ERROR),
         ]);

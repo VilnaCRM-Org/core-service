@@ -161,6 +161,7 @@ RUN set -eux; \
         opcache \
         redis \
         xsl \
+        openssl \
         mongodb-2.1.8 \
     ;
 

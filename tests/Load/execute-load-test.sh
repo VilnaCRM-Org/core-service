@@ -48,11 +48,18 @@ if [ -z "$RESULTS_DIR" ]; then
     exit 1
 fi
 
-K6="docker run --user $(id -u):$(id -g) -v ./tests/Load:/loadTests --net=host --rm \
-    -e LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost} \
-    -e LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-80} \
-    k6 run --summary-trend-stats='avg,min,med,max,p(95),p(99)' \
-    --out 'web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html'"
+K6=(
+    docker run
+    --user "$(id -u):$(id -g)"
+    -v "./tests/Load:/loadTests"
+    --net=host
+    --rm
+    -e "LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost}"
+    -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-80}"
+    k6 run
+    "--summary-trend-stats=avg,min,med,max,p(95),p(99)"
+    --out "web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html"
+)
 
 # Prepare customers for all Customer scenarios EXCEPT create scenarios
 # Also include cachePerformance which needs pre-existing customers
@@ -64,17 +71,17 @@ if [[ $scenario_name != "createCustomer" \
       && $scenario_name != "prepareCustomers" \
       && $scenario_name != "cleanupCustomers" \
       && $scenario_name != "insertCustomers" ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomers.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomers.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
 # Prepare customer statuses for all CustomerStatus scenarios EXCEPT create scenarios
 if [[ $scenario_name != "createCustomerStatus" && $scenario_name != "graphQLCreateCustomerStatus" && $scenario_name == *CustomerStatus* ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomerStatuses.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomerStatuses.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
 # Prepare customer types for all CustomerType scenarios EXCEPT create scenarios
 if [[ $scenario_name != "createCustomerType" && $scenario_name != "graphQLCreateCustomerType" && $scenario_name == *CustomerType* ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomerTypes.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomerTypes.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
-eval "$K6" "/loadTests/scripts/${scenario_path}.js" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+"${K6[@]}" "/loadTests/scripts/${scenario_path}.js" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
