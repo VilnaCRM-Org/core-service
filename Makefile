@@ -307,7 +307,7 @@ negative-tests-with-coverage: ## Run negative tests with coverage reporting
 
 all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
 
-worker-mode-verification: memory-tests ## Run same-kernel memory tests and repeated smoke load tests against FrankenPHP worker mode
+worker-mode-verification: memory-tests build-k6-docker ## Run same-kernel memory tests and repeated smoke load tests against FrankenPHP worker mode
 	@LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
 	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$(if $(strip $(HTTP_PORT)),$(HTTP_PORT),80)}" \
 	SOAK_ITERATIONS="$(SOAK_ITERATIONS)" \
@@ -327,6 +327,9 @@ cleanup-test-data: build-k6-docker ## Clean up test data after load tests
 	tests/Load/cleanup-test-data.sh
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
+	tests/Load/run-smoke-load-tests.sh
+
+smoke-load-tests-no-build: ## Run smoke load tests without rebuilding the K6 image
 	tests/Load/run-smoke-load-tests.sh
 
 average-load-tests: build-k6-docker ## Run load tests with average load

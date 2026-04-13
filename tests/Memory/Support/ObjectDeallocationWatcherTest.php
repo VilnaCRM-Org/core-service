@@ -28,4 +28,17 @@ final class ObjectDeallocationWatcherTest extends TestCase
 
         $watcher->assertAllReleased($this);
     }
+
+    public function testExpectUniquifiesDuplicateLabels(): void
+    {
+        $watcher = new ObjectDeallocationWatcher();
+        $firstObject = new \stdClass();
+        $secondObject = new \stdClass();
+
+        $watcher->expect($firstObject, 'duplicate label');
+        $watcher->expect($secondObject, 'duplicate label');
+        unset($firstObject, $secondObject);
+
+        $watcher->assertAllReleased($this);
+    }
 }

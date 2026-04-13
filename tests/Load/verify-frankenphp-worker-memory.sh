@@ -6,6 +6,11 @@ service=${WORKER_MEMORY_SERVICE:-caddy}
 report_path=${WORKER_MEMORY_REPORT:-tests/Load/results/frankenphp-worker-memory.txt}
 allowed_growth_mib=${WORKER_MEMORY_ALLOWED_GROWTH_MIB:-32}
 
+if ! [[ "$loops" =~ ^[1-9][0-9]*$ ]]; then
+    echo "SOAK_ITERATIONS must be a positive integer. Received: '$loops'." >&2
+    exit 1
+fi
+
 mkdir -p "$(dirname "$report_path")"
 : > "$report_path"
 
@@ -59,10 +64,15 @@ measure_memory() {
 }
 
 declare -a samples=()
+baseline_sample=$(measure_memory)
+baseline=${baseline_sample%%|*}
+baseline_raw=${baseline_sample#*|}
+
+printf 'baseline_rss=%s\n' "$baseline_raw" | tee -a "$report_path"
 
 for iteration in $(seq 1 "$loops"); do
     echo "Running worker-mode smoke load soak iteration ${iteration}/${loops}..."
-    make smoke-load-tests
+    make smoke-load-tests-no-build
 
     sample=$(measure_memory)
     sample_mib=${sample%%|*}
@@ -72,15 +82,13 @@ for iteration in $(seq 1 "$loops"); do
     printf 'iteration=%s rss=%s\n' "$iteration" "$sample_raw" | tee -a "$report_path"
 done
 
-baseline_index=0
 last_index=$((${#samples[@]} - 1))
-baseline=${samples[$baseline_index]}
 final=${samples[$last_index]}
 delta=$(awk "BEGIN { printf \"%.2f\", ${final} - ${baseline} }")
 monotonic_growth=true
 previous=$baseline
 
-for sample in "${samples[@]:1}"; do
+for sample in "${samples[@]}"; do
     if ! awk "BEGIN { exit !(${sample} > ${previous}) }"; then
         monotonic_growth=false
         break

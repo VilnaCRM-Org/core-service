@@ -209,13 +209,18 @@ abstract class BaseApiCase extends ApiTestCase
     ): array {
         return [
             'initials' => $initials ?? $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $this->generateUniqueEmailAddress(),
             'phone' => $this->faker->phoneNumber(),
             'leadSource' => $this->faker->word(),
             'type' => $type,
             'status' => $status,
             'confirmed' => $this->faker->boolean(),
         ];
+    }
+
+    protected function generateUniqueEmailAddress(string $prefix = 'customer'): string
+    {
+        return sprintf('%s-%s@example.test', strtolower($prefix), strtolower((string) $this->faker->ulid()));
     }
 
     /**

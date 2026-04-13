@@ -33,14 +33,19 @@ final readonly class SameKernelRequestMemoryProbe
         $this->trackedRequestHolder->clear();
         $exercise($client);
 
-        $trackedRequest = $this->trackedRequestHolder->requireTrackedRequest();
-        $watcher->expect($trackedRequest, "{$label} request");
+        $trackedRequests = $this->trackedRequestHolder->requireTrackedRequests();
+
+        foreach ($trackedRequests as $index => $trackedRequest) {
+            $watcher->expect($trackedRequest, sprintf('%s request #%d', $label, $index + 1));
+        }
+
         $this->trackedRequestHolder->clear();
 
         $exercise($client);
         $this->trackedRequestHolder->clear();
 
         unset($trackedRequest);
+        unset($trackedRequests);
 
         $watcher->assertAllReleased($testCase);
     }

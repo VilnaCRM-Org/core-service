@@ -11,23 +11,23 @@ use InvalidArgumentException;
 
 final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
 {
-    private const GRAPHQL_SCENARIOS = [
-        'customerQuery' => 'customer_query',
-        'customerQueryCollection' => 'customer_query_collection',
-        'customerCreateMutation' => 'customer_create_mutation',
-        'customerUpdateMutation' => 'customer_update_mutation',
-        'customerDeleteMutation' => 'customer_delete_mutation',
-        'customerStatusQuery' => 'customer_status_query',
-        'customerStatusQueryCollection' => 'customer_status_query_collection',
-        'customerStatusCreateMutation' => 'customer_status_create_mutation',
-        'customerStatusUpdateMutation' => 'customer_status_update_mutation',
-        'customerStatusDeleteMutation' => 'customer_status_delete_mutation',
-        'customerTypeQuery' => 'customer_type_query',
-        'customerTypeQueryCollection' => 'customer_type_query_collection',
-        'customerTypeCreateMutation' => 'customer_type_create_mutation',
-        'customerTypeUpdateMutation' => 'customer_type_update_mutation',
-        'customerTypeDeleteMutation' => 'customer_type_delete_mutation',
-        'customerTypeDeleteMissing' => 'customer_type_delete_missing',
+    private const GRAPHQL_SCENARIO_METHODS = [
+        'customer_query' => 'exerciseCustomerQuery',
+        'customer_query_collection' => 'exerciseCustomerQueryCollection',
+        'customer_create_mutation' => 'exerciseCustomerCreateMutation',
+        'customer_update_mutation' => 'exerciseCustomerUpdateMutation',
+        'customer_delete_mutation' => 'exerciseCustomerDeleteMutation',
+        'customer_status_query' => 'exerciseCustomerStatusQuery',
+        'customer_status_query_collection' => 'exerciseCustomerStatusQueryCollection',
+        'customer_status_create_mutation' => 'exerciseCustomerStatusCreateMutation',
+        'customer_status_update_mutation' => 'exerciseCustomerStatusUpdateMutation',
+        'customer_status_delete_mutation' => 'exerciseCustomerStatusDeleteMutation',
+        'customer_type_query' => 'exerciseCustomerTypeQuery',
+        'customer_type_query_collection' => 'exerciseCustomerTypeQueryCollection',
+        'customer_type_create_mutation' => 'exerciseCustomerTypeCreateMutation',
+        'customer_type_update_mutation' => 'exerciseCustomerTypeUpdateMutation',
+        'customer_type_delete_mutation' => 'exerciseCustomerTypeDeleteMutation',
+        'customer_type_delete_missing' => 'exerciseCustomerTypeDeleteMissing',
     ];
 
     /**
@@ -53,13 +53,13 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
      */
     public static function graphQlScenarioProvider(): array
     {
-        return array_combine(
-            array_values(self::GRAPHQL_SCENARIOS),
-            array_map(
-                static fn (string $scenario): array => [$scenario],
-                array_values(self::GRAPHQL_SCENARIOS)
-            )
-        );
+        $provider = [];
+
+        foreach (array_keys(self::GRAPHQL_SCENARIO_METHODS) as $scenario) {
+            $provider[$scenario] = [$scenario];
+        }
+
+        return $provider;
     }
 
     private function exerciseGraphQlScenario(string $scenario, Client $client): void
@@ -79,24 +79,13 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
      */
     private function graphQlScenarioHandlers(): array
     {
-        return [
-            self::GRAPHQL_SCENARIOS['customerQuery'] => $this->exerciseCustomerQuery(...),
-            self::GRAPHQL_SCENARIOS['customerQueryCollection'] => $this->exerciseCustomerQueryCollection(...),
-            self::GRAPHQL_SCENARIOS['customerCreateMutation'] => $this->exerciseCustomerCreateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerUpdateMutation'] => $this->exerciseCustomerUpdateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerDeleteMutation'] => $this->exerciseCustomerDeleteMutation(...),
-            self::GRAPHQL_SCENARIOS['customerStatusQuery'] => $this->exerciseCustomerStatusQuery(...),
-            self::GRAPHQL_SCENARIOS['customerStatusQueryCollection'] => $this->exerciseCustomerStatusQueryCollection(...),
-            self::GRAPHQL_SCENARIOS['customerStatusCreateMutation'] => $this->exerciseCustomerStatusCreateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerStatusUpdateMutation'] => $this->exerciseCustomerStatusUpdateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerStatusDeleteMutation'] => $this->exerciseCustomerStatusDeleteMutation(...),
-            self::GRAPHQL_SCENARIOS['customerTypeQuery'] => $this->exerciseCustomerTypeQuery(...),
-            self::GRAPHQL_SCENARIOS['customerTypeQueryCollection'] => $this->exerciseCustomerTypeQueryCollection(...),
-            self::GRAPHQL_SCENARIOS['customerTypeCreateMutation'] => $this->exerciseCustomerTypeCreateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerTypeUpdateMutation'] => $this->exerciseCustomerTypeUpdateMutation(...),
-            self::GRAPHQL_SCENARIOS['customerTypeDeleteMutation'] => $this->exerciseCustomerTypeDeleteMutation(...),
-            self::GRAPHQL_SCENARIOS['customerTypeDeleteMissing'] => $this->exerciseCustomerTypeDeleteMissing(...),
-        ];
+        $handlers = [];
+
+        foreach (self::GRAPHQL_SCENARIO_METHODS as $scenario => $method) {
+            $handlers[$scenario] = \Closure::fromCallable([$this, $method]);
+        }
+
+        return $handlers;
     }
 
     private function exerciseCustomerQuery(Client $client): void
@@ -142,7 +131,7 @@ final class GraphQLEndpointMemorySafetyTest extends BaseGraphQLCase
             [
                 'id' => $iri,
                 'initials' => 'Updated GraphQL',
-                'email' => $this->faker->unique()->safeEmail(),
+                'email' => $this->generateUniqueEmailAddress('graphql-updated-customer'),
             ]
         );
 

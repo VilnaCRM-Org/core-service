@@ -9,24 +9,37 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class TrackedRequestHolder
 {
-    private ?Request $trackedRequest = null;
+    /**
+     * @var list<Request>
+     */
+    private array $trackedRequests = [];
 
     public function track(Request $request): void
     {
-        $this->trackedRequest = $request;
+        $this->trackedRequests[] = $request;
     }
 
     public function requireTrackedRequest(): Request
     {
-        if ($this->trackedRequest === null) {
+        $trackedRequests = $this->requireTrackedRequests();
+
+        return $trackedRequests[array_key_last($trackedRequests)];
+    }
+
+    /**
+     * @return list<Request>
+     */
+    public function requireTrackedRequests(): array
+    {
+        if ($this->trackedRequests === []) {
             throw new LogicException('Expected a tracked main request, but none was recorded.');
         }
 
-        return $this->trackedRequest;
+        return $this->trackedRequests;
     }
 
     public function clear(): void
     {
-        $this->trackedRequest = null;
+        $this->trackedRequests = [];
     }
 }

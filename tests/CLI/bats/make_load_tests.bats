@@ -45,7 +45,7 @@ load 'bats-assert/load'
 @test "worker-mode verification target runs repeated smoke tests with a memory guardrail" {
   run sed -n '/^worker-mode-verification:/,/^prepare-test-data:/p' Makefile
   assert_success
-  assert_output --partial 'worker-mode-verification: memory-tests'
+  assert_output --partial 'worker-mode-verification: memory-tests build-k6-docker'
   assert_output --partial 'verify-frankenphp-worker-memory.sh'
   assert_output --partial 'SOAK_ITERATIONS'
   assert_output --partial 'WORKER_MEMORY_ALLOWED_GROWTH_MIB'
@@ -53,7 +53,7 @@ load 'bats-assert/load'
 
 @test "load-test scripts use configurable base domains instead of hardcoded localhost:80" {
   run rg -n 'localhost:80' tests/Load/scripts/rest-api/getCustomerStatus.js tests/Load/scripts/rest-api/updateCustomerStatus.js tests/Load/scripts/rest-api/updateCustomerType.js
-  assert_failure
+  [ "$status" -eq 1 ]
 }
 
 @test "make execute-load-tests-script with scenario parameter" {

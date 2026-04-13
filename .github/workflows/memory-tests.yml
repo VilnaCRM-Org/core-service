@@ -21,17 +21,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start worker-mode stack
+        timeout-minutes: 15
         run: make start
 
       - name: Execute worker-mode verification
+        timeout-minutes: 35
         run: make worker-mode-verification
 
       - name: Copy memory coverage report to host
         if: always()
+        timeout-minutes: 5
         run: make export-memory-coverage
 
       - name: Upload memory coverage to Codecov
         if: always()
+        timeout-minutes: 10
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -43,4 +47,5 @@ jobs:
 
       - name: Stop worker-mode stack
         if: always()
+        timeout-minutes: 10
         run: make down

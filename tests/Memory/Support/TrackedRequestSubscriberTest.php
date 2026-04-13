@@ -42,12 +42,17 @@ final class TrackedRequestSubscriberTest extends TestCase
         $holder = new TrackedRequestHolder();
         $subscriber = new TrackedRequestSubscriber($holder);
         $kernel = $this->createStub(HttpKernelInterface::class);
-        $request = Request::create('/memory/main');
+        $firstRequest = Request::create('/memory/main/one');
+        $secondRequest = Request::create('/memory/main/two');
 
         $subscriber->onKernelRequest(
-            new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST)
+            new RequestEvent($kernel, $firstRequest, HttpKernelInterface::MAIN_REQUEST)
+        );
+        $subscriber->onKernelRequest(
+            new RequestEvent($kernel, $secondRequest, HttpKernelInterface::MAIN_REQUEST)
         );
 
-        self::assertSame($request, $holder->requireTrackedRequest());
+        self::assertSame([$firstRequest, $secondRequest], $holder->requireTrackedRequests());
+        self::assertSame($secondRequest, $holder->requireTrackedRequest());
     }
 }

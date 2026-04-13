@@ -24,10 +24,13 @@ final class TrackedRequestHolderTest extends TestCase
     public function testTrackAndClearManageTheTrackedRequest(): void
     {
         $holder = new TrackedRequestHolder();
-        $request = Request::create('/memory');
+        $firstRequest = Request::create('/memory/first');
+        $secondRequest = Request::create('/memory/second');
 
-        $holder->track($request);
-        self::assertSame($request, $holder->requireTrackedRequest());
+        $holder->track($firstRequest);
+        $holder->track($secondRequest);
+        self::assertSame([$firstRequest, $secondRequest], $holder->requireTrackedRequests());
+        self::assertSame($secondRequest, $holder->requireTrackedRequest());
 
         $holder->clear();
 

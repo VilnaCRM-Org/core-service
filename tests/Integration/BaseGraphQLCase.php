@@ -247,7 +247,7 @@ abstract class BaseGraphQLCase extends BaseApiCase
     {
         return [
             'initials' => $initials ?? $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $this->generateUniqueEmailAddress('graphql-customer'),
             'phone' => $this->faker->phoneNumber(),
             'leadSource' => $this->faker->word(),
             'type' => $this->createCustomerType(),
