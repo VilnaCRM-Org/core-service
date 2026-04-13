@@ -55,8 +55,6 @@ RUN <<-EOF
 		bash \
 		curl \
 		make
-	curl -fsSL https://get.symfony.com/cli/installer | bash
-	mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 	install-php-extensions xdebug
 	rm -rf /var/lib/apt/lists/*
 	git config --system --add safe.directory /srv/app
