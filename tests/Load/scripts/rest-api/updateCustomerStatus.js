@@ -46,9 +46,13 @@ export default function updateCustomerStatus(data) {
     value: `${statusNames[Math.floor(Math.random() * statusNames.length)]}_Updated_${randomString(6)}`,
   };
 
-  const response = http.patch(`${utils.getBaseDomain()}${status['@id']}`, JSON.stringify(updateData), {
-    headers: { 'Content-Type': 'application/merge-patch+json' },
-  });
+  const response = http.patch(
+    `${utils.getBaseDomain()}${status['@id']}`,
+    JSON.stringify(updateData),
+    {
+      headers: { 'Content-Type': 'application/merge-patch+json' },
+    }
+  );
 
   utils.checkResponse(response, 'is status 200', res => res.status === 200);
 }

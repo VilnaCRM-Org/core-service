@@ -4,8 +4,7 @@ services:
     build:
       context: .
       target: app_frankenphp
-    command:
-      ['/srv/app/infrastructure/docker/frankenphp/start-worker.sh']
+    command: ['/srv/app/infrastructure/docker/frankenphp/start-worker.sh']
     depends_on:
       php:
         condition: service_healthy
