@@ -32,6 +32,8 @@ We run performance tests locally using the repository Docker Compose setup (not 
 
 FrankenPHP worker mode is now the default Docker runtime for the service and is exercised directly in CI through the dedicated memory workflow.
 
+The runtime itself follows the official Symfony + FrankenPHP integration path for Symfony `7.4+`: the app runs through `symfony/runtime` native worker support, the embedded Caddy server is configured in `frankenphp/Caddyfile`, and no legacy `runtime/frankenphp-symfony` bridge or custom worker bootstrap script is required in this repository.
+
 The safety net combines two layers:
 
 - Symfony same-kernel memory tests using `disableReboot()` plus `shipmonk/memory-scanner` to catch retained request objects and reset failures with object-level precision.

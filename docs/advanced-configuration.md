@@ -26,8 +26,21 @@ The Core Service utilizes environment variables for configuration to ensure that
 - `STRUCTURIZR_PORT`: The port on which Structurizr is running (for architecture diagrams).
 - `CADDY_MERCURE_JWT_SECRET`: The JWT secret for the FrankenPHP/Caddy Mercure integration.
 - `SERVER_NAME`: The server name for the application.
+- `DEFAULT_URI`: The default absolute base URI used by Symfony components when the embedded Caddy listener terminates HTTPS locally.
+- `FRANKENPHP_LOOP_MAX`: Caps how many requests a single Symfony worker loop handles before FrankenPHP restarts it. This is a worker-mode safety fuse, not a substitute for fixing leaks.
+- `FRANKENPHP_SITE_CONFIG`: Passes site-level FrankenPHP directives such as `hot_reload` in local development.
+- `FRANKENPHP_WORKER_CONFIG`: Passes worker-block directives such as `watch` for local development hot reload.
 
 Learn more about [Symfony Environment Variables](https://symfony.com/doc/current/configuration.html#configuring-environment-variables-in-env-files)
+
+## FrankenPHP Runtime
+
+The repository now follows the official FrankenPHP + Symfony Docker layout:
+
+- the main container image is built from `dunglas/frankenphp`,
+- the embedded Caddy server is configured through `frankenphp/Caddyfile`,
+- the default Docker stack serves the application through FrankenPHP worker mode,
+- Symfony `7.4` native worker support is used through `symfony/runtime`, so no legacy `runtime/frankenphp-symfony` bridge package or custom worker bootstrap is required.
 
 ### Managing different environments
 

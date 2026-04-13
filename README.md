@@ -17,6 +17,7 @@
 - [Hexagonal Architecture, DDD & CQRS in PHP](https://github.com/CodelyTV/php-ddd-example)
 
 - Built-in docker environment and convenient `make` cli command
+- Official FrankenPHP + embedded Caddy runtime for Symfony, with worker mode enabled in the Docker stack
 
 - A lot of CI checks to ensure the highest code quality that can be ([Psalm](https://psalm.dev/), [PHPInsights](https://phpinsights.com/), Security checks, Code style fixer)
 
