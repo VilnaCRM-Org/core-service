@@ -107,7 +107,7 @@ make ci
 
 GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as separate `Memory leak tests (dev env)`, `Memory leak tests (test env)`, and `Memory leak tests (prod env)` checks. The workflow boots the FrankenPHP worker stack for each environment using only `make` entrypoints, executes the object-level PHPUnit memory suite in the test-environment job, reruns the K6 smoke suite against the live worker in every environment, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
 
-The development-environment row intentionally uses `APP_ENV=dev` with `APP_DEBUG=1` but disables the `hot_reload` and `watch` helper snippets during the leak gate. Those helpers are useful for interactive local development, but they allocate long-lived watcher state that is outside the request-lifecycle memory contract being tested here. The leak gate therefore stays focused on the application worker itself while still covering the dev kernel and full endpoint inventory.
+The development-environment row intentionally uses `APP_ENV=dev` with `APP_DEBUG=0` and disables the `hot_reload` and `watch` helper snippets during the leak gate. Symfony allows `APP_ENV` and `APP_DEBUG` to vary independently, and this keeps the gate focused on the long-running worker contract instead of profiler/debug collectors or live-reload watchers. The workflow still covers the dev kernel and full endpoint inventory, but it does so without the development-only diagnostics that intentionally retain extra request metadata.
 
 ## API Contract Validation
 
