@@ -56,7 +56,7 @@ final class ApiQueryAttributesPopulatorTest extends UnitTestCase
         self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
     }
 
-    public function testPopulateKeepsApiQueryParametersAuthoritativeWhenBothAttributesExist(): void
+    public function testPopulateKeepsBothPreExistingApiAttributesWhenBothExist(): void
     {
         $request = Request::create('/api/customers');
         $request->attributes->set('_api_query_parameters', ['page' => '99']);
@@ -65,6 +65,6 @@ final class ApiQueryAttributesPopulatorTest extends UnitTestCase
         (new ApiQueryAttributesPopulator())->populate($request, ['page' => '2']);
 
         self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
-        self::assertSame(['page' => '99'], $request->attributes->get('_api_filters'));
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
     }
 }

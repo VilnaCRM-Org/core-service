@@ -37,6 +37,20 @@ BENCHMARK_SCENARIOS_JSON="$(jq -c --argjson selected "$SELECTED_SCENARIOS_JSON" 
   map(select(.id as $id | $selected | index($id)))
 ' ./tests/Load/benchmark-scenarios.json)"
 
+readarray -t RESOLVED_SCENARIO_IDS < <(printf '%s' "$BENCHMARK_SCENARIOS_JSON" | jq -r '.[].id')
+missing_scenarios=()
+
+for scenario in "${SCENARIOS[@]}"; do
+  if ! printf '%s\n' "${RESOLVED_SCENARIO_IDS[@]}" | grep -Fqx "$scenario"; then
+    missing_scenarios+=("$scenario")
+  fi
+done
+
+if [[ ${#missing_scenarios[@]} -gt 0 ]]; then
+  printf 'Error: Unknown benchmark scenario(s): %s\n' "$(IFS=', '; echo "${missing_scenarios[*]}")" >&2
+  exit 1
+fi
+
 is_delete_scenario() {
   local scenario="$1"
   local scenario_name
@@ -126,15 +140,19 @@ for scenario in "${SCENARIOS[@]}"; do
     if [[ "$warmup_count" == "0" ]]; then
       echo "WARN: warmup benchmark request count resolved to 0 for ${scenario} from ${warmup_summary_json}; delete calibration will fall back to BENCHMARK_DELETE_MIN_FIXTURE_POOL." >&2
     fi
-    delete_expected_requests="$(awk -v count="$warmup_count" -v warmup="$BENCHMARK_WARMUP_DURATION_SECONDS" -v duration="$BENCHMARK_DURATION_SECONDS" -v buffer="$BENCHMARK_DELETE_REQUEST_BUFFER_PERCENT" 'BEGIN {
-      if (warmup <= 0) {
-        print 0;
-        exit;
-      }
-      projected = (count / warmup) * duration;
-      buffered = projected * (1 + (buffer / 100));
-      print int(buffered + 0.999999);
-    }')"
+
+    if awk -v count="$warmup_count" -v warmup="$BENCHMARK_WARMUP_DURATION_SECONDS" 'BEGIN { exit !((count <= 0) || (warmup <= 0)) }'; then
+      if awk -v warmup="$BENCHMARK_WARMUP_DURATION_SECONDS" 'BEGIN { exit !(warmup <= 0) }'; then
+        echo "WARN: warmup duration ${BENCHMARK_WARMUP_DURATION_SECONDS} prevents delete calibration for ${scenario}; delete calibration will fall back to BENCHMARK_DELETE_MIN_FIXTURE_POOL." >&2
+      fi
+      delete_expected_requests=""
+    else
+      delete_expected_requests="$(awk -v count="$warmup_count" -v warmup="$BENCHMARK_WARMUP_DURATION_SECONDS" -v duration="$BENCHMARK_DURATION_SECONDS" -v buffer="$BENCHMARK_DELETE_REQUEST_BUFFER_PERCENT" 'BEGIN {
+        projected = (count / warmup) * duration;
+        buffered = projected * (1 + (buffer / 100));
+        print int(buffered + 0.999999);
+      }')"
+    fi
   fi
 
   echo "Benchmark: ${scenario}"

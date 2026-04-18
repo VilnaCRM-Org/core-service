@@ -35,10 +35,11 @@ EOF
 
 COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link --chmod=755 frankenphp/healthcheck.php /usr/local/bin/frankenphp-healthcheck
 COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 
 ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD php -r '$context = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 5], "ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); $result = @file_get_contents("https://localhost/api/health", false, $context); foreach ($http_response_header ?? [] as $header) { if (preg_match("{^HTTP/\\S+\\s+(\\d+)}", $header, $matches)) { exit(((int) $matches[1]) === 204 ? 0 : 1); } } exit($result === false ? 1 : 0);'
+HEALTHCHECK --start-period=60s CMD ["/usr/local/bin/frankenphp-healthcheck"]
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
 
 FROM frankenphp_base AS frankenphp_dev
@@ -137,6 +138,7 @@ EOF
 COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app
 COPY --link --chown=www-data:www-data --from=frankenphp_prod_builder /srv/app/var /srv/app/var
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link --chmod=755 frankenphp/healthcheck.php /usr/local/bin/frankenphp-healthcheck
 
 VOLUME /srv/app/var/
 
@@ -144,5 +146,5 @@ USER www-data
 WORKDIR /srv/app
 
 ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD php -r '$context = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 5], "ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); $result = @file_get_contents("https://localhost/api/health", false, $context); foreach ($http_response_header ?? [] as $header) { if (preg_match("{^HTTP/\\S+\\s+(\\d+)}", $header, $matches)) { exit(((int) $matches[1]) === 204 ? 0 : 1); } } exit($result === false ? 1 : 0);'
+HEALTHCHECK --start-period=60s CMD ["/usr/local/bin/frankenphp-healthcheck"]
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

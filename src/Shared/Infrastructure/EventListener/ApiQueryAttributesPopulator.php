@@ -20,6 +20,10 @@ final class ApiQueryAttributesPopulator
         $hasQueryParameters = $request->attributes->has('_api_query_parameters');
         $hasFilters = $request->attributes->has('_api_filters');
 
+        if ($hasQueryParameters && $hasFilters) {
+            return;
+        }
+
         if ($hasQueryParameters) {
             $this->copyAttribute($request, '_api_query_parameters', '_api_filters');
             return;

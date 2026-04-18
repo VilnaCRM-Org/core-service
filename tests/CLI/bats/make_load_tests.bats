@@ -87,6 +87,14 @@ load 'bats-assert/load'
   assert_output --partial 'test("test_type[:=]benchmark")'
   assert_output --partial 'startswith("http_reqs")'
   assert_output --partial 'WARN: warmup benchmark request count resolved to 0'
+  assert_output --partial 'delete_expected_requests=""'
+}
+
+@test "fixed-vu benchmark runner rejects invalid benchmark scenarios before invoking k6" {
+  run env BENCHMARK_SCENARIOS='health,missing-scenario' bash tests/Load/run-fixed-vu-benchmarks.sh
+  assert_failure
+  assert_output --partial 'Error: Unknown benchmark scenario(s):'
+  assert_output --partial 'missing-scenario'
 }
 
 @test "load-test scenario discovery supports explicit scenario overrides" {
@@ -150,6 +158,8 @@ load 'bats-assert/load'
   assert_output --partial '#syntax=docker/dockerfile:1-labs'
   assert_output --partial 'COPY --link --exclude=frankenphp/ . ./'
   assert_output --partial 'COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app'
+  assert_output --partial 'frankenphp/healthcheck.php'
+  assert_output --partial 'HEALTHCHECK --start-period=60s CMD ["/usr/local/bin/frankenphp-healthcheck"]'
 
   run grep -c '^VOLUME /srv/app/var/$' Dockerfile
   assert_success

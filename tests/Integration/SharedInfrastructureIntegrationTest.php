@@ -339,8 +339,9 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
+        $collection = $data['member'] ?? $data['hydra:member'] ?? [];
         $this->assertResponseHasHydraOrType($data);
-        self::assertContains($validUlid, array_column($data['member'] ?? [], 'ulid'));
+        self::assertContains($validUlid, array_column($collection, 'ulid'));
     }
 
     /**
