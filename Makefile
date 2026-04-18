@@ -410,7 +410,11 @@ cache-warmup: ## Warmup the Symfony cache
 	@$(SYMFONY) cache:warmup
 
 purge: ## Purge cache and logs
-	@rm -rf var/cache/* var/logs/*
+	@if $(DOCKER_COMPOSE) ps --status running --services 2>/dev/null | grep -qx 'php'; then \
+		$(DOCKER_COMPOSE) exec -u root php sh -lc 'rm -rf var/cache/* var/log/* var/logs/*'; \
+	else \
+		rm -rf var/cache/* var/log/* var/logs/*; \
+	fi
 
 up: ## Start the docker hub (FrankenPHP, database, redis, support services)
 	$(DOCKER_COMPOSE) up --detach
