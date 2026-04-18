@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\EventListener;
 
+use App\Shared\Infrastructure\EventListener\ApiQueryAttributesPopulator;
+use App\Shared\Infrastructure\EventListener\ApiQueryKeyValidator;
 use App\Shared\Infrastructure\EventListener\ApiQueryParametersListener;
+use App\Shared\Infrastructure\EventListener\ApiQueryParametersParser;
+use App\Shared\Infrastructure\EventListener\ApiQueryParametersSanitizer;
+use App\Shared\Infrastructure\EventListener\ApiQueryRequestGuard;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -20,7 +25,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         );
         $event = $this->createRequestEvent($request);
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertSame(
@@ -47,7 +52,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $request->attributes->set('_api_query_parameters', ['page' => '99']);
         $event = $this->createRequestEvent($request);
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
@@ -62,7 +67,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         );
         $event = $this->createRequestEvent($request);
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertSame(
@@ -79,7 +84,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $request = Request::create('/health?page=2', Request::METHOD_GET);
         $event = $this->createRequestEvent($request);
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
@@ -90,10 +95,77 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $request = Request::create('/api/customer_statuses', Request::METHOD_GET);
         $event = $this->createRequestEvent($request);
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+    }
+
+    public function testDoesNotRecomputeWhenApiQueryParametersAndFiltersAlreadyExist(): void
+    {
+        $request = Request::create('/api/customer_statuses?page=2', Request::METHOD_GET);
+        $request->attributes->set('_api_query_parameters', ['page' => '99']);
+        $request->attributes->set('_api_filters', ['page' => '88']);
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
+    }
+
+    public function testHandlesRootApiPathAndPreservesNestedIntegerKeys(): void
+    {
+        $request = Request::create(
+            '/api?filters%5Bstatus%5D%5B0%5D=active&filters%5Bstatus%5D%5B1%5D=pending',
+            Request::METHOD_GET
+        );
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame(
+            [
+                'filters' => [
+                    'status' => [
+                        0 => 'active',
+                        1 => 'pending',
+                    ],
+                ],
+            ],
+            $request->attributes->get('_api_query_parameters')
+        );
+    }
+
+    public function testPreservesDotNotationFilterKeysFromRawQueryString(): void
+    {
+        $request = Request::create(
+            '/api/customers?status.value=Active&order%5Bstatus.value%5D=asc&itemsPerPage=1',
+            Request::METHOD_GET
+        );
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame(
+            [
+                'status.value' => 'Active',
+                'order' => ['status.value' => 'asc'],
+                'itemsPerPage' => '1',
+            ],
+            $request->attributes->get('_api_query_parameters')
+        );
+        self::assertSame(
+            [
+                'status.value' => 'Active',
+                'order' => ['status.value' => 'asc'],
+                'itemsPerPage' => '1',
+            ],
+            $request->attributes->get('_api_filters')
+        );
     }
 
     public function testIgnoresSubRequests(): void
@@ -105,10 +177,20 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
             HttpKernelInterface::SUB_REQUEST
         );
 
-        $listener = new ApiQueryParametersListener();
+        $listener = $this->createListener();
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+    }
+
+    private function createListener(): ApiQueryParametersListener
+    {
+        return new ApiQueryParametersListener(
+            new ApiQueryRequestGuard(),
+            new ApiQueryParametersParser(),
+            new ApiQueryParametersSanitizer(new ApiQueryKeyValidator()),
+            new ApiQueryAttributesPopulator()
+        );
     }
 
     private function createRequestEvent(Request $request): RequestEvent

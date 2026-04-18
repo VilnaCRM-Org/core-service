@@ -181,7 +181,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
-unit-tests: ## Run unit tests with 100% coverage requirement
+unit-tests: ensure-coverage-driver ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@rm -f coverage.txt; \
 	tmpfile=$$(mktemp); \
@@ -240,6 +240,19 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	done; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
+ensure-coverage-driver: ensure-test-services ## Ensure the PHP container exposes Xdebug for coverage-dependent targets
+	@if $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) php php --ri xdebug >/dev/null 2>&1; then \
+		echo "✅ Xdebug coverage driver available in the current php container."; \
+	else \
+		echo "⚠️  Xdebug coverage driver missing in the current php container. Rebuilding php with the active Compose target..."; \
+		$(DOCKER_COMPOSE) build php; \
+		$(DOCKER_COMPOSE) up --detach --wait php; \
+		if ! $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) php php --ri xdebug >/dev/null 2>&1; then \
+			echo "❌ Xdebug coverage driver is still unavailable after rebuilding php."; \
+			exit 1; \
+		fi; \
+	fi
+
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
@@ -248,10 +261,10 @@ setup-test-db: ensure-test-services ## Create database for testing purposes
 behat: setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
 
-integration-tests: setup-test-db ## Run integration tests
+integration-tests: ensure-coverage-driver setup-test-db ## Run integration tests
 	$(RUN_TESTS_COVERAGE) --testsuite=Integration
 
-memory-tests: setup-test-db ## Run memory-safety tests with 100% coverage requirement for memory-support helpers
+memory-tests: ensure-coverage-driver setup-test-db ## Run memory-safety tests with 100% coverage requirement for memory-support helpers
 	@echo "Running memory tests with coverage requirement of 100%..."
 	@mkdir -p coverage
 	@rm -f $(MEMORY_COVERAGE_TEXT_FILE) $(MEMORY_COVERAGE_XML_FILE); \
@@ -299,10 +312,10 @@ integration-negative-tests: ## Run integration negative tests
 fixtures-load: ## Run fixtures
 	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
 
-tests-with-coverage: ## Run tests with coverage
+tests-with-coverage: ensure-coverage-driver ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
-negative-tests-with-coverage: ## Run negative tests with coverage reporting
+negative-tests-with-coverage: ensure-coverage-driver ## Run negative tests with coverage reporting
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
 all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
@@ -447,10 +460,10 @@ stop: ## Stop docker and the Symfony binary server
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
-coverage-html: ## Create the code coverage report with PHPUnit
+coverage-html: ensure-coverage-driver ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
 
-coverage-xml: ## Create the code coverage report with PHPUnit
+coverage-xml: ensure-coverage-driver ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover coverage/coverage.xml
 
 generate-openapi-spec: ## Generate OpenAPI specification

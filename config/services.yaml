@@ -114,6 +114,15 @@ services:
           priority: 255,
         }
 
+  App\Shared\Infrastructure\EventListener\ApiQueryParametersListener:
+    tags:
+      - {
+          name: 'kernel.event_listener',
+          event: 'kernel.request',
+          method: '__invoke',
+          priority: 512,
+        }
+
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 

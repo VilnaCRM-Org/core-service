@@ -8,6 +8,7 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class TestDataCleaner
 {
@@ -21,6 +22,7 @@ final class TestDataCleaner
         private readonly StatusRepositoryInterface $statusRepository,
         private readonly TypeRepositoryInterface $typeRepository,
         private readonly UlidFactory $ulidFactory,
+        private readonly TagAwareCacheInterface $customerCache,
         private array $customerIds = [],
         private array $statusIds = [],
         private array $typeIds = [],
@@ -56,6 +58,7 @@ final class TestDataCleaner
             $this->customerRepository->deleteById($ulid);
         }
         $this->customerIds = [];
+        $this->customerCache->invalidateTags(['customer']);
     }
 
     public function cleanupStatuses(): void
