@@ -151,7 +151,7 @@ load 'bats-assert/load'
   assert_output --partial 'COPY --link --exclude=frankenphp/ . ./'
   assert_output --partial 'COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app'
 
-  run rg -c '^VOLUME /srv/app/var/$' Dockerfile
+  run grep -c '^VOLUME /srv/app/var/$' Dockerfile
   assert_success
   assert_output '1'
 }
