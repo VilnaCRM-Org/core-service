@@ -38,8 +38,15 @@ final class ApiQueryAttributesPopulator
 
     private function attributeState(Request $request): string
     {
-        return (string) ((int) $request->attributes->has('_api_query_parameters'))
-            . (string) ((int) $request->attributes->has('_api_filters'));
+        $hasQueryParameters = $request->attributes->has('_api_query_parameters');
+        $hasFilters = $request->attributes->has('_api_filters');
+
+        return match (true) {
+            $hasQueryParameters && $hasFilters => '11',
+            $hasQueryParameters => '10',
+            $hasFilters => '01',
+            default => '00',
+        };
     }
 
     private function copyAttribute(Request $request, string $source, string $target): void
