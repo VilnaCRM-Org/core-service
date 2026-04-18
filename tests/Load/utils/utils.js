@@ -50,7 +50,8 @@ export default class Utils {
         return;
       }
 
-      config[key] = `${fileName.slice(0, extensionIndex)}-${fixtureSuffix}${fileName.slice(extensionIndex)}`;
+      config[key] =
+        `${fileName.slice(0, extensionIndex)}-${fixtureSuffix}${fileName.slice(extensionIndex)}`;
     });
 
     return config;
