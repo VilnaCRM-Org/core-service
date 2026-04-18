@@ -353,6 +353,12 @@ spike-load-tests: build-k6-docker ## Run load tests with a spike of extreme load
 load-tests: build-k6-docker ## Run load tests
 	tests/Load/run-load-tests.sh
 
+fixed-vu-benchmarks: build-k6-docker ## Run the fixed-VU benchmark suite against the currently running API
+	tests/Load/run-fixed-vu-benchmarks.sh
+
+fixed-vu-benchmark-report: ## Generate the fixed-VU runtime comparison report
+	node tests/Load/generate-fixed-vu-benchmark-report.mjs
+
 cache-performance-tests: setup-test-db ## Run cache performance integration tests
 	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
 

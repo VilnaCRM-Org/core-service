@@ -62,6 +62,10 @@ During the repeated smoke-load soak, the K6 scripts still execute the endpoint c
 
 For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
 
+## Runtime Comparison
+
+For the local three-way runtime benchmark between php-fpm, FrankenPHP without worker mode, and FrankenPHP with worker mode, see [FrankenPHP Worker Mode Runtime Comparison](frankenphp-worker-mode-comparison.md).
+
 ## Benchmarks
 
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.

@@ -33,6 +33,8 @@ runAverage=$3
 runStress=$4
 runSpike=$5
 htmlPrefix=${6:-}
+summaryExportPath=${K6_SUMMARY_EXPORT_PATH:-}
+disableWebDashboard=${K6_DISABLE_WEB_DASHBOARD:-false}
 
 # Read results directory from config
 CONFIG_FILE="./tests/Load/config.json.dist"
@@ -58,10 +60,26 @@ K6=(
     -e "LOAD_TEST_API_SCHEME=${LOAD_TEST_API_SCHEME:-https}"
     -e "LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost}"
     -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-443}"
+    -e "LOAD_TEST_FIXTURE_SUFFIX=${LOAD_TEST_FIXTURE_SUFFIX:-}"
     k6 run
     "--summary-trend-stats=avg,min,med,max,p(95),p(99)"
-    --out "web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html"
 )
+
+if [ "$disableWebDashboard" != "true" ]; then
+  K6+=(
+    --out "web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html"
+  )
+fi
+
+if [ -n "$summaryExportPath" ]; then
+  K6+=(--summary-export "$summaryExportPath")
+fi
+
+if [ -n "${K6_EXTRA_ARGS:-}" ]; then
+  # shellcheck disable=SC2206
+  EXTRA_K6_ARGS=(${K6_EXTRA_ARGS})
+  K6+=("${EXTRA_K6_ARGS[@]}")
+fi
 
 # Prepare customers for all Customer scenarios EXCEPT create scenarios
 # Also include cachePerformance which needs pre-existing customers

@@ -7,11 +7,10 @@ export default class ThresholdsBuilder {
   }
 
   addThreshold(scenarioName, config) {
-    if (!this.skipDurationThresholds) {
-      this.thresholds[`http_req_duration{test_type:${scenarioName}}`] = [
-        'p(99)<' + config.threshold,
-      ];
-    }
+    this.thresholds[`http_req_duration{test_type:${scenarioName}}`] = [
+      this.skipDurationThresholds ? 'max>=0' : 'p(99)<' + config.threshold,
+    ];
+    this.thresholds[`http_reqs{test_type:${scenarioName}}`] = ['count>=0'];
     this.thresholds[`checks{scenario:${scenarioName}}`] = ['rate>0.99'];
     return this;
   }

@@ -25,13 +25,35 @@ export default class Utils {
 
     for (const path of candidatePaths) {
       try {
-        return JSON.parse(open(path));
+        return this.applyFixtureSuffix(JSON.parse(open(path)));
       } catch (error) {
         // Try next candidate
       }
     }
 
     throw new Error('Unable to load load-test configuration (config.json or config.json.dist)');
+  }
+
+  applyFixtureSuffix(config) {
+    const fixtureSuffix = this.getOptionalCLIVariable('LOAD_TEST_FIXTURE_SUFFIX');
+
+    if (!fixtureSuffix) {
+      return config;
+    }
+
+    ['customersFileName', 'customerStatusesFileName', 'customerTypesFileName'].forEach(key => {
+      const fileName = config[key];
+      const extensionIndex = fileName.lastIndexOf('.');
+
+      if (extensionIndex === -1) {
+        config[key] = `${fileName}-${fixtureSuffix}`;
+        return;
+      }
+
+      config[key] = `${fileName.slice(0, extensionIndex)}-${fixtureSuffix}${fileName.slice(extensionIndex)}`;
+    });
+
+    return config;
   }
 
   getBaseDomain() {
@@ -85,6 +107,23 @@ export default class Utils {
 
   getCLIVariable(variable) {
     return `${__ENV[variable]}`;
+  }
+
+  getOptionalCLIVariable(variable) {
+    return __ENV[variable];
+  }
+
+  getIntCLIVariable(variable, fallback) {
+    const rawValue = this.getOptionalCLIVariable(variable);
+    const parsedValue = Number.parseInt(rawValue ?? '', 10);
+
+    return Number.isNaN(parsedValue) ? fallback : parsedValue;
+  }
+
+  isCLIVariableTrue(variable) {
+    return ['1', 'true', 'yes'].includes(
+      `${this.getOptionalCLIVariable(variable) ?? ''}`.toLowerCase()
+    );
   }
 
   checkCustomerIsDefined(customer) {
