@@ -1,6 +1,33 @@
 #!/bin/sh
 set -e
 
+has_argument() {
+	for arg in "$@"; do
+		if [ "$arg" = '--watch' ]; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+watch_enabled() {
+	case "${FRANKENPHP_ENABLE_WATCH:-0}" in
+		1|true|TRUE|yes|YES|on|ON)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+if [ "$1" = 'frankenphp' ] && [ "${2:-}" = 'run' ] && watch_enabled; then
+	if ! has_argument "$@"; then
+		set -- "$@" '--watch'
+	fi
+fi
+
 if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	if [ ! -f composer.json ]; then
 		echo 'composer.json not found in /srv/app; cannot bootstrap the container.' >&2
