@@ -33,7 +33,7 @@ load 'bats-assert/load'
 @test "make check-security command executes and reports no vulnerabilities" {
   run make check-security
   assert_success
-  assert_output --partial "docker compose exec php composer audit --locked --no-interaction --abandoned=ignore"
+  assert_output --partial "docker compose exec php composer audit --locked --no-interaction --abandoned=report"
   assert_output --partial "No security vulnerability advisories found."
 }
 
