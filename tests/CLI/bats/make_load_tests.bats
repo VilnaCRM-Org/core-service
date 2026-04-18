@@ -113,7 +113,7 @@ load 'bats-assert/load'
 }
 
 @test "customer dependency bootstrap fetches full collections with JSON-LD accept headers" {
-  run sed -n '1,220p' tests/Load/utils/utils.js
+  run cat tests/Load/utils/utils.js
   assert_success
   assert_output --partial "Accept: 'application/ld+json'"
   assert_output --partial 'customer_types?itemsPerPage=100'
