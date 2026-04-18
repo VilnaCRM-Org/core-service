@@ -104,6 +104,21 @@ Complex skills have multi-file structure:
 - Need detailed patterns → `reference/*.md`
 - Want complete examples → `examples/*.md`
 
+## Issue #155 Source-of-Truth Rules
+
+Issue `#155` is a documentation- and skill-guidance migration only. Do not
+treat it as runtime feature work.
+
+- `core-service` remains authoritative for BMALPH usage, autonomous-planning
+  flow, MongoDB-specific correctness, the current onboarding path, and
+  repository-supported commands.
+- Keep the default routing aligned across the discovery surfaces: documentation
+  updates route to `documentation-sync`, PR feedback routes to `code-review`
+  using `make pr-comments` plus `make ci`, and autonomous planning from a short
+  task routes to `bmad-autonomous-planning`.
+- Unsupported references from other repositories must be adapted or excluded
+  rather than copied into `core-service`.
+
 ## Available Skills (15 Total)
 
 ### 🤖 Autonomous Planning Skills

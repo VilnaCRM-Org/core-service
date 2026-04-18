@@ -34,6 +34,22 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
 - Skills are **regularly updated** with correct patterns
 - Following skills ensures **consistency** with the codebase
 
+## Issue #155 Scope Guardrail
+
+Issue `#155` is a documentation- and skill-guidance migration only. It does not
+authorize runtime feature work, behavior changes, or edits to unsupported
+workflow surfaces.
+
+- `core-service` remains authoritative for BMALPH usage, autonomous-planning
+  flow, MongoDB-specific correctness, the current onboarding path, and
+  repository-supported commands.
+- Keep the default routing aligned across discovery docs: documentation updates
+  route to `documentation-sync`, PR feedback routes to `code-review` using
+  `make pr-comments` plus `make ci`, and autonomous planning from a short task
+  routes to `bmad-autonomous-planning`.
+- Unsupported references from other repositories must be adapted or excluded
+  rather than copied into `core-service`.
+
 ## Quick Reference
 
 ### Essential Execution Rules

@@ -37,6 +37,21 @@ What are you trying to do?
     └─ Architecture diagrams → structurizr-architecture-sync
 ```
 
+## Issue #155 Migration Baseline
+
+Issue `#155` is a documentation- and skill-guidance migration only. Do not use
+it to justify runtime feature work or unsupported workflow changes.
+
+- `core-service` remains authoritative for BMALPH usage, autonomous-planning
+  flow, MongoDB-specific correctness, the current onboarding path, and
+  repository-supported commands.
+- Default routing must stay consistent across the canonical discovery docs:
+  documentation updates route to `documentation-sync`, PR feedback routes to
+  `code-review` using `make pr-comments` plus `make ci`, and autonomous
+  planning from a short task routes to `bmad-autonomous-planning`.
+- Unsupported references from other repositories must be adapted or excluded
+  rather than copied into `core-service`.
+
 ## Scenario-Based Guide
 
 ### "Deptrac is failing with violations"
