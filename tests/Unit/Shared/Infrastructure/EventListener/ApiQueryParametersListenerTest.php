@@ -108,6 +108,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+        self::assertFalse($request->attributes->has('_api_filters'));
     }
 
     public function testIgnoresApiRequestsWithoutQueryParameters(): void
@@ -119,6 +120,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+        self::assertFalse($request->attributes->has('_api_filters'));
     }
 
     public function testIgnoresPathsThatMerelyStartWithApi(): void
@@ -130,6 +132,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+        self::assertFalse($request->attributes->has('_api_filters'));
     }
 
     public function testDoesNotRecomputeWhenApiQueryParametersAndFiltersAlreadyExist(): void
@@ -167,6 +170,17 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
                 ],
             ],
             $request->attributes->get('_api_query_parameters')
+        );
+        self::assertSame(
+            [
+                'filters' => [
+                    'status' => [
+                        0 => 'active',
+                        1 => 'pending',
+                    ],
+                ],
+            ],
+            $request->attributes->get('_api_filters')
         );
     }
 
@@ -212,6 +226,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $listener($event);
 
         self::assertFalse($request->attributes->has('_api_query_parameters'));
+        self::assertFalse($request->attributes->has('_api_filters'));
     }
 
     private function createListener(): ApiQueryParametersListener

@@ -12,6 +12,9 @@ namespace App\Tests\Integration;
  */
 final class SharedInfrastructureIntegrationTest extends BaseApiCase
 {
+    /**
+     * Raw Schemathesis fuzz-regression payload; keep the malformed encodings intact.
+     */
     private const SCHEMATHESIS_MALFORMED_LOOKUP_QUERY =
         '?%C3%A9%C2%A3%C2%87=%5BTrue%5D'
         . '&%C3%A9%C2%A3%C2%87=%5B%27__main__%27%2C+None%2C+22610%5D'

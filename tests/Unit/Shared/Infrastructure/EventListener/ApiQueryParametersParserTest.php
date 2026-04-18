@@ -10,6 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class ApiQueryParametersParserTest extends UnitTestCase
 {
+    public function testParseReturnsEmptyArrayForEmptyQueryString(): void
+    {
+        $parser = new ApiQueryParametersParser();
+        $request = Request::create('/', Request::METHOD_GET);
+
+        self::assertSame([], $parser->parse($request));
+    }
+
     public function testParseUsesRawQueryString(): void
     {
         $parser = new ApiQueryParametersParser();

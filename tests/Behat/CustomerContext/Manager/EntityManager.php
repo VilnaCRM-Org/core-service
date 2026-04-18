@@ -11,7 +11,9 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
+use RuntimeException;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Throwable;
 
 final readonly class EntityManager
 {
@@ -91,6 +93,16 @@ final readonly class EntityManager
      */
     private function invalidateCustomerCache(): void
     {
-        $this->customerCache->invalidateTags(['customer']);
+        try {
+            if (! $this->customerCache->invalidateTags(['customer'])) {
+                throw new RuntimeException('Failed to invalidate customer cache.');
+            }
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Failed to invalidate customer cache: ' . $exception->getMessage(),
+                0,
+                $exception
+            );
+        }
     }
 }
