@@ -113,6 +113,10 @@ export default class ScenarioUtils {
       return this.utils.isCLIVariableTrue(key);
     }
 
+    if (this.utils.isCLIVariableTrue('run_benchmark')) {
+      return false;
+    }
+
     return this.utils.getCLIVariable(key) !== 'false';
   }
 }

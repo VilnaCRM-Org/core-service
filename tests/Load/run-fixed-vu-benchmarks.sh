@@ -102,7 +102,25 @@ for scenario in "${SCENARIOS[@]}"; do
     "${RESULTS_DIR}/${scenario_slug}.warmup.summary.json"
 
   if is_delete_scenario "$scenario"; then
-    warmup_count="$(jq -r '.metrics["http_reqs{test_type:benchmark}"].count // 0' "${RESULTS_DIR}/${scenario_slug}.warmup.summary.json")"
+    warmup_summary_json="${RESULTS_DIR}/${scenario_slug}.warmup.summary.json"
+    warmup_count="$(jq -r '
+      [
+        .metrics["http_reqs{test_type:benchmark}"].count?,
+        (.metrics
+          | to_entries[]?
+          | select(.key | startswith("http_reqs") and test("test_type[:=]benchmark"))
+          | .value.count?),
+        (.metrics
+          | to_entries[]?
+          | select(.key | startswith("http_reqs"))
+          | .value.count?)
+      ]
+      | map(select(. != null))
+      | .[0] // 0
+    ' "$warmup_summary_json")"
+    if [[ "$warmup_count" == "0" ]]; then
+      echo "WARN: warmup benchmark request count resolved to 0 for ${scenario} from ${warmup_summary_json}; delete calibration will fall back to BENCHMARK_DELETE_MIN_FIXTURE_POOL." >&2
+    fi
     delete_expected_requests="$(awk -v count="$warmup_count" -v warmup="$BENCHMARK_WARMUP_DURATION_SECONDS" -v duration="$BENCHMARK_DURATION_SECONDS" -v buffer="$BENCHMARK_DELETE_REQUEST_BUFFER_PERCENT" 'BEGIN {
       if (warmup <= 0) {
         print 0;

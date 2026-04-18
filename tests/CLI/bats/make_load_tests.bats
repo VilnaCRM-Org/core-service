@@ -74,6 +74,21 @@ load 'bats-assert/load'
   assert_output --partial 'treating this as warmup/transient growth'
 }
 
+@test "benchmark mode disables non-benchmark scenarios" {
+  run sed -n '111,123p' tests/Load/utils/scenarioUtils.js
+  assert_success
+  assert_output --partial "if (this.utils.isCLIVariableTrue('run_benchmark')) {"
+  assert_output --partial 'return false;'
+}
+
+@test "delete benchmark calibration falls back across http_reqs metrics and warns on zero warmup counts" {
+  run sed -n '104,130p' tests/Load/run-fixed-vu-benchmarks.sh
+  assert_success
+  assert_output --partial 'test("test_type[:=]benchmark")'
+  assert_output --partial 'startswith("http_reqs")'
+  assert_output --partial 'WARN: warmup benchmark request count resolved to 0'
+}
+
 @test "load-test scenario discovery supports explicit scenario overrides" {
   run sed -n '1,120p' tests/Load/get-load-test-scenarios.sh
   assert_success
@@ -127,6 +142,18 @@ load 'bats-assert/load'
   assert_output --partial 'LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}"'
   assert_output --partial 'if [ "$${LOAD_TEST_API_SCHEME:-https}" = "http" ]'
   assert_output --partial 'LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$$default_load_test_port}"'
+}
+
+@test "Dockerfile uses the labs frontend for COPY --exclude and keeps the var volume in the runtime stage only" {
+  run sed -n '1,150p' Dockerfile
+  assert_success
+  assert_output --partial '#syntax=docker/dockerfile:1-labs'
+  assert_output --partial 'COPY --link --exclude=frankenphp/ . ./'
+  assert_output --partial 'COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app'
+
+  run rg -c '^VOLUME /srv/app/var/$' Dockerfile
+  assert_success
+  assert_output '1'
 }
 
 @test "make execute-load-tests-script with scenario parameter" {

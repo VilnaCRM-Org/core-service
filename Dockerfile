@@ -1,4 +1,4 @@
-#syntax=docker/dockerfile:1
+#syntax=docker/dockerfile:1-labs
 
 FROM dunglas/frankenphp:1-php8.4-bookworm AS frankenphp_upstream
 
@@ -15,7 +15,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 
 WORKDIR /srv/app
-VOLUME /srv/app/var/
 
 RUN <<-EOF
 	apt-get update
