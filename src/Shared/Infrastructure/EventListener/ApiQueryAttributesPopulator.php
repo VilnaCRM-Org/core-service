@@ -11,30 +11,35 @@ final class ApiQueryAttributesPopulator
     /**
      * @param array<array-key, array|scalar|null>|scalar|null $parameters
      */
-    public function populate(Request $request, $parameters): void
+    public function populate(Request $request, array|string|int|float|bool|null $parameters): void
     {
         if (! is_array($parameters)) {
             return;
         }
 
-        $hasQueryParameters = $request->attributes->has('_api_query_parameters');
-        $hasFilters = $request->attributes->has('_api_filters');
+        $attributeState = $this->attributeState($request);
 
-        if ($hasQueryParameters && $hasFilters) {
+        if ($attributeState === '11') {
             return;
         }
 
-        if ($hasQueryParameters) {
+        if ($attributeState === '10') {
             $this->copyAttribute($request, '_api_query_parameters', '_api_filters');
             return;
         }
 
-        if ($hasFilters) {
+        if ($attributeState === '01') {
             $this->copyAttribute($request, '_api_filters', '_api_query_parameters');
             return;
         }
 
         $this->populateMissingAttributes($request, $parameters);
+    }
+
+    private function attributeState(Request $request): string
+    {
+        return (string) ((int) $request->attributes->has('_api_query_parameters'))
+            . (string) ((int) $request->attributes->has('_api_filters'));
     }
 
     private function copyAttribute(Request $request, string $source, string $target): void
@@ -45,7 +50,7 @@ final class ApiQueryAttributesPopulator
     /**
      * @param array<array-key, array|scalar|null> $parameters
      */
-    private function populateMissingAttributes(Request $request, $parameters): void
+    private function populateMissingAttributes(Request $request, array $parameters): void
     {
         $request->attributes->set('_api_query_parameters', $parameters);
         $request->attributes->set('_api_filters', $parameters);

@@ -12,7 +12,7 @@ final class ApiQueryParametersParser
     /**
      * @return array<array-key, array|scalar|null>
      */
-    public function parse(Request $request)
+    public function parse(Request $request): array
     {
         return HeaderUtils::parseQuery($request->server->get('QUERY_STRING', ''));
     }

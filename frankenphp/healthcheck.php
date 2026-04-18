@@ -3,35 +3,46 @@
 
 declare(strict_types=1);
 
-function normalizeTarget(?string $value): string
-{
+$normalizeTarget = static function (?string $value): string {
     $trimmedValue = trim((string) $value);
 
     if ($trimmedValue === '') {
         return 'localhost';
     }
 
-    $segments = array_map('trim', explode(',', $trimmedValue));
-
-    foreach ($segments as $segment) {
+    foreach (array_map('trim', explode(',', $trimmedValue)) as $segment) {
         if ($segment !== '') {
             return $segment;
         }
     }
 
     return 'localhost';
-}
+};
 
-function hasScheme(string $value): bool
-{
+$configuredTarget = (static function () use ($normalizeTarget): string {
+    foreach (['HEALTHCHECK_URL', 'DEFAULT_URI', 'SERVER_NAME'] as $envName) {
+        $value = getenv($envName);
+
+        if (! is_string($value) || trim($value) === '') {
+            continue;
+        }
+
+        return $normalizeTarget($value);
+    }
+
+    return 'localhost';
+})();
+
+$hasScheme = static function (string $value): bool {
     return preg_match('#^[a-z][a-z0-9+.-]*://#i', $value) === 1;
-}
+};
 
 /**
  * @param array<string, int|string> $parts
+ *
+ * @return array<string, int|string>
  */
-function withHealthPath(array $parts): array
-{
+$withHealthPath = static function (array $parts): array {
     $path = (string) ($parts['path'] ?? '');
 
     if ($path === '' || $path === '/') {
@@ -39,77 +50,99 @@ function withHealthPath(array $parts): array
     }
 
     return $parts;
-}
+};
 
 /**
  * @param array<string, int|string> $parts
  */
-function buildUrl(array $parts): string
-{
+$buildUrl = static function (array $parts): string {
     $scheme = (string) ($parts['scheme'] ?? 'https');
     $host = (string) ($parts['host'] ?? 'localhost');
-    $port = isset($parts['port']) ? ':' . (int) $parts['port'] : '';
+    $port = isset($parts['port']) ? ':' . (string) ((int) $parts['port']) : '';
     $user = (string) ($parts['user'] ?? '');
     $password = isset($parts['pass']) ? ':' . (string) $parts['pass'] : '';
-    $auth = $user !== '' ? $user . $password . '@' : '';
+    $auth = $user === '' ? '' : $user . $password . '@';
     $path = (string) ($parts['path'] ?? '/api/health');
     $query = isset($parts['query']) ? '?' . (string) $parts['query'] : '';
     $fragment = isset($parts['fragment']) ? '#' . (string) $parts['fragment'] : '';
 
-    return sprintf('%s://%s%s%s%s%s', $scheme, $auth, $host, $port, $path, $query . $fragment);
-}
+    return sprintf(
+        '%s://%s%s%s%s%s',
+        $scheme,
+        $auth,
+        $host,
+        $port,
+        $path,
+        $query . $fragment
+    );
+};
+
+$fallbackTarget = static function (string $target): string {
+    $normalizedTarget = rtrim($target, '/');
+
+    if ($normalizedTarget === '') {
+        $normalizedTarget = 'localhost';
+    }
+
+    if (! str_contains($normalizedTarget, '/')) {
+        $normalizedTarget .= '/api/health';
+    }
+
+    return $normalizedTarget;
+};
 
 /**
+ * @param array<string, int|string> $parts
+ *
  * @return list<string>
  */
-function healthcheckCandidates(): array
-{
-    $configuredTarget = normalizeTarget(
-        getenv('HEALTHCHECK_URL') ?: getenv('DEFAULT_URI') ?: getenv('SERVER_NAME') ?: 'localhost'
-    );
+$buildSchemeCandidates = static function (array $parts) use ($buildUrl): array {
+    $schemes = (int) ($parts['port'] ?? 0) === 80 ? ['http', 'https'] : ['https', 'http'];
+    $candidates = [];
 
-    if (hasScheme($configuredTarget)) {
+    foreach ($schemes as $scheme) {
+        $candidates[] = $buildUrl($parts + ['scheme' => $scheme]);
+    }
+
+    return $candidates;
+};
+
+$healthcheckCandidates = (static function () use (
+    $buildSchemeCandidates,
+    $buildUrl,
+    $configuredTarget,
+    $fallbackTarget,
+    $hasScheme,
+    $withHealthPath
+): array {
+    if ($hasScheme($configuredTarget)) {
         $parts = parse_url($configuredTarget);
 
         if ($parts === false) {
             return [$configuredTarget];
         }
 
-        return [buildUrl(withHealthPath($parts))];
+        return [$buildUrl($withHealthPath($parts))];
     }
 
     $parts = parse_url('https://' . ltrim($configuredTarget, '/'));
 
     if ($parts === false) {
-        $fallbackTarget = rtrim($configuredTarget, '/');
-
-        if ($fallbackTarget === '') {
-            $fallbackTarget = 'localhost';
-        }
-
-        if (! str_contains($fallbackTarget, '/')) {
-            $fallbackTarget .= '/api/health';
-        }
+        $normalizedTarget = $fallbackTarget($configuredTarget);
 
         return [
-            'https://' . $fallbackTarget,
-            'http://' . $fallbackTarget,
+            'https://' . $normalizedTarget,
+            'http://' . $normalizedTarget,
         ];
     }
 
-    $parts = withHealthPath($parts);
-    $preferredSchemes = ((int) ($parts['port'] ?? 0) === 80) ? ['http', 'https'] : ['https', 'http'];
-    $candidates = [];
+    return $buildSchemeCandidates($withHealthPath($parts));
+})();
 
-    foreach ($preferredSchemes as $scheme) {
-        $candidates[] = buildUrl($parts + ['scheme' => $scheme]);
-    }
-
-    return $candidates;
-}
-
-function isHealthyResponse(string $url): bool
-{
+/**
+ * @return array{0: false|string, 1: list<string>}
+ */
+$fetchUrl = static function (string $url): array {
     $context = stream_context_create([
         'http' => [
             'ignore_errors' => true,
@@ -120,26 +153,45 @@ function isHealthyResponse(string $url): bool
             'verify_peer_name' => false,
         ],
     ]);
+    $headers = [];
 
-    $result = @file_get_contents($url, false, $context);
-    $statusCode = null;
+    set_error_handler(static fn (): bool => true);
 
-    foreach ($http_response_header ?? [] as $header) {
+    try {
+        $result = file_get_contents($url, false, $context);
+        $headers = is_array($http_response_header ?? null)
+            ? array_values($http_response_header)
+            : [];
+    } finally {
+        restore_error_handler();
+    }
+
+    return [$result, $headers];
+};
+
+$extractStatusCode = static function (array $headers): ?int {
+    foreach ($headers as $header) {
         if (preg_match('{^HTTP/\S+\s+(\d+)}', $header, $matches) === 1) {
-            $statusCode = (int) $matches[1];
-            break;
+            return (int) $matches[1];
         }
     }
+
+    return null;
+};
+
+$isHealthyResponse = static function (string $url) use ($extractStatusCode, $fetchUrl): bool {
+    [$result, $headers] = $fetchUrl($url);
+    $statusCode = $extractStatusCode($headers);
 
     if ($statusCode !== null) {
         return $statusCode >= 200 && $statusCode < 400;
     }
 
     return $result !== false;
-}
+};
 
-foreach (healthcheckCandidates() as $candidate) {
-    if (isHealthyResponse($candidate)) {
+foreach ($healthcheckCandidates as $candidate) {
+    if ($isHealthyResponse($candidate)) {
         exit(0);
     }
 }

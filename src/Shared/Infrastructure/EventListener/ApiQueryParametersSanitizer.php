@@ -16,8 +16,10 @@ final readonly class ApiQueryParametersSanitizer
      *
      * @return array<array-key, array|scalar|null>
      */
-    public function sanitize($parameters, bool $allowIntegerKeys = false)
-    {
+    public function sanitize(
+        array|string|int|float|bool|null $parameters,
+        bool $allowIntegerKeys = false
+    ): array {
         if (! is_array($parameters)) {
             return [];
         }
@@ -41,8 +43,9 @@ final readonly class ApiQueryParametersSanitizer
      *
      * @return array<array-key, array|scalar|null>|scalar|null
      */
-    private function sanitizeValue($value)
-    {
+    private function sanitizeValue(
+        array|string|int|float|bool|null $value
+    ): array|string|int|float|bool|null {
         return is_array($value) ? $this->sanitize($value, true) : $value;
     }
 }
