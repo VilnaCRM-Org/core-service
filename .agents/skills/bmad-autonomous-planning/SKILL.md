@@ -20,7 +20,8 @@ for the repository before this skill can run. Otherwise:
    BMAD config file first.
 2. Read `.claude/skills/bmad-autonomous-planning/SKILL.md`.
 3. Resolve or create a bundle directory under the configured planning artifacts
-   folder, typically `autonomous/<timestamp>-<task-slug>/`.
+   folder rooted at `specs/`, typically
+   `specs/autonomous/<timestamp>-<task-slug>/`.
 4. Run each BMALPH planning stage in a dedicated subagent, using the BMALPH
    command surface as the handoff contract:
    - research and repository context: `analyst`

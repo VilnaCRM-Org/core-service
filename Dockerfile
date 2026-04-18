@@ -6,11 +6,20 @@ FROM mlocati/php-extension-installer:2.9.29 AS php_extension_installer
 # Build Caddy with the Mercure and Vulcain modules
 FROM caddy:2.11-builder-alpine AS app_caddy_builder
 
-RUN xcaddy build \
-    --with github.com/dunglas/mercure \
-    --with github.com/dunglas/mercure/caddy \
-    --with github.com/dunglas/vulcain \
-    --with github.com/dunglas/vulcain/caddy
+RUN set -eux; \
+    for attempt in 1 2 3; do \
+        if xcaddy build \
+            --with github.com/dunglas/mercure@v0.22.1 \
+            --with github.com/dunglas/mercure/caddy@v0.22.1 \
+            --with github.com/dunglas/vulcain@v1.4.0 \
+            --with github.com/dunglas/vulcain/caddy@v1.4.0; then \
+            break; \
+        fi; \
+        if [ "$attempt" -eq 3 ]; then \
+            exit 1; \
+        fi; \
+        sleep $((attempt * 2)); \
+    done
 
 # Prod image
 # Keep a maintained Alpine base for PHP 8.4 and extension installer v2.9+.

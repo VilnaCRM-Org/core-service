@@ -174,25 +174,67 @@ final class CachePerformanceTest extends KernelTestCase
 
         $cacheMissStart = hrtime(true);
         $this->repository->findByEmail($email);
-        $cacheMissEnd = hrtime(true);
-        $cacheMissLatencyNs = $cacheMissEnd - $cacheMissStart;
+        $cacheMissLatencyNs = hrtime(true) - $cacheMissStart;
 
-        $cacheHitStart = hrtime(true);
-        $this->repository->findByEmail($email);
-        $cacheHitEnd = hrtime(true);
-        $cacheHitLatencyNs = $cacheHitEnd - $cacheHitStart;
-
-        self::assertLessThan(
-            $cacheMissLatencyNs,
-            $cacheHitLatencyNs,
-            'Email lookup cache hit should be faster than cache miss'
+        $this->cachePool->clear();
+        self::assertFalse(
+            $this->cachePool->getItem('customer.email.' . hash('sha256', strtolower($email)))->isHit(),
+            'Email lookup cache should be empty before warmup'
         );
+
+        $this->repository->findByEmail($email);
 
         $emailHash = hash('sha256', strtolower($email));
         self::assertTrue(
             $this->cachePool->getItem('customer.email.' . $emailHash)->isHit(),
             'Email lookup should be cached after first query'
         );
+
+        $totalLatencyNs = 0;
+        for ($i = 0; $i < self::PERFORMANCE_ITERATIONS; $i++) {
+            $start = hrtime(true);
+            $this->repository->findByEmail($email);
+            $end = hrtime(true);
+            $totalLatencyNs += $end - $start;
+        }
+
+        $averageLatencyMs = $totalLatencyNs / self::PERFORMANCE_ITERATIONS / 1_000_000;
+        $cacheMissLatencyMs = $cacheMissLatencyNs / 1_000_000;
+
+        self::assertLessThanOrEqual(
+            self::MAX_CACHE_HIT_LATENCY_MS,
+            $averageLatencyMs,
+            sprintf(
+                'Average cached email lookup latency (%.2fms) exceeds maximum allowed (%dms)',
+                $averageLatencyMs,
+                self::MAX_CACHE_HIT_LATENCY_MS
+            )
+        );
+
+        self::assertLessThan(
+            $cacheMissLatencyMs,
+            $averageLatencyMs,
+            sprintf(
+                'Cached email lookup average (%.2fms) should be faster than cache miss (%.2fms)',
+                $averageLatencyMs,
+                $cacheMissLatencyMs
+            )
+        );
+
+        if ($cacheMissLatencyMs > 0) {
+            $speedupFactor = $cacheMissLatencyMs / max($averageLatencyMs, 0.001);
+            self::assertGreaterThanOrEqual(
+                self::MIN_SPEEDUP_FACTOR,
+                $speedupFactor,
+                sprintf(
+                    'Cached email lookups should provide at least %.1fx speedup, got %.1fx (miss: %.2fms, average hit: %.2fms)',
+                    self::MIN_SPEEDUP_FACTOR,
+                    $speedupFactor,
+                    $cacheMissLatencyMs,
+                    $averageLatencyMs
+                )
+            );
+        }
     }
 
     public function testCacheRecoveryAfterInvalidation(): void

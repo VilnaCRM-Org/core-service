@@ -159,6 +159,9 @@ agent session. The canonical workflow lives in
 `.claude/skills/bmad-autonomous-planning/SKILL.md`, and Codex can start from
 `.agents/skills/bmad-autonomous-planning/SKILL.md`.
 
+Track committed BMALPH planning bundles under `specs/autonomous/`. Keep
+`docs/` reserved for repository documentation only.
+
 Use a short task description and let the main agent orchestrate the BMALPH
 stages in subagents without repo-local launchers.
 
