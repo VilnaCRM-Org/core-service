@@ -17,22 +17,32 @@ final class ApiQueryAttributesPopulator
             return;
         }
 
-        if ($request->attributes->has('_api_query_parameters')) {
-            $request->attributes->set(
-                '_api_filters',
-                $request->attributes->get('_api_query_parameters')
-            );
+        $hasQueryParameters = $request->attributes->has('_api_query_parameters');
+        $hasFilters = $request->attributes->has('_api_filters');
+
+        if ($hasQueryParameters) {
+            $this->copyAttribute($request, '_api_query_parameters', '_api_filters');
             return;
         }
 
-        if ($request->attributes->has('_api_filters')) {
-            $request->attributes->set(
-                '_api_query_parameters',
-                $request->attributes->get('_api_filters')
-            );
+        if ($hasFilters) {
+            $this->copyAttribute($request, '_api_filters', '_api_query_parameters');
             return;
         }
 
+        $this->populateMissingAttributes($request, $parameters);
+    }
+
+    private function copyAttribute(Request $request, string $source, string $target): void
+    {
+        $request->attributes->set($target, $request->attributes->get($source));
+    }
+
+    /**
+     * @param array<array-key, array|scalar|null> $parameters
+     */
+    private function populateMissingAttributes(Request $request, $parameters): void
+    {
         $request->attributes->set('_api_query_parameters', $parameters);
         $request->attributes->set('_api_filters', $parameters);
     }

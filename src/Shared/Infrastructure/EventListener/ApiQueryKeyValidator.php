@@ -12,7 +12,6 @@ final class ApiQueryKeyValidator
     {
         return match (true) {
             is_int($key) => $allowIntegerKeys,
-            $key === '' => false,
             default => preg_match(self::SAFE_QUERY_KEY_PATTERN, $key) === 1,
         };
     }
