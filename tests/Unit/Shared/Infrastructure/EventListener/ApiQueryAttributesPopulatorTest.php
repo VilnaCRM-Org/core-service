@@ -33,4 +33,38 @@ final class ApiQueryAttributesPopulatorTest extends UnitTestCase
         self::assertSame($parameters, $request->attributes->get('_api_query_parameters'));
         self::assertSame($parameters, $request->attributes->get('_api_filters'));
     }
+
+    public function testPopulateMirrorsExistingApiQueryParameters(): void
+    {
+        $request = Request::create('/api/customers');
+        $request->attributes->set('_api_query_parameters', ['page' => '99']);
+
+        (new ApiQueryAttributesPopulator())->populate($request, ['page' => '2']);
+
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_filters'));
+    }
+
+    public function testPopulateMirrorsExistingApiFilters(): void
+    {
+        $request = Request::create('/api/customers');
+        $request->attributes->set('_api_filters', ['page' => '88']);
+
+        (new ApiQueryAttributesPopulator())->populate($request, ['page' => '2']);
+
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_query_parameters'));
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
+    }
+
+    public function testPopulateKeepsApiQueryParametersAuthoritativeWhenBothAttributesExist(): void
+    {
+        $request = Request::create('/api/customers');
+        $request->attributes->set('_api_query_parameters', ['page' => '99']);
+        $request->attributes->set('_api_filters', ['page' => '88']);
+
+        (new ApiQueryAttributesPopulator())->populate($request, ['page' => '2']);
+
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_filters'));
+    }
 }

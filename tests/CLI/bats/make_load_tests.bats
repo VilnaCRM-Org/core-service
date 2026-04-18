@@ -75,14 +75,14 @@ load 'bats-assert/load'
 }
 
 @test "benchmark mode disables non-benchmark scenarios" {
-  run sed -n '111,123p' tests/Load/utils/scenarioUtils.js
+  run cat tests/Load/utils/scenarioUtils.js
   assert_success
   assert_output --partial "if (this.utils.isCLIVariableTrue('run_benchmark')) {"
   assert_output --partial 'return false;'
 }
 
 @test "delete benchmark calibration falls back across http_reqs metrics and warns on zero warmup counts" {
-  run sed -n '104,130p' tests/Load/run-fixed-vu-benchmarks.sh
+  run cat tests/Load/run-fixed-vu-benchmarks.sh
   assert_success
   assert_output --partial 'test("test_type[:=]benchmark")'
   assert_output --partial 'startswith("http_reqs")'
@@ -90,7 +90,7 @@ load 'bats-assert/load'
 }
 
 @test "load-test scenario discovery supports explicit scenario overrides" {
-  run sed -n '1,120p' tests/Load/get-load-test-scenarios.sh
+  run cat tests/Load/get-load-test-scenarios.sh
   assert_success
   assert_output --partial 'SCENARIO_OVERRIDE=${LOAD_TEST_SCENARIOS:-}'
   assert_output --partial "sed -E 's/[[:space:],]+/\\n/g'"
@@ -113,14 +113,14 @@ load 'bats-assert/load'
 }
 
 @test "execute-load-test forwards the memory-soak threshold override into k6" {
-  run sed -n '1,120p' tests/Load/execute-load-test.sh
+  run cat tests/Load/execute-load-test.sh
   assert_success
   assert_output --partial '-e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"'
   assert_output --partial '-e "LOAD_TEST_API_SCHEME=${LOAD_TEST_API_SCHEME:-https}"'
 }
 
 @test "customer dependency bootstrap tolerates empty collection responses in worker-mode smoke setup" {
-  run sed -n '1,220p' tests/Load/utils/insertCustomersUtils.js
+  run cat tests/Load/utils/insertCustomersUtils.js
   assert_success
   assert_output --partial 'parseCollectionResponse(response, resourceName)'
   assert_output --partial 'Received an empty ${resourceName} collection response'
@@ -145,7 +145,7 @@ load 'bats-assert/load'
 }
 
 @test "Dockerfile uses the labs frontend for COPY --exclude and keeps the var volume in the runtime stage only" {
-  run sed -n '1,150p' Dockerfile
+  run cat Dockerfile
   assert_success
   assert_output --partial '#syntax=docker/dockerfile:1-labs'
   assert_output --partial 'COPY --link --exclude=frankenphp/ . ./'

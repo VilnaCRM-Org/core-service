@@ -56,7 +56,20 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
         $listener($event);
 
         self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
-        self::assertSame(['page' => '2'], $request->attributes->get('_api_filters'));
+        self::assertSame(['page' => '99'], $request->attributes->get('_api_filters'));
+    }
+
+    public function testDoesNotOverwriteExistingApiFilters(): void
+    {
+        $request = Request::create('/api/customer_statuses?page=2', Request::METHOD_GET);
+        $request->attributes->set('_api_filters', ['page' => '88']);
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_query_parameters'));
+        self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
     }
 
     public function testRemovesMalformedTopLevelQueryKeys(): void
@@ -77,6 +90,13 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
             ],
             $request->attributes->get('_api_query_parameters')
         );
+        self::assertSame(
+            [
+                'order' => ['ulid' => 'asc'],
+                'value' => 'Active',
+            ],
+            $request->attributes->get('_api_filters')
+        );
     }
 
     public function testIgnoresNonApiRequests(): void
@@ -93,6 +113,17 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
     public function testIgnoresApiRequestsWithoutQueryParameters(): void
     {
         $request = Request::create('/api/customer_statuses', Request::METHOD_GET);
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertFalse($request->attributes->has('_api_query_parameters'));
+    }
+
+    public function testIgnoresPathsThatMerelyStartWithApi(): void
+    {
+        $request = Request::create('/apiv2/customer_statuses?page=2', Request::METHOD_GET);
         $event = $this->createRequestEvent($request);
 
         $listener = $this->createListener();

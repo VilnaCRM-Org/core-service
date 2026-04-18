@@ -329,13 +329,16 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $client = self::createClient();
         $response = $client->request('GET', $resourcePath, [
             'query' => [
+                'ulid[gte]' => $validUlid,
                 'ulid[lte]' => $validUlid,
                 'ulid[lt]' => '😍',
             ],
         ]);
 
         $this->assertResponseIsSuccessful();
-        $this->assertResponseHasHydraOrType($response->toArray());
+        $data = $response->toArray();
+        $this->assertResponseHasHydraOrType($data);
+        self::assertContains($validUlid, array_column($data['member'] ?? [], 'ulid'));
     }
 
     /**

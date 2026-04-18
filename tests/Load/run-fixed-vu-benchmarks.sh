@@ -32,6 +32,11 @@ if [[ ${#SCENARIOS[@]} -eq 0 ]]; then
   exit 1
 fi
 
+SELECTED_SCENARIOS_JSON="$(printf '%s\n' "${SCENARIOS[@]}" | jq -R . | jq -s '.')"
+BENCHMARK_SCENARIOS_JSON="$(jq -c --argjson selected "$SELECTED_SCENARIOS_JSON" '
+  map(select(.id as $id | $selected | index($id)))
+' ./tests/Load/benchmark-scenarios.json)"
+
 is_delete_scenario() {
   local scenario="$1"
   local scenario_name
@@ -153,7 +158,7 @@ jq -n \
   --argjson deleteBufferPercent "$BENCHMARK_DELETE_REQUEST_BUFFER_PERCENT" \
   --argjson deleteMinFixturePool "$BENCHMARK_DELETE_MIN_FIXTURE_POOL" \
   --arg failureLog "$BENCHMARK_FAILURES_LOG" \
-  --argjson scenarios "$(jq -c '.' ./tests/Load/benchmark-scenarios.json)" \
+  --argjson scenarios "$BENCHMARK_SCENARIOS_JSON" \
   '{
     generatedAt: $generatedAt,
     modeLabel: $modeLabel,

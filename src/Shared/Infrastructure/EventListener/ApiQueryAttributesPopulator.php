@@ -17,20 +17,23 @@ final class ApiQueryAttributesPopulator
             return;
         }
 
-        $this->setAttributeIfMissing($request, '_api_query_parameters', $parameters);
-        $this->setAttributeIfMissing($request, '_api_filters', $parameters);
-    }
-
-    /**
-     * @param array<array-key, array|scalar|null> $parameters
-     */
-    private function setAttributeIfMissing(
-        Request $request,
-        string $attribute,
-        $parameters
-    ): void {
-        if (! $request->attributes->has($attribute)) {
-            $request->attributes->set($attribute, $parameters);
+        if ($request->attributes->has('_api_query_parameters')) {
+            $request->attributes->set(
+                '_api_filters',
+                $request->attributes->get('_api_query_parameters')
+            );
+            return;
         }
+
+        if ($request->attributes->has('_api_filters')) {
+            $request->attributes->set(
+                '_api_query_parameters',
+                $request->attributes->get('_api_filters')
+            );
+            return;
+        }
+
+        $request->attributes->set('_api_query_parameters', $parameters);
+        $request->attributes->set('_api_filters', $parameters);
     }
 }

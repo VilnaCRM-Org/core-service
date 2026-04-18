@@ -158,11 +158,11 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 composer-validate: ## The validate command validates a given composer.json and composer.lock
 	$(COMPOSER) validate
 
-check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
+check-requirements: ## Validate Composer platform requirements from composer.lock.
 	$(COMPOSER) check-platform-reqs
 
-check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(COMPOSER) audit --locked --no-interaction --abandoned=ignore
+check-security: ## Check project dependencies for known security issues and report abandoned packages.
+	$(COMPOSER) audit --locked --no-interaction --abandoned=report
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
@@ -293,7 +293,12 @@ memory-tests: ensure-coverage-driver setup-test-db ## Run memory-safety tests wi
 		exit 1; \
 	fi; \
 	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $(MEMORY_COVERAGE_TEXT_FILE) | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	executed_lines=$$(sed 's/\x1b\[[0-9;]*m//g' $(MEMORY_COVERAGE_TEXT_FILE) | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*[0-9.]*%[[:space:]]*(\([0-9][0-9]*\)\/[0-9][0-9]*).*/\1/p' | head -1); \
 	rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+	if [ -z "$$executed_lines" ] || [ "$$executed_lines" -eq 0 ]; then \
+		echo "❌ ERROR: Memory tests did not execute any covered helper lines."; \
+		exit 1; \
+	fi; \
 	if [ -n "$$coverage" ]; then \
 		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
 			echo "❌ COVERAGE FAILURE: Memory-support helper coverage is $$coverage%, but 100% is required."; \

@@ -38,7 +38,7 @@ COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-en
 COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 
 ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD php -r 'exit(false === @file_get_contents("http://localhost:2019/metrics", false, stream_context_create(["http" => ["timeout" => 5]])) ? 1 : 0);'
+HEALTHCHECK --start-period=60s CMD php -r '$context = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 5], "ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); $result = @file_get_contents("https://localhost/api/health", false, $context); foreach ($http_response_header ?? [] as $header) { if (preg_match("{^HTTP/\\S+\\s+(\\d+)}", $header, $matches)) { exit(((int) $matches[1]) === 204 ? 0 : 1); } } exit($result === false ? 1 : 0);'
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
 
 FROM frankenphp_base AS frankenphp_dev
@@ -98,6 +98,10 @@ RUN <<-'EOF'
 			[ -f "$lib" ] && cp -n "$lib" /tmp/libs/
 		done
 	done
+	if [ -z "$(find /tmp/libs -type f -print -quit)" ]; then
+		echo "ERROR: libtree did not capture any runtime libraries." >&2
+		exit 1
+	fi
 	sed -i 's/opcache.preload_user = root/opcache.preload_user = www-data/' "$PHP_INI_DIR/app.conf.d/20-app.prod.ini"
 	rm -rf /var/lib/apt/lists/*
 EOF
@@ -131,7 +135,7 @@ RUN <<-EOF
 EOF
 
 COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app
-COPY --chown=www-data:www-data --from=frankenphp_prod_builder /srv/app/var /srv/app/var
+COPY --link --chown=www-data:www-data --from=frankenphp_prod_builder /srv/app/var /srv/app/var
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
 VOLUME /srv/app/var/
@@ -140,5 +144,5 @@ USER www-data
 WORKDIR /srv/app
 
 ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD php -r 'exit(false === @file_get_contents("http://localhost:2019/metrics", false, stream_context_create(["http" => ["timeout" => 5]])) ? 1 : 0);'
+HEALTHCHECK --start-period=60s CMD php -r '$context = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 5], "ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); $result = @file_get_contents("https://localhost/api/health", false, $context); foreach ($http_response_header ?? [] as $header) { if (preg_match("{^HTTP/\\S+\\s+(\\d+)}", $header, $matches)) { exit(((int) $matches[1]) === 204 ? 0 : 1); } } exit($result === false ? 1 : 0);'
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
