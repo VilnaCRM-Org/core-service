@@ -45,6 +45,7 @@ CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
 FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev
+ENV FRANKENPHP_ENABLE_WATCH=1
 ENV XDEBUG_MODE=off
 ENV FRANKENPHP_WORKER_CONFIG=watch
 
@@ -64,7 +65,7 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 RUN rm -f .env.local.php
 
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch"]
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
 
 FROM frankenphp_base AS frankenphp_prod_builder
 
