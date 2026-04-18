@@ -11,7 +11,7 @@ final class ApiQueryAttributesPopulator
     /**
      * @param array<array-key, array|scalar|null>|scalar|null $parameters
      */
-    public function populate(Request $request, array|string|int|float|bool|null $parameters): void
+    public function populate(Request $request, mixed $parameters): void
     {
         if (! is_array($parameters)) {
             return;
@@ -50,7 +50,7 @@ final class ApiQueryAttributesPopulator
     /**
      * @param array<array-key, array|scalar|null> $parameters
      */
-    private function populateMissingAttributes(Request $request, array $parameters): void
+    private function populateMissingAttributes(Request $request, mixed $parameters): void
     {
         $request->attributes->set('_api_query_parameters', $parameters);
         $request->attributes->set('_api_filters', $parameters);

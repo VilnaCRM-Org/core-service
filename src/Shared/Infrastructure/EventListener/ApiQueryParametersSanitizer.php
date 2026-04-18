@@ -17,9 +17,9 @@ final readonly class ApiQueryParametersSanitizer
      * @return array<array-key, array|scalar|null>
      */
     public function sanitize(
-        array|string|int|float|bool|null $parameters,
+        mixed $parameters,
         bool $allowIntegerKeys = false
-    ): array {
+    ): mixed {
         if (! is_array($parameters)) {
             return [];
         }
@@ -43,9 +43,8 @@ final readonly class ApiQueryParametersSanitizer
      *
      * @return array<array-key, array|scalar|null>|scalar|null
      */
-    private function sanitizeValue(
-        array|string|int|float|bool|null $value
-    ): array|string|int|float|bool|null {
+    private function sanitizeValue(mixed $value): mixed
+    {
         return is_array($value) ? $this->sanitize($value, true) : $value;
     }
 }
