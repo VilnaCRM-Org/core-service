@@ -113,14 +113,14 @@ Add metrics and logs for:
 
 These defaults are proposed starting points for CRM traffic and should be tuned from production metrics:
 
-| Cache family | Fresh TTL | Hard TTL | Jitter | Rationale |
-| --- | --- | --- | --- | --- |
-| Customer detail by id | 5 min | 30 min | +/- 15% | Frequently read, moderate stale tolerance, should converge quickly after writes |
-| Customer detail by email | 5 min | 30 min | +/- 15% | Same volatility as detail lookups, often used in lookup and auth-style reads |
-| Filtered customer collections | 60 sec | 5 min | +/- 10% | List screens must reflect recent writes quickly |
-| Reference data: customer types | 30 min | 6 h | +/- 20% | Rare admin changes, high read rate, explicit event invalidation available |
-| Reference data: customer statuses | 30 min | 6 h | +/- 20% | Same characteristics as customer types |
-| Negative lookups | 15 sec | 60 sec | +/- 10% | Prevent thundering herd without hiding new writes for long |
+| Cache family                      | Fresh TTL | Hard TTL | Jitter  | Rationale                                                                       |
+| --------------------------------- | --------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| Customer detail by id             | 5 min     | 30 min   | +/- 15% | Frequently read, moderate stale tolerance, should converge quickly after writes |
+| Customer detail by email          | 5 min     | 30 min   | +/- 15% | Same volatility as detail lookups, often used in lookup and auth-style reads    |
+| Filtered customer collections     | 60 sec    | 5 min    | +/- 10% | List screens must reflect recent writes quickly                                 |
+| Reference data: customer types    | 30 min    | 6 h      | +/- 20% | Rare admin changes, high read rate, explicit event invalidation available       |
+| Reference data: customer statuses | 30 min    | 6 h      | +/- 20% | Same characteristics as customer types                                          |
+| Negative lookups                  | 15 sec    | 60 sec   | +/- 10% | Prevent thundering herd without hiding new writes for long                      |
 
 Interpretation:
 
