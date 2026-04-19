@@ -64,6 +64,25 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
+    public function testFindFreshBypassesCacheAndDelegatesToInnerRepository(): void
+    {
+        $customerId = (string) $this->faker->ulid();
+        $customer = $this->createMock(Customer::class);
+
+        $this->cache->expects($this->never())->method('get');
+        $this->cacheKeyBuilder->expects($this->never())->method('buildCustomerKey');
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with($customerId, 0, null)
+            ->willReturn($customer);
+
+        $result = $this->repository->findFresh($customerId);
+
+        self::assertSame($customer, $result);
+    }
+
     public function testFindByEmailUsesCacheWithCorrectKey(): void
     {
         $email = 'test@example.com';

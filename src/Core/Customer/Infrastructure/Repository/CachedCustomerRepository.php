@@ -92,6 +92,14 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         }
     }
 
+    public function findFresh(
+        mixed $id,
+        int $lockMode = 0,
+        ?int $lockVersion = null
+    ): ?object {
+        return $this->inner->find($id, $lockMode, $lockVersion);
+    }
+
     /**
      * Cache Policy: findByEmail
      *

@@ -9,7 +9,7 @@ use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerPut;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPutProcessor;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -31,7 +31,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
-    private CustomerReferenceResolver|MockObject $referenceResolver;
+    private CustomerRelationTransformerInterface|MockObject $relationTransformer;
     private CustomerRepositoryInterface|MockObject $repository;
     private CustomerPutProcessor $processor;
     private UlidTransformer $ulidTransformer;
@@ -44,8 +44,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->createMock(CommandBusInterface::class);
         $this->factory = $this
             ->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->referenceResolver = $this
-            ->createMock(CustomerReferenceResolver::class);
+        $this->relationTransformer = $this
+            ->createMock(CustomerRelationTransformerInterface::class);
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $ulidFactory = new UlidFactory();
@@ -62,7 +62,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
             $this->repository,
             $this->commandBus,
             $this->factory,
-            $this->referenceResolver,
+            $this->relationTransformer,
         );
     }
 
@@ -79,7 +79,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $command = $this->createMock(UpdateCustomerCommand::class);
 
         $this->setupRepository($ulid, $customer);
-        $this->setupReferenceResolver($dto, $type, $status);
+        $this->setupReferenceResolver($dto, $type, $status, $customer);
         $this->setupFactoryAndCommandBus(
             $dto,
             $type,
@@ -103,7 +103,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn(null);
 
@@ -121,7 +121,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn(new ArrayObject());
 
@@ -133,7 +133,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
     {
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn($customer);
     }
@@ -141,17 +141,18 @@ final class CustomerPutProcessorTest extends UnitTestCase
     private function setupReferenceResolver(
         CustomerPut $dto,
         CustomerType $type,
-        CustomerStatus $status
+        CustomerStatus $status,
+        Customer $customer
     ): void {
-        $this->referenceResolver
+        $this->relationTransformer
             ->expects($this->once())
             ->method('resolveType')
-            ->with($dto->type)
+            ->with($dto->type, $customer)
             ->willReturn($type);
-        $this->referenceResolver
+        $this->relationTransformer
             ->expects($this->once())
             ->method('resolveStatus')
-            ->with($dto->status)
+            ->with($dto->status, $customer)
             ->willReturn($status);
     }
 

@@ -82,7 +82,7 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 
         $dependencies['repository']
             ->expects(self::once())
-            ->method('find')
+            ->method('findFresh')
             ->with($ulid)
             ->willReturn(null);
 
@@ -124,7 +124,7 @@ final class UpdateCustomerMutationResolverTest extends UnitTestCase
 
         $deps['repository']
             ->expects(self::once())
-            ->method('find')
+            ->method('findFresh')
             ->with($ulid)
             ->willReturn($customer);
     }

@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerPut;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
@@ -24,7 +24,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
         private CustomerRepositoryInterface $customerRepository,
         private CommandBusInterface $commandBus,
         private UpdateCustomerCommandFactoryInterface $updateCommandFactory,
-        private CustomerReferenceResolver $referenceResolver,
+        private CustomerRelationTransformerInterface $relationTransformer,
     ) {
     }
 
@@ -40,8 +40,8 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
         array $context = []
     ): Customer {
         $customer = $this->retrieveCustomer($uriVariables['ulid']);
-        $customerType = $this->referenceResolver->resolveType($data->type);
-        $customerStatus = $this->referenceResolver->resolveStatus($data->status);
+        $customerType = $this->resolveCustomerType($data, $customer);
+        $customerStatus = $this->resolveCustomerStatus($data, $customer);
         $this->executeUpdateCommand(
             $customer,
             $data,
@@ -53,7 +53,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
 
     private function retrieveCustomer(string $customerId): Customer
     {
-        $customer = $this->customerRepository->find($customerId);
+        $customer = $this->customerRepository->findFresh($customerId);
         if (! $customer instanceof Customer) {
             throw new CustomerNotFoundException();
         }
@@ -79,5 +79,19 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
         $command = $this->updateCommandFactory
             ->create($customer, $customerUpdate);
         $this->commandBus->dispatch($command);
+    }
+
+    private function resolveCustomerType(
+        CustomerPut $data,
+        Customer $customer
+    ): object {
+        return $this->relationTransformer->resolveType($data->type, $customer);
+    }
+
+    private function resolveCustomerStatus(
+        CustomerPut $data,
+        Customer $customer
+    ): object {
+        return $this->relationTransformer->resolveStatus($data->status, $customer);
     }
 }

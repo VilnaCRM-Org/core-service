@@ -184,6 +184,27 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $repository->deleteByEmail($email);
     }
 
+    public function testFindFreshDelegatesToFind(): void
+    {
+        $id = (string) $this->faker->ulid();
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['find'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->with($id, 0, null)
+            ->willReturn($customer);
+
+        $result = $repository->findFresh($id);
+
+        self::assertSame($customer, $result);
+    }
+
     public function testDeleteByIdDeletesResolvedCustomer(): void
     {
         $id = (string) $this->faker->ulid();

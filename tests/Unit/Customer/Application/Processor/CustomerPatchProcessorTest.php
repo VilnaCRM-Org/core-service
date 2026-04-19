@@ -133,7 +133,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $uriVars = ['ulid' => $ulidStr];
 
         $this->repository->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with((string) $ulid)
             ->willReturn(null);
 
@@ -215,7 +215,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
     private function setupRepository(Ulid $ulid, Customer $customer): void
     {
         $this->repository->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with((string) $ulid)
             ->willReturn($customer);
     }
@@ -244,42 +244,24 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 
     private function setupReferenceResolver(
         CustomerPatch $dto,
-        CustomerType $existingType,
         CustomerType $resolvedType,
-        CustomerStatus $existingStatus,
         CustomerStatus $resolvedStatus
     ): void {
-        $typeLookup = $dto->type;
-
-        if ($typeLookup === null) {
-            $typeLookup = (string) $this->faker->ulid();
-            $existingType
+        if ($dto->type !== null) {
+            $this->referenceResolver
                 ->expects(self::once())
-                ->method('getUlid')
-                ->willReturn($typeLookup);
+                ->method('resolveType')
+                ->with($dto->type)
+                ->willReturn($resolvedType);
         }
 
-        $statusLookup = $dto->status;
-
-        if ($statusLookup === null) {
-            $statusLookup = (string) $this->faker->ulid();
-            $existingStatus
+        if ($dto->status !== null) {
+            $this->referenceResolver
                 ->expects(self::once())
-                ->method('getUlid')
-                ->willReturn($statusLookup);
+                ->method('resolveStatus')
+                ->with($dto->status)
+                ->willReturn($resolvedStatus);
         }
-
-        $this->referenceResolver
-            ->expects(self::once())
-            ->method('resolveType')
-            ->with($typeLookup)
-            ->willReturn($resolvedType);
-
-        $this->referenceResolver
-            ->expects(self::once())
-            ->method('resolveStatus')
-            ->with($statusLookup)
-            ->willReturn($resolvedStatus);
     }
 
     private function isUpdateValid(
@@ -383,9 +365,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->setupRepository($ulid, $customer);
         $this->setupReferenceResolver(
             $dto,
-            $currentType,
             $resolvedType,
-            $currentStatus,
             $resolvedStatus
         );
         $this->setupDependencies(
@@ -426,15 +406,13 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->setupRepository($ulid, $customer);
         $this->setupReferenceResolver(
             $dto,
-            $existingType,
             $resolvedType,
-            $existingStatus,
             $resolvedStatus
         );
         $this->expectUpdateCommand(
             $dto,
-            $resolvedType,
-            $resolvedStatus,
+            $dto->type === null ? $existingType : $resolvedType,
+            $dto->status === null ? $existingStatus : $resolvedStatus,
             $customer
         );
         return [$dto, $operation, $uriVars, $customer];

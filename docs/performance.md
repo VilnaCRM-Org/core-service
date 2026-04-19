@@ -50,6 +50,8 @@ make export-memory-coverage   # test-environment job only
 
 The test-environment job sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `APP_ENV=test`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=3`. The dev-environment job uses the same Docker stack with `APP_ENV=dev`, but it forces `APP_DEBUG=0` and disables the `hot_reload` and `watch` helper snippets during the leak gate so the RSS guardrail measures the Symfony application worker rather than profiler/debug or file-watcher/live-reload helpers. The prod-environment job switches to `COMPOSE_FILE=docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml` so the soak runs against the production image and settings. In all three cases, API traffic is served by FrankenPHP worker mode over the default local HTTPS listener.
 
+The same principle now applies to local benchmark runs: `make start-load-test-stack` composes in `docker-compose.load_test.override.yml`, forces `APP_DEBUG=0`, and disables the dev-only `hot_reload`/`watch` FrankenPHP helpers before running K6. That keeps local before/after latency measurements focused on the application worker rather than live-reload overhead.
+
 That distinction is intentional. `hot_reload` and `watch` remain the default developer ergonomics for local interactive work, but they are not part of the request-lifecycle memory contract that this workflow enforces. The memory workflow therefore validates:
 
 - `dev`: Symfony development kernel under FrankenPHP worker mode, with debug collectors disabled for the leak gate.

@@ -33,6 +33,14 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
         return $this->inner->find($id, $lockMode, $lockVersion);
     }
 
+    public function findFresh(
+        mixed $id,
+        int $lockMode = 0,
+        ?int $lockVersion = null
+    ): ?object {
+        return $this->inner->findFresh($id, $lockMode, $lockVersion);
+    }
+
     public function delete(Customer $customer): void
     {
         $this->inner->delete($customer);

@@ -21,8 +21,14 @@ final readonly class CustomerRelationTransformer implements
         ?string $typeIri,
         Customer $customer
     ): CustomerType {
+        $currentType = $customer->getType();
+
         if ($typeIri === null) {
-            return $this->referenceResolver->resolveType($customer->getType()->getUlid());
+            return $currentType;
+        }
+
+        if ($this->matchesCurrentReference($typeIri, $currentType->getUlid())) {
+            return $currentType;
         }
 
         return $this->referenceResolver->resolveType($typeIri);
@@ -32,10 +38,22 @@ final readonly class CustomerRelationTransformer implements
         ?string $statusIri,
         Customer $customer
     ): CustomerStatus {
+        $currentStatus = $customer->getStatus();
+
         if ($statusIri === null) {
-            return $this->referenceResolver->resolveStatus($customer->getStatus()->getUlid());
+            return $currentStatus;
+        }
+
+        if ($this->matchesCurrentReference($statusIri, $currentStatus->getUlid())) {
+            return $currentStatus;
         }
 
         return $this->referenceResolver->resolveStatus($statusIri);
+    }
+
+    private function matchesCurrentReference(string $idOrIri, string $currentUlid): bool
+    {
+        return $idOrIri === $currentUlid
+            || str_ends_with($idOrIri, '/' . $currentUlid);
     }
 }

@@ -35,30 +35,43 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         self::assertSame($customerType, $result);
     }
 
-    public function testResolveTypeWithNullIriUsesDefault(): void
+    public function testResolveTypeWithNullIriReturnsExistingRelation(): void
     {
         $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $existingType = $this->createMock(CustomerType::class);
-        $reloadedType = $this->createMock(CustomerType::class);
-        $typeUlid = (string) $this->faker->ulid();
 
-        $existingType
-            ->expects(self::once())
-            ->method('getUlid')
-            ->willReturn($typeUlid);
         $customer->method('getType')->willReturn($existingType);
         $referenceResolver
-            ->expects(self::once())
-            ->method('resolveType')
-            ->with($typeUlid)
-            ->willReturn($reloadedType);
+            ->expects(self::never())
+            ->method('resolveType');
 
         $result = $resolver->resolveType(null, $customer);
 
-        self::assertSame($reloadedType, $result);
+        self::assertSame($existingType, $result);
+    }
+
+    public function testResolveTypeWithExistingUlidSkipsResolver(): void
+    {
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
+
+        $typeUlid = (string) $this->faker->ulid();
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getType' => $this->createConfiguredMock(CustomerType::class, [
+                'getUlid' => $typeUlid,
+            ]),
+        ]);
+
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveType');
+
+        $result = $resolver->resolveType('/api/customer_types/' . $typeUlid, $customer);
+
+        self::assertSame($customer->getType(), $result);
     }
 
     public function testResolveTypeThrowsWhenResolverFails(): void
@@ -99,30 +112,43 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         self::assertSame($customerStatus, $result);
     }
 
-    public function testResolveStatusWithNullIriUsesDefault(): void
+    public function testResolveStatusWithNullIriReturnsExistingRelation(): void
     {
         $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $existingStatus = $this->createMock(CustomerStatus::class);
-        $reloadedStatus = $this->createMock(CustomerStatus::class);
-        $statusUlid = (string) $this->faker->ulid();
 
-        $existingStatus
-            ->expects(self::once())
-            ->method('getUlid')
-            ->willReturn($statusUlid);
         $customer->method('getStatus')->willReturn($existingStatus);
         $referenceResolver
-            ->expects(self::once())
-            ->method('resolveStatus')
-            ->with($statusUlid)
-            ->willReturn($reloadedStatus);
+            ->expects(self::never())
+            ->method('resolveStatus');
 
         $result = $resolver->resolveStatus(null, $customer);
 
-        self::assertSame($reloadedStatus, $result);
+        self::assertSame($existingStatus, $result);
+    }
+
+    public function testResolveStatusWithExistingUlidSkipsResolver(): void
+    {
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
+
+        $statusUlid = (string) $this->faker->ulid();
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getStatus' => $this->createConfiguredMock(CustomerStatus::class, [
+                'getUlid' => $statusUlid,
+            ]),
+        ]);
+
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveStatus');
+
+        $result = $resolver->resolveStatus($statusUlid, $customer);
+
+        self::assertSame($customer->getStatus(), $result);
     }
 
     public function testResolveStatusThrowsWhenResolverFails(): void
