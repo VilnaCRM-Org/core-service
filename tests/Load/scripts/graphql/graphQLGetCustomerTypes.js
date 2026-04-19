@@ -40,13 +40,6 @@ export default function getCustomerTypes(data) {
             value
           }
         }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        totalCount
       }
     }`;
 

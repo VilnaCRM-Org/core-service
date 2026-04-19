@@ -18,6 +18,7 @@
         <indexes>
             <index>
                 <key name="value" order="asc" />
+                <key name="ulid" order="asc" />
             </index>
         </indexes>
 

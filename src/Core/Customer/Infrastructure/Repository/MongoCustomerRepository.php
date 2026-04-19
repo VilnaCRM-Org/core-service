@@ -40,6 +40,14 @@ final class MongoCustomerRepository extends BaseRepository implements
         return $this->findOneByCriteria(['email' => $email]);
     }
 
+    public function findFresh(
+        mixed $id,
+        int $lockMode = 0,
+        ?int $lockVersion = null
+    ): ?object {
+        return $this->find($id, $lockMode, $lockVersion);
+    }
+
     /**
      * Delete customer with proper entity management
      */

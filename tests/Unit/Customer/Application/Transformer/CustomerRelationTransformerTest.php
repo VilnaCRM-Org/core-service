@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use ApiPlatform\Metadata\IriConverterInterface;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
@@ -17,16 +17,16 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 {
     public function testResolveTypeWithProvidedIri(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveType')
             ->with($typeIri)
             ->willReturn($customerType);
 
@@ -35,40 +35,58 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         self::assertSame($customerType, $result);
     }
 
-    public function testResolveTypeWithNullIriUsesDefault(): void
+    public function testResolveTypeWithNullIriReturnsExistingRelation(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
-        $customerType = $this->createMock(CustomerType::class);
-        $typeUlid = $this->faker->uuid();
-
         $existingType = $this->createMock(CustomerType::class);
-        $existingType->method('getUlid')->willReturn($typeUlid);
-        $customer->method('getType')->willReturn($existingType);
 
-        $expectedIri = '/api/customer_types/' . $typeUlid;
-        $this->setupIriConverter($iriConverter, $existingType, $expectedIri, $customerType);
+        $customer->method('getType')->willReturn($existingType);
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveType');
 
         $result = $resolver->resolveType(null, $customer);
 
-        self::assertSame($customerType, $result);
+        self::assertSame($existingType, $result);
     }
 
-    public function testResolveTypeThrowsWhenInvalidResourceReturned(): void
+    public function testResolveTypeWithExistingUlidSkipsResolver(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
+
+        $typeUlid = (string) $this->faker->ulid();
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getType' => $this->createConfiguredMock(CustomerType::class, [
+                'getUlid' => $typeUlid,
+            ]),
+        ]);
+
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveType');
+
+        $result = $resolver->resolveType('/api/customer_types/' . $typeUlid, $customer);
+
+        self::assertSame($customer->getType(), $result);
+    }
+
+    public function testResolveTypeThrowsWhenResolverFails(): void
+    {
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveType')
             ->with($typeIri)
-            ->willReturn(new \stdClass());
+            ->willThrowException(CustomerTypeNotFoundException::withIri($typeIri));
 
         $this->expectException(CustomerTypeNotFoundException::class);
         $resolver->resolveType($typeIri, $customer);
@@ -76,16 +94,16 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithProvidedIri(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveStatus')
             ->with($statusIri)
             ->willReturn($customerStatus);
 
@@ -94,61 +112,60 @@ final class CustomerRelationTransformerTest extends UnitTestCase
         self::assertSame($customerStatus, $result);
     }
 
-    public function testResolveStatusWithNullIriUsesDefault(): void
+    public function testResolveStatusWithNullIriReturnsExistingRelation(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
-        $customerStatus = $this->createMock(CustomerStatus::class);
-        $statusUlid = $this->faker->uuid();
-
         $existingStatus = $this->createMock(CustomerStatus::class);
-        $existingStatus->method('getUlid')->willReturn($statusUlid);
-        $customer->method('getStatus')->willReturn($existingStatus);
 
-        $expectedIri = '/api/customer_statuses/' . $statusUlid;
-        $this->setupIriConverter($iriConverter, $existingStatus, $expectedIri, $customerStatus);
+        $customer->method('getStatus')->willReturn($existingStatus);
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveStatus');
 
         $result = $resolver->resolveStatus(null, $customer);
 
-        self::assertSame($customerStatus, $result);
+        self::assertSame($existingStatus, $result);
     }
 
-    public function testResolveStatusThrowsWhenInvalidResourceReturned(): void
+    public function testResolveStatusWithExistingUlidSkipsResolver(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
+
+        $statusUlid = (string) $this->faker->ulid();
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getStatus' => $this->createConfiguredMock(CustomerStatus::class, [
+                'getUlid' => $statusUlid,
+            ]),
+        ]);
+
+        $referenceResolver
+            ->expects(self::never())
+            ->method('resolveStatus');
+
+        $result = $resolver->resolveStatus($statusUlid, $customer);
+
+        self::assertSame($customer->getStatus(), $result);
+    }
+
+    public function testResolveStatusThrowsWhenResolverFails(): void
+    {
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveStatus')
             ->with($statusIri)
-            ->willReturn(new \stdClass());
+            ->willThrowException(CustomerStatusNotFoundException::withIri($statusIri));
 
         $this->expectException(CustomerStatusNotFoundException::class);
         $resolver->resolveStatus($statusIri, $customer);
-    }
-
-    private function setupIriConverter(
-        IriConverterInterface $iriConverter,
-        object $resource,
-        string $iri,
-        object $returnedResource
-    ): void {
-        $iriConverter
-            ->expects(self::once())
-            ->method('getIriFromResource')
-            ->with($resource)
-            ->willReturn($iri);
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getResourceFromIri')
-            ->with($iri)
-            ->willReturn($returnedResource);
     }
 }

@@ -125,6 +125,18 @@ final class CustomerTypeApiTest extends BaseApiCase
         $this->assertIsArray($data['member']);
     }
 
+    public function testGetCustomerTypesCollectionWithInvalidUlidRangeFilter(): void
+    {
+        $this->createCustomerType();
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_types', [
+            'query' => ['ulid[between]' => 'IM'],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertArrayHasKey('member', $response->toArray());
+    }
+
     public function testGetCustomerTypeNotFound(): void
     {
         $ulid = (string) $this->faker->ulid();

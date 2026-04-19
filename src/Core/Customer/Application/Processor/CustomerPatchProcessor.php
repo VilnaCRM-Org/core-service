@@ -60,7 +60,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
     {
         $ulidObject = $this->ulidTransformer->create($ulid);
 
-        return $this->repository->find($ulidObject)
+        return $this->repository->findFresh($ulidObject)
             ?? throw new CustomerNotFoundException();
     }
 

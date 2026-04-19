@@ -1,6 +1,8 @@
 App\Core\Customer\Domain\Entity\Customer:
   exceptionToStatus:
     'App\Core\Customer\Domain\Exception\CustomerNotFoundException': 404
+    'App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException': 404
+    'App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException': 404
   normalizationContext:
     groups: ['output']
   paginationViaCursor:

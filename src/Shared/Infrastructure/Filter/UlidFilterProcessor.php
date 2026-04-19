@@ -30,11 +30,8 @@ final class UlidFilterProcessor
 
     private function canProcess(string $property, string|array|int|float|bool|null $rawValue): bool
     {
-        if (! $this->isUlidProperty($property)) {
-            return false;
-        }
-
-        return is_string($rawValue);
+        return $this->isUlidProperty($property)
+            && is_string($rawValue);
     }
 
     private function isUlidProperty(string $property): bool

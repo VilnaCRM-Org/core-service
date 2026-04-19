@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerPut;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPutProcessor;
+use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -31,7 +31,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
-    private IriConverterInterface|MockObject $iriConverter;
+    private CustomerRelationTransformerInterface|MockObject $relationTransformer;
     private CustomerRepositoryInterface|MockObject $repository;
     private CustomerPutProcessor $processor;
     private UlidTransformer $ulidTransformer;
@@ -44,8 +44,8 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->createMock(CommandBusInterface::class);
         $this->factory = $this
             ->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->iriConverter = $this
-            ->createMock(IriConverterInterface::class);
+        $this->relationTransformer = $this
+            ->createMock(CustomerRelationTransformerInterface::class);
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $ulidFactory = new UlidFactory();
@@ -62,7 +62,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
             $this->repository,
             $this->commandBus,
             $this->factory,
-            $this->iriConverter,
+            $this->relationTransformer,
         );
     }
 
@@ -79,7 +79,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
         $command = $this->createMock(UpdateCustomerCommand::class);
 
         $this->setupRepository($ulid, $customer);
-        $this->setupIriConverter($dto, $type, $status);
+        $this->setupReferenceResolver($dto, $type, $status, $customer);
         $this->setupFactoryAndCommandBus(
             $dto,
             $type,
@@ -103,7 +103,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn(null);
 
@@ -121,7 +121,7 @@ final class CustomerPutProcessorTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn(new ArrayObject());
 
@@ -133,22 +133,27 @@ final class CustomerPutProcessorTest extends UnitTestCase
     {
         $this->repository
             ->expects($this->once())
-            ->method('find')
+            ->method('findFresh')
             ->with($this->ulidTransformer->transformFromSymfonyUlid($ulid))
             ->willReturn($customer);
     }
 
-    private function setupIriConverter(
+    private function setupReferenceResolver(
         CustomerPut $dto,
         CustomerType $type,
-        CustomerStatus $status
+        CustomerStatus $status,
+        Customer $customer
     ): void {
-        $this->iriConverter
-            ->expects($this->exactly(2))
-            ->method('getResourceFromIri')
-            ->willReturnCallback(fn (
-                string $iri
-            ) => $this->resolveIri($iri, $dto, $type, $status));
+        $this->relationTransformer
+            ->expects($this->once())
+            ->method('resolveType')
+            ->with($dto->type, $customer)
+            ->willReturn($type);
+        $this->relationTransformer
+            ->expects($this->once())
+            ->method('resolveStatus')
+            ->with($dto->status, $customer)
+            ->willReturn($status);
     }
 
     private function setupFactoryAndCommandBus(
@@ -178,28 +183,6 @@ final class CustomerPutProcessorTest extends UnitTestCase
             ->expects($this->once())
             ->method('dispatch')
             ->with($command);
-    }
-
-    /**
-     * Resolves the IRI to the corresponding resource using a mapping array.
-     *
-     * @throws \InvalidArgumentException if the IRI is unexpected.
-     */
-    private function resolveIri(
-        string $iri,
-        CustomerPut $dto,
-        CustomerType $type,
-        CustomerStatus $status
-    ): CustomerType|CustomerStatus {
-        $mapping = [
-            $dto->type => $type,
-            $dto->status => $status,
-        ];
-
-        if (isset($mapping[$iri])) {
-            return $mapping[$iri];
-        }
-        throw new \InvalidArgumentException('Unexpected IRI');
     }
 
     private function isUpdateValid(

@@ -10,6 +10,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
+      APP_DEBUG: ${APP_DEBUG:-0}
+      FRANKENPHP_ENABLE_WATCH: ${FRANKENPHP_ENABLE_WATCH:-0}
+      FRANKENPHP_SITE_CONFIG: '${FRANKENPHP_SITE_CONFIG-}'
+      FRANKENPHP_WORKER_CONFIG: '${FRANKENPHP_WORKER_CONFIG-}'
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://localhost/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}

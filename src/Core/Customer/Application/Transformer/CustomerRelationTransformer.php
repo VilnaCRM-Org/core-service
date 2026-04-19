@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Transformer;
 
-use ApiPlatform\Metadata\IriConverterInterface;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
-use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
-use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 
 final readonly class CustomerRelationTransformer implements
     CustomerRelationTransformerInterface
 {
     public function __construct(
-        private IriConverterInterface $iriConverter,
+        private CustomerReferenceResolverInterface $referenceResolver,
     ) {
     }
 
@@ -23,51 +21,39 @@ final readonly class CustomerRelationTransformer implements
         ?string $typeIri,
         Customer $customer
     ): CustomerType {
-        return $this->resolveRelation(
-            $typeIri,
-            $customer->getType(),
-            CustomerType::class,
-            static function (string $iri): CustomerTypeNotFoundException {
-                return CustomerTypeNotFoundException::withIri($iri);
-            }
-        );
+        $currentType = $customer->getType();
+
+        if ($typeIri === null) {
+            return $currentType;
+        }
+
+        if ($this->matchesCurrentReference($typeIri, $currentType->getUlid())) {
+            return $currentType;
+        }
+
+        return $this->referenceResolver->resolveType($typeIri);
     }
 
     public function resolveStatus(
         ?string $statusIri,
         Customer $customer
     ): CustomerStatus {
-        return $this->resolveRelation(
-            $statusIri,
-            $customer->getStatus(),
-            CustomerStatus::class,
-            static function (string $iri): CustomerStatusNotFoundException {
-                return CustomerStatusNotFoundException::withIri($iri);
-            }
-        );
-    }
+        $currentStatus = $customer->getStatus();
 
-    /**
-     * @template T of object
-     *
-     * @param class-string<T> $expectedClass
-     * @param callable(string): \Exception $exceptionFactory
-     *
-     * @return T
-     */
-    private function resolveRelation(
-        ?string $iri,
-        object $default,
-        string $expectedClass,
-        callable $exceptionFactory
-    ): object {
-        $resolvedIri = $iri ?? $this->iriConverter->getIriFromResource($default);
-        $resource = $this->iriConverter->getResourceFromIri($resolvedIri);
-
-        if (! $resource instanceof $expectedClass) {
-            throw $exceptionFactory($resolvedIri);
+        if ($statusIri === null) {
+            return $currentStatus;
         }
 
-        return $resource;
+        if ($this->matchesCurrentReference($statusIri, $currentStatus->getUlid())) {
+            return $currentStatus;
+        }
+
+        return $this->referenceResolver->resolveStatus($statusIri);
+    }
+
+    private function matchesCurrentReference(string $idOrIri, string $currentUlid): bool
+    {
+        return $idOrIri === $currentUlid
+            || str_ends_with($idOrIri, '/' . $currentUlid);
     }
 }

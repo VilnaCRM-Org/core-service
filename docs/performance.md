@@ -50,6 +50,8 @@ make export-memory-coverage   # test-environment job only
 
 The test-environment job sets `COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml`, `APP_ENV=test`, `FRANKENPHP_LOOP_MAX=500`, and `SOAK_ITERATIONS=3`. The dev-environment job uses the same Docker stack with `APP_ENV=dev`, but it forces `APP_DEBUG=0` and disables the `hot_reload` and `watch` helper snippets during the leak gate so the RSS guardrail measures the Symfony application worker rather than profiler/debug or file-watcher/live-reload helpers. The prod-environment job switches to `COMPOSE_FILE=docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml` so the soak runs against the production image and settings. In all three cases, API traffic is served by FrankenPHP worker mode over the default local HTTPS listener.
 
+The same principle now applies to local benchmark runs: `make start-load-test-stack` composes in `docker-compose.load_test.override.yml`, forces `APP_DEBUG=0`, and disables the dev-only `hot_reload`/`watch` FrankenPHP helpers before running K6. That keeps local before/after latency measurements focused on the application worker rather than live-reload overhead.
+
 That distinction is intentional. `hot_reload` and `watch` remain the default developer ergonomics for local interactive work, but they are not part of the request-lifecycle memory contract that this workflow enforces. The memory workflow therefore validates:
 
 - `dev`: Symfony development kernel under FrankenPHP worker mode, with debug collectors disabled for the leak gate.
@@ -58,7 +60,7 @@ That distinction is intentional. `hot_reload` and `watch` remain the default dev
 
 The standalone PHPUnit suite still runs only in the test-environment job, inside the Dockerized `php` container with the standalone `phpunit.memory.xml.dist` configuration and a 100% coverage requirement over `tests/Support/Memory`. The worker soak derives its default scenario list from `tests/Load/get-load-test-scenarios.sh`, so every committed load-test endpoint participates in the repeated RSS-growth check unless it is explicitly excluded as test-support scaffolding.
 
-During the repeated smoke-load soak, the K6 scripts still execute the endpoint checks for every REST and GraphQL smoke scenario, but the dedicated memory workflow disables the standalone latency thresholds. The RSS guardrail now measures from a post-warmup baseline and only fails when growth both exceeds the configured delta and stays monotonic across the measured iterations. That separation is intentional: the memory job should fail on response-integrity regressions or sustained RSS growth, while latency budgets remain enforced by the separate `Load testing` workflow.
+During the repeated smoke-load soak, the K6 scripts still execute the endpoint checks for every REST and GraphQL smoke scenario, but the dedicated memory workflow disables the standalone latency thresholds. The RSS guardrail now measures from a post-warmup baseline, can take more than one warmup pass before that baseline in environments that load extra dev-only code paths, samples container memory multiple times per checkpoint to smooth `docker stats` jitter, and only fails when growth both exceeds the configured delta and stays monotonic across the measured iterations. That separation is intentional: the memory job should fail on response-integrity regressions or sustained RSS growth, while latency budgets remain enforced by the separate `Load testing` workflow.
 
 For hard cases that CI cannot explain, `arnaud-lb/memprof` remains the manual escalation path for local or staging forensics. It is intentionally not part of mandatory CI in the current phase.
 
@@ -69,6 +71,10 @@ For the local three-way runtime benchmark between php-fpm, FrankenPHP without wo
 ## Benchmarks
 
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.
+
+Reference-data GraphQL collection benchmarks should use matching selection sets when compared against each other. The current load scripts standardize `customerTypes(first: 10)` and `customerStatuses(first: 10)` on `edges.node { id value ulid }` so the results are not skewed by `pageInfo`/`totalCount` overhead on only one query.
+
+Recent write-path tuning also avoids re-resolving unchanged `type` and `status` relations during customer PATCH/update flows, resolves create/PUT relation IRIs through typed repositories by ULID, and adds compound `(value, ulid)` indexes for `customer_types` and `customer_statuses` collection ordering.
 
 Each endpoint was tested for smoke, average, stress, and spike load scenarios. You can learn more about them [here](https://grafana.com/docs/k6/latest/testing-guides/test-types/).
 Also, you can find HTML files with load test reports [here](https://github.com/VilnaCRM-Org/core-service/tree/main/tests/Load/results)

@@ -104,6 +104,8 @@ BATS_ARGS ?=
 DOCKER_TTY_FLAG = $(if $(CI),-T,)
 BMALPH_PLATFORM ?= codex
 BMALPH_DRY_RUN ?= false
+LOAD_TEST_STACK_COMPOSE_FILE ?= docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+LOAD_TEST_STACK_ENV = COMPOSE_FILE="$(LOAD_TEST_STACK_COMPOSE_FILE)" APP_DEBUG=0 FRANKENPHP_ENABLE_WATCH=0 FRANKENPHP_SITE_CONFIG= FRANKENPHP_WORKER_CONFIG=
 
 define DOCKER_EXEC_WITH_ENV
 $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) -e $(1) php $(2)
@@ -456,6 +458,12 @@ new-logs: ## Show live logs
 
 .PHONY: start
 start: ensure-test-services build-k6-docker ## Start docker, wait for required services, and build k6
+
+start-load-test-stack: ## Start a benchmark-friendly worker-mode stack without dev hot-reload watchers
+	$(LOAD_TEST_STACK_ENV) $(MAKE) start
+
+setup-load-test-db: ## Reset the benchmark-friendly load-test stack database
+	$(LOAD_TEST_STACK_ENV) $(MAKE) setup-test-db
 
 ps: ## Check docker containers
 	$(DOCKER_COMPOSE) ps

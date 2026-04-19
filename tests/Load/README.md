@@ -29,6 +29,10 @@ The load tests cover all major REST API endpoints:
 ### Quick Start
 
 ```bash
+# Start the benchmark-friendly worker-mode stack
+make start-load-test-stack
+make setup-load-test-db
+
 # Run all API load tests with all load levels
 make load-tests
 
@@ -71,6 +75,11 @@ Load test parameters are configured in `config.json.dist`:
 - **Replace operations**: PUT for full replacement
 - **Delete operations**: DELETE with proper cleanup
 
+### Benchmark Parity
+
+- Keep GraphQL collection benchmarks comparable by using the same page size and selection set when measuring similar resources.
+- The reference-data collection scripts for `customerTypes` and `customerStatuses` intentionally use `edges.node { id value ulid }` without `pageInfo` or `totalCount` so their latency can be compared directly.
+
 ### Smart Resource Management
 
 - Setup/teardown for test data
@@ -101,6 +110,8 @@ Load test configuration is managed through:
 - `config.json` - Main configuration file
 - `config.json.dist` - Default configuration template
 - Environment variables (API_HOST, API_PORT, ENVIRONMENT)
+
+For reproducible local benchmarking, prefer `make start-load-test-stack` over `make start`. That target composes in `docker-compose.load_test.override.yml`, disables `APP_DEBUG`, and turns off the dev-only `hot_reload`/`watch` FrankenPHP helpers so benchmark latency is not inflated by live-reload tooling.
 
 ## Results
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Resolver;
 
 use ApiPlatform\GraphQl\Resolver\MutationResolverInterface as MutationResolver;
-use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\Factory as CustomerFactory;
 use App\Core\Customer\Application\Transformer as CustomerTf;
 use App\Core\Customer\Domain\Entity\Customer;
@@ -19,7 +18,7 @@ final readonly class CreateCustomerMutationResolver implements MutationResolver
         private MutationInputValidatorInterface $validator,
         private CustomerTf\CreateCustomerMutationInputTransformer $inputMapper,
         private CustomerFactory\CreateCustomerFactoryInterface $factory,
-        private IriConverterInterface $iriConverter,
+        private CustomerReferenceResolverInterface $referenceResolver,
         private CustomerTf\CustomerTransformerInterface $builder,
     ) {
     }
@@ -45,10 +44,8 @@ final readonly class CreateCustomerMutationResolver implements MutationResolver
         $mutationInput = $this->inputMapper->transform($input);
         $this->validator->validate($mutationInput);
 
-        $customerStatusEntity = $this->iriConverter
-            ->getResourceFromIri($input['status']);
-        $customerTypeEntity = $this->iriConverter
-            ->getResourceFromIri($input['type']);
+        $customerStatusEntity = $this->referenceResolver->resolveStatus($input['status']);
+        $customerTypeEntity = $this->referenceResolver->resolveType($input['type']);
 
         $customer = $this->builder->transform(
             $input['initials'],

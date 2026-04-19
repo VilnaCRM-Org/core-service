@@ -71,7 +71,7 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
     private function findCustomerById(string $id): Customer
     {
         $ulid = $this->iriTransformer->transform($id);
-        $customer = $this->repository->find($ulid);
+        $customer = $this->repository->findFresh($ulid);
 
         if (! $customer instanceof Customer) {
             throw CustomerNotFoundException::withId($id);

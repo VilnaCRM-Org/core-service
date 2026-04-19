@@ -90,6 +90,15 @@ final class IriTransformerTest extends UnitTestCase
         self::assertSame('01HQZX444555666', $result);
     }
 
+    public function testTransformHandlesAbsoluteUrlIri(): void
+    {
+        $result = $this->transformer->transform(
+            'https://api.example.test/api/customer_types/01HQZX777888999?include=details#meta'
+        );
+
+        self::assertSame('01HQZX777888999', $result);
+    }
+
     public function testTransformHandlesUuidFormat(): void
     {
         $uuid = '550e8400-e29b-41d4-a716-446655440000';

@@ -126,6 +126,9 @@ services:
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
+  App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface:
+    alias: App\Core\Customer\Application\Resolver\CustomerReferenceResolver
+
   App\Shared\Application\Validator\LoggingMutationInputValidator:
     decorates: App\Shared\Application\Validator\MutationInputValidator
     arguments:

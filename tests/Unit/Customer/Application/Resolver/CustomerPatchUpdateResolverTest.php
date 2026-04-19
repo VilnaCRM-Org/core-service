@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Resolver;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Resolver\CustomerPatchUpdateResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
@@ -18,16 +18,18 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 final class CustomerPatchUpdateResolverTest extends UnitTestCase
 {
-    private IriConverterInterface|MockObject $iriConverter;
+    private CustomerReferenceResolverInterface|MockObject $referenceResolver;
     private CustomerPatchUpdateResolver $resolver;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->referenceResolver = $this->createMock(
+            CustomerReferenceResolverInterface::class
+        );
         $this->resolver = new CustomerPatchUpdateResolver(
             new CustomerUpdateScalarResolver(),
-            new CustomerRelationTransformer($this->iriConverter)
+            new CustomerRelationTransformer($this->referenceResolver)
         );
     }
 
@@ -57,15 +59,16 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
         $type = $this->createMock(CustomerType::class);
         $status = $this->createMock(CustomerStatus::class);
 
-        $this->iriConverter
-            ->method('getResourceFromIri')
-            ->willReturnCallback(static function (string $iri) use ($dto, $type, $status): object {
-                return match ($iri) {
-                    $dto->type => $type,
-                    $dto->status => $status,
-                    default => throw new \RuntimeException('Unexpected IRI: ' . $iri),
-                };
-            });
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($dto->type)
+            ->willReturn($type);
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveStatus')
+            ->with($dto->status)
+            ->willReturn($status);
 
         $update = $this->resolver->build($dto, $customer);
 
@@ -76,6 +79,48 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
         self::assertSame($type, $update->newType);
         self::assertSame($status, $update->newStatus);
         self::assertTrue($update->newConfirmed);
+    }
+
+    public function testBuildPreservesExistingRelationsWhenReferencesAreOmitted(): void
+    {
+        $dto = new CustomerPatch(
+            id: null,
+            initials: null,
+            email: null,
+            phone: null,
+            leadSource: null,
+            type: null,
+            status: null,
+            confirmed: null,
+        );
+
+        $type = $this->createConfiguredMock(CustomerType::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+        ]);
+        $status = $this->createConfiguredMock(CustomerStatus::class, [
+            'getUlid' => (string) $this->faker->ulid(),
+        ]);
+        $customer = $this->createConfiguredMock(Customer::class, [
+            'getInitials' => 'OLD',
+            'getEmail' => 'old@example.com',
+            'getPhone' => '+999',
+            'getLeadSource' => 'Legacy',
+            'getType' => $type,
+            'getStatus' => $status,
+            'isConfirmed' => true,
+        ]);
+
+        $this->referenceResolver
+            ->expects(self::never())
+            ->method('resolveType');
+        $this->referenceResolver
+            ->expects(self::never())
+            ->method('resolveStatus');
+
+        $update = $this->resolver->build($dto, $customer);
+
+        self::assertSame($type, $update->newType);
+        self::assertSame($status, $update->newStatus);
     }
 
     public function testBuildThrowsWhenTypeIriIsInvalid(): void
@@ -101,9 +146,11 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
             'isConfirmed' => true,
         ]);
 
-        $this->iriConverter
-            ->method('getResourceFromIri')
-            ->willReturn($this->createMock(CustomerStatus::class));
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($dto->type)
+            ->willThrowException(CustomerTypeNotFoundException::withIri($dto->type));
 
         $this->expectException(CustomerTypeNotFoundException::class);
 

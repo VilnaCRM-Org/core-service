@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Resolver;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput;
 use App\Core\Customer\Application\Resolver\CreateCustomerMutationResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CreateCustomerMutationInputTransformer;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
@@ -30,7 +30,11 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
         $this->setupValidatorExpectations($dependencies['validator']);
 
         $entities = $this->setupEntityMocks();
-        $this->setupIriConverterExpectations($dependencies['iriConverter'], $input, $entities);
+        $this->setupReferenceResolverExpectations(
+            $dependencies['referenceResolver'],
+            $input,
+            $entities
+        );
         $this->setupCustomerTransformerExpectations(
             $dependencies['customerTransformer'],
             $input,
@@ -57,7 +61,9 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             'validator' => $this->createMock(MutationInputValidator::class),
             'transformer' => $this->createMock(CreateCustomerMutationInputTransformer::class),
             'factory' => $this->createMock(CreateCustomerFactoryInterface::class),
-            'iriConverter' => $this->createMock(IriConverterInterface::class),
+            'referenceResolver' => $this->createMock(
+                CustomerReferenceResolverInterface::class
+            ),
             'customerTransformer' => $this->createMock(CustomerTransformerInterface::class),
         ];
     }
@@ -70,7 +76,7 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             $deps['validator'],
             $deps['transformer'],
             $deps['factory'],
-            $deps['iriConverter'],
+            $deps['referenceResolver'],
             $deps['customerTransformer'],
         );
     }
@@ -83,8 +89,8 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
             'leadSource' => $this->faker->word(),
-            'type' => '/api/customer_types/' . $this->faker->uuid(),
-            'status' => '/api/customer_statuses/' . $this->faker->uuid(),
+            'type' => '/api/customer_types/' . $this->faker->ulid(),
+            'status' => '/api/customer_statuses/' . $this->faker->ulid(),
             'confirmed' => $this->faker->boolean(),
         ];
     }
@@ -124,23 +130,21 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
      * @param array<string, string|bool> $input
      * @param array<string, \PHPUnit\Framework\MockObject\MockObject> $entities
      */
-    private function setupIriConverterExpectations(
-        \PHPUnit\Framework\MockObject\MockObject $iriConverter,
+    private function setupReferenceResolverExpectations(
+        \PHPUnit\Framework\MockObject\MockObject $referenceResolver,
         array $input,
         array $entities
     ): void {
-        $iriConverter
-            ->expects(self::exactly(2))
-            ->method('getResourceFromIri')
-            ->willReturnCallback(static function (string $iri) use ($input, $entities) {
-                if ($iri === $input['status']) {
-                    return $entities['customerStatus'];
-                }
-                if ($iri === $input['type']) {
-                    return $entities['customerType'];
-                }
-                throw new \RuntimeException('Unexpected IRI: ' . $iri);
-            });
+        $referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($input['type'])
+            ->willReturn($entities['customerType']);
+        $referenceResolver
+            ->expects(self::once())
+            ->method('resolveStatus')
+            ->with($input['status'])
+            ->willReturn($entities['customerStatus']);
     }
 
     /**
