@@ -22,7 +22,7 @@ final class RequestBodyContentSchemaRefUpdater
      *
      * @return ArrayObject<string, ContentDefinition>|null
      */
-    public function update(ArrayObject $content): ?ArrayObject
+    public function update(ArrayObject $content, string $schemaRef): ?ArrayObject
     {
         $updatedContent = $content->getArrayCopy();
         $changed = false;
@@ -32,7 +32,10 @@ final class RequestBodyContentSchemaRefUpdater
                 continue;
             }
 
-            $updatedDefinition = $this->definitionUpdater->update($definition);
+            $updatedDefinition = $this->definitionUpdater->update(
+                $definition,
+                $schemaRef
+            );
 
             if ($updatedDefinition === null) {
                 continue;

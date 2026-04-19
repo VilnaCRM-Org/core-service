@@ -20,8 +20,8 @@ load 'bats-assert/load'
 @test "make check-requirements command executes and passes" {
   run make check-requirements
   assert_success
-  assert_output --partial "Symfony Requirements Checker"
-  assert_output --partial "Your system is ready to run Symfony projects"
+  assert_output --partial "docker compose exec php composer check-platform-reqs"
+  assert_output --partial "Checking platform requirements for packages in the vendor dir"
 }
 
 @test "make phpinsights command executes and completes analysis" {
@@ -33,8 +33,8 @@ load 'bats-assert/load'
 @test "make check-security command executes and reports no vulnerabilities" {
   run make check-security
   assert_success
-  assert_output --partial "Symfony Security Check Report"
-  assert_output --partial "No packages have known vulnerabilities."
+  assert_output --partial "docker compose exec php composer audit --locked --no-interaction --abandoned=report"
+  assert_output --partial "No security vulnerability advisories found."
 }
 
 @test "make infection command executes" {
@@ -109,7 +109,14 @@ load 'bats-assert/load'
   assert_output --partial 'ensure-test-services'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRIES:-5'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5'
-  assert_output --partial 'up --detach --wait database redis php caddy localstack'
+  assert_output --partial 'up --detach --wait database redis php localstack'
+}
+
+@test "make start waits for required services before building k6" {
+  run sed -n '/^.PHONY: start/,/^ps:/p' Makefile
+  assert_success
+  assert_output --partial 'start: ensure-test-services build-k6-docker'
+  refute_output --partial 'start: up build-k6-docker'
 }
 
 @test "make uses conditional docker exec tty flag" {
@@ -126,6 +133,31 @@ load 'bats-assert/load'
   assert_output --partial '$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .'
 }
 
+@test "memory-tests workflow uses make-only FrankenPHP worker entrypoints" {
+  run cat .github/workflows/memory-tests.yml
+  assert_success
+  assert_output --partial 'name: ${{ matrix.job_name }}'
+  assert_output --partial 'Memory leak tests (dev env)'
+  assert_output --partial 'Memory leak tests (test env)'
+  assert_output --partial 'Memory leak tests (prod env)'
+  assert_output --partial "app_env: dev"
+  assert_output --partial "app_debug: '0'"
+  assert_output --partial "frankenphp_site_config: ''"
+  assert_output --partial "frankenphp_worker_config: ''"
+  assert_output --partial 'compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml'
+  assert_output --partial 'compose_file: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml'
+  assert_output --partial 'APP_ENV: ${{ matrix.app_env }}'
+  assert_output --partial 'FRANKENPHP_SITE_CONFIG: ${{ matrix.frankenphp_site_config }}'
+  assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ${{ matrix.frankenphp_worker_config }}'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'docker compose cp'
+
+  run awk '/^[[:space:]]*run:[[:space:]]+make[[:space:]]+/ { sub(/^[[:space:]]*/, "", $0); print }' .github/workflows/memory-tests.yml
+  assert_success
+  assert_output $'run: make start\nrun: make memory-tests\nrun: make worker-mode-verification\nrun: make export-memory-coverage\nrun: make down'
+}
+
 @test "load test LocalStack healthcheck waits for SQS readiness" {
   run awk '
     /^  localstack:/ {in_block=1}
@@ -135,4 +167,43 @@ load 'bats-assert/load'
   assert_success
   assert_output --partial 'curl -fsS http://localhost:4566/_localstack/health'
   assert_output --partial 'grep -Eq "\"sqs\": \"(available|running)\""'
+}
+
+@test "dev and load-test FrankenPHP overrides keep the official automatic HTTPS flow" {
+  run grep -n 'CADDY_GLOBAL_OPTIONS: auto_https off' docker-compose.override.yml docker-compose.load_test.override.yml
+  assert_equal "$status" "1"
+}
+
+@test "dev FrankenPHP override keeps hot reload defaults but allows CI to disable them" {
+  run sed -n '/^services:/,/^  structurizr:/p' docker-compose.override.yml
+  assert_success
+  assert_output --partial 'APP_DEBUG: ${APP_DEBUG:-1}'
+  assert_output --partial 'FRANKENPHP_SITE_CONFIG: ${FRANKENPHP_SITE_CONFIG-hot_reload}'
+  assert_output --partial 'FRANKENPHP_WORKER_CONFIG: ${FRANKENPHP_WORKER_CONFIG-watch}'
+}
+
+@test "Behat targets the FrankenPHP HTTPS endpoint" {
+  run sed -n '1,40p' behat.yml.dist
+  assert_success
+  assert_output --partial 'base_url: "https://localhost"'
+  assert_output --partial 'verify_host: false'
+  assert_output --partial 'verify_peer: false'
+}
+
+@test ".env.test aligns BASE_URL with the FrankenPHP HTTPS listener" {
+  run sed -n '1,20p' .env.test
+  assert_success
+  assert_output --partial 'BASE_URL=https://localhost'
+}
+
+@test "symfony checks workflow uses make-only Docker entrypoints" {
+  run cat .github/workflows/symfony.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make composer-validate'
+  assert_output --partial 'run: make check-requirements'
+  assert_output --partial 'run: make check-security'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
 }

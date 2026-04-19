@@ -21,15 +21,46 @@ final class CustomerTypeFactoryTest extends UnitTestCase
         parent::setUp();
 
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
-        $this->setupExpectedParameter();
-        $this->setupParameterBuilderMock();
         $this->factory = new CustomerTypeUlidParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
     {
+        $this->setupExpectedParameter();
+        $this->setupParameterBuilderMock();
+
         $actualParameter = $this->factory->getParameter();
         $this->assertSame($this->expectedParameter, $actualParameter);
+    }
+
+    public function testGetDeleteParameterReturnsDedicatedDeleteIdentifier(): void
+    {
+        $deleteParameter = new Parameter(
+            'ulid',
+            'query',
+            'CustomerType identifier',
+            true,
+            false,
+            false,
+            [
+                'default' => SchemathesisFixtures::DELETE_CUSTOMER_TYPE_ID,
+                'type' => 'string',
+            ]
+        );
+
+        $this->parameterBuilder->expects($this->once())
+            ->method('build')
+            ->with(
+                'ulid',
+                'CustomerType identifier',
+                true,
+                SchemathesisFixtures::DELETE_CUSTOMER_TYPE_ID,
+                'string',
+                [SchemathesisFixtures::DELETE_CUSTOMER_TYPE_ID]
+            )
+            ->willReturn($deleteParameter);
+
+        $this->assertSame($deleteParameter, $this->factory->getDeleteParameter());
     }
 
     private function setupExpectedParameter(): void
@@ -57,7 +88,11 @@ final class CustomerTypeFactoryTest extends UnitTestCase
                 'CustomerType identifier',
                 true,
                 SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
-                'string'
+                'string',
+                [
+                    SchemathesisFixtures::CUSTOMER_TYPE_ID,
+                    SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
+                ]
             )
             ->willReturn($this->expectedParameter);
     }

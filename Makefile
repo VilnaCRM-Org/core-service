@@ -42,8 +42,9 @@ DOCKER        = docker
 DOCKER_COMPOSE = docker compose
 SCHEMATHESIS_VERSION ?= 4.15.1
 SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
-SCHEMATHESIS_API_URL ?= http://localhost$(if $(strip $(HTTP_PORT)),:$(HTTP_PORT),)
+SCHEMATHESIS_API_URL ?= https://localhost$(if $(strip $(HTTPS_PORT)),:$(HTTPS_PORT),)
 SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
+SCHEMATHESIS_OUTPUT_LOG ?= $(SCHEMATHESIS_REPORT_DIR)/schemathesis-output.log
 SCHEMATHESIS_PHASES ?= examples,coverage,fuzzing
 SCHEMATHESIS_REPORT_FORMATS ?= junit,har,ndjson
 SCHEMATHESIS_MAX_EXAMPLES ?= 5
@@ -85,6 +86,14 @@ endif
 FIXER_ENV = PHP_CS_FIXER_IGNORE_ENV=1
 PHP_CS_FIXER_CMD = php ./vendor/bin/php-cs-fixer fix $(git ls-files -om --exclude-standard) --allow-risky=yes --config .php-cs-fixer.dist.php
 COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-text=coverage.txt --colors=never
+MEMORY_COVERAGE_TEXT_FILE = memory-coverage.txt
+MEMORY_COVERAGE_XML_FILE = coverage/memory-coverage.xml
+MEMORY_COVERAGE_HOST_FILE ?= /tmp/memory-coverage.xml
+MEMORY_COVERAGE_CMD = php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit --configuration phpunit.memory.xml.dist --coverage-text=$(MEMORY_COVERAGE_TEXT_FILE) --coverage-clover $(MEMORY_COVERAGE_XML_FILE) --colors=never
+SOAK_ITERATIONS ?= 3
+WORKER_MEMORY_SERVICE ?= php
+WORKER_MEMORY_REPORT ?= tests/Load/results/frankenphp-worker-memory.txt
+WORKER_MEMORY_ALLOWED_GROWTH_MIB ?= 32
 
 GITHUB_HOST ?= github.com
 FORMAT ?= markdown
@@ -110,10 +119,12 @@ endef
 ifeq ($(CI),1)
     RUN_PHP_CS_FIXER = $(FIXER_ENV) $(PHP_CS_FIXER_CMD)
     RUN_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_CMD)
+    RUN_MEMORY_TESTS_COVERAGE = XDEBUG_MODE=coverage $(MEMORY_COVERAGE_CMD)
     RUN_INTERNAL_TESTS_COVERAGE = XDEBUG_MODE=coverage $(COVERAGE_INTERNAL_CMD)
 else
     RUN_PHP_CS_FIXER = $(call DOCKER_EXEC_WITH_ENV,$(FIXER_ENV),$(PHP_CS_FIXER_CMD))
     RUN_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_CMD))
+    RUN_MEMORY_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(MEMORY_COVERAGE_CMD))
     RUN_INTERNAL_TESTS_COVERAGE = $(call DOCKER_EXEC_WITH_ENV,APP_ENV=test -e XDEBUG_MODE=coverage,$(COVERAGE_INTERNAL_CMD))
 endif
 
@@ -148,11 +159,11 @@ phpcsfixer: ## A tool to automatically fix PHP Coding Standards issues
 composer-validate: ## The validate command validates a given composer.json and composer.lock
 	$(COMPOSER) validate
 
-check-requirements: ## Checks requirements for running Symfony and gives useful recommendations to optimize PHP for Symfony.
-	$(EXEC_ENV) $(SYMFONY_BIN) check:requirements
+check-requirements: ## Validate Composer platform requirements from composer.lock.
+	$(COMPOSER) check-platform-reqs
 
-check-security: ## Checks security issues in project dependencies. Without arguments, it looks for a "composer.lock" file in the current directory. Pass it explicitly to check a specific "composer.lock" file.
-	$(EXEC_ENV) $(SYMFONY_BIN) security:check
+check-security: ## Check project dependencies for known security issues and report abandoned packages.
+	$(COMPOSER) audit --locked --no-interaction --abandoned=report
 
 psalm: ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
@@ -171,7 +182,7 @@ phpinsights: phpmd ## Instant PHP quality checks, static analysis, and complexit
 	$(EXEC_ENV) ./vendor/bin/phpinsights --no-interaction --flush-cache --fix --ansi --disable-security-check
 	$(EXEC_ENV) ./vendor/bin/phpinsights analyse tests --no-interaction --flush-cache --fix --disable-security-check --config-path=phpinsights-tests.php
 
-unit-tests: ## Run unit tests with 100% coverage requirement
+unit-tests: ensure-coverage-driver ## Run unit tests with 100% coverage requirement
 	@echo "Running unit tests with coverage requirement of 100%..."
 	@rm -f coverage.txt; \
 	tmpfile=$$(mktemp); \
@@ -217,7 +228,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	@attempt=1; \
 	max_attempts=$${DOCKER_COMPOSE_UP_RETRIES:-5}; \
 	retry_delay=$${DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5}; \
-	until $(DOCKER_COMPOSE) up --detach --wait database redis php caddy localstack; do \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php localstack; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
 			$(DOCKER_COMPOSE) ps || true; \
@@ -230,6 +241,19 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	done; \
 	$(DOCKER_COMPOSE) exec php sh -lc 'mkdir -p var/cache/dev/doctrine/odm/mongodb/Proxies var/cache/test var/log && chmod -R 777 var/cache var/log'
 
+ensure-coverage-driver: ensure-test-services ## Ensure the PHP container exposes Xdebug for coverage-dependent targets
+	@if $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) php php --ri xdebug >/dev/null 2>&1; then \
+		echo "✅ Xdebug coverage driver available in the current php container."; \
+	else \
+		echo "⚠️  Xdebug coverage driver missing in the current php container. Rebuilding php with the active Compose target..."; \
+		$(DOCKER_COMPOSE) build php; \
+		$(DOCKER_COMPOSE) up --detach --wait php; \
+		if ! $(DOCKER_COMPOSE) exec $(DOCKER_TTY_FLAG) php php --ri xdebug >/dev/null 2>&1; then \
+			echo "❌ Xdebug coverage driver is still unavailable after rebuilding php."; \
+			exit 1; \
+		fi; \
+	fi
+
 setup-test-db: ensure-test-services ## Create database for testing purposes
 	$(SYMFONY_TEST_ENV) c:c
 	-$(SYMFONY_TEST_ENV) doctrine:mongodb:schema:drop
@@ -238,8 +262,55 @@ setup-test-db: ensure-test-services ## Create database for testing purposes
 behat: setup-test-db ## A php framework for autotesting business expectations
 	$(EXEC_ENV) $(BEHAT)
 
-integration-tests: setup-test-db ## Run integration tests
+integration-tests: ensure-coverage-driver setup-test-db ## Run integration tests
 	$(RUN_TESTS_COVERAGE) --testsuite=Integration
+
+memory-tests: ensure-coverage-driver setup-test-db ## Run memory-safety tests with 100% coverage requirement for memory-support helpers
+	@echo "Running memory tests with coverage requirement of 100%..."
+	@mkdir -p coverage
+	@rm -f $(MEMORY_COVERAGE_TEXT_FILE) $(MEMORY_COVERAGE_XML_FILE); \
+	tmpfile=$$(mktemp); \
+	script -qec "$(RUN_MEMORY_TESTS_COVERAGE)" /dev/null > $$tmpfile 2>&1; \
+	test_status=$$?; \
+	cat $$tmpfile; \
+	if [ $$test_status -ne 0 ]; then \
+		echo "❌ TEST FAILURE: Memory tests returned a non-zero exit code ($$test_status)."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit $$test_status; \
+	fi; \
+	if sed 's/\x1b\[[0-9;]*m//g' $$tmpfile | grep -Eq 'FAILURES!|ERRORS!|[Ii]ncomplete'; then \
+		echo "❌ TEST FAILURE: Memory tests reported failures, errors, or incomplete tests."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit 1; \
+	fi; \
+	if [ ! -f $(MEMORY_COVERAGE_TEXT_FILE) ]; then \
+		echo "❌ ERROR: $(MEMORY_COVERAGE_TEXT_FILE) was not generated."; \
+		rm -f $$tmpfile; \
+		exit 1; \
+	fi; \
+	if [ ! -f $(MEMORY_COVERAGE_XML_FILE) ]; then \
+		echo "❌ ERROR: $(MEMORY_COVERAGE_XML_FILE) was not generated."; \
+		rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+		exit 1; \
+	fi; \
+	coverage=$$(sed 's/\x1b\[[0-9;]*m//g' $(MEMORY_COVERAGE_TEXT_FILE) | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*\([0-9.]*\)%.*/\1/p' | head -1); \
+	executed_lines=$$(sed 's/\x1b\[[0-9;]*m//g' $(MEMORY_COVERAGE_TEXT_FILE) | tr -d '\r' | sed -n 's/.*Lines:[[:space:]]*[0-9.]*%[[:space:]]*(\([0-9][0-9]*\)\/[0-9][0-9]*).*/\1/p' | head -1); \
+	rm -f $$tmpfile $(MEMORY_COVERAGE_TEXT_FILE); \
+	if [ -z "$$executed_lines" ] || [ "$$executed_lines" -eq 0 ]; then \
+		echo "❌ ERROR: Memory tests did not execute any covered helper lines."; \
+		exit 1; \
+	fi; \
+	if [ -n "$$coverage" ]; then \
+		if perl -e 'exit(($$ARGV[0] < 100) ? 0 : 1)' "$$coverage"; then \
+			echo "❌ COVERAGE FAILURE: Memory-support helper coverage is $$coverage%, but 100% is required."; \
+			exit 1; \
+		else \
+			echo "✅ COVERAGE SUCCESS: Memory-support helper coverage is $$coverage%"; \
+		fi; \
+	else \
+		echo "❌ ERROR: Could not parse coverage from memory test output"; \
+		exit 1; \
+	fi
 
 integration-negative-tests: ## Run integration negative tests
 	$(EXEC_ENV) $(PHPUNIT) --testsuite=Negative
@@ -247,13 +318,35 @@ integration-negative-tests: ## Run integration negative tests
 fixtures-load: ## Run fixtures
 	$(SYMFONY_TEST_ENV) doctrine:mongodb:fixtures:load -n || true
 
-tests-with-coverage: ## Run tests with coverage
+tests-with-coverage: ensure-coverage-driver ## Run tests with coverage
 	$(RUN_TESTS_COVERAGE)
 
-negative-tests-with-coverage: ## Run negative tests with coverage reporting
+negative-tests-with-coverage: ensure-coverage-driver ## Run negative tests with coverage reporting
 	$(RUN_INTERNAL_TESTS_COVERAGE)
 
-all-tests: unit-tests integration-tests behat ## Run unit, integration and e2e tests
+all-tests: unit-tests integration-tests memory-tests behat ## Run unit, integration, memory and e2e tests
+
+worker-mode-verification: ## Run repeated smoke load tests against the running FrankenPHP worker mode stack
+	@default_load_test_port=$$(if [ "$${LOAD_TEST_API_SCHEME:-https}" = "http" ]; then printf '%s' "$${HTTP_PORT:-80}"; else printf '%s' "$${HTTPS_PORT:-443}"; fi); \
+	LOAD_TEST_API_SCHEME="$${LOAD_TEST_API_SCHEME:-https}" \
+	LOAD_TEST_API_HOST="$${LOAD_TEST_API_HOST:-localhost}" \
+	LOAD_TEST_API_PORT="$${LOAD_TEST_API_PORT:-$$default_load_test_port}" \
+	SOAK_ITERATIONS="$(SOAK_ITERATIONS)" \
+	WORKER_MEMORY_SERVICE="$(WORKER_MEMORY_SERVICE)" \
+	WORKER_MEMORY_REPORT="$(WORKER_MEMORY_REPORT)" \
+	WORKER_MEMORY_ALLOWED_GROWTH_MIB="$(WORKER_MEMORY_ALLOWED_GROWTH_MIB)" \
+	bash tests/Load/verify-frankenphp-worker-memory.sh
+
+export-memory-coverage: ## Copy the memory-suite coverage report from the PHP container to the host
+	@mkdir -p "$(dir $(MEMORY_COVERAGE_HOST_FILE))"
+	@if [ "$(CI)" = "1" ] && [ -f "$(MEMORY_COVERAGE_XML_FILE)" ]; then \
+		cp "$(MEMORY_COVERAGE_XML_FILE)" "$(MEMORY_COVERAGE_HOST_FILE)"; \
+		echo "✅ Copied host memory coverage report to $(MEMORY_COVERAGE_HOST_FILE)"; \
+	elif [ -f "$(MEMORY_COVERAGE_HOST_FILE)" ]; then \
+		echo "✅ Memory coverage report already available at $(MEMORY_COVERAGE_HOST_FILE)"; \
+	else \
+		$(DOCKER_COMPOSE) cp php:/srv/app/$(MEMORY_COVERAGE_XML_FILE) $(MEMORY_COVERAGE_HOST_FILE); \
+	fi
 
 prepare-test-data: build-k6-docker ## Prepare test data for load tests
 	tests/Load/prepare-test-data.sh
@@ -262,6 +355,9 @@ cleanup-test-data: build-k6-docker ## Clean up test data after load tests
 	tests/Load/cleanup-test-data.sh
 
 smoke-load-tests: build-k6-docker ## Run load tests with minimal load
+	tests/Load/run-smoke-load-tests.sh
+
+smoke-load-tests-no-build: ## Run smoke load tests without rebuilding the K6 image
 	tests/Load/run-smoke-load-tests.sh
 
 average-load-tests: build-k6-docker ## Run load tests with average load
@@ -275,6 +371,12 @@ spike-load-tests: build-k6-docker ## Run load tests with a spike of extreme load
 
 load-tests: build-k6-docker ## Run load tests
 	tests/Load/run-load-tests.sh
+
+fixed-vu-benchmarks: build-k6-docker ## Run the fixed-VU benchmark suite against the currently running API
+	tests/Load/run-fixed-vu-benchmarks.sh
+
+fixed-vu-benchmark-report: ## Generate the fixed-VU runtime comparison report
+	node tests/Load/generate-fixed-vu-benchmark-report.mjs
 
 cache-performance-tests: setup-test-db ## Run cache performance integration tests
 	$(EXEC_ENV) $(PHPUNIT) tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php --testdox
@@ -327,12 +429,16 @@ cache-warmup: ## Warmup the Symfony cache
 	@$(SYMFONY) cache:warmup
 
 purge: ## Purge cache and logs
-	@rm -rf var/cache/* var/logs/*
+	@if $(DOCKER_COMPOSE) ps --status running --services 2>/dev/null | grep -qx 'php'; then \
+		$(DOCKER_COMPOSE) exec -u root php sh -lc 'rm -rf var/cache/* var/log/* var/logs/*'; \
+	else \
+		rm -rf var/cache/* var/log/* var/logs/*; \
+	fi
 
-up: ## Start the docker hub (PHP, caddy)
+up: ## Start the docker hub (FrankenPHP, database, redis, support services)
 	$(DOCKER_COMPOSE) up --detach
 
-build: ## Builds the images (PHP, caddy)
+build: ## Builds the images (FrankenPHP and support services)
 	$(DOCKER_COMPOSE) build --pull --no-cache
 
 down: ## Stop the docker hub
@@ -349,7 +455,7 @@ new-logs: ## Show live logs
 	@$(DOCKER_COMPOSE) logs --tail=0 --follow
 
 .PHONY: start
-start: up build-k6-docker ## Start docker with k6
+start: ensure-test-services build-k6-docker ## Start docker, wait for required services, and build k6
 
 ps: ## Check docker containers
 	$(DOCKER_COMPOSE) ps
@@ -360,10 +466,10 @@ stop: ## Stop docker and the Symfony binary server
 commands: ## List all Symfony commands
 	@$(SYMFONY) list
 
-coverage-html: ## Create the code coverage report with PHPUnit
+coverage-html: ensure-coverage-driver ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-html=coverage/html
 
-coverage-xml: ## Create the code coverage report with PHPUnit
+coverage-xml: ensure-coverage-driver ## Create the code coverage report with PHPUnit
 	$(DOCKER_COMPOSE) exec -e XDEBUG_MODE=coverage php php -d memory_limit=-1 vendor/bin/phpunit --coverage-clover coverage/coverage.xml
 
 generate-openapi-spec: ## Generate OpenAPI specification
@@ -381,6 +487,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	@phases="$(SCHEMATHESIS_PHASES)"; \
+	output_log="$(SCHEMATHESIS_OUTPUT_LOG)"; \
 	if grep -Eq '^[[:space:]]+links:' .github/openapi-spec/spec.yaml; then \
 		phases="$$phases,stateful"; \
 		echo "OpenAPI links detected; enabling Schemathesis stateful phase."; \
@@ -392,6 +499,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 		-v "$(SCHEMATHESIS_REPORT_DIR):/reports" \
 		$(SCHEMATHESIS_IMAGE) run /schema/spec.yaml \
 		--url "$(SCHEMATHESIS_API_URL)" \
+		--tls-verify false \
 		--checks all \
 		--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)" \
 		--phases="$$phases" \
@@ -412,7 +520,16 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 		--coverage-report-html-path /reports/schema-coverage.html \
 		--coverage-report-markdown-path /reports/schema-coverage.md \
 		--coverage-show-missing parameters \
-		--header "X-Schemathesis-Test: cleanup-customers"
+		--header "X-Schemathesis-Test: cleanup-customers" > "$$output_log" 2>&1; \
+	status=$$?; \
+	cat "$$output_log"; \
+	if [ $$status -ne 0 ]; then \
+		exit $$status; \
+	fi; \
+	if sed 's/\x1b\[[0-9;]*m//g' "$$output_log" | grep -Eq '^Warnings:'; then \
+		echo "❌ Schemathesis reported warnings. Treating warnings as CI failures."; \
+		exit 1; \
+	fi
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	@if [ "$(LOCAL_MODE_ENV)" = "true" ]; then $(MAKE) ensure-test-services; fi
@@ -451,9 +568,10 @@ ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	if ! make phpinsights; then failed_checks="$$failed_checks\n❌ PHPInsights quality analysis"; fi; \
 	echo "🔟  Validating architecture with Deptrac..."; \
 	if ! make deptrac; then failed_checks="$$failed_checks\n❌ Deptrac architecture validation"; fi; \
-	echo "1️⃣1️⃣ Running complete test suite (unit, integration, e2e)..."; \
+	echo "1️⃣1️⃣ Running complete test suite (unit, integration, memory, e2e)..."; \
 	if ! make unit-tests; then failed_checks="$$failed_checks\n❌ unit tests"; fi; \
 	if ! make integration-tests; then failed_checks="$$failed_checks\n❌ integration tests"; fi; \
+	if ! make memory-tests; then failed_checks="$$failed_checks\n❌ memory tests"; fi; \
 	if ! make behat; then failed_checks="$$failed_checks\n❌ Behat e2e tests"; fi; \
 	echo "1️⃣2️⃣ Running mutation testing with Infection..."; \
 	if ! make infection; then failed_checks="$$failed_checks\n❌ mutation testing"; fi; \

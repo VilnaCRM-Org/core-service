@@ -22,10 +22,6 @@ jobs:
           app_id: ${{ secrets.VILNACRM_APP_ID }}
           private_key: ${{ secrets.VILNACRM_APP_PRIVATE_KEY }}
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
       - name: Checkout Repository
         uses: actions/checkout@v4.2.1
         with:
@@ -33,17 +29,15 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start application
         run: make start
 
       - name: Generate GraphQL spec
         run: make generate-graphql-spec
 
-      - name: Copy openapi spec to host
-        run: docker cp core-service-php-1:/srv/app/.github/graphql-spec/spec .github/graphql-spec/spec
+      - name: Stop application
+        if: always()
+        run: make down
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9

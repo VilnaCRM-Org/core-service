@@ -3,10 +3,12 @@ import http from 'k6/http';
 
 export default class Utils {
   constructor() {
-    const host = this.getConfig().apiHost;
-    const port = this.getConfig().apiPort;
+    const config = this.getConfig();
+    const scheme = __ENV.LOAD_TEST_API_SCHEME || config.apiScheme || 'http';
+    const host = __ENV.LOAD_TEST_API_HOST || config.apiHost;
+    const port = __ENV.LOAD_TEST_API_PORT || config.apiPort;
 
-    this.baseDomain = `http://${host}:${port}`;
+    this.baseDomain = `${scheme}://${host}:${port}`;
     this.baseUrl = `${this.baseDomain}/api`;
     this.baseHttpUrl = this.baseUrl + '/customers';
     this.baseGraphQLUrl = this.baseUrl + '/graphql';
@@ -23,13 +25,36 @@ export default class Utils {
 
     for (const path of candidatePaths) {
       try {
-        return JSON.parse(open(path));
+        return this.applyFixtureSuffix(JSON.parse(open(path)));
       } catch (error) {
         // Try next candidate
       }
     }
 
     throw new Error('Unable to load load-test configuration (config.json or config.json.dist)');
+  }
+
+  applyFixtureSuffix(config) {
+    const fixtureSuffix = this.getOptionalCLIVariable('LOAD_TEST_FIXTURE_SUFFIX');
+
+    if (!fixtureSuffix) {
+      return config;
+    }
+
+    ['customersFileName', 'customerStatusesFileName', 'customerTypesFileName'].forEach(key => {
+      const fileName = config[key];
+      const extensionIndex = fileName.lastIndexOf('.');
+
+      if (extensionIndex === -1) {
+        config[key] = `${fileName}-${fixtureSuffix}`;
+        return;
+      }
+
+      config[key] =
+        `${fileName.slice(0, extensionIndex)}-${fixtureSuffix}${fileName.slice(extensionIndex)}`;
+    });
+
+    return config;
   }
 
   getBaseDomain() {
@@ -55,6 +80,7 @@ export default class Utils {
   getJsonHeader() {
     return {
       headers: {
+        Accept: 'application/ld+json',
         'Content-Type': 'application/ld+json',
       },
     };
@@ -82,6 +108,23 @@ export default class Utils {
 
   getCLIVariable(variable) {
     return `${__ENV[variable]}`;
+  }
+
+  getOptionalCLIVariable(variable) {
+    return __ENV[variable];
+  }
+
+  getIntCLIVariable(variable, fallback) {
+    const rawValue = this.getOptionalCLIVariable(variable);
+    const parsedValue = Number.parseInt(rawValue ?? '', 10);
+
+    return Number.isNaN(parsedValue) ? fallback : parsedValue;
+  }
+
+  isCLIVariableTrue(variable) {
+    return ['1', 'true', 'yes'].includes(
+      `${this.getOptionalCLIVariable(variable) ?? ''}`.toLowerCase()
+    );
   }
 
   checkCustomerIsDefined(customer) {
@@ -184,11 +227,11 @@ export default class Utils {
   }
 
   getCustomerTypes() {
-    return http.get(`${this.baseUrl}/customer_types`, this.getJsonHeader());
+    return http.get(`${this.baseUrl}/customer_types?itemsPerPage=100`, this.getJsonHeader());
   }
 
   getCustomerStatuses() {
-    return http.get(`${this.baseUrl}/customer_statuses`, this.getJsonHeader());
+    return http.get(`${this.baseUrl}/customer_statuses?itemsPerPage=100`, this.getJsonHeader());
   }
 
   executeGraphQL(query) {

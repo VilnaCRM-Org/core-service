@@ -15,16 +15,49 @@ abstract class UlidParameterFactory implements UriParameterFactoryInterface
 
     public function getParameter(): Parameter
     {
-        return $this->parameterBuilder->build(
-            'ulid',
-            $this->getDescription(),
-            true,
+        return $this->buildParameter(
             $this->getExampleUlid(),
-            'string'
+            $this->getAllowedUlids()
         );
+    }
+
+    public function getDeleteParameter(): Parameter
+    {
+        return $this->buildParameter(
+            $this->getDeleteUlid(),
+            [$this->getDeleteUlid()]
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function getAllowedUlids(): array
+    {
+        return [$this->getExampleUlid()];
+    }
+
+    protected function getDeleteUlid(): string
+    {
+        return $this->getExampleUlid();
     }
 
     abstract protected function getDescription(): string;
 
     abstract protected function getExampleUlid(): string;
+
+    /**
+     * @param array<int, string> $allowedUlids
+     */
+    private function buildParameter(string $example, array $allowedUlids): Parameter
+    {
+        return $this->parameterBuilder->build(
+            'ulid',
+            $this->getDescription(),
+            true,
+            $example,
+            'string',
+            $allowedUlids
+        );
+    }
 }

@@ -47,6 +47,17 @@ export default class ScenariosBuilder {
     return this;
   }
 
+  addBenchmarkScenario(benchmarkConfig) {
+    this.scenarios.benchmark = {
+      executor: 'constant-vus',
+      vus: benchmarkConfig.vus,
+      duration: benchmarkConfig.duration + 's',
+      tags: { test_type: 'benchmark' },
+    };
+
+    return this;
+  }
+
   addDefaultScenario(scenarioName, config, startTime) {
     this.scenarios[scenarioName] = {
       executor: 'ramping-arrival-rate',

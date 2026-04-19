@@ -11,19 +11,24 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Domain\ValueObject\Ulid;
+use RuntimeException;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Throwable;
 
 final readonly class EntityManager
 {
     public function __construct(
         private CustomerRepositoryInterface $customerRepository,
         private StatusRepositoryInterface $statusRepository,
-        private TypeRepositoryInterface $typeRepository
+        private TypeRepositoryInterface $typeRepository,
+        private TagAwareCacheInterface $customerCache
     ) {
     }
 
     public function saveCustomer(Customer $customer): void
     {
         $this->customerRepository->save($customer);
+        $this->invalidateCustomerCache();
     }
 
     public function saveType(CustomerType $type): void
@@ -54,11 +59,13 @@ final readonly class EntityManager
     public function deleteCustomer(Customer $customer): void
     {
         $this->customerRepository->delete($customer);
+        $this->invalidateCustomerCache();
     }
 
     public function deleteCustomerByEmail(string $email): void
     {
         $this->customerRepository->deleteByEmail($email);
+        $this->invalidateCustomerCache();
     }
 
     public function deleteType(CustomerType $type): void
@@ -79,5 +86,23 @@ final readonly class EntityManager
     public function deleteStatusByValue(string $value): void
     {
         $this->statusRepository->deleteByValue($value);
+    }
+
+    /**
+     * Direct Behat fixture writes bypass the normal event-driven cache invalidation path.
+     */
+    private function invalidateCustomerCache(): void
+    {
+        try {
+            if (! $this->customerCache->invalidateTags(['customer'])) {
+                throw new RuntimeException('Failed to invalidate customer cache.');
+            }
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Failed to invalidate customer cache: ' . $exception->getMessage(),
+                0,
+                $exception
+            );
+        }
     }
 }

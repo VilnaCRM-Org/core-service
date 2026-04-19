@@ -15,7 +15,7 @@ final class RequestBodySchemaRefUpdater
     ) {
     }
 
-    public function update(Operation $operation): Operation
+    public function update(Operation $operation, string $schemaRef): Operation
     {
         $requestBody = $operation->getRequestBody();
         $content = $requestBody?->getContent();
@@ -24,7 +24,7 @@ final class RequestBodySchemaRefUpdater
             return $operation;
         }
 
-        $updatedContent = $this->contentUpdater->update($content);
+        $updatedContent = $this->contentUpdater->update($content, $schemaRef);
 
         return $updatedContent === null
             ? $operation

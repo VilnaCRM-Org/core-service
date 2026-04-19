@@ -1,0 +1,167 @@
+[
+  {
+    "id": "rest-api/apiDocs",
+    "section": "REST API",
+    "label": "/api/docs"
+  },
+  {
+    "id": "health",
+    "section": "REST API",
+    "label": "/api/health"
+  },
+  {
+    "id": "rest-api/getCustomer",
+    "section": "REST API",
+    "label": "GET /api/customers/{id}"
+  },
+  {
+    "id": "rest-api/getCustomers",
+    "section": "REST API",
+    "label": "GET /api/customers"
+  },
+  {
+    "id": "rest-api/createCustomer",
+    "section": "REST API",
+    "label": "POST /api/customers"
+  },
+  {
+    "id": "rest-api/updateCustomer",
+    "section": "REST API",
+    "label": "PATCH /api/customers/{id}"
+  },
+  {
+    "id": "rest-api/replaceCustomer",
+    "section": "REST API",
+    "label": "PUT /api/customers/{id}"
+  },
+  {
+    "id": "rest-api/deleteCustomer",
+    "section": "REST API",
+    "label": "DELETE /api/customers/{id}"
+  },
+  {
+    "id": "rest-api/getCustomerType",
+    "section": "REST API",
+    "label": "GET /api/customer_types/{id}"
+  },
+  {
+    "id": "rest-api/getCustomerTypes",
+    "section": "REST API",
+    "label": "GET /api/customer_types"
+  },
+  {
+    "id": "rest-api/createCustomerType",
+    "section": "REST API",
+    "label": "POST /api/customer_types"
+  },
+  {
+    "id": "rest-api/updateCustomerType",
+    "section": "REST API",
+    "label": "PATCH /api/customer_types/{id}"
+  },
+  {
+    "id": "rest-api/deleteCustomerType",
+    "section": "REST API",
+    "label": "DELETE /api/customer_types/{id}"
+  },
+  {
+    "id": "rest-api/getCustomerStatus",
+    "section": "REST API",
+    "label": "GET /api/customer_statuses/{id}"
+  },
+  {
+    "id": "rest-api/getCustomerStatuses",
+    "section": "REST API",
+    "label": "GET /api/customer_statuses"
+  },
+  {
+    "id": "rest-api/createCustomerStatus",
+    "section": "REST API",
+    "label": "POST /api/customer_statuses"
+  },
+  {
+    "id": "rest-api/updateCustomerStatus",
+    "section": "REST API",
+    "label": "PATCH /api/customer_statuses/{id}"
+  },
+  {
+    "id": "rest-api/deleteCustomerStatus",
+    "section": "REST API",
+    "label": "DELETE /api/customer_statuses/{id}"
+  },
+  {
+    "id": "graphql/graphQLGetCustomer",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomer"
+  },
+  {
+    "id": "graphql/graphQLGetCustomers",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomers"
+  },
+  {
+    "id": "graphql/graphQLCreateCustomer",
+    "section": "GraphQL",
+    "label": "GraphQL createCustomer"
+  },
+  {
+    "id": "graphql/graphQLUpdateCustomer",
+    "section": "GraphQL",
+    "label": "GraphQL updateCustomer"
+  },
+  {
+    "id": "graphql/graphQLDeleteCustomer",
+    "section": "GraphQL",
+    "label": "GraphQL deleteCustomer"
+  },
+  {
+    "id": "graphql/graphQLGetCustomerType",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomerType"
+  },
+  {
+    "id": "graphql/graphQLGetCustomerTypes",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomerTypes"
+  },
+  {
+    "id": "graphql/graphQLCreateCustomerType",
+    "section": "GraphQL",
+    "label": "GraphQL createCustomerType"
+  },
+  {
+    "id": "graphql/graphQLUpdateCustomerType",
+    "section": "GraphQL",
+    "label": "GraphQL updateCustomerType"
+  },
+  {
+    "id": "graphql/graphQLDeleteCustomerType",
+    "section": "GraphQL",
+    "label": "GraphQL deleteCustomerType"
+  },
+  {
+    "id": "graphql/graphQLGetCustomerStatus",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomerStatus"
+  },
+  {
+    "id": "graphql/graphQLGetCustomerStatuses",
+    "section": "GraphQL",
+    "label": "GraphQL getCustomerStatuses"
+  },
+  {
+    "id": "graphql/graphQLCreateCustomerStatus",
+    "section": "GraphQL",
+    "label": "GraphQL createCustomerStatus"
+  },
+  {
+    "id": "graphql/graphQLUpdateCustomerStatus",
+    "section": "GraphQL",
+    "label": "GraphQL updateCustomerStatus"
+  },
+  {
+    "id": "graphql/graphQLDeleteCustomerStatus",
+    "section": "GraphQL",
+    "label": "GraphQL deleteCustomerStatus"
+  }
+]

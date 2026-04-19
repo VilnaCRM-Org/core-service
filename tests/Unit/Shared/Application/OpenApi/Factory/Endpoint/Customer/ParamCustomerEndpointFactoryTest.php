@@ -12,7 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\Customer\ParamCustomerEndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\ReplaceCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
@@ -33,11 +33,12 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
     private BadRequestResponseFactory $badRequestResponseFactory;
     private CustomerNotFoundResponseFactory $customerNotFoundFactory;
     private CustomerDeletedResponseFactory $deletedResponseFactory;
-    private CreateCustomerRequestFactory $replaceCustomerRequestFactory;
+    private ReplaceCustomerRequestFactory $replaceCustomerRequestFactory;
     private InternalErrorFactory $internalErrorFactory;
     private ForbiddenResponseFactory $forbiddenResponseFactory;
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
     private Parameter $ulidParam;
+    private Parameter $deleteUlidParam;
     private RequestBody $updateCustomerRequest;
     private RequestBody $replaceCustomerRequest;
     private Response $validResponse;
@@ -86,7 +87,7 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
         $this->deletedResponseFactory = $this
             ->createMock(CustomerDeletedResponseFactory::class);
         $this->replaceCustomerRequestFactory = $this
-            ->createMock(CreateCustomerRequestFactory::class);
+            ->createMock(ReplaceCustomerRequestFactory::class);
         $this->internalErrorFactory = $this
             ->createMock(InternalErrorFactory::class);
         $this->forbiddenResponseFactory = $this
@@ -104,6 +105,8 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
     private function setupRequestMocks(): void
     {
         $this->ulidParam = $this
+            ->createMock(Parameter::class);
+        $this->deleteUlidParam = $this
             ->createMock(Parameter::class);
         $this->updateCustomerRequest = $this
             ->createMock(RequestBody::class);
@@ -148,6 +151,8 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
     {
         $this->parameterFactory->method('getParameter')
             ->willReturn($this->ulidParam);
+        $this->parameterFactory->method('getDeleteParameter')
+            ->willReturn($this->deleteUlidParam);
         $this->updateCustomerRequestFactory->method('getRequest')
             ->willReturn($this->updateCustomerRequest);
         $this->validationErrorFactory->method('getResponse')
@@ -316,7 +321,7 @@ final class ParamCustomerEndpointFactoryTest extends UnitTestCase
     {
         $this->operationDelete->expects($this->once())
             ->method('withParameters')
-            ->with([$this->ulidParam])->willReturnSelf();
+            ->with([$this->deleteUlidParam])->willReturnSelf();
         $this->operationDelete->expects($this->once())
             ->method('withResponses')
             ->with($this->getDeleteResponses())->willReturnSelf();

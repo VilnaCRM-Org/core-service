@@ -1,0 +1,95 @@
+name: Memory safety testing
+
+on:
+  pull_request:
+    branches: ['main']
+
+permissions:
+  contents: read
+
+jobs:
+  memory-tests:
+    name: ${{ matrix.job_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job_name: Memory leak tests (dev env)
+            compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+            app_env: dev
+            app_debug: '0'
+            frankenphp_enable_watch: '0'
+            frankenphp_site_config: ''
+            frankenphp_worker_config: ''
+            soak_iterations: '2'
+            run_memory_suite: false
+          - job_name: Memory leak tests (test env)
+            compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+            app_env: test
+            app_debug: '0'
+            frankenphp_enable_watch: '0'
+            frankenphp_site_config: ''
+            frankenphp_worker_config: ''
+            soak_iterations: '3'
+            run_memory_suite: true
+          - job_name: Memory leak tests (prod env)
+            compose_file: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml
+            app_env: prod
+            app_debug: '0'
+            frankenphp_enable_watch: '0'
+            frankenphp_site_config: ''
+            frankenphp_worker_config: ''
+            soak_iterations: '2'
+            run_memory_suite: false
+    env:
+      COMPOSE_FILE: ${{ matrix.compose_file }}
+      APP_ENV: ${{ matrix.app_env }}
+      APP_DEBUG: ${{ matrix.app_debug }}
+      APP_SECRET: frankenphp-worker-mode-check
+      FRANKENPHP_ENABLE_WATCH: ${{ matrix.frankenphp_enable_watch }}
+      FRANKENPHP_SITE_CONFIG: ${{ matrix.frankenphp_site_config }}
+      FRANKENPHP_WORKER_CONFIG: ${{ matrix.frankenphp_worker_config }}
+      FRANKENPHP_LOOP_MAX: 500
+      SOAK_ITERATIONS: ${{ matrix.soak_iterations }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Start worker-mode stack
+        timeout-minutes: 15
+        run: make start
+
+      - name: Execute same-kernel memory suite
+        if: ${{ matrix.run_memory_suite }}
+        timeout-minutes: 20
+        run: make memory-tests
+
+      - name: Execute worker-mode verification
+        timeout-minutes: 35
+        run: make worker-mode-verification
+
+      - name: Copy memory coverage report to host
+        if: ${{ always() && matrix.run_memory_suite }}
+        timeout-minutes: 5
+        run: make export-memory-coverage
+
+      - name: Upload memory coverage to Codecov
+        if: ${{ always() && matrix.run_memory_suite && github.repository == github.event.pull_request.head.repo.full_name }}
+        timeout-minutes: 10
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: /tmp/memory-coverage.xml
+          flags: memory-tests
+          name: codecov-memory
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Stop worker-mode stack
+        if: always()
+        timeout-minutes: 10
+        run: make down

@@ -24,6 +24,7 @@ use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Closure;
 use Faker\Factory;
 use Faker\Generator;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use TwentytwoLabs\BehatOpenApiExtension\Context\RestContext;
 
 /**
@@ -49,6 +50,7 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         CustomerFactoryInterface $customerFactory,
         StatusFactoryInterface $statusFactory,
         TypeFactoryInterface $typeFactory,
+        TagAwareCacheInterface $customerCache,
     ) {
         $this->faker = Factory::create();
         $this->faker->addProvider(new UlidProvider($this->faker));
@@ -60,7 +62,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $customerRepository,
             $customerFactory,
             $statusFactory,
-            $typeFactory
+            $typeFactory,
+            $customerCache
         );
     }
 
@@ -360,12 +363,14 @@ final class CustomerContext implements Context, SnippetAcceptingContext
         CustomerRepositoryInterface $customerRepository,
         CustomerFactoryInterface $customerFactory,
         StatusFactoryInterface $statusFactory,
-        TypeFactoryInterface $typeFactory
+        TypeFactoryInterface $typeFactory,
+        TagAwareCacheInterface $customerCache
     ): void {
         $this->entityManager = new EntityManager(
             $customerRepository,
             $statusRepository,
-            $typeRepository
+            $typeRepository,
+            $customerCache
         );
         $this->entityFactory = new TestEntityFactory(
             $typeFactory,
@@ -378,7 +383,8 @@ final class CustomerContext implements Context, SnippetAcceptingContext
             $customerRepository,
             $statusRepository,
             $typeRepository,
-            $ulidFactory
+            $ulidFactory,
+            $customerCache
         );
         $this->dateUrlMapper = new DateUrlMapper();
     }

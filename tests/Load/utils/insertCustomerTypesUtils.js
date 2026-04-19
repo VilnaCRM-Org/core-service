@@ -50,6 +50,10 @@ export default class InsertCustomerTypesUtils {
   }
 
   countTotalRequest() {
+    if (this.utils.isCLIVariableTrue('run_benchmark')) {
+      return this.countBenchmarkRequest();
+    }
+
     const requestsMap = {
       run_smoke: this.countSmokeRequest.bind(this),
       run_average: this.countAverageRequest.bind(this),
@@ -66,6 +70,22 @@ export default class InsertCustomerTypesUtils {
     }
 
     return Math.round(totalRequests * this.additionalTypesRatio);
+  }
+
+  countBenchmarkRequest() {
+    const fixturePoolSize = this.utils.getIntCLIVariable('benchmark_fixture_pool_size', 50);
+    const expectedRequests = this.utils.getIntCLIVariable(
+      'benchmark_expected_requests',
+      fixturePoolSize
+    );
+    const deleteMinFixturePool = this.utils.getIntCLIVariable(
+      'benchmark_delete_min_fixture_pool',
+      fixturePoolSize
+    );
+
+    return this.scenarioName.toLowerCase().includes('delete')
+      ? Math.max(expectedRequests, fixturePoolSize, deleteMinFixturePool)
+      : fixturePoolSize;
   }
 
   countSmokeRequest() {

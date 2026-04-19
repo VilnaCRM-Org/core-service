@@ -41,12 +41,19 @@ load 'bats-assert/load'
   assert_output --partial '--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)"'
   assert_output --partial '--coverage-format html,markdown'
   assert_output --partial '--report "$(SCHEMATHESIS_REPORT_FORMATS)"'
+  assert_output --partial 'schemathesis-output.log'
+  assert_output --partial "grep -Eq '^Warnings:'"
   refute_output --partial '--phases=examples'
 }
 
 @test "graphql-diff workflow uses GraphQL Inspector action" {
-  run sed -n '/GraphQL Inspector/,$p' .github/workflows/graphql-diff.yml
+  run cat .github/workflows/graphql-diff.yml
   assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make generate-graphql-spec'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
   assert_output --partial 'uses: kamilkisiela/graphql-inspector@91cefc9d934ccac1b4be9f26f44b6f533c300247'
   assert_output --partial "schema: '\${{ github.base_ref }}:.github/graphql-spec/spec'"
   refute_output --partial 'temporary fallback'
@@ -58,9 +65,14 @@ load 'bats-assert/load'
 }
 
 @test "openapi-diff workflow generates specs without post-export fixer scripts" {
-  run sed -n '/Generate openapi spec/,/Run OpenAPI Diff/p' .github/workflows/openapi-diff.yml
+  run cat .github/workflows/openapi-diff.yml
   assert_success
   [ -n "$output" ]
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make generate-openapi-spec'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'setup-php'
+  refute_output --partial 'composer install'
   refute_output --partial 'php scripts/fix-openapi-spec.php .github/openapi-spec/spec.yaml'
   refute_output --partial 'php ../scripts/fix-openapi-spec.php'
 }

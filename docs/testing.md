@@ -7,6 +7,7 @@ This document provides an overview of the testing strategies employed in the Cor
 - [Prerequisites](#prerequisites)
 - [Unit Testing](#unit-testing)
 - [Integration Testing](#integration-testing)
+- [Memory-Safety Testing](#memory-safety-testing)
 - [API Contract Validation](#api-contract-validation)
 - [Mutation Testing](#mutation-testing)
 - [Load Testing](#load-testing)
@@ -67,6 +68,46 @@ For integration testing, we use PHPUnit in conjunction with real database connec
 ### Execution:
 
 Run `make integration-tests` to execute the integration tests. This command ensures that all dependencies are correctly set up and that the tests are run against the configured test database and external services.
+
+## Memory-Safety Testing
+
+FrankenPHP worker mode keeps the Symfony kernel and container alive across requests, so the repository now includes a dedicated same-kernel memory-safety layer under `tests/Memory`.
+
+### What This Covers
+
+- Repeated same-kernel REST requests for:
+  - `/api/health`
+  - `/api/customers`
+  - `/api/customer_statuses`
+  - `/api/customer_types`
+- Repeated same-kernel GraphQL requests for the committed `/api/graphql` operations for customers, customer statuses, and customer types.
+- A reset-aware observability check that proves test-only metric objects do not accumulate across repeated requests.
+
+### How It Works
+
+- The suite uses `shipmonk/memory-scanner` as the primary retained-object detector for the FrankenPHP migration track.
+- Tests use BrowserKit clients with `disableReboot()` so multiple requests reuse the same kernel instead of rebuilding the full container on every request.
+- A test-only request subscriber records the Symfony main `Request` object for each handled request. The suite verifies that the previous request object is deallocated before or during the next same-kernel request cycle.
+- `BusinessMetricsEmitterSpy` now implements `ResetInterface`, so Symfony resets it through `kernel.reset` when same-kernel tests call `disableReboot()`.
+
+### Current Limitations
+
+- The application now runs through FrankenPHP worker mode in the default Docker stack, but the PHPUnit suite itself remains the primary retained-object detector because it can pinpoint specific leaked objects and reset failures.
+- The current PHPUnit stack is `10.5`, while the upstream `ObjectDeallocationCheckerKernelTestCaseTrait` from `shipmonk/memory-scanner` targets PHPUnit 11+. The repository therefore uses a local manual bridge around `ObjectDeallocationChecker` until PHPUnit is upgraded.
+- The committed repository still lacks a real authenticated route and firewall configuration, so authenticated same-kernel memory coverage remains blocked on a follow-up implementation.
+
+### Execution
+
+Run the dedicated memory suite locally or through the standalone GitHub Actions workflow:
+
+```bash
+make memory-tests
+make ci
+```
+
+GitHub Actions runs this suite through `.github/workflows/memory-tests.yml` as separate `Memory leak tests (dev env)`, `Memory leak tests (test env)`, and `Memory leak tests (prod env)` checks. The workflow boots the FrankenPHP worker stack for each environment using only `make` entrypoints, executes the object-level PHPUnit memory suite in the test-environment job, reruns the K6 smoke suite against the live worker in every environment, and fails if the memory-support helper coverage drops below 100% or if the worker memory guardrail detects sustained growth across the soak loop.
+
+The development-environment row intentionally uses `APP_ENV=dev` with `APP_DEBUG=0` and disables the `hot_reload` and `watch` helper snippets during the leak gate. Symfony allows `APP_ENV` and `APP_DEBUG` to vary independently, and this keeps the gate focused on the long-running worker contract instead of profiler/debug collectors or live-reload watchers. The workflow still covers the dev kernel and full endpoint inventory, but it does so without the development-only diagnostics that intentionally retain extra request metadata.
 
 ## API Contract Validation
 
@@ -134,7 +175,8 @@ There is a wide range of customizable options, starting with a global setting fo
 ```json
 {
   "apiHost": "localhost",
-  "apiPort": "80",
+  "apiPort": "443",
+  "apiScheme": "https",
   "delayBetweenScenarios": 60,
   "batchSize": 50,
   "resultsDirectory": "results",
@@ -143,7 +185,7 @@ There is a wide range of customizable options, starting with a global setting fo
 }
 ```
 
-**Note:** Update `apiHost` with your actual domain when running load tests against production or staging environments.
+**Note:** Update `apiHost` with your actual domain when running load tests against production or staging environments. Local FrankenPHP runs use HTTPS with the self-signed development certificate, so the bundled K6 scenarios keep TLS verification disabled for that local-only path.
 
 Also, you can customize plenty of options for each separate script, and even for each load type. Here is an example:
 

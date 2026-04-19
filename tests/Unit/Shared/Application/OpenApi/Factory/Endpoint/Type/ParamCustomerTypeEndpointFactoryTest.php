@@ -39,6 +39,7 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
     private UnauthorizedResponseFactory $unauthorizedResponseFactory;
 
     private Parameter $ulidParam;
+    private Parameter $deleteUlidParam;
     private RequestBody $updateRequest;
     private RequestBody $replaceRequest;
     private Response $validResponse;
@@ -106,6 +107,7 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
     private function setupRequestMocks(): void
     {
         $this->ulidParam = $this->createMock(Parameter::class);
+        $this->deleteUlidParam = $this->createMock(Parameter::class);
         $this->updateRequest = $this->createMock(RequestBody::class);
         $this->replaceRequest = $this->createMock(RequestBody::class);
     }
@@ -149,6 +151,8 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
     {
         $this->parameterFactory->method('getParameter')
             ->willReturn($this->ulidParam);
+        $this->parameterFactory->method('getDeleteParameter')
+            ->willReturn($this->deleteUlidParam);
         $this->updateFactory->method('getRequest')
             ->willReturn($this->updateRequest);
         $this->replaceFactory->method('getRequest')
@@ -274,7 +278,7 @@ final class ParamCustomerTypeEndpointFactoryTest extends UnitTestCase
             ->willReturn($this->operationDelete);
         $this->operationDelete->expects($this->once())
             ->method('withParameters')
-            ->with([$this->ulidParam])->willReturnSelf();
+            ->with([$this->deleteUlidParam])->willReturnSelf();
         $expectedDelete = $this->getDeleteExpectedResponses();
         $this->operationDelete->expects($this->once())
             ->method('withResponses')
