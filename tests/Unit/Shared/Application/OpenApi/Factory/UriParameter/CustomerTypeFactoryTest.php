@@ -57,7 +57,11 @@ final class CustomerTypeFactoryTest extends UnitTestCase
                 'CustomerType identifier',
                 true,
                 SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
-                'string'
+                'string',
+                [
+                    SchemathesisFixtures::CUSTOMER_TYPE_ID,
+                    SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
+                ]
             )
             ->willReturn($this->expectedParameter);
     }

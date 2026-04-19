@@ -6,16 +6,16 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Factory\Request\Customer;
 
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Shared\Application\Fixture\SchemathesisFixtures;
-use App\Shared\Application\OpenApi\Builder\RequestPatchBuilder;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Builder\RequestBuilder;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\ReplaceCustomerRequestFactory;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
 use App\Tests\Unit\UnitTestCase;
 
-final class UpdateFactoryTest extends UnitTestCase
+final class ReplaceFactoryTest extends UnitTestCase
 {
     public function testGetRequest(): void
     {
-        $requestBuilderMock = $this->createMock(RequestPatchBuilder::class);
+        $requestBuilderMock = $this->createMock(RequestBuilder::class);
 
         $requestBuilderMock->expects($this->once())
             ->method('build')
@@ -33,16 +33,17 @@ final class UpdateFactoryTest extends UnitTestCase
                     $indexed[$parameter->name] = $parameter->example;
                 }
 
-                return isset($indexed['email'], $indexed['type'], $indexed['status'])
-                    && $indexed['email'] === SchemathesisFixtures::UPDATE_REQUEST_CUSTOMER_EMAIL
-                    && $indexed['type'] === '/api/customer_types/' . SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID
-                    && $indexed['status'] === '/api/customer_statuses/' . SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID;
+                return isset($indexed['email'], $indexed['initials'], $indexed['phone'], $indexed['leadSource'])
+                    && $indexed['email'] === SchemathesisFixtures::REPLACE_REQUEST_CUSTOMER_EMAIL
+                    && $indexed['initials'] === SchemathesisFixtures::REPLACE_CUSTOMER_INITIALS
+                    && $indexed['phone'] === SchemathesisFixtures::REPLACE_CUSTOMER_PHONE
+                    && $indexed['leadSource'] === SchemathesisFixtures::REPLACE_CUSTOMER_LEAD_SOURCE;
             }))
             ->willReturn($this->createMock(RequestBody::class));
 
-        $updateFactory = new UpdateCustomerRequestFactory($requestBuilderMock);
+        $replaceFactory = new ReplaceCustomerRequestFactory($requestBuilderMock);
 
-        $requestBody = $updateFactory->getRequest();
+        $requestBody = $replaceFactory->getRequest();
 
         $this->assertInstanceOf(RequestBody::class, $requestBody);
     }

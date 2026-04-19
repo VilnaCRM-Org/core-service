@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\Processor;
 
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\Fixture\SchemathesisFixtures;
 use ArrayObject;
 
 /**
@@ -12,9 +13,73 @@ use ArrayObject;
  */
 final class OpenApiInputSchemaUpdater
 {
-    private const REQUIRED_NON_NULLABLE_PROPERTIES = [
-        'Customer.CustomerCreate' => 'confirmed',
-        'CustomerType.TypeCreate' => 'value',
+    private const CUSTOMER_TYPE_IRIS = [
+        '/api/customer_types/' . SchemathesisFixtures::CUSTOMER_TYPE_ID,
+        '/api/customer_types/' . SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
+    ];
+
+    private const CUSTOMER_STATUS_IRIS = [
+        '/api/customer_statuses/' . SchemathesisFixtures::CUSTOMER_STATUS_ID,
+        '/api/customer_statuses/' . SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
+    ];
+
+    private const INPUT_PROPERTY_SCHEMA_UPDATES = [
+        'Customer.CustomerCreate' => [
+            'initials' => ['minLength' => 1],
+            'email' => ['minLength' => 1],
+            'phone' => ['minLength' => 1],
+            'leadSource' => ['minLength' => 1],
+            'type' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_TYPE_IRIS,
+            ],
+            'status' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_STATUS_IRIS,
+            ],
+            'confirmed' => [],
+        ],
+        'Customer.CustomerPatch.jsonMergePatch' => [
+            'type' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_TYPE_IRIS,
+            ],
+            'status' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_STATUS_IRIS,
+            ],
+        ],
+        'Customer.CustomerPut' => [
+            'initials' => ['minLength' => 1],
+            'email' => ['minLength' => 1],
+            'phone' => ['minLength' => 1],
+            'leadSource' => ['minLength' => 1],
+            'type' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_TYPE_IRIS,
+            ],
+            'status' => [
+                'format' => 'iri-reference',
+                'enum' => self::CUSTOMER_STATUS_IRIS,
+            ],
+            'confirmed' => [],
+        ],
+        'CustomerStatus.StatusCreate' => [
+            'value' => ['minLength' => 1],
+        ],
+        'CustomerStatus.StatusPut' => [
+            'value' => ['minLength' => 1],
+        ],
+        'CustomerType.TypeCreate' => [
+            'value' => ['minLength' => 1],
+        ],
+        'CustomerType.TypePut' => [
+            'value' => ['minLength' => 1],
+        ],
+    ];
+
+    private const REQUIRED_PROPERTIES_TO_ENFORCE = [
+        'Customer.CustomerPut' => ['confirmed'],
     ];
 
     public function __construct(
@@ -46,10 +111,17 @@ final class OpenApiInputSchemaUpdater
         $updatedSchemas = $schemas->getArrayCopy();
         $changed = false;
 
-        foreach (self::REQUIRED_NON_NULLABLE_PROPERTIES as $schemaName => $propertyName) {
-            $updatedSchema = $this->propertyUpdater->update(
-                SchemaNormalizer::normalize($updatedSchemas[$schemaName] ?? []),
-                $propertyName
+        foreach (self::INPUT_PROPERTY_SCHEMA_UPDATES as $schemaName => $propertySchemaUpdates) {
+            $schema = SchemaNormalizer::normalize($updatedSchemas[$schemaName] ?? []);
+
+            if ($schema === []) {
+                continue;
+            }
+
+            $updatedSchema = $this->updatedSchema(
+                $schemaName,
+                $schema,
+                $propertySchemaUpdates
             );
 
             if ($updatedSchema === null) {
@@ -63,5 +135,152 @@ final class OpenApiInputSchemaUpdater
         return $changed
             ? $updatedSchemas
             : null;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<string, array<string, SchemaValue>> $propertySchemaUpdates
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function updatedSchema(
+        string $schemaName,
+        array $schema,
+        array $propertySchemaUpdates
+    ): ?array {
+        $updatedSchema = $schema;
+        $changed = false;
+
+        $schemaWithRequiredProperties = $this->ensureRequiredProperties(
+            $updatedSchema,
+            self::REQUIRED_PROPERTIES_TO_ENFORCE[$schemaName] ?? []
+        );
+
+        if ($schemaWithRequiredProperties !== null) {
+            $updatedSchema = $schemaWithRequiredProperties;
+            $changed = true;
+        }
+
+        foreach ($propertySchemaUpdates as $propertyName => $schemaPatch) {
+            $nonNullableSchema = $this->propertyUpdater->update($updatedSchema, $propertyName);
+
+            if ($nonNullableSchema !== null) {
+                $updatedSchema = $nonNullableSchema;
+                $changed = true;
+            }
+
+            $patchedSchema = $this->mergePropertySchemaPatch(
+                $updatedSchema,
+                $propertyName,
+                $schemaPatch
+            );
+
+            if ($patchedSchema === null) {
+                continue;
+            }
+
+            $updatedSchema = $patchedSchema;
+            $changed = true;
+        }
+
+        return $changed
+            ? $updatedSchema
+            : null;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<int, string> $requiredProperties
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function ensureRequiredProperties(
+        array $schema,
+        array $requiredProperties
+    ): ?array {
+        if ($requiredProperties === []) {
+            return null;
+        }
+
+        $currentRequiredProperties = SchemaNormalizer::normalize($schema['required'] ?? []);
+
+        if (array_diff($requiredProperties, $currentRequiredProperties) === []) {
+            return null;
+        }
+
+        $schema['required'] = array_values(
+            array_unique([
+                ...$currentRequiredProperties,
+                ...$requiredProperties,
+            ])
+        );
+
+        return $schema;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<string, SchemaValue> $schemaPatch
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function mergePropertySchemaPatch(
+        array $schema,
+        string $propertyName,
+        array $schemaPatch
+    ): ?array {
+        if ($schemaPatch === []) {
+            return null;
+        }
+
+        $properties = SchemaNormalizer::normalize($schema['properties'] ?? []);
+        $propertySchema = SchemaNormalizer::normalize($properties[$propertyName] ?? []);
+
+        if ($propertySchema === []) {
+            return null;
+        }
+
+        if (! $this->supportsPropertySchemaPatch($propertySchema, $schemaPatch)) {
+            return null;
+        }
+
+        $updatedPropertySchema = array_replace($propertySchema, $schemaPatch);
+
+        if ($updatedPropertySchema === $propertySchema) {
+            return null;
+        }
+
+        $properties[$propertyName] = $updatedPropertySchema;
+        $schema['properties'] = $properties;
+
+        return $schema;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $propertySchema
+     * @param array<string, SchemaValue> $schemaPatch
+     */
+    private function supportsPropertySchemaPatch(
+        array $propertySchema,
+        array $schemaPatch
+    ): bool {
+        $stringSpecificKeywords = ['minLength', 'format', 'enum'];
+
+        if (array_intersect($stringSpecificKeywords, array_keys($schemaPatch)) === []) {
+            return true;
+        }
+
+        $type = $propertySchema['type'] ?? null;
+
+        if ($type === 'string') {
+            return true;
+        }
+
+        if (! \is_array($type)) {
+            return false;
+        }
+
+        return \in_array('string', $type, true)
+            && array_diff($type, ['string', 'null']) === [];
     }
 }

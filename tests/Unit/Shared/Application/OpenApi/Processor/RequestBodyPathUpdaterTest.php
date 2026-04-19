@@ -7,14 +7,14 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Shared\Application\OpenApi\Processor\CustomerTypeRequestBodyPathUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodyContentSchemaRefUpdater;
+use App\Shared\Application\OpenApi\Processor\RequestBodyPathUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodySchemaRefDefinitionUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodySchemaRefUpdater;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
-final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
+final class RequestBodyPathUpdaterTest extends UnitTestCase
 {
     public function testUpdateReplacesInlineRequestBodySchemasWithComponentRefs(): void
     {
@@ -37,7 +37,9 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
             )
         );
 
-        $updated = $this->createUpdater()->update($pathItem);
+        $updated = $this->createUpdater()->update($pathItem, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ]);
         $content = $updated->getPost()?->getRequestBody()?->getContent();
 
         self::assertInstanceOf(ArrayObject::class, $content);
@@ -51,10 +53,12 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
         );
     }
 
-    public function testUpdateLeavesNonPostAndAlreadyNormalizedDefinitionsUntouched(): void
+    public function testUpdateLeavesUnknownOperationsAndNormalizedDefinitionsUntouched(): void
     {
         $getOnly = (new PathItem())->withGet(new Operation());
-        self::assertSame($getOnly, $this->createUpdater()->update($getOnly));
+        self::assertSame($getOnly, $this->createUpdater()->update($getOnly, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ]));
 
         $pathItem = (new PathItem())->withPost(
             new Operation(
@@ -70,7 +74,9 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
             )
         );
 
-        self::assertSame($pathItem, $this->createUpdater()->update($pathItem));
+        self::assertSame($pathItem, $this->createUpdater()->update($pathItem, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ]));
     }
 
     public function testUpdateLeavesOperationsWithoutRenderableRequestBodiesUntouched(): void
@@ -78,7 +84,9 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
         $withoutRequestBody = (new PathItem())->withPost(new Operation());
         self::assertSame(
             $withoutRequestBody,
-            $this->createUpdater()->update($withoutRequestBody)
+            $this->createUpdater()->update($withoutRequestBody, [
+                'Post' => '#/components/schemas/CustomerType.TypeCreate',
+            ])
         );
 
         $withoutContent = (new PathItem())->withPost(
@@ -86,7 +94,9 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
         );
         self::assertSame(
             $withoutContent,
-            $this->createUpdater()->update($withoutContent)
+            $this->createUpdater()->update($withoutContent, [
+                'Post' => '#/components/schemas/CustomerType.TypeCreate',
+            ])
         );
     }
 
@@ -102,10 +112,12 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
             )
         );
 
-        self::assertSame($pathItem, $this->createUpdater()->update($pathItem));
+        self::assertSame($pathItem, $this->createUpdater()->update($pathItem, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ]));
     }
 
-    public function testUpdateContinuesPastNonArrayContentDefinitions(): void
+    public function testUpdateContinuesPastMixedContentDefinitions(): void
     {
         $pathItem = (new PathItem())->withPost(
             new Operation(
@@ -125,7 +137,9 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
             )
         );
 
-        $updated = $this->createUpdater()->update($pathItem);
+        $updated = $this->createUpdater()->update($pathItem, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ]);
         $content = $updated->getPost()?->getRequestBody()?->getContent();
 
         self::assertInstanceOf(ArrayObject::class, $content);
@@ -136,47 +150,50 @@ final class CustomerTypeRequestBodyPathUpdaterTest extends UnitTestCase
         self::assertInstanceOf(ArrayObject::class, $content['application/problem+json']);
     }
 
-    public function testUpdateContinuesPastAlreadyNormalizedContentDefinitions(): void
+    public function testUpdateCanApplyDifferentRefsPerOperation(): void
     {
-        $pathItem = (new PathItem())->withPost(
-            new Operation(
-                requestBody: new RequestBody(
-                    content: new ArrayObject([
-                        'application/problem+json' => [
-                            'schema' => [
-                                '$ref' => '#/components/schemas/CustomerType.TypeCreate',
+        $pathItem = (new PathItem())
+            ->withPut(
+                new Operation(
+                    requestBody: new RequestBody(
+                        content: new ArrayObject([
+                            'application/ld+json' => [
+                                'schema' => ['type' => 'object'],
                             ],
-                        ],
-                        'application/ld+json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'value' => ['type' => 'string'],
-                                ],
-                            ],
-                        ],
-                    ])
+                        ])
+                    )
                 )
             )
-        );
+            ->withPatch(
+                new Operation(
+                    requestBody: new RequestBody(
+                        content: new ArrayObject([
+                            'application/merge-patch+json' => [
+                                'schema' => ['type' => 'object'],
+                            ],
+                        ])
+                    )
+                )
+            );
 
-        $updated = $this->createUpdater()->update($pathItem);
-        $content = $updated->getPost()?->getRequestBody()?->getContent();
+        $updated = $this->createUpdater()->update($pathItem, [
+            'Put' => '#/components/schemas/CustomerType.TypePut',
+            'Patch' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch',
+        ]);
 
-        self::assertInstanceOf(ArrayObject::class, $content);
         self::assertSame(
-            ['$ref' => '#/components/schemas/CustomerType.TypeCreate'],
-            $content['application/problem+json']['schema']
+            ['$ref' => '#/components/schemas/CustomerType.TypePut'],
+            $updated->getPut()?->getRequestBody()?->getContent()['application/ld+json']['schema']
         );
         self::assertSame(
-            ['$ref' => '#/components/schemas/CustomerType.TypeCreate'],
-            $content['application/ld+json']['schema']
+            ['$ref' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch'],
+            $updated->getPatch()?->getRequestBody()?->getContent()['application/merge-patch+json']['schema']
         );
     }
 
-    private function createUpdater(): CustomerTypeRequestBodyPathUpdater
+    private function createUpdater(): RequestBodyPathUpdater
     {
-        return new CustomerTypeRequestBodyPathUpdater(
+        return new RequestBodyPathUpdater(
             new RequestBodySchemaRefUpdater(
                 new RequestBodyContentSchemaRefUpdater(
                     new RequestBodySchemaRefDefinitionUpdater()

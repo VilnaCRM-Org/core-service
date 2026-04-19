@@ -13,14 +13,25 @@ final class UriParameterBuilder
         string $description,
         bool $required,
         string $example,
-        string $type
+        string $type,
+        ?array $enum = null
     ): Parameter {
+        $schema = [
+            'type' => $type,
+            'default' => $example,
+            'example' => $example,
+        ];
+
+        if (\is_array($enum) && $enum !== []) {
+            $schema['enum'] = $enum;
+        }
+
         return new Parameter(
             name: $name,
             in: 'path',
             description: $description,
             required: $required,
-            schema: ['type' => $type, 'example' => $example],
+            schema: $schema,
             example: $example
         );
     }

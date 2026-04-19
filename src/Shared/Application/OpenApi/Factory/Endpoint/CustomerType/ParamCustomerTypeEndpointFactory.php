@@ -25,7 +25,8 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customer_types/{ulid}';
 
-    private Parameter $ulidWithExamplePathParam;
+    private Parameter $ulidPathParam;
+    private Parameter $deleteUlidPathParam;
 
     private RequestBody $updateCustomerTypeRequest;
     private Response $validationResp;
@@ -49,8 +50,10 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
         ForbiddenResponseFactory $forbiddenResponseFactory,
         UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->ulidWithExamplePathParam =
+        $this->ulidPathParam =
             $parameterFactory->getParameter();
+        $this->deleteUlidPathParam =
+            $parameterFactory->getDeleteParameter();
 
         $this->updateCustomerTypeRequest =
             $updateCustomerTypeRequestFactory->getRequest();
@@ -94,7 +97,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Patch',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getUpdateResponses(),
             $this->updateCustomerTypeRequest
         );
@@ -106,7 +109,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Put',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getUpdateResponses(),
             $this->replaceCustomerTypeRequest
         );
@@ -118,7 +121,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Delete',
-            [$this->ulidWithExamplePathParam],
+            [$this->deleteUlidPathParam],
             $this->getDeleteResponses()
         );
     }
@@ -129,7 +132,7 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Get',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getGetResponses()
         );
     }

@@ -41,6 +41,8 @@ load 'bats-assert/load'
   assert_output --partial '--exclude-checks "$(SCHEMATHESIS_EXCLUDED_CHECKS)"'
   assert_output --partial '--coverage-format html,markdown'
   assert_output --partial '--report "$(SCHEMATHESIS_REPORT_FORMATS)"'
+  assert_output --partial 'schemathesis-output.log'
+  assert_output --partial "grep -Eq '^Warnings:'"
   refute_output --partial '--phases=examples'
 }
 

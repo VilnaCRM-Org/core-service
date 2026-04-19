@@ -8,7 +8,7 @@ use App\Shared\Application\Fixture\SchemathesisFixtures;
 use App\Shared\Application\OpenApi\Builder\RequestBuilderInterface;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
 
-final class UpdateCustomerRequestFactory extends CustomerRequestFactory
+final class ReplaceCustomerRequestFactory extends CustomerRequestFactory
 {
     public function __construct(private RequestBuilderInterface $requestBuilder)
     {
@@ -19,21 +19,12 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         return $this->requestBuilder;
     }
 
-    protected function getConfirmedParam(): Parameter
-    {
-        return Parameter::optional(
-            'confirmed',
-            'boolean',
-            true
-        );
-    }
-
     protected function getEmailParam(): Parameter
     {
-        return Parameter::optional(
+        return new Parameter(
             'email',
             'string',
-            SchemathesisFixtures::UPDATE_REQUEST_CUSTOMER_EMAIL,
+            SchemathesisFixtures::REPLACE_REQUEST_CUSTOMER_EMAIL,
             255,
             'email'
         );
@@ -41,50 +32,30 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
 
     protected function getPhoneParam(): Parameter
     {
-        return Parameter::optional(
+        return new Parameter(
             'phone',
             'string',
-            '0123456789',
+            SchemathesisFixtures::REPLACE_CUSTOMER_PHONE,
             255
         );
     }
 
     protected function getLeadSourceParam(): Parameter
     {
-        return Parameter::optional(
+        return new Parameter(
             'leadSource',
             'string',
-            'Google',
-            255
-        );
-    }
-
-    protected function getTypeParam(): Parameter
-    {
-        return Parameter::optional(
-            'type',
-            'iri-reference',
-            '/api/customer_types/' . SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
-            255
-        );
-    }
-
-    protected function getStatusParam(): Parameter
-    {
-        return Parameter::optional(
-            'status',
-            'iri-reference',
-            '/api/customer_statuses/' . SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
+            SchemathesisFixtures::REPLACE_CUSTOMER_LEAD_SOURCE,
             255
         );
     }
 
     protected function getInitialsParam(): Parameter
     {
-        return Parameter::optional(
+        return new Parameter(
             'initials',
             'string',
-            'Name Surname',
+            SchemathesisFixtures::REPLACE_CUSTOMER_INITIALS,
             255
         );
     }

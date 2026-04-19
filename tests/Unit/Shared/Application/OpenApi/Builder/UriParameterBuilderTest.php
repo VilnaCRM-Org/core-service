@@ -40,7 +40,14 @@ final class UriParameterBuilderTest extends UnitTestCase
         $this->assertEquals('path', $parameter->getIn());
         $this->assertEquals($description, $parameter->getDescription());
         $this->assertEquals($required, $parameter->getRequired());
-        $this->assertEquals(['type' => $type, 'example' => $example], $parameter->getSchema());
+        $this->assertEquals(
+            [
+                'type' => $type,
+                'default' => $example,
+                'example' => $example,
+            ],
+            $parameter->getSchema()
+        );
         $this->assertEquals($example, $parameter->getExample());
     }
 
@@ -65,7 +72,39 @@ final class UriParameterBuilderTest extends UnitTestCase
         $this->assertEquals('path', $parameter->getIn());
         $this->assertEquals($description, $parameter->getDescription());
         $this->assertFalse($parameter->getRequired());
-        $this->assertEquals(['type' => $type, 'example' => $example], $parameter->getSchema());
+        $this->assertEquals(
+            [
+                'type' => $type,
+                'default' => $example,
+                'example' => $example,
+            ],
+            $parameter->getSchema()
+        );
         $this->assertEquals($example, $parameter->getExample());
+    }
+
+    public function testBuildIncludesAllowedEnumValuesWhenProvided(): void
+    {
+        $example = $this->faker->word();
+        $enum = [$example, $this->faker->word()];
+
+        $parameter = $this->builder->build(
+            'ulid',
+            'A constrained identifier',
+            true,
+            $example,
+            'string',
+            $enum
+        );
+
+        $this->assertEquals(
+            [
+                'type' => 'string',
+                'default' => $example,
+                'example' => $example,
+                'enum' => $enum,
+            ],
+            $parameter->getSchema()
+        );
     }
 }

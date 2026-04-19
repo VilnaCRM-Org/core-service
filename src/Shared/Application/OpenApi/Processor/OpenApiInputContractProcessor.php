@@ -10,11 +10,33 @@ use App\Shared\Application\OpenApi\Mapper\PathsMapper;
 
 final class OpenApiInputContractProcessor implements OpenApiProcessorInterface
 {
-    private const CUSTOMER_TYPES_PATH = '/api/customer_types';
+    private const INPUT_REQUEST_BODY_SCHEMA_REFS = [
+        '/api/customers' => [
+            'Post' => '#/components/schemas/Customer.CustomerCreate',
+        ],
+        '/api/customers/{ulid}' => [
+            'Put' => '#/components/schemas/Customer.CustomerPut',
+            'Patch' => '#/components/schemas/Customer.CustomerPatch.jsonMergePatch',
+        ],
+        '/api/customer_statuses' => [
+            'Post' => '#/components/schemas/CustomerStatus.StatusCreate',
+        ],
+        '/api/customer_statuses/{ulid}' => [
+            'Put' => '#/components/schemas/CustomerStatus.StatusPut',
+            'Patch' => '#/components/schemas/CustomerStatus.StatusPatch.jsonMergePatch',
+        ],
+        '/api/customer_types' => [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+        ],
+        '/api/customer_types/{ulid}' => [
+            'Put' => '#/components/schemas/CustomerType.TypePut',
+            'Patch' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch',
+        ],
+    ];
 
     public function __construct(
         private readonly OpenApiInputSchemaUpdater $schemaUpdater,
-        private readonly CustomerTypeRequestBodyPathUpdater $pathUpdater
+        private readonly RequestBodyPathUpdater $pathUpdater
     ) {
     }
 
@@ -24,8 +46,13 @@ final class OpenApiInputContractProcessor implements OpenApiProcessorInterface
 
         return PathsMapper::map(
             $openApi,
-            fn (PathItem $pathItem, string $path): PathItem => $path === self::CUSTOMER_TYPES_PATH
-                ? $this->pathUpdater->update($pathItem)
+            fn (PathItem $pathItem, string $path): PathItem => \is_array(
+                self::INPUT_REQUEST_BODY_SCHEMA_REFS[$path] ?? null
+            )
+                ? $this->pathUpdater->update(
+                    $pathItem,
+                    self::INPUT_REQUEST_BODY_SCHEMA_REFS[$path]
+                )
                 : $pathItem
         );
     }

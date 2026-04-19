@@ -57,7 +57,11 @@ final class CustomerStatusFactoryTest extends TestCase
                 'CustomerStatus identifier',
                 true,
                 SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
-                'string'
+                'string',
+                [
+                    SchemathesisFixtures::CUSTOMER_STATUS_ID,
+                    SchemathesisFixtures::UPDATE_CUSTOMER_STATUS_ID,
+                ]
             )
             ->willReturn($this->expectedParameter);
     }

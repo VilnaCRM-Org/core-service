@@ -270,6 +270,10 @@ services:
     arguments:
       $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
 
+  App\Shared\Application\OpenApi\Factory\Request\Customer\ReplaceCustomerRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
   App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory:
     arguments:
       $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestPatchBuilder'

@@ -22,14 +22,45 @@ final class CustomerFactoryTest extends UnitTestCase
 
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
         $this->setupExpectedParameter();
-        $this->setupParameterBuilderMock();
         $this->factory = new CustomerUlidParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
     {
+        $this->setupParameterBuilderMock();
+
         $actualParameter = $this->factory->getParameter();
         $this->assertSame($this->expectedParameter, $actualParameter);
+    }
+
+    public function testGetDeleteParameterReturnsDedicatedDeleteIdentifier(): void
+    {
+        $deleteParameter = new Parameter(
+            'ulid',
+            'query',
+            'Customer identifier',
+            true,
+            false,
+            false,
+            [
+                'default' => SchemathesisFixtures::DELETE_CUSTOMER_ID,
+                'type' => 'string',
+            ]
+        );
+
+        $this->parameterBuilder->expects($this->once())
+            ->method('build')
+            ->with(
+                'ulid',
+                'Customer identifier',
+                true,
+                SchemathesisFixtures::DELETE_CUSTOMER_ID,
+                'string',
+                [SchemathesisFixtures::DELETE_CUSTOMER_ID]
+            )
+            ->willReturn($deleteParameter);
+
+        $this->assertSame($deleteParameter, $this->factory->getDeleteParameter());
     }
 
     private function setupExpectedParameter(): void
@@ -57,7 +88,13 @@ final class CustomerFactoryTest extends UnitTestCase
                 'Customer identifier',
                 true,
                 SchemathesisFixtures::UPDATE_CUSTOMER_ID,
-                'string'
+                'string',
+                [
+                    SchemathesisFixtures::CUSTOMER_ID,
+                    SchemathesisFixtures::UPDATE_CUSTOMER_ID,
+                    SchemathesisFixtures::REPLACE_CUSTOMER_ID,
+                    SchemathesisFixtures::GET_CUSTOMER_ID,
+                ]
             )
             ->willReturn($this->expectedParameter);
     }

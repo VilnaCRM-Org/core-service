@@ -17,4 +17,20 @@ final class CustomerTypeUlidParameterFactory extends UlidParameterFactory
     {
         return SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID;
     }
+
+    protected function getDeleteUlid(): string
+    {
+        return SchemathesisFixtures::DELETE_CUSTOMER_TYPE_ID;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function getAllowedUlids(): array
+    {
+        return [
+            SchemathesisFixtures::CUSTOMER_TYPE_ID,
+            SchemathesisFixtures::UPDATE_CUSTOMER_TYPE_ID,
+        ];
+    }
 }

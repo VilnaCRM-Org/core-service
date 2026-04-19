@@ -88,6 +88,17 @@ final class CustomerApiTest extends BaseApiCase
         $this->verifyCustomerUpdate($iri, $updatedPayload);
     }
 
+    public function testReplaceCustomerWithExistingOwnEmail(): void
+    {
+        $payload = $this->getCustomer('Replace Same Email');
+        $iri = $this->createEntity('/api/customers', $payload);
+        $updatedPayload = $this->getUpdatedCustomerPayload();
+        $updatedPayload['email'] = $payload['email'];
+
+        $this->updateCustomer($iri, $updatedPayload);
+        $this->verifyCustomerUpdate($iri, $updatedPayload);
+    }
+
     public function testReplaceCustomerFailure(): void
     {
         $payload = $this->getCustomer('Missing Email');
@@ -155,6 +166,25 @@ final class CustomerApiTest extends BaseApiCase
         $this->assertResponseIsSuccessful();
         $data = (self::createClient()->request('GET', $iri))->toArray();
         $this->assertSame($patch['email'], $data['email']);
+    }
+
+    public function testPatchCustomerWithExistingOwnEmail(): void
+    {
+        $payload = $this->getCustomer('Patch Same Email');
+        $iri = $this->createEntity('/api/customers', $payload);
+        $patch = ['email' => $payload['email']];
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode($patch),
+            ]
+        );
+        $this->assertResponseIsSuccessful();
+        $data = (self::createClient()->request('GET', $iri))->toArray();
+        $this->assertSame($payload['email'], $data['email']);
     }
 
     public function testPatchCustomerFailure(): void
@@ -808,6 +838,26 @@ final class CustomerApiTest extends BaseApiCase
         $this->assertResponseStatusCodeSame(400);
         $this->assertStringContainsString(
             'The input data is misformatted.',
+            $error['detail']
+        );
+    }
+
+    public function testReplaceCustomerWithNullConfirmed(): void
+    {
+        $payload = $this->getCustomer();
+        $payload['confirmed'] = null;
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PUT', $iri, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'body' => json_encode($payload),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            'confirmed: This value should not be null.',
             $error['detail']
         );
     }

@@ -44,6 +44,7 @@ SCHEMATHESIS_VERSION ?= 4.15.1
 SCHEMATHESIS_IMAGE ?= schemathesis/schemathesis:$(SCHEMATHESIS_VERSION)
 SCHEMATHESIS_API_URL ?= https://localhost$(if $(strip $(HTTPS_PORT)),:$(HTTPS_PORT),)
 SCHEMATHESIS_REPORT_DIR ?= /tmp/$(PROJECT)-schemathesis-report
+SCHEMATHESIS_OUTPUT_LOG ?= $(SCHEMATHESIS_REPORT_DIR)/schemathesis-output.log
 SCHEMATHESIS_PHASES ?= examples,coverage,fuzzing
 SCHEMATHESIS_REPORT_FORMATS ?= junit,har,ndjson
 SCHEMATHESIS_MAX_EXAMPLES ?= 5
@@ -486,6 +487,7 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 	@chmod 0777 "$(SCHEMATHESIS_REPORT_DIR)"
 	$(EXEC_PHP) php bin/console app:seed-schemathesis-data
 	@phases="$(SCHEMATHESIS_PHASES)"; \
+	output_log="$(SCHEMATHESIS_OUTPUT_LOG)"; \
 	if grep -Eq '^[[:space:]]+links:' .github/openapi-spec/spec.yaml; then \
 		phases="$$phases,stateful"; \
 		echo "OpenAPI links detected; enabling Schemathesis stateful phase."; \
@@ -518,7 +520,16 @@ schemathesis-validate: ensure-test-services reset-db generate-openapi-spec ## Ru
 		--coverage-report-html-path /reports/schema-coverage.html \
 		--coverage-report-markdown-path /reports/schema-coverage.md \
 		--coverage-show-missing parameters \
-		--header "X-Schemathesis-Test: cleanup-customers"
+		--header "X-Schemathesis-Test: cleanup-customers" > "$$output_log" 2>&1; \
+	status=$$?; \
+	cat "$$output_log"; \
+	if [ $$status -ne 0 ]; then \
+		exit $$status; \
+	fi; \
+	if sed 's/\x1b\[[0-9;]*m//g' "$$output_log" | grep -Eq '^Warnings:'; then \
+		echo "❌ Schemathesis reported warnings. Treating warnings as CI failures."; \
+		exit 1; \
+	fi
 
 aws-load-tests: ## Run load tests on AWS infrastructure
 	@if [ "$(LOCAL_MODE_ENV)" = "true" ]; then $(MAKE) ensure-test-services; fi

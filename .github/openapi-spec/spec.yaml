@@ -666,39 +666,7 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                initials:
-                  type: string
-                  maxLength: 255
-                leadSource:
-                  type: string
-                  maxLength: 255
-                type:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                status:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                confirmed:
-                  type: boolean
-              required:
-                - email
-                - phone
-                - initials
-                - leadSource
-                - type
-                - status
-                - confirmed
+              $ref: '#/components/schemas/Customer.CustomerCreate'
             example:
               email: schemathesis-created@example.com
               phone: '0123456789'
@@ -815,7 +783,13 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z4
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z5
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
@@ -971,7 +945,13 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z4
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z5
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
@@ -979,44 +959,12 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                initials:
-                  type: string
-                  maxLength: 255
-                leadSource:
-                  type: string
-                  maxLength: 255
-                type:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                status:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                confirmed:
-                  type: boolean
-              required:
-                - email
-                - phone
-                - initials
-                - leadSource
-                - type
-                - status
-                - confirmed
+              $ref: '#/components/schemas/Customer.CustomerPut'
             example:
-              email: schemathesis-created@example.com
-              phone: '0123456789'
-              initials: 'Name Surname'
-              leadSource: Google
+              email: schemathesis-replaced@example.com
+              phone: '+1234567893'
+              initials: 'Replace Customer'
+              leadSource: email_campaign
               type: /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
               status: /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
               confirmed: true
@@ -1123,10 +1071,13 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z3
+            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z3
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z3
           style: simple
           explode: false
-          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z3
     patch:
       operationId: api_customers_ulid_patch
       tags:
@@ -1279,7 +1230,13 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z4
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0Z5
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0Z2
@@ -1287,33 +1244,9 @@ paths:
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                phone:
-                  type: string
-                  maxLength: 255
-                initials:
-                  type: string
-                  maxLength: 255
-                leadSource:
-                  type: string
-                  maxLength: 255
-                type:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                status:
-                  type: string
-                  maxLength: 255
-                  format: iri-reference
-                confirmed:
-                  type: boolean
+              $ref: '#/components/schemas/Customer.CustomerPatch.jsonMergePatch'
             example:
-              email: update-customer@example.com
+              email: schemathesis-updated@example.com
               phone: '0123456789'
               initials: 'Name Surname'
               leadSource: Google
@@ -1662,13 +1595,7 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerStatus.StatusCreate'
             example:
               value: Active
         required: true
@@ -1779,7 +1706,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
@@ -1935,7 +1866,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
@@ -1943,13 +1878,7 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerStatus.StatusPut'
             example:
               value: Active
         required: true
@@ -2055,10 +1984,13 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0B3
+            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B3
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B3
           style: simple
           explode: false
-          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
+          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B3
     patch:
       operationId: api_customer_statuses_ulid_patch
       tags:
@@ -2211,7 +2143,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0B2
@@ -2219,13 +2155,7 @@ paths:
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerStatus.StatusPatch.jsonMergePatch'
             example:
               value: Active
         required: true
@@ -2681,7 +2611,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
@@ -2837,7 +2771,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
@@ -2845,13 +2783,7 @@ paths:
         content:
           application/ld+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerType.TypePut'
             example:
               value: Prospect
         required: true
@@ -2957,10 +2889,13 @@ paths:
           deprecated: false
           schema:
             type: string
-            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0A3
+            example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A3
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A3
           style: simple
           explode: false
-          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
+          example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A3
     patch:
       operationId: api_customer_types_ulid_patch
       tags:
@@ -3113,7 +3048,11 @@ paths:
           deprecated: false
           schema:
             type: string
+            default: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
             example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
+            enum:
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+              - 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
           style: simple
           explode: false
           example: 01JGVZ9YGXE8P3Q2R5T7W9Y0A2
@@ -3121,13 +3060,7 @@ paths:
         content:
           application/merge-patch+json:
             schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  maxLength: 255
-              required:
-                - value
+              $ref: '#/components/schemas/CustomerType.TypePatch.jsonMergePatch'
             example:
               value: Prospect
         required: true
@@ -3206,35 +3139,35 @@ components:
       properties:
         initials:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         email:
           format: email
           maxLength: 255
           externalDocs:
             url: 'https://schema.org/email'
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         phone:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         leadSource:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         type:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
+          enum:
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A2
         status:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
+          enum:
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B2
         confirmed:
           type: boolean
     Customer.CustomerPatch.jsonMergePatch:
@@ -3272,10 +3205,18 @@ components:
           type:
             - string
             - 'null'
+          format: iri-reference
+          enum:
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A2
         status:
           type:
             - string
             - 'null'
+          format: iri-reference
+          enum:
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B2
         confirmed:
           type:
             - boolean
@@ -3290,42 +3231,41 @@ components:
         - leadSource
         - type
         - status
+        - confirmed
       properties:
         initials:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         email:
           format: email
           maxLength: 255
           externalDocs:
             url: 'https://schema.org/email'
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         phone:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         leadSource:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         type:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
+          enum:
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A1
+            - /api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A2
         status:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: iri-reference
+          enum:
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B1
+            - /api/customer_statuses/01JGVZ9YGXE8P3Q2R5T7W9Y0B2
         confirmed:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
     Customer.jsonld-output:
       allOf:
         -
@@ -3363,9 +3303,8 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
     CustomerStatus.StatusPatch.jsonMergePatch:
       type: object
       additionalProperties: false
@@ -3387,9 +3326,8 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
     CustomerStatus.jsonld-output:
       allOf:
         -
@@ -3410,6 +3348,7 @@ components:
         value:
           maxLength: 255
           type: string
+          minLength: 1
     CustomerType.TypePatch.jsonMergePatch:
       type: object
       properties:
@@ -3430,9 +3369,8 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
     CustomerType.jsonld-output:
       allOf:
         -
