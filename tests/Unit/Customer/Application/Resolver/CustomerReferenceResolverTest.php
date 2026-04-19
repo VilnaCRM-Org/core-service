@@ -150,6 +150,62 @@ final class CustomerReferenceResolverTest extends UnitTestCase
         $resolver->resolveType('invalid-iri');
     }
 
+    public function testResolveTypeRejectsNonHttpAbsoluteUrl(): void
+    {
+        $typeRepository = $this->createMock(TypeRepositoryInterface::class);
+        $statusRepository = $this->createMock(StatusRepositoryInterface::class);
+        $iriTransformer = $this->createMock(IriTransformerInterface::class);
+        $resolver = new CustomerReferenceResolver(
+            $typeRepository,
+            $statusRepository,
+            $iriTransformer
+        );
+
+        $typeRepository
+            ->expects(self::never())
+            ->method('find');
+        $iriTransformer
+            ->expects(self::never())
+            ->method('transform');
+
+        $this->expectException(ApiPlatformInvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'No route matches "ftp://api.example.test/api/customer_types/01HQZX999888777".'
+        );
+
+        $resolver->resolveType(
+            'ftp://api.example.test/api/customer_types/01HQZX999888777'
+        );
+    }
+
+    public function testResolveTypeRejectsMalformedHttpsReference(): void
+    {
+        $typeRepository = $this->createMock(TypeRepositoryInterface::class);
+        $statusRepository = $this->createMock(StatusRepositoryInterface::class);
+        $iriTransformer = $this->createMock(IriTransformerInterface::class);
+        $resolver = new CustomerReferenceResolver(
+            $typeRepository,
+            $statusRepository,
+            $iriTransformer
+        );
+
+        $typeRepository
+            ->expects(self::never())
+            ->method('find');
+        $iriTransformer
+            ->expects(self::never())
+            ->method('transform');
+
+        $this->expectException(ApiPlatformInvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'No route matches "https:/api.example.test/api/customer_types/01HQZX999888777".'
+        );
+
+        $resolver->resolveType(
+            'https:/api.example.test/api/customer_types/01HQZX999888777'
+        );
+    }
+
     public function testResolveStatusTransformsAbsoluteUrlBeforeRepositoryLookup(): void
     {
         $typeRepository = $this->createMock(TypeRepositoryInterface::class);
@@ -162,6 +218,35 @@ final class CustomerReferenceResolverTest extends UnitTestCase
         );
 
         $input = 'https://api.example.test/api/customer_statuses/' . $this->faker->uuid();
+        $identifier = $this->faker->uuid();
+        $status = $this->createMock(CustomerStatus::class);
+
+        $iriTransformer
+            ->expects(self::once())
+            ->method('transform')
+            ->with($input)
+            ->willReturn($identifier);
+        $statusRepository
+            ->expects(self::once())
+            ->method('find')
+            ->with($identifier)
+            ->willReturn($status);
+
+        self::assertSame($status, $resolver->resolveStatus($input));
+    }
+
+    public function testResolveStatusTransformsAbsoluteUrlWithUppercaseScheme(): void
+    {
+        $typeRepository = $this->createMock(TypeRepositoryInterface::class);
+        $statusRepository = $this->createMock(StatusRepositoryInterface::class);
+        $iriTransformer = $this->createMock(IriTransformerInterface::class);
+        $resolver = new CustomerReferenceResolver(
+            $typeRepository,
+            $statusRepository,
+            $iriTransformer
+        );
+
+        $input = 'HTTPS://api.example.test/api/customer_statuses/' . $this->faker->uuid();
         $identifier = $this->faker->uuid();
         $status = $this->createMock(CustomerStatus::class);
 

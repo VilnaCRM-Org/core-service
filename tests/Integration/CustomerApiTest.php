@@ -468,6 +468,8 @@ final class CustomerApiTest extends BaseApiCase
     public function testPatchRepositorySeededCustomerWithScalarFieldsOnly(): void
     {
         $customerId = (string) $this->faker->ulid();
+        $typeId = (string) $this->faker->ulid();
+        $statusId = (string) $this->faker->ulid();
         $ulidFactory = $this->container->get(UlidFactory::class);
         $typeFactory = $this->container->get(TypeFactoryInterface::class);
         $statusFactory = $this->container->get(StatusFactoryInterface::class);
@@ -476,8 +478,8 @@ final class CustomerApiTest extends BaseApiCase
         $statusRepository = $this->container->get(StatusRepositoryInterface::class);
         $customerRepository = $this->container->get(CustomerRepositoryInterface::class);
 
-        $type = $typeFactory->create('seeded-type', $ulidFactory->create($customerId));
-        $status = $statusFactory->create('seeded-status', $ulidFactory->create($customerId));
+        $type = $typeFactory->create('seeded-type', $ulidFactory->create($typeId));
+        $status = $statusFactory->create('seeded-status', $ulidFactory->create($statusId));
 
         $typeRepository->save($type);
         $statusRepository->save($status);
@@ -507,6 +509,8 @@ final class CustomerApiTest extends BaseApiCase
         $data = (self::createClient()->request('GET', "/api/customers/{$customerId}"))->toArray();
         $this->assertSame('0987654321', $data['phone']);
         $this->assertSame('Facebook', $data['leadSource']);
+        $this->assertSame("/api/customer_types/{$typeId}", $data['type']['@id']);
+        $this->assertSame("/api/customer_statuses/{$statusId}", $data['status']['@id']);
     }
 
     public function testPatchCustomerWithInvalidEmail(): void

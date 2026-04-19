@@ -81,7 +81,17 @@ final readonly class CustomerReferenceResolver
 
     private function isIri(string $idOrIri): bool
     {
-        return str_starts_with($idOrIri, '/')
-            || filter_var($idOrIri, FILTER_VALIDATE_URL) !== false;
+        if (str_starts_with($idOrIri, '/')) {
+            return true;
+        }
+
+        if (filter_var($idOrIri, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
+        $scheme = parse_url($idOrIri, PHP_URL_SCHEME);
+
+        return is_string($scheme)
+            && in_array(strtolower($scheme), ['http', 'https'], true);
     }
 }
