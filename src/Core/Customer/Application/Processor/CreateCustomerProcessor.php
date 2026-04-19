@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
@@ -21,7 +21,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
     public function __construct(
         private CommandBusInterface $commandBus,
         private CreateCustomerFactoryInterface $createCustomerFactory,
-        private CustomerReferenceResolver $referenceResolver,
+        private CustomerReferenceResolverInterface $referenceResolver,
         private CustomerTransformerInterface $transformer,
     ) {
     }

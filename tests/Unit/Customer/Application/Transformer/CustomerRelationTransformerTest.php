@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
@@ -17,7 +17,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 {
     public function testResolveTypeWithProvidedIri(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
@@ -37,7 +37,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveTypeWithNullIriReturnsExistingRelation(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
@@ -55,7 +55,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveTypeWithExistingUlidSkipsResolver(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $typeUlid = (string) $this->faker->ulid();
@@ -76,7 +76,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveTypeThrowsWhenResolverFails(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
@@ -94,7 +94,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithProvidedIri(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
@@ -114,7 +114,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithNullIriReturnsExistingRelation(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
@@ -132,7 +132,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithExistingUlidSkipsResolver(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $statusUlid = (string) $this->faker->ulid();
@@ -153,7 +153,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusThrowsWhenResolverFails(): void
     {
-        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $referenceResolver = $this->createMock(CustomerReferenceResolverInterface::class);
         $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);

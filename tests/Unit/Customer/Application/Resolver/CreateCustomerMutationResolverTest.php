@@ -8,7 +8,7 @@ use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Core\Customer\Application\MutationInput\CreateCustomerMutationInput;
 use App\Core\Customer\Application\Resolver\CreateCustomerMutationResolver;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CreateCustomerMutationInputTransformer;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
@@ -61,7 +61,9 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             'validator' => $this->createMock(MutationInputValidator::class),
             'transformer' => $this->createMock(CreateCustomerMutationInputTransformer::class),
             'factory' => $this->createMock(CreateCustomerFactoryInterface::class),
-            'referenceResolver' => $this->createMock(CustomerReferenceResolver::class),
+            'referenceResolver' => $this->createMock(
+                CustomerReferenceResolverInterface::class
+            ),
             'customerTransformer' => $this->createMock(CustomerTransformerInterface::class),
         ];
     }
@@ -87,8 +89,8 @@ final class CreateCustomerMutationResolverTest extends UnitTestCase
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
             'leadSource' => $this->faker->word(),
-            'type' => '/api/customer_types/' . $this->faker->uuid(),
-            'status' => '/api/customer_statuses/' . $this->faker->uuid(),
+            'type' => '/api/customer_types/' . $this->faker->ulid(),
+            'status' => '/api/customer_statuses/' . $this->faker->ulid(),
             'confirmed' => $this->faker->boolean(),
         ];
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Transformer;
 
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
@@ -13,7 +13,7 @@ final readonly class CustomerRelationTransformer implements
     CustomerRelationTransformerInterface
 {
     public function __construct(
-        private CustomerReferenceResolver $referenceResolver,
+        private CustomerReferenceResolverInterface $referenceResolver,
     ) {
     }
 

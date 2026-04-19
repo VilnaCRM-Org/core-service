@@ -10,6 +10,8 @@ use App\Core\Customer\Application\DTO\CustomerPut;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Entity\CustomerStatus;
+use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
@@ -64,8 +66,8 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     private function executeUpdateCommand(
         Customer $customer,
         CustomerPut $data,
-        object $customerType,
-        object $customerStatus
+        CustomerType $customerType,
+        CustomerStatus $customerStatus
     ): void {
         $customerUpdate = new CustomerUpdate(
             $data->initials,
@@ -84,14 +86,14 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     private function resolveCustomerType(
         CustomerPut $data,
         Customer $customer
-    ): object {
+    ): CustomerType {
         return $this->relationTransformer->resolveType($data->type, $customer);
     }
 
     private function resolveCustomerStatus(
         CustomerPut $data,
         Customer $customer
-    ): object {
+    ): CustomerStatus {
         return $this->relationTransformer->resolveStatus($data->status, $customer);
     }
 }

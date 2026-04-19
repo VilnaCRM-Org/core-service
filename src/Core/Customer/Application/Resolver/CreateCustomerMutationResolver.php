@@ -18,7 +18,7 @@ final readonly class CreateCustomerMutationResolver implements MutationResolver
         private MutationInputValidatorInterface $validator,
         private CustomerTf\CreateCustomerMutationInputTransformer $inputMapper,
         private CustomerFactory\CreateCustomerFactoryInterface $factory,
-        private CustomerReferenceResolver $referenceResolver,
+        private CustomerReferenceResolverInterface $referenceResolver,
         private CustomerTf\CustomerTransformerInterface $builder,
     ) {
     }

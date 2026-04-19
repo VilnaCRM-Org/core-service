@@ -10,7 +10,7 @@ use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPatchProcessor;
 use App\Core\Customer\Application\Resolver\CustomerPatchUpdateResolver;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
@@ -30,7 +30,7 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
-    private CustomerReferenceResolver|MockObject $referenceResolver;
+    private CustomerReferenceResolverInterface|MockObject $referenceResolver;
     private CustomerRelationTransformerInterface $relationTransformer;
     private CustomerRepositoryInterface|MockObject $repository;
     private CustomerPatchUpdateResolver $patchUpdateResolver;
@@ -44,7 +44,9 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this
             ->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $this->referenceResolver = $this->createMock(
+            CustomerReferenceResolverInterface::class
+        );
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $this->ulidFactory = new UlidFactory();

@@ -9,7 +9,7 @@ use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateCustomerProcessor;
-use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolverInterface;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
@@ -22,7 +22,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateCustomerFactoryInterface|MockObject $factory;
-    private CustomerReferenceResolver|MockObject $referenceResolver;
+    private CustomerReferenceResolverInterface|MockObject $referenceResolver;
     private CustomerTransformerInterface|MockObject $transformer;
     private CreateCustomerProcessor $processor;
 
@@ -34,7 +34,9 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $this->factory = $this->createMock(
             CreateCustomerFactoryInterface::class
         );
-        $this->referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $this->referenceResolver = $this->createMock(
+            CustomerReferenceResolverInterface::class
+        );
         $this->transformer = $this->createMock(
             CustomerTransformerInterface::class
         );
@@ -57,8 +59,8 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $customerEntity = $this->createMock(Customer::class);
 
         $this->setupReferenceResolver($dto, $type, $status);
-        $this->testTransformerIsCalled($dto, $type, $status, $customerEntity);
-        $this->testFactoryAndDispatchAreCalled($customerEntity);
+        $this->assertTransformerCalled($dto, $type, $status, $customerEntity);
+        $this->assertFactoryAndDispatchCalled($customerEntity);
 
         $result = $this->processor->process($dto, $operation);
 
@@ -95,7 +97,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
             ->willReturn($status);
     }
 
-    private function testFactoryAndDispatchAreCalled(
+    private function assertFactoryAndDispatchCalled(
         MockObject|Customer $customerEntity
     ): void {
         $command = new CreateCustomerCommand($customerEntity);
@@ -111,7 +113,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
             ->with($command);
     }
 
-    private function testTransformerIsCalled(
+    private function assertTransformerCalled(
         CustomerCreate $dto,
         MockObject|CustomerType $type,
         MockObject|CustomerStatus $status,

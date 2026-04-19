@@ -14,7 +14,8 @@ use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Application\Transformer\IriTransformerInterface;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
-final readonly class CustomerReferenceResolver
+final readonly class CustomerReferenceResolver implements
+    CustomerReferenceResolverInterface
 {
     public function __construct(
         private TypeRepositoryInterface $typeRepository,
