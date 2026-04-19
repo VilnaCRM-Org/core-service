@@ -49,9 +49,15 @@ The migration should validate the exact surface we use locally:
 | --- | --- | --- | --- |
 | SQS | Symfony Messenger async domain events and workers | `config/packages/messenger.yaml`, `config/services.yaml` | Supported |
 | S3 | local-mode AWS helper scripts for load-test artifacts and bucket operations | `tests/Load/*.sh` | Supported |
-| IAM | helper scripts create roles, policies, and instance profiles | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
-| STS | helper scripts and auth validation | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
-| EC2 | helper scripts launch and inspect load-test infrastructure in local mode | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
+| IAM | helper scripts create roles, policies, and instance profiles | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
+| STS | helper scripts and auth validation | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
+| EC2 | helper scripts launch and inspect load-test infrastructure in local mode | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
+
+Working assumptions before the migration starts:
+
+- `IAM` must be treated as partial until we confirm the exact policy-evaluation branches used by the helper scripts, plus instance-profile creation and attachment behavior.
+- `STS` must be treated as partial until we verify the repository's `AssumeRole`-style flows and SigV4 request-signing behavior end to end.
+- `EC2` must be treated as partial until we verify instance lifecycle transitions, describe/list semantics, and tag handling against the local helper scripts.
 
 ## Migration Principles
 
@@ -99,6 +105,17 @@ The migration should explicitly test:
 
 The implementation should pin a concrete Floci release after compatibility validation. Do not use `latest` in the repository.
 
+## Phase 0 Blocker: Verify the Actual Usage Surface
+
+Do not enter Phase 1 until the repository's current LocalStack usage is mapped to concrete commands and expectations.
+
+Minimum blocker checklist:
+
+- confirm whether any load-test or helper-script path relies on STS role assumption rather than simple static credentials
+- confirm which IAM APIs are required beyond create/list primitives, especially policy evaluation and instance-profile behavior
+- confirm which EC2 flows are exercised locally, including instance lifecycle transitions, waiters, and tagging
+- document the expected QueueUrl hostname shape that PHP, workers, and helper scripts currently consume
+
 ## Proposed Rollout
 
 ### Phase 1: Inventory and Abstraction
@@ -106,6 +123,62 @@ The implementation should pin a concrete Floci release after compatibility valid
 - replace LocalStack-specific config naming with emulator-neutral naming
 - isolate all vendor-specific behavior behind a small set of compose env vars and helper functions
 - update docs so they describe a local AWS emulator, not one implementation
+- run a repo-wide `rg` inventory for `localstack`, `LOCALSTACK_PORT`, `/_localstack/health`, and hardcoded `4566` assumptions before any rename lands
+
+#### Abstraction implementation
+
+Phase 1 should introduce a compatibility wrapper instead of a one-shot rename:
+
+- add `AWS_EMULATOR_HOST`, `AWS_EMULATOR_PORT`, and `AWS_EMULATOR_PROVIDER` as the new configuration surface
+- keep `LOCALSTACK_PORT` as a deprecated alias only during the transition, with a visible runtime warning whenever it is present in app startup scripts, Bats helpers, or load-test bootstrap
+- default `AWS_EMULATOR_PROVIDER` to `localstack` when unset in the transition release so existing developer setups do not break mid-migration
+- validate `AWS_EMULATOR_PROVIDER` against known values `localstack` and `floci`; if another string is supplied, warn loudly, preserve host/port-driven behavior, and treat it as a custom emulator provider rather than failing silently
+- publish a removal timeline in the migration guide: remove `LOCALSTACK_PORT` no earlier than two releases or sixty days after Floci becomes the default provider, whichever is longer
+
+Example transition shape:
+
+Before:
+
+```yaml
+services:
+  localstack:
+    image: localstack/localstack:3.4.0
+    ports:
+      - "${LOCALSTACK_PORT}:4566"
+```
+
+```bash
+export LOCALSTACK_PORT="${LOCALSTACK_PORT:-4566}"
+ENDPOINT_URL="http://localhost:${LOCALSTACK_PORT}"
+docker compose port localstack 4566
+```
+
+After:
+
+```yaml
+services:
+  floci:
+    image: hectorvent/floci:<pinned-version>
+    ports:
+      - "${AWS_EMULATOR_PORT:-4566}:4566"
+    environment:
+      AWS_EMULATOR_PROVIDER: "${AWS_EMULATOR_PROVIDER:-localstack}"
+      FLOCI_HOSTNAME: floci
+      FLOCI_STORAGE_MODE: hybrid
+```
+
+```bash
+export AWS_EMULATOR_PROVIDER="${AWS_EMULATOR_PROVIDER:-localstack}"
+export AWS_EMULATOR_HOST="${AWS_EMULATOR_HOST:-localhost}"
+export AWS_EMULATOR_PORT="${AWS_EMULATOR_PORT:-${LOCALSTACK_PORT:-4566}}"
+
+if [[ -n "${LOCALSTACK_PORT:-}" ]]; then
+  echo "warning: LOCALSTACK_PORT is deprecated; use AWS_EMULATOR_PORT" >&2
+fi
+
+ENDPOINT_URL="http://${AWS_EMULATOR_HOST}:${AWS_EMULATOR_PORT}"
+docker compose port "${AWS_EMULATOR_PROVIDER}" 4566
+```
 
 ### Phase 2: Compose Migration
 
@@ -114,14 +187,61 @@ The implementation should pin a concrete Floci release after compatibility valid
 - preserve port `4566`
 - choose Floci storage mode intentionally instead of relying on defaults
 
+#### Storage mode guidance
+
+Floci currently documents four storage modes:
+
+- `memory` for the fastest ephemeral execution
+- `persistent` for fully synchronous durable writes
+- `hybrid` for in-memory reads with asynchronous persistence
+- `wal` for append-only write-heavy workloads with compaction
+
+For this repository, Phase 2 should pin `FLOCI_STORAGE_MODE=hybrid` in Docker Compose because local development benefits from restart persistence, while the Floci docs recommend `hybrid` specifically for local development and reserve `memory` for fast CI-style execution. The compose defaults should therefore be deterministic:
+
+- `FLOCI_HOSTNAME=floci`
+- `FLOCI_STORAGE_MODE=hybrid`
+- `FLOCI_STORAGE_PERSISTENT_PATH=/app/data`
+- published port `4566`
+
+If CI later migrates to Floci, the GitHub Actions variant can explicitly override the mode to `memory` to minimize job runtime and keep the local-developer profile separate from ephemeral CI workers.
+
 ### Phase 3: Runtime Validation
 
-Validate these workflows against Floci:
+Validate these workflows against Floci with both automated and developer-run checks:
 
-- Messenger can publish domain-event messages
-- worker can consume those messages
-- local helper scripts can perform S3, IAM, STS, and EC2 operations they currently expect
-- load-test setup logic still resolves the correct emulator endpoint and credentials
+- add a dedicated emulator-validation script such as `scripts/validate-floci.sh`
+- run that script locally before merge and record the outcome in a committed validation artifact such as `docs/floci-validation-results.md`, plus a matching PR checklist item
+- add a GitHub Actions job, or a provider matrix for the existing load-test/cache workflows, that boots Floci and executes the same validation set in CI
+
+Required validation coverage:
+
+- Messenger can publish domain-event messages to SQS
+- worker can consume those messages from a separate container
+- local helper scripts can perform the S3, IAM, STS, and EC2 operations they currently expect
+- load-test setup logic still resolves the correct emulator endpoint, credentials, and QueueUrl hostnames
+- any LocalStack-specific health probe has been replaced by API-level smoke checks
+
+Suggested `scripts/validate-floci.sh` responsibilities:
+
+- start the compose stack with `AWS_EMULATOR_PROVIDER=floci`
+- assert `GetCallerIdentity`, queue create/list/send/receive, and a minimal S3 bucket cycle
+- run the helper-script subset that exercises IAM, STS, and EC2 expectations
+- fail fast if QueueUrls do not contain `floci` inside the Docker network
+
+#### Developer transition plan
+
+- keep a provider toggle during rollout so developers can switch between `localstack` and `floci` while compatibility is still being proven
+- land a migration guide in the same change set that closes `#177`, covering new env vars, the deprecation window, and the validation script
+- define rollback steps up front: set `AWS_EMULATOR_PROVIDER=localstack`, keep the deprecated alias working during the window, and leave the old compose wiring available until the Floci validation artifact is green
+
+#### CI/CD note
+
+Today, GitHub Actions already boots `localstack` explicitly in `.github/workflows/load-tests.yml` and `.github/workflows/cache-performance-tests.yml`. The migration therefore needs a CI decision, not just a local compose change:
+
+- either migrate those workflows in the same PR with a provider matrix or explicit Floci jobs
+- or keep them on LocalStack temporarily while the application/runtime abstraction is introduced
+
+That choice must be called out in the rollout so `make ci` expectations and GitHub Actions behavior do not drift apart.
 
 ### Phase 4: Fallback Decision
 
@@ -146,9 +266,13 @@ The implementation that eventually closes `#177` will likely touch:
 ## Risks
 
 - QueueUrl hostname mismatches across containers
+  Mitigation: validate QueueUrls in Phase 3 with `FLOCI_HOSTNAME=floci` and fail the rollout if any helper or worker still sees `localhost`.
 - subtle IAM or EC2 parity gaps in helper-script flows
+  Mitigation: keep IAM, STS, and EC2 in the Phase 3 integration-validation set and do not remove the provider toggle until those checks are green.
 - hardcoded service names in tests
+  Mitigation: run the Phase 1 `rg` scan before code changes and parameterize every `localstack` service reference found in Bats, shell scripts, compose commands, and docs.
 - hidden assumptions around LocalStack-specific health endpoints
+  Mitigation: add a code-review checklist item that rejects `/_localstack/health` probes and requires API-level readiness checks instead.
 
 ## Acceptance Scope for the Future Implementation
 
@@ -159,4 +283,5 @@ The implementation that closes `#177` should prove:
 - local helper scripts are either validated against Floci or explicitly feature-gated
 - LocalStack-specific health probes and docs are removed
 - the repository no longer depends on vendor-specific naming for local AWS emulation
-- `make ci` passes after the migration work
+- the Floci migration plan explicitly states whether the GitHub Actions workflows that currently boot `localstack` are migrated in parallel, run in a provider matrix, or stay temporarily on LocalStack
+- `make ci` passes after the migration work, with any required CI-pipeline adjustments called out in the migration guide
