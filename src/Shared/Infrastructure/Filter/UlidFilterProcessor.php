@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Filter;
 
 use App\Shared\Domain\ValueObject\Ulid;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
+use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 final class UlidFilterProcessor
 {
@@ -20,17 +21,17 @@ final class UlidFilterProcessor
         }
 
         $parsedValue = $this->parseUlidValue($rawValue);
+        if ($parsedValue === null) {
+            return;
+        }
 
         $this->applyOperator($operator, $parsedValue, $property, $builder);
     }
 
     private function canProcess(string $property, string|array|int|float|bool|null $rawValue): bool
     {
-        if (! $this->isUlidProperty($property)) {
-            return false;
-        }
-
-        return is_string($rawValue);
+        return $this->isUlidProperty($property)
+            && is_string($rawValue);
     }
 
     private function isUlidProperty(string $property): bool
@@ -41,12 +42,31 @@ final class UlidFilterProcessor
     private function parseUlidValue(string $value): Ulid|array|null
     {
         if (str_contains($value, '..')) {
-            $parts = explode('..', $value, 2);
-            $min = new Ulid(trim($parts[0]));
-            $max = new Ulid(trim($parts[1]));
+            $parts = array_map(trim(...), explode('..', $value, 2));
+            if (
+                count($parts) !== 2
+                || ! $this->isValidUlid($parts[0])
+                || ! $this->isValidUlid($parts[1])
+            ) {
+                return null;
+            }
+
+            $min = new Ulid($parts[0]);
+            $max = new Ulid($parts[1]);
             return [$min, $max];
         }
+
+        $value = trim($value);
+        if (! $this->isValidUlid($value)) {
+            return null;
+        }
+
         return new Ulid($value);
+    }
+
+    private function isValidUlid(string $value): bool
+    {
+        return SymfonyUlid::isValid($value);
     }
 
     private function applyOperator(

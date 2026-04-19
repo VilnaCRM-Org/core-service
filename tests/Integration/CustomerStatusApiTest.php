@@ -62,6 +62,18 @@ final class CustomerStatusApiTest extends BaseApiCase
         );
     }
 
+    public function testGetCustomerStatusesCollectionWithInvalidUlidFilter(): void
+    {
+        $this->createCustomerStatus();
+        $client = self::createClient();
+        $response = $client->request('GET', '/api/customer_statuses', [
+            'query' => ['ulid[lt]' => 'IM'],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertArrayHasKey('member', $response->toArray());
+    }
+
     public function testGetCustomerStatusesCollectionFilteringByValue(): void
     {
         $this->createEntity('/api/customer_statuses', ['value' => 'Active']);

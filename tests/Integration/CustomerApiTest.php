@@ -66,6 +66,26 @@ final class CustomerApiTest extends BaseApiCase
         $this->validationForBlankEmail($client);
     }
 
+    public function testCreateCustomerWithUnknownAbsoluteStatusIriReturnsNotFound(): void
+    {
+        $payload = $this->getCustomer('Unknown Status');
+        $payload['status'] = 'https://W.q250kA9Gmy.p.aETna';
+
+        $client = self::createClient();
+        $client->request(
+            'POST',
+            '/api/customers',
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode($payload),
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(404);
+        $this->assertStringContainsString('Customer status', $error['detail']);
+    }
+
     public function testGetCustomerSuccess(): void
     {
         $payload = $this->getCustomer('Test Get');

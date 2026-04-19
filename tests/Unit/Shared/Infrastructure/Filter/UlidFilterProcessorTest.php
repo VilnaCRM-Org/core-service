@@ -36,6 +36,18 @@ final class UlidFilterProcessorTest extends UnitTestCase
         );
     }
 
+    public function testProcessWithNonUlidPropertyAndValidUlidValue(): void
+    {
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process(
+            'email',
+            'lt',
+            (string) $this->faker->ulid(),
+            $this->builder
+        );
+    }
+
     public function testProcessWithNonStringValue(): void
     {
         $this->builder->expects($this->never())->method('match');
@@ -75,5 +87,24 @@ final class UlidFilterProcessorTest extends UnitTestCase
         $this->processor->process('ulid', 'lte', $ulid, $this->builder);
         $this->processor->process('ulid', 'gt', $ulid, $this->builder);
         $this->processor->process('ulid', 'gte', $ulid, $this->builder);
+    }
+
+    public function testProcessSkipsInvalidUlid(): void
+    {
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process('ulid', 'lt', 'IM', $this->builder);
+    }
+
+    public function testProcessSkipsInvalidUlidRange(): void
+    {
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process(
+            'ulid',
+            'between',
+            '01ARZ3NDEKTSV4RRFFQ69G5FAV..IM',
+            $this->builder
+        );
     }
 }
