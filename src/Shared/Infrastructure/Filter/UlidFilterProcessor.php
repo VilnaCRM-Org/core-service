@@ -42,31 +42,26 @@ final class UlidFilterProcessor
     private function parseUlidValue(string $value): Ulid|array|null
     {
         if (str_contains($value, '..')) {
-            $parts = array_map(trim(...), explode('..', $value, 2));
-            if (
-                count($parts) !== 2
-                || ! $this->isValidUlid($parts[0])
-                || ! $this->isValidUlid($parts[1])
-            ) {
+            $parts = explode('..', $value, 2);
+            $min = $this->createUlidIfValid(trim($parts[0]));
+            $max = $this->createUlidIfValid(trim($parts[1]));
+            if (! $min instanceof Ulid || ! $max instanceof Ulid) {
                 return null;
             }
 
-            $min = new Ulid($parts[0]);
-            $max = new Ulid($parts[1]);
             return [$min, $max];
         }
 
-        $value = trim($value);
-        if (! $this->isValidUlid($value)) {
+        return $this->createUlidIfValid(trim($value));
+    }
+
+    private function createUlidIfValid(string $value): ?Ulid
+    {
+        if ($value === '' || ! SymfonyUlid::isValid($value)) {
             return null;
         }
 
         return new Ulid($value);
-    }
-
-    private function isValidUlid(string $value): bool
-    {
-        return SymfonyUlid::isValid($value);
     }
 
     private function applyOperator(

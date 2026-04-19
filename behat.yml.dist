@@ -13,10 +13,13 @@ default:
     TwentytwoLabs\BehatOpenApiExtension:
       schemaFile: "file:///srv/app/.github/openapi-spec/spec.yaml"
     Behat\MinkExtension:
-      base_url: "http://caddy"
+      base_url: "https://localhost"
       sessions:
         default:
-          browserkit_http: ~
+          browserkit_http:
+            http_client_parameters:
+              verify_host: false
+              verify_peer: false
   suites:
     default:
       contexts:

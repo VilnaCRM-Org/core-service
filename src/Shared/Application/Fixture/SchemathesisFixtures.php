@@ -17,6 +17,8 @@ final class SchemathesisFixtures
     // Update Customer - Used for testing update operations
     public const UPDATE_CUSTOMER_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0Z2';
     public const UPDATE_CUSTOMER_EMAIL = 'update-customer@example.com';
+    public const UPDATE_REQUEST_CUSTOMER_EMAIL =
+        'schemathesis-updated@example.com';
     public const UPDATE_CUSTOMER_INITIALS = 'Jane Smith';
     public const UPDATE_CUSTOMER_PHONE = '+1234567891';
     public const UPDATE_CUSTOMER_LEAD_SOURCE = 'referral';
@@ -31,6 +33,8 @@ final class SchemathesisFixtures
     // Replace Customer - Used for testing replace operations
     public const REPLACE_CUSTOMER_ID = '01JGVZ9YGXE8P3Q2R5T7W9Y0Z4';
     public const REPLACE_CUSTOMER_EMAIL = 'replace-customer@example.com';
+    public const REPLACE_REQUEST_CUSTOMER_EMAIL =
+        'schemathesis-replaced@example.com';
     public const REPLACE_CUSTOMER_INITIALS = 'Replace Customer';
     public const REPLACE_CUSTOMER_PHONE = '+1234567893';
     public const REPLACE_CUSTOMER_LEAD_SOURCE = 'email_campaign';

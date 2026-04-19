@@ -59,12 +59,15 @@ load 'bats-assert/load'
 }
 
 @test "deptrac workflow uses Makefile startup and deptrac entrypoints" {
-  run sed -n '/Start Application/,/run: make deptrac/p' .github/workflows/deptrac.yml
+  run cat .github/workflows/deptrac.yml
   assert_success
   assert_output --partial 'run: make start'
   assert_output --partial 'run: make deptrac'
+  assert_output --partial 'run: make down'
   refute_output --partial 'docker compose up --detach --wait php'
   refute_output --partial 'vendor/bin/deptrac'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
 }
 
 @test "psalm workflow uses Makefile startup and analysis entrypoints" {
@@ -81,14 +84,10 @@ load 'bats-assert/load'
   run sed -n '/Start application services/,$p' .github/workflows/phpinsights.yml
   assert_success
   assert_output --partial 'run: make start'
-  assert_output --partial 'run: CI=1 make phpinsights'
+  assert_output --partial 'run: make phpinsights'
+  assert_output --partial 'run: make down'
   refute_output --partial 'docker compose up --detach --wait php'
   refute_output --partial 'vendor/bin/phpinsights'
-}
-
-@test "phpinsights workflow configures the shared PHP version before host analysis" {
-  run sed -n '1,/Start application services/p' .github/workflows/phpinsights.yml
-  assert_success
-  assert_output --partial 'shivammathur/setup-php@v2'
-  assert_output --partial 'php-version: ${{ vars.PHP_VERSION }}'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
 }

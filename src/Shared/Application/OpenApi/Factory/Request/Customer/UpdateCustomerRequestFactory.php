@@ -33,7 +33,7 @@ final class UpdateCustomerRequestFactory extends CustomerRequestFactory
         return Parameter::optional(
             'email',
             'string',
-            SchemathesisFixtures::UPDATE_CUSTOMER_EMAIL,
+            SchemathesisFixtures::UPDATE_REQUEST_CUSTOMER_EMAIL,
             255,
             'email'
         );

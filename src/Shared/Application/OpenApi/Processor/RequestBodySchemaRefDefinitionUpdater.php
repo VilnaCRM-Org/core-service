@@ -10,22 +10,20 @@ namespace App\Shared\Application\OpenApi\Processor;
  */
 final class RequestBodySchemaRefDefinitionUpdater
 {
-    private const CUSTOMER_TYPE_CREATE_SCHEMA_REF = '#/components/schemas/CustomerType.TypeCreate';
-
     /**
      * @param ContentDefinition $definition
      *
      * @return ContentDefinition|null
      */
-    public function update(array $definition): ?array
+    public function update(array $definition, string $schemaRef): ?array
     {
         $schema = SchemaNormalizer::normalize($definition['schema'] ?? []);
 
-        if ($schema === [] || $schema === ['$ref' => self::CUSTOMER_TYPE_CREATE_SCHEMA_REF]) {
+        if ($schema === [] || $schema === ['$ref' => $schemaRef]) {
             return null;
         }
 
-        $definition['schema'] = ['$ref' => self::CUSTOMER_TYPE_CREATE_SCHEMA_REF];
+        $definition['schema'] = ['$ref' => $schemaRef];
 
         return $definition;
     }

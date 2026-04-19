@@ -8,6 +8,9 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
+use RuntimeException;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Throwable;
 
 final class TestDataCleaner
 {
@@ -21,6 +24,7 @@ final class TestDataCleaner
         private readonly StatusRepositoryInterface $statusRepository,
         private readonly TypeRepositoryInterface $typeRepository,
         private readonly UlidFactory $ulidFactory,
+        private readonly TagAwareCacheInterface $customerCache,
         private array $customerIds = [],
         private array $statusIds = [],
         private array $typeIds = [],
@@ -56,6 +60,7 @@ final class TestDataCleaner
             $this->customerRepository->deleteById($ulid);
         }
         $this->customerIds = [];
+        $this->invalidateCustomerCache();
     }
 
     public function cleanupStatuses(): void
@@ -89,6 +94,21 @@ final class TestDataCleaner
     {
         if (! in_array($id, $storage, true)) {
             $storage[] = $id;
+        }
+    }
+
+    private function invalidateCustomerCache(): void
+    {
+        try {
+            if (! $this->customerCache->invalidateTags(['customer'])) {
+                throw new RuntimeException('Failed to invalidate customer cache.');
+            }
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Failed to invalidate customer cache: ' . $exception->getMessage(),
+                0,
+                $exception
+            );
         }
     }
 }

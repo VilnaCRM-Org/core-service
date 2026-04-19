@@ -31,7 +31,7 @@ final class UlidFilterProcessorTest extends UnitTestCase
         $this->processor->process(
             'email',
             'lt',
-            $this->faker->email(),
+            (string) $this->faker->ulid(),
             $this->builder
         );
     }
@@ -96,6 +96,13 @@ final class UlidFilterProcessorTest extends UnitTestCase
         $this->processor->process('ulid', 'lt', 'IM', $this->builder);
     }
 
+    public function testProcessSkipsInvalidEmojiUlid(): void
+    {
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process('ulid', 'lt', '😍', $this->builder);
+    }
+
     public function testProcessSkipsInvalidUlidRange(): void
     {
         $this->builder->expects($this->never())->method('match');
@@ -106,5 +113,13 @@ final class UlidFilterProcessorTest extends UnitTestCase
             '01ARZ3NDEKTSV4RRFFQ69G5FAV..IM',
             $this->builder
         );
+    }
+
+    public function testProcessSkipsInvalidEmojiUlidRange(): void
+    {
+        $ulid = (string) $this->faker->ulid();
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process('ulid', 'between', sprintf('%s..%s', $ulid, '😍'), $this->builder);
     }
 }

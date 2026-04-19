@@ -9,7 +9,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\OpenApi;
 use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactory;
-use App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory;
+use App\Shared\Application\OpenApi\Factory\Request\Customer\ReplaceCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Request\Customer\UpdateCustomerRequestFactory;
 use App\Shared\Application\OpenApi\Factory\Response\BadRequestResponseFactory;
 use App\Shared\Application\OpenApi\Factory\Response\Customer\CustomerDeletedResponseFactory;
@@ -25,7 +25,8 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
 {
     private const ENDPOINT_URI = '/api/customers/{ulid}';
 
-    private Parameter $ulidWithExamplePathParam;
+    private Parameter $ulidPathParam;
+    private Parameter $deleteUlidPathParam;
 
     private RequestBody $updateCustomerRequest;
 
@@ -45,40 +46,22 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
         BadRequestResponseFactory $badRequestResponseFactory,
         CustomerNotFoundResponseFactory $customerNotFoundResponseFactory,
         CustomerDeletedResponseFactory $deletedResponseFactory,
-        CreateCustomerRequestFactory $replaceCustomerRequestFactory,
+        ReplaceCustomerRequestFactory $replaceCustomerRequestFactory,
         InternalErrorFactory $internalErrorFactory,
         UnauthorizedResponseFactory $unauthorizedResponseFactory,
         ForbiddenResponseFactory $forbiddenResponseFactory,
     ) {
-        $this->ulidWithExamplePathParam =
-            $parameterFactory->getParameter();
-
-        $this->updateCustomerRequest =
-            $updateCustomerRequestFactory->getRequest();
-
-        $this->validationResp =
-            $validationErrorResponseFactory->getResponse();
-
-        $this->badRequestResp =
-            $badRequestResponseFactory->getResponse();
-
-        $this->custNotFoundResp =
-            $customerNotFoundResponseFactory->getResponse();
-
-        $this->custDeletedResp =
-            $deletedResponseFactory->getResponse();
-
-        $this->replaceCustomerRequest =
-            $replaceCustomerRequestFactory->getRequest();
-
-        $this->internalResp =
-            $internalErrorFactory->getResponse();
-
-        $this->forbiddenResp =
-            $forbiddenResponseFactory->getResponse();
-
-        $this->unauthorizedResp =
-            $unauthorizedResponseFactory->getResponse();
+        $this->ulidPathParam = $parameterFactory->getParameter();
+        $this->deleteUlidPathParam = $parameterFactory->getDeleteParameter();
+        $this->updateCustomerRequest = $updateCustomerRequestFactory->getRequest();
+        $this->validationResp = $validationErrorResponseFactory->getResponse();
+        $this->badRequestResp = $badRequestResponseFactory->getResponse();
+        $this->custNotFoundResp = $customerNotFoundResponseFactory->getResponse();
+        $this->custDeletedResp = $deletedResponseFactory->getResponse();
+        $this->replaceCustomerRequest = $replaceCustomerRequestFactory->getRequest();
+        $this->internalResp = $internalErrorFactory->getResponse();
+        $this->forbiddenResp = $forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResp = $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void
@@ -95,7 +78,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Put',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getUpdateResponses(),
             $this->replaceCustomerRequest
         );
@@ -107,7 +90,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Patch',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getUpdateResponses(),
             $this->updateCustomerRequest
         );
@@ -119,7 +102,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Delete',
-            [$this->ulidWithExamplePathParam],
+            [$this->deleteUlidPathParam],
             $this->getDeleteResponses()
         );
     }
@@ -130,7 +113,7 @@ final class ParamCustomerEndpointFactory extends EndpointFactory
             $openApi,
             self::ENDPOINT_URI,
             'Get',
-            [$this->ulidWithExamplePathParam],
+            [$this->ulidPathParam],
             $this->getGetResponses()
         );
     }

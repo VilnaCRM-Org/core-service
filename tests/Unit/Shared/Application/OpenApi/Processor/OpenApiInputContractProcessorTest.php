@@ -12,11 +12,11 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Processor\CustomerTypeRequestBodyPathUpdater;
 use App\Shared\Application\OpenApi\Processor\NullableSchemaTypeNormalizer;
 use App\Shared\Application\OpenApi\Processor\OpenApiInputContractProcessor;
 use App\Shared\Application\OpenApi\Processor\OpenApiInputSchemaUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodyContentSchemaRefUpdater;
+use App\Shared\Application\OpenApi\Processor\RequestBodyPathUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodySchemaRefDefinitionUpdater;
 use App\Shared\Application\OpenApi\Processor\RequestBodySchemaRefUpdater;
 use App\Shared\Application\OpenApi\Processor\RequiredSchemaPropertyUpdater;
@@ -26,45 +26,43 @@ use ArrayObject;
 
 final class OpenApiInputContractProcessorTest extends UnitTestCase
 {
-    public function testProcessAppliesInputFixesOnlyToCustomerTypeCollectionPath(): void
+    public function testProcessAppliesInputFixesToSchemathesisSensitiveRequestBodies(): void
     {
         $paths = new Paths();
         $paths->addPath(
+            '/api/customers',
+            (new PathItem())->withPost(
+                $this->operationWithRequestBody('application/ld+json', 'email')
+            )
+        );
+        $paths->addPath(
+            '/api/customers/{ulid}',
+            (new PathItem())->withPatch(
+                $this->operationWithRequestBody('application/merge-patch+json', 'status')
+            )
+        );
+        $paths->addPath(
             '/api/customer_types',
             (new PathItem())->withPost(
-                new Operation(
-                    requestBody: new RequestBody(
-                        content: new ArrayObject([
-                            'application/ld+json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'value' => ['type' => 'string'],
-                                    ],
-                                ],
-                            ],
-                        ])
-                    )
-                )
+                $this->operationWithRequestBody('application/ld+json', 'value')
+            )
+        );
+        $paths->addPath(
+            '/api/customer_types/{ulid}',
+            (new PathItem())->withPut(
+                $this->operationWithRequestBody('application/ld+json', 'value')
             )
         );
         $paths->addPath(
             '/api/customer_statuses',
             (new PathItem())->withPost(
-                new Operation(
-                    requestBody: new RequestBody(
-                        content: new ArrayObject([
-                            'application/ld+json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'value' => ['type' => 'string'],
-                                    ],
-                                ],
-                            ],
-                        ])
-                    )
-                )
+                $this->operationWithRequestBody('application/ld+json', 'value')
+            )
+        );
+        $paths->addPath(
+            '/api/customer_statuses/{ulid}',
+            (new PathItem())->withPatch(
+                $this->operationWithRequestBody('application/merge-patch+json', 'value')
             )
         );
 
@@ -83,7 +81,7 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                     'CustomerType.TypeCreate' => [
                         'required' => ['value'],
                         'properties' => [
-                            'value' => ['type' => 'string'],
+                            'value' => ['type' => ['string', 'null']],
                         ],
                     ],
                 ])
@@ -92,16 +90,6 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
 
         $processed = $this->createProcessor()->process($openApi);
         $schemas = $processed->getComponents()->getSchemas();
-        $customerTypeContent = $processed->getPaths()
-            ->getPath('/api/customer_types')
-            ->getPost()
-            ?->getRequestBody()
-            ?->getContent();
-        $customerStatusContent = $processed->getPaths()
-            ->getPath('/api/customer_statuses')
-            ->getPost()
-            ?->getRequestBody()
-            ?->getContent();
 
         self::assertInstanceOf(ArrayObject::class, $schemas);
         self::assertSame(
@@ -120,15 +108,29 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                 )['value']
             )['type']
         );
-        self::assertInstanceOf(ArrayObject::class, $customerTypeContent);
+        self::assertSame(
+            ['$ref' => '#/components/schemas/Customer.CustomerCreate'],
+            $this->requestSchema($processed, '/api/customers', 'Post', 'application/ld+json')
+        );
+        self::assertSame(
+            ['$ref' => '#/components/schemas/Customer.CustomerPatch.jsonMergePatch'],
+            $this->requestSchema($processed, '/api/customers/{ulid}', 'Patch', 'application/merge-patch+json')
+        );
         self::assertSame(
             ['$ref' => '#/components/schemas/CustomerType.TypeCreate'],
-            $customerTypeContent['application/ld+json']['schema']
+            $this->requestSchema($processed, '/api/customer_types', 'Post', 'application/ld+json')
         );
-        self::assertInstanceOf(ArrayObject::class, $customerStatusContent);
         self::assertSame(
-            'object',
-            $customerStatusContent['application/ld+json']['schema']['type']
+            ['$ref' => '#/components/schemas/CustomerType.TypePut'],
+            $this->requestSchema($processed, '/api/customer_types/{ulid}', 'Put', 'application/ld+json')
+        );
+        self::assertSame(
+            ['$ref' => '#/components/schemas/CustomerStatus.StatusCreate'],
+            $this->requestSchema($processed, '/api/customer_statuses', 'Post', 'application/ld+json')
+        );
+        self::assertSame(
+            ['$ref' => '#/components/schemas/CustomerStatus.StatusPatch.jsonMergePatch'],
+            $this->requestSchema($processed, '/api/customer_statuses/{ulid}', 'Patch', 'application/merge-patch+json')
         );
     }
 
@@ -140,7 +142,7 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                     new NullableSchemaTypeNormalizer()
                 )
             ),
-            new CustomerTypeRequestBodyPathUpdater(
+            new RequestBodyPathUpdater(
                 new RequestBodySchemaRefUpdater(
                     new RequestBodyContentSchemaRefUpdater(
                         new RequestBodySchemaRefDefinitionUpdater()
@@ -148,5 +150,40 @@ final class OpenApiInputContractProcessorTest extends UnitTestCase
                 )
             )
         );
+    }
+
+    private function operationWithRequestBody(string $contentType, string $propertyName): Operation
+    {
+        return new Operation(
+            requestBody: new RequestBody(
+                content: new ArrayObject([
+                    $contentType => [
+                        'schema' => [
+                            'type' => 'object',
+                            'properties' => [
+                                $propertyName => ['type' => 'string'],
+                            ],
+                        ],
+                    ],
+                ])
+            )
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function requestSchema(
+        OpenApi $openApi,
+        string $path,
+        string $operationName,
+        string $contentType
+    ): array {
+        $operation = $openApi->getPaths()->getPath($path)?->{'get' . $operationName}();
+        $content = $operation?->getRequestBody()?->getContent();
+
+        self::assertInstanceOf(ArrayObject::class, $content);
+
+        return $content[$contentType]['schema'];
     }
 }

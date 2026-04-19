@@ -3,6 +3,10 @@ services:
     autowire: true
     autoconfigure: true
 
+  Psr\Log\NullLogger: ~
+
+  logger: '@Psr\Log\NullLogger'
+
   Symfony\Contracts\Cache\CacheInterface:
     public: true
     class: Symfony\Component\Cache\Adapter\ArrayAdapter
@@ -12,8 +16,15 @@ services:
   App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy:
     public: true
 
+  App\Tests\Support\Memory\TrackedRequestHolder:
+    public: true
+
+  App\Tests\Support\Memory\TrackedRequestSubscriber: ~
+
   App\Tests\Behat\:
     resource: '../tests/Behat/*'
+    bind:
+      $customerCache: '@cache.customer'
 
   # Use sync event bus for integration tests (not async via SQS)
   App\Shared\Domain\Bus\Event\EventBusInterface:

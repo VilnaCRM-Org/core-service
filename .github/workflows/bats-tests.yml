@@ -87,13 +87,6 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start required services
         if: ${{ matrix.suite.needs_services }}
         run: make ensure-test-services
@@ -108,6 +101,10 @@ jobs:
 
       - name: Run Bats tests
         run: make bats BATS_FILES="${{ matrix.suite.path }}" BATS_ARGS='${{ matrix.suite.args }}'
+
+      - name: Stop services
+        if: ${{ always() && matrix.suite.needs_services }}
+        run: make down
 
   bats_core_tests:
     name: Run Bats Core Tests

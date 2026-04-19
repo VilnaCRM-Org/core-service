@@ -31,3 +31,24 @@ load 'bats-assert/load'
   run make negative-tests-with-coverage
   assert_success
 }
+
+@test "E2E workflow uses make-only Docker entrypoints" {
+  run cat .github/workflows/E2Etests.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make behat'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
+}
+
+@test "PHPUnit workflow uses make-only Docker entrypoints" {
+  run cat .github/workflows/tests.yml
+  assert_success
+  assert_output --partial 'run: make start'
+  assert_output --partial 'run: make coverage-xml'
+  assert_output --partial 'files: coverage/coverage.xml'
+  assert_output --partial 'run: make down'
+  refute_output --partial 'composer install'
+  refute_output --partial 'setup-php'
+}

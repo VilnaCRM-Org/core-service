@@ -33,6 +33,8 @@ runAverage=$3
 runStress=$4
 runSpike=$5
 htmlPrefix=${6:-}
+summaryExportPath=${K6_SUMMARY_EXPORT_PATH:-}
+disableWebDashboard=${K6_DISABLE_WEB_DASHBOARD:-false}
 
 # Read results directory from config
 CONFIG_FILE="./tests/Load/config.json.dist"
@@ -48,9 +50,36 @@ if [ -z "$RESULTS_DIR" ]; then
     exit 1
 fi
 
-K6="docker run --user $(id -u):$(id -g) -v ./tests/Load:/loadTests --net=host --rm \
-    k6 run --summary-trend-stats='avg,min,med,max,p(95),p(99)' \
-    --out 'web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html'"
+K6=(
+    docker run
+    --user "$(id -u):$(id -g)"
+    -v "./tests/Load:/loadTests"
+    --net=host
+    --rm
+    -e "K6_SKIP_DURATION_THRESHOLDS=${K6_SKIP_DURATION_THRESHOLDS:-}"
+    -e "LOAD_TEST_API_SCHEME=${LOAD_TEST_API_SCHEME:-https}"
+    -e "LOAD_TEST_API_HOST=${LOAD_TEST_API_HOST:-localhost}"
+    -e "LOAD_TEST_API_PORT=${LOAD_TEST_API_PORT:-443}"
+    -e "LOAD_TEST_FIXTURE_SUFFIX=${LOAD_TEST_FIXTURE_SUFFIX:-}"
+    k6 run
+    "--summary-trend-stats=avg,min,med,max,p(95),p(99)"
+)
+
+if [ "$disableWebDashboard" != "true" ]; then
+  K6+=(
+    --out "web-dashboard=period=1s&export=/loadTests/${RESULTS_DIR}/${htmlPrefix}${scenario_name}.html"
+  )
+fi
+
+if [ -n "$summaryExportPath" ]; then
+  K6+=(--summary-export "$summaryExportPath")
+fi
+
+if [ -n "${K6_EXTRA_ARGS:-}" ]; then
+  # shellcheck disable=SC2206
+  EXTRA_K6_ARGS=(${K6_EXTRA_ARGS})
+  K6+=("${EXTRA_K6_ARGS[@]}")
+fi
 
 # Prepare customers for all Customer scenarios EXCEPT create scenarios
 # Also include cachePerformance which needs pre-existing customers
@@ -62,17 +91,17 @@ if [[ $scenario_name != "createCustomer" \
       && $scenario_name != "prepareCustomers" \
       && $scenario_name != "cleanupCustomers" \
       && $scenario_name != "insertCustomers" ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomers.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomers.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
 # Prepare customer statuses for all CustomerStatus scenarios EXCEPT create scenarios
 if [[ $scenario_name != "createCustomerStatus" && $scenario_name != "graphQLCreateCustomerStatus" && $scenario_name == *CustomerStatus* ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomerStatuses.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomerStatuses.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
 # Prepare customer types for all CustomerType scenarios EXCEPT create scenarios
 if [[ $scenario_name != "createCustomerType" && $scenario_name != "graphQLCreateCustomerType" && $scenario_name == *CustomerType* ]]; then
-  eval "$K6" /loadTests/utils/prepareCustomerTypes.js -e scenarioName="${scenario_name}" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+  "${K6[@]}" /loadTests/utils/prepareCustomerTypes.js -e "scenarioName=${scenario_name}" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"
 fi
 
-eval "$K6" "/loadTests/scripts/${scenario_path}.js" -e run_smoke="${runSmoke}" -e run_average="${runAverage}" -e run_stress="${runStress}" -e run_spike="${runSpike}"
+"${K6[@]}" "/loadTests/scripts/${scenario_path}.js" -e "run_smoke=${runSmoke}" -e "run_average=${runAverage}" -e "run_stress=${runStress}" -e "run_spike=${runSpike}"

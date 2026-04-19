@@ -105,6 +105,24 @@ services:
     arguments:
       $delayMs: '%env(int:MESSENGER_RETRY_DELAY_MS)%'
 
+  App\Shared\Infrastructure\EventListener\ApiNotFoundProblemListener:
+    tags:
+      - {
+          name: 'kernel.event_listener',
+          event: 'kernel.exception',
+          method: 'onKernelException',
+          priority: 255,
+        }
+
+  App\Shared\Infrastructure\EventListener\ApiQueryParametersListener:
+    tags:
+      - {
+          name: 'kernel.event_listener',
+          event: 'kernel.request',
+          method: '__invoke',
+          priority: 512,
+        }
+
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
@@ -249,6 +267,10 @@ services:
       - { name: 'app.openapi_processor', priority: 100 }
 
   App\Shared\Application\OpenApi\Factory\Request\Customer\CreateCustomerRequestFactory:
+    arguments:
+      $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
+
+  App\Shared\Application\OpenApi\Factory\Request\Customer\ReplaceCustomerRequestFactory:
     arguments:
       $requestBuilder: '@App\Shared\Application\OpenApi\Builder\RequestBuilder'
 
