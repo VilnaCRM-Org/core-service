@@ -15,6 +15,7 @@ use App\Shared\Application\OpenApi\Processor\RequiredSchemaPropertyUpdater;
 use App\Shared\Application\OpenApi\Processor\SchemaNormalizer;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
+use ReflectionMethod;
 
 final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
 {
@@ -161,6 +162,153 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         self::assertSame($schemas, $updated->getComponents()->getSchemas());
     }
 
+    public function testUpdateIgnoresConfiguredSchemasWhenTheirDefinitionsAreEmpty(): void
+    {
+        $schemas = new ArrayObject([
+            'Customer.CustomerCreate' => [],
+        ]);
+        $openApi = new OpenApi(
+            new Info('VilnaCRM', '1.0.0', 'Spec under test'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        self::assertSame($openApi, $this->createUpdater()->update($openApi));
+    }
+
+    public function testSupportsPropertySchemaPatchAllowsNonStringSpecificKeywords(): void
+    {
+        $result = $this->invokeUpdaterMethod('supportsPropertySchemaPatch', [
+            ['type' => 'integer'],
+            ['default' => true],
+        ]);
+
+        self::assertTrue($result);
+    }
+
+    public function testSupportsPropertySchemaPatchRejectsStringSpecificKeywordsForNonStringProperties(): void
+    {
+        $result = $this->invokeUpdaterMethod('supportsPropertySchemaPatch', [
+            ['type' => 'integer'],
+            ['format' => 'iri-reference'],
+        ]);
+
+        self::assertFalse($result);
+    }
+
+    public function testMergePropertySchemaPatchReturnsNullWhenPropertyIsMissing(): void
+    {
+        $result = $this->invokeUpdaterMethod('mergePropertySchemaPatch', [
+            ['properties' => []],
+            'value',
+            ['default' => true],
+        ]);
+
+        self::assertNull($result);
+    }
+
+    public function testUpdatedRequiredSchemaMarksAddedRequiredPropertiesAsChanged(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedRequiredSchema', [
+            'Customer.CustomerPut',
+            [
+                'required' => ['initials'],
+                'properties' => [
+                    'confirmed' => ['type' => 'boolean'],
+                ],
+            ],
+        ]);
+
+        self::assertSame(['initials', 'confirmed'], $result[0]['required']);
+        self::assertTrue($result[1]);
+    }
+
+    public function testUpdatedPropertySchemaMarksNonNullableUpdatesWhenSchemaPatchIsEmpty(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedPropertySchema', [
+            [
+                'required' => ['confirmed'],
+                'properties' => [
+                    'confirmed' => ['type' => ['boolean', 'null']],
+                ],
+            ],
+            'confirmed',
+            [],
+        ]);
+
+        self::assertSame(
+            'boolean',
+            SchemaNormalizer::normalize($result[0]['properties'])['confirmed']['type']
+        );
+        self::assertTrue($result[1]);
+    }
+
+    public function testUpdatedPropertySchemaDoesNotReportChangesForNoOpSchemaPatches(): void
+    {
+        $schema = [
+            'properties' => [
+                'value' => [
+                    'type' => 'string',
+                    'minLength' => 1,
+                ],
+            ],
+        ];
+
+        $result = $this->invokeUpdaterMethod('updatedPropertySchema', [
+            $schema,
+            'value',
+            ['minLength' => 1],
+        ]);
+
+        self::assertSame($schema, $result[0]);
+        self::assertFalse($result[1]);
+    }
+
+    public function testEnsureRequiredPropertiesReturnsNullWhenNothingNeedsToBeAdded(): void
+    {
+        $result = $this->invokeUpdaterMethod('ensureRequiredProperties', [
+            ['required' => ['initials', 'confirmed']],
+            ['confirmed'],
+        ]);
+
+        self::assertNull($result);
+    }
+
+    public function testEnsureRequiredPropertiesPreservesExistingOrderAndRemovesDuplicates(): void
+    {
+        $result = $this->invokeUpdaterMethod('ensureRequiredProperties', [
+            ['required' => ['initials', 'phone']],
+            ['confirmed', 'status'],
+        ]);
+
+        self::assertSame(
+            ['initials', 'phone', 'confirmed', 'status'],
+            $result['required']
+        );
+        self::assertSame(
+            [0, 1, 2, 3],
+            array_keys($result['required'])
+        );
+    }
+
+    public function testEnsureRequiredPropertiesRemovesDuplicatesFromMergedValues(): void
+    {
+        $result = $this->invokeUpdaterMethod('ensureRequiredProperties', [
+            ['required' => ['initials', 'email']],
+            ['email', 'confirmed', 'status'],
+        ]);
+
+        self::assertSame(
+            ['initials', 'email', 'confirmed', 'status'],
+            $result['required']
+        );
+        self::assertSame(
+            [0, 1, 2, 3],
+            array_keys($result['required'])
+        );
+    }
+
     private function createUpdater(): OpenApiInputSchemaUpdater
     {
         return new OpenApiInputSchemaUpdater(
@@ -180,5 +328,15 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
                 SchemaNormalizer::normalize($schemas[$schemaName])['properties']
             )[$propertyName]
         );
+    }
+
+    /**
+     * @param array<int, mixed> $arguments
+     */
+    private function invokeUpdaterMethod(string $methodName, array $arguments)
+    {
+        $method = new ReflectionMethod(OpenApiInputSchemaUpdater::class, $methodName);
+
+        return $method->invokeArgs($this->createUpdater(), $arguments);
     }
 }

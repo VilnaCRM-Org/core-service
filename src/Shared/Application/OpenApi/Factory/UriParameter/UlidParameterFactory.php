@@ -42,6 +42,10 @@ abstract class UlidParameterFactory implements UriParameterFactoryInterface
         return $this->getExampleUlid();
     }
 
+    abstract protected function getDescription(): string;
+
+    abstract protected function getExampleUlid(): string;
+
     /**
      * @param array<int, string> $allowedUlids
      */
@@ -56,8 +60,4 @@ abstract class UlidParameterFactory implements UriParameterFactoryInterface
             $allowedUlids
         );
     }
-
-    abstract protected function getDescription(): string;
-
-    abstract protected function getExampleUlid(): string;
 }

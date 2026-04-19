@@ -115,6 +115,32 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->validate($email, new UniqueEmail());
     }
 
+    public function testValidateRejectsDuplicateEmailWhenCurrentRequestUlidIsDifferent(): void
+    {
+        $email = $this->faker->email();
+        $customer = $this->createCustomer($email);
+        $request = new Request();
+        $request->attributes->set('ulid', (string) new Ulid());
+        $this->requestStack->push($request);
+
+        $this->setupValidationExpectations($email, $customer);
+
+        $this->validator->validate($email, new UniqueEmail());
+    }
+
+    public function testValidateTreatsNonStringRequestUlidAsMissing(): void
+    {
+        $email = $this->faker->email();
+        $customer = $this->createCustomer($email);
+        $request = new Request();
+        $request->attributes->set('ulid', 123);
+        $this->requestStack->push($request);
+
+        $this->setupValidationExpectations($email, $customer);
+
+        $this->validator->validate($email, new UniqueEmail());
+    }
+
     private function createCustomer(
         string $email,
         ?string $ulid = null

@@ -110,31 +110,19 @@ final class OpenApiInputSchemaUpdater
     {
         $updatedSchemas = $schemas->getArrayCopy();
         $changed = false;
-
         foreach (self::INPUT_PROPERTY_SCHEMA_UPDATES as $schemaName => $propertySchemaUpdates) {
-            $schema = SchemaNormalizer::normalize($updatedSchemas[$schemaName] ?? []);
-
-            if ($schema === []) {
-                continue;
-            }
-
-            $updatedSchema = $this->updatedSchema(
+            $updatedSchema = $this->updatedSchemaFromCollection(
                 $schemaName,
-                $schema,
+                $updatedSchemas,
                 $propertySchemaUpdates
             );
-
             if ($updatedSchema === null) {
                 continue;
             }
-
             $updatedSchemas[$schemaName] = $updatedSchema;
             $changed = true;
         }
-
-        return $changed
-            ? $updatedSchemas
-            : null;
+        return $changed ? $updatedSchemas : null;
     }
 
     /**
@@ -148,44 +136,105 @@ final class OpenApiInputSchemaUpdater
         array $schema,
         array $propertySchemaUpdates
     ): ?array {
-        $updatedSchema = $schema;
-        $changed = false;
+        if ($schema === []) {
+            return null;
+        }
 
-        $schemaWithRequiredProperties = $this->ensureRequiredProperties(
+        [$updatedSchema, $requiredPropertiesChanged] = $this->updatedRequiredSchema(
+            $schemaName,
+            $schema
+        );
+        [$updatedSchema, $propertySchemasChanged] = $this->updatedPropertySchemas(
             $updatedSchema,
+            $propertySchemaUpdates
+        );
+        return $requiredPropertiesChanged || $propertySchemasChanged ? $updatedSchema : null;
+    }
+
+    /**
+     * @param array<int|string, SchemaValue> $schemas
+     * @param array<string, array<string, SchemaValue>> $propertySchemaUpdates
+     *
+     * @return array<string, SchemaValue>|null
+     */
+    private function updatedSchemaFromCollection(
+        string $schemaName,
+        array $schemas,
+        array $propertySchemaUpdates
+    ): ?array {
+        return $this->updatedSchema(
+            $schemaName,
+            SchemaNormalizer::normalize($schemas[$schemaName] ?? []),
+            $propertySchemaUpdates
+        );
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function updatedRequiredSchema(string $schemaName, array $schema): array
+    {
+        $updatedSchema = $this->ensureRequiredProperties(
+            $schema,
             self::REQUIRED_PROPERTIES_TO_ENFORCE[$schemaName] ?? []
         );
 
-        if ($schemaWithRequiredProperties !== null) {
-            $updatedSchema = $schemaWithRequiredProperties;
-            $changed = true;
-        }
+        return $updatedSchema === null
+            ? [$schema, false]
+            : [$updatedSchema, true];
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<string, array<string, SchemaValue>> $propertySchemaUpdates
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function updatedPropertySchemas(
+        array $schema,
+        array $propertySchemaUpdates
+    ): array {
+        $updatedSchema = $schema;
+        $changed = false;
 
         foreach ($propertySchemaUpdates as $propertyName => $schemaPatch) {
-            $nonNullableSchema = $this->propertyUpdater->update($updatedSchema, $propertyName);
-
-            if ($nonNullableSchema !== null) {
-                $updatedSchema = $nonNullableSchema;
-                $changed = true;
-            }
-
-            $patchedSchema = $this->mergePropertySchemaPatch(
+            [$updatedSchema, $propertyChanged] = $this->updatedPropertySchema(
                 $updatedSchema,
                 $propertyName,
                 $schemaPatch
             );
-
-            if ($patchedSchema === null) {
-                continue;
-            }
-
-            $updatedSchema = $patchedSchema;
-            $changed = true;
+            $changed = $changed || $propertyChanged;
         }
 
-        return $changed
-            ? $updatedSchema
-            : null;
+        return [$updatedSchema, $changed];
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<string, SchemaValue> $schemaPatch
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function updatedPropertySchema(
+        array $schema,
+        string $propertyName,
+        array $schemaPatch
+    ): array {
+        $nonNullableSchema = $this->propertyUpdater->update($schema, $propertyName);
+        $updatedSchema = $nonNullableSchema ?? $schema;
+        $patchedSchema = $this->mergePropertySchemaPatch(
+            $updatedSchema,
+            $propertyName,
+            $schemaPatch
+        );
+
+        if ($patchedSchema === null) {
+            return [$updatedSchema, $nonNullableSchema !== null];
+        }
+
+        return [$patchedSchema, true];
     }
 
     /**
@@ -198,10 +247,6 @@ final class OpenApiInputSchemaUpdater
         array $schema,
         array $requiredProperties
     ): ?array {
-        if ($requiredProperties === []) {
-            return null;
-        }
-
         $currentRequiredProperties = SchemaNormalizer::normalize($schema['required'] ?? []);
 
         if (array_diff($requiredProperties, $currentRequiredProperties) === []) {
@@ -229,10 +274,6 @@ final class OpenApiInputSchemaUpdater
         string $propertyName,
         array $schemaPatch
     ): ?array {
-        if ($schemaPatch === []) {
-            return null;
-        }
-
         $properties = SchemaNormalizer::normalize($schema['properties'] ?? []);
         $propertySchema = SchemaNormalizer::normalize($properties[$propertyName] ?? []);
 

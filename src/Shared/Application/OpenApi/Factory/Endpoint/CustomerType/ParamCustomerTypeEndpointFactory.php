@@ -50,37 +50,17 @@ final class ParamCustomerTypeEndpointFactory extends EndpointFactory
         ForbiddenResponseFactory $forbiddenResponseFactory,
         UnauthorizedResponseFactory $unauthorizedResponseFactory,
     ) {
-        $this->ulidPathParam =
-            $parameterFactory->getParameter();
-        $this->deleteUlidPathParam =
-            $parameterFactory->getDeleteParameter();
-
-        $this->updateCustomerTypeRequest =
-            $updateCustomerTypeRequestFactory->getRequest();
-
-        $this->validationResp =
-            $validationErrorResponseFactory->getResponse();
-
-        $this->badRequestResp =
-            $badRequestResponseFactory->getResponse();
-
-        $this->custTyNFResp =
-            $customerTypeNotFoundResponseFactory->getResponse();
-
-        $this->custTyDeletedResp =
-            $deletedResponseFactory->getResponse();
-
-        $this->replaceCustomerTypeRequest =
-            $replaceCustomerRequestFactory->getRequest();
-
-        $this->internalResp =
-            $internalErrorFactory->getResponse();
-
-        $this->forbiddenResp =
-            $forbiddenResponseFactory->getResponse();
-
-        $this->unauthorizedResp =
-            $unauthorizedResponseFactory->getResponse();
+        $this->ulidPathParam = $parameterFactory->getParameter();
+        $this->deleteUlidPathParam = $parameterFactory->getDeleteParameter();
+        $this->updateCustomerTypeRequest = $updateCustomerTypeRequestFactory->getRequest();
+        $this->validationResp = $validationErrorResponseFactory->getResponse();
+        $this->badRequestResp = $badRequestResponseFactory->getResponse();
+        $this->custTyNFResp = $customerTypeNotFoundResponseFactory->getResponse();
+        $this->custTyDeletedResp = $deletedResponseFactory->getResponse();
+        $this->replaceCustomerTypeRequest = $replaceCustomerRequestFactory->getRequest();
+        $this->internalResp = $internalErrorFactory->getResponse();
+        $this->forbiddenResp = $forbiddenResponseFactory->getResponse();
+        $this->unauthorizedResp = $unauthorizedResponseFactory->getResponse();
     }
 
     public function createEndpoint(OpenApi $openApi): void

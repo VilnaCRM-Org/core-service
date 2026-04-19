@@ -21,15 +21,46 @@ final class CustomerStatusFactoryTest extends TestCase
         parent::setUp();
 
         $this->parameterBuilder = $this->createMock(UriParameterBuilder::class);
-        $this->setupExpectedParameter();
-        $this->setupParameterBuilderMock();
         $this->factory = new CustomerStatusUlidParameterFactory($this->parameterBuilder);
     }
 
     public function testGetParameterReturnsCorrectParameter(): void
     {
+        $this->setupExpectedParameter();
+        $this->setupParameterBuilderMock();
+
         $actualParameter = $this->factory->getParameter();
         $this->assertSame($this->expectedParameter, $actualParameter);
+    }
+
+    public function testGetDeleteParameterReturnsDedicatedDeleteIdentifier(): void
+    {
+        $deleteParameter = new Parameter(
+            'ulid',
+            'query',
+            'CustomerStatus identifier',
+            true,
+            false,
+            false,
+            [
+                'default' => SchemathesisFixtures::DELETE_CUSTOMER_STATUS_ID,
+                'type' => 'string',
+            ]
+        );
+
+        $this->parameterBuilder->expects($this->once())
+            ->method('build')
+            ->with(
+                'ulid',
+                'CustomerStatus identifier',
+                true,
+                SchemathesisFixtures::DELETE_CUSTOMER_STATUS_ID,
+                'string',
+                [SchemathesisFixtures::DELETE_CUSTOMER_STATUS_ID]
+            )
+            ->willReturn($deleteParameter);
+
+        $this->assertSame($deleteParameter, $this->factory->getDeleteParameter());
     }
 
     private function setupExpectedParameter(): void

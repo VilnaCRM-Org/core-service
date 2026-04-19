@@ -191,6 +191,74 @@ final class RequestBodyPathUpdaterTest extends UnitTestCase
         );
     }
 
+    public function testUpdateContinuesPastOperationsThatDoNotNeedChanges(): void
+    {
+        $pathItem = (new PathItem())
+            ->withPut(
+                new Operation(
+                    requestBody: new RequestBody(
+                        content: new ArrayObject([
+                            'application/ld+json' => [
+                                'schema' => [
+                                    '$ref' => '#/components/schemas/CustomerType.TypePut',
+                                ],
+                            ],
+                        ])
+                    )
+                )
+            )
+            ->withPatch(
+                new Operation(
+                    requestBody: new RequestBody(
+                        content: new ArrayObject([
+                            'application/merge-patch+json' => [
+                                'schema' => ['type' => 'object'],
+                            ],
+                        ])
+                    )
+                )
+            );
+
+        $updated = $this->createUpdater()->update($pathItem, [
+            'Put' => '#/components/schemas/CustomerType.TypePut',
+            'Patch' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch',
+        ]);
+
+        self::assertSame(
+            ['$ref' => '#/components/schemas/CustomerType.TypePut'],
+            $updated->getPut()?->getRequestBody()?->getContent()['application/ld+json']['schema']
+        );
+        self::assertSame(
+            ['$ref' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch'],
+            $updated->getPatch()?->getRequestBody()?->getContent()['application/merge-patch+json']['schema']
+        );
+    }
+
+    public function testUpdateContinuesPastUnknownOperationsBeforeApplyingKnownOnes(): void
+    {
+        $pathItem = (new PathItem())->withPatch(
+            new Operation(
+                requestBody: new RequestBody(
+                    content: new ArrayObject([
+                        'application/merge-patch+json' => [
+                            'schema' => ['type' => 'object'],
+                        ],
+                    ])
+                )
+            )
+        );
+
+        $updated = $this->createUpdater()->update($pathItem, [
+            'Post' => '#/components/schemas/CustomerType.TypeCreate',
+            'Patch' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch',
+        ]);
+
+        self::assertSame(
+            ['$ref' => '#/components/schemas/CustomerType.TypePatch.jsonMergePatch'],
+            $updated->getPatch()?->getRequestBody()?->getContent()['application/merge-patch+json']['schema']
+        );
+    }
+
     private function createUpdater(): RequestBodyPathUpdater
     {
         return new RequestBodyPathUpdater(
