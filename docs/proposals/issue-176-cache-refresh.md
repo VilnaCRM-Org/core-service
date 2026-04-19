@@ -82,6 +82,15 @@ The refresh message should carry only the data needed to rebuild a cache family,
 - resource id or normalized filter hash
 - triggering event id
 - causation metadata for logs and metrics
+- deduplication key, stable for the cache family, target resource, and triggering event
+- event occurrence timestamp for stale-message detection
+- entity version or another monotonic sequence token for ordering checks
+
+Handlers must be idempotent. They must ignore SQS retries with the same deduplication key inside the configured deduplication window, and they must drop stale refreshes when ordering data shows the message has already been superseded by a newer event for the same cache target. The minimum rule is:
+
+- drop when `entity_version <= last_applied_version` for the same cache target
+- if no version exists, drop when `event_occurred_at` is older than the last applied refresh timestamp
+- record a `refresh skipped as stale` metric whenever this happens
 
 ### 3. Domain Events Drive Both Invalidation and Refresh Scheduling
 
@@ -91,6 +100,12 @@ Customer-created, updated, and deleted events should map to affected cache famil
 2. Dispatch a refresh message for the keys that should become warm again.
 
 This keeps writes non-blocking while ensuring warm caches are restored by workers instead of the next user request.
+
+`TagAwareCacheInterface::invalidateTags()` must stay best-effort and non-blocking on the write path:
+
+- catch and log `Psr\Cache\InvalidArgumentException` and any other thrown exception
+- treat a `false` return value as a warning and emit logs and metrics for it
+- never fail the originating write command because cache-tag invalidation could not complete
 
 ### 4. Keep Query Logic Canonical
 
@@ -108,6 +123,12 @@ Add metrics and logs for:
 - refresh failed
 - refresh skipped because newer event already superseded it
 - queue lag and retry count
+
+Logging and privacy rule:
+
+- do not log raw refresh payloads, customer emails, or other PII
+- log only policy ids, event ids, hashed or truncated cache target identifiers, and bounded error metadata
+- metrics labels must use sanitized identifiers only; no raw payload fields may be emitted
 
 ## Default TTL Matrix
 
