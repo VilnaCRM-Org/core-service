@@ -7,6 +7,13 @@ namespace App\Tests\Integration;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
+use App\Core\Customer\Domain\Factory\CustomerFactoryInterface;
+use App\Core\Customer\Domain\Factory\StatusFactoryInterface;
+use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
+use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Shared\Infrastructure\Factory\UlidFactory;
 
 final class CustomerApiTest extends BaseApiCase
 {
@@ -456,6 +463,50 @@ final class CustomerApiTest extends BaseApiCase
             'initials: This value is too long',
             $error['detail']
         );
+    }
+
+    public function testPatchRepositorySeededCustomerWithScalarFieldsOnly(): void
+    {
+        $customerId = (string) $this->faker->ulid();
+        $ulidFactory = $this->container->get(UlidFactory::class);
+        $typeFactory = $this->container->get(TypeFactoryInterface::class);
+        $statusFactory = $this->container->get(StatusFactoryInterface::class);
+        $customerFactory = $this->container->get(CustomerFactoryInterface::class);
+        $typeRepository = $this->container->get(TypeRepositoryInterface::class);
+        $statusRepository = $this->container->get(StatusRepositoryInterface::class);
+        $customerRepository = $this->container->get(CustomerRepositoryInterface::class);
+
+        $type = $typeFactory->create('seeded-type', $ulidFactory->create($customerId));
+        $status = $statusFactory->create('seeded-status', $ulidFactory->create($customerId));
+
+        $typeRepository->save($type);
+        $statusRepository->save($status);
+
+        $customer = $customerFactory->create(
+            'Seeded Customer',
+            $this->faker->unique()->safeEmail(),
+            '+1234567890',
+            'Seeded',
+            $type,
+            $status,
+            true,
+            $ulidFactory->create($customerId)
+        );
+        $customerRepository->save($customer);
+
+        $client = self::createClient();
+        $client->request('PATCH', "/api/customers/{$customerId}", [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode([
+                'phone' => '0987654321',
+                'leadSource' => 'Facebook',
+            ]),
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = (self::createClient()->request('GET', "/api/customers/{$customerId}"))->toArray();
+        $this->assertSame('0987654321', $data['phone']);
+        $this->assertSame('Facebook', $data['leadSource']);
     }
 
     public function testPatchCustomerWithInvalidEmail(): void

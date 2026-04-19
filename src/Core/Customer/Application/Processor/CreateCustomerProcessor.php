@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Core\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
@@ -21,7 +21,7 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
     public function __construct(
         private CommandBusInterface $commandBus,
         private CreateCustomerFactoryInterface $createCustomerFactory,
-        private IriConverterInterface $iriConverter,
+        private CustomerReferenceResolver $referenceResolver,
         private CustomerTransformerInterface $transformer,
     ) {
     }
@@ -37,10 +37,8 @@ final readonly class CreateCustomerProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
-        $customerStatusEntity = $this->iriConverter
-            ->getResourceFromIri($data->status);
-        $customerTypeEntity = $this->iriConverter
-            ->getResourceFromIri($data->type);
+        $customerStatusEntity = $this->referenceResolver->resolveStatus($data->status);
+        $customerTypeEntity = $this->referenceResolver->resolveType($data->type);
         $customer = $this->transformer->transform(
             $data->initials,
             $data->email,

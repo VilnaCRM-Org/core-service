@@ -32,6 +32,10 @@ We run performance tests locally using the repository Docker Compose setup (not 
 
 Here you will find the results of load tests for each Core Service endpoint, with a graph, that shows how execution parameters were changing over time for different load scenarios. Also, the metric for Spike testing will be provided, alongside a table, that will show the most important of them.
 
+Reference-data GraphQL collection benchmarks should use matching selection sets when compared against each other. The current load scripts standardize `customerTypes(first: 10)` and `customerStatuses(first: 10)` on `edges.node { id value ulid }` so the results are not skewed by `pageInfo`/`totalCount` overhead on only one query.
+
+Recent write-path tuning also avoids re-resolving unchanged `type` and `status` relations during customer PATCH/update flows, resolves create/PUT relation IRIs through typed repositories by ULID, and adds compound `(value, ulid)` indexes for `customer_types` and `customer_statuses` collection ordering.
+
 Each endpoint was tested for smoke, average, stress, and spike load scenarios. You can learn more about them [here](https://grafana.com/docs/k6/latest/testing-guides/test-types/).
 Also, you can find HTML files with load test reports [here](https://github.com/VilnaCRM-Org/core-service/tree/main/tests/Load/results)
 

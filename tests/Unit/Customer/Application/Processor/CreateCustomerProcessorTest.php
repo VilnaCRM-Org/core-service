@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Application\Command\CreateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerCreate;
 use App\Core\Customer\Application\Factory\CreateCustomerFactoryInterface;
 use App\Core\Customer\Application\Processor\CreateCustomerProcessor;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
 use App\Core\Customer\Application\Transformer\CustomerTransformerInterface;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
@@ -22,7 +22,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private CreateCustomerFactoryInterface|MockObject $factory;
-    private IriConverterInterface|MockObject $iriConverter;
+    private CustomerReferenceResolver|MockObject $referenceResolver;
     private CustomerTransformerInterface|MockObject $transformer;
     private CreateCustomerProcessor $processor;
 
@@ -34,7 +34,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $this->factory = $this->createMock(
             CreateCustomerFactoryInterface::class
         );
-        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->referenceResolver = $this->createMock(CustomerReferenceResolver::class);
         $this->transformer = $this->createMock(
             CustomerTransformerInterface::class
         );
@@ -42,7 +42,7 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $this->processor = new CreateCustomerProcessor(
             $this->commandBus,
             $this->factory,
-            $this->iriConverter,
+            $this->referenceResolver,
             $this->transformer,
         );
     }
@@ -56,10 +56,8 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         $status = $this->createMock(CustomerStatus::class);
         $customerEntity = $this->createMock(Customer::class);
 
-        $this->testIriConvertor($dto, $type, $status);
-
+        $this->setupReferenceResolver($dto, $type, $status);
         $this->testTransformerIsCalled($dto, $type, $status, $customerEntity);
-
         $this->testFactoryAndDispatchAreCalled($customerEntity);
 
         $result = $this->processor->process($dto, $operation);
@@ -80,29 +78,21 @@ final class CreateCustomerProcessorTest extends UnitTestCase
         );
     }
 
-    private function testIriConvertor(
+    private function setupReferenceResolver(
         CustomerCreate $dto,
         CustomerType $type,
         CustomerStatus $status
     ): void {
-        $this->iriConverter
-            ->expects(self::exactly(2))
-            ->method('getResourceFromIri')
-            ->willReturnCallback(static function (
-                string $iri
-            ) use (
-                $dto,
-                $type,
-                $status
-            ) {
-                return match ($iri) {
-                    $dto->type => $type,
-                    $dto->status => $status,
-                    default => throw new \InvalidArgumentException(
-                        'Unexpected IRI'
-                    ),
-                };
-            });
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($dto->type)
+            ->willReturn($type);
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveStatus')
+            ->with($dto->status)
+            ->willReturn($status);
     }
 
     private function testFactoryAndDispatchAreCalled(

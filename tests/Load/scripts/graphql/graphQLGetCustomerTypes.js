@@ -38,15 +38,9 @@ export default function getCustomerTypes(data) {
           node {
             id
             value
+            ulid
           }
         }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        totalCount
       }
     }`;
 

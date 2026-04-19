@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Transformer;
 
-use ApiPlatform\Metadata\IriConverterInterface;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
@@ -17,16 +17,16 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 {
     public function testResolveTypeWithProvidedIri(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $customerType = $this->createMock(CustomerType::class);
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveType')
             ->with($typeIri)
             ->willReturn($customerType);
 
@@ -37,38 +37,43 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveTypeWithNullIriUsesDefault(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
-        $customerType = $this->createMock(CustomerType::class);
-        $typeUlid = $this->faker->uuid();
-
         $existingType = $this->createMock(CustomerType::class);
-        $existingType->method('getUlid')->willReturn($typeUlid);
-        $customer->method('getType')->willReturn($existingType);
+        $reloadedType = $this->createMock(CustomerType::class);
+        $typeUlid = (string) $this->faker->ulid();
 
-        $expectedIri = '/api/customer_types/' . $typeUlid;
-        $this->setupIriConverter($iriConverter, $existingType, $expectedIri, $customerType);
+        $existingType
+            ->expects(self::once())
+            ->method('getUlid')
+            ->willReturn($typeUlid);
+        $customer->method('getType')->willReturn($existingType);
+        $referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($typeUlid)
+            ->willReturn($reloadedType);
 
         $result = $resolver->resolveType(null, $customer);
 
-        self::assertSame($customerType, $result);
+        self::assertSame($reloadedType, $result);
     }
 
-    public function testResolveTypeThrowsWhenInvalidResourceReturned(): void
+    public function testResolveTypeThrowsWhenResolverFails(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $typeIri = '/api/customer_types/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveType')
             ->with($typeIri)
-            ->willReturn(new \stdClass());
+            ->willThrowException(CustomerTypeNotFoundException::withIri($typeIri));
 
         $this->expectException(CustomerTypeNotFoundException::class);
         $resolver->resolveType($typeIri, $customer);
@@ -76,16 +81,16 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithProvidedIri(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveStatus')
             ->with($statusIri)
             ->willReturn($customerStatus);
 
@@ -96,59 +101,45 @@ final class CustomerRelationTransformerTest extends UnitTestCase
 
     public function testResolveStatusWithNullIriUsesDefault(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
-        $customerStatus = $this->createMock(CustomerStatus::class);
-        $statusUlid = $this->faker->uuid();
-
         $existingStatus = $this->createMock(CustomerStatus::class);
-        $existingStatus->method('getUlid')->willReturn($statusUlid);
-        $customer->method('getStatus')->willReturn($existingStatus);
+        $reloadedStatus = $this->createMock(CustomerStatus::class);
+        $statusUlid = (string) $this->faker->ulid();
 
-        $expectedIri = '/api/customer_statuses/' . $statusUlid;
-        $this->setupIriConverter($iriConverter, $existingStatus, $expectedIri, $customerStatus);
+        $existingStatus
+            ->expects(self::once())
+            ->method('getUlid')
+            ->willReturn($statusUlid);
+        $customer->method('getStatus')->willReturn($existingStatus);
+        $referenceResolver
+            ->expects(self::once())
+            ->method('resolveStatus')
+            ->with($statusUlid)
+            ->willReturn($reloadedStatus);
 
         $result = $resolver->resolveStatus(null, $customer);
 
-        self::assertSame($customerStatus, $result);
+        self::assertSame($reloadedStatus, $result);
     }
 
-    public function testResolveStatusThrowsWhenInvalidResourceReturned(): void
+    public function testResolveStatusThrowsWhenResolverFails(): void
     {
-        $iriConverter = $this->createMock(IriConverterInterface::class);
-        $resolver = new CustomerRelationTransformer($iriConverter);
+        $referenceResolver = $this->createMock(CustomerReferenceResolver::class);
+        $resolver = new CustomerRelationTransformer($referenceResolver);
 
         $customer = $this->createMock(Customer::class);
         $statusIri = '/api/customer_statuses/' . $this->faker->uuid();
 
-        $iriConverter
+        $referenceResolver
             ->expects(self::once())
-            ->method('getResourceFromIri')
+            ->method('resolveStatus')
             ->with($statusIri)
-            ->willReturn(new \stdClass());
+            ->willThrowException(CustomerStatusNotFoundException::withIri($statusIri));
 
         $this->expectException(CustomerStatusNotFoundException::class);
         $resolver->resolveStatus($statusIri, $customer);
-    }
-
-    private function setupIriConverter(
-        IriConverterInterface $iriConverter,
-        object $resource,
-        string $iri,
-        object $returnedResource
-    ): void {
-        $iriConverter
-            ->expects(self::once())
-            ->method('getIriFromResource')
-            ->with($resource)
-            ->willReturn($iri);
-
-        $iriConverter
-            ->expects(self::once())
-            ->method('getResourceFromIri')
-            ->with($iri)
-            ->willReturn($returnedResource);
     }
 }

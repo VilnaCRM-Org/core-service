@@ -71,6 +71,11 @@ Load test parameters are configured in `config.json.dist`:
 - **Replace operations**: PUT for full replacement
 - **Delete operations**: DELETE with proper cleanup
 
+### Benchmark Parity
+
+- Keep GraphQL collection benchmarks comparable by using the same page size and selection set when measuring similar resources.
+- The reference-data collection scripts for `customerTypes` and `customerStatuses` intentionally use `edges.node { id value ulid }` without `pageInfo` or `totalCount` so their latency can be compared directly.
+
 ### Smart Resource Management
 
 - Setup/teardown for test data

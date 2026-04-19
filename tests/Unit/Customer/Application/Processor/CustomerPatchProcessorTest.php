@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Processor;
 
-use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Core\Customer\Application\Command\UpdateCustomerCommand;
 use App\Core\Customer\Application\DTO\CustomerPatch;
 use App\Core\Customer\Application\Factory\UpdateCustomerCommandFactoryInterface;
 use App\Core\Customer\Application\Processor\CustomerPatchProcessor;
 use App\Core\Customer\Application\Resolver\CustomerPatchUpdateResolver;
+use App\Core\Customer\Application\Resolver\CustomerReferenceResolver;
 use App\Core\Customer\Application\Resolver\CustomerUpdateScalarResolver;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformer;
 use App\Core\Customer\Application\Transformer\CustomerRelationTransformerInterface;
@@ -30,17 +30,13 @@ final class CustomerPatchProcessorTest extends UnitTestCase
 {
     private CommandBusInterface|MockObject $commandBus;
     private UpdateCustomerCommandFactoryInterface|MockObject $factory;
-    private IriConverterInterface|MockObject $iriConverter;
+    private CustomerReferenceResolver|MockObject $referenceResolver;
     private CustomerRelationTransformerInterface $relationTransformer;
     private CustomerRepositoryInterface|MockObject $repository;
     private CustomerPatchUpdateResolver $patchUpdateResolver;
     private PatchUlidExtractor $patchUlidExtractor;
     private CustomerPatchProcessor $processor;
     private UlidFactory $ulidFactory;
-    /** @var array<string, object> */
-    private array $iriResourceMap;
-    /** @var array<string, string> */
-    private array $resourceToIri;
 
     protected function setUp(): void
     {
@@ -48,41 +44,13 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->commandBus = $this->createMock(CommandBusInterface::class);
         $this->factory = $this
             ->createMock(UpdateCustomerCommandFactoryInterface::class);
-        $this->iriConverter = $this->createMock(IriConverterInterface::class);
+        $this->referenceResolver = $this->createMock(CustomerReferenceResolver::class);
         $this->repository = $this
             ->createMock(CustomerRepositoryInterface::class);
         $this->ulidFactory = new UlidFactory();
-        $this->iriResourceMap = [];
-        $this->resourceToIri = [];
-
-        $this->iriConverter
-            ->method('getResourceFromIri')
-            ->willReturnCallback(function (string $iri): object {
-                if (! array_key_exists($iri, $this->iriResourceMap)) {
-                    throw new \InvalidArgumentException(
-                        sprintf('Unknown IRI "%s"', $iri)
-                    );
-                }
-
-                return $this->iriResourceMap[$iri];
-            });
-
-        $this->iriConverter
-            ->method('getIriFromResource')
-            ->willReturnCallback(function (object $resource): string {
-                $hash = spl_object_hash($resource);
-
-                if (! isset($this->resourceToIri[$hash])) {
-                    $generatedIri = sprintf('/resources/%s', $hash);
-                    $this->resourceToIri[$hash] = $generatedIri;
-                    $this->iriResourceMap[$generatedIri] = $resource;
-                }
-
-                return $this->resourceToIri[$hash];
-            });
 
         $this->relationTransformer = new CustomerRelationTransformer(
-            $this->iriConverter
+            $this->referenceResolver
         );
 
         $this->patchUpdateResolver = new CustomerPatchUpdateResolver(
@@ -274,23 +242,44 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $customer->method('getStatus')->willReturn($status);
     }
 
-    private function setupIriConverter(
+    private function setupReferenceResolver(
         CustomerPatch $dto,
-        CustomerType $type,
-        CustomerStatus $status
+        CustomerType $existingType,
+        CustomerType $resolvedType,
+        CustomerStatus $existingStatus,
+        CustomerStatus $resolvedStatus
     ): void {
-        $this->registerIri($dto->type, $type);
-        $this->registerIri($dto->status, $status);
-    }
+        $typeLookup = $dto->type;
 
-    private function registerIri(?string $iri, object $resource): void
-    {
-        if ($iri === null) {
-            return;
+        if ($typeLookup === null) {
+            $typeLookup = (string) $this->faker->ulid();
+            $existingType
+                ->expects(self::once())
+                ->method('getUlid')
+                ->willReturn($typeLookup);
         }
 
-        $this->iriResourceMap[$iri] = $resource;
-        $this->resourceToIri[spl_object_hash($resource)] = $iri;
+        $statusLookup = $dto->status;
+
+        if ($statusLookup === null) {
+            $statusLookup = (string) $this->faker->ulid();
+            $existingStatus
+                ->expects(self::once())
+                ->method('getUlid')
+                ->willReturn($statusLookup);
+        }
+
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveType')
+            ->with($typeLookup)
+            ->willReturn($resolvedType);
+
+        $this->referenceResolver
+            ->expects(self::once())
+            ->method('resolveStatus')
+            ->with($statusLookup)
+            ->willReturn($resolvedStatus);
     }
 
     private function isUpdateValid(
@@ -305,8 +294,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             'newEmail' => $dto->email ?? $customer->getEmail(),
             'newPhone' => $dto->phone ?? $customer->getPhone(),
             'newLeadSource' => $dto->leadSource ?? $customer->getLeadSource(),
-            'newType' => $dto->type ? $type : $customer->getType(),
-            'newStatus' => $dto->status ? $status : $customer->getStatus(),
+            'newType' => $type,
+            'newStatus' => $status,
             'newConfirmed' => $dto->confirmed ?? $customer->isConfirmed(),
         ];
         return get_object_vars($update) === $expected;
@@ -377,8 +366,8 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $uriVars = ['ulid' => $ulidStr];
         $currentType = $this->createMock(CustomerType::class);
         $currentStatus = $this->createMock(CustomerStatus::class);
-        $type = $this->createMock(CustomerType::class);
-        $status = $this->createMock(CustomerStatus::class);
+        $resolvedType = $this->createMock(CustomerType::class);
+        $resolvedStatus = $this->createMock(CustomerStatus::class);
         $customer = $this->createMock(Customer::class);
         $command = $this->createMock(UpdateCustomerCommand::class);
         $this->setupCustomer(
@@ -392,8 +381,20 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             $currentStatus
         );
         $this->setupRepository($ulid, $customer);
-        $this->setupIriConverter($dto, $type, $status);
-        $this->setupDependencies($dto, $type, $status, $customer, $command);
+        $this->setupReferenceResolver(
+            $dto,
+            $currentType,
+            $resolvedType,
+            $currentStatus,
+            $resolvedStatus
+        );
+        $this->setupDependencies(
+            $dto,
+            $resolvedType,
+            $resolvedStatus,
+            $customer,
+            $command
+        );
         return [$dto, $operation, $uriVars, $customer];
     }
 
@@ -407,8 +408,10 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         array $exData
     ): array {
         [$operation, $uriVars, $ulid] = $this->createOperationContext();
-        $exType = $this->createMock(CustomerType::class);
-        $exStatus = $this->createMock(CustomerStatus::class);
+        $existingType = $this->createMock(CustomerType::class);
+        $existingStatus = $this->createMock(CustomerStatus::class);
+        $resolvedType = $this->createMock(CustomerType::class);
+        $resolvedStatus = $this->createMock(CustomerStatus::class);
         $customer = $this->createMock(Customer::class);
         $this->setupCustomer(
             $customer,
@@ -417,11 +420,23 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             $exData['phone'],
             $exData['leadSource'],
             $exData['confirmed'],
-            $exType,
-            $exStatus,
+            $existingType,
+            $existingStatus,
         );
         $this->setupRepository($ulid, $customer);
-        $this->expectUpdateCommand($dto, $exType, $exStatus, $customer);
+        $this->setupReferenceResolver(
+            $dto,
+            $existingType,
+            $resolvedType,
+            $existingStatus,
+            $resolvedStatus
+        );
+        $this->expectUpdateCommand(
+            $dto,
+            $resolvedType,
+            $resolvedStatus,
+            $customer
+        );
         return [$dto, $operation, $uriVars, $customer];
     }
 
