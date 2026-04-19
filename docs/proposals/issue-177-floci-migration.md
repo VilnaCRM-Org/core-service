@@ -45,13 +45,13 @@ This is enough to justify a migration attempt. It is not enough to justify blind
 
 The migration should validate the exact surface we use locally:
 
-| Service | Why this repo needs it locally | Current touch points | Floci claims |
-| --- | --- | --- | --- |
-| SQS | Symfony Messenger async domain events and workers | `config/packages/messenger.yaml`, `config/services.yaml` | Supported |
-| S3 | local-mode AWS helper scripts for load-test artifacts and bucket operations | `tests/Load/*.sh` | Supported |
-| IAM | helper scripts create roles, policies, and instance profiles | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
-| STS | helper scripts and auth validation | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
-| EC2 | helper scripts launch and inspect load-test infrastructure in local mode | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported |
+| Service | Why this repo needs it locally                                              | Current touch points                                            | Floci claims |
+| ------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------ |
+| SQS     | Symfony Messenger async domain events and workers                           | `config/packages/messenger.yaml`, `config/services.yaml`        | Supported    |
+| S3      | local-mode AWS helper scripts for load-test artifacts and bucket operations | `tests/Load/*.sh`                                               | Supported    |
+| IAM     | helper scripts create roles, policies, and instance profiles                | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported    |
+| STS     | helper scripts and auth validation                                          | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported    |
+| EC2     | helper scripts launch and inspect load-test infrastructure in local mode    | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Supported    |
 
 ## Migration Principles
 
