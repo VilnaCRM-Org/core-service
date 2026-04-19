@@ -25,6 +25,7 @@ jobs:
             frankenphp_enable_watch: '0'
             frankenphp_site_config: ''
             frankenphp_worker_config: ''
+            worker_memory_warmup_iterations: '2'
             soak_iterations: '2'
             run_memory_suite: false
           - job_name: Memory leak tests (test env)
@@ -34,6 +35,7 @@ jobs:
             frankenphp_enable_watch: '0'
             frankenphp_site_config: ''
             frankenphp_worker_config: ''
+            worker_memory_warmup_iterations: '1'
             soak_iterations: '3'
             run_memory_suite: true
           - job_name: Memory leak tests (prod env)
@@ -43,6 +45,7 @@ jobs:
             frankenphp_enable_watch: '0'
             frankenphp_site_config: ''
             frankenphp_worker_config: ''
+            worker_memory_warmup_iterations: '1'
             soak_iterations: '2'
             run_memory_suite: false
     env:
@@ -54,6 +57,7 @@ jobs:
       FRANKENPHP_SITE_CONFIG: ${{ matrix.frankenphp_site_config }}
       FRANKENPHP_WORKER_CONFIG: ${{ matrix.frankenphp_worker_config }}
       FRANKENPHP_LOOP_MAX: 500
+      WORKER_MEMORY_WARMUP_ITERATIONS: ${{ matrix.worker_memory_warmup_iterations }}
       SOAK_ITERATIONS: ${{ matrix.soak_iterations }}
     steps:
       - name: Checkout Repository

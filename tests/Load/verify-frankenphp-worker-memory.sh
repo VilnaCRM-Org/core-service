@@ -2,9 +2,12 @@
 set -euo pipefail
 
 loops=${SOAK_ITERATIONS:-3}
+warmup_iterations=${WORKER_MEMORY_WARMUP_ITERATIONS:-1}
 service=${WORKER_MEMORY_SERVICE:-php}
 report_path=${WORKER_MEMORY_REPORT:-tests/Load/results/frankenphp-worker-memory.txt}
 allowed_growth_mib=${WORKER_MEMORY_ALLOWED_GROWTH_MIB:-32}
+memory_sample_count=${WORKER_MEMORY_SAMPLE_COUNT:-5}
+memory_sample_delay_seconds=${WORKER_MEMORY_SAMPLE_DELAY_SECONDS:-1}
 
 if [[ -n "${WORKER_MEMORY_SOAK_SCENARIOS:-}" ]]; then
     soak_scenarios=${WORKER_MEMORY_SOAK_SCENARIOS}
@@ -14,6 +17,16 @@ fi
 
 if ! [[ "$loops" =~ ^[1-9][0-9]*$ ]]; then
     echo "SOAK_ITERATIONS must be a positive integer. Received: '$loops'." >&2
+    exit 1
+fi
+
+if ! [[ "$warmup_iterations" =~ ^[1-9][0-9]*$ ]]; then
+    echo "WORKER_MEMORY_WARMUP_ITERATIONS must be a positive integer. Received: '$warmup_iterations'." >&2
+    exit 1
+fi
+
+if ! [[ "$memory_sample_count" =~ ^[1-9][0-9]*$ ]]; then
+    echo "WORKER_MEMORY_SAMPLE_COUNT must be a positive integer. Received: '$memory_sample_count'." >&2
     exit 1
 fi
 
@@ -70,17 +83,29 @@ run_soak_iteration() {
 }
 
 measure_memory() {
-    local raw_usage mib_usage
+    local raw_usage mib_usage attempt median_index
+    local -a samples sorted_samples
 
-    raw_usage=$(docker stats --no-stream --format '{{.MemUsage}}' "$container_id" | head -n 1)
+    for attempt in $(seq 1 "$memory_sample_count"); do
+        raw_usage=$(docker stats --no-stream --format '{{.MemUsage}}' "$container_id" | head -n 1)
 
-    if [[ -z "$raw_usage" ]]; then
-        echo "Unable to collect docker stats for container '$container_id'." >&2
-        exit 1
-    fi
+        if [[ -z "$raw_usage" ]]; then
+            echo "Unable to collect docker stats for container '$container_id'." >&2
+            exit 1
+        fi
 
-    mib_usage=$(parse_mib "$raw_usage")
-    printf '%s|%s\n' "$mib_usage" "$raw_usage"
+        mib_usage=$(parse_mib "$raw_usage")
+        samples+=("$mib_usage|$raw_usage")
+
+        if [ "$attempt" -lt "$memory_sample_count" ]; then
+            sleep "$memory_sample_delay_seconds"
+        fi
+    done
+
+    mapfile -t sorted_samples < <(printf '%s\n' "${samples[@]}" | sort -t'|' -k1,1g)
+    median_index=$(( (memory_sample_count - 1) / 2 ))
+
+    printf '%s\n' "${sorted_samples[$median_index]}"
 }
 
 declare -a samples=()
@@ -90,7 +115,9 @@ cold_baseline_raw=${cold_baseline_sample#*|}
 
 printf 'cold_baseline_rss=%s\n' "$cold_baseline_raw" | tee -a "$report_path"
 
-run_soak_iteration "warmup"
+for warmup_iteration in $(seq 1 "$warmup_iterations"); do
+    run_soak_iteration "warmup ${warmup_iteration}/${warmup_iterations}"
+done
 
 baseline_sample=$(measure_memory)
 baseline=${baseline_sample%%|*}
@@ -130,6 +157,8 @@ done
     printf 'delta_mib=%s\n' "$delta"
     printf 'cold_to_final_delta_mib=%s\n' "$cold_to_final_delta"
     printf 'allowed_growth_mib=%s\n' "$allowed_growth_mib"
+    printf 'warmup_iterations=%s\n' "$warmup_iterations"
+    printf 'memory_sample_count=%s\n' "$memory_sample_count"
     printf 'monotonic_growth=%s\n' "$monotonic_growth"
 } | tee -a "$report_path"
 
