@@ -150,9 +150,9 @@ These defaults are proposed starting points for CRM traffic and should be tuned 
 
 Interpretation:
 
-- `fresh TTL` is the normal serve-from-cache window.
-- `hard TTL` is the maximum stale window during refresh failures or dependency brownouts.
-- `jitter` is applied at write time to avoid synchronized expiry bursts.
+- `fresh TTL` defines the normal serve-from-cache window.
+- `hard TTL` sets the maximum stale window during refresh failures or dependency brownouts.
+- Apply `jitter` at write time to avoid synchronized expiry bursts.
 
 ## Event-to-Cache Mapping
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\EventDispatcher;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -32,16 +33,24 @@ final class MalformedQueryStringSanitizerSubscriber implements EventSubscriberIn
         }
 
         $request = $event->getRequest();
-        $queryString = (string) $request->server->get('QUERY_STRING', '');
+        $queryString = $request->server->get('QUERY_STRING', '');
 
-        if ($queryString !== '') {
-            $sanitizedQueryString = $this->queryStringSanitizer->sanitize($queryString);
+        if (! is_string($queryString)) {
+            $request->server->set('QUERY_STRING', '');
+            $request->query->replace([]);
 
-            if ($sanitizedQueryString !== $queryString) {
-                $request->server->set('QUERY_STRING', $sanitizedQueryString);
-                parse_str($sanitizedQueryString, $parameters);
-                $request->query->replace($parameters);
-            }
+            return;
+        }
+
+        if ($queryString === '') {
+            return;
+        }
+
+        $sanitizedQueryString = $this->queryStringSanitizer->sanitize($queryString);
+
+        if ($sanitizedQueryString !== $queryString) {
+            $request->server->set('QUERY_STRING', $sanitizedQueryString);
+            $request->query->replace(HeaderUtils::parseQuery($sanitizedQueryString));
         }
     }
 }

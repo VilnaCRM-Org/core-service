@@ -41,6 +41,30 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
         self::assertSame($response, $event->getResponse());
     }
 
+    public function testHandlesApiJsonWriteRequestWithUppercaseContentType(): void
+    {
+        $response = new JsonResponse([], JsonResponse::HTTP_BAD_REQUEST);
+        $factory = $this->createMock(ApiProblemJsonResponseFactory::class);
+        $factory->expects(self::once())
+            ->method('createBadRequestResponse')
+            ->willReturn($response);
+
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
+        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request->headers->set('Content-Type', 'Application/Merge-Patch+JSON');
+
+        $event = new ExceptionEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            new InvalidPropertyPathException('Could not parse property path ".exe".')
+        );
+
+        $listener->onKernelException($event);
+
+        self::assertSame($response, $event->getResponse());
+    }
+
     public function testIgnoresNonJsonRequests(): void
     {
         $factory = $this->createMock(ApiProblemJsonResponseFactory::class);

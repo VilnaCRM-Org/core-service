@@ -83,7 +83,7 @@ final class MalformedQueryStringSanitizerSubscriberTest extends UnitTestCase
 
         $subscriber->onRequest($event);
 
-        self::assertNull($request->server->get('QUERY_STRING'));
+        self::assertSame('', $request->server->get('QUERY_STRING'));
         self::assertSame([], $request->query->all());
     }
 

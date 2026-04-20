@@ -12,9 +12,10 @@ final class ApiWriteJsonRequestMatcher
     {
         $path = $request->getPathInfo();
         $writeMethods = [Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_PATCH];
+        $contentType = strtolower((string) $request->headers->get('Content-Type', ''));
 
         return ($path === '/api' || str_starts_with($path, '/api/'))
             && \in_array($request->getMethod(), $writeMethods, true)
-            && str_contains((string) $request->headers->get('Content-Type', ''), 'json');
+            && str_contains($contentType, 'json');
     }
 }
