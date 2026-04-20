@@ -17,6 +17,28 @@ use Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException;
 
 final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
 {
+    public function testIgnoresSubRequests(): void
+    {
+        $factory = $this->createMock(ApiProblemJsonResponseFactory::class);
+        $factory->expects(self::never())
+            ->method('createBadRequestResponse');
+
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
+        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request->headers->set('Content-Type', 'application/merge-patch+json');
+
+        $event = new ExceptionEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::SUB_REQUEST,
+            new InvalidPropertyPathException('Could not parse property path ".exe".')
+        );
+
+        $listener->onKernelException($event);
+
+        self::assertNull($event->getResponse());
+    }
+
     public function testHandlesApiJsonWriteRequestWithInvalidPropertyPath(): void
     {
         $response = new JsonResponse([], JsonResponse::HTTP_BAD_REQUEST);
