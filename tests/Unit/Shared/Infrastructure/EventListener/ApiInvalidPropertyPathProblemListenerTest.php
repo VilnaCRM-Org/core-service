@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\EventListener;
 
 use App\Shared\Infrastructure\EventListener\ApiInvalidPropertyPathProblemListener;
+use App\Shared\Infrastructure\EventListener\ApiWriteJsonRequestMatcher;
 use App\Shared\Infrastructure\Factory\ApiProblemJsonResponseFactory;
 use App\Tests\Unit\UnitTestCase;
 use RuntimeException;
@@ -24,7 +25,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->method('createBadRequestResponse')
             ->willReturn($response);
 
-        $listener = new ApiInvalidPropertyPathProblemListener($factory);
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
         $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 
@@ -46,7 +47,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
         $factory->expects(self::never())
             ->method('createBadRequestResponse');
 
-        $listener = new ApiInvalidPropertyPathProblemListener($factory);
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
         $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
 
         $event = new ExceptionEvent(
@@ -67,7 +68,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
         $factory->expects(self::never())
             ->method('createBadRequestResponse');
 
-        $listener = new ApiInvalidPropertyPathProblemListener($factory);
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
         $request = Request::create('/favicon.ico', Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 
@@ -89,7 +90,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
         $factory->expects(self::never())
             ->method('createBadRequestResponse');
 
-        $listener = new ApiInvalidPropertyPathProblemListener($factory);
+        $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
         $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 

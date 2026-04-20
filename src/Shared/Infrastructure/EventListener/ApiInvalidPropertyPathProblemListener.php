@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\EventListener;
 
 use App\Shared\Infrastructure\Factory\ApiProblemJsonResponseFactory;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException;
-use Throwable;
 
 final readonly class ApiInvalidPropertyPathProblemListener
 {
     public function __construct(
         private ApiProblemJsonResponseFactory $responseFactory,
+        private ApiWriteJsonRequestMatcher $requestMatcher,
     ) {
     }
 
@@ -23,35 +22,16 @@ final readonly class ApiInvalidPropertyPathProblemListener
             return;
         }
 
-        $request = $event->getRequest();
         $throwable = $event->getThrowable();
 
-        if (! $this->shouldHandle($request, $throwable)) {
+        if (! $throwable instanceof InvalidPropertyPathException) {
+            return;
+        }
+
+        if (! $this->requestMatcher->matches($event->getRequest())) {
             return;
         }
 
         $event->setResponse($this->responseFactory->createBadRequestResponse());
-    }
-
-    private function shouldHandle(Request $request, Throwable $throwable): bool
-    {
-        if (! $throwable instanceof InvalidPropertyPathException) {
-            return false;
-        }
-
-        if (! $this->isApiPath($request->getPathInfo())) {
-            return false;
-        }
-
-        if (! \in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_PATCH], true)) {
-            return false;
-        }
-
-        return str_contains((string) $request->headers->get('Content-Type', ''), 'json');
-    }
-
-    private function isApiPath(string $path): bool
-    {
-        return $path === '/api' || str_starts_with($path, '/api/');
     }
 }

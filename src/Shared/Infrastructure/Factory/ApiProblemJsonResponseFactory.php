@@ -8,8 +8,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class ApiProblemJsonResponseFactory
 {
-    public function createBadRequestResponse(string $detail = 'Invalid request payload.'): JsonResponse
-    {
+    public function createBadRequestResponse(
+        string $detail = 'Invalid request payload.',
+    ): JsonResponse {
         $response = new JsonResponse(
             [
                 'title' => 'An error occurred',
