@@ -73,6 +73,7 @@ final class MalformedQueryStringSanitizerSubscriberTest extends UnitTestCase
     {
         $subscriber = new MalformedQueryStringSanitizerSubscriber($this->queryStringSanitizer);
         $request = Request::create('/api/customer_statuses');
+        $request->query->replace(['stale' => 'value']);
         $request->server->set('QUERY_STRING', null);
 
         $event = new RequestEvent(

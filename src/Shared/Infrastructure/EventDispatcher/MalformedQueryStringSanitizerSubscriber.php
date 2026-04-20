@@ -35,14 +35,12 @@ final class MalformedQueryStringSanitizerSubscriber implements EventSubscriberIn
         $request = $event->getRequest();
         $queryString = $request->server->get('QUERY_STRING', '');
 
-        if (! is_string($queryString)) {
-            $request->server->set('QUERY_STRING', '');
-            $request->query->replace([]);
+        if (! is_string($queryString) || $queryString === '') {
+            if (! is_string($queryString)) {
+                $request->server->set('QUERY_STRING', '');
+                $request->query->replace([]);
+            }
 
-            return;
-        }
-
-        if ($queryString === '') {
             return;
         }
 
