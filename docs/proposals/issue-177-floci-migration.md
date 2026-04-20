@@ -45,13 +45,13 @@ This is enough to justify a migration attempt. It is not enough to justify blind
 
 The migration should validate the exact surface we use locally:
 
-| Service | Why this repo needs it locally | Current touch points | Floci claims |
-| --- | --- | --- | --- |
-| SQS | Symfony Messenger async domain events and workers | `config/packages/messenger.yaml`, `config/services.yaml` | Supported |
-| S3 | local-mode AWS helper scripts for load-test artifacts and bucket operations | `tests/Load/*.sh` | Supported |
-| IAM | helper scripts create roles, policies, and instance profiles | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
-| STS | helper scripts and auth validation | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
-| EC2 | helper scripts launch and inspect load-test infrastructure in local mode | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial |
+| Service | Why this repo needs it locally                                              | Current touch points                                            | Floci claims |
+| ------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------ |
+| SQS     | Symfony Messenger async domain events and workers                           | `config/packages/messenger.yaml`, `config/services.yaml`        | Supported    |
+| S3      | local-mode AWS helper scripts for load-test artifacts and bucket operations | `tests/Load/*.sh`                                               | Supported    |
+| IAM     | helper scripts create roles, policies, and instance profiles                | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial      |
+| STS     | helper scripts and auth validation                                          | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial      |
+| EC2     | helper scripts launch and inspect load-test infrastructure in local mode    | `tests/Load/aws-execute-load-tests.sh`, `tests/Load/cleanup.sh` | Partial      |
 
 Working assumptions before the migration starts:
 
@@ -144,7 +144,7 @@ services:
   localstack:
     image: localstack/localstack:3.4.0
     ports:
-      - "${LOCALSTACK_PORT}:4566"
+      - '${LOCALSTACK_PORT}:4566'
 ```
 
 ```bash
@@ -160,9 +160,9 @@ services:
   floci:
     image: hectorvent/floci:<pinned-version>
     ports:
-      - "${AWS_EMULATOR_PORT:-4566}:4566"
+      - '${AWS_EMULATOR_PORT:-4566}:4566'
     environment:
-      AWS_EMULATOR_PROVIDER: "${AWS_EMULATOR_PROVIDER:-localstack}"
+      AWS_EMULATOR_PROVIDER: '${AWS_EMULATOR_PROVIDER:-localstack}'
       FLOCI_HOSTNAME: floci
       FLOCI_STORAGE_MODE: hybrid
 ```
