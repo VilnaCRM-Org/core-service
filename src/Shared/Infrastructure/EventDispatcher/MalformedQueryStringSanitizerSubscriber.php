@@ -18,7 +18,7 @@ final class MalformedQueryStringSanitizerSubscriber implements EventSubscriberIn
     /**
      * @return array<string, array{0: string, 1: int}>
      */
-    public static function getSubscribedEvents(): array
+    public static function getSubscribedEvents()
     {
         return [
             KernelEvents::REQUEST => ['onRequest', 2048],
@@ -34,19 +34,14 @@ final class MalformedQueryStringSanitizerSubscriber implements EventSubscriberIn
         $request = $event->getRequest();
         $queryString = (string) $request->server->get('QUERY_STRING', '');
 
-        if ($queryString === '') {
-            return;
+        if ($queryString !== '') {
+            $sanitizedQueryString = $this->queryStringSanitizer->sanitize($queryString);
+
+            if ($sanitizedQueryString !== $queryString) {
+                $request->server->set('QUERY_STRING', $sanitizedQueryString);
+                parse_str($sanitizedQueryString, $parameters);
+                $request->query->replace($parameters);
+            }
         }
-
-        $sanitizedQueryString = $this->queryStringSanitizer->sanitize($queryString);
-
-        if ($sanitizedQueryString === $queryString) {
-            return;
-        }
-
-        $request->server->set('QUERY_STRING', $sanitizedQueryString);
-        parse_str($sanitizedQueryString, $parameters);
-
-        $request->query->replace($parameters);
     }
 }

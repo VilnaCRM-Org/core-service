@@ -16,11 +16,15 @@ final class QueryStringSanitizer
         $sanitizedParts = [];
 
         foreach (explode('&', $queryString) as $part) {
-            if ($part === '' || $part[0] === '=') {
+            if ($part === '') {
                 continue;
             }
 
-            [$rawKey] = explode('=', $part, 2);
+            if (str_starts_with($part, '=')) {
+                continue;
+            }
+
+            $rawKey = strtok($part, '=');
 
             if (! $this->safeQueryKeyValidator->isSafe($rawKey)) {
                 continue;

@@ -69,6 +69,24 @@ final class MalformedQueryStringSanitizerSubscriberTest extends UnitTestCase
         self::assertSame([], $request->query->all());
     }
 
+    public function testTreatsNullQueryStringAsEmpty(): void
+    {
+        $subscriber = new MalformedQueryStringSanitizerSubscriber($this->queryStringSanitizer);
+        $request = Request::create('/api/customer_statuses');
+        $request->server->set('QUERY_STRING', null);
+
+        $event = new RequestEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $subscriber->onRequest($event);
+
+        self::assertNull($request->server->get('QUERY_STRING'));
+        self::assertSame([], $request->query->all());
+    }
+
     public function testLeavesSafeQueryParametersUntouched(): void
     {
         $subscriber = new MalformedQueryStringSanitizerSubscriber($this->queryStringSanitizer);
@@ -91,6 +109,23 @@ final class MalformedQueryStringSanitizerSubscriberTest extends UnitTestCase
         self::assertSame('desc', $request->query->all()['order']['ulid']);
         self::assertSame('10', $request->query->all()['itemsPerPage']);
         self::assertSame('value', $request->query->all()['unsupportedParam']);
+    }
+
+    public function testDoesNotRewriteQueryBagWhenSanitizedQueryStringMatchesOriginal(): void
+    {
+        $subscriber = new MalformedQueryStringSanitizerSubscriber($this->queryStringSanitizer);
+        $request = Request::create('/api/customer_statuses?itemsPerPage=10');
+        $request->query->replace(['custom' => 'value']);
+
+        $event = new RequestEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $subscriber->onRequest($event);
+
+        self::assertSame(['custom' => 'value'], $request->query->all());
     }
 
     public function testRemovesMalformedQueryKeysAndRefreshesQueryBag(): void

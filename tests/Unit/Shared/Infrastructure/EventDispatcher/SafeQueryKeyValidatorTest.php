@@ -20,7 +20,7 @@ final class SafeQueryKeyValidatorTest extends UnitTestCase
     {
         $validator = new SafeQueryKeyValidator();
 
-        self::assertFalse($validator->isSafe('a%F1%87%8E%80%F3%86%9B%8F%5B'));
+        self::assertFalse($validator->isSafe('%80status'));
     }
 
     public function testRejectsUnbalancedBracketKeys(): void
