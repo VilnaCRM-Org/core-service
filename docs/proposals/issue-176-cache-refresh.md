@@ -8,8 +8,8 @@
 
 The repository already has the right primitives, but not the full mechanism:
 
-- Redis-backed cache pools exist, but customer caching is concentrated in a single `cache.customer` pool with one default lifetime.
-- `CachedCustomerRepository` hardcodes TTLs per method and only covers `find()` and `findByEmail()`.
+- Redis-backed cache pools exist, but customer caching is concentrated in a single `cache.customer` pool with pool-level defaults and per-method TTL overrides.
+- `CachedCustomerRepository` hardcodes TTLs per method and only covers `find()` and `findByEmail()` today, with `find()` set to `600` seconds and `findByEmail()` set to `300` seconds.
 - customer domain-event subscribers invalidate tags asynchronously, but they do not repopulate endpoint caches after invalidation.
 - the async event pipeline already runs through Messenger + SQS, so the missing piece is refresh scheduling and refresh handlers, not a new transport stack.
 
@@ -85,6 +85,11 @@ The refresh message should carry only the data needed to rebuild a cache family,
 - deduplication key, stable for the cache family, target resource, and triggering event
 - event occurrence timestamp for stale-message detection
 - entity version or another monotonic sequence token for ordering checks
+
+Transport note:
+
+- Prefer SQS FIFO queues for cache-refresh messages when native ordering and five-minute deduplication are required from the transport itself.
+- If SQS Standard is retained, the handler must enforce the same deduplication window and monotonic ordering checks in application code by using the deduplication key, event timestamp, and entity version fields above.
 
 Handlers must be idempotent. They must ignore SQS retries with the same deduplication key inside the configured deduplication window, and they must drop stale refreshes when ordering data shows the message has already been superseded by a newer event for the same cache target. The minimum rule is:
 
