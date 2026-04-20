@@ -12,6 +12,7 @@ use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
 use App\Shared\Domain\ValueObject\Ulid;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
@@ -305,6 +306,10 @@ final class CachePerformanceTest extends KernelTestCase
      */
     private function medianLatency(array $latenciesMs): float
     {
+        if ($latenciesMs === []) {
+            throw new InvalidArgumentException('latencies array must not be empty');
+        }
+
         sort($latenciesMs);
 
         $middle = intdiv(count($latenciesMs), 2);

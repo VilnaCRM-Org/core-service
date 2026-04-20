@@ -17,6 +17,8 @@ use Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException;
 
 final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
 {
+    private const API_CUSTOMER_TYPE_PATH = '/api/customer_types/test-id';
+
     public function testIgnoresSubRequests(): void
     {
         $factory = $this->createMock(ApiProblemJsonResponseFactory::class);
@@ -24,7 +26,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->method('createBadRequestResponse');
 
         $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
-        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request = Request::create(self::API_CUSTOMER_TYPE_PATH, Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 
         $event = new ExceptionEvent(
@@ -48,7 +50,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->willReturn($response);
 
         $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
-        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request = Request::create(self::API_CUSTOMER_TYPE_PATH, Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 
         $event = new ExceptionEvent(
@@ -72,7 +74,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->willReturn($response);
 
         $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
-        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request = Request::create(self::API_CUSTOMER_TYPE_PATH, Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'Application/Merge-Patch+JSON');
 
         $event = new ExceptionEvent(
@@ -94,7 +96,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->method('createBadRequestResponse');
 
         $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
-        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request = Request::create(self::API_CUSTOMER_TYPE_PATH, Request::METHOD_PATCH);
 
         $event = new ExceptionEvent(
             $this->createMock(HttpKernelInterface::class),
@@ -137,7 +139,7 @@ final class ApiInvalidPropertyPathProblemListenerTest extends UnitTestCase
             ->method('createBadRequestResponse');
 
         $listener = new ApiInvalidPropertyPathProblemListener($factory, new ApiWriteJsonRequestMatcher());
-        $request = Request::create('/api/customer_types/' . $this->faker->ulid(), Request::METHOD_PATCH);
+        $request = Request::create(self::API_CUSTOMER_TYPE_PATH, Request::METHOD_PATCH);
         $request->headers->set('Content-Type', 'application/merge-patch+json');
 
         $event = new ExceptionEvent(

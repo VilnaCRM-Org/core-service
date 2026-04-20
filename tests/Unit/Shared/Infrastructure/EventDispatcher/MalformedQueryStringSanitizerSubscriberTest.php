@@ -174,6 +174,7 @@ final class MalformedQueryStringSanitizerSubscriberTest extends UnitTestCase
             $request->server->get('QUERY_STRING')
         );
         self::assertArrayNotHasKey('broken_', $request->query->all());
+        self::assertArrayNotHasKey('broken', $request->query->all());
         self::assertSame('5', $request->query->all()['itemsPerPage']);
     }
 
