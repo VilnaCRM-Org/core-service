@@ -114,6 +114,15 @@ services:
           priority: 255,
         }
 
+  App\Shared\Infrastructure\EventListener\ApiInvalidPropertyPathProblemListener:
+    tags:
+      - {
+          name: 'kernel.event_listener',
+          event: 'kernel.exception',
+          method: 'onKernelException',
+          priority: 254,
+        }
+
   App\Shared\Infrastructure\EventListener\ApiQueryParametersListener:
     tags:
       - {

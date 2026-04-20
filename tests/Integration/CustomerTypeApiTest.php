@@ -91,6 +91,26 @@ final class CustomerTypeApiTest extends BaseApiCase
         $this->assertArrayNotHasKey('unknown', $data, 'Extra field is ignored');
     }
 
+    public function testPatchCustomerTypeWithMalformedPropertyPathReturnsBadRequest(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode(['.exe' => [null, null, -123]]),
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString('Invalid request payload', $error['detail']);
+    }
+
     public function testCreateCustomerTypeWithInvalidContentType(): void
     {
         $value = $this->faker->word();
@@ -135,6 +155,30 @@ final class CustomerTypeApiTest extends BaseApiCase
 
         $this->assertResponseIsSuccessful();
         $this->assertArrayHasKey('member', $response->toArray());
+    }
+
+    public function testGetCustomerTypesCollectionWithMalformedQueryKey(): void
+    {
+        $this->createCustomerType();
+        $client = self::createClient();
+        $response = $client->request(
+            'GET',
+            '/api/customer_types?order%5Bulid%5D=&itemsPerPage=12&a%F1%87%8E%80%F3%86%9B%8F%5B=16156&a%F1%87%8E%80%F3%86%9B%8F%5B=False'
+        );
+
+        $this->assertResponseIsSuccessful();
+        self::assertResponseHeaderSame(
+            'content-type',
+            'application/ld+json; charset=utf-8'
+        );
+
+        $data = $response->toArray();
+        $this->assertArrayHasKey('member', $data);
+        $this->assertStringContainsString('itemsPerPage=12', $data['view']['@id'] ?? '');
+        $this->assertStringNotContainsString(
+            'a%F1%87%8E%80%F3%86%9B%8F',
+            $data['view']['@id'] ?? ''
+        );
     }
 
     public function testGetCustomerTypeNotFound(): void
