@@ -1,151 +1,120 @@
-#syntax=docker/dockerfile:1-labs
+FROM composer/composer:2-bin AS composer
+FROM mlocati/php-extension-installer:2.2 AS php_extension_installer
 
-FROM dunglas/frankenphp:1-php8.4-bookworm AS frankenphp_upstream
-
-FROM frankenphp_upstream AS frankenphp_base
-
-SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
-
-ARG STABILITY="stable"
-ARG SYMFONY_VERSION=""
-
-ENV STABILITY=${STABILITY}
-ENV SYMFONY_VERSION=${SYMFONY_VERSION}
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
+FROM dunglas/frankenphp:1-php8.3.17-alpine AS frankenphp_base
 
 WORKDIR /srv/app
 
-RUN <<-EOF
-	apt-get update
-	apt-get install -y --no-install-recommends \
-		file \
-		git
-	install-php-extensions \
-		@composer \
-		apcu \
-		intl \
-		mongodb-2.1.8 \
-		opcache \
-		redis \
-		xsl \
-		zip
-	rm -rf /var/lib/apt/lists/*
-EOF
+COPY --from=php_extension_installer --link /usr/bin/install-php-extensions /usr/local/bin/
 
-COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
-COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-COPY --link --chmod=755 frankenphp/healthcheck.php /usr/local/bin/frankenphp-healthcheck
-COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
+RUN apk add --no-cache \
+    acl \
+    curl \
+    file \
+    gettext \
+    git
+
+ARG STABILITY=stable
+ENV STABILITY=${STABILITY}
+
+ARG SYMFONY_VERSION=""
+ENV SYMFONY_VERSION=${SYMFONY_VERSION}
+
+ENV APP_ENV=prod
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV PATH="${PATH}:/root/.composer/vendor/bin"
+
+RUN set -eux; \
+    install-php-extensions \
+        apcu \
+        intl \
+        opcache \
+        openssl \
+        pdo_pgsql \
+        redis \
+        xsl \
+        zip
+
+COPY --link infrastructure/docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
+COPY --link --chmod=755 infrastructure/docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link infrastructure/docker/caddy/Caddyfile /etc/caddy/Caddyfile
 
 ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD ["/usr/local/bin/frankenphp-healthcheck"]
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+HEALTHCHECK --start-period=180s CMD curl -fsS http://localhost:8081/ping || exit 1
+
+COPY --from=composer --link /composer /usr/bin/composer
+
+COPY --link composer.* symfony.* ./
+RUN set -eux; \
+    if [ -f composer.json ]; then \
+        composer install --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress; \
+        composer clear-cache; \
+    fi
+
+COPY --link . ./
+RUN set -eux; \
+    rm -Rf infrastructure/docker/; \
+    mkdir -p var/cache var/log; \
+    if [ -f composer.json ]; then \
+        composer dump-autoload --classmap-authoritative --no-dev; \
+        composer dump-env prod; \
+        chmod +x bin/console; \
+        sync; \
+    fi
+
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
 
 FROM frankenphp_base AS frankenphp_dev
 
-ENV APP_ENV=dev
-ENV FRANKENPHP_ENABLE_WATCH=1
+ARG XDEBUG_VERSION=3.4.2
+
 ENV XDEBUG_MODE=off
-ENV FRANKENPHP_WORKER_CONFIG=watch
 
-RUN <<-EOF
-	mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-	apt-get update
-	apt-get install -y --no-install-recommends \
-		bash \
-		curl \
-		make
-	install-php-extensions xdebug
-	rm -rf /var/lib/apt/lists/*
-	git config --system --add safe.directory /srv/app
-EOF
+RUN apk add --no-cache \
+    bash \
+    bats \
+    make
 
-COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
+COPY --link --from=ghcr.io/symfony-cli/symfony-cli:latest@sha256:e4cf5473fb10649a3774a8c5035109e451016de4910ea0fff38bb8d525c5a322 /usr/local/bin/symfony /usr/local/bin/symfony
 
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+RUN set -eux; \
+    apk add --no-cache --virtual .xdebug-build-deps \
+        $PHPIZE_DEPS \
+        gnupg \
+        linux-headers; \
+    export GNUPGHOME="$(mktemp -d)"; \
+    git clone --depth 1 --branch "${XDEBUG_VERSION}" https://github.com/xdebug/xdebug.git /tmp/xdebug-src; \
+    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 910DEB46F53EA312; \
+    git -C /tmp/xdebug-src tag -v "${XDEBUG_VERSION}"; \
+    cd /tmp/xdebug-src; \
+    phpize; \
+    ./configure --enable-xdebug; \
+    make -j"$(nproc)"; \
+    make install; \
+    docker-php-ext-enable xdebug; \
+    gpgconf --kill all; \
+    apk del .xdebug-build-deps; \
+    rm -rf "$GNUPGHOME" /tmp/xdebug-src
+
+COPY --link infrastructure/docker/php/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
+
+RUN git config --global --add safe.directory /srv/app
 RUN rm -f .env.local.php
+RUN set -eux; \
+    if [ -f composer.json ]; then \
+        CAPTAINHOOK_DISABLE=true composer install --prefer-dist --no-interaction --no-progress --no-scripts; \
+        composer clear-cache; \
+    fi
 
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
-
-FROM frankenphp_base AS frankenphp_prod_builder
-
-ENV APP_ENV=prod
+FROM frankenphp_base AS frankenphp_prod
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
-COPY --link composer.* symfony.* ./
+COPY --link infrastructure/docker/php/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
 
-RUN composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
-
-COPY --link --exclude=frankenphp/ . ./
-
-RUN <<-EOF
-	mkdir -p var/cache var/log var/share
-	composer dump-autoload --classmap-authoritative --no-dev
-	composer dump-env prod
-	composer run-script --no-dev post-install-cmd
-	chmod +x bin/console
-	sync
-EOF
-
-RUN <<-'EOF'
-	apt-get update
-	apt-get install -y --no-install-recommends libtree
-	mkdir -p /tmp/libs
-	BINARIES=(frankenphp php file)
-	for target in $(printf '%s\n' "${BINARIES[@]}" | xargs -I{} which {}) \
-		$(find "$(php -r 'echo ini_get("extension_dir");')" -maxdepth 2 -name "*.so"); do
-		libtree -pv "$target" 2>/dev/null | grep -oP '(?:── )\K/\S+(?= \[)' | while IFS= read -r lib; do
-			[ -f "$lib" ] && cp -n "$lib" /tmp/libs/
-		done
-	done
-	if [ -z "$(find /tmp/libs -type f -print -quit)" ]; then
-		echo "ERROR: libtree did not capture any runtime libraries." >&2
-		exit 1
-	fi
-	sed -i 's/opcache.preload_user = root/opcache.preload_user = www-data/' "$PHP_INI_DIR/app.conf.d/20-app.prod.ini"
-	rm -rf /var/lib/apt/lists/*
-EOF
-
-FROM debian:13-slim AS frankenphp_prod
-
-SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
-
-ENV APP_ENV=prod
-ENV PHP_INI_SCAN_DIR=":/usr/local/etc/php/app.conf.d"
-ENV XDG_CONFIG_HOME=/config
-ENV XDG_DATA_HOME=/data
-
-COPY --from=frankenphp_prod_builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
-COPY --from=frankenphp_prod_builder /usr/local/bin/php /usr/local/bin/php
-COPY --from=frankenphp_prod_builder /usr/local/bin/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
-COPY --from=frankenphp_prod_builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=frankenphp_prod_builder /tmp/libs /usr/lib
-COPY --from=frankenphp_prod_builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-COPY --from=frankenphp_prod_builder /usr/local/etc/php/php.ini /usr/local/etc/php/php.ini
-COPY --from=frankenphp_prod_builder /usr/local/etc/php/app.conf.d /usr/local/etc/php/app.conf.d
-COPY --from=frankenphp_prod_builder /etc/frankenphp/Caddyfile /etc/frankenphp/Caddyfile
-COPY --from=frankenphp_prod_builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=frankenphp_prod_builder /usr/bin/file /usr/bin/file
-COPY --from=frankenphp_prod_builder /usr/lib/file/magic.mgc /usr/lib/file/magic.mgc
-
-RUN <<-EOF
-	mkdir -p /data/caddy /config/caddy
-	chown -R www-data:www-data /data /config
-	find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
-EOF
-
-COPY --link --exclude=var --from=frankenphp_prod_builder /srv/app /srv/app
-COPY --link --chown=www-data:www-data --from=frankenphp_prod_builder /srv/app/var /srv/app/var
-COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-COPY --link --chmod=755 frankenphp/healthcheck.php /usr/local/bin/frankenphp-healthcheck
-
-VOLUME /srv/app/var/
+RUN mkdir -p /data /config /srv/app/var \
+ && chown -R www-data:www-data /data /config /srv/app
 
 USER www-data
-WORKDIR /srv/app
-
-ENTRYPOINT ["docker-entrypoint"]
-HEALTHCHECK --start-period=60s CMD ["/usr/local/bin/frankenphp-healthcheck"]
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

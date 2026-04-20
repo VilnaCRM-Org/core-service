@@ -4,32 +4,33 @@ on:
   pull_request:
     branches: ['main']
 
+permissions:
+  contents: read
+
 jobs:
   schemathesis:
     name: Schemathesis
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start Application
         run: make start
 
+      - name: Wait for Application Readiness
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:8081/ping; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          docker compose logs php database localstack
+          exit 1
+
       - name: Run Schemathesis Validation
         run: make schemathesis-validate
-
-      - name: Upload Schemathesis Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: schemathesis-report
-          path: /tmp/core-service-schemathesis-report
-          if-no-files-found: ignore
-
-      - name: Stop Application
-        if: always()
-        run: make down

@@ -10,24 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start application
         run: make start
 
-      - name: Execute all tests with coverage
-        run: make coverage-xml
+      - name: Setup test db
+        run: make setup-test-db
+
+      - name: Execute Unit and Integration tests
+        run: make tests-with-coverage
+
+      - name: Copy coverage report to host
+        run: docker cp php-service-template-php-1:/coverage/coverage.xml /tmp
 
       - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/coverage.xml
-          flags: unittests
+          files: /tmp/coverage.xml
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
-
-      - name: Stop application
-        if: always()
-        run: make down
