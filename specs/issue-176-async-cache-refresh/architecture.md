@@ -63,6 +63,8 @@ flowchart LR
     RefreshCommand --> RefreshHandler
     RefreshHandler --> PolicyResolver
     PolicyResolver --> PolicyCollection
+    PolicyResolver --> PolicyDto
+    RefreshHandler --> PolicyDto
     RefreshHandler --> InnerRepo
     RefreshHandler --> KeyBuilder
     RefreshHandler --> CachePools
