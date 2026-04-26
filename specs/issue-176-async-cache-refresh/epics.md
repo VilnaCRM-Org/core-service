@@ -1,59 +1,82 @@
 # Epics and Stories
 
-## Epic 1: Declare Cache Policy Contract
+## Epic 1: Create Shared Cache Refresh Contract
 
-Story 1.1: Add typed customer cache policy DTO, factory, collection, and resolver.
-
-Acceptance:
-
-- Policies expose key namespace, tags, soft TTL, hard TTL, jitter, consistency class, and refresh strategy.
-- TTL jitter is deterministic enough to test and bounded by policy.
-- Unit tests cover policy construction, collection lookup, and resolver behavior.
-
-Story 1.2: Wire policy collection and resolver through Symfony services.
+Story 1.1: Add shared cache-refresh DTOs, resolver interfaces, collections, and metrics.
 
 Acceptance:
 
-- TTL/jitter defaults are configurable through parameters/env-backed service arguments.
-- Customer detail/email repository cache uses resolved policy values instead of literals.
+- `CacheRefreshPolicy`, `CacheRefreshTarget`, and `CacheRefreshResult` are shared DTOs.
+- Policy and target resolver interfaces are shared and context-agnostic.
+- Shared metric classes cover scheduled, succeeded, failed, hit, miss, and stale-served lifecycle events.
+- Unit tests cover construction, validation, and metric dimensions.
 
-## Epic 2: Add Async Refresh Pipeline
-
-Story 2.1: Add cache refresh command, command factory, target resolver, and command handler.
-
-Acceptance:
-
-- Subscribers dispatch dedicated refresh commands through Messenger or the configured command path.
-- Command handler warms customer detail and email lookup entries from persisted state.
-- Command handler logs and emits failure metrics without throwing into business behavior.
-
-Story 2.2: Add SQS runtime and LocalStack local routing.
+Story 1.2: Add generic command and abstract orchestration classes.
 
 Acceptance:
 
-- Non-test config routes refresh commands to an SQS-backed transport.
-- Test config uses in-memory transport.
-- Existing domain event routing remains unchanged.
+- Abstract subscriber invalidates tags, resolves targets, dispatches refresh commands, and emits metrics.
+- Abstract factory creates scalar, Messenger-safe `RefreshCacheCommand` payloads.
+- Generic `RefreshCacheCommandHandler` is the single worker entrypoint for the shared queue.
+- Abstract context handler resolves policy and target, refreshes cache through context callbacks, and returns a result.
+- Unit tests prove the shared classes are reusable without Customer-specific types.
 
-## Epic 3: Connect Domain Events to Refresh Work
+## Epic 2: Add Shared Queue and Worker Path
 
-Story 3.1: Update customer create/update/delete cache subscribers.
+Story 2.1: Add cache refresh Messenger routing.
 
 Acceptance:
 
-- Subscribers invalidate affected tags.
+- Non-test config routes refresh commands to one SQS-backed `cache-refresh` transport.
+- Failed jobs route to `failed-cache-refresh`.
+- Test config uses deterministic in-memory routing.
+- Existing `domain-events` routing remains unchanged.
+
+Story 2.2: Document operational worker usage.
+
+Acceptance:
+
+- Documentation explains the difference between domain-event workers and cache-refresh workers.
+- LocalStack variables and runtime variables are documented.
+- Per-domain queues are explicitly deferred until metrics justify them.
+
+## Epic 3: Add Customer as the First Adapter
+
+Story 3.1: Declare Customer policies and target resolution using existing directories.
+
+Acceptance:
+
+- Customer uses existing `Application/Factory`, `Infrastructure/Collection`, and `Infrastructure/Resolver` directories.
+- Customer detail, lookup, collection, reference, and negative lookup policies are declared.
+- `CachedCustomerRepository` uses resolved policies instead of hardcoded TTL literals.
+
+Story 3.2: Connect Customer events to shared refresh orchestration.
+
+Acceptance:
+
+- Customer create/update/delete subscribers extend or delegate to the abstract subscriber.
 - Create/update events schedule detail and email refresh work.
 - Update with email change handles previous and current email families correctly.
-- Delete avoids warming deleted entities and keeps invalidation behavior.
+- Delete invalidates and avoids warming deleted entities.
 - Scheduling failure is best effort.
+
+Story 3.3: Add Customer refresh command handler adapter.
+
+Acceptance:
+
+- `CustomerCacheRefreshCommandFactory` creates the shared `RefreshCacheCommand` payload without Customer-specific fields in the payload contract.
+- `CustomerCacheRefreshCommandHandler` extends or composes the shared abstract context handler.
+- The handler warms Customer detail and email lookup entries from persisted state.
+- Context-specific logic is limited to target mapping and repository loading.
 
 ## Epic 4: Observability and Evidence
 
-Story 4.1: Add typed cache lifecycle metrics.
+Story 4.1: Add shared cache lifecycle metrics.
 
 Acceptance:
 
-- Scheduled, success, failure, hit, miss, and stale-served metrics exist as typed classes.
+- Shared metric classes support context and family dimensions.
+- Customer adapter emits the shared metrics with `customer` context.
 - Unit tests cover names, units, and dimensions.
 
 Story 4.2: Add integration and performance proof.
@@ -65,15 +88,16 @@ Acceptance:
 
 ## Epic 5: Documentation and CI
 
-Story 5.1: Document cache policies and operations.
+Story 5.1: Document reusable cache-refresh architecture.
 
 Acceptance:
 
-- Docs describe TTL defaults, stale-read risk, SQS refresh transport, LocalStack, and metrics.
+- Docs describe shared classes, context adapter responsibilities, TTL defaults, stale-read risk, SQS refresh transport, LocalStack, and metrics.
+- Source-tree documentation shows new shared files and Customer adapter files.
 
 Story 5.2: Validate the PR.
 
 Acceptance:
 
-- `make ci` passes.
-- GitHub PR is opened, CI is green, and review comments are addressed.
+- `make ci` passes or a local environment blocker is documented and GitHub CI is green.
+- GitHub PR is updated, CI is green, and review comments are addressed.

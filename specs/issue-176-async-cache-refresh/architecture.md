@@ -1,119 +1,202 @@
-# Architecture: Async Endpoint Cache Refresh
+# Architecture: Abstract Async Endpoint Cache Refresh
 
 ## Current Architecture Fit
 
-The implementation should extend the existing Customer feature directories instead of creating a new `src/Core/Customer/Infrastructure/Cache` bucket:
+Issue #176 should introduce a reusable cache-refresh foundation, not a Customer-only worker design. Customer is the first adopter because it already has cached repository reads and domain-event cache invalidation subscribers, but the refresh command, queue, worker, metrics, and abstract orchestration must be reusable by future bounded contexts.
 
-- Domain events stay in `src/Core/Customer/Domain/Event`.
-- Event subscribers stay in `src/Core/Customer/Application/EventSubscriber`.
-- Async cache refresh should be modeled as CQRS command flow with `Application/Command` and `Application/CommandHandler`.
-- Cache policy data belongs in existing Application and Infrastructure type directories: `DTO`, `Factory`, `Collection`, and `Resolver`.
-- The cached repository decorator remains the feature anchor in `Infrastructure/Repository`.
-- Existing cache tag helpers remain in `Infrastructure/Collection` and `Infrastructure/Resolver`.
-- Shared low-level cache utilities remain in `src/Shared/Infrastructure/Cache`.
-- Do not introduce `ReadModel`, `Query`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler` directories for this feature unless the current repo already contains and collects those directory types.
+The current repository already has the right primitives:
 
-This structure follows the repository rule: one directory contains one class type, and planning must prefer existing directory names that are already represented in the source tree and `deptrac.yaml`.
+- Any domain event can flow through `Shared/Infrastructure/Bus/Event/Async/DomainEventEnvelope`.
+- `Shared/Infrastructure/Bus/Event/Async/DomainEventMessageHandler` already reads domain events from the async event transport and invokes tagged subscribers.
+- CQRS command objects and handlers already live in `Application/Command` and `Application/CommandHandler`.
+- `Shared/Application/Command` already exists, and deptrac collects `Application/Command` and `Application/CommandHandler`.
+- Shared metrics already live in `Shared/Application/Observability/Metric`.
+- Shared cache utilities already live in `Shared/Infrastructure/Cache`.
+- Context-specific cache behavior already appears as repository decorators, collections, resolvers, factories, and event subscribers.
+
+The implementation should add shared abstractions and thin context adapters. It should not add Customer-only queue contracts that future domains would need to copy.
+
+## Directory Rules
+
+This plan follows the repository rule: one directory contains one class type.
+
+- Put the reusable refresh command in `src/Shared/Application/Command`.
+- Put reusable refresh command handlers and abstract handler bases in `src/Shared/Application/CommandHandler`.
+- Put reusable DTOs, resolver interfaces, event-subscriber bases, factories, and metrics in their matching class-type directories.
+- Put reusable metrics under `src/Shared/Application/Observability/Metric`, matching the existing shared observability structure.
+- Put reusable infrastructure collaborators in existing or deptrac-collected class-type directories such as `src/Shared/Infrastructure/{Cache,Collection,Resolver}`.
+- Put bounded-context adapters in existing context directories such as `src/Core/Customer/Application/{CommandHandler,EventSubscriber,Factory}` and `src/Core/Customer/Infrastructure/{Collection,Repository,Resolver}`.
+- Do not introduce new context directories named `Cache`, `ReadModel`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler`.
+- Do not create a Customer `Infrastructure/Cache` directory. Cache refresh is part of the existing repository, collection, resolver, subscriber, factory, command, and handler surface.
 
 ## Architecture Diagram
 
 ```mermaid
 flowchart LR
-    subgraph Domain["Domain layer (framework-free)"]
-        DomainEvents["CustomerCreatedEvent\nCustomerUpdatedEvent\nCustomerDeletedEvent"]
+    subgraph Domain["Any bounded-context Domain layer"]
+        DomainEvent["DomainEvent\nCustomerCreatedEvent\nFutureContextEvent"]
     end
 
-    subgraph Application["Customer Application layer"]
-        Subscribers["Customer cache invalidation subscribers"]
-        CommandFactory["CustomerCacheRefreshCommandFactory"]
-        RefreshCommand["RefreshCustomerCacheCommand"]
-        RefreshHandler["RefreshCustomerCacheCommandHandler"]
-        PolicyDto["CustomerCachePolicy DTO"]
-        Metrics["Customer cache metric classes"]
+    subgraph DomainEventWorker["Shared async domain-event path"]
+        EventEnvelope["DomainEventEnvelope"]
+        EventQueue["domain-events SQS transport\nLocalStack locally"]
+        EventWorker["DomainEventMessageHandler\nreads any domain event"]
     end
 
-    subgraph Infrastructure["Customer Infrastructure layer"]
-        PolicyCollection["CustomerCachePolicyCollection"]
-        PolicyResolver["CustomerCachePolicyResolver"]
-        TargetResolver["CustomerCacheRefreshTargetResolver"]
-        CachedRepo["CachedCustomerRepository"]
-        InnerRepo["MongoCustomerRepository"]
-        TagResolver["CustomerCacheTagResolver"]
+    subgraph SharedRefresh["Shared cache-refresh foundation"]
+        AbstractSubscriber["AbstractCacheInvalidationSubscriber"]
+        AbstractFactory["AbstractCacheRefreshCommandFactory"]
+        RefreshCommand["RefreshCacheCommand\nscalar reusable payload"]
+        RefreshWorker["RefreshCacheCommandHandler\nsingle shared worker"]
+        AbstractHandler["AbstractCacheRefreshCommandHandler"]
+        PolicyDto["CacheRefreshPolicy DTO"]
+        TargetDto["CacheRefreshTarget DTO"]
+        ResultDto["CacheRefreshResult DTO"]
+        HandlerResolver["CacheRefreshCommandHandlerResolver"]
+        PolicyResolver["CacheRefreshPolicyResolver"]
+        TargetResolver["CacheRefreshTargetResolverCollection"]
         KeyBuilder["CacheKeyBuilder"]
-        CachePools["Redis tag-aware cache pools\ncustomer detail, lookup, collection, reference"]
-        Messenger["Symfony Messenger"]
-        Sqs["SQS transport\nLocalStack locally"]
+        Metrics["Shared cache-refresh metrics"]
+    end
+
+    subgraph CustomerAdapter["Customer first adopter"]
+        CustomerSubscriber["Customer cache invalidation subscribers"]
+        CustomerFactory["CustomerCacheRefreshCommandFactory"]
+        CustomerHandler["CustomerCacheRefreshCommandHandler\nregistered adapter"]
+        CustomerTargetResolver["CustomerCacheRefreshTargetResolver"]
+        CustomerPolicyCollection["CustomerCachePolicyCollection"]
+        CachedCustomerRepository["CachedCustomerRepository"]
+        CustomerRepository["MongoCustomerRepository"]
+    end
+
+    subgraph FutureAdapter["Future bounded-context adopter"]
+        FutureSubscriber["Future context subscriber"]
+        FutureFactory["Future context command factory"]
+        FutureHandler["Future context refresh handler"]
+        FutureRepository["Future cached repository"]
+    end
+
+    subgraph RefreshTransport["Shared cache-refresh queue"]
+        RefreshQueue["cache-refresh SQS transport\nLocalStack locally"]
+        FailedQueue["failed-cache-refresh transport"]
+        MessengerWorkers["Symfony Messenger workers"]
+    end
+
+    subgraph Runtime["Cache runtime"]
+        CachePools["Redis tag-aware cache pools\ncontext + family scoped"]
     end
 
     subgraph Observability["Shared observability"]
         Emitter["BusinessMetricsEmitterInterface"]
     end
 
-    WriteApi["Customer write API\ncommand handlers"] --> DomainEvents
-    DomainEvents --> Messenger
-    Messenger --> Subscribers
-    Subscribers --> TagResolver
-    Subscribers --> CachePools
-    Subscribers --> TargetResolver
-    Subscribers --> CommandFactory
-    CommandFactory --> RefreshCommand
-    Subscribers --> Messenger
-    Messenger --> Sqs
-    Sqs --> RefreshCommand
-    RefreshCommand --> RefreshHandler
-    RefreshHandler --> PolicyResolver
-    PolicyResolver --> PolicyCollection
-    PolicyResolver --> PolicyDto
-    RefreshHandler --> PolicyDto
-    RefreshHandler --> InnerRepo
-    RefreshHandler --> KeyBuilder
-    RefreshHandler --> CachePools
+    WriteApi["Any write API\ncommand handlers"] --> DomainEvent
+    DomainEvent --> EventEnvelope
+    EventEnvelope --> EventQueue
+    EventQueue --> EventWorker
 
-    ReadApi["Customer read API"] --> CachedRepo
-    CachedRepo --> PolicyResolver
-    CachedRepo --> KeyBuilder
-    CachedRepo --> CachePools
-    CachedRepo --> InnerRepo
+    EventWorker --> CustomerSubscriber
+    EventWorker --> FutureSubscriber
 
-    CachedRepo --> Metrics
-    Subscribers --> Metrics
-    RefreshHandler --> Metrics
+    CustomerSubscriber --> AbstractSubscriber
+    FutureSubscriber --> AbstractSubscriber
+    AbstractSubscriber --> CachePools
+    AbstractSubscriber --> TargetResolver
+    CustomerTargetResolver --> TargetResolver
+    AbstractSubscriber --> AbstractFactory
+    CustomerFactory --> AbstractFactory
+    FutureFactory --> AbstractFactory
+    AbstractFactory --> RefreshCommand
+    RefreshCommand --> RefreshQueue
+
+    RefreshQueue --> MessengerWorkers
+    MessengerWorkers --> RefreshWorker
+    RefreshWorker --> HandlerResolver
+    HandlerResolver --> CustomerHandler
+    HandlerResolver --> FutureHandler
+    CustomerHandler --> AbstractHandler
+    FutureHandler --> AbstractHandler
+    AbstractHandler --> PolicyResolver
+    PolicyResolver --> CustomerPolicyCollection
+    AbstractHandler --> TargetResolver
+    TargetResolver --> TargetDto
+    AbstractHandler --> PolicyDto
+    AbstractHandler --> KeyBuilder
+    CustomerHandler --> CustomerRepository
+    CustomerHandler --> CachePools
+    AbstractHandler --> ResultDto
+    RefreshWorker --> FailedQueue
+
+    ReadApi["Customer read API"] --> CachedCustomerRepository
+    CachedCustomerRepository --> PolicyResolver
+    CachedCustomerRepository --> KeyBuilder
+    CachedCustomerRepository --> CachePools
+    CachedCustomerRepository --> CustomerRepository
+    FutureReadApi["Future read API"] --> FutureRepository
+
+    AbstractSubscriber --> Metrics
+    RefreshWorker --> Metrics
+    AbstractHandler --> Metrics
+    CachedCustomerRepository --> Metrics
     Metrics --> Emitter
 ```
 
-Read requests continue to use the cache repository decorator. Write-side domain events invalidate affected tags and enqueue `RefreshCustomerCacheCommand` work for same-entity cache refresh. Refresh workers warm customer detail and email lookup cache entries through the inner repository without blocking business writes.
+## New Source Tree
 
-## Planned Source Tree
-
-The implementation PR should add the following source files and edit the listed existing feature files.
+The implementation PR should add reusable shared classes first, then add Customer as the first adapter. The tree below shows new files and existing files that should be edited.
 
 ```text
 src/
+  Shared/
+    Application/
+      Command/
+        RefreshCacheCommand.php
+      CommandHandler/
+        AbstractCacheRefreshCommandHandler.php
+        RefreshCacheCommandHandler.php
+      DTO/
+        CacheRefreshPolicy.php
+        CacheRefreshResult.php
+        CacheRefreshTarget.php
+      EventSubscriber/
+        AbstractCacheInvalidationSubscriber.php
+      Factory/
+        AbstractCacheRefreshCommandFactory.php
+      Observability/
+        Metric/
+          CacheHitMetric.php
+          CacheMissMetric.php
+          CacheRefreshFailedMetric.php
+          CacheRefreshScheduledMetric.php
+          CacheRefreshStaleServedMetric.php
+          CacheRefreshSucceededMetric.php
+          ValueObject/
+            CacheRefreshMetricDimensions.php
+      Resolver/
+        CacheRefreshCommandHandlerResolverInterface.php
+        CacheRefreshPolicyResolverInterface.php
+        CacheRefreshTargetResolverInterface.php
+    Infrastructure/
+      Cache/
+        CacheKeyBuilder.php (existing, edit for generic context/family key helpers)
+      Collection/
+        CacheRefreshCommandHandlerCollection.php
+        CacheRefreshPolicyCollection.php
+        CacheRefreshTargetResolverCollection.php
+      Resolver/
+        CacheRefreshCommandHandlerResolver.php
+        CacheRefreshPolicyResolver.php
   Core/
     Customer/
       Application/
-        Command/
-          RefreshCustomerCacheCommand.php
         CommandHandler/
-          RefreshCustomerCacheCommandHandler.php
-        DTO/
-          CustomerCachePolicy.php
+          CustomerCacheRefreshCommandHandler.php
         EventSubscriber/
           CustomerCreatedCacheInvalidationSubscriber.php (edit)
           CustomerDeletedCacheInvalidationSubscriber.php (edit)
           CustomerUpdatedCacheInvalidationSubscriber.php (edit)
         Factory/
-          CustomerCachePolicyFactory.php
           CustomerCacheRefreshCommandFactory.php
-        Metric/
-          CustomerCacheHitMetric.php
-          CustomerCacheMissMetric.php
-          CustomerCacheRefreshFailedMetric.php
-          CustomerCacheRefreshScheduledMetric.php
-          CustomerCacheRefreshSucceededMetric.php
-          CustomerCacheStaleServedMetric.php
-          ValueObject/
-            CustomerCacheMetricDimensions.php
       Infrastructure/
         Collection/
           CustomerCachePolicyCollection.php
@@ -124,43 +207,55 @@ src/
           CustomerCachePolicyResolver.php
           CustomerCacheRefreshTargetResolver.php
           CustomerCacheTagResolver.php (existing)
-  Shared/
-    Infrastructure/
-      Cache/
-        CacheKeyBuilder.php (existing, edit only for generic key helpers)
 ```
 
-This layout matches current source and deptrac boundaries:
-
-- `Application/Command`, `Application/CommandHandler`, `Application/DTO`, `Application/EventSubscriber`, `Application/Factory`, and `Application/Metric` are already collected as Application.
-- `Infrastructure/Collection`, `Infrastructure/Repository`, and `Infrastructure/Resolver` are already collected as Infrastructure.
-- `Shared/Infrastructure/Cache` already exists for shared cache utilities.
-- No new Customer `Infrastructure/Cache` directory is needed because cache behavior is part of the existing Customer repository, collection, resolver, and subscriber feature surface.
-
-Planned test files:
+Planned test tree:
 
 ```text
 tests/
   Unit/
-    Customer/
+    Shared/
       Application/
         Command/
-          RefreshCustomerCacheCommandTest.php
+          RefreshCacheCommandTest.php
         CommandHandler/
-          RefreshCustomerCacheCommandHandlerTest.php
+          AbstractCacheRefreshCommandHandlerTest.php
+          RefreshCacheCommandHandlerTest.php
         DTO/
-          CustomerCachePolicyTest.php
+          CacheRefreshPolicyTest.php
+          CacheRefreshResultTest.php
+          CacheRefreshTargetTest.php
+        EventSubscriber/
+          AbstractCacheInvalidationSubscriberTest.php
+        Factory/
+          AbstractCacheRefreshCommandFactoryTest.php
+        Observability/
+          Metric/
+            CacheRefreshMetricTest.php
+            ValueObject/
+              CacheRefreshMetricDimensionsTest.php
+        Resolver/
+          CacheRefreshCommandHandlerResolverInterfaceTest.php
+          CacheRefreshPolicyResolverInterfaceTest.php
+          CacheRefreshTargetResolverInterfaceTest.php
+      Infrastructure/
+        Collection/
+          CacheRefreshCommandHandlerCollectionTest.php
+          CacheRefreshPolicyCollectionTest.php
+          CacheRefreshTargetResolverCollectionTest.php
+        Resolver/
+          CacheRefreshCommandHandlerResolverTest.php
+          CacheRefreshPolicyResolverTest.php
+    Customer/
+      Application/
+        CommandHandler/
+          CustomerCacheRefreshCommandHandlerTest.php
         EventSubscriber/
           CustomerCreatedCacheInvalidationSubscriberTest.php
           CustomerDeletedCacheInvalidationSubscriberTest.php
           CustomerUpdatedCacheInvalidationSubscriberTest.php
         Factory/
-          CustomerCachePolicyFactoryTest.php
           CustomerCacheRefreshCommandFactoryTest.php
-        Metric/
-          CustomerCacheMetricTest.php
-          ValueObject/
-            CustomerCacheMetricDimensionsTest.php
       Infrastructure/
         Collection/
           CustomerCachePolicyCollectionTest.php
@@ -176,7 +271,7 @@ tests/
           AsyncCustomerCacheRefreshTest.php
 ```
 
-Configuration and documentation expected to change:
+Configuration and documentation expected to change in the later implementation PR:
 
 ```text
 config/
@@ -196,44 +291,79 @@ docs/
   performance.md
 ```
 
-## Proposed Components
+## Shared Components
 
-### Cache Policy Model
+### Generic Refresh Command
 
-Add cache policy classes through existing class-type directories:
+`RefreshCacheCommand` is the single queue payload for all bounded contexts. It should carry scalar, serialization-stable data only:
 
-- `CustomerCachePolicy` in `Application/DTO`
-- `CustomerCachePolicyFactory` in `Application/Factory`
-- `CustomerCachePolicyCollection` in `Infrastructure/Collection`
-- `CustomerCachePolicyResolver` in `Infrastructure/Resolver`
+- context name, such as `customer`
+- cache family, such as `detail` or `lookup`
+- target identifiers as a string map
+- triggering domain event name and event ID
+- occurred-at timestamp
+- refresh strategy
+- attempt metadata where Messenger retry handling needs it
 
-Use services.yaml arguments for TTLs and jitter so defaults are configurable without editing repository code. Avoid separate enum classes in the first implementation unless the implementation already has an existing enum directory pattern to reuse.
+The command must not contain Customer-specific fields such as `customerEmail`. Customer-specific meaning belongs in `CustomerCacheRefreshCommandFactory` and `CustomerCacheRefreshTargetResolver`.
 
-### Cache Refresh Command Path
+### Abstract Subscriber Contract
 
-Add a dedicated command model instead of a separate message model:
+`AbstractCacheInvalidationSubscriber` should handle the common sequence:
 
-- `RefreshCustomerCacheCommand` in `Application/Command`
-- `RefreshCustomerCacheCommandHandler` in `Application/CommandHandler`
-- `CustomerCacheRefreshCommandFactory` in `Application/Factory`
-- `CustomerCacheRefreshTargetResolver` in `Infrastructure/Resolver`
+1. Resolve affected cache targets from the domain event.
+2. Invalidate tags immediately.
+3. Create one or more `RefreshCacheCommand` instances.
+4. Dispatch refresh commands best-effort.
+5. Emit scheduled or failed metrics without breaking domain-event processing.
 
-The command should carry scalar payload only, such as family name, customer ID, email, and event metadata, so it remains stable across Messenger serialization. Event subscribers create refresh commands after invalidation and dispatch them best-effort through Messenger or the configured command path. The handler warms same-entity entries from persisted state, such as customer detail by ID and lookup by email. For delete events, it should avoid warming deleted entities and may only preserve invalidation behavior.
+Concrete subscribers should only map a domain event to context-specific tags and targets.
 
-### Repository Decorator Changes
+### Shared Worker Contract
 
-Update `CachedCustomerRepository` to inject:
+`RefreshCacheCommandHandler` is the single Messenger worker entrypoint for the `cache-refresh` queue. It should:
 
-- detail cache pool
-- lookup cache pool
-- policy resolver
-- metrics emitter or cache metrics service
+1. Resolve a registered context command handler by context and family.
+2. Delegate refresh execution to that context handler.
+3. Emit common success or failure metrics.
+4. Let Messenger route unrecoverable job failures to `failed-cache-refresh` according to configured retry strategy.
 
-Use the policy resolver for TTL, tags, and cache key metadata. Preserve existing `findFresh()` bypass behavior for write paths.
+`AbstractCacheRefreshCommandHandler` should hold the reusable refresh template for context handlers:
 
-### Messenger Configuration
+1. Resolve the cache policy.
+2. Resolve the concrete target.
+3. Build cache keys through `CacheKeyBuilder`.
+4. Refresh the cache through a context repository callback.
+5. Return a `CacheRefreshResult`.
 
-Add:
+Concrete handlers, such as `CustomerCacheRefreshCommandHandler`, should only provide context-specific target loading, such as customer detail by ID or customer lookup by email.
+
+### Policy and Target Resolution
+
+`CacheRefreshPolicy` belongs in `Shared/Application/DTO` because it is data passed across application orchestration. It should contain:
+
+- context
+- family
+- key namespace
+- tags
+- soft TTL
+- hard TTL
+- jitter
+- consistency class
+- refresh strategy
+
+`CacheRefreshPolicyCollection` belongs in `Shared/Infrastructure/Collection` as the generic iterable policy holder. `CustomerCachePolicyCollection` may compose or configure customer policies in the Customer context, but policy lookup should be performed through the shared resolver interface.
+
+`CacheRefreshTarget` belongs in `Shared/Application/DTO`. It should describe what must be refreshed without depending on Customer classes.
+
+## Queue and Worker Model
+
+Use two worker paths:
+
+- Existing `domain-events` queue: reads any domain event through `DomainEventMessageHandler`.
+- New `cache-refresh` queue: reads the generic `RefreshCacheCommand` through `RefreshCacheCommandHandler`.
+
+The implementation should add a single shared cache-refresh transport:
 
 - `CACHE_REFRESH_QUEUE_NAME`
 - `FAILED_CACHE_REFRESH_QUEUE_NAME`
@@ -241,41 +371,61 @@ Add:
 - `FAILED_CACHE_REFRESH_TRANSPORT_DSN`
 - `cache-refresh` transport
 - `failed-cache-refresh` transport
-- routing for `RefreshCustomerCacheCommand`
 
-In `when@test`, route cache refresh to an in-memory transport.
+Do not create per-domain cache-refresh queues in the first implementation. A single queue keeps worker operations reusable. If future throughput requires separate queues, that should be an operations-driven follow-up with metrics evidence.
 
-### Observability
+## Customer Adapter
 
-Add typed metrics under `src/Core/Customer/Application/Metric`:
+Customer should be the first adapter for the shared design:
 
-- `CustomerCacheRefreshScheduledMetric`
-- `CustomerCacheRefreshSucceededMetric`
-- `CustomerCacheRefreshFailedMetric`
-- `CustomerCacheHitMetric`
-- `CustomerCacheMissMetric`
-- `CustomerCacheStaleServedMetric`
+- Customer create/update/delete subscribers extend or delegate to `AbstractCacheInvalidationSubscriber`.
+- `CustomerCacheRefreshCommandFactory` creates generic `RefreshCacheCommand` instances from Customer events.
+- `CustomerCacheRefreshTargetResolver` maps target DTOs to Customer repository lookup inputs.
+- `CustomerCachePolicyCollection` declares Customer detail, lookup, collection, reference, and negative lookup policies.
+- `CustomerCacheRefreshCommandHandler` extends or composes `AbstractCacheRefreshCommandHandler` and registers for `customer` context families.
+- `CachedCustomerRepository` consumes the shared policy resolver and key builder instead of method-local TTL literals.
 
-Place metric dimension value objects under `Application/Metric/ValueObject` so metric classes and value objects do not share one directory.
+The first implementation should refresh currently cached same-entity families:
 
-### Failure Semantics
+- Customer detail by ID.
+- Customer lookup by email.
 
-- Repository cache failures fall back to the inner repository.
-- Subscriber dispatch failures log and emit a failure metric, then return.
-- Command handler failures log and emit a failure metric, then return so poison refresh jobs do not block business behavior.
-- Domain event subscribers remain resilient through the existing `DomainEventMessageHandler`.
+Collection and reference policies should be declared and immediately invalidated by tags, but arbitrary proactive collection materialization stays out of scope until the codebase has a stable query-shape abstraction.
+
+## Observability
+
+Metric classes should be shared because refresh lifecycle is not Customer-specific:
+
+- `CacheRefreshScheduledMetric`
+- `CacheRefreshSucceededMetric`
+- `CacheRefreshFailedMetric`
+- `CacheHitMetric`
+- `CacheMissMetric`
+- `CacheRefreshStaleServedMetric`
+
+Place them under `Shared/Application/Observability/Metric`. Use dimensions such as context, family, source event, result, and failure type. Context-specific metrics should only be added when a bounded context needs dimensions that the shared classes cannot represent.
+
+## Failure Semantics
+
+- Cache failures fall back to the inner repository where the current repository already does so.
+- Subscriber dispatch failures are logged and measured but do not break domain-event handling.
+- Worker refresh failures are logged and measured; retry and failed routing are controlled by Messenger.
+- Delete events invalidate and avoid warming deleted entities.
+- Domain remains free of Symfony, cache, Messenger, logging, and metrics dependencies.
 
 ## Implementation Sequence
 
-1. Add policy DTO, factory, collection, resolver, and tests.
-2. Split cache pools and update repository TTL usage.
-3. Add refresh command, command factory, command handler, target resolver, and Messenger routing.
-4. Update subscribers to invalidate plus dispatch refresh commands.
-5. Add metrics and tests.
-6. Add integration proof and docs.
-7. Run CI and cache performance evidence.
+1. Add shared DTOs, resolver interfaces, collections, abstract subscriber, abstract factory, generic refresh command, generic worker, abstract context handler, and shared metrics.
+2. Add the single `cache-refresh` and `failed-cache-refresh` Messenger transports.
+3. Add Customer adapter classes that extend or compose the shared abstractions.
+4. Update `CachedCustomerRepository` to use resolved policies and generic key helpers.
+5. Update Customer subscribers to invalidate plus schedule refresh work through the shared subscriber path.
+6. Add unit and integration tests for shared orchestration and the Customer adapter.
+7. Update docs and run cache performance evidence where runtime services allow.
 
 ## Architectural Tradeoffs
 
-- The first PR should not attempt generic API Platform collection caching. That requires a provider-level design and may be a separate architecture change.
-- Reference-data policies can be declared before reference-data domain events exist. Full refresh triggering for type/status mutations should be follow-up work unless events are added in this PR.
+- This design keeps reusable orchestration in `Shared` and leaves domain-specific mapping in bounded contexts.
+- It uses the existing CQRS command/handler names instead of inventing `Request`, `Message`, `MessageHandler`, `Scheduler`, or `Worker` directories.
+- It uses `Policy` as a DTO class name, not as a new directory type.
+- It avoids `ReadModel` because the current project read paths are repository and resolver based, and issue #176 is about refreshing endpoint cache entries rather than introducing a separate projection model.

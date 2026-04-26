@@ -57,12 +57,16 @@ Do not propose `ReadModel`, `Query`, `QueryHandler`, `Message`, `MessageHandler`
 
 Example for Customer cache planning:
 
-- Refresh work: `Application/Command/RefreshCustomerCacheCommand.php`
-- Refresh execution: `Application/CommandHandler/RefreshCustomerCacheCommandHandler.php`
-- Policy data: `Application/DTO/CustomerCachePolicy.php`
-- Policy creation: `Application/Factory/CustomerCachePolicyFactory.php`
-- Policy lookup: `Infrastructure/Collection/CustomerCachePolicyCollection.php` plus `Infrastructure/Resolver/CustomerCachePolicyResolver.php`
-- Cached storage access: existing `Infrastructure/Repository/CachedCustomerRepository.php`
+- Shared reusable refresh work: `Shared/Application/Command/RefreshCacheCommand.php`
+- Shared reusable worker: `Shared/Application/CommandHandler/RefreshCacheCommandHandler.php`
+- Shared reusable handler base: `Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php`
+- Shared reusable metrics: `Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php`
+- Customer adapter execution: `Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php`
+- Customer adapter factory: `Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php`
+- Customer policy lookup: `Core/Customer/Infrastructure/Collection/CustomerCachePolicyCollection.php` plus `Core/Customer/Infrastructure/Resolver/CustomerCachePolicyResolver.php`
+- Customer cached storage access: existing `Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`
+
+When a feature must be reusable across bounded contexts, put the generic command, worker, abstract base classes, DTOs, resolver interfaces, and metrics in `Shared` first. Keep each bounded context as a thin adapter that maps its domain events, tags, targets, policies, and repository warmup behavior into the shared contract. Do not route Customer-specific command payloads if the same queue and worker must later refresh other domains.
 
 ---
 

@@ -20,6 +20,21 @@ Rules:
 
 Example: a Customer cache feature should not automatically create `src/Core/Customer/Infrastructure/Cache`. The current cache feature already uses `Infrastructure/Repository`, `Infrastructure/Collection`, `Infrastructure/Resolver`, and `Application/EventSubscriber`, so new cache policy and refresh classes should use existing precise directories such as `DTO`, `Factory`, `Collection`, `Resolver`, `Command`, and `CommandHandler`.
 
+If the cache refresh path must be reusable across bounded contexts, the generic queue payload and worker belong in Shared class-type directories, while Customer stays a first adapter:
+
+```text
+src/Shared/Application/Command/RefreshCacheCommand.php
+src/Shared/Application/CommandHandler/RefreshCacheCommandHandler.php
+src/Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php
+src/Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php
+src/Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php
+src/Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php
+src/Core/Customer/Infrastructure/Collection/CustomerCachePolicyCollection.php
+src/Core/Customer/Infrastructure/Resolver/CustomerCachePolicyResolver.php
+```
+
+Do not route a Customer-specific command if the requirement is "one queue and worker can refresh any bounded context." Use a feature-neutral command payload with context, family, target identifiers, strategy, and event metadata, then resolve Customer-specific meaning in Customer factories, resolvers, and handlers.
+
 ## Infrastructure Layer
 
 ```text

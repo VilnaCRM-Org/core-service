@@ -1,8 +1,8 @@
-# Research: Issue 176 Async Endpoint Cache Refresh
+# Research: Issue 176 Abstract Async Endpoint Cache Refresh
 
 ## Issue Scope
 
-GitHub issue #176 asks for endpoint-grade cache consistency for customer-facing cached query shapes. The requested outcome is not just invalidation: domain events must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while LocalStack remains the local transport.
+GitHub issue #176 asks for endpoint-grade cache consistency. The planned solution should create a reusable domain-event-driven cache refresh foundation, with Customer as the first adopter. The requested outcome is not just invalidation: domain events must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while LocalStack remains the local transport.
 
 ## Current State
 
@@ -64,14 +64,31 @@ Load and cache tests already exist:
 - Cache operations must be best effort and must not break business writes.
 - Event subscribers may live in Application and can depend on Infrastructure per the current deptrac rules.
 - Async cache refresh should reuse the repo's CQRS command directories: `Application/Command` and `Application/CommandHandler`.
-- Cache policy structure should reuse existing type directories such as `Application/DTO`, `Application/Factory`, `Infrastructure/Collection`, and `Infrastructure/Resolver`.
-- Do not introduce new Customer `Infrastructure/Cache`, `ReadModel`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler` directories for this feature unless the implementation first proves the current source tree and `deptrac.yaml` already support that directory type.
+- Shared metrics should reuse `Shared/Application/Observability/Metric`.
+- Cache policy structure should reuse existing type directories such as `DTO`, `Factory`, `Collection`, and `Resolver`.
+- Do not introduce new context `Infrastructure/Cache`, `ReadModel`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler` directories for this feature unless the implementation first proves the current source tree and `deptrac.yaml` already support that directory type.
 
 ## Implementation Surface
 
-Likely production code changes:
+### Shared Reusable Orchestration
 
-- Add endpoint cache policy DTO/factory/collection/resolver classes under the existing Customer Application and Infrastructure directories.
+Likely shared production code changes:
+
+- Add a generic `RefreshCacheCommand` under `Shared/Application/Command` with scalar context, family, target identifiers, strategy, and event metadata.
+- Add a generic `RefreshCacheCommandHandler` under `Shared/Application/CommandHandler` as the single Messenger worker entrypoint.
+- Add `AbstractCacheInvalidationSubscriber`, `AbstractCacheRefreshCommandFactory`, and `AbstractCacheRefreshCommandHandler` for reusable event-to-refresh orchestration and context handler behavior.
+- Add shared cache policy/target/result DTOs, resolver interfaces, handler resolver, handler collection, policy collection, and target resolver collection.
+- Add shared cache refresh lifecycle metrics under `Shared/Application/Observability/Metric`.
+- Add generic cache key helpers to `CacheKeyBuilder` if needed.
+- Add `cache-refresh` and `failed-cache-refresh` transports while keeping the existing `domain-events` transport unchanged.
+
+### Customer Adopter Changes
+
+Likely Customer production code changes:
+
+- Add Customer cache policy collection/resolver and refresh target resolver under existing Infrastructure directories.
+- Add `CustomerCacheRefreshCommandFactory` under `Application/Factory`.
+- Add `CustomerCacheRefreshCommandHandler` under `Application/CommandHandler` as a registered adapter for the shared worker.
 - Add customer endpoint cache policy configuration in `config/services.yaml` with environment-overridable TTLs and jitter.
 - Split cache pools in `config/packages/cache.yaml` and `config/packages/test/cache.yaml`, likely:
   - `cache.customer.detail`
@@ -79,23 +96,21 @@ Likely production code changes:
   - `cache.customer.collection`
   - `cache.customer.reference`
 - Update `CachedCustomerRepository` to use declared policies for customer detail and email lookup instead of method-local TTL constants.
-- Add `RefreshCustomerCacheCommand` and `RefreshCustomerCacheCommandHandler` routed through Messenger to SQS in non-test environments.
-- Add a command factory and target resolver that event subscribers use after invalidation.
-- Update create/update/delete invalidation subscribers to enqueue same-entity refresh workloads for affected families.
-- Add typed cache refresh lifecycle metrics for scheduled, succeeded, failed, stale served, and cache lookup hit/miss where feasible.
-- Update docs for cache policies, TTL defaults, LocalStack/SQS refresh routing, and operational metrics.
+- Update create/update/delete invalidation subscribers to invalidate and enqueue same-entity refresh workloads for affected families through the shared path.
+- Update docs for shared refresh orchestration, Customer policies, TTL defaults, LocalStack/SQS refresh routing, and operational metrics.
 
 Potential test changes:
 
-- Unit tests for cache policy construction, collection lookup, resolver behavior, TTL jitter bounds, and key/tag schema.
-- Unit tests for refresh command creation from create/update/delete subscribers.
-- Unit tests for refresh command handler success, missing entity/negative cache handling, and failure metric emission.
-- Integration tests that publish customer domain events and verify cache entries are repopulated by the refresh handler after invalidation.
+- Unit tests for shared command serialization, handler delegation, handler failure isolation, subscriber/factory behavior, policy construction, resolver behavior, TTL jitter bounds, and metric dimensions.
+- Unit tests for Customer refresh command creation from create/update/delete subscribers.
+- Unit tests for Customer refresh handler success, missing entity/negative cache handling, and failure metric emission.
+- Integration tests that publish Customer domain events and verify cache entries are repopulated by the shared worker plus Customer handler after invalidation.
 - Existing cache performance tests should continue to pass.
 - Existing K6 cache performance smoke scenario can be used as load evidence.
 
 ## Key Risks
 
+- A generic shared design may still carry Customer-only payload assumptions. The payload must use feature-neutral fields and leave Customer-specific mapping in the Customer adapter.
 - API Platform collection caching is not currently repository-level, so adding full collection refresh for arbitrary filters may exceed a safe first implementation. Forward-safe policy classes can declare collection policies while the first worker refreshes known detail/email workloads and invalidates collection tags.
 - Customer type/status operations do not publish domain events today, so reference-data cache refresh should either be limited to declared policy plus current invalidation behavior or be split into a follow-up if events are missing.
 - Symfony cache `get()` does not expose simple hit/miss hooks; hit/miss metrics may require a wrapper service or conservative instrumentation around callback execution.
@@ -104,10 +119,10 @@ Potential test changes:
 
 ## Planning Assumptions
 
-- The first PR should implement cache policy DTO/factory/collection/resolver classes, split pools, and async refresh for the currently cached customer detail and email lookup families.
+- The first implementation should deliver the shared refresh foundation plus Customer adoption for currently cached detail and email lookup families.
 - Customer collection and customer reference-data policies should be declared and documented, with collection tags still invalidated. Full arbitrary collection materialization can remain policy-ready unless the codebase exposes a stable cacheable query abstraction during implementation.
 - Cache refresh failures should be logged and measured but must not rethrow into business writes or domain event processing.
-- Tests should prefer direct handler invocation for deterministic refresh verification, while Messenger routing config proves SQS/local transport wiring.
+- Tests should prefer direct worker and handler invocation for deterministic refresh verification, while Messenger routing config proves SQS/local transport wiring.
 
 ## Commands Run During Research
 

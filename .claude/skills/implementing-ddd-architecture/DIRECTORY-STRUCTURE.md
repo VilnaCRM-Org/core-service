@@ -48,23 +48,28 @@ Use existing class-type directories first. A directory name is a class responsib
 - `Collection/` contains collections only.
 - `Resolver/` contains resolvers only.
 - `Repository/` contains repositories only.
-- `Metric/` contains metric classes; nested `ValueObject/` may hold metric value objects where that pattern already exists.
+- `Metric/` contains metric classes in bounded contexts; shared metrics use the existing `Shared/Application/Observability/Metric/` structure, with nested `ValueObject/` where that pattern already exists.
 
 Do not create umbrella directories such as `Cache/`, `Policy/`, `Registry/`, or `Scheduler/` inside a bounded context when the feature can be represented by existing class-type directories. If a new directory type is truly needed, update the architecture spec with the reason and validate that deptrac collects it.
 
-Example: customer cache refresh should reuse the current Customer directories:
+Example: a reusable cache refresh feature should put generic orchestration in Shared and keep Customer as an adapter:
 
 ```text
-src/Core/Customer/
+src/Shared/
   Application/
     Command/
-      RefreshCustomerCacheCommand.php
+      RefreshCacheCommand.php
     CommandHandler/
-      RefreshCustomerCacheCommandHandler.php
-    DTO/
-      CustomerCachePolicy.php
+      RefreshCacheCommandHandler.php
+      AbstractCacheRefreshCommandHandler.php
+    Observability/
+      Metric/
+        CacheRefreshSucceededMetric.php
+src/Core/Customer/
+  Application/
+    CommandHandler/
+      CustomerCacheRefreshCommandHandler.php
     Factory/
-      CustomerCachePolicyFactory.php
       CustomerCacheRefreshCommandFactory.php
   Infrastructure/
     Collection/
@@ -76,7 +81,7 @@ src/Core/Customer/
       CustomerCacheRefreshTargetResolver.php
 ```
 
-This avoids inventing `Infrastructure/Cache` for a cache feature that already exists through repository, collection, resolver, and subscriber classes.
+This avoids inventing `Infrastructure/Cache` for a context feature that already exists through repository, collection, resolver, and subscriber classes. It also avoids Customer-only queue payloads when the queue and worker must refresh cache entries for other domains later.
 
 ## Complete Directory Structure (CodelyTV Pattern)
 
