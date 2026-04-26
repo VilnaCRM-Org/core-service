@@ -58,9 +58,9 @@ Example: a reusable cache refresh feature should put generic orchestration in Sh
 src/Shared/
   Application/
     Command/
-      RefreshCacheCommand.php
+      CacheRefreshCommand.php
     CommandHandler/
-      RefreshCacheCommandHandler.php
+      CacheRefreshCommandHandler.php
       AbstractCacheRefreshCommandHandler.php
     Observability/
       Metric/

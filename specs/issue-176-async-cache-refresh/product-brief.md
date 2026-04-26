@@ -55,7 +55,7 @@ This creates three product risks:
 ## Key Requirements
 
 - Add shared cache-refresh DTOs with context, family, target identifiers, strategy, and event metadata.
-- Add a generic `RefreshCacheCommand` and shared `RefreshCacheCommandHandler`.
+- Add a generic `CacheRefreshCommand` and shared `CacheRefreshCommandHandler`.
 - Add abstract subscriber, factory, and context handler classes so bounded contexts only implement event mapping and warmup logic.
 - Add Customer policy collection/resolver/target resolver/handler adapters through existing directories.
 - Update Customer cache invalidation subscribers to invalidate and schedule same-entity refresh workloads through the shared path.

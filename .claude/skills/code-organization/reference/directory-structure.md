@@ -23,8 +23,8 @@ Example: a Customer cache feature should not automatically create `src/Core/Cust
 If the cache refresh path must be reusable across bounded contexts, the generic queue payload and worker belong in Shared class-type directories, while Customer stays a first adapter:
 
 ```text
-src/Shared/Application/Command/RefreshCacheCommand.php
-src/Shared/Application/CommandHandler/RefreshCacheCommandHandler.php
+src/Shared/Application/Command/CacheRefreshCommand.php
+src/Shared/Application/CommandHandler/CacheRefreshCommandHandler.php
 src/Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php
 src/Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php
 src/Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php

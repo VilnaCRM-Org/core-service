@@ -14,7 +14,7 @@ Ready to implement with scoped constraints.
 ## Gaps and Mitigations
 
 - Generic adopter contract needs to stay feature-neutral.
-  - Mitigation: `RefreshCacheCommand` uses context, family, target identifiers, strategy, and event metadata only; Customer-specific meaning stays in Customer factory/resolver/handler classes.
+  - Mitigation: `CacheRefreshCommand` uses context, family, target identifiers, strategy, and event metadata only; Customer-specific meaning stays in Customer factory/resolver/handler classes.
 - Generic collection cache warmup is not currently represented by a stable repository query object.
   - Mitigation: declare collection policy and continue invalidating collection tags; implement same-entity refresh for detail/email families in this PR.
 - Reference-data mutations do not appear to publish domain events.

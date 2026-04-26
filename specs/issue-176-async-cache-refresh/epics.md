@@ -16,8 +16,8 @@ Story 1.2: Add generic command and abstract orchestration classes.
 Acceptance:
 
 - Abstract subscriber invalidates tags, resolves targets, dispatches refresh commands, and emits metrics.
-- Abstract factory creates scalar, Messenger-safe `RefreshCacheCommand` payloads.
-- Generic `RefreshCacheCommandHandler` is the single worker entrypoint for the shared queue.
+- Abstract factory creates scalar, Messenger-safe `CacheRefreshCommand` payloads.
+- Generic `CacheRefreshCommandHandler` is the single worker entrypoint for the shared queue.
 - Abstract context handler resolves policy and target, refreshes cache through context callbacks, and returns a result.
 - Unit tests prove the shared classes are reusable without Customer-specific types.
 
@@ -64,7 +64,7 @@ Story 3.3: Add Customer refresh command handler adapter.
 
 Acceptance:
 
-- `CustomerCacheRefreshCommandFactory` creates the shared `RefreshCacheCommand` payload without Customer-specific fields in the payload contract.
+- `CustomerCacheRefreshCommandFactory` creates the shared `CacheRefreshCommand` payload without Customer-specific fields in the payload contract.
 - `CustomerCacheRefreshCommandHandler` extends or composes the shared abstract context handler.
 - The handler warms Customer detail and email lookup entries from persisted state.
 - Context-specific logic is limited to target mapping and repository loading.

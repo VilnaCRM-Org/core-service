@@ -57,8 +57,8 @@ Do not propose `ReadModel`, `Query`, `QueryHandler`, `Message`, `MessageHandler`
 
 Example for Customer cache planning:
 
-- Shared reusable refresh work: `Shared/Application/Command/RefreshCacheCommand.php`
-- Shared reusable worker: `Shared/Application/CommandHandler/RefreshCacheCommandHandler.php`
+- Shared reusable refresh work: `Shared/Application/Command/CacheRefreshCommand.php`
+- Shared reusable worker: `Shared/Application/CommandHandler/CacheRefreshCommandHandler.php`
 - Shared reusable handler base: `Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php`
 - Shared reusable metrics: `Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php`
 - Customer adapter execution: `Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php`

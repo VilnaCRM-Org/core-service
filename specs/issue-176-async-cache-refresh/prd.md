@@ -53,7 +53,7 @@ Implement endpoint-grade cache consistency through a reusable domain-event-drive
 
 ## Acceptance Criteria Mapping
 
-- Reusable orchestration: shared abstract subscriber, abstract factory, generic `RefreshCacheCommand`, generic `RefreshCacheCommandHandler`, reusable context handler base, policy DTOs, target DTOs, resolvers, collections, and metrics exist with unit tests.
+- Reusable orchestration: shared abstract subscriber, abstract factory, generic `CacheRefreshCommand`, generic `CacheRefreshCommandHandler`, reusable context handler base, policy DTOs, target DTOs, resolvers, collections, and metrics exist with unit tests.
 - Domain-event invalidation plus async recalculation: existing domain-event worker invokes context subscribers, which schedule cache-refresh commands after invalidation.
 - Queue reuse: one shared `cache-refresh` transport and one `failed-cache-refresh` transport handle the generic refresh command for all contexts.
 - Customer first adapter: Customer detail and email lookup refresh through the shared orchestration; collection/reference policies are declared and tag-invalidated.

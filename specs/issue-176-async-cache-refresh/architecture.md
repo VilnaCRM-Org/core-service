@@ -46,8 +46,8 @@ flowchart LR
     subgraph SharedRefresh["Shared cache-refresh foundation"]
         AbstractSubscriber["AbstractCacheInvalidationSubscriber"]
         AbstractFactory["AbstractCacheRefreshCommandFactory"]
-        RefreshCommand["RefreshCacheCommand\nscalar reusable payload"]
-        RefreshWorker["RefreshCacheCommandHandler\nsingle shared worker"]
+        RefreshCommand["CacheRefreshCommand\nscalar reusable payload"]
+        RefreshWorker["CacheRefreshCommandHandler\nsingle shared worker"]
         AbstractHandler["AbstractCacheRefreshCommandHandler"]
         PolicyDto["CacheRefreshPolicy DTO"]
         TargetDto["CacheRefreshTarget DTO"]
@@ -150,10 +150,10 @@ src/
   Shared/
     Application/
       Command/
-        RefreshCacheCommand.php
+        CacheRefreshCommand.php
       CommandHandler/
         AbstractCacheRefreshCommandHandler.php
-        RefreshCacheCommandHandler.php
+        CacheRefreshCommandHandler.php
       DTO/
         CacheRefreshPolicy.php
         CacheRefreshResult.php
@@ -217,10 +217,10 @@ tests/
     Shared/
       Application/
         Command/
-          RefreshCacheCommandTest.php
+          CacheRefreshCommandTest.php
         CommandHandler/
           AbstractCacheRefreshCommandHandlerTest.php
-          RefreshCacheCommandHandlerTest.php
+          CacheRefreshCommandHandlerTest.php
         DTO/
           CacheRefreshPolicyTest.php
           CacheRefreshResultTest.php
@@ -295,7 +295,7 @@ docs/
 
 ### Generic Refresh Command
 
-`RefreshCacheCommand` is the single queue payload for all bounded contexts. It should carry scalar, serialization-stable data only:
+`CacheRefreshCommand` is the single queue payload for all bounded contexts. It should carry scalar, serialization-stable data only:
 
 - context name, such as `customer`
 - cache family, such as `detail` or `lookup`
@@ -313,7 +313,7 @@ The command must not contain Customer-specific fields such as `customerEmail`. C
 
 1. Resolve affected cache targets from the domain event.
 2. Invalidate tags immediately.
-3. Create one or more `RefreshCacheCommand` instances.
+3. Create one or more `CacheRefreshCommand` instances.
 4. Dispatch refresh commands best-effort.
 5. Emit scheduled or failed metrics without breaking domain-event processing.
 
@@ -321,7 +321,7 @@ Concrete subscribers should only map a domain event to context-specific tags and
 
 ### Shared Worker Contract
 
-`RefreshCacheCommandHandler` is the single Messenger worker entrypoint for the `cache-refresh` queue. It should:
+`CacheRefreshCommandHandler` is the single Messenger worker entrypoint for the `cache-refresh` queue. It should:
 
 1. Resolve a registered context command handler by context and family.
 2. Delegate refresh execution to that context handler.
@@ -361,7 +361,7 @@ Concrete handlers, such as `CustomerCacheRefreshCommandHandler`, should only pro
 Use two worker paths:
 
 - Existing `domain-events` queue: reads any domain event through `DomainEventMessageHandler`.
-- New `cache-refresh` queue: reads the generic `RefreshCacheCommand` through `RefreshCacheCommandHandler`.
+- New `cache-refresh` queue: reads the generic `CacheRefreshCommand` through `CacheRefreshCommandHandler`.
 
 The implementation should add a single shared cache-refresh transport:
 
@@ -379,7 +379,7 @@ Do not create per-domain cache-refresh queues in the first implementation. A sin
 Customer should be the first adapter for the shared design:
 
 - Customer create/update/delete subscribers extend or delegate to `AbstractCacheInvalidationSubscriber`.
-- `CustomerCacheRefreshCommandFactory` creates generic `RefreshCacheCommand` instances from Customer events.
+- `CustomerCacheRefreshCommandFactory` creates generic `CacheRefreshCommand` instances from Customer events.
 - `CustomerCacheRefreshTargetResolver` maps target DTOs to Customer repository lookup inputs.
 - `CustomerCachePolicyCollection` declares Customer detail, lookup, collection, reference, and negative lookup policies.
 - `CustomerCacheRefreshCommandHandler` extends or composes `AbstractCacheRefreshCommandHandler` and registers for `customer` context families.

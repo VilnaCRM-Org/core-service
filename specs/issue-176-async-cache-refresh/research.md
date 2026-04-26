@@ -74,8 +74,8 @@ Load and cache tests already exist:
 
 Likely shared production code changes:
 
-- Add a generic `RefreshCacheCommand` under `Shared/Application/Command` with scalar context, family, target identifiers, strategy, and event metadata.
-- Add a generic `RefreshCacheCommandHandler` under `Shared/Application/CommandHandler` as the single Messenger worker entrypoint.
+- Add a generic `CacheRefreshCommand` under `Shared/Application/Command` with scalar context, family, target identifiers, strategy, and event metadata.
+- Add a generic `CacheRefreshCommandHandler` under `Shared/Application/CommandHandler` as the single Messenger worker entrypoint.
 - Add `AbstractCacheInvalidationSubscriber`, `AbstractCacheRefreshCommandFactory`, and `AbstractCacheRefreshCommandHandler` for reusable event-to-refresh orchestration and context handler behavior.
 - Add shared cache policy/target/result DTOs, resolver interfaces, handler resolver, handler collection, policy collection, and target resolver collection.
 - Add shared cache refresh lifecycle metrics under `Shared/Application/Observability/Metric`.

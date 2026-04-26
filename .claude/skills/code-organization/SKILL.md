@@ -44,8 +44,8 @@ Before proposing a source tree, creating files, or responding to review feedback
 
 For CQRS in this repository, async work can still be a command. If the work must be reusable across bounded contexts, define the generic command and worker in `Shared`, then add bounded-context adapters:
 
-- `Shared/Application/Command/RefreshCacheCommand.php`
-- `Shared/Application/CommandHandler/RefreshCacheCommandHandler.php`
+- `Shared/Application/Command/CacheRefreshCommand.php`
+- `Shared/Application/CommandHandler/CacheRefreshCommandHandler.php`
 - `Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php`
 - `Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php`
 - `Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php`
