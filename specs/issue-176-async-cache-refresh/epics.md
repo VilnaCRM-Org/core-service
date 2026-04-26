@@ -2,36 +2,36 @@
 
 ## Epic 1: Declare Cache Policy Contract
 
-Story 1.1: Add typed customer cache family, consistency, refresh strategy, and policy objects.
+Story 1.1: Add typed customer cache policy DTO, factory, collection, and resolver.
 
 Acceptance:
 
 - Policies expose key namespace, tags, soft TTL, hard TTL, jitter, consistency class, and refresh strategy.
 - TTL jitter is deterministic enough to test and bounded by policy.
-- Unit tests cover policy construction and registry lookup.
+- Unit tests cover policy construction, collection lookup, and resolver behavior.
 
-Story 1.2: Wire policy registry through Symfony services.
+Story 1.2: Wire policy collection and resolver through Symfony services.
 
 Acceptance:
 
 - TTL/jitter defaults are configurable through parameters/env-backed service arguments.
-- Customer detail/email repository cache uses registry values instead of literals.
+- Customer detail/email repository cache uses resolved policy values instead of literals.
 
 ## Epic 2: Add Async Refresh Pipeline
 
-Story 2.1: Add cache refresh message, scheduler, and handler.
+Story 2.1: Add cache refresh command, command factory, target resolver, and command handler.
 
 Acceptance:
 
-- Scheduler dispatches dedicated cache refresh messages through Messenger.
-- Handler warms customer detail and email lookup entries from persisted state.
-- Handler logs and emits failure metrics without throwing into business behavior.
+- Subscribers dispatch dedicated refresh commands through Messenger or the configured command path.
+- Command handler warms customer detail and email lookup entries from persisted state.
+- Command handler logs and emits failure metrics without throwing into business behavior.
 
 Story 2.2: Add SQS runtime and LocalStack local routing.
 
 Acceptance:
 
-- Non-test config routes refresh messages to an SQS-backed transport.
+- Non-test config routes refresh commands to an SQS-backed transport.
 - Test config uses in-memory transport.
 - Existing domain event routing remains unchanged.
 

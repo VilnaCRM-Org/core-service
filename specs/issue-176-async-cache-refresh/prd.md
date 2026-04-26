@@ -6,7 +6,7 @@ Implement endpoint-grade cache consistency for customer cached query families so
 
 ## Functional Requirements
 
-1. Provide a typed cache policy registry for customer cached query families:
+1. Provide typed customer cache policies for cached query families:
    - customer detail by ID
    - customer lookup by email
    - customer collection/search
@@ -21,10 +21,10 @@ Implement endpoint-grade cache consistency for customer cached query families so
    - jitter
    - consistency class
    - refresh strategy
-3. Replace hardcoded customer detail/email TTLs in `CachedCustomerRepository` with registry policies.
+3. Replace hardcoded customer detail/email TTLs in `CachedCustomerRepository` with resolved cache policies.
 4. Split cache pools by customer query family in Symfony cache configuration, while preserving a compatibility alias if existing tests or fixtures still use `cache.customer`.
-5. Add a dedicated cache refresh message routed through Symfony Messenger to an SQS-backed transport in non-test environments.
-6. Add a cache refresh handler that refreshes same-entity customer detail and email lookup entries from the inner repository.
+5. Add `RefreshCustomerCacheCommand` routed through Symfony Messenger to an SQS-backed transport in non-test environments.
+6. Add a command handler that refreshes same-entity customer detail and email lookup entries from the inner repository.
 7. Update customer create/update/delete cache subscribers so they:
    - invalidate affected tags
    - enqueue same-entity refresh workloads for affected customer detail/email families when useful
@@ -48,13 +48,13 @@ Implement endpoint-grade cache consistency for customer cached query families so
 
 ## Acceptance Criteria Mapping
 
-- Declared policy per cached family: policy registry and unit tests.
-- Domain-event invalidation plus async recalculation: updated subscribers, refresh scheduler/message/handler, Messenger routing.
+- Declared policy per cached family: policy DTO/factory/collection/resolver and unit tests.
+- Domain-event invalidation plus async recalculation: updated subscribers, refresh command/handler, Messenger routing.
 - LocalStack compatibility: `.env` and `config/packages/messenger.yaml` add cache refresh DSN/transport mirroring domain events.
 - Writes do not block on rebuild: subscribers only schedule work; handler runs separately.
 - TTL defaults documented: docs update with policy table and rationale.
 - Observability: typed EMF metrics and tests.
-- Tests: unit coverage for policies/scheduler/handler/subscribers/metrics, integration coverage for post-event warmup, cache performance target rerun.
+- Tests: unit coverage for policies, command dispatch, command handler, subscribers, metrics, integration coverage for post-event warmup, cache performance target rerun.
 
 ## Out of Scope
 

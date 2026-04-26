@@ -35,6 +35,37 @@ Business logic belongs in the Domain layer. Application layer orchestrates, Doma
 
 ---
 
+## Architecture Planning: Existing Structure First
+
+When writing architecture specs or proposing new classes for this repository, inspect the current source tree and `deptrac.yaml` before inventing directories.
+
+Required workflow:
+
+1. List existing directories for the bounded context, for example `find src/Core/Customer -maxdepth 4 -type d | sort`.
+2. Check `deptrac.yaml` collectors for allowed Application, Domain, and Infrastructure directory names.
+3. Reuse existing type directories whenever they already express the class responsibility.
+4. Keep the rule **one directory = one class type**. Do not place policies, schedulers, registries, handlers, DTOs, and resolvers together in a broad feature bucket.
+5. If a feature already exists through `Repository`, `Collection`, `Resolver`, `EventSubscriber`, or other established directories, extend that feature surface instead of creating a new umbrella directory such as `Cache`.
+6. Introduce a new directory type only when no existing type fits, it is added to deptrac, and the architecture spec explains why the new type is necessary.
+
+For CQRS in this codebase, prefer:
+
+- `Application/Command/{Action}{Entity}Command.php`
+- `Application/CommandHandler/{Action}{Entity}CommandHandler.php`
+
+Do not propose `ReadModel`, `Query`, `QueryHandler`, `Message`, `MessageHandler`, `Policy`, `Registry`, or `Scheduler` directories unless the current repo already uses that directory type and deptrac collects it. Reads in the current Customer context are served by repositories, resolvers, processors, and DTOs rather than a separate read-model directory.
+
+Example for Customer cache planning:
+
+- Refresh work: `Application/Command/RefreshCustomerCacheCommand.php`
+- Refresh execution: `Application/CommandHandler/RefreshCustomerCacheCommandHandler.php`
+- Policy data: `Application/DTO/CustomerCachePolicy.php`
+- Policy creation: `Application/Factory/CustomerCachePolicyFactory.php`
+- Policy lookup: `Infrastructure/Collection/CustomerCachePolicyCollection.php` plus `Infrastructure/Resolver/CustomerCachePolicyResolver.php`
+- Cached storage access: existing `Infrastructure/Repository/CachedCustomerRepository.php`
+
+---
+
 ## Layer Dependency Rules
 
 ```
@@ -292,6 +323,8 @@ final readonly class CustomerNameChangedSubscriber implements DomainEventSubscri
 - Modify `deptrac.yaml` to allow violations
 - Skip validation (either in Value Objects or YAML config)
 - Use public setters in entities
+- Create a new feature bucket directory when existing class-type directories fit
+- Propose directories that deptrac does not collect without explicitly updating and validating deptrac
 
 ### ALWAYS
 
@@ -302,6 +335,8 @@ final readonly class CustomerNameChangedSubscriber implements DomainEventSubscri
 - Implement repositories in Infrastructure layer
 - Use Command Bus for write operations
 - Record Domain Events for state changes
+- Reuse existing bounded-context directory names before adding new ones
+- Keep one directory focused on one class type
 - Verify with `make deptrac` after changes
 
 ---

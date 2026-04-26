@@ -37,7 +37,7 @@ This creates three product risks:
 
 - All currently cached customer query families use declared policy objects instead of hardcoded TTL constants.
 - Domain events enqueue refresh work after invalidation.
-- Cache refresh handler warms affected customer detail and email lookup entries without a user request.
+- Cache refresh command handler warms affected customer detail and email lookup entries without a user request.
 - Refresh failures are logged and measured but do not fail domain-event processing.
 - Local and CI Messenger routing works with in-memory test transport, SQS runtime transport, and LocalStack-backed local transport.
 - `make ci` passes.
@@ -45,9 +45,9 @@ This creates three product risks:
 
 ## Key Requirements
 
-- Add typed cache policy registry with namespace, tags, soft TTL, hard TTL, jitter, consistency class, and refresh strategy.
+- Add typed cache policy DTO/factory/collection/resolver classes with namespace, tags, soft TTL, hard TTL, jitter, consistency class, and refresh strategy.
 - Use environment-overridable TTL/jitter parameters in Symfony service config.
-- Add dedicated cache refresh message and Messenger handler.
+- Add dedicated `RefreshCustomerCacheCommand` and command handler routed through Messenger.
 - Update customer cache invalidation subscribers to invalidate and schedule same-entity refresh workloads.
 - Add typed metrics for refresh scheduled, success, failure, stale served, hit, and miss.
 - Keep cache and metric failures best effort.
@@ -58,7 +58,7 @@ This creates three product risks:
 - First implementation focuses background refresh on currently cached customer detail and email lookup entries.
 - Same-entity refresh workloads mean refresh jobs for the specific cache keys affected by the domain event, such as customer detail by ID and lookup by email. They do not include arbitrary collection query refreshes.
 - Collection and reference-data policies are declared and tags are invalidated immediately. Async refresh for collections remains a follow-up unless a deterministic query-shape abstraction exists; until then, collection entries stay request-path cached after invalidation instead of being warmed proactively.
-- Integration tests can invoke the refresh handler directly for deterministic proof while unit tests cover Messenger routing and scheduler dispatch.
+- Integration tests can invoke the command handler directly for deterministic proof while unit tests cover Messenger routing and command dispatch.
 
 ## Open Questions
 

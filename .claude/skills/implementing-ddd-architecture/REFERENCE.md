@@ -110,7 +110,7 @@ class Customer extends AggregateRoot
 - **Transformers**: Convert between representations
 - **API Platform Processors**: Handle API operations
 - **GraphQL Resolvers**: Handle GraphQL queries/mutations
-- **Message Handlers**: Process async messages
+- **Command Handlers**: Process commands; async delivery can still use command classes when that matches the existing CQRS structure
 - **Factory Implementations**: Build domain objects from external data
 
 **Rules**:
