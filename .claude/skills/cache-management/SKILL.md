@@ -1,6 +1,6 @@
 ---
 name: cache-management
-description: Implement production-grade caching with cache keys/TTLs/consistency classes per query, SWR (stale-while-revalidate), explicit invalidation, and comprehensive testing for stale reads and cache warmup. Use when adding caching to queries, implementing cache invalidation, or ensuring cache consistency and performance.
+description: Implement production-grade caching with cache keys/TTLs/consistency classes per query, SWR (stale-while-revalidate), layered explicit invalidation, and comprehensive testing for stale reads and cache warmup. Use when adding caching to queries, implementing cache invalidation, or ensuring cache consistency and performance.
 ---
 
 # Cache Management Skill
@@ -10,7 +10,7 @@ description: Implement production-grade caching with cache keys/TTLs/consistency
 Use this skill when:
 
 - Adding caching to repositories or expensive queries
-- Implementing cache invalidation via domain events
+- Implementing cache invalidation via domain events, Doctrine ODM lifecycle events, or repository fallback hooks
 - Defining cache keys, TTLs, and consistency requirements
 - Implementing stale-while-revalidate (SWR) pattern
 - Testing cache behavior (stale reads, cold start, invalidation)
@@ -18,13 +18,13 @@ Use this skill when:
 
 ## Task (Function)
 
-Implement production-ready caching with proper key design, TTL management, event-driven invalidation, and comprehensive testing.
+Implement production-ready caching with proper key design, TTL management, layered explicit invalidation, and comprehensive testing.
 
 **Success Criteria**:
 
 - Cache policy declared for each query (key, TTL, consistency class)
 - Decorator pattern with `CachedXxxRepository` wrapping `MongoXxxRepository`
-- Event-driven invalidation via domain event subscribers
+- Layered invalidation via domain event subscribers, ODM lifecycle listeners, and repository fallback hooks for custom writes that bypass ODM observation
 - Best-effort invalidation (try/catch, never fail business operations)
 - Comprehensive unit tests for all cache paths
 - Cache observability (hit/miss/error logging)
@@ -38,12 +38,12 @@ Implement production-ready caching with proper key design, TTL management, event
 ╔═══════════════════════════════════════════════════════════════╗
 ║  ALWAYS use Decorator Pattern for caching (wrap repositories) ║
 ║  ALWAYS use CacheKeyBuilder service (prevent key drift)       ║
-║  ALWAYS invalidate via Domain Events (decouple from business) ║
+║  ALWAYS invalidate via explicit mapped write signals           ║
 ║  ALWAYS use TagAwareCacheInterface for cache tags             ║
 ║  ALWAYS wrap cache ops in try/catch (best-effort, no failures)║
 ║                                                               ║
-║  ❌ FORBIDDEN: Caching in repository, implicit invalidation   ║
-║  ✅ REQUIRED:  Decorator pattern, event-driven invalidation   ║
+║  ❌ FORBIDDEN: Caching in repository, unmapped invalidation    ║
+║  ✅ REQUIRED:  Decorators + layered explicit invalidation      ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
@@ -51,7 +51,10 @@ Implement production-ready caching with proper key design, TTL management, event
 
 - Use Decorator Pattern: `CachedXxxRepository` wraps `MongoXxxRepository`
 - Use centralized `CacheKeyBuilder` service (in `Shared/Infrastructure/Cache`)
-- Invalidate via Domain Event Subscribers (one subscriber per event)
+- Invalidate through every reliable write signal:
+  - Domain event subscribers when events are exposed
+  - Doctrine ODM lifecycle listeners for managed document changes
+  - Repository fallback hooks for custom bulk/direct writes that bypass ODM change sets
 - Wrap ALL cache operations in try/catch (never fail business operations)
 - Use `TagAwareCacheInterface` (not `CacheInterface`) for tag support
 - Configure test cache pools with `tags: true` in `config/packages/test/cache.yaml`
@@ -81,13 +84,15 @@ Implement production-ready caching with proper key design, TTL management, event
 - [ ] Identified slow query worth caching (use query-performance-analysis)
 - [ ] Cache policy declared (key pattern, TTL, consistency class)
 - [ ] Cache tags defined for invalidation strategy
-- [ ] Domain events defined for cache invalidation triggers
+- [ ] Reliable invalidation triggers defined: domain events, ODM change sets, and repository fallback hooks where needed
 
 **Architecture Setup:**
 
 - [ ] Created `CachedXxxRepository` decorator class
 - [ ] Created `CacheKeyBuilder` service (or extended existing one)
-- [ ] Created cache invalidation event subscribers (one per event)
+- [ ] Created cache invalidation event subscribers for exposed domain events
+- [ ] Created ODM invalidation listener/rules for managed document create/update/delete
+- [ ] Classified custom repository writes as ODM-observed or repository-fallback required
 - [ ] Configured services.yaml with explicit cache pool injection
 
 **During Implementation:**
@@ -95,7 +100,7 @@ Implement production-ready caching with proper key design, TTL management, event
 - [ ] Decorator wraps inner repository (not extends)
 - [ ] CacheKeyBuilder used for all cache keys (prevents drift)
 - [ ] Cache operations wrapped in try/catch (best-effort)
-- [ ] Event subscribers use same CacheKeyBuilder for tags
+- [ ] Event subscribers, ODM listeners, and repository fallbacks use the same tag/rule resolvers
 - [ ] Logging added for cache hits/misses/errors
 - [ ] Repository uses `TagAwareCacheInterface` (required for tags)
 
@@ -103,6 +108,8 @@ Implement production-ready caching with proper key design, TTL management, event
 
 - [ ] Test cache pool configured with `tags: true`
 - [ ] Unit tests for cache invalidation subscribers
+- [ ] Unit tests for ODM listener invalidation
+- [ ] Unit tests for repository fallback invalidation where custom writes bypass ODM observation
 - [ ] Integration tests for stale reads after writes
 - [ ] Test: Cache error fallback to database works
 
@@ -197,8 +204,9 @@ final readonly class CacheKeyBuilder
  * - Delegates ALL persistence operations to inner repository
  *
  * Cache Invalidation:
- * - Handled by *CacheInvalidationSubscriber classes via domain events
- * - This class only reads from cache, never invalidates (except delete)
+ * - Handled by explicit invalidation sources:
+ *   domain-event subscribers, ODM lifecycle listeners, or repository fallbacks
+ * - This class only reads from cache and delegates writes
  */
 final class CachedCustomerRepository implements CustomerRepositoryInterface
 {
@@ -253,7 +261,8 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     public function save(Customer $customer): void
     {
         $this->inner->save($customer);
-        // NO cache invalidation here - handled by domain event subscribers
+        // No read-through cache logic here.
+        // Invalidation is handled by mapped write signals.
     }
 
     public function delete(Customer $customer): void
@@ -560,9 +569,11 @@ make ci
 - **Write-through**: Invalidate immediately after writes
 - **Tag-based**: Batch invalidation using cache tags
 - **Event-driven**: Invalidate via domain events
+- **ODM lifecycle**: Invalidate when managed documents change
+- **Repository fallback**: Invalidate after custom bulk/direct writes that bypass ODM change sets
 - **Time-based**: TTL-only (for static data)
 
-**Critical Rule**: ALWAYS invalidate explicitly on create/update/delete
+**Critical Rule**: ALWAYS invalidate explicitly on create/update/delete through every reliable write signal.
 
 ```php
 // ✅ CORRECT
@@ -625,18 +636,20 @@ public function findById(string $id): ?Customer
 
 - **NO caching** - Pure business logic
 - Domain entities are cache-agnostic
-- Domain events carry data needed for cache invalidation
+- Domain events should carry data needed for cache invalidation when they are exposed
 
 ### Application Layer
 
 - **Command Handlers** publish domain events (not invalidate directly)
-- **Event Subscribers** handle cache invalidation via domain events
+- **Event Subscribers** handle cache invalidation via exposed domain events
 
 ### Infrastructure Layer
 
 - **CachedXxxRepository** decorates MongoXxxRepository (read-through caching)
 - **MongoXxxRepository** handles persistence only
-- Cache invalidation triggered by domain events, NOT in save()
+- **Doctrine ODM listeners** handle managed document create/update/delete invalidation
+- **Repository fallback hooks** handle custom writes that bypass ODM change sets
+- Domain repository interfaces stay cache-free
 
 **Architecture Flow**:
 
@@ -651,22 +664,24 @@ public function findById(string $id): ?Customer
 ┌─────────────────────────────────────────────────────────────┐
 │  CachedCustomerRepository (Decorator)                       │
 │  └─ inner.save(customer)  // delegates to Mongo             │
-│  └─ (NO invalidation here!)                                 │
+│  └─ no read-through cache mutation in write path            │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  CustomerUpdatedCacheInvalidationSubscriber                 │
-│  └─ cache.invalidateTags([...])  // event-driven!           │
+│  Layered invalidation                                      │
+│  ├─ Domain event subscriber when event is exposed           │
+│  ├─ ODM listener when managed document changes              │
+│  └─ Repository fallback for unobservable custom writes      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Why Event-Driven Invalidation?**
+**Why Layered Explicit Invalidation?**
 
-1. **Decoupling**: Repository doesn't know about cache invalidation strategy
-2. **Testability**: Easier to test invalidation logic separately
-3. **Flexibility**: Can add more invalidation logic without touching repository
-4. **Consistency**: Same event triggers multiple side effects (cache, notifications, etc.)
+1. **Coverage**: Domain events cover business signals, ODM covers entity changes, and repository fallbacks cover custom write paths.
+2. **Decoupling**: Domain repository interfaces stay cache-free.
+3. **Testability**: Invalidation rules and resolvers are tested separately.
+4. **Consistency**: All sources use the same cache tags and idempotent invalidation command.
 
 ---
 
@@ -700,12 +715,13 @@ $this->logger->info('Cache miss - loading from database', [
 - Don't cache without declaring policy first
 - Don't cache without TTL
 - Don't cache in Domain layer
-- Don't use implicit invalidation (use events!)
+- Don't use unmapped invalidation or rely on TTL alone
 - Don't share cache keys between different queries
 - Don't cache sensitive data (PII, passwords, tokens)
 - Don't cache without testing all paths
 - Don't forget to log cache operations
-- Don't invalidate in repository save() method (use event subscribers!)
+- Don't put cache invalidation in Domain repository interfaces
+- Don't add repository fallback hooks unless the write bypasses ODM change-set observation
 - Don't forget to handle email changes (invalidate both old and new email caches)
 
 ### ✅ DO

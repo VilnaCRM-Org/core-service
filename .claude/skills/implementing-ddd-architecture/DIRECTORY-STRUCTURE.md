@@ -17,7 +17,7 @@ Is it business logic?
 ├─ Is it orchestration/use case?
 │   ├─ YES → Application layer
 │   │   ├─ Write operation? → Command + Handler (Application/Command/, Application/CommandHandler/)
-│   │   ├─ Read operation? → Query + Handler (Application/Query/, Application/QueryHandler/)
+│   │   ├─ Read operation? → Existing read path (Repository/Resolver/Processor/DTO); use Query only if the repo already has Query directories and deptrac collectors
 │   │   ├─ React to event? → Event Subscriber (Application/EventSubscriber/)
 │   │   ├─ API transformation? → DTO/Processor (Application/DTO/, Application/Processor/)
 │   │   └─ GraphQL input? → Mutation Input (Application/MutationInput/)
@@ -29,6 +29,59 @@ Is it business logic?
         ├─ Doctrine type? → Custom Type (Infrastructure/DoctrineType/)
         └─ External service? → Service Implementation (Infrastructure/Service/)
 ```
+
+## Project-First Directory Rule
+
+Before writing an architecture spec or creating files, inspect the current context and deptrac collectors:
+
+```bash
+find src/Core/{Context} -maxdepth 4 -type d | sort
+sed -n '1,140p' deptrac.yaml
+```
+
+Use existing class-type directories first. A directory name is a class responsibility, not a feature label:
+
+- `Command/` contains command objects only.
+- `CommandHandler/` contains command handlers only.
+- `DTO/` contains data-transfer objects only.
+- `Factory/` contains factories only.
+- `Collection/` contains collections only.
+- `Resolver/` contains resolvers only.
+- `Repository/` contains repositories only.
+- `Metric/` contains metric classes in bounded contexts; shared metrics use the existing `Shared/Application/Observability/Metric/` structure, with nested `ValueObject/` where that pattern already exists.
+
+Do not create umbrella directories such as `Cache/`, `Policy/`, `Registry/`, or `Scheduler/` inside a bounded context when the feature can be represented by existing class-type directories. If a new directory type is truly needed, update the architecture spec with the reason and validate that deptrac collects it.
+
+Example: a reusable cache refresh feature should put generic orchestration in Shared and keep Customer as an adapter:
+
+```text
+src/Shared/
+  Application/
+    Command/
+      CacheRefreshCommand.php
+    CommandHandler/
+      CacheRefreshCommandHandler.php
+      AbstractCacheRefreshCommandHandler.php
+    Observability/
+      Metric/
+        CacheRefreshSucceededMetric.php
+src/Core/Customer/
+  Application/
+    CommandHandler/
+      CustomerCacheRefreshCommandHandler.php
+    Factory/
+      CustomerCacheRefreshCommandFactory.php
+  Infrastructure/
+    Collection/
+      CustomerCachePolicyCollection.php
+    Repository/
+      CachedCustomerRepository.php
+    Resolver/
+      CustomerCachePolicyResolver.php
+      CustomerCacheRefreshTargetResolver.php
+```
+
+This avoids inventing `Infrastructure/Cache` for a context feature that already exists through repository, collection, resolver, and subscriber classes. It also avoids Customer-only queue payloads when the queue and worker must refresh cache entries for other domains later.
 
 ## Complete Directory Structure (CodelyTV Pattern)
 

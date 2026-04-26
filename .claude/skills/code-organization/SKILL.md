@@ -1,6 +1,6 @@
 ---
 name: code-organization
-description: Ensure proper code organization with class names, directories, namespaces, and naming consistency following the principle "Directory X contains ONLY class type X (project)
+description: Ensure proper code organization with class names, directories, namespaces, and naming consistency following the principle "Directory X contains ONLY class type X".
 ---
 
 # Code Organization Skill
@@ -31,6 +31,28 @@ Examples:
 - `Cleaner/` → Contains ONLY cleaners
 - `Factory/` → Contains ONLY factories
 - `Resolver/` → Contains ONLY resolvers
+
+## Repository-First Directory Architecture
+
+Before proposing a source tree, creating files, or responding to review feedback about architecture:
+
+1. Inspect the current context directories, for example `find src/Core/Customer -maxdepth 4 -type d | sort`.
+2. Inspect `deptrac.yaml` collectors for directory names that are already recognized.
+3. Prefer existing class-type directories over new feature buckets.
+4. Name the class after its responsibility and place it in the matching directory.
+5. Avoid broad directories such as `Cache/`, `Policy/`, `Registry/`, `Scheduler/`, `Manager/`, `Helper/`, or `Service/` when an existing precise type directory fits.
+
+For CQRS in this repository, async work can still be a command. If the work must be reusable across bounded contexts, define the generic command and worker in `Shared`, then add bounded-context adapters:
+
+- `Shared/Application/Command/CacheRefreshCommand.php`
+- `Shared/Application/CommandHandler/CacheRefreshCommandHandler.php`
+- `Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php`
+- `Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php`
+- `Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php`
+
+Do not invent `Message` or `MessageHandler` for async work if the same intent fits the existing Command/CommandHandler pattern. Do not invent `ReadModel`, `Query`, or `QueryHandler` unless the current context already uses that pattern and deptrac collects it.
+
+Shared metrics belong under the existing observability structure, for example `Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php`, not a new bounded-context metric bucket when the metric represents cross-context lifecycle behavior.
 
 ## Quick Reference: Where Does It Belong?
 

@@ -104,13 +104,12 @@ class Customer extends AggregateRoot
 
 **Contains**:
 
-- **Command Handlers**: Execute write operations (implement `CommandHandlerInterface`)
+- **Command Handlers**: Execute write operations and process commands (implement `CommandHandlerInterface`); async delivery can still use command classes when that matches the existing CQRS structure
 - **Event Subscribers**: React to domain events (implement `DomainEventSubscriberInterface`)
 - **DTOs**: Data transfer between layers (validation via YAML config at `config/validator/`)
 - **Transformers**: Convert between representations
 - **API Platform Processors**: Handle API operations
 - **GraphQL Resolvers**: Handle GraphQL queries/mutations
-- **Message Handlers**: Process async messages
 - **Factory Implementations**: Build domain objects from external data
 
 **Rules**:

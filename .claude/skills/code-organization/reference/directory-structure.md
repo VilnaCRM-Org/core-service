@@ -2,6 +2,39 @@
 
 This document provides a comprehensive reference for the project's directory structure and where each type of class belongs.
 
+## Architecture Spec Workflow
+
+When documenting a planned source tree, do not start from generic DDD names. Start from the repository:
+
+```bash
+find src/Core/{Context} -maxdepth 4 -type d | sort
+sed -n '1,140p' deptrac.yaml
+```
+
+Rules:
+
+- Reuse existing directory names for the bounded context whenever possible.
+- Keep one directory focused on one class type.
+- Extend the existing feature surface instead of adding an umbrella directory with the feature name.
+- Only propose a new directory type when no existing class type fits and deptrac will be updated and validated.
+
+Example: a Customer cache feature should not automatically create `src/Core/Customer/Infrastructure/Cache`. The current cache feature already uses `Infrastructure/Repository`, `Infrastructure/Collection`, `Infrastructure/Resolver`, and `Application/EventSubscriber`, so new cache policy and refresh classes should use existing precise directories such as `DTO`, `Factory`, `Collection`, `Resolver`, `Command`, and `CommandHandler`.
+
+If the cache refresh path must be reusable across bounded contexts, the generic queue payload and worker belong in Shared class-type directories, while Customer stays a first adapter:
+
+```text
+src/Shared/Application/Command/CacheRefreshCommand.php
+src/Shared/Application/CommandHandler/CacheRefreshCommandHandler.php
+src/Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php
+src/Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php
+src/Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php
+src/Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php
+src/Core/Customer/Infrastructure/Collection/CustomerCachePolicyCollection.php
+src/Core/Customer/Infrastructure/Resolver/CustomerCachePolicyResolver.php
+```
+
+Do not route a Customer-specific command if the requirement is "one queue and worker can refresh any bounded context." Use a feature-neutral command payload with context, family, target identifiers, strategy, and event metadata, then resolve Customer-specific meaning in Customer factories, resolvers, and handlers.
+
 ## Infrastructure Layer
 
 ```text

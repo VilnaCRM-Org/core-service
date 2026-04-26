@@ -35,6 +35,41 @@ Business logic belongs in the Domain layer. Application layer orchestrates, Doma
 
 ---
 
+## Architecture Planning: Existing Structure First
+
+When writing architecture specs or proposing new classes for this repository, inspect the current source tree and `deptrac.yaml` before inventing directories.
+
+Required workflow:
+
+1. List existing directories for the bounded context, for example `find src/Core/Customer -maxdepth 4 -type d | sort`.
+2. Check `deptrac.yaml` collectors for allowed Application, Domain, and Infrastructure directory names.
+3. Reuse existing type directories whenever they already express the class responsibility.
+4. Keep the rule **one directory = one class type**. Do not place policies, schedulers, registries, handlers, DTOs, and resolvers together in a broad feature bucket.
+5. If a feature already exists through `Repository`, `Collection`, `Resolver`, `EventSubscriber`, or other established directories, extend that feature surface instead of creating a new umbrella directory such as `Cache`.
+6. Introduce a new directory type only when no existing type fits, it is added to deptrac, and the architecture spec explains why the new type is necessary.
+
+For CQRS in this codebase, prefer:
+
+- `Application/Command/{Action}{Entity}Command.php`
+- `Application/CommandHandler/{Action}{Entity}CommandHandler.php`
+
+Do not propose `ReadModel`, `Query`, `QueryHandler`, `Message`, `MessageHandler`, `Policy`, `Registry`, or `Scheduler` directories unless the current repo already uses that directory type and deptrac collects it. Reads in the current Customer context are served by repositories, resolvers, processors, and DTOs rather than a separate read-model directory.
+
+Example for Customer cache planning:
+
+- Shared reusable refresh work: `Shared/Application/Command/CacheRefreshCommand.php`
+- Shared reusable worker: `Shared/Application/CommandHandler/CacheRefreshCommandHandler.php`
+- Shared reusable handler base: `Shared/Application/CommandHandler/AbstractCacheRefreshCommandHandler.php`
+- Shared reusable metrics: `Shared/Application/Observability/Metric/CacheRefreshSucceededMetric.php`
+- Customer adapter execution: `Core/Customer/Application/CommandHandler/CustomerCacheRefreshCommandHandler.php`
+- Customer adapter factory: `Core/Customer/Application/Factory/CustomerCacheRefreshCommandFactory.php`
+- Customer policy lookup: `Core/Customer/Infrastructure/Collection/CustomerCachePolicyCollection.php` plus `Core/Customer/Infrastructure/Resolver/CustomerCachePolicyResolver.php`
+- Customer cached storage access: existing `Core/Customer/Infrastructure/Repository/CachedCustomerRepository.php`
+
+When a feature must be reusable across bounded contexts, put the generic command, worker, abstract base classes, DTOs, resolver interfaces, and metrics in `Shared` first. Keep each bounded context as a thin adapter that maps its domain events, tags, targets, policies, and repository warmup behavior into the shared contract. Do not route Customer-specific command payloads if the same queue and worker must later refresh other domains.
+
+---
+
 ## Layer Dependency Rules
 
 ```
@@ -292,6 +327,8 @@ final readonly class CustomerNameChangedSubscriber implements DomainEventSubscri
 - Modify `deptrac.yaml` to allow violations
 - Skip validation (either in Value Objects or YAML config)
 - Use public setters in entities
+- Create a new feature bucket directory when existing class-type directories fit
+- Propose directories that deptrac does not collect without explicitly updating and validating deptrac
 
 ### ALWAYS
 
@@ -302,6 +339,8 @@ final readonly class CustomerNameChangedSubscriber implements DomainEventSubscri
 - Implement repositories in Infrastructure layer
 - Use Command Bus for write operations
 - Record Domain Events for state changes
+- Reuse existing bounded-context directory names before adding new ones
+- Keep one directory focused on one class type
 - Verify with `make deptrac` after changes
 
 ---
