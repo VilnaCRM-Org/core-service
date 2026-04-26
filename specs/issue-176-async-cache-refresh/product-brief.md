@@ -4,7 +4,7 @@
 
 Customer reads are cached, but cache consistency is still request-path driven. Domain events invalidate cache tags, and the next user read may pay the cost to rebuild the affected cache entry. Cache policy is also spread across repository methods and Symfony cache pool defaults instead of being declared per endpoint/query family.
 
-The current domain events identify affected cache entries, but they do not carry complete Customer snapshots. Rebuilding cache entries directly from those events would couple correctness to incomplete payloads. The safer shared design is automatic CRUD invalidation from ODM write/change-set data plus async refresh from persisted state.
+The current domain events identify affected cache entries, but they do not carry complete Customer snapshots. Rebuilding cache entries directly from those events would couple correctness to incomplete payloads. The safer shared design is layered automatic invalidation: domain events clear cache when exposed, ODM change sets clear cache when managed documents change, and custom repository fallbacks clear cache when a write bypasses ODM observation.
 
 Solving this only with Customer-specific commands and workers would create a second product risk: every future bounded context would need to copy the same refresh queue, worker, metrics, and failure behavior.
 
@@ -27,6 +27,7 @@ This creates three product risks:
 - Add one reusable cache refresh orchestration that can be adopted by any bounded context.
 - Add one reusable automatic CRUD invalidation path that can invalidate cache tags for any mapped ODM document.
 - Keep the existing domain-event worker as the ingress for any domain event.
+- Add repository fallback invalidation for custom write methods that cannot be observed by ODM UnitOfWork change sets.
 - Add one generic refresh command payload, one shared `cache-refresh` queue, and one shared worker.
 - Keep context-specific mapping in bounded-context adapters.
 - Implement Customer detail and email lookup refresh as the first adoption.
@@ -50,6 +51,8 @@ This creates three product risks:
 
 - One shared refresh command, queue, and worker path can refresh cache entries for any registered bounded-context adapter.
 - One shared ODM listener can invalidate mapped cache tags after successful create/update/delete flushes.
+- One shared domain-event subscriber path invalidates mapped cache tags when domain events are exposed.
+- Custom repository methods are classified as ODM-observed or repository-fallback required.
 - Customer adopts the shared path for currently cached detail and email lookup families.
 - Hardcoded Customer detail/email TTLs are replaced by resolved policy objects.
 - Automatic CRUD invalidation and domain events enqueue refresh work after invalidation without blocking writes.
@@ -61,13 +64,15 @@ This creates three product risks:
 ## Key Requirements
 
 - Add shared cache-refresh DTOs with context, family, target identifiers, strategy, and event metadata.
+- Add a shared invalidation command/handler used by domain events, ODM events, and repository fallbacks.
 - Add shared invalidation DTOs/resolvers/collections for document-class, operation, and change-set driven tag resolution.
 - Add a shared Doctrine MongoDB ODM invalidation listener that invalidates after successful flush and can schedule `repository_refresh` work.
 - Add a generic `CacheRefreshCommand` and shared `CacheRefreshCommandHandler`.
 - Add abstract subscriber, factory, and context handler classes so bounded contexts only implement event mapping and warmup logic.
 - Add Customer policy collection/resolver/target resolver/handler adapters through existing directories.
 - Add Customer invalidation rule/tag adapters through existing Infrastructure collection/resolver directories.
-- Keep Customer cache invalidation subscribers narrow, using them only where domain-event scheduling is still needed beyond automatic CRUD invalidation.
+- Keep Customer cache invalidation subscribers as the automatic domain-event invalidation path, with idempotent overlap against ODM invalidation.
+- Review custom repositories and require fallback invalidation only for methods that bypass managed ODM document changes.
 - Use environment-overridable TTL/jitter parameters in Symfony service config.
 - Add shared typed metrics for refresh scheduled, success, failure, stale served, hit, and miss.
 - Keep cache, queue, and metric failures best effort.
@@ -84,6 +89,6 @@ This creates three product risks:
 
 ## Open Questions
 
-- Should Customer type/status create/update/delete operations publish domain events in a follow-up so reference-data refresh can be fully event-driven?
+- Should Customer type/status create/update/delete operations publish domain events in a follow-up for business semantics beyond cache invalidation?
 - Should collection endpoint caching be implemented through an API Platform provider decorator in a later issue?
-- Are there any production write paths that bypass ODM UnitOfWork change sets and need explicit repository-level invalidation fallback?
+- Are there any production write paths outside current repositories that bypass ODM UnitOfWork change sets and need explicit repository-level invalidation fallback?

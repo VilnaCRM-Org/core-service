@@ -1,6 +1,6 @@
 # Cache Invalidation Strategies
 
-Complete guide for implementing explicit cache invalidation: write-through, event-driven, tag-based, and time-based strategies.
+Complete guide for implementing explicit cache invalidation: write-through, event-driven, ODM lifecycle, repository fallback, tag-based, and time-based strategies.
 
 ## Core Principle: Explicit Over Implicit
 
@@ -30,14 +30,24 @@ public function save(Customer $customer): void
 
 ## Invalidation Strategy Matrix
 
-| Strategy          | When to Use                       | Complexity | Consistency    |
-| ----------------- | --------------------------------- | ---------- | -------------- |
-| **Write-through** | Single entity CRUD operations     | Low        | Strong         |
-| **Tag-based**     | Batch invalidation, related data  | Low        | Strong         |
-| **Event-driven**  | Complex domain events, decoupling | Medium     | Strong         |
-| **Time-based**    | Static data, aggregations         | Low        | Eventual       |
-| **Manual**        | One-off operations, bulk imports  | Low        | User-triggered |
-| **Lazy (TTL)**    | Acceptable staleness, low churn   | Very Low   | Eventual       |
+| Strategy                | When to Use                                      | Complexity | Consistency    |
+| ----------------------- | ------------------------------------------------ | ---------- | -------------- |
+| **ODM lifecycle**       | Managed document create/update/delete operations | Medium     | Strong         |
+| **Event-driven**        | Exposed domain events and cross-context effects  | Medium     | Strong         |
+| **Repository fallback** | Custom bulk/direct writes that bypass ODM        | Medium     | Strong         |
+| **Write-through**       | Small isolated operations                        | Low        | Strong         |
+| **Tag-based**           | Batch invalidation, related data                 | Low        | Strong         |
+| **Time-based**          | Static data, aggregations                        | Low        | Eventual       |
+| **Manual**              | One-off operations, bulk imports                 | Low        | User-triggered |
+| **Lazy (TTL)**          | Acceptable staleness, low churn                  | Very Low   | Eventual       |
+
+For this repository, prefer a layered model:
+
+1. Domain event subscribers invalidate when domain events are exposed.
+2. Doctrine ODM listeners invalidate when managed documents change.
+3. Repository fallback hooks invalidate after custom writes that bypass ODM change-set observation.
+
+All three sources should use the same tag/rule resolver surface and idempotent invalidation command.
 
 ---
 
@@ -658,16 +668,17 @@ public function testRelatedCachesInvalidated(): void
 
 ## Recommended Strategy by Use Case
 
-| Use Case                   | Recommended Strategy         | Rationale                    |
-| -------------------------- | ---------------------------- | ---------------------------- |
-| Single entity CRUD         | Write-through                | Simple, predictable          |
-| Entity with related data   | Tag-based                    | Invalidate multiple caches   |
-| Complex domain events      | Event-driven                 | Decouple logic, flexibility  |
-| External data imports      | Manual + Time-based          | Control when refresh happens |
-| Historical/archival data   | Time-based only              | Data never changes           |
-| High-frequency writes      | SWR (see swr-pattern.md)     | Reduce invalidation overhead |
-| Multi-tenant isolation     | Tag-based (with tenant tags) | Isolate cache by tenant      |
-| Cross-service invalidation | Event-driven (message bus)   | Distributed invalidation     |
+| Use Case                   | Recommended Strategy         | Rationale                                    |
+| -------------------------- | ---------------------------- | -------------------------------------------- |
+| Single entity CRUD         | ODM lifecycle                | Covers managed document writes automatically |
+| Entity with related data   | Tag-based                    | Invalidate multiple caches                   |
+| Complex domain events      | Event-driven                 | Decouple logic, flexibility                  |
+| Custom bulk/direct writes  | Repository fallback          | Covers writes ODM cannot observe             |
+| External data imports      | Manual + Time-based          | Control when refresh happens                 |
+| Historical/archival data   | Time-based only              | Data never changes                           |
+| High-frequency writes      | SWR (see swr-pattern.md)     | Reduce invalidation overhead                 |
+| Multi-tenant isolation     | Tag-based (with tenant tags) | Isolate cache by tenant                      |
+| Cross-service invalidation | Event-driven (message bus)   | Distributed invalidation                     |
 
 ---
 
@@ -678,13 +689,17 @@ public function testRelatedCachesInvalidated(): void
 1. **Always invalidate explicitly** on write operations
 2. **Use cache tags** for flexible batch invalidation
 3. **Consider related caches** when invalidating
-4. **Test invalidation behavior** thoroughly
-5. **Log invalidation events** for debugging
-6. **Document invalidation strategy** in cache policy
+4. **Layer invalidation sources**: domain events, ODM lifecycle, and repository fallback where needed
+5. **Test invalidation behavior** thoroughly
+6. **Log invalidation events** for debugging
+7. **Document invalidation strategy** in cache policy
 
 **Invalidation Checklist**:
 
 - ✅ Invalidate on create/update/delete
+- ✅ Invalidate on exposed domain events
+- ✅ Invalidate on managed ODM document changes
+- ✅ Add repository fallback hooks for custom writes that bypass ODM change sets
 - ✅ Use cache tags for batch operations
 - ✅ Invalidate related caches (lists, aggregations)
 - ✅ Log invalidation events

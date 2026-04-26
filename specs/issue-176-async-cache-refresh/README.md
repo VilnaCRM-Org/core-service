@@ -1,6 +1,6 @@
 # Issue 176 Abstract Cache Refresh Planning Specs
 
-Planning bundle for GitHub issue #176, "Implement endpoint cache invalidation with async background refresh via SQS workers", framed as shared automatic CRUD invalidation plus reusable async cache refresh with Customer as the first adopter.
+Planning bundle for GitHub issue #176, "Implement endpoint cache invalidation with async background refresh via SQS workers", framed as shared layered invalidation plus reusable async cache refresh with Customer as the first adopter.
 
 ## Artifacts
 
