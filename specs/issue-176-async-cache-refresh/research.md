@@ -2,7 +2,7 @@
 
 ## Issue Scope
 
-GitHub issue #176 asks for endpoint-grade cache consistency. The planned solution should create a reusable domain-event-driven cache refresh foundation, with Customer as the first adopter. The requested outcome is not just invalidation: domain events must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while LocalStack remains the local transport.
+GitHub issue #176 asks for endpoint-grade cache consistency. The planned solution should create reusable automatic CRUD invalidation plus an async cache refresh foundation, with Customer as the first adopter. The requested outcome is not just invalidation: writes and domain events must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while LocalStack remains the local transport.
 
 ## Current State
 
@@ -38,6 +38,18 @@ Customer cache invalidation currently happens in domain event subscribers:
 
 Those subscribers only invalidate tags. They do not enqueue dedicated refresh work or warm cache entries in background workers.
 
+The current Customer events are sufficient for invalidation but not sufficient for event-only refresh:
+
+- `CustomerCreatedEvent` carries customer ID and email.
+- `CustomerUpdatedEvent` carries customer ID, current email, and previous email.
+- `CustomerDeletedEvent` carries customer ID and email.
+- `CachedCustomerRepository` caches full `Customer` objects for `find()` and `findByEmail()`.
+- A cacheable Customer object includes fields beyond event identifiers, such as initials, phone, lead source, type, status, confirmation state, ULID, and timestamps.
+
+Therefore the first implementation should refresh from persisted state through a context adapter. Event-snapshot refresh can be added later only if events carry complete, versioned, serialization-stable payloads and stale-overwrite guards.
+
+Repository writes generally flow through `BaseRepository::save()` and `BaseRepository::delete()`, but some infrastructure repositories also define custom delete methods that call `DocumentManager` directly. A generic Doctrine MongoDB ODM listener can inspect scheduled insertions, updates, deletions, and change sets at flush time, then invalidate tags after a successful flush. This is a better shared invalidation point than adding one cache repository per entity or adding cache invalidation methods to Domain repository interfaces.
+
 Observability already uses typed EMF business metrics:
 
 - Application metric classes extend `BusinessMetric`.
@@ -66,6 +78,8 @@ Load and cache tests already exist:
 - Async cache refresh should reuse the repo's CQRS command directories: `Application/Command` and `Application/CommandHandler`.
 - Shared metrics should reuse `Shared/Application/Observability/Metric`.
 - Cache policy structure should reuse existing type directories such as `DTO`, `Factory`, `Collection`, and `Resolver`.
+- Automatic CRUD invalidation should live in `Shared/Infrastructure/EventListener` and use existing `Collection` and `Resolver` directory types for mapping.
+- Domain repository interfaces should remain cache-free. Invalidation rules belong to infrastructure/application adapters.
 - Do not introduce new context `Infrastructure/Cache`, `ReadModel`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler` directories for this feature unless the implementation first proves the current source tree and `deptrac.yaml` already support that directory type.
 
 ## Implementation Surface
@@ -79,6 +93,8 @@ Likely shared production code changes:
 - Add `AbstractCacheInvalidationSubscriber`, `AbstractCacheRefreshCommandFactory`, and `AbstractCacheRefreshCommandHandler` for reusable event-to-refresh orchestration and context handler behavior.
 - Add shared cache policy/target/result DTOs, resolver interfaces, handler resolver, handler collection, policy collection, and target resolver collection.
 - Add shared cache refresh lifecycle metrics under `Shared/Application/Observability/Metric`.
+- Add `CacheInvalidationDoctrineEventListener` under `Shared/Infrastructure/EventListener` to collect ODM change-set driven invalidation and scheduling work.
+- Add shared invalidation rule collection and tag resolver classes under existing Shared Infrastructure `Collection` and `Resolver` directories.
 - Add generic cache key helpers to `CacheKeyBuilder` if needed.
 - Add `cache-refresh` and `failed-cache-refresh` transports while keeping the existing `domain-events` transport unchanged.
 
@@ -87,6 +103,7 @@ Likely shared production code changes:
 Likely Customer production code changes:
 
 - Add Customer cache policy collection/resolver and refresh target resolver under existing Infrastructure directories.
+- Add Customer cache invalidation rule collection/resolver under existing Infrastructure directories.
 - Add `CustomerCacheRefreshCommandFactory` under `Application/Factory`.
 - Add `CustomerCacheRefreshCommandHandler` under `Application/CommandHandler` as a registered adapter for the shared worker.
 - Add customer endpoint cache policy configuration in `config/services.yaml` with environment-overridable TTLs and jitter.
@@ -96,21 +113,26 @@ Likely Customer production code changes:
   - `cache.customer.collection`
   - `cache.customer.reference`
 - Update `CachedCustomerRepository` to use declared policies for customer detail and email lookup instead of method-local TTL constants.
-- Update create/update/delete invalidation subscribers to invalidate and enqueue same-entity refresh workloads for affected families through the shared path.
+- Update create/update/delete invalidation so normal ODM writes are covered by the shared listener; keep Customer event subscribers only for domain-event scheduling responsibilities that are not already covered by CRUD invalidation.
 - Update docs for shared refresh orchestration, Customer policies, TTL defaults, LocalStack/SQS refresh routing, and operational metrics.
 
 Potential test changes:
 
 - Unit tests for shared command serialization, handler delegation, handler failure isolation, subscriber/factory behavior, policy construction, resolver behavior, TTL jitter bounds, and metric dimensions.
+- Unit tests for ODM listener insert/update/delete handling, old/new tag resolution, post-flush invalidation, and best-effort failure behavior.
 - Unit tests for Customer refresh command creation from create/update/delete subscribers.
+- Unit tests for Customer invalidation rules and automatic old/new email tag resolution.
 - Unit tests for Customer refresh handler success, missing entity/negative cache handling, and failure metric emission.
-- Integration tests that publish Customer domain events and verify cache entries are repopulated by the shared worker plus Customer handler after invalidation.
+- Integration tests that perform Customer create/update/delete writes and verify cache entries are invalidated and repopulated by the shared worker plus Customer handler after invalidation.
 - Existing cache performance tests should continue to pass.
 - Existing K6 cache performance smoke scenario can be used as load evidence.
 
 ## Key Risks
 
 - A generic shared design may still carry Customer-only payload assumptions. The payload must use feature-neutral fields and leave Customer-specific mapping in the Customer adapter.
+- A generic ODM listener can become too implicit if rules are not explicit. Keep document-class, operation, and field mappings in typed collection/resolver classes with focused tests.
+- Bulk writes or direct database operations that bypass ODM UnitOfWork change sets may bypass automatic invalidation. The first implementation should document this limitation and only add repository fallbacks when tests prove a real bypass.
+- Event-snapshot refresh can overwrite good cache with incomplete or stale data if events are not complete and versioned. Current Customer events should use invalidation plus `repository_refresh`, not `event_snapshot`.
 - API Platform collection caching is not currently repository-level, so adding full collection refresh for arbitrary filters may exceed a safe first implementation. Forward-safe policy classes can declare collection policies while the first worker refreshes known detail/email workloads and invalidates collection tags.
 - Customer type/status operations do not publish domain events today, so reference-data cache refresh should either be limited to declared policy plus current invalidation behavior or be split into a follow-up if events are missing.
 - Symfony cache `get()` does not expose simple hit/miss hooks; hit/miss metrics may require a wrapper service or conservative instrumentation around callback execution.
@@ -120,6 +142,8 @@ Potential test changes:
 ## Planning Assumptions
 
 - The first implementation should deliver the shared refresh foundation plus Customer adoption for currently cached detail and email lookup families.
+- Automatic CRUD invalidation should be implemented through a shared ODM listener and Customer mapping adapters, not through per-entity cache repositories.
+- The default refresh source should be `repository_refresh`; `event_snapshot` is future-only unless events contain complete, versioned cache snapshots.
 - Customer collection and customer reference-data policies should be declared and documented, with collection tags still invalidated. Full arbitrary collection materialization can remain policy-ready unless the codebase exposes a stable cacheable query abstraction during implementation.
 - Cache refresh failures should be logged and measured but must not rethrow into business writes or domain event processing.
 - Tests should prefer direct worker and handler invocation for deterministic refresh verification, while Messenger routing config proves SQS/local transport wiring.
