@@ -28,6 +28,23 @@ We run performance tests locally using the repository Docker Compose setup (not 
 - **Database:** MongoDB 6.0
 - **Cache:** Redis (docker-compose service `redis`, image `redis:8.0.0-alpine`)
 
+## Layered Cache Invalidation Performance
+
+Customer reads use a tag-aware Redis cache through the cached repository. Writes do not synchronously recompute cache entries. Instead, the write path emits domain events and Doctrine ODM change-set notifications that resolve affected tags, invalidate them on a best-effort basis, and enqueue `CacheRefreshCommand` messages on the `cache-refresh` Messenger transport.
+
+This keeps create, update, replace, and delete latency bounded by the write itself plus tag invalidation and message dispatch. Cache warmup runs later in a Messenger worker:
+
+- detail and lookup entries are recomputed asynchronously by `CustomerCacheRefreshCommandHandler`;
+- collection and reference entries are invalidated and repopulated by later reads;
+- delete refresh commands use `invalidate_only`, so deleted documents are not read back into cache;
+- invalidation and refresh failures are logged and emitted as cache refresh metrics, but they do not fail the originating write.
+
+Customer REST reads keep `Cache-Control` private because the local/runtime stack does not include a purge-capable shared HTTP cache. Redis repository caching provides the server-side performance gain, while private HTTP headers prevent an external CDN or reverse proxy from serving stale customer responses after writes.
+
+The operational contract is eventual consistency. A parallel read can briefly observe a value that was cached before a concurrent update, especially before the async refresh worker has completed. Race coverage is provided by the `cacheReadWriteRace` load-test scenario, which warms customer cache entries, mixes reads with writes, waits for a short eventual-consistency grace period, and tracks `cache_race_stale_after_update`. The configured threshold allows a small transient stale-read rate while still catching sustained invalidation regressions.
+
+The `cachePerformance` scenario measures hot-cache read latency after an explicit warmup. Its fast-response ratio is heuristic; cache correctness is covered by functional tests, while the load scenario verifies that concurrent reads continue to meet latency and error-rate budgets under Redis-backed caching.
+
 ## Worker-Mode Memory Safety
 
 FrankenPHP worker mode is now the default Docker runtime for the service and is exercised directly in CI through the dedicated memory workflow.

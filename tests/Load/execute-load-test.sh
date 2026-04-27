@@ -85,7 +85,7 @@ fi
 # Also include cachePerformance which needs pre-existing customers
 if [[ $scenario_name != "createCustomer" \
       && $scenario_name != "graphQLCreateCustomer" \
-      && ($scenario_name == *Customer* || $scenario_name == "cachePerformance") \
+      && ($scenario_name == *Customer* || $scenario_name == "cachePerformance" || $scenario_name == "cacheReadWriteRace") \
       && $scenario_name != *CustomerStatus* \
       && $scenario_name != *CustomerType* \
       && $scenario_name != "prepareCustomers" \

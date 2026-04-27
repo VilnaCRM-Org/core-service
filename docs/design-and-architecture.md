@@ -83,6 +83,135 @@ This is the list of currently available Domain Events:
 
 Also, you can find Subscribers for these events in `Internal/HealthCheck/Application/EventSub`, and a Message Bus for them in `Shared/Infrastructure/Bus/Event`.
 
+## Shared Cache Invalidation and Refresh
+
+Core Service uses a reusable cache invalidation and refresh pipeline. The shared code lives in the existing `Shared/Application` and `Shared/Infrastructure` layers, while each bounded context contributes adapters for its own cache tags, policies, targets, and warmers. Customer is the first adapter, but the design is not customer-specific.
+
+Writes never synchronously recompute cached repository entries. They invalidate affected tags on a best-effort basis and schedule refresh commands for async workers. If cache invalidation or refresh scheduling fails, the write path logs the failure and continues; TTLs and later reads still provide eventual recovery. Deletes use `invalidate_only` refresh commands so removed resources are not warmed back into cache.
+
+```mermaid
+flowchart TD
+    A[Customer write command] --> B[Domain event]
+    A --> C[Doctrine ODM UnitOfWork]
+
+    B --> D[Customer cache invalidation subscriber]
+    C --> E[CacheInvalidationDoctrineEventListener]
+
+    D --> F[CustomerCacheInvalidationTagResolver]
+    E --> G[CacheInvalidationTagResolver]
+    G --> F
+
+    F --> H[CacheInvalidationCommand]
+    H --> I[CacheInvalidationCommandHandler]
+    I --> J[Tag-aware cache invalidateTags]
+    I --> K[CacheRefreshCommand]
+    K --> L[Messenger cache-refresh transport]
+    L --> M[CacheRefreshCommandHandler]
+    M --> N[CacheRefreshCommandHandlerResolver]
+    N --> O[CustomerCacheRefreshCommandHandler]
+    O --> P[Customer repository read]
+    O --> Q[Cache warmer writes refreshed item]
+
+    I --> R[Cache refresh scheduled metric]
+    M --> S[Cache refresh succeeded or failed metric]
+```
+
+The source tree follows the repository's existing one-directory-per-class-type convention. There is no new bounded-context or Customer cache directory; shared cache helpers stay in the existing `Shared/Infrastructure/Cache` directory, while orchestration abstractions are placed with other application commands, DTOs, resolvers, handlers, infrastructure collections, and listeners.
+
+The async transports use Symfony Messenger with `symfony/amazon-sqs-messenger`. Local development uses LocalStack queue-name DSNs such as `sqs://localstack:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, allowing Messenger to auto-create queues without AWS metadata lookup.
+
+```text
+src/
+├── Shared/
+│   ├── Application/
+│   │   ├── Command/
+│   │   │   ├── CacheInvalidationCommand.php
+│   │   │   └── CacheRefreshCommand.php
+│   │   ├── CommandHandler/
+│   │   │   ├── CacheRefreshCommandHandlerBase.php
+│   │   │   ├── CacheInvalidationCommandHandler.php
+│   │   │   └── CacheRefreshCommandHandler.php
+│   │   ├── Exception/
+│   │   │   └── UnsupportedCacheRefreshPolicyException.php
+│   │   ├── DTO/
+│   │   │   ├── CacheChangeSet.php
+│   │   │   ├── CacheFieldChange.php
+│   │   │   ├── CacheInvalidationRule.php
+│   │   │   ├── CacheInvalidationTagSet.php
+│   │   │   ├── CacheRefreshPolicy.php
+│   │   │   ├── CacheRefreshResult.php
+│   │   │   └── CacheRefreshTarget.php
+│   │   ├── EventSubscriber/
+│   │   │   └── AbstractCacheInvalidationSubscriber.php
+│   │   ├── Factory/
+│   │   │   └── AbstractCacheRefreshCommandFactory.php
+│   │   ├── Observability/Metric/
+│   │   │   ├── CacheHitMetric.php
+│   │   │   ├── CacheMissMetric.php
+│   │   │   ├── CacheRefreshFailedMetric.php
+│   │   │   ├── CacheRefreshScheduledMetric.php
+│   │   │   ├── CacheRefreshStaleServedMetric.php
+│   │   │   ├── CacheRefreshSucceededMetric.php
+│   │   │   └── ValueObject/CacheRefreshMetricDimensions.php
+│   │   └── Resolver/
+│   │       ├── CachePoolResolverInterface.php
+│   │       ├── CacheRefreshCommandHandlerResolverInterface.php
+│   │       ├── CacheRefreshPolicyResolverInterface.php
+│   │       ├── CacheRefreshTargetResolverInterface.php
+│   │       └── DocumentCacheInvalidationResolverInterface.php
+│   └── Infrastructure/
+│       ├── Cache/
+│       │   └── CacheKeyBuilder.php
+│       ├── Collection/
+│       │   ├── CacheInvalidationRuleCollection.php
+│       │   ├── CacheRefreshCommandCollection.php
+│       │   ├── CacheRefreshCommandHandlerCollection.php
+│       │   ├── CacheRefreshPolicyCollection.php
+│       │   └── CacheRefreshTargetResolverCollection.php
+│       ├── EventListener/
+│       │   └── CacheInvalidationDoctrineEventListener.php
+│       └── Resolver/
+│           ├── CachePoolResolver.php
+│           ├── CacheInvalidationTagResolver.php
+│           ├── CacheRefreshCommandHandlerResolver.php
+│           └── CacheRefreshPolicyResolver.php
+└── Core/
+    └── Customer/
+        ├── Application/
+        │   ├── CommandHandler/
+        │   │   └── CustomerCacheRefreshCommandHandler.php
+        │   ├── EventSubscriber/
+        │   │   ├── CustomerCreatedCacheInvalidationSubscriber.php
+        │   │   ├── CustomerDeletedCacheInvalidationSubscriber.php
+        │   │   └── CustomerUpdatedCacheInvalidationSubscriber.php
+        │   └── Factory/
+        │       └── CustomerCacheRefreshCommandFactory.php
+        └── Infrastructure/
+            ├── Collection/
+            │   ├── CustomerCacheInvalidationRuleCollection.php
+            │   ├── CustomerCachePolicyCollection.php
+            │   └── CustomerCacheTagCollection.php
+            ├── Repository/
+            │   └── CachedCustomerRepository.php
+            └── Resolver/
+                ├── CustomerCachePolicyResolver.php
+                ├── CustomerCacheInvalidationTagResolver.php
+                ├── CustomerCacheRefreshTargetResolver.php
+                └── CustomerCacheTagResolver.php
+```
+
+The shared handler and resolver classes are registered through service tags:
+
+- `app.cache_invalidation_resolver` for context-specific document invalidation resolvers.
+- `app.cache_refresh_handler` for context-specific warmers that extend `CacheRefreshCommandHandlerBase`.
+- `app.cache_refresh_policy_resolver` for context-specific cache policies.
+
+Customer repository read-through caching stays context-local: `CachedCustomerRepository` reads Customer TTL, beta, consistency, and refresh-source settings from `CustomerCachePolicyCollection`. Shared worker-side policy lookup uses `CacheRefreshPolicyResolverInterface`, with the shared resolver delegating to context resolvers such as `CustomerCachePolicyResolver`.
+
+Refresh commands use target-based dedupe keys built from context, family, normalized target identifier, and refresh source. Source event IDs and ODM write IDs stay as correlation metadata, so equivalent domain-event and ODM signals share one dedupe marker in the context cache pool.
+
+The customer adapter defines the first policy set: detail cache entries use stale-while-revalidate behavior, lookup entries are eventual, collection/reference entries are invalidated without eager recompute, and negative lookups have a short TTL.
+
 ## Architecture Diagram
 
 This is the architecture diagram of Core Service. When running the service locally, you can view interactive diagrams at [http://localhost:8080/workspace/diagrams](http://localhost:8080/workspace/diagrams).

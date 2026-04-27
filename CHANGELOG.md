@@ -1,3 +1,9 @@
+# Unreleased
+
+### Features
+
+- **#176:** add layered asynchronous cache invalidation and refresh. Customer cache TTLs can be tuned with integer environment variables: `CUSTOMER_CACHE_DETAIL_TTL` (default 600), `CUSTOMER_CACHE_LOOKUP_TTL` (default 300), `CUSTOMER_CACHE_COLLECTION_TTL` (default 300), `CUSTOMER_CACHE_REFERENCE_TTL` (default 1800), and `CUSTOMER_CACHE_NEGATIVE_LOOKUP_TTL` (default 60). These map to `CustomerCachePolicyCollection` constructor arguments for detail, lookup, collection, reference, and negative lookup policies.
+
 # [0.9.0](https://github.com/VilnaCRM-Org/core-service/compare/v0.8.0...v0.9.0) (2025-12-21)
 
 ### Features

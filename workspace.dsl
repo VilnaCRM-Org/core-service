@@ -59,6 +59,18 @@ workspace {
                     customerDeletedMetricsSubscriber = component "CustomerDeletedMetricsSubscriber" "Emits metrics when customer deleted" "EventSubscriber" {
                         tags "Item"
                     }
+                    customerCacheInvalidationSubscribers = component "CustomerCacheInvalidationSubscribers" "Translate customer domain events into cache invalidation and refresh requests" "EventSubscriber" {
+                        tags "Item"
+                    }
+                    cacheInvalidationCommandHandler = component "CacheInvalidationCommandHandler" "Invalidates resolved cache tags and schedules asynchronous refresh commands" "CommandHandler" {
+                        tags "Item"
+                    }
+                    cacheRefreshCommandHandler = component "CacheRefreshCommandHandler" "Consumes shared cache refresh commands and routes them to context handlers" "CommandHandler" {
+                        tags "Item"
+                    }
+                    customerCacheRefreshCommandHandler = component "CustomerCacheRefreshCommandHandler" "Warms customer cache entries for refresh targets" "CommandHandler" {
+                        tags "Item"
+                    }
                     businessMetricsEmitterInterface = component "BusinessMetricsEmitterInterface" "Interface for emitting business metrics" "Interface" {
                         tags "Item"
                     }
@@ -96,6 +108,21 @@ workspace {
                         tags "Item"
                     }
                     mongoTypeRepository = component "MongoTypeRepository" "Manages access to types" "Repository" {
+                        tags "Item"
+                    }
+                    cachedCustomerRepository = component "CachedCustomerRepository" "Reads customers through Redis-backed cache policies with repository fallback" "Repository" {
+                        tags "Item"
+                    }
+                    cacheInvalidationDoctrineEventListener = component "CacheInvalidationDoctrineEventListener" "Observes MongoDB ODM flush changes and schedules cache invalidation" "EventListener" {
+                        tags "Item"
+                    }
+                    cacheInvalidationTagResolver = component "CacheInvalidationTagResolver" "Resolves document changes into cache tags for the active context" "Resolver" {
+                        tags "Item"
+                    }
+                    cacheRefreshPolicyResolver = component "CacheRefreshPolicyResolver" "Resolves cache refresh policies by context and cache family" "Resolver" {
+                        tags "Item"
+                    }
+                    cacheRefreshCommandHandlerResolver = component "CacheRefreshCommandHandlerResolver" "Routes refresh commands to context-specific cache warmers" "Resolver" {
                         tags "Item"
                     }
                     eventBus = component "InMemorySymfonyEventBus" "Handles event publishing" "EventBus" {
@@ -167,12 +194,29 @@ workspace {
                 customerCreatedEvent -> customerCreatedMetricsSubscriber "triggers"
                 customerUpdatedEvent -> customerUpdatedMetricsSubscriber "triggers"
                 customerDeletedEvent -> customerDeletedMetricsSubscriber "triggers"
+                customerCreatedEvent -> customerCacheInvalidationSubscribers "triggers"
+                customerUpdatedEvent -> customerCacheInvalidationSubscribers "triggers"
+                customerDeletedEvent -> customerCacheInvalidationSubscribers "triggers"
 
                 kernelTerminateEvent -> apiEndpointMetricsSubscriber "triggers"
 
                 customerCreatedMetricsSubscriber -> businessMetricsEmitterInterface "emits via"
                 customerUpdatedMetricsSubscriber -> businessMetricsEmitterInterface "emits via"
                 customerDeletedMetricsSubscriber -> businessMetricsEmitterInterface "emits via"
+                customerCacheInvalidationSubscribers -> cacheInvalidationCommandHandler "dispatch invalidation"
+                mongoCustomerRepository -> cacheInvalidationDoctrineEventListener "flush changes observed by"
+                cacheInvalidationDoctrineEventListener -> cacheInvalidationTagResolver "resolves tags through"
+                cacheInvalidationDoctrineEventListener -> cacheInvalidationCommandHandler "dispatches after flush"
+                cacheInvalidationCommandHandler -> cache "invalidates tags"
+                cacheInvalidationCommandHandler -> messageBroker "enqueues CacheRefreshCommand"
+                messageBroker -> cacheRefreshCommandHandler "delivers cache refresh work"
+                cacheRefreshCommandHandler -> cacheRefreshCommandHandlerResolver "routes through"
+                cacheRefreshCommandHandlerResolver -> customerCacheRefreshCommandHandler "selects customer warmer"
+                customerCacheRefreshCommandHandler -> mongoCustomerRepository "loads source data"
+                customerCacheRefreshCommandHandler -> cache "warms entries"
+                cachedCustomerRepository -> cacheRefreshPolicyResolver "resolves cache policies"
+                cachedCustomerRepository -> cache "reads and stores entries"
+                cachedCustomerRepository -> mongoCustomerRepository "falls back on misses"
                 businessMetricsEmitterInterface -> awsEmfMetricsEmitter "implemented by"
                 awsEmfMetricsEmitter -> emfPayloadFactory "uses"
                 awsEmfMetricsEmitter -> cloudWatch "sends EMF logs to"

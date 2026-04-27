@@ -10,6 +10,7 @@ The current repository already has the right primitives:
 
 - Any domain event can flow through `Shared/Infrastructure/Bus/Event/Async/DomainEventEnvelope`.
 - `Shared/Infrastructure/Bus/Event/Async/DomainEventMessageHandler` already reads domain events from the async event transport and invokes tagged subscribers.
+- Symfony Messenger SQS transports require `symfony/amazon-sqs-messenger`; LocalStack DSNs must use the queue-name path form, such as `sqs://localstack:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, so queues can be auto-created without AWS metadata lookup.
 - CQRS command objects and handlers already live in `Application/Command` and `Application/CommandHandler`.
 - `Shared/Application/Command` already exists, and deptrac collects `Application/Command` and `Application/CommandHandler`.
 - Shared metrics already live in `Shared/Application/Observability/Metric`.
@@ -64,6 +65,7 @@ flowchart LR
         RuleCollection["CacheInvalidationRuleCollection"]
         TagResolver["CacheInvalidationTagResolver"]
         TagSetDto["CacheInvalidationTagSet DTO"]
+        CachePoolResolver["CachePoolResolver\ncontext -> tag-aware pool"]
     end
 
     subgraph SharedRefresh["Shared cache-refresh foundation"]
@@ -71,12 +73,12 @@ flowchart LR
         AbstractFactory["AbstractCacheRefreshCommandFactory"]
         RefreshCommand["CacheRefreshCommand\nrepository_refresh | event_snapshot | invalidate_only"]
         RefreshWorker["CacheRefreshCommandHandler\nsingle shared worker"]
-        AbstractHandler["AbstractCacheRefreshCommandHandler"]
+        AbstractHandler["CacheRefreshCommandHandlerBase"]
         PolicyDto["CacheRefreshPolicy DTO"]
         TargetDto["CacheRefreshTarget DTO"]
         ResultDto["CacheRefreshResult DTO"]
         HandlerResolver["CacheRefreshCommandHandlerResolver"]
-        PolicyResolver["CacheRefreshPolicyResolver"]
+        PolicyResolver["CacheRefreshPolicyResolverInterface"]
         TargetResolver["CacheRefreshTargetResolverCollection"]
         KeyBuilder["CacheKeyBuilder"]
         Metrics["Shared cache-refresh metrics"]
@@ -90,6 +92,7 @@ flowchart LR
         CustomerInvalidationRules["CustomerCacheInvalidationRuleCollection"]
         CustomerInvalidationResolver["CustomerCacheInvalidationTagResolver"]
         CustomerPolicyCollection["CustomerCachePolicyCollection"]
+        CustomerPolicyResolver["CustomerCachePolicyResolver"]
         CachedCustomerRepository["CachedCustomerRepository"]
         CustomerRepository["MongoCustomerRepository"]
         CustomRepoFallback["Custom repository fallback\nonly when ODM cannot observe"]
@@ -159,18 +162,20 @@ flowchart LR
     CustomerHandler --> AbstractHandler
     FutureHandler --> AbstractHandler
     AbstractHandler --> PolicyResolver
-    PolicyResolver --> CustomerPolicyCollection
+    PolicyResolver --> CustomerPolicyResolver
+    CustomerPolicyResolver --> CustomerPolicyCollection
     AbstractHandler --> TargetResolver
     TargetResolver --> TargetDto
     AbstractHandler --> PolicyDto
     AbstractHandler --> KeyBuilder
     CustomerHandler --> CustomerRepository
+    CustomerHandler --> CustomerPolicyCollection
     CustomerHandler --> CachePools
     AbstractHandler --> ResultDto
     RefreshWorker --> FailedQueue
 
     ReadApi["Customer read API"] --> CachedCustomerRepository
-    CachedCustomerRepository --> PolicyResolver
+    CachedCustomerRepository --> CustomerPolicyCollection
     CachedCustomerRepository --> KeyBuilder
     CachedCustomerRepository --> CachePools
     CachedCustomerRepository --> CustomerRepository
@@ -196,9 +201,13 @@ src/
         CacheRefreshCommand.php
       CommandHandler/
         CacheInvalidationCommandHandler.php
-        AbstractCacheRefreshCommandHandler.php
+        CacheRefreshCommandHandlerBase.php
         CacheRefreshCommandHandler.php
+      Exception/
+        UnsupportedCacheRefreshPolicyException.php
       DTO/
+        CacheChangeSet.php
+        CacheFieldChange.php
         CacheInvalidationRule.php
         CacheInvalidationTagSet.php
         CacheRefreshPolicy.php
@@ -219,20 +228,24 @@ src/
           ValueObject/
             CacheRefreshMetricDimensions.php
       Resolver/
+        CachePoolResolverInterface.php
         CacheRefreshCommandHandlerResolverInterface.php
         CacheRefreshPolicyResolverInterface.php
         CacheRefreshTargetResolverInterface.php
+        DocumentCacheInvalidationResolverInterface.php
     Infrastructure/
       Cache/
         CacheKeyBuilder.php (existing, edit for generic context/family key helpers)
       Collection/
         CacheInvalidationRuleCollection.php
+        CacheRefreshCommandCollection.php
         CacheRefreshCommandHandlerCollection.php
         CacheRefreshPolicyCollection.php
         CacheRefreshTargetResolverCollection.php
       EventListener/
         CacheInvalidationDoctrineEventListener.php
       Resolver/
+        CachePoolResolver.php
         CacheInvalidationTagResolver.php
         CacheRefreshCommandHandlerResolver.php
         CacheRefreshPolicyResolver.php
@@ -258,8 +271,8 @@ src/
           MongoStatusRepository.php (review custom write methods for ODM visibility)
           MongoTypeRepository.php (review custom write methods for ODM visibility)
         Resolver/
-          CustomerCacheInvalidationTagResolver.php
           CustomerCachePolicyResolver.php
+          CustomerCacheInvalidationTagResolver.php
           CustomerCacheRefreshTargetResolver.php
           CustomerCacheTagResolver.php (existing)
 ```
@@ -276,38 +289,29 @@ tests/
           CacheRefreshCommandTest.php
         CommandHandler/
           CacheInvalidationCommandHandlerTest.php
-          AbstractCacheRefreshCommandHandlerTest.php
           CacheRefreshCommandHandlerTest.php
         DTO/
+          CacheChangeSetTest.php
           CacheInvalidationRuleTest.php
           CacheInvalidationTagSetTest.php
           CacheRefreshPolicyTest.php
           CacheRefreshResultTest.php
-          CacheRefreshTargetTest.php
         EventSubscriber/
           AbstractCacheInvalidationSubscriberTest.php
-        Factory/
-          AbstractCacheRefreshCommandFactoryTest.php
         Observability/
           Metric/
             CacheRefreshMetricTest.php
-            ValueObject/
-              CacheRefreshMetricDimensionsTest.php
-        Resolver/
-          CacheRefreshCommandHandlerResolverInterfaceTest.php
-          CacheRefreshPolicyResolverInterfaceTest.php
-          CacheRefreshTargetResolverInterfaceTest.php
       Infrastructure/
+        Cache/
+          CacheKeyBuilderTest.php
         Collection/
-          CacheInvalidationRuleCollectionTest.php
-          CacheRefreshCommandHandlerCollectionTest.php
-          CacheRefreshPolicyCollectionTest.php
-          CacheRefreshTargetResolverCollectionTest.php
+          CacheRefreshCollectionTest.php
         EventListener/
           CacheInvalidationDoctrineEventListenerTest.php
         Resolver/
+          CachePoolResolverTest.php
           CacheInvalidationTagResolverTest.php
-          CacheRefreshCommandHandlerResolverTest.php
+          CacheRefreshCommandHandlerTest.php (covers handler resolver integration)
           CacheRefreshPolicyResolverTest.php
     Customer/
       Application/
@@ -324,20 +328,18 @@ tests/
           CustomerCacheInvalidationRuleCollectionTest.php
           CustomerCachePolicyCollectionTest.php
         Repository/
-          AutomaticCustomerCacheInvalidationTest.php
-          CachedCustomerRepositoryPolicyTest.php
-          CustomerCustomRepositoryInvalidationCoverageTest.php
+          CachedCustomerRepositoryTest.php
         Resolver/
-          CustomerCacheInvalidationTagResolverTest.php
           CustomerCachePolicyResolverTest.php
+          CustomerCacheInvalidationTagResolverTest.php
           CustomerCacheRefreshTargetResolverTest.php
   Integration/
+    CustomerHttpCacheTest.php
     Customer/
       Infrastructure/
         Repository/
-          AsyncCustomerCacheRefreshTest.php
-          CustomerCustomRepositoryInvalidationCoverageTest.php
-          CustomerDomainEventCacheInvalidationTest.php
+          MongoCustomerRepositoryInvalidationTest.php
+          MongoCustomerRepositoryTagInvalidationTest.php
 ```
 
 Configuration and documentation expected to change in the later implementation PR:
@@ -370,7 +372,7 @@ All automatic invalidation sources should normalize into one idempotent invalida
 2. **ODM entity-change signal**: when Doctrine MongoDB ODM flushes managed document insertions, updates, or deletions, `CacheInvalidationDoctrineEventListener` maps UnitOfWork change sets to the same `CacheInvalidationCommand`. This path covers normal repository writes and custom repository methods that still persist/remove managed documents and flush.
 3. **Custom repository fallback signal**: when a custom repository method performs a bulk update/delete, direct query builder write, or external database operation that ODM cannot observe as managed document changes, that repository method must call the shared invalidation command after the write succeeds.
 
-The command/handler path is intentionally idempotent. If a write both changes an ODM document and exposes a domain event, duplicate invalidation of the same tags is acceptable and should not break writes. Refresh scheduling should include a deterministic dedupe key based on context, family, target identifiers, source event ID or write operation ID, and refresh source so duplicate signals do not create unbounded duplicate jobs.
+The command/handler path is intentionally idempotent. If a write both changes an ODM document and exposes a domain event, duplicate invalidation of the same tags is acceptable and should not break writes. Refresh scheduling should include a deterministic dedupe key based on context, family, normalized target identifiers, and refresh source so equivalent domain-event and ODM signals collapse to the same refresh target while source IDs remain correlation metadata.
 
 Coverage rules:
 
@@ -431,6 +433,7 @@ The command should be callable directly from the ODM listener, domain event subs
 - occurred-at timestamp
 - refresh strategy
 - refresh source, such as `repository_refresh`, `event_snapshot`, or `invalidate_only`
+- deterministic target-based dedupe key
 - attempt metadata where Messenger retry handling needs it
 
 The command must not contain Customer-specific fields such as `customerEmail`. Customer-specific meaning belongs in `CustomerCacheRefreshCommandFactory` and `CustomerCacheRefreshTargetResolver`.
@@ -455,12 +458,14 @@ Concrete subscribers should only map a domain event to context-specific tags and
 
 `CacheRefreshCommandHandler` is the single Messenger worker entrypoint for the `cache-refresh` queue. It should:
 
-1. Resolve a registered context command handler by context and family.
-2. Delegate refresh execution to that context handler.
-3. Emit common success or failure metrics.
-4. Let Messenger route unrecoverable job failures to `failed-cache-refresh` according to configured retry strategy.
+1. Claim a short-lived target-based dedupe marker in the context cache pool.
+2. Resolve a registered context command handler by context and family.
+3. Delegate refresh execution to that context handler.
+4. Emit common success or failure metrics.
+5. Release the dedupe marker on refresh failure so Messenger retries can recompute.
+6. Let Messenger route unrecoverable job failures to `failed-cache-refresh` according to configured retry strategy.
 
-`AbstractCacheRefreshCommandHandler` should hold the reusable refresh template for context handlers:
+`CacheRefreshCommandHandlerBase` should hold the reusable refresh template for context handlers:
 
 1. Resolve the cache policy.
 2. Resolve the concrete target.
@@ -488,7 +493,7 @@ Concrete handlers, such as `CustomerCacheRefreshCommandHandler`, should only pro
 - refresh strategy
 - refresh source
 
-`CacheRefreshPolicyCollection` belongs in `Shared/Infrastructure/Collection` as the generic iterable policy holder. `CustomerCachePolicyCollection` may compose or configure customer policies in the Customer context, but policy lookup should be performed through the shared resolver interface.
+`CacheRefreshPolicyCollection` belongs in `Shared/Infrastructure/Collection` as the generic iterable policy holder. `CustomerCachePolicyCollection` is the context-local source for Customer detail, lookup, collection, reference, and negative lookup policies. `CachedCustomerRepository` reads that collection directly for Customer read-through caching. Shared worker-side policy lookup should be performed through `CacheRefreshPolicyResolverInterface`; the shared resolver delegates to context resolvers such as `CustomerCachePolicyResolver`, which adapt context-local collections into generic `CacheRefreshPolicy` DTOs.
 
 `CacheRefreshTarget` belongs in `Shared/Application/DTO`. It should describe what must be refreshed without depending on Customer classes.
 
@@ -522,8 +527,9 @@ Customer should be the first adapter for the shared design:
 - `CustomerCacheInvalidationRuleCollection` maps Customer document operations and changed fields to invalidation rules.
 - `CustomerCacheInvalidationTagResolver` derives concrete ID, email, collection, and old-email tags from ODM change-set data.
 - `CustomerCachePolicyCollection` declares Customer detail, lookup, collection, reference, and negative lookup policies.
-- `CustomerCacheRefreshCommandHandler` extends or composes `AbstractCacheRefreshCommandHandler` and registers for `customer` context families.
-- `CachedCustomerRepository` consumes the shared policy resolver and key builder instead of method-local TTL literals.
+- `CustomerCachePolicyResolver` adapts Customer policies to `CacheRefreshPolicyResolverInterface` for shared worker-side lookups.
+- `CustomerCacheRefreshCommandHandler` extends or composes `CacheRefreshCommandHandlerBase` and registers for `customer` context families.
+- `CachedCustomerRepository` consumes the context-local `CustomerCachePolicyCollection` and key builder instead of method-local TTL literals.
 - Existing custom repository methods must be reviewed:
   - `MongoCustomerRepository::deleteByEmail()` and `deleteById()` load managed Customer documents and delegate to delete, so the ODM listener should cover them.
   - `MongoTypeRepository::deleteByValue()` and `MongoStatusRepository::deleteByValue()` remove managed documents and flush, so the ODM listener should cover them.
@@ -569,9 +575,9 @@ Place them under `Shared/Application/Observability/Metric`. Use dimensions such 
 2. Add generic invalidation rule/tag resolution and Customer invalidation rules for domain events plus CRUD create/update/delete change sets.
 3. Add deterministic invalidation/refresh dedupe keys so domain-event and ODM signals can safely overlap.
 4. Review custom repository methods and add repository fallback invalidation only where a write bypasses ODM managed document change sets.
-5. Add the single `cache-refresh` and `failed-cache-refresh` Messenger transports.
+5. Add the single `cache-refresh` and `failed-cache-refresh` Messenger transports, backed by `symfony/amazon-sqs-messenger` and LocalStack-compatible queue-name DSNs.
 6. Add Customer adapter classes that extend or compose the shared abstractions.
-7. Update `CachedCustomerRepository` to use resolved policies and generic key helpers.
+7. Update `CachedCustomerRepository` to use `CustomerCachePolicyCollection` and generic key helpers.
 8. Update Customer subscribers to route exposed domain events through the shared invalidation command.
 9. Add unit and integration tests for shared orchestration, domain-event invalidation, automatic ODM invalidation, repository fallback coverage, and the Customer adapter.
 10. Update docs and run cache performance evidence where runtime services allow.

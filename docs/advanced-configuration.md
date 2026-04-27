@@ -22,7 +22,15 @@ The Core Service utilizes environment variables for configuration to ensure that
 - `AWS_SQS_KEY`: The AWS access key.
 - `AWS_SQS_SECRET`: The AWS secret key.
 - `LOCALSTACK_PORT`: The port on which Localstack is running.
-- `MESSENGER_TRANSPORT_DSN`: The DSN (Data Source Name) for the messenger transport, configured to use Amazon SQS via Localstack for sending emails.
+- `MESSENGER_RETRY_DELAY_MS`: The default retry delay, in milliseconds, used by Messenger retry-aware scripts and local configuration.
+- `DOMAIN_EVENTS_QUEUE_NAME`: The SQS queue name for asynchronous domain events.
+- `FAILED_DOMAIN_EVENTS_QUEUE_NAME`: The SQS queue name for failed domain-event messages.
+- `CACHE_REFRESH_QUEUE_NAME`: The SQS queue name for asynchronous cache refresh work.
+- `FAILED_CACHE_REFRESH_QUEUE_NAME`: The SQS queue name for failed cache refresh messages.
+- `DOMAIN_EVENTS_TRANSPORT_DSN`: The Messenger DSN for the `domain-events` transport.
+- `FAILED_DOMAIN_EVENTS_TRANSPORT_DSN`: The Messenger DSN for the `failed-domain-events` transport.
+- `CACHE_REFRESH_TRANSPORT_DSN`: The Messenger DSN for the `cache-refresh` transport.
+- `FAILED_CACHE_REFRESH_TRANSPORT_DSN`: The Messenger DSN for the `failed-cache-refresh` transport.
 - `STRUCTURIZR_PORT`: The port on which Structurizr is running (for architecture diagrams).
 - `CADDY_MERCURE_JWT_SECRET`: The JWT secret for the FrankenPHP/Caddy Mercure integration.
 - `SERVER_NAME`: The server name for the application.
@@ -55,6 +63,37 @@ You can use `.env.test` and `.env.prod` to override variables for other environm
 1. Never commit your `.env.prod` file to version control. This file will likely contain sensitive information that should not be exposed publicly.
 
 2. While your `.env.prod` file should not be committed to version control, your `.env.test` file can be if it does not contain sensitive information. This helps maintain consistency across testing environments.
+
+## Messenger Cache Refresh Transports
+
+Messenger has separate transports for domain events and cache refresh work:
+
+- `domain-events`: asynchronous domain-event delivery.
+- `failed-domain-events`: failed domain-event messages after retry exhaustion.
+- `cache-refresh`: shared asynchronous transport for proactive cache refresh commands.
+- `failed-cache-refresh`: failed cache refresh messages after retry exhaustion.
+
+The `cache-refresh` transport consumes `App\Shared\Application\Command\CacheRefreshCommand` messages. In local development it uses Localstack SQS through `CACHE_REFRESH_TRANSPORT_DSN`; in tests, `config/packages/messenger.yaml` overrides it to `in-memory://` together with `failed-cache-refresh`.
+
+Example local values:
+
+```dotenv
+AWS_SQS_ENDPOINT_BASE=localstack
+AWS_SQS_REGION=us-east-1
+AWS_SQS_KEY=fake
+AWS_SQS_SECRET=fake
+LOCALSTACK_PORT=4566
+DOMAIN_EVENTS_QUEUE_NAME=domain-events
+FAILED_DOMAIN_EVENTS_QUEUE_NAME=failed-domain-events
+CACHE_REFRESH_QUEUE_NAME=cache-refresh
+FAILED_CACHE_REFRESH_QUEUE_NAME=failed-cache-refresh
+DOMAIN_EVENTS_TRANSPORT_DSN=sqs://localstack:${LOCALSTACK_PORT}/${DOMAIN_EVENTS_QUEUE_NAME}?sslmode=disable&region=${AWS_SQS_REGION}&access_key=${AWS_SQS_KEY}&secret_key=${AWS_SQS_SECRET}
+FAILED_DOMAIN_EVENTS_TRANSPORT_DSN=sqs://localstack:${LOCALSTACK_PORT}/${FAILED_DOMAIN_EVENTS_QUEUE_NAME}?sslmode=disable&region=${AWS_SQS_REGION}&access_key=${AWS_SQS_KEY}&secret_key=${AWS_SQS_SECRET}
+CACHE_REFRESH_TRANSPORT_DSN=sqs://localstack:${LOCALSTACK_PORT}/${CACHE_REFRESH_QUEUE_NAME}?sslmode=disable&region=${AWS_SQS_REGION}&access_key=${AWS_SQS_KEY}&secret_key=${AWS_SQS_SECRET}
+FAILED_CACHE_REFRESH_TRANSPORT_DSN=sqs://localstack:${LOCALSTACK_PORT}/${FAILED_CACHE_REFRESH_QUEUE_NAME}?sslmode=disable&region=${AWS_SQS_REGION}&access_key=${AWS_SQS_KEY}&secret_key=${AWS_SQS_SECRET}
+```
+
+Both cache refresh transports have `auto_setup: true`. The primary transport retries three times with exponential backoff before moving messages to `failed-cache-refresh`; the failed transport uses the same infinite retry strategy as failed domain events.
 
 ## Configuring Load Tests
 
@@ -133,6 +172,7 @@ The Core Service has load tests configured for the following endpoints:
 - `createCustomer`, `getCustomer`, `getCustomers`, `updateCustomer`, `replaceCustomer`, `deleteCustomer`
 - `createCustomerType`, `getCustomerType`, `getCustomerTypes`, `updateCustomerType`, `deleteCustomerType`
 - `createCustomerStatus`, `getCustomerStatus`, `getCustomerStatuses`, `updateCustomerStatus`, `deleteCustomerStatus`
+- `cachePerformance`, `cacheReadWriteRace`
 
 #### GraphQL
 

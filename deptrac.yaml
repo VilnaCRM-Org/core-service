@@ -8,7 +8,7 @@ parameters:
     - name: Application
       collectors:
         - type: classNameRegex
-          value: '#.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|Fixture|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message|Metric).*#'
+          value: '#.*\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|Fixture|MutationInput|Processor|Resolver|Exception|ExceptionMessageHandler|Message|Metric).*#'
         - type: classNameRegex
           value: '#.*\\Internal\\HealthCheck\\Application\\(Transformer|Command|CommandHandler|DTO|EventListener|EventSubscriber|Factory|MutationInput|Processor|Resolver|ExceptionMessageHandler|Message).*#'
         - type: classNameRegex
