@@ -1338,6 +1338,45 @@
                     "fall": 2
                 }
             }
+        },
+        "cacheReadWriteRace": {
+            "setupTimeoutInMinutes": 30,
+            "teardownTimeoutInMinutes": 30,
+            "smoke": {
+                "threshold": 300,
+                "rps": 10,
+                "vus": 5,
+                "duration": 30
+            },
+            "average": {
+                "threshold": 500,
+                "rps": 30,
+                "vus": 20,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 20,
+                    "fall": 3
+                }
+            },
+            "stress": {
+                "threshold": 900,
+                "rps": 60,
+                "vus": 40,
+                "duration": {
+                    "rise": 3,
+                    "plateau": 20,
+                    "fall": 3
+                }
+            },
+            "spike": {
+                "threshold": 1500,
+                "rps": 120,
+                "vus": 80,
+                "duration": {
+                    "rise": 2,
+                    "fall": 2
+                }
+            }
         }
     }
 }

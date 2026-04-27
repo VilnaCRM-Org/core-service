@@ -13,9 +13,11 @@ use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use MongoDB\BSON\Binary;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
@@ -77,37 +79,15 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
 
     public function testInvalidateAllCustomersByTag(): void
     {
-        $customer1 = $this->createTestCustomer(
-            'Customer 1',
-            sprintf('customer1+%s@example.com', (string) $this->generateUlid())
-        );
-        $customer2 = $this->createTestCustomer(
-            'Customer 2',
-            sprintf('customer2+%s@example.com', (string) $this->generateUlid())
-        );
-        $customer3 = $this->createTestCustomer(
-            'Customer 3',
-            sprintf('customer3+%s@example.com', (string) $this->generateUlid())
-        );
+        $customers = $this->createCustomersForTagInvalidation();
 
-        $this->repository->find($customer1->getUlid());
-        $this->repository->find($customer2->getUlid());
-        $this->repository->find($customer3->getUlid());
-
-        $this->updateCustomerDirectly($customer1->getUlid(), 'Updated 1');
-        $this->updateCustomerDirectly($customer2->getUlid(), 'Updated 2');
-        $this->updateCustomerDirectly($customer3->getUlid(), 'Updated 3');
+        $this->warmCustomerDetailCaches($customers);
+        $this->updateCustomersDirectly($customers);
         $this->documentManager->clear();
 
         $this->cache->invalidateTags(['customer']);
 
-        $result1 = $this->repository->find($customer1->getUlid());
-        $result2 = $this->repository->find($customer2->getUlid());
-        $result3 = $this->repository->find($customer3->getUlid());
-
-        self::assertSame('Updated 1', $result1->getInitials());
-        self::assertSame('Updated 2', $result2->getInitials());
-        self::assertSame('Updated 3', $result3->getInitials());
+        $this->assertUpdatedCustomerInitials($customers);
     }
 
     /**
@@ -121,31 +101,9 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
             sprintf('stale-test+%s@example.com', (string) $this->generateUlid())
         );
 
-        // First read - populates cache
-        $result1 = $this->repository->find($customer->getUlid());
-        self::assertSame('Original Name', $result1->getInitials());
-
-        // Update database directly (bypassing cache invalidation)
-        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Name');
-        $this->documentManager->clear();
-
-        // Second read - should return STALE cached data (proves cache is working)
-        $result2 = $this->repository->find($customer->getUlid());
-        self::assertSame(
-            'Original Name',
-            $result2->getInitials(),
-            'Cache should return stale data when not invalidated - this proves caching is working'
-        );
-
-        // Now invalidate and verify fresh data is returned
+        $this->assertDetailCacheReturnsStaleData($customer);
         $this->cache->invalidateTags(["customer.{$customer->getUlid()}"]);
-
-        $result3 = $this->repository->find($customer->getUlid());
-        self::assertSame(
-            'Updated Name',
-            $result3->getInitials(),
-            'After invalidation, fresh data should be returned'
-        );
+        $this->assertCustomerDetailInitials($customer, 'Updated Name');
     }
 
     /**
@@ -156,32 +114,113 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         $email = sprintf('email-stale+%s@example.com', (string) $this->generateUlid());
         $customer = $this->createTestCustomer('Original Email Name', $email);
 
-        // First read - populates email cache
-        $result1 = $this->repository->findByEmail($email);
-        self::assertSame('Original Email Name', $result1->getInitials());
+        $this->assertEmailCacheReturnsStaleData($customer, $email);
 
-        // Update database directly (bypassing cache invalidation)
-        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Email Name');
-        $this->documentManager->clear();
-
-        // Second read - should return STALE cached data
-        $result2 = $this->repository->findByEmail($email);
-        self::assertSame(
-            'Original Email Name',
-            $result2->getInitials(),
-            'Email cache should return stale data when not invalidated'
-        );
-
-        // Invalidate email cache tag and verify fresh data
         $emailHash = $this->cacheKeyBuilder->hashEmail($email);
         $this->cache->invalidateTags(["customer.email.{$emailHash}"]);
+        $this->assertCustomerEmailInitials($email, 'Updated Email Name');
+    }
 
-        $result3 = $this->repository->findByEmail($email);
-        self::assertSame(
-            'Updated Email Name',
-            $result3->getInitials(),
-            'After email cache invalidation, fresh data should be returned'
+    public function testManagedTypeChangeInvalidatesRelatedCustomerTags(): void
+    {
+        $type = new CustomerType(
+            sprintf('business-%s', (string) $this->generateUlid()),
+            $this->generateUlid()
         );
+        $this->typeRepository->save($type);
+
+        $customer = $this->createTestCustomerWithReferences(
+            'Type Reference Customer',
+            sprintf('type-reference+%s@example.com', (string) $this->generateUlid()),
+            $type,
+            $this->defaultStatus()
+        );
+        $detailKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
+        $lookupKey = $this->cacheKeyBuilder->buildCustomerEmailKey($customer->getEmail());
+
+        $this->warmCustomerLookupCaches($customer);
+        $this->warmReferenceCaches('type-change');
+        $this->assertRelatedCustomerCachesHit($detailKey, $lookupKey, 'type-change');
+
+        $type->setValue(sprintf('enterprise-%s', (string) $this->generateUlid()));
+        $this->typeRepository->save($type);
+
+        $this->assertRelatedCustomerCachesMiss($detailKey, $lookupKey, 'type-change');
+    }
+
+    public function testManagedStatusChangeInvalidatesRelatedCustomerTags(): void
+    {
+        $status = new CustomerStatus(
+            sprintf('pending-%s', (string) $this->generateUlid()),
+            $this->generateUlid()
+        );
+        $this->statusRepository->save($status);
+
+        $customer = $this->createTestCustomerWithReferences(
+            'Status Reference Customer',
+            sprintf('status-reference+%s@example.com', (string) $this->generateUlid()),
+            $this->defaultType(),
+            $status
+        );
+        $detailKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
+        $lookupKey = $this->cacheKeyBuilder->buildCustomerEmailKey($customer->getEmail());
+
+        $this->warmCustomerLookupCaches($customer);
+        $this->warmReferenceCaches('status-change');
+        $this->assertRelatedCustomerCachesHit($detailKey, $lookupKey, 'status-change');
+
+        $status->setValue(sprintf('qualified-%s', (string) $this->generateUlid()));
+        $this->statusRepository->save($status);
+
+        $this->assertRelatedCustomerCachesMiss($detailKey, $lookupKey, 'status-change');
+    }
+
+    public function testCustomTypeRepositoryDeleteByValueInvalidatesRelatedCustomerTags(): void
+    {
+        $typeValue = sprintf('custom-delete-type-%s', (string) $this->generateUlid());
+        $type = new CustomerType($typeValue, $this->generateUlid());
+        $this->typeRepository->save($type);
+
+        $customer = $this->createTestCustomerWithReferences(
+            'Custom Type Delete Customer',
+            sprintf('custom-type-delete+%s@example.com', (string) $this->generateUlid()),
+            $type,
+            $this->defaultStatus()
+        );
+        $detailKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
+        $lookupKey = $this->cacheKeyBuilder->buildCustomerEmailKey($customer->getEmail());
+
+        $this->warmCustomerLookupCaches($customer);
+        $this->warmReferenceCaches('custom-type-delete');
+        $this->assertRelatedCustomerCachesHit($detailKey, $lookupKey, 'custom-type-delete');
+
+        $this->typeRepository->deleteByValue($typeValue);
+
+        $this->assertRelatedCustomerCachesMiss($detailKey, $lookupKey, 'custom-type-delete');
+    }
+
+    public function testCustomStatusRepositoryDeleteByValueInvalidatesRelatedCustomerTags(): void
+    {
+        $statusValue = sprintf('custom-delete-status-%s', (string) $this->generateUlid());
+        $status = new CustomerStatus($statusValue, $this->generateUlid());
+        $this->statusRepository->save($status);
+
+        $customer = $this->createTestCustomerWithReferences(
+            'Custom Status Delete Customer',
+            sprintf('custom-status-delete+%s@example.com', (string) $this->generateUlid()),
+            $this->defaultType(),
+            $status
+        );
+        $detailKey = $this->cacheKeyBuilder->buildCustomerKey((string) $customer->getUlid());
+        $lookupKey = $this->cacheKeyBuilder->buildCustomerEmailKey($customer->getEmail());
+
+        $this->warmCustomerLookupCaches($customer);
+        $this->warmReferenceCaches('custom-status-delete');
+        $this->assertRelatedCustomerCachesHit($detailKey, $lookupKey, 'custom-status-delete');
+
+        $this->statusRepository->deleteByValue($statusValue);
+
+        $this->assertRelatedCustomerCachesMiss($detailKey, $lookupKey, 'custom-status-delete');
     }
 
     /**
@@ -218,36 +257,42 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
 
     private function ensureDefaultTypeAndStatus(): void
     {
-        if ($this->defaultType === null) {
-            $existing = $this->typeRepository->findOneByCriteria(['value' => 'individual']);
-            $this->defaultType = $existing instanceof CustomerType
-                ? $existing
-                : new CustomerType('individual', $this->generateUlid());
-            if (! $existing) {
-                $this->typeRepository->save($this->defaultType);
-            }
-        }
+        $type = $this->typeRepository->findOneByCriteria(['value' => 'individual'])
+            ?? new CustomerType('individual', $this->generateUlid());
+        self::assertInstanceOf(CustomerType::class, $type);
+        $this->defaultType = $type;
+        $this->typeRepository->save($this->defaultType);
 
-        if ($this->defaultStatus === null) {
-            $existing = $this->statusRepository->findOneByCriteria(['value' => 'active']);
-            $this->defaultStatus = $existing instanceof CustomerStatus
-                ? $existing
-                : new CustomerStatus('active', $this->generateUlid());
-            if (! $existing) {
-                $this->statusRepository->save($this->defaultStatus);
-            }
-        }
+        $status = $this->statusRepository->findOneByCriteria(['value' => 'active'])
+            ?? new CustomerStatus('active', $this->generateUlid());
+        self::assertInstanceOf(CustomerStatus::class, $status);
+        $this->defaultStatus = $status;
+        $this->statusRepository->save($this->defaultStatus);
     }
 
     private function createTestCustomer(string $initials, string $email): Customer
     {
+        return $this->createTestCustomerWithReferences(
+            $initials,
+            $email,
+            $this->defaultType(),
+            $this->defaultStatus()
+        );
+    }
+
+    private function createTestCustomerWithReferences(
+        string $initials,
+        string $email,
+        CustomerType $type,
+        CustomerStatus $status
+    ): Customer {
         $customer = new Customer(
             initials: $initials,
             email: $email,
             phone: '+1234567890',
             leadSource: 'test',
-            type: $this->defaultType,
-            status: $this->defaultStatus,
+            type: $type,
+            status: $status,
             confirmed: true,
             ulid: $this->generateUlid()
         );
@@ -257,17 +302,198 @@ final class MongoCustomerRepositoryTagInvalidationTest extends KernelTestCase
         return $customer;
     }
 
+    private function defaultType(): CustomerType
+    {
+        $defaultType = $this->defaultType;
+        self::assertInstanceOf(CustomerType::class, $defaultType);
+
+        return $defaultType;
+    }
+
+    private function defaultStatus(): CustomerStatus
+    {
+        $defaultStatus = $this->defaultStatus;
+        self::assertInstanceOf(CustomerStatus::class, $defaultStatus);
+
+        return $defaultStatus;
+    }
+
+    /**
+     * @return list<Customer>
+     */
+    private function createCustomersForTagInvalidation(): array
+    {
+        return [
+            $this->createNumberedCustomer(1),
+            $this->createNumberedCustomer(2),
+            $this->createNumberedCustomer(3),
+        ];
+    }
+
+    private function createNumberedCustomer(int $number): Customer
+    {
+        return $this->createTestCustomer(
+            sprintf('Customer %d', $number),
+            sprintf('customer%d+%s@example.com', $number, (string) $this->generateUlid())
+        );
+    }
+
+    /**
+     * @param list<Customer> $customers
+     */
+    private function warmCustomerDetailCaches(array $customers): void
+    {
+        $this->repository->find($customers[0]->getUlid());
+        $this->repository->find($customers[1]->getUlid());
+        $this->repository->find($customers[2]->getUlid());
+    }
+
+    /**
+     * @param list<Customer> $customers
+     */
+    private function updateCustomersDirectly(array $customers): void
+    {
+        $this->updateCustomerDirectly($customers[0]->getUlid(), 'Updated 1');
+        $this->updateCustomerDirectly($customers[1]->getUlid(), 'Updated 2');
+        $this->updateCustomerDirectly($customers[2]->getUlid(), 'Updated 3');
+    }
+
+    /**
+     * @param list<Customer> $customers
+     */
+    private function assertUpdatedCustomerInitials(array $customers): void
+    {
+        $this->assertCustomerDetailInitials($customers[0], 'Updated 1');
+        $this->assertCustomerDetailInitials($customers[1], 'Updated 2');
+        $this->assertCustomerDetailInitials($customers[2], 'Updated 3');
+    }
+
+    private function assertDetailCacheReturnsStaleData(Customer $customer): void
+    {
+        $this->assertCustomerDetailInitials($customer, 'Original Name');
+
+        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Name');
+        $this->documentManager->clear();
+
+        $this->assertCustomerDetailInitials($customer, 'Original Name');
+    }
+
+    private function assertEmailCacheReturnsStaleData(Customer $customer, string $email): void
+    {
+        $this->assertCustomerEmailInitials($email, 'Original Email Name');
+
+        $this->updateCustomerDirectly($customer->getUlid(), 'Updated Email Name');
+        $this->documentManager->clear();
+
+        $this->assertCustomerEmailInitials($email, 'Original Email Name');
+    }
+
+    private function assertCustomerDetailInitials(
+        Customer $customer,
+        string $expectedInitials
+    ): void {
+        $result = $this->repository->find($customer->getUlid());
+        self::assertSame($expectedInitials, $result->getInitials());
+    }
+
+    private function assertCustomerEmailInitials(
+        string $email,
+        string $expectedInitials
+    ): void {
+        $result = $this->repository->findByEmail($email);
+        self::assertSame($expectedInitials, $result->getInitials());
+    }
+
     private function updateCustomerDirectly(string $customerId, string $newInitials): void
     {
-        $customer = $this->documentManager->find(Customer::class, $customerId);
-        self::assertNotNull($customer, "Customer {$customerId} not found for direct update");
-        $customer->setInitials($newInitials);
+        $result = $this->documentManager
+            ->getDocumentCollection(Customer::class)
+            ->updateOne(
+                ['_id' => new Binary((new Ulid($customerId))->toBinary(), Binary::TYPE_GENERIC)],
+                ['$set' => ['initials' => $newInitials]]
+            );
 
-        $this->documentManager->flush();
+        self::assertSame(
+            1,
+            $result->getMatchedCount(),
+            "Customer {$customerId} not found for raw update"
+        );
+    }
+
+    private function warmCustomerLookupCaches(Customer $customer): void
+    {
+        self::assertNotNull($this->repository->find($customer->getUlid()));
+        self::assertNotNull($this->repository->findByEmail($customer->getEmail()));
+    }
+
+    private function warmReferenceCaches(string $scenario): void
+    {
+        $this->warmTaggedCacheItem(
+            $this->collectionCacheKey($scenario),
+            'customer.collection'
+        );
+        $this->warmTaggedCacheItem(
+            $this->referenceCacheKey($scenario),
+            'customer.reference'
+        );
+    }
+
+    private function assertRelatedCustomerCachesHit(
+        string $detailKey,
+        string $lookupKey,
+        string $scenario
+    ): void {
+        $this->assertCacheHit($detailKey);
+        $this->assertCacheHit($lookupKey);
+        $this->assertCacheHit($this->collectionCacheKey($scenario));
+        $this->assertCacheHit($this->referenceCacheKey($scenario));
+    }
+
+    private function assertRelatedCustomerCachesMiss(
+        string $detailKey,
+        string $lookupKey,
+        string $scenario
+    ): void {
+        $this->assertCacheMiss($detailKey);
+        $this->assertCacheMiss($lookupKey);
+        $this->assertCacheMiss($this->collectionCacheKey($scenario));
+        $this->assertCacheMiss($this->referenceCacheKey($scenario));
+    }
+
+    private function assertCacheHit(string $cacheKey): void
+    {
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
+    }
+
+    private function assertCacheMiss(string $cacheKey): void
+    {
+        self::assertFalse($this->cachePool->getItem($cacheKey)->isHit());
+    }
+
+    private function collectionCacheKey(string $scenario): string
+    {
+        return "customer.collection.{$scenario}";
+    }
+
+    private function referenceCacheKey(string $scenario): string
+    {
+        return "customer.reference.{$scenario}";
     }
 
     private function generateUlid(): Ulid
     {
         return new Ulid((string) new SymfonyUlid());
+    }
+
+    private function warmTaggedCacheItem(string $key, string $tag): void
+    {
+        $this->cache->get(
+            $key,
+            static function (ItemInterface $item) use ($tag): string {
+                $item->tag($tag);
+
+                return 'warmed';
+            }
+        );
     }
 }

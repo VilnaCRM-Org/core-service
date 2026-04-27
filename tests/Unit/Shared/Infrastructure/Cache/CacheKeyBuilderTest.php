@@ -48,4 +48,74 @@ final class CacheKeyBuilderTest extends TestCase
 
         self::assertSame(hash('sha256', 'upper@example.com'), $hash);
     }
+
+    public function testBuildContextFamilyKeyHashesLowercasedIdentifierValue(): void
+    {
+        $key = $this->builder->buildContextFamilyKey(
+            'customer',
+            'lookup',
+            'email',
+            'John@Example.COM'
+        );
+
+        self::assertSame(
+            'customer.lookup.email.' . hash('sha256', 'john@example.com'),
+            $key
+        );
+    }
+
+    public function testBuildContextFamilyKeyCanPreserveCaseSensitiveIdentifierValue(): void
+    {
+        $key = $this->builder->buildContextFamilyKey(
+            'token',
+            'detail',
+            'external_id',
+            'CaseSensitiveValue',
+            false
+        );
+
+        self::assertSame(
+            'token.detail.external_id.' . hash('sha256', 'CaseSensitiveValue'),
+            $key
+        );
+    }
+
+    public function testBuildRefreshDedupeKeyUsesStableLowercasedIdentifierValue(): void
+    {
+        $key = $this->builder->buildRefreshDedupeKey(
+            'customer',
+            'lookup',
+            'email',
+            'John@Example.COM',
+            'repository_refresh'
+        );
+
+        self::assertSame(hash('sha256', implode('|', array_map('rawurlencode', [
+            'customer',
+            'lookup',
+            'email',
+            'john@example.com',
+            'repository_refresh',
+        ]))), $key);
+    }
+
+    public function testBuildRefreshDedupeKeyEscapesDelimiterSegments(): void
+    {
+        $key = $this->builder->buildRefreshDedupeKey(
+            'customer|crm',
+            'lookup',
+            'email',
+            'User|Example',
+            'repository|refresh',
+            false
+        );
+
+        self::assertSame(hash('sha256', implode('|', array_map('rawurlencode', [
+            'customer|crm',
+            'lookup',
+            'email',
+            'User|Example',
+            'repository|refresh',
+        ]))), $key);
+    }
 }

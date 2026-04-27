@@ -10,6 +10,7 @@ on:
       - 'config/packages/cache.yaml'
       - 'tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php'
       - 'tests/Load/scripts/rest-api/cachePerformance.js'
+      - 'tests/Load/scripts/rest-api/cacheReadWriteRace.js'
       - 'tests/Load/execute-load-test.sh'
       - 'tests/Load/config.json.dist'
 

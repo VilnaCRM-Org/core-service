@@ -94,6 +94,27 @@ final class MongoCustomerRepositoryCacheTest extends KernelTestCase
         self::assertTrue($this->cachePool->getItem($emailCacheKey)->isHit());
     }
 
+    public function testNegativeEmailLookupCacheIsInvalidatedByLaterCreate(): void
+    {
+        $this->cachePool->clear();
+
+        $email = sprintf('missing-then-created+%s@example.com', (string) $this->generateUlid());
+        $emailCacheKey = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
+
+        self::assertNull($this->repository->findByEmail($email));
+        self::assertTrue($this->cachePool->getItem($emailCacheKey)->isHit());
+
+        $customer = $this->createTestCustomer('Created Later', $email);
+
+        self::assertFalse($this->cachePool->getItem($emailCacheKey)->isHit());
+
+        $result = $this->repository->findByEmail($email);
+
+        self::assertNotNull($result);
+        self::assertSame($customer->getUlid(), $result->getUlid());
+        self::assertTrue($this->cachePool->getItem($emailCacheKey)->isHit());
+    }
+
     private function ensureDefaultTypeAndStatus(): void
     {
         if ($this->defaultType === null) {

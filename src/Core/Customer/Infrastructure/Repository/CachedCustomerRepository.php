@@ -6,11 +6,17 @@ namespace App\Core\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Infrastructure\Collection\CustomerCachePolicyCollection;
 use App\Core\Customer\Infrastructure\Resolver\CustomerCacheTagResolver;
+use App\Shared\Application\Command\CacheInvalidationCommand;
+use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
+use App\Shared\Application\DTO\CacheInvalidationTagSet;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
+use App\Shared\Infrastructure\Collection\CacheRefreshCommandCollection;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Throwable;
 
 /**
  * Cached Customer Repository Decorator
@@ -28,8 +34,8 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  * - Transparent to consumers (implements same interface)
  *
  * Cache Invalidation:
- * - Handled by CustomerCacheInvalidationSubscriber via domain events
- * - Direct deleteByEmail/deleteById cleanup paths invalidate cache explicitly
+ * - Managed deletes are owned by the shared ODM invalidation path
+ * - Direct deleteByEmail/deleteById fallback tags are used only on lookup misses
  */
 final class CachedCustomerRepository implements CustomerRepositoryInterface
 {
@@ -38,7 +44,9 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         private TagAwareCacheInterface $cache,
         private CacheKeyBuilder $cacheKeyBuilder,
         private CustomerCacheTagResolver $cacheTagResolver,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private CustomerCachePolicyCollection $cachePolicies,
+        private ?CacheInvalidationCommandHandler $invalidationHandler = null
     ) {
     }
 
@@ -70,19 +78,18 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         int $lockMode = 0,
         ?int $lockVersion = null
     ): ?Customer {
+        $policy = $this->cachePolicies()->detail();
         $cacheKey = $this->cacheKeyBuilder->buildCustomerKey((string) $id);
+        $cacheMiss = false;
 
         try {
-            return $this->cache->get(
+            return $this->findCachedCustomerWithFallback(
                 $cacheKey,
-                fn (ItemInterface $item) => $this->loadCustomerFromDb(
-                    $id,
-                    $lockMode,
-                    $lockVersion,
-                    $cacheKey,
-                    $item
-                ),
-                beta: 1.0  // Enable Stale-While-Revalidate
+                $id,
+                $lockMode,
+                $lockVersion,
+                $policy,
+                $cacheMiss
             );
         } catch (\Throwable $e) {
             $this->logCacheError($cacheKey, $e);
@@ -112,17 +119,24 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
      */
     public function findByEmail(string $email): ?Customer
     {
+        $policy = $this->cachePolicies()->lookup();
         $cacheKey = $this->cacheKeyBuilder->buildCustomerEmailKey($email);
+        $cacheMiss = false;
 
         try {
-            return $this->cache->get(
+            $customer = $this->findCachedCustomerByEmail(
                 $cacheKey,
-                fn (ItemInterface $item) => $this->loadCustomerByEmail(
-                    $email,
-                    $cacheKey,
-                    $item
-                )
+                $policy,
+                $email,
+                $cacheMiss
             );
+            $this->logHitWhenLoadedFromCache(
+                $cacheMiss,
+                $cacheKey,
+                CustomerCachePolicyCollection::FAMILY_LOOKUP
+            );
+
+            return $customer;
         } catch (\Throwable $e) {
             $this->logCacheError($cacheKey, $e);
 
@@ -141,7 +155,7 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     /**
      * Delegate deletion to inner repository (no invalidation here)
      *
-     * Cache invalidation is handled via CustomerDeletedEvent subscribers.
+     * Managed delete invalidation is handled by the shared ODM listener.
      */
     public function delete(Customer $customer): void
     {
@@ -149,9 +163,9 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
-     * Direct deletion by email bypasses domain events, so cache invalidation
-     * must happen here to keep test cleanup and other raw-delete callers
-     * consistent with the normal event-driven delete path.
+     * Direct deletion by email is covered by the ODM listener when the customer
+     * can be loaded as a managed document. Fallback tag invalidation remains for
+     * lookup misses or lookup failures where the raw delete path may bypass that.
      */
     public function deleteByEmail(string $email): void
     {
@@ -159,7 +173,6 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
         if ($customer instanceof Customer) {
             $this->inner->delete($customer);
-            $this->invalidateTagsForDeletedCustomer($customer, $email);
 
             return;
         }
@@ -169,9 +182,9 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
-     * Direct deletion by ID bypasses domain events, so cache invalidation
-     * must happen here to keep test cleanup and other raw-delete callers
-     * consistent with the normal event-driven delete path.
+     * Direct deletion by ID is covered by the ODM listener when the customer can
+     * be loaded as a managed document. Fallback tag invalidation remains for
+     * lookup misses or lookup failures where the raw delete path may bypass that.
      */
     public function deleteById(mixed $id): void
     {
@@ -179,11 +192,6 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
         if ($customer instanceof Customer) {
             $this->inner->delete($customer);
-            $this->invalidateTagsForDeletedCustomer(
-                $customer,
-                null,
-                (string) $id
-            );
 
             return;
         }
@@ -198,21 +206,115 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
     /**
      * Load customer from database and configure cache item
+     *
+     * @param array{ttl: int, tags: list<string>} $policy
+     */
+    private function findCachedCustomerWithFallback(
+        string $cacheKey,
+        mixed $id,
+        int $lockMode,
+        ?int $lockVersion,
+        array $policy,
+        bool &$cacheMiss
+    ): ?Customer {
+        $customer = $this->findCachedCustomer(
+            $cacheKey,
+            $policy,
+            $id,
+            $lockMode,
+            $lockVersion,
+            $cacheMiss
+        );
+        $this->logHitWhenLoadedFromCache(
+            $cacheMiss,
+            $cacheKey,
+            CustomerCachePolicyCollection::FAMILY_DETAIL
+        );
+
+        return $customer;
+    }
+
+    /**
+     * @param array{ttl: int, tags: list<string>} $policy
+     */
+    private function findCachedCustomer(
+        string $cacheKey,
+        array $policy,
+        mixed $id,
+        int $lockMode,
+        ?int $lockVersion,
+        bool &$cacheMiss
+    ): ?Customer {
+        return $this->cache->get(
+            $cacheKey,
+            $this->loadCustomerFromDbCallback(
+                $id,
+                $lockMode,
+                $lockVersion,
+                $cacheKey,
+                $policy,
+                $cacheMiss
+            ),
+            beta: $this->cachePolicies()->beta($policy)
+        );
+    }
+
+    /**
+     * @param array{ttl: int, tags: list<string>} $policy
+     *
+     * @return callable(ItemInterface): ?Customer
+     */
+    private function loadCustomerFromDbCallback(
+        mixed $id,
+        int $lockMode,
+        ?int $lockVersion,
+        string $cacheKey,
+        array $policy,
+        bool &$cacheMiss
+    ): callable {
+        return function (ItemInterface $item) use (
+            $id,
+            $lockMode,
+            $lockVersion,
+            $cacheKey,
+            $policy,
+            &$cacheMiss
+        ): ?Customer {
+            $cacheMiss = true;
+
+            return $this->loadCustomerFromDb(
+                $id,
+                $lockMode,
+                $lockVersion,
+                $cacheKey,
+                $item,
+                $policy
+            );
+        };
+    }
+
+    /**
+     * Load customer from database and configure cache item
+     *
+     * @param array{ttl: int, tags: list<string>} $policy
      */
     private function loadCustomerFromDb(
         mixed $id,
         int $lockMode,
         ?int $lockVersion,
         string $cacheKey,
-        ItemInterface $item
+        ItemInterface $item,
+        array $policy
     ): ?Customer {
-        $item->expiresAfter(600);  // 10 minutes TTL
-        $item->tag(['customer', "customer.{$id}"]);
+        $item->expiresAfter($this->cachePolicies()->ttl($policy));
+        $item->tag($this->cachePolicies()->tags($policy, "customer.{$id}"));
 
         $this->logger->info('Cache miss - loading customer from database', [
             'cache_key' => $cacheKey,
             'customer_id' => $id,
             'operation' => 'cache.miss',
+            'context' => CustomerCachePolicyCollection::CONTEXT,
+            'family' => CustomerCachePolicyCollection::FAMILY_DETAIL,
         ]);
 
         return $this->inner->find($id, $lockMode, $lockVersion);
@@ -220,26 +322,71 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
 
     /**
      * Load customer by email from database and configure cache item
+     *
+     * @param array{ttl: int, tags: list<string>} $policy
+     */
+    private function findCachedCustomerByEmail(
+        string $cacheKey,
+        array $policy,
+        string $email,
+        bool &$cacheMiss
+    ): ?Customer {
+        $loader = function (ItemInterface $item) use (
+            $email,
+            $cacheKey,
+            $policy,
+            &$cacheMiss
+        ): ?Customer {
+            $cacheMiss = true;
+
+            return $this->loadCustomerByEmail(
+                $email,
+                $cacheKey,
+                $item,
+                $policy
+            );
+        };
+
+        return $this->cache->get(
+            $cacheKey,
+            $loader,
+            $this->cachePolicies()->beta($policy)
+        );
+    }
+
+    /**
+     * Load customer by email from database and configure cache item
+     *
+     * @param array{ttl: int, tags: list<string>} $policy
      */
     private function loadCustomerByEmail(
         string $email,
         string $cacheKey,
-        ItemInterface $item
+        ItemInterface $item,
+        array $policy
     ): ?Customer {
-        $item->expiresAfter(300);  // 5 minutes TTL
+        $customer = $this->inner->findByEmail($email);
+        $effectivePolicy = $customer instanceof Customer
+            ? $policy
+            : $this->cachePolicies()->forFamily(
+                CustomerCachePolicyCollection::FAMILY_NEGATIVE_LOOKUP
+            );
+
+        $item->expiresAfter($this->cachePolicies()->ttl($effectivePolicy));
         $emailHash = $this->cacheKeyBuilder->hashEmail($email);
-        $item->tag([
-            'customer',
-            'customer.email',
-            "customer.email.{$emailHash}",
-        ]);
+        $item->tag($this->cachePolicies()->tags(
+            $effectivePolicy,
+            "customer.email.{$emailHash}"
+        ));
 
         $this->logger->info('Cache miss - loading customer by email', [
             'cache_key' => $cacheKey,
             'operation' => 'cache.miss',
+            'context' => CustomerCachePolicyCollection::CONTEXT,
+            'family' => $effectivePolicy['family'],
         ]);
 
-        return $this->inner->findByEmail($email);
+        return $customer;
     }
 
     /**
@@ -252,6 +399,33 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             'error' => $e->getMessage(),
             'operation' => 'cache.error',
         ]);
+    }
+
+    private function logCacheHit(string $cacheKey, string $family): void
+    {
+        $this->logger->info('Cache hit - returning customer from cache', [
+            'cache_key' => $cacheKey,
+            'operation' => 'cache.hit',
+            'context' => CustomerCachePolicyCollection::CONTEXT,
+            'family' => $family,
+        ]);
+    }
+
+    private function logHitWhenLoadedFromCache(
+        bool $cacheMiss,
+        string $cacheKey,
+        string $family
+    ): void {
+        if ($cacheMiss) {
+            return;
+        }
+
+        $this->logCacheHit($cacheKey, $family);
+    }
+
+    private function cachePolicies(): CustomerCachePolicyCollection
+    {
+        return $this->cachePolicies;
     }
 
     private function findCustomerForDeleteByEmail(string $email): ?Customer
@@ -296,6 +470,10 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
                 $deletedId
             ));
 
+            if ($this->invalidateTagsThroughSharedHandler($tags)) {
+                return;
+            }
+
             if ($this->cache->invalidateTags($tags) === true) {
                 return;
             }
@@ -312,5 +490,47 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
             'operation' => 'cache.invalidation.error',
             'error' => $error,
         ]);
+    }
+
+    /**
+     * @param list<string> $tags
+     */
+    private function invalidateTagsThroughSharedHandler(array $tags): bool
+    {
+        if (! $this->invalidationHandler instanceof CacheInvalidationCommandHandler) {
+            return false;
+        }
+
+        try {
+            return $this->dispatchRepositoryFallbackInvalidation(
+                $this->invalidationHandler,
+                $tags
+            );
+        } catch (Throwable $e) {
+            $this->logger->warning('Shared cache invalidation failed after customer deletion', [
+                'operation' => 'cache.invalidation.error',
+                'source' => 'repository_fallback',
+                'error' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param list<string> $tags
+     */
+    private function dispatchRepositoryFallbackInvalidation(
+        CacheInvalidationCommandHandler $invalidationHandler,
+        array $tags
+    ): bool {
+        return $invalidationHandler->tryHandle(CacheInvalidationCommand::create(
+            CustomerCachePolicyCollection::CONTEXT,
+            'repository_fallback',
+            'deleted',
+            CacheInvalidationTagSet::create(...$tags),
+            CacheRefreshCommandCollection::create()
+        ));
     }
 }
