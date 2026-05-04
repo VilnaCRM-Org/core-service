@@ -2,21 +2,22 @@ name: E2E testing
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   behat:
     name: Behat
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start Application
         run: make start
 
+      - name: Setup Test Database
+        run: make setup-test-db
+
       - name: Run Behat Tests
         run: make behat
-
-      - name: Stop Application
-        if: always()
-        run: make down

@@ -2,17 +2,18 @@ name: code quality
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   phpinsights:
     runs-on: ubuntu-latest
     name: PHP Insights checks
     steps:
-      - uses: actions/checkout@v4
-      - name: Start application services
+      - name: Checkout Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Start Application
         run: make start
-      - name: Run PHP Insights checks
+
+      - name: Run PHPInsights
         run: make phpinsights
-      - name: Stop application services
-        if: always()
-        run: make down
