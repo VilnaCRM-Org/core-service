@@ -28,6 +28,11 @@ framework:
         dsn: '%env(FAILED_DOMAIN_EVENTS_TRANSPORT_DSN)%'
         retry_strategy:
           service: 'App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy'
+        failure_transport: dead-domain-events
+
+      # Terminal DLQ for domain events that cannot be retried safely.
+      dead-domain-events:
+        dsn: '%env(DEAD_DOMAIN_EVENTS_TRANSPORT_DSN)%'
 
       # Shared async transport for proactive cache refresh work.
       cache-refresh:
@@ -62,5 +67,6 @@ when@test:
       transports:
         domain-events: 'in-memory://'
         failed-domain-events: 'in-memory://'
+        dead-domain-events: 'in-memory://'
         cache-refresh: 'in-memory://'
         failed-cache-refresh: 'in-memory://'
