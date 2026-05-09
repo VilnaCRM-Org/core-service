@@ -17,6 +17,17 @@ load 'bats-assert/load'
   assert_output --partial "./composer.json is valid"
 }
 
+@test "make ci runs validate-configuration as an aggregated check" {
+  run awk '
+    /^ci:/ { in_target = 1; print; next }
+    in_target && /^[A-Za-z0-9_.-]+:/ { exit }
+    in_target { print }
+  ' Makefile
+  assert_success
+  assert_output --partial 'make validate-configuration'
+  assert_output --partial 'configuration validation'
+}
+
 @test "make check-requirements command executes and passes" {
   run make check-requirements
   assert_success

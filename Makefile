@@ -560,6 +560,8 @@ validate-configuration: ## Validate configuration structure and detect locked fi
 ci: ## Run comprehensive CI checks (excludes bats and load tests)
 	@echo "🚀 Running comprehensive CI checks..."
 	@failed_checks=""; \
+	echo "1️⃣  Validating repository configuration..."; \
+	if ! make validate-configuration; then failed_checks="$$failed_checks\n❌ configuration validation"; fi; \
 	echo "2️⃣  Validating composer.json and composer.lock..."; \
 	if ! make composer-validate; then failed_checks="$$failed_checks\n❌ composer validation"; fi; \
 	echo "3️⃣  Checking Symfony requirements..."; \
