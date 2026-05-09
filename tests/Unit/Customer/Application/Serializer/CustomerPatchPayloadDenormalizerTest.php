@@ -44,6 +44,26 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
         ));
     }
 
+    public function testDoesNotSupportPatchDtoWhenAlreadyCalled(): void
+    {
+        self::assertFalse($this->denormalizer->supportsDenormalization(
+            ['value' => 'VIP'],
+            TypePatch::class,
+            'json',
+            ['customer_patch_payload_denormalizer_called' => true]
+        ));
+    }
+
+    public function testDoesNotSupportPatchDtoWhenPayloadIsNotArray(): void
+    {
+        self::assertFalse($this->denormalizer->supportsDenormalization(
+            'VIP',
+            TypePatch::class,
+            'json',
+            ['allow_extra_attributes' => true]
+        ));
+    }
+
     public function testDenormalizeRemovesUnsupportedPayloadKeys(): void
     {
         $payload = [
@@ -61,15 +81,17 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
             ->expects($this->once())
             ->method('denormalize')
             ->with(
-                [
-                    'value' => 'VIP',
-                    'id' => '/api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A2',
-                ],
+                $this->callback(static function (array $data): bool {
+                    self::assertSame([
+                        'value' => 'VIP',
+                        'id' => '/api/customer_types/01JGVZ9YGXE8P3Q2R5T7W9Y0A2',
+                    ], $data);
+
+                    return true;
+                }),
                 TypePatch::class,
                 'json',
-                $this->callback(static fn (array $context): bool => (
-                    $context['customer_patch_payload_denormalizer_called'] ?? false
-                ) === true)
+                $this->callback(static fn (array $context): bool => ($context['customer_patch_payload_denormalizer_called'] ?? false) === true)
             )
             ->willReturn($expectedDto);
 
@@ -77,6 +99,91 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
             $expectedDto,
             $this->denormalizer->denormalize(
                 $payload,
+                TypePatch::class,
+                'json',
+                ['allow_extra_attributes' => true]
+            )
+        );
+    }
+
+    public function testDenormalizePreservesPayloadKeysByDefault(): void
+    {
+        $payload = [
+            'value' => 'VIP',
+            'unknown' => 'rejected downstream',
+        ];
+        $expectedDto = new TypePatch('VIP');
+
+        $this->innerDenormalizer
+            ->expects($this->once())
+            ->method('denormalize')
+            ->with(
+                $payload,
+                TypePatch::class,
+                'json',
+                $this->callback(static fn (array $context): bool => ($context['customer_patch_payload_denormalizer_called'] ?? false) === true)
+            )
+            ->willReturn($expectedDto);
+
+        self::assertSame(
+            $expectedDto,
+            $this->denormalizer->denormalize(
+                $payload,
+                TypePatch::class,
+                'json'
+            )
+        );
+    }
+
+    public function testDenormalizePreservesPayloadKeysWhenExtraAttributesAreTruthyButNotTrue(): void
+    {
+        $payload = [
+            'value' => 'VIP',
+            'unknown' => 'rejected downstream',
+        ];
+        $expectedDto = new TypePatch('VIP');
+
+        $this->innerDenormalizer
+            ->expects($this->once())
+            ->method('denormalize')
+            ->with(
+                $payload,
+                TypePatch::class,
+                'json',
+                $this->callback(static fn (array $context): bool => ($context['customer_patch_payload_denormalizer_called'] ?? false) === true)
+            )
+            ->willReturn($expectedDto);
+
+        self::assertSame(
+            $expectedDto,
+            $this->denormalizer->denormalize(
+                $payload,
+                TypePatch::class,
+                'json',
+                ['allow_extra_attributes' => 1]
+            )
+        );
+    }
+
+    public function testDenormalizePreservesNonArrayPayloadWhenExtraAttributesAreAllowed(): void
+    {
+        $expectedDto = new TypePatch('VIP');
+
+        $this->innerDenormalizer
+            ->expects($this->once())
+            ->method('denormalize')
+            ->with(
+                'VIP',
+                TypePatch::class,
+                'json',
+                $this->callback(static fn (array $context): bool => ($context['customer_patch_payload_denormalizer_called'] ?? false) === true)
+            )
+            ->willReturn($expectedDto);
+
+        self::assertSame(
+            $expectedDto,
+            $this->denormalizer->denormalize(
+                'VIP',
                 TypePatch::class,
                 'json',
                 ['allow_extra_attributes' => true]
@@ -99,9 +206,7 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
                 $payload,
                 TypePatch::class,
                 'json',
-                $this->callback(static fn (array $context): bool => (
-                    $context['customer_patch_payload_denormalizer_called'] ?? false
-                ) === true)
+                $this->callback(static fn (array $context): bool => ($context['customer_patch_payload_denormalizer_called'] ?? false) === true)
             )
             ->willReturn($expectedDto);
 

@@ -35,6 +35,19 @@ final class PatchPayloadGuardTest extends UnitTestCase
         PatchPayloadGuard::assertContainsAnyField($payload, ['confirmed']);
     }
 
+    public function testAssertContainsAnyFieldAllowsSupportedFieldAfterMissingField(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $payload = new stdClass();
+        $payload->email = 'customer@example.com';
+
+        PatchPayloadGuard::assertContainsAnyField($payload, [
+            'name',
+            'email',
+        ]);
+    }
+
     public function testAssertContainsAnyFieldRejectsAllNullFields(): void
     {
         $payload = new stdClass();
