@@ -75,7 +75,10 @@ Do not run schema-drop commands against production or shared databases.
 
 Symfony Messenger uses the configured transport DSN and queue name. Check:
 
-- `MESSENGER_TRANSPORT_DSN`
+- `DOMAIN_EVENTS_TRANSPORT_DSN`
+- `FAILED_DOMAIN_EVENTS_TRANSPORT_DSN`
+- `CACHE_REFRESH_TRANSPORT_DSN`
+- `FAILED_CACHE_REFRESH_TRANSPORT_DSN`
 - `EMAIL_QUEUE_NAME`
 - AWS SQS endpoint and credentials for the target environment
 - local AWS emulator health when running locally
@@ -99,7 +102,7 @@ Deptrac failures usually mean a new class crosses a forbidden layer or bounded-c
 Start with the smallest failing target:
 
 ```bash
-make phpunit
+make unit-tests
 make behat
 make bats
 ```

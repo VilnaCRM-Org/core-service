@@ -19,9 +19,9 @@ Doctrine ODM XML mappings are the source of truth for persisted fields, identifi
 When changing persistence behavior:
 
 1. Update the mapped domain entity and its XML mapping together.
-2. Update validators and serialization metadata when API-visible fields change.
-3. Update OpenAPI/GraphQL expectations when the API contract changes.
-4. Update this document if a collection, relation, index, or ownership rule changes.
+2. When API-visible fields change, update validators and serialization metadata.
+3. Adjust OpenAPI/GraphQL expectations to reflect API contract changes.
+4. Revise this document for changes to collections, relations, indexes, or ownership rules.
 5. Add or adjust tests that exercise repository and API behavior.
 
 ## Identifiers

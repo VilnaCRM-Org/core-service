@@ -10,7 +10,7 @@ Core Service runs as a PHP/Symfony application with these required dependencies:
 - Caddy or another HTTP edge for local and deployed HTTP routing
 - MongoDB for customer, customer type, and customer status documents
 - Redis for cache storage
-- Amazon SQS compatible queue transport for asynchronous work
+- Amazon SQS-compatible queue transport for asynchronous work
 - Structurizr workspace service for architecture diagrams when enabled
 
 The local Docker Compose stack is the reference environment for wiring these services together.
@@ -24,7 +24,10 @@ Required production values include:
 - `APP_ENV=prod`
 - `APP_SECRET`
 - `DB_URL`
-- `MESSENGER_TRANSPORT_DSN`
+- `DOMAIN_EVENTS_TRANSPORT_DSN`
+- `FAILED_DOMAIN_EVENTS_TRANSPORT_DSN`
+- `CACHE_REFRESH_TRANSPORT_DSN`
+- `FAILED_CACHE_REFRESH_TRANSPORT_DSN`
 - `AWS_SQS_REGION`
 - `AWS_SQS_KEY`
 - `AWS_SQS_SECRET`
@@ -42,7 +45,7 @@ See [advanced-configuration.md](advanced-configuration.md) for the complete envi
    - `make docs-check`
    - `make psalm`
    - `make deptrac`
-   - `make phpunit`
+   - `make unit-tests`
    - `make behat`
 4. Publish the immutable image to the registry used by the deployment platform.
 5. Roll out the image with the approved production environment variables.

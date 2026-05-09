@@ -48,7 +48,7 @@ for doc in "${required_docs[@]}"; do
   fi
 done
 
-if ! grep -Eq '\]\(docs/README\.md\)' "${ROOT_DIR}/README.md"; then
+if ! grep -Eq '\]\((\./)?docs/README\.md\)' "${ROOT_DIR}/README.md"; then
   fail "root README.md must link to docs/README.md"
 fi
 
@@ -56,11 +56,12 @@ if ! grep -Eq '^docs:.*## ' "${ROOT_DIR}/Makefile"; then
   fail "Makefile must expose a documented docs target"
 fi
 
-if grep -RIn '[[:blank:]]$' "${DOCS_DIR}" "${ROOT_DIR}/README.md" "${ROOT_DIR}/Makefile" >/tmp/core-service-docs-trailing-whitespace.$$; then
-  cat /tmp/core-service-docs-trailing-whitespace.$$ >&2
+tmp_ws_file="$(mktemp)"
+trap 'rm -f "${tmp_ws_file}"' EXIT
+if grep -RIn '[[:blank:]]$' "${DOCS_DIR}" "${ROOT_DIR}/README.md" "${ROOT_DIR}/Makefile" >"${tmp_ws_file}"; then
+  cat "${tmp_ws_file}" >&2
   fail "documentation files must not contain trailing whitespace"
 fi
-rm -f /tmp/core-service-docs-trailing-whitespace.$$
 
 link_sources=(
   "${ROOT_DIR}/README.md"
