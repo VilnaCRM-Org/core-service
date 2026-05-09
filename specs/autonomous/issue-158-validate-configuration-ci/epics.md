@@ -38,4 +38,3 @@ Acceptance criteria:
 - `make validate-configuration` passes.
 - The targeted Bats test passes.
 - The branch is committed and opened as a PR linked to issue #158.
-

@@ -58,4 +58,3 @@ preserving all later checks.
   standalone shell and should not require Docker.
 - Existing numbered output will shift. The least risky approach is to insert a
   new first step and renumber the later messages for readability.
-

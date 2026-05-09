@@ -36,4 +36,3 @@ None.
 The only meaningful risk is false failure from existing configuration state.
 That risk is intentional: the issue asks CI to catch exactly that class of
 problem.
-

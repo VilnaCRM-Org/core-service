@@ -43,4 +43,3 @@ This matches the current aggregate-CI design.
 Use Bats to inspect the `ci` target block rather than executing all CI steps.
 This verifies the intended Makefile wiring without requiring Docker, mutation
 testing, or long-running suites.
-

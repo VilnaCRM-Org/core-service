@@ -34,4 +34,3 @@ must run as part of the same failure-aggregating pipeline.
 - A failing `make validate-configuration` contributes a readable failure entry
   to the existing `failed_checks` summary.
 - A Bats test pins this Makefile integration.
-
