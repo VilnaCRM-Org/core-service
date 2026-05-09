@@ -58,4 +58,4 @@ When running the service locally, you can view interactive diagrams at [http://l
 
 Also, check [this link](https://structurizr.com/) to learn about the tool we used to create this diagram.
 
-Learn more about [Getting Started](getting-started.md).
+Continue with the [documentation index](README.md) or go directly to [Getting Started](getting-started.md).

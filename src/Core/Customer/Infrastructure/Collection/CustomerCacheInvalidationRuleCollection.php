@@ -9,6 +9,10 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
+use App\Core\Customer\Domain\Event\CustomerStatusCreatedEvent;
+use App\Core\Customer\Domain\Event\CustomerStatusUpdatedEvent;
+use App\Core\Customer\Domain\Event\CustomerTypeCreatedEvent;
+use App\Core\Customer\Domain\Event\CustomerTypeUpdatedEvent;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Shared\Application\DTO\CacheInvalidationRule;
 
@@ -91,6 +95,24 @@ final readonly class CustomerCacheInvalidationRuleCollection
     private function domainEventRules(): array
     {
         return [
+            ...$this->customerDomainEventRules(),
+            ...$this->referenceDomainEventRules(),
+        ];
+    }
+
+    /**
+     * @return list<array{
+     *     context: string,
+     *     source: string,
+     *     subject: class-string,
+     *     operation: string,
+     *     families: list<string>,
+     *     refresh_source: string
+     * }>
+     */
+    private function customerDomainEventRules(): array
+    {
+        return [
             $this->domainEventRule(
                 CustomerCreatedEvent::class,
                 self::OPERATION_CREATED,
@@ -105,6 +127,38 @@ final readonly class CustomerCacheInvalidationRuleCollection
                 CustomerDeletedEvent::class,
                 self::OPERATION_DELETED,
                 CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
+            ),
+        ];
+    }
+
+    /**
+     * @return list<array{
+     *     context: string,
+     *     source: string,
+     *     subject: class-string,
+     *     operation: string,
+     *     families: list<string>,
+     *     refresh_source: string
+     * }>
+     */
+    private function referenceDomainEventRules(): array
+    {
+        return [
+            $this->referenceDomainEventRule(
+                CustomerStatusCreatedEvent::class,
+                self::OPERATION_CREATED
+            ),
+            $this->referenceDomainEventRule(
+                CustomerStatusUpdatedEvent::class,
+                self::OPERATION_UPDATED
+            ),
+            $this->referenceDomainEventRule(
+                CustomerTypeCreatedEvent::class,
+                self::OPERATION_CREATED
+            ),
+            $this->referenceDomainEventRule(
+                CustomerTypeUpdatedEvent::class,
+                self::OPERATION_UPDATED
             ),
         ];
     }
@@ -234,6 +288,35 @@ final readonly class CustomerCacheInvalidationRuleCollection
             'context' => CustomerCachePolicyCollection::CONTEXT,
             'source' => 'odm_change_set',
             'subject' => $documentClass,
+            'operation' => $operation,
+            'families' => [
+                CustomerCachePolicyCollection::FAMILY_COLLECTION,
+                CustomerCachePolicyCollection::FAMILY_REFERENCE,
+            ],
+            'refresh_source' => CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY,
+        ];
+    }
+
+    /**
+     * @param class-string $eventClass
+     *
+     * @return array{
+     *     context: string,
+     *     source: string,
+     *     subject: class-string,
+     *     operation: string,
+     *     families: list<string>,
+     *     refresh_source: string
+     * }
+     */
+    private function referenceDomainEventRule(
+        string $eventClass,
+        string $operation
+    ): array {
+        return [
+            'context' => CustomerCachePolicyCollection::CONTEXT,
+            'source' => 'domain_event',
+            'subject' => $eventClass,
             'operation' => $operation,
             'families' => [
                 CustomerCachePolicyCollection::FAMILY_COLLECTION,
