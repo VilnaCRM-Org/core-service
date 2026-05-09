@@ -17,7 +17,7 @@ Implement endpoint-grade cache consistency through layered automatic invalidatio
    - the generic refresh cache command
    - the generic refresh cache command worker
    - reusable context refresh command handler behavior
-3. Add a single shared cache-refresh Messenger transport backed by SQS in non-test environments and LocalStack locally.
+3. Add a single shared cache-refresh Messenger transport backed by SQS in non-test environments and the Floci-backed AWS emulator locally.
 4. Keep the existing domain-event worker path intact so any exposed domain event can automatically trigger cache invalidation and refresh scheduling through tagged subscribers.
 5. Allow each bounded context to declare cache families and refresh adapters through existing class-type directories, including:
    - invalidation rule collection
@@ -54,7 +54,7 @@ Implement endpoint-grade cache consistency through layered automatic invalidatio
 
 - Domain layer remains framework-free.
 - Cache, queue, and metric failures are best effort.
-- SQS routing uses existing AWS/LocalStack environment conventions.
+- SQS routing uses existing AWS emulator environment conventions.
 - Implementation uses existing directory names and deptrac-collected class types.
 - No new bounded-context `Cache`, `ReadModel`, `Policy`, `Registry`, `Scheduler`, `Message`, or `MessageHandler` directories are introduced.
 - No cache invalidation methods are added to Domain repository interfaces.
@@ -72,7 +72,7 @@ Implement endpoint-grade cache consistency through layered automatic invalidatio
 - Queue reuse: one shared `cache-refresh` transport and one `failed-cache-refresh` transport handle the generic refresh command for all contexts.
 - Customer first adapter: Customer detail and email lookup refresh through the shared orchestration; collection/reference policies are declared and tag-invalidated.
 - Refresh source: Customer uses `repository_refresh`; event-only cache refresh is documented as future-safe only when events carry complete, versioned snapshots.
-- LocalStack compatibility: `.env` and `config/packages/messenger.yaml` add cache refresh DSN/transport mirroring existing SQS conventions.
+- Local AWS emulator compatibility: `.env` and `config/packages/messenger.yaml` add cache refresh DSN/transport mirroring existing SQS conventions.
 - Writes do not block on rebuild: invalidation listeners and subscribers only schedule work; handlers run separately.
 - TTL defaults documented: docs update with policy table and rationale.
 - Observability: shared typed EMF metrics and tests.

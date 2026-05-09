@@ -10,7 +10,7 @@ The current repository already has the right primitives:
 
 - Any domain event can flow through `Shared/Infrastructure/Bus/Event/Async/DomainEventEnvelope`.
 - `Shared/Infrastructure/Bus/Event/Async/DomainEventMessageHandler` already reads domain events from the async event transport and invokes tagged subscribers.
-- Symfony Messenger SQS transports require `symfony/amazon-sqs-messenger`; LocalStack DSNs must use the queue-name path form, such as `sqs://localstack:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, so queues can be auto-created without AWS metadata lookup.
+- Symfony Messenger SQS transports require `symfony/amazon-sqs-messenger`; AWS emulator DSNs must use the queue-name path form, such as `sqs://aws-emulator:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, so queues can be auto-created without AWS metadata lookup.
 - CQRS command objects and handlers already live in `Application/Command` and `Application/CommandHandler`.
 - `Shared/Application/Command` already exists, and deptrac collects `Application/Command` and `Application/CommandHandler`.
 - Shared metrics already live in `Shared/Application/Observability/Metric`.
@@ -54,7 +54,7 @@ flowchart LR
 
     subgraph DomainEventWorker["Shared async domain-event path"]
         EventEnvelope["DomainEventEnvelope"]
-        EventQueue["domain-events SQS transport\nLocalStack locally"]
+        EventQueue["domain-events SQS transport\nAWS emulator locally"]
         EventWorker["DomainEventMessageHandler\nreads any domain event"]
     end
 
@@ -106,7 +106,7 @@ flowchart LR
     end
 
     subgraph RefreshTransport["Shared cache-refresh queue"]
-        RefreshQueue["cache-refresh SQS transport\nLocalStack locally"]
+        RefreshQueue["cache-refresh SQS transport\nAWS emulator locally"]
         FailedQueue["failed-cache-refresh transport"]
         MessengerWorkers["Symfony Messenger workers"]
     end
@@ -575,7 +575,7 @@ Place them under `Shared/Application/Observability/Metric`. Use dimensions such 
 2. Add generic invalidation rule/tag resolution and Customer invalidation rules for domain events plus CRUD create/update/delete change sets.
 3. Add deterministic invalidation/refresh dedupe keys so domain-event and ODM signals can safely overlap.
 4. Review custom repository methods and add repository fallback invalidation only where a write bypasses ODM managed document change sets.
-5. Add the single `cache-refresh` and `failed-cache-refresh` Messenger transports, backed by `symfony/amazon-sqs-messenger` and LocalStack-compatible queue-name DSNs.
+5. Add the single `cache-refresh` and `failed-cache-refresh` Messenger transports, backed by `symfony/amazon-sqs-messenger` and AWS-emulator-compatible queue-name DSNs.
 6. Add Customer adapter classes that extend or compose the shared abstractions.
 7. Update `CachedCustomerRepository` to use `CustomerCachePolicyCollection` and generic key helpers.
 8. Update Customer subscribers to route exposed domain events through the shared invalidation command.

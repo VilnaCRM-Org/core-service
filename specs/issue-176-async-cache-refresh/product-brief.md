@@ -57,7 +57,7 @@ This creates three product risks:
 - Hardcoded Customer detail/email TTLs are replaced by resolved policy objects.
 - Automatic CRUD invalidation and domain events enqueue refresh work after invalidation without blocking writes.
 - Refresh failures are logged and measured but do not fail domain-event processing.
-- Local and CI Messenger routing works with in-memory test transport, SQS runtime transport, and LocalStack-backed local transport.
+- Local and CI Messenger routing works with in-memory test transport, SQS runtime transport, and the Floci-backed local AWS emulator transport.
 - `make ci` passes.
 - Cache performance smoke evidence is captured with `make cache-performance-tests` and `make cache-performance-load-tests` where runtime services allow.
 

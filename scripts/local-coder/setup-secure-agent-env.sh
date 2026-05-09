@@ -119,8 +119,8 @@ persist_agent_secrets_file() {
         if [ -n "${REDIS_PORT:-}" ]; then
             printf 'export REDIS_PORT=%q\n' "${REDIS_PORT}"
         fi
-        if [ -n "${LOCALSTACK_PORT:-}" ]; then
-            printf 'export LOCALSTACK_PORT=%q\n' "${LOCALSTACK_PORT}"
+        if [ -n "${AWS_EMULATOR_PORT:-}" ]; then
+            printf 'export AWS_EMULATOR_PORT=%q\n' "${AWS_EMULATOR_PORT}"
         fi
         if [ -n "${STRUCTURIZR_PORT:-}" ]; then
             printf 'export STRUCTURIZR_PORT=%q\n' "${STRUCTURIZR_PORT}"
@@ -350,6 +350,6 @@ if cs_should_configure_workspace_ports; then
     echo "  - https/http3: ${HTTPS_PORT:-443}"
     echo "  - db: ${DB_PORT:-27017}"
     echo "  - redis: ${REDIS_PORT:-6379}"
-    echo "  - localstack: ${LOCALSTACK_PORT:-4566}"
+    echo "  - aws-emulator: ${AWS_EMULATOR_PORT:-4566}"
     echo "  - structurizr: ${STRUCTURIZR_PORT:-8080}"
 fi
