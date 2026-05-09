@@ -6,7 +6,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      localstack:
+      aws-emulator:
         condition: service_healthy
     restart: unless-stopped
     environment:
@@ -23,25 +23,31 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  localstack:
-    image: localstack/localstack:3.4.0
+  aws-emulator:
+    image: floci/floci:latest-compat
     ports:
-      - '${LOCALSTACK_PORT}:4566'
+      - '${AWS_EMULATOR_PORT}:4566'
     healthcheck:
       test:
         [
           'CMD-SHELL',
-          'curl -fsS http://localhost:4566/_localstack/health | grep -Eq "\"sqs\": \"(available|running)\""',
+          'aws --endpoint-url=http://localhost:4566 sqs list-queues >/dev/null',
         ]
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 10s
     environment:
-      - SERVICES=sqs
-      - DEBUG=0
+      - FLOCI_DEFAULT_REGION=${AWS_SQS_REGION:-us-east-1}
+      - FLOCI_HOSTNAME=aws-emulator
+      - FLOCI_BASE_URL=http://aws-emulator:4566
+      - AWS_ACCESS_KEY_ID=${AWS_SQS_KEY:-fake}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SQS_SECRET:-fake}
+      - AWS_DEFAULT_REGION=${AWS_SQS_REGION:-us-east-1}
     volumes:
-      - localstack_data:/var/lib/localstack
+      - aws_emulator_data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root
 
 volumes:
-  localstack_data:
+  aws_emulator_data:

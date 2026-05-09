@@ -196,14 +196,14 @@ teardown() {
   run bash -lc '
     set -euo pipefail
     source scripts/local-coder/lib/workspace-ports.sh
-    unset HTTP_PORT HTTPS_PORT HTTP3_PORT DB_PORT REDIS_PORT LOCALSTACK_PORT STRUCTURIZR_PORT
+    unset HTTP_PORT HTTPS_PORT HTTP3_PORT DB_PORT REDIS_PORT AWS_EMULATOR_PORT STRUCTURIZR_PORT
     cs_configure_workspace_port_overrides "80 443 6379 8080 27017 4566"
     [ "$HTTP_PORT" = "18080" ]
     [ "$HTTPS_PORT" = "18443" ]
     [ "$HTTP3_PORT" = "18443" ]
     [ "$DB_PORT" = "37017" ]
     [ "$REDIS_PORT" = "36379" ]
-    [ "$LOCALSTACK_PORT" = "14566" ]
+    [ "$AWS_EMULATOR_PORT" = "14566" ]
     [ "$STRUCTURIZR_PORT" = "18081" ]
   '
   assert_success
@@ -327,7 +327,7 @@ EOF
       -u HTTP3_PORT \
       -u DB_PORT \
       -u REDIS_PORT \
-      -u LOCALSTACK_PORT \
+      -u AWS_EMULATOR_PORT \
       -u STRUCTURIZR_PORT \
       HOME="$temp_home" \
       PATH="$mock_bin:/usr/bin:/bin" \
@@ -341,17 +341,17 @@ EOF
     grep -Fx "export HTTP3_PORT=18443" "$secrets_file"
     grep -Fx "export DB_PORT=37017" "$secrets_file"
     grep -Fx "export REDIS_PORT=36379" "$secrets_file"
-    grep -Fx "export LOCALSTACK_PORT=14566" "$secrets_file"
+    grep -Fx "export AWS_EMULATOR_PORT=14566" "$secrets_file"
     grep -Fx "export STRUCTURIZR_PORT=18081" "$secrets_file"
   '
   assert_success
   assert_output --partial "Workspace host ports:"
 }
 
-@test "workspace compose files avoid fixed localstack names and parameterize redis host ports" {
+@test "workspace compose files avoid fixed AWS emulator container names and parameterize redis host ports" {
   run bash -lc '
     set -euo pipefail
-    ! grep -En "container_name:[[:space:]]*localstack" docker-compose.override.yml docker-compose.load_test.override.yml
+    ! grep -En "container_name:[[:space:]]*aws-emulator" docker-compose.override.yml docker-compose.load_test.override.yml
     grep -En "\\$\\{REDIS_PORT:-6379\\}:6379" docker-compose.yml
   '
   assert_success
@@ -407,7 +407,7 @@ EOF
     HTTP3_PORT=18443 \
     DB_PORT=37017 \
     REDIS_PORT=36379 \
-    LOCALSTACK_PORT=14566 \
+    AWS_EMULATOR_PORT=14566 \
     STRUCTURIZR_PORT=18081 \
     make -pn >/tmp/make-vars.out
     grep -Fx "HTTP_PORT := 18080" /tmp/make-vars.out
@@ -415,7 +415,7 @@ EOF
     grep -Fx "HTTP3_PORT := 18443" /tmp/make-vars.out
     grep -Fx "DB_PORT := 37017" /tmp/make-vars.out
     grep -Fx "REDIS_PORT := 36379" /tmp/make-vars.out
-    grep -Fx "LOCALSTACK_PORT := 14566" /tmp/make-vars.out
+    grep -Fx "AWS_EMULATOR_PORT := 14566" /tmp/make-vars.out
     grep -Fx "STRUCTURIZR_PORT := 18081" /tmp/make-vars.out
     rm -f /tmp/make-vars.out
   '

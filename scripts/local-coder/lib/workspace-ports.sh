@@ -138,6 +138,6 @@ cs_configure_workspace_port_overrides() {
     cs_ensure_workspace_https_ports reserved_ports
     cs_ensure_workspace_port DB_PORT 27017 37017 reserved_ports
     cs_ensure_workspace_port REDIS_PORT 6379 36379 reserved_ports
-    cs_ensure_workspace_port LOCALSTACK_PORT 4566 14566 reserved_ports
+    cs_ensure_workspace_port AWS_EMULATOR_PORT 4566 14566 reserved_ports
     cs_ensure_workspace_port STRUCTURIZR_PORT 8080 18081 reserved_ports
 }

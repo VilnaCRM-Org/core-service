@@ -20,8 +20,8 @@ load_dotenv_defaults() {
   done < .env
 }
 
-resolve_localstack_port() {
-  local default_port="${LOCALSTACK_PORT:-4566}"
+resolve_aws_emulator_port() {
+  local default_port="${AWS_EMULATOR_PORT:-4566}"
   local published_address published_port
 
   if ! command -v docker >/dev/null 2>&1; then
@@ -29,7 +29,7 @@ resolve_localstack_port() {
     return 0
   fi
 
-  published_address=$(docker compose port localstack 4566 2>/dev/null || true)
+  published_address=$(docker compose port aws-emulator 4566 2>/dev/null || true)
   published_port=$(printf '%s\n' "$published_address" | awk -F: 'END {print $NF}' | tr -d '[:space:]')
 
   if [ -n "$published_port" ]; then
@@ -119,16 +119,16 @@ SECURITY_GROUP_NAME=${SECURITY_GROUP_NAME:-$DEFAULT_SECURITY_GROUP_NAME}
 LOCAL_MODE=${LOCAL_MODE_ENV:-$DEFAULT_LOCAL_MODE}
 
 if [[ "$LOCAL_MODE" == "true" ]]; then
-    if ! LOCALSTACK_PORT="$(resolve_localstack_port)"; then
-        echo "Failed to resolve LocalStack port." >&2
+    if ! AWS_EMULATOR_PORT="$(resolve_aws_emulator_port)"; then
+        echo "Failed to resolve AWS emulator port." >&2
         exit 1
     fi
-    if [[ -z "$LOCALSTACK_PORT" ]]; then
-        echo "Resolved LocalStack port is empty." >&2
+    if [[ -z "$AWS_EMULATOR_PORT" ]]; then
+        echo "Resolved AWS emulator port is empty." >&2
         exit 1
     fi
-    export LOCALSTACK_PORT
-    export ENDPOINT_URL=http://localhost:$LOCALSTACK_PORT
+    export AWS_EMULATOR_PORT
+    export ENDPOINT_URL=http://localhost:$AWS_EMULATOR_PORT
     export AWS_ACCESS_KEY_ID=$AWS_SQS_KEY
     export AWS_SECRET_ACCESS_KEY=$AWS_SQS_SECRET
     AWS_CLI="aws --endpoint-url=${ENDPOINT_URL}"

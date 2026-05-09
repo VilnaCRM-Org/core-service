@@ -4,7 +4,7 @@ HTTPS_PORT_OVERRIDE := $(value HTTPS_PORT)
 HTTP3_PORT_OVERRIDE := $(value HTTP3_PORT)
 DB_PORT_OVERRIDE := $(value DB_PORT)
 REDIS_PORT_OVERRIDE := $(value REDIS_PORT)
-LOCALSTACK_PORT_OVERRIDE := $(value LOCALSTACK_PORT)
+AWS_EMULATOR_PORT_OVERRIDE := $(value AWS_EMULATOR_PORT)
 STRUCTURIZR_PORT_OVERRIDE := $(value STRUCTURIZR_PORT)
 
 # Load environment variables from .env.test
@@ -25,8 +25,8 @@ endif
 ifneq ($(strip $(REDIS_PORT_OVERRIDE)),)
 REDIS_PORT := $(REDIS_PORT_OVERRIDE)
 endif
-ifneq ($(strip $(LOCALSTACK_PORT_OVERRIDE)),)
-LOCALSTACK_PORT := $(LOCALSTACK_PORT_OVERRIDE)
+ifneq ($(strip $(AWS_EMULATOR_PORT_OVERRIDE)),)
+AWS_EMULATOR_PORT := $(AWS_EMULATOR_PORT_OVERRIDE)
 endif
 ifneq ($(strip $(STRUCTURIZR_PORT_OVERRIDE)),)
 STRUCTURIZR_PORT := $(STRUCTURIZR_PORT_OVERRIDE)
@@ -132,7 +132,7 @@ else
 endif
 
 export SYMFONY
-export HTTP_PORT HTTPS_PORT HTTP3_PORT DB_PORT REDIS_PORT LOCALSTACK_PORT STRUCTURIZR_PORT
+export HTTP_PORT HTTPS_PORT HTTP3_PORT DB_PORT REDIS_PORT AWS_EMULATOR_PORT STRUCTURIZR_PORT
 
 help:
 	@printf "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m\n"
@@ -231,7 +231,7 @@ ensure-test-services: ## Ensure required Docker services for test suites are run
 	@attempt=1; \
 	max_attempts=$${DOCKER_COMPOSE_UP_RETRIES:-5}; \
 	retry_delay=$${DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5}; \
-	until $(DOCKER_COMPOSE) up --detach --wait database redis php localstack; do \
+	until $(DOCKER_COMPOSE) up --detach --wait database redis php aws-emulator; do \
 		if [ $$attempt -ge $$max_attempts ]; then \
 			echo "❌ Failed to start required test services after $$attempt attempts."; \
 			$(DOCKER_COMPOSE) ps || true; \
@@ -393,6 +393,13 @@ build-k6-docker:
 
 build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
+
+aws-emulator-smoke: ensure-test-services ## Verify local AWS emulator APIs used by scripts
+	AWS_EMULATOR_ENDPOINT=http://localhost:$(AWS_EMULATOR_PORT) \
+	AWS_ACCESS_KEY_ID="$(AWS_SQS_KEY)" \
+	AWS_SECRET_ACCESS_KEY="$(AWS_SQS_SECRET)" \
+	AWS_DEFAULT_REGION="$(AWS_SQS_REGION)" \
+	scripts/aws-emulator-smoke.sh
 
 infection: ## Run mutation testing with 100% MSI requirement
 	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j$(INFECTION_JOBS) --min-msi=100 --min-covered-msi=100

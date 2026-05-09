@@ -146,7 +146,7 @@ make aws-load-tests         # Deploy and run on AWS
 make aws-load-tests-cleanup # Clean up AWS resources
 ```
 
-For local-mode validation against LocalStack, export `LOCAL_MODE_ENV=true`. The target now bootstraps the required Docker services automatically, resolves the published LocalStack host port from Docker when workspaces remap it away from `4566`, and falls back to `LOCALSTACK_PORT` for static environments.
+For local-mode validation against the Floci-backed AWS emulator, export `LOCAL_MODE_ENV=true`. The target bootstraps the required Docker services automatically, resolves the published AWS emulator host port from Docker when workspaces remap it away from `4566`, and falls back to `AWS_EMULATOR_PORT` for static environments.
 
 ## Best Practices
 

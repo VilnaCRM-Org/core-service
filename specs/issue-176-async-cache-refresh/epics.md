@@ -59,7 +59,7 @@ Story 2.2: Document operational worker usage.
 Acceptance:
 
 - Documentation explains the difference between domain-event workers and cache-refresh workers.
-- LocalStack variables and runtime variables are documented.
+- AWS emulator variables and runtime variables are documented.
 - Per-domain queues are explicitly deferred until metrics justify them.
 
 ## Epic 3: Add Customer as the First Adapter
@@ -138,7 +138,7 @@ Story 5.1: Document reusable cache-refresh architecture.
 
 Acceptance:
 
-- Docs describe shared classes, context adapter responsibilities, TTL defaults, stale-read risk, SQS refresh transport, LocalStack, and metrics.
+- Docs describe shared classes, context adapter responsibilities, TTL defaults, stale-read risk, SQS refresh transport, the local AWS emulator, and metrics.
 - Source-tree documentation shows new shared files and Customer adapter files.
 
 Story 5.2: Validate the PR.
