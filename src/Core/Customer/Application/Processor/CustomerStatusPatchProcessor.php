@@ -11,7 +11,6 @@ use App\Core\Customer\Application\Factory\UpdateStatusCommandFactoryInterface;
 use App\Core\Customer\Application\Resolver\CustomerStatusResolver;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\ValueObject\CustomerStatusUpdate;
-use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use InvalidArgumentException;
 
@@ -20,8 +19,6 @@ use InvalidArgumentException;
  */
 final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
 {
-    private const PATCH_FIELDS = ['value'];
-
     public function __construct(
         private CommandBusInterface $commandBus,
         private UpdateStatusCommandFactoryInterface $commandFactory,
@@ -48,8 +45,6 @@ final readonly class CustomerStatusPatchProcessor implements ProcessorInterface
                 get_debug_type($data)
             ));
         }
-
-        PatchPayloadGuard::assertContainsAnyField($data, self::PATCH_FIELDS);
 
         $customerStatus = $this->customerStatusResolver->resolve(
             $data,

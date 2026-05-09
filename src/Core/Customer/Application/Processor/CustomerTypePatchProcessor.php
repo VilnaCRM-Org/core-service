@@ -13,7 +13,6 @@ use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerTypeUpdate;
 use App\Shared\Application\Extractor\PatchUlidExtractor;
-use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -24,8 +23,6 @@ use function trim;
  */
 final readonly class CustomerTypePatchProcessor implements ProcessorInterface
 {
-    private const PATCH_FIELDS = ['value'];
-
     public function __construct(
         private TypeRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
@@ -46,8 +43,6 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): CustomerType {
-        PatchPayloadGuard::assertContainsAnyField($data, self::PATCH_FIELDS);
-
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
             $data->id,

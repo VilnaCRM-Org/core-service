@@ -13,13 +13,11 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerTypeNotFoundException;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
 use App\Shared\Application\Extractor\PatchUlidExtractor;
-use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CustomerTypePatchProcessorTest extends UnitTestCase
 {
@@ -70,34 +68,40 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->assertSame($customerType, $result);
     }
 
-    public function testProcessRejectsBlankValuePatchPayload(): void
+    public function testProcessSkipsDispatchForBlankValuePatchPayload(): void
     {
         $dto = $this->createDtoWithEmptyValue();
         $operation = $this->createMock(Operation::class);
+        $ulid = (string) $this->faker->ulid();
+        $customerType = $this->createMock(CustomerType::class);
+        $ulidMock = $this->createMock(Ulid::class);
 
-        $this->repository->expects($this->never())->method('find');
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
         $this->factory->expects($this->never())->method('create');
         $this->commandBus->expects($this->never())->method('dispatch');
 
-        $this->expectException(BadRequestHttpException::class);
-        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
 
-        $this->processor->process($dto, $operation);
+        $this->assertSame($customerType, $result);
     }
 
-    public function testProcessRejectsEmptyPatchPayload(): void
+    public function testProcessSkipsDispatchForNullValuePatchPayload(): void
     {
         $dto = new TypePatch(value: null, id: null);
         $operation = $this->createMock(Operation::class);
+        $ulid = (string) $this->faker->ulid();
+        $customerType = $this->createMock(CustomerType::class);
+        $ulidMock = $this->createMock(Ulid::class);
 
-        $this->repository->expects($this->never())->method('find');
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
         $this->factory->expects($this->never())->method('create');
         $this->commandBus->expects($this->never())->method('dispatch');
 
-        $this->expectException(BadRequestHttpException::class);
-        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
 
-        $this->processor->process($dto, $operation);
+        $this->assertSame($customerType, $result);
     }
 
     public function testProcessThrowsExceptionWhenCustomerTypeNotFound(): void

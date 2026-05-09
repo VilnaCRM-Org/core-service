@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Customer\Application\Serializer;
 
+use App\Core\Customer\Application\DTO\CustomerPatch;
+use App\Core\Customer\Application\DTO\StatusPatch;
 use App\Core\Customer\Application\DTO\TypePatch;
 use App\Core\Customer\Application\Serializer\CustomerPatchPayloadDenormalizer;
 use App\Tests\Unit\UnitTestCase;
@@ -62,6 +64,15 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
             'json',
             ['allow_extra_attributes' => true]
         ));
+    }
+
+    public function testReturnsSupportedTypes(): void
+    {
+        self::assertSame([
+            CustomerPatch::class => false,
+            StatusPatch::class => false,
+            TypePatch::class => false,
+        ], $this->denormalizer->getSupportedTypes(null));
     }
 
     public function testDenormalizeRemovesUnsupportedPayloadKeys(): void

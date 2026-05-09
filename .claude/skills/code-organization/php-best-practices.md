@@ -84,6 +84,48 @@ final class IriReferenceContentTransformer
 - Violates Dependency Inversion Principle
 - Makes circular dependencies possible
 
+## No Static Methods in src/
+
+Do not add static method declarations in production source. Static methods hide dependencies, are hard to replace in tests, and bypass the service container patterns this project uses.
+
+✅ **CORRECT (Injected service or listener)**:
+
+```php
+final readonly class CustomerPatchPayloadListener
+{
+    public function __construct(
+        private PatchPayloadGuard $guard
+    ) {
+    }
+
+    public function __invoke(RequestEvent $event): void
+    {
+        $this->guard->assertContainsAnyField($payload, $supportedFields);
+    }
+}
+```
+
+❌ **WRONG (Static utility method)**:
+
+```php
+final class PatchPayloadGuard
+{
+    public static function assertContainsAnyField(object $payload, array $fields): void
+    {
+        // ...
+    }
+}
+```
+
+Use these alternatives instead:
+
+- Inject an application service for business/application behavior
+- Use a kernel listener for automatic HTTP request checks
+- Use a factory service for object creation
+- Keep value objects as regular instances
+
+CI enforces this through `make forbid-static-methods`, which is also run by `make psalm`. Existing legacy methods are listed in `config/static-methods-baseline.txt`; do not add to that file for new code.
+
 ## Factory Pattern - No `new` in src/
 
 In `src/`, always use factories instead of the `new` keyword (except for Value Objects, Exceptions, and Framework objects).
@@ -459,7 +501,7 @@ When refactoring for better code organization:
 - [ ] Identify misplaced classes (wrong directory)
 - [ ] Find classes with direct instantiation (`new` in constructors)
 - [ ] Locate optional dependencies with defaults
-- [ ] Check for static methods that should be instance methods
+- [ ] Remove new static method declarations; use injected services/listeners/factories
 - [ ] Review test coverage gaps
 
 ### Phase 2: Plan

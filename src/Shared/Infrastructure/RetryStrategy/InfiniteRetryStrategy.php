@@ -25,9 +25,6 @@ use ValueError;
 
 final class InfiniteRetryStrategy implements RetryStrategyInterface
 {
-    /**
-     * @var list<class-string<Throwable>>
-     */
     private const PERMANENT_FAILURES = [
         DomainException::class,
         InvalidArgumentException::class,

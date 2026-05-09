@@ -187,7 +187,10 @@ check-requirements: ## Validate Composer platform requirements from composer.loc
 check-security: ## Check project dependencies for known security issues and report abandoned packages.
 	$(COMPOSER) audit --locked --no-interaction --abandoned=report
 
-psalm: ## A static analysis tool for finding errors in PHP applications
+forbid-static-methods: ## Prevent new static method declarations in src/
+	$(EXEC_ENV) php scripts/forbid-static-methods.php
+
+psalm: forbid-static-methods ## A static analysis tool for finding errors in PHP applications
 	$(EXEC_ENV) $(PSALM)
 
 psalm-security: ## Psalm security analysis

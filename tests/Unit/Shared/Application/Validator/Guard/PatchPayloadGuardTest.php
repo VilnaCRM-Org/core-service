@@ -11,6 +11,15 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class PatchPayloadGuardTest extends UnitTestCase
 {
+    private PatchPayloadGuard $guard;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->guard = new PatchPayloadGuard();
+    }
+
     public function testAssertContainsAnyFieldAllowsNonNullSupportedField(): void
     {
         $this->expectNotToPerformAssertions();
@@ -19,7 +28,7 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $payload->name = 'Customer';
         $payload->email = null;
 
-        PatchPayloadGuard::assertContainsAnyField($payload, [
+        $this->guard->assertContainsAnyField($payload, [
             'name',
             'email',
         ]);
@@ -32,7 +41,41 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $payload = new stdClass();
         $payload->confirmed = false;
 
-        PatchPayloadGuard::assertContainsAnyField($payload, ['confirmed']);
+        $this->guard->assertContainsAnyField($payload, ['confirmed']);
+    }
+
+    public function testAssertContainsAnyFieldAllowsArrayPayload(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->guard->assertContainsAnyField(
+            ['confirmed' => false],
+            ['confirmed']
+        );
+    }
+
+    public function testAssertContainsAnyFieldAllowsArrayPayloadWhenSupportedFieldIsAfterIgnoredField(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->guard->assertContainsAnyField(
+            [
+                'ignored' => 'value',
+                'confirmed' => false,
+            ],
+            ['confirmed']
+        );
+    }
+
+    public function testAssertContainsAnyFieldAllowsDeclaredObjectProperty(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $payload = new class() {
+            private string $name = 'Customer';
+        };
+
+        $this->guard->assertContainsAnyField($payload, ['name']);
     }
 
     public function testAssertContainsAnyFieldAllowsSupportedFieldAfterMissingField(): void
@@ -42,36 +85,34 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $payload = new stdClass();
         $payload->email = 'customer@example.com';
 
-        PatchPayloadGuard::assertContainsAnyField($payload, [
+        $this->guard->assertContainsAnyField($payload, [
             'name',
             'email',
         ]);
     }
 
-    public function testAssertContainsAnyFieldRejectsAllNullFields(): void
+    public function testAssertContainsAnyFieldAllowsNullSupportedField(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $payload = new stdClass();
         $payload->name = null;
         $payload->email = null;
 
-        $this->expectException(BadRequestHttpException::class);
-        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
-
-        PatchPayloadGuard::assertContainsAnyField($payload, [
+        $this->guard->assertContainsAnyField($payload, [
             'name',
             'email',
         ]);
     }
 
-    public function testAssertContainsAnyFieldRejectsBlankStringFields(): void
+    public function testAssertContainsAnyFieldAllowsBlankStringField(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $payload = new stdClass();
         $payload->name = '   ';
 
-        $this->expectException(BadRequestHttpException::class);
-        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
-
-        PatchPayloadGuard::assertContainsAnyField($payload, ['name']);
+        $this->guard->assertContainsAnyField($payload, ['name']);
     }
 
     public function testAssertContainsAnyFieldRejectsMissingFields(): void
@@ -81,6 +122,6 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $this->expectException(BadRequestHttpException::class);
         $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
 
-        PatchPayloadGuard::assertContainsAnyField($payload, ['name']);
+        $this->guard->assertContainsAnyField($payload, ['name']);
     }
 }

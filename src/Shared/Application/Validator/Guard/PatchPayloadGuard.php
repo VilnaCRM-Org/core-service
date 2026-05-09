@@ -6,30 +6,47 @@ namespace App\Shared\Application\Validator\Guard;
 
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
+/**
+ * @psalm-type PatchPayloadValue = object|iterable|string|int|float|bool|null
+ */
 final class PatchPayloadGuard
 {
     public const EMPTY_PAYLOAD_MESSAGE = 'PATCH payload must contain at least one supported field.';
 
     /**
-     * @param list<non-empty-string> $fields
+     * @param object|iterable<array-key, PatchPayloadValue> $payload
+     * @param iterable<non-empty-string> $fields
      */
-    public static function assertContainsAnyField(
-        object $payload,
-        array $fields
+    public function assertContainsAnyField(
+        object|iterable $payload,
+        iterable $fields
     ): void {
         foreach ($fields as $field) {
-            if (!property_exists($payload, $field)) {
-                continue;
+            if ($this->containsField($payload, $field)) {
+                return;
             }
-
-            $value = $payload->{$field};
-            if ($value === null || (is_string($value) && trim($value) === '')) {
-                continue;
-            }
-
-            return;
         }
 
         throw new BadRequestHttpException(self::EMPTY_PAYLOAD_MESSAGE);
+    }
+
+    /**
+     * @param object|iterable<array-key, PatchPayloadValue> $payload
+     */
+    private function containsField(object|iterable $payload, string $field): bool
+    {
+        if (is_object($payload)) {
+            return property_exists($payload, $field);
+        }
+
+        foreach ($payload as $payloadField => $_) {
+            if ($payloadField !== $field) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -178,6 +178,34 @@ load 'bats-assert/load'
   assert_output --partial "Use Psalm array shapes/docblocks or typed collections instead of native array declarations in src/."
 }
 
+@test "make psalm should fail on static method declarations in src" {
+  run bash -lc '
+    set -euo pipefail
+    source_path="tests/CLI/bats/php/SourcePatternGuardStaticMethodExample.php"
+    target_path="src/Shared/Application/SourcePatternGuardStaticMethodExample.php"
+
+    cleanup() {
+      if [ -f "$target_path" ]; then
+        mv "$target_path" "$source_path"
+      fi
+    }
+    trap cleanup EXIT
+
+    mv "$source_path" "$target_path"
+
+    set +e
+    make psalm
+    status=$?
+    set -e
+
+    exit "$status"
+  '
+
+  assert_failure
+  assert_output --partial "Static methods are forbidden in src/."
+  assert_output --partial "App\\Shared\\Application\\SourcePatternGuardStaticMethodExample::create"
+}
+
 @test "make psalm should fail on parse errors in src" {
   run bash -lc '
     set -euo pipefail
