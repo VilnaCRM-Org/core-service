@@ -115,15 +115,7 @@ services:
   app.tariff_plan.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments:
-      [
-        {
-          'ulid': 'desc',
-          'position': 'asc',
-          'code': 'asc',
-          'name': 'asc',
-          'priceCents': 'asc',
-        },
-      ]
+      [{ 'ulid': 'desc', 'position': 'asc', 'code': 'asc', 'name': 'asc', 'priceCents': 'asc' }]
     tags:
       - { name: 'api_platform.filter', id: 'tariff_plan.mongodb.order' }
 
