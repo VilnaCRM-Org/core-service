@@ -17,6 +17,13 @@ load 'bats-assert/load'
   assert_output --partial "./composer.json is valid"
 }
 
+@test "make ci runs validate-configuration as an aggregated check" {
+  run sed -n '/^ci:/,/^pr-comments:/p' Makefile
+  assert_success
+  assert_output --partial 'make validate-configuration'
+  assert_output --partial 'configuration validation'
+}
+
 @test "make check-requirements command executes and passes" {
   run make check-requirements
   assert_success
