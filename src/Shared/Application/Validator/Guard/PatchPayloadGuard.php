@@ -76,10 +76,6 @@ final class PatchPayloadGuard
         string $field,
         array $blankStringFieldMap
     ): bool {
-        if (! property_exists($payload, $field)) {
-            return false;
-        }
-
         foreach ((array) $payload as $property => $value) {
             if ($this->objectPropertyName($property) !== $field) {
                 continue;

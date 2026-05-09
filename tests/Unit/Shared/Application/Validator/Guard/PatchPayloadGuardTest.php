@@ -78,6 +78,17 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $this->guard->assertContainsAnyField($payload, ['name']);
     }
 
+    public function testAssertContainsAnyFieldAllowsObjectPayloadWhenSupportedFieldIsAfterIgnoredField(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $payload = new stdClass();
+        $payload->ignored = 'value';
+        $payload->name = 'Customer';
+
+        $this->guard->assertContainsAnyField($payload, ['name']);
+    }
+
     public function testAssertContainsAnyFieldAllowsSupportedFieldAfterMissingField(): void
     {
         $this->expectNotToPerformAssertions();
