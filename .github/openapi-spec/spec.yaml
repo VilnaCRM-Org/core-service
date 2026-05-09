@@ -3670,7 +3670,7 @@ paths:
         -
           name: 'priceCents[between]'
           in: query
-          description: 'Filter by price amount range (comma-separated minimum and maximum)'
+          description: 'Filter by price amount min/max range'
           required: false
           deprecated: false
           schema:
@@ -3770,7 +3770,7 @@ paths:
         -
           name: 'position[between]'
           in: query
-          description: 'Filter by display position range (comma-separated minimum and maximum)'
+          description: 'Filter by display position min/max range'
           required: false
           deprecated: false
           schema:
@@ -4764,8 +4764,6 @@ components:
         -
           type: object
           properties:
-            ulid:
-              type: string
             code:
               readOnly: true
               type: string
@@ -4805,6 +4803,8 @@ components:
             enabled:
               readOnly: true
               type: boolean
+            ulid:
+              type: string
     UlidInterface.jsonld-output:
       type: object
       properties:
