@@ -18,9 +18,16 @@ final class PatchPayloadGuard
         array $fields
     ): void {
         foreach ($fields as $field) {
-            if (property_exists($payload, $field) && $payload->{$field} !== null) {
-                return;
+            if (!property_exists($payload, $field)) {
+                continue;
             }
+
+            $value = $payload->{$field};
+            if ($value === null || (is_string($value) && trim($value) === '')) {
+                continue;
+            }
+
+            return;
         }
 
         throw new BadRequestHttpException(self::EMPTY_PAYLOAD_MESSAGE);

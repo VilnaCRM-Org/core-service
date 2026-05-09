@@ -316,7 +316,7 @@ final class CustomerTypeApiTest extends BaseApiCase
 
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(400);
-        $this->assertStringContainsString(
+        $this->assertSame(
             PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
             $error['detail']
         );

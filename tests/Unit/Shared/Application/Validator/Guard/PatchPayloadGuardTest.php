@@ -13,6 +13,8 @@ final class PatchPayloadGuardTest extends UnitTestCase
 {
     public function testAssertContainsAnyFieldAllowsNonNullSupportedField(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $payload = new stdClass();
         $payload->name = 'Customer';
         $payload->email = null;
@@ -21,18 +23,16 @@ final class PatchPayloadGuardTest extends UnitTestCase
             'name',
             'email',
         ]);
-
-        self::assertTrue(true);
     }
 
     public function testAssertContainsAnyFieldAllowsFalseBoolean(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $payload = new stdClass();
         $payload->confirmed = false;
 
         PatchPayloadGuard::assertContainsAnyField($payload, ['confirmed']);
-
-        self::assertTrue(true);
     }
 
     public function testAssertContainsAnyFieldRejectsAllNullFields(): void
@@ -48,6 +48,17 @@ final class PatchPayloadGuardTest extends UnitTestCase
             'name',
             'email',
         ]);
+    }
+
+    public function testAssertContainsAnyFieldRejectsBlankStringFields(): void
+    {
+        $payload = new stdClass();
+        $payload->name = '   ';
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        PatchPayloadGuard::assertContainsAnyField($payload, ['name']);
     }
 
     public function testAssertContainsAnyFieldRejectsMissingFields(): void
