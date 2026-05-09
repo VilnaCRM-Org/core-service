@@ -204,6 +204,25 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
         );
     }
 
+    public function testDlqMetricReportsMatchedPermanentFailure(): void
+    {
+        $rootCause = new RuntimeException('database unavailable');
+        $permanentFailure = new DomainException('Domain rule failed', 0, $rootCause);
+        $throwable = new RuntimeException('handler failed', 0, $permanentFailure);
+
+        $this->assertFalse($this->retryStrategy->isRetryable(
+            $this->envelope(),
+            $throwable
+        ));
+
+        $this->assertEmittedMetric(
+            DlqRoutingMetric::class,
+            'MessengerDlqRoutings',
+            'dlq',
+            DomainException::class
+        );
+    }
+
     public function testMetricsFailureDoesNotChangeRetryDecision(): void
     {
         $this->metricsEmitter->failOnNextCall();

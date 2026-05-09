@@ -15,10 +15,10 @@ use LogicException;
 use Symfony\Component\HttpClient\Response\AsyncContext;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
-use Symfony\Component\Messenger\Exception\ValidationFailedException as MessengerValidationFailedException;
+use Symfony\Component\Messenger\Exception\ValidationFailedException as MessengerValidationFailure;
 use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
-use Symfony\Component\Validator\Exception\ValidationFailedException as ValidatorValidationFailedException;
+use Symfony\Component\Validator\Exception\ValidationFailedException as ValidatorValidationFailure;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Throwable;
 use TypeError;
@@ -35,10 +35,10 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         JsonException::class,
         LogicException::class,
         MessageDecodingFailedException::class,
-        MessengerValidationFailedException::class,
+        MessengerValidationFailure::class,
         SerializerExceptionInterface::class,
         TypeError::class,
-        ValidatorValidationFailedException::class,
+        ValidatorValidationFailure::class,
         ValueError::class,
     ];
 
@@ -68,8 +68,9 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         Envelope $message,
         ?Throwable $throwable = null
     ): bool {
-        if ($this->containsPermanentFailure($throwable)) {
-            $this->emitDlqRouting($message, $throwable);
+        $permanentFailure = $this->permanentFailure($throwable);
+        if ($permanentFailure instanceof Throwable) {
+            $this->emitDlqRouting($message, $permanentFailure);
 
             return false;
         }
@@ -86,17 +87,17 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         return $this->delayMs;
     }
 
-    private function containsPermanentFailure(?Throwable $throwable): bool
+    private function permanentFailure(?Throwable $throwable): ?Throwable
     {
         while ($throwable instanceof Throwable) {
             if ($this->isPermanentFailure($throwable)) {
-                return true;
+                return $throwable;
             }
 
             $throwable = $throwable->getPrevious();
         }
 
-        return false;
+        return null;
     }
 
     private function isPermanentFailure(Throwable $throwable): bool
@@ -122,7 +123,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
     {
         $this->emitMetric(DlqRoutingMetric::create(
             $this->messageType($message),
-            $this->exceptionType($throwable)
+            $this->matchedExceptionType($throwable)
         ));
     }
 
@@ -132,6 +133,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
             $this->metricsEmitter->emit($metric);
         } catch (Throwable) {
             // Retry decisions must not depend on observability availability.
+            return;
         }
     }
 
@@ -145,6 +147,11 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         $rootCause = $this->rootCause($throwable);
 
         return $rootCause instanceof Throwable ? $rootCause::class : 'None';
+    }
+
+    private function matchedExceptionType(?Throwable $throwable): string
+    {
+        return $throwable instanceof Throwable ? $throwable::class : 'None';
     }
 
     private function rootCause(?Throwable $throwable): ?Throwable
