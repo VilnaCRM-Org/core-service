@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+    configVersion="3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd"
+>
+    <title>VilnaCRM Core Service API Reference</title>
+    <paths>
+        <output>build/docs/phpdoc</output>
+        <cache>build/docs/phpdoc-cache</cache>
+    </paths>
+    <version number="main">
+        <api format="php">
+            <source dsn=".">
+                <path>src</path>
+            </source>
+            <extensions>
+                <extension>php</extension>
+            </extensions>
+            <ignore hidden="true" symlinks="true">
+                <path>build/**/*</path>
+                <path>var/**/*</path>
+                <path>vendor/**/*</path>
+            </ignore>
+        </api>
+    </version>
+</phpdocumentor>

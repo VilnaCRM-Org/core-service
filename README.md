@@ -218,11 +218,21 @@ up                           Start the docker hub (FrankenPHP, database, redis, 
 
 ## Documentation
 
-Start reading at the [GitHub wiki](https://github.com/VilnaCRM-Org/core-service/wiki). If you're having trouble, head for [the troubleshooting guide](https://github.com/VilnaCRM-Org/core-service/wiki/Troubleshooting) as it's frequently updated.
+Start with the maintained [documentation index](docs/README.md). It links to setup, architecture, API, database, testing, deployment, operations, troubleshooting, security, and release documentation.
 
-You can generate complete API-level documentation by running `phpdoc` in the top-level folder, and documentation will appear in the `docs` folder, though you'll need to have [PHPDocumentor](http://www.phpdoc.org) installed.
+To validate documentation structure and local Markdown links, run:
 
-If the documentation doesn't cover what you need, search the [many questions on Stack Overflow](http://stackoverflow.com/questions/tagged/vilnacrm), and before you ask a question, [read the troubleshooting guide](https://github.com/VilnaCRM-Org/core-service/wiki/Troubleshooting).
+```bash
+make docs-check
+```
+
+To validate the docs and generate the PHPDocumentor source API reference into `build/docs/phpdoc`, run:
+
+```bash
+make docs
+```
+
+The local API Platform documentation is available at `https://localhost/api/docs` when the stack is running. For common setup and CI issues, see [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Tests
 
