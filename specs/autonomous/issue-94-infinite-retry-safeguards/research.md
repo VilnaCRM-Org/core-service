@@ -4,7 +4,7 @@
 
 - GitHub issue: VilnaCRM-Org/core-service#94, "Feature Request: InfiniteRetryStrategy Safeguards"
 - Base branch: `origin/main` at `3f3fed0393e7ccd7be9fba85eeb499237226715c`
-- Worktree: `/home/kravtsov/Projects/core-service-issue-94`
+- Worktree: local development worktree (path omitted)
 - Branch: `fix/issue-94-infinite-retry-safeguards`
 
 ## Current State On Main

@@ -17,7 +17,6 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\ValidationFailedException as MessengerValidationFailure;
 use Symfony\Component\Messenger\Retry\RetryStrategyInterface;
-use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException as ValidatorValidationFailure;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Throwable;
@@ -36,7 +35,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
         LogicException::class,
         MessageDecodingFailedException::class,
         MessengerValidationFailure::class,
-        SerializerExceptionInterface::class,
+        \Symfony\Component\Serializer\Exception\ExceptionInterface::class,
         TypeError::class,
         ValidatorValidationFailure::class,
         ValueError::class,
