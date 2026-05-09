@@ -12,9 +12,11 @@ use App\Core\Customer\Application\Processor\CustomerStatusPatchProcessor;
 use App\Core\Customer\Application\Resolver\CustomerStatusResolver;
 use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Exception\CustomerStatusNotFoundException;
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CustomerStatusPatchProcessorTest extends UnitTestCase
 {
@@ -99,6 +101,21 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $result = $this->processor->process($dto, $operation);
 
         $this->assertSame($customerStatus, $result);
+    }
+
+    public function testProcessRejectsEmptyPatchPayload(): void
+    {
+        $dto = new StatusPatch(value: null, id: null);
+        $operation = $this->createMock(Operation::class);
+
+        $this->resolver->expects($this->never())->method('resolve');
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->processor->process($dto, $operation);
     }
 
     public function testProcessThrowsExceptionWhenResolverFails(): void

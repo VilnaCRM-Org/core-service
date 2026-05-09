@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
+
 final class CustomerStatusApiTest extends BaseApiCase
 {
     public function testGetCustomerStatusesCollection(): void
@@ -250,6 +252,29 @@ final class CustomerStatusApiTest extends BaseApiCase
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
         $this->assertStringContainsString('Not Found', $error['detail']);
+    }
+
+    public function testPatchCustomerStatusWithEmptyPayloadReturnsBadRequest(): void
+    {
+        $orig = $this->getStatusPayload();
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => '{}',
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
     }
 
     public function testDeleteCustomerStatusSuccess(): void

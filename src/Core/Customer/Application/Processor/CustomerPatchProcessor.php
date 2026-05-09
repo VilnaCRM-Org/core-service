@@ -14,6 +14,7 @@ use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\ValueObject\CustomerUpdate;
 use App\Shared\Application\Extractor\PatchUlidExtractor;
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -22,6 +23,16 @@ use App\Shared\Infrastructure\Factory\UlidFactory;
  */
 final readonly class CustomerPatchProcessor implements ProcessorInterface
 {
+    private const PATCH_FIELDS = [
+        'initials',
+        'email',
+        'phone',
+        'leadSource',
+        'type',
+        'status',
+        'confirmed',
+    ];
+
     public function __construct(
         private CustomerRepositoryInterface $repository,
         private CommandBusInterface $commandBus,
@@ -43,6 +54,8 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         array $uriVariables = [],
         array $context = []
     ): Customer {
+        PatchPayloadGuard::assertContainsAnyField($data, self::PATCH_FIELDS);
+
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
             $data->id,

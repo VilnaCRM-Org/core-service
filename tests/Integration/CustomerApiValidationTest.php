@@ -10,6 +10,7 @@ use App\Core\Customer\Domain\Factory\TypeFactoryInterface;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Domain\Repository\StatusRepositoryInterface;
 use App\Core\Customer\Domain\Repository\TypeRepositoryInterface;
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
 final class CustomerApiValidationTest extends BaseApiCase
@@ -254,6 +255,24 @@ final class CustomerApiValidationTest extends BaseApiCase
         $this->assertResponseStatusCodeSame(422);
         $this->assertStringContainsString(
             'initials: This value is too long',
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithEmptyPayloadReturnsBadRequest(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => '{}',
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertStringContainsString(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
             $error['detail']
         );
     }

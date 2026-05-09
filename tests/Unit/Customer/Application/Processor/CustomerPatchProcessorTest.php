@@ -20,10 +20,12 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Exception\CustomerNotFoundException;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Shared\Application\Extractor\PatchUlidExtractor;
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
 use App\Shared\Domain\Bus\Command\CommandBusInterface;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Uid\Ulid;
 
 final class CustomerPatchProcessorTest extends UnitTestCase
@@ -84,20 +86,21 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->assertSame($customer, $result);
     }
 
-    public function testProcessPreservesExistingValuesWhenNull(): void
+    public function testProcessRejectsEmptyPatchPayload(): void
     {
         $dto = $this->createEmptyDto();
-        $exData = [
-            'initials' => 'Original Name',
-            'email' => 'original@example.com',
-            'phone' => '+123456789',
-            'leadSource' => 'Original Source',
-            'confirmed' => true,
-        ];
-        [$dto, $operation, $uriVars, $customer] = $this
-            ->prepareProcessPreserveData($dto, $exData);
-        $result = $this->processor->process($dto, $operation, $uriVars);
-        $this->assertSame($customer, $result);
+        $operation = $this->createMock(Operation::class);
+
+        $this->repository->expects($this->never())->method('findFresh');
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->processor->process($dto, $operation, [
+            'ulid' => (string) $this->faker->ulid(),
+        ]);
     }
 
     public function testProcessWithPartialData(): void
