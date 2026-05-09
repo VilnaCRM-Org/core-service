@@ -31,14 +31,14 @@ Current Floci docs state:
 
 - The Docker image is `floci/floci`.
 - Port `4566` remains the local AWS endpoint.
-- `latest-compat` includes AWS CLI and boto3.
+- `1.5.13-compat` includes AWS CLI and boto3.
 - `FLOCI_HOSTNAME` controls hostnames embedded in response URLs.
 - `SERVICES` is not needed because Floci starts supported services without selection.
 - Supported services include SQS, S3, IAM, STS, and EC2.
 
 ## Decision
 
-Use a vendor-neutral Compose service named `aws-emulator` backed by `floci/floci:latest-compat`.
+Use a vendor-neutral Compose service named `aws-emulator` backed by `floci/floci:1.5.13-compat`.
 
 The compat image allows the Compose healthcheck to use `aws sqs list-queues`, which proves the SQS API is usable instead of checking an emulator-specific status endpoint.
 

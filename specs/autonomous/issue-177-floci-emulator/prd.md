@@ -22,10 +22,9 @@
 ## Compose Requirements
 
 - Service name: `aws-emulator`
-- Image: `floci/floci:latest-compat`
+- Image: `floci/floci:1.5.13-compat`
 - `FLOCI_HOSTNAME=aws-emulator`
 - `FLOCI_BASE_URL=http://aws-emulator:4566`
-- `/var/run/docker.sock` mounted for Docker-backed Floci services.
 - Data stored under `/app/data`.
 
 ## Verification Requirements

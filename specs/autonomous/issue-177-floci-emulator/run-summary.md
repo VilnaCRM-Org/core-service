@@ -12,7 +12,7 @@
 Replaced the local AWS emulator wiring:
 
 - `localstack` Compose service -> `aws-emulator`.
-- `localstack/localstack:3.4.0` -> `floci/floci:latest-compat`.
+- `localstack/localstack:3.4.0` -> `floci/floci:1.5.13-compat`.
 - `LOCALSTACK_PORT` -> `AWS_EMULATOR_PORT`.
 - `AWS_SQS_ENDPOINT_BASE` -> `AWS_SQS_ENDPOINT`.
 - LocalStack health endpoint checks -> AWS CLI SQS `list-queues` checks.
@@ -24,7 +24,7 @@ Updated docs and BATS tests to use vendor-neutral AWS emulator naming.
 ## Verification
 
 - Official Floci docs checked:
-  - `floci/floci:latest` and `latest-compat` image tags.
+  - `floci/floci` compatibility image tags.
   - port `4566` compatibility.
   - `FLOCI_HOSTNAME` migration mapping.
   - SQS, S3, IAM, STS, and EC2 support.

@@ -7,7 +7,7 @@ Local AWS emulation should be provider-neutral in repository naming and backed b
 ## Minimal Viable Change
 
 - Rename the Compose service to `aws-emulator`.
-- Use `floci/floci:latest-compat`.
+- Use `floci/floci:1.5.13-compat`.
 - Replace `LOCALSTACK_PORT` with `AWS_EMULATOR_PORT`.
 - Replace `AWS_SQS_ENDPOINT_BASE` with `AWS_SQS_ENDPOINT`.
 - Use AWS CLI smoke healthchecks instead of `/_localstack/health`.

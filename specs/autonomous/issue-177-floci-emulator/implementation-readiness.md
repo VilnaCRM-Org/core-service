@@ -8,7 +8,7 @@ Ready for implementation.
 
 - Docker Compose is already used for local development.
 - AWS CLI is available on the host for smoke validation.
-- Floci `latest-compat` includes AWS CLI for container healthchecks.
+- Floci `1.5.13-compat` includes AWS CLI for container healthchecks.
 - Symfony Messenger already uses SQS queue-name DSNs.
 
 ## Constraints

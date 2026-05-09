@@ -3,9 +3,8 @@
 ## Epic 1: Compose Migration
 
 - Replace `localstack` service with `aws-emulator`.
-- Use `floci/floci:latest-compat`.
+- Use `floci/floci:1.5.13-compat`.
 - Replace data volume paths with `/app/data`.
-- Add Docker socket mount for Docker-backed services.
 - Configure Floci hostname/base URL.
 
 ## Epic 2: Environment Abstraction
