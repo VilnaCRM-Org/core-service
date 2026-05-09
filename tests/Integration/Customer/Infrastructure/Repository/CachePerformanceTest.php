@@ -10,9 +10,13 @@ use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Repository\MongoStatusRepository;
 use App\Core\Customer\Infrastructure\Repository\MongoTypeRepository;
+use App\Shared\Application\Command\CacheRefreshCommand;
+use App\Shared\Application\CommandHandler\CacheRefreshCommandHandler;
 use App\Shared\Domain\ValueObject\Ulid;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Uid\Ulid as SymfonyUlid;
 
 /**
@@ -25,12 +29,16 @@ final class CachePerformanceTest extends KernelTestCase
 {
     private const PERFORMANCE_ITERATIONS = 10;
     private const MAX_CACHE_HIT_LATENCY_MS = 10;
+    private const MAX_GUARDED_CACHE_HIT_LATENCY_MS = 100;
+    private const MAX_ASYNC_REFRESH_LATENCY_MS = 5000;
     private const MIN_SPEEDUP_FACTOR = 2.0;
 
     private CustomerRepositoryInterface $repository;
     private MongoTypeRepository $typeRepository;
     private MongoStatusRepository $statusRepository;
     private CacheItemPoolInterface $cachePool;
+    private InMemoryTransport $cacheRefreshTransport;
+    private CacheRefreshCommandHandler $cacheRefreshHandler;
     private ?CustomerType $defaultType = null;
     private ?CustomerStatus $defaultStatus = null;
 
@@ -42,9 +50,14 @@ final class CachePerformanceTest extends KernelTestCase
         $this->typeRepository = self::getContainer()->get(MongoTypeRepository::class);
         $this->statusRepository = self::getContainer()->get(MongoStatusRepository::class);
         $this->cachePool = self::getContainer()->get('cache.customer');
+        $this->cacheRefreshTransport = self::getContainer()->get(
+            'messenger.transport.cache-refresh'
+        );
+        $this->cacheRefreshHandler = self::getContainer()->get(CacheRefreshCommandHandler::class);
 
         $this->cachePool->clear();
         $this->ensureDefaultTypeAndStatus();
+        $this->cacheRefreshTransport->reset();
     }
 
     public function testCacheHitIsSignificantlyFasterThanMiss(): void
@@ -195,6 +208,93 @@ final class CachePerformanceTest extends KernelTestCase
         );
     }
 
+    public function testAsyncRefreshWarmsCacheBeforeNextRead(): void
+    {
+        $customer = $this->createTestCustomer(
+            'Async Refresh Perf',
+            sprintf('async-refresh+%s@example.com', (string) $this->generateUlid())
+        );
+        $customerId = (string) $customer->getUlid();
+        $cacheKey = 'customer.' . $customerId;
+
+        $this->cachePool->clear();
+        $this->repository->find($customerId);
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
+        $this->cacheRefreshTransport->reset();
+
+        $customer->setInitials('Async Refresh Perf Updated');
+        $this->repository->save($customer);
+        self::assertFalse($this->cachePool->getItem($cacheKey)->isHit());
+        self::assertNotEmpty($this->cacheRefreshTransport->getSent());
+
+        $this->handleCacheRefreshMessages();
+
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
+
+        $result = $this->repository->find($customerId);
+
+        self::assertNotNull($result);
+        self::assertSame('Async Refresh Perf Updated', $result->getInitials());
+    }
+
+    /**
+     * @group performance
+     */
+    public function testAsyncRefreshWarmsCacheBeforeNextReadWithinGuardedLatencyBudget(): void
+    {
+        if (getenv('CI_PERFORMANCE_GUARDED') !== '1') {
+            self::markTestSkipped('Guarded latency budget runs only when CI_PERFORMANCE_GUARDED=1.');
+        }
+
+        $customer = $this->createTestCustomer(
+            'Async Refresh Perf Guarded',
+            sprintf('async-refresh-guarded+%s@example.com', (string) $this->generateUlid())
+        );
+        $customerId = (string) $customer->getUlid();
+        $cacheKey = 'customer.' . $customerId;
+
+        $this->cachePool->clear();
+        $this->repository->find($customerId);
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
+        $this->cacheRefreshTransport->reset();
+
+        $customer->setInitials('Async Refresh Perf Guarded Updated');
+        $this->repository->save($customer);
+        self::assertFalse($this->cachePool->getItem($cacheKey)->isHit());
+        self::assertNotEmpty($this->cacheRefreshTransport->getSent());
+
+        $refreshStart = hrtime(true);
+        $this->handleCacheRefreshMessages();
+        $refreshLatencyMs = (hrtime(true) - $refreshStart) / 1_000_000;
+
+        self::assertTrue($this->cachePool->getItem($cacheKey)->isHit());
+
+        $hitStart = hrtime(true);
+        $result = $this->repository->find($customerId);
+        $hitLatencyMs = (hrtime(true) - $hitStart) / 1_000_000;
+
+        self::assertNotNull($result);
+        self::assertSame('Async Refresh Perf Guarded Updated', $result->getInitials());
+        self::assertLessThanOrEqual(
+            self::MAX_GUARDED_CACHE_HIT_LATENCY_MS,
+            $hitLatencyMs,
+            sprintf(
+                'Read after async refresh should stay under %dms, got %.2fms',
+                self::MAX_GUARDED_CACHE_HIT_LATENCY_MS,
+                $hitLatencyMs
+            )
+        );
+        self::assertLessThan(
+            self::MAX_ASYNC_REFRESH_LATENCY_MS,
+            $refreshLatencyMs,
+            sprintf(
+                'Async refresh should complete within %dms, got %.2fms',
+                self::MAX_ASYNC_REFRESH_LATENCY_MS,
+                $refreshLatencyMs
+            )
+        );
+    }
+
     public function testCacheRecoveryAfterInvalidation(): void
     {
         $customer = $this->createTestCustomer(
@@ -275,6 +375,21 @@ final class CachePerformanceTest extends KernelTestCase
         $this->repository->save($customer);
 
         return $customer;
+    }
+
+    private function handleCacheRefreshMessages(): void
+    {
+        foreach ($this->cacheRefreshTransport->getSent() as $envelope) {
+            $this->handleCacheRefreshEnvelope($envelope);
+        }
+    }
+
+    private function handleCacheRefreshEnvelope(Envelope $envelope): void
+    {
+        $message = $envelope->getMessage();
+
+        self::assertInstanceOf(CacheRefreshCommand::class, $message);
+        ($this->cacheRefreshHandler)($message);
     }
 
     private function generateUlid(): Ulid

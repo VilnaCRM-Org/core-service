@@ -69,6 +69,7 @@ Load and cache tests already exist:
 - `make cache-performance-tests` runs `tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php`.
 - `make cache-performance-load-tests` runs the K6 `rest-api/cachePerformance` smoke scenario.
 - `tests/Load/scripts/rest-api/cachePerformance.js` warms customer reads and reports heuristic cache hit indicators.
+- `tests/Load/scripts/rest-api/cacheReadWriteRace.js` exercises deterministic read/write concurrency and stale-after-update checks.
 - Existing integration tests cover cache population, invalidation, SWR-style cache population, and delete cleanup.
 
 ## Architecture Constraints
@@ -96,7 +97,7 @@ Likely shared production code changes:
 
 - Add a generic `CacheRefreshCommand` under `Shared/Application/Command` with scalar context, family, target identifiers, strategy, and event metadata.
 - Add a generic `CacheRefreshCommandHandler` under `Shared/Application/CommandHandler` as the single Messenger worker entrypoint.
-- Add `AbstractCacheInvalidationSubscriber`, `AbstractCacheRefreshCommandFactory`, and `AbstractCacheRefreshCommandHandler` for reusable event-to-refresh orchestration and context handler behavior.
+- Add `AbstractCacheInvalidationSubscriber`, `AbstractCacheRefreshCommandFactory`, and `CacheRefreshCommandHandlerBase` for reusable event-to-refresh orchestration and context handler behavior.
 - Add shared cache policy/target/result DTOs, resolver interfaces, handler resolver, handler collection, policy collection, and target resolver collection.
 - Add shared cache refresh lifecycle metrics under `Shared/Application/Observability/Metric`.
 - Add a generic `CacheInvalidationCommand` and handler used by domain event subscribers, the ODM listener, and repository fallbacks.
@@ -141,7 +142,7 @@ Potential test changes:
 - A generic shared design may still carry Customer-only payload assumptions. The payload must use feature-neutral fields and leave Customer-specific mapping in the Customer adapter.
 - A generic ODM listener can become too implicit if rules are not explicit. Keep document-class, operation, and field mappings in typed collection/resolver classes with focused tests.
 - Bulk writes or direct database operations that bypass ODM UnitOfWork change sets may bypass automatic invalidation. The first implementation should classify custom repository methods and require repository fallback calls for any path that cannot be observed by ODM.
-- Domain-event invalidation and ODM invalidation may duplicate each other. This should be safe because tag invalidation is idempotent; refresh scheduling needs deterministic dedupe keys.
+- Domain-event invalidation and ODM invalidation may duplicate each other. This should be safe because tag invalidation is idempotent; refresh scheduling needs deterministic target-based dedupe keys while source IDs stay correlation metadata.
 - Event-snapshot refresh can overwrite good cache with incomplete or stale data if events are not complete and versioned. Current Customer events should use invalidation plus `repository_refresh`, not `event_snapshot`.
 - API Platform collection caching is not currently repository-level, so adding full collection refresh for arbitrary filters may exceed a safe first implementation. Forward-safe policy classes can declare collection policies while the first worker refreshes known detail/email workloads and invalidates collection tags.
 - Customer type/status operations do not publish domain events today. Cache invalidation can still be covered through ODM listener rules for managed document changes; domain events are a follow-up only if business semantics or cross-context reactions require them.

@@ -20,7 +20,9 @@
     "doctrine/mongodb-odm": "^2.10",
     "doctrine/mongodb-odm-bundle": "^5.3",
     "dpauli/graphql-request-builder": "^1.8",
+    "mongodb/mongodb": "~2.1.0",
     "phpmailer/phpmailer": "^7.0",
+    "symfony/amazon-sqs-messenger": "7.4.*",
     "symfony/asset": "7.4.*",
     "symfony/cache": "7.4.*",
     "symfony/console": "7.4.*",
@@ -36,8 +38,7 @@
     "symfony/uid": "7.4.*",
     "symfony/validator": "7.4.*",
     "symfony/yaml": "7.4.*",
-    "webonyx/graphql-php": "^15.14",
-    "mongodb/mongodb": "~2.1.0"
+    "webonyx/graphql-php": "^15.14"
   },
   "config": {
     "allow-plugins": {

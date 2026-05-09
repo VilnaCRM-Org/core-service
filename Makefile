@@ -70,6 +70,7 @@ PSALM         = php -d display_errors=0 -d error_reporting='E_ALL & ~E_DEPRECATE
 PHP_CS_FIXER  = ./vendor/bin/php-cs-fixer
 DEPTRAC       = ./vendor/bin/deptrac
 INFECTION     = ./vendor/bin/infection
+INFECTION_JOBS ?= 4
 
 # Misc
 .DEFAULT_GOAL = help
@@ -385,6 +386,7 @@ cache-performance-tests: setup-test-db ## Run cache performance integration test
 
 cache-performance-load-tests: build-k6-docker ## Run cache performance K6 load tests
 	tests/Load/execute-load-test.sh rest-api/cachePerformance true false false false smoke-
+	tests/Load/execute-load-test.sh rest-api/cacheReadWriteRace true false false false smoke-
 
 build-k6-docker:
 	$(DOCKER) build -t k6 -f ./tests/Load/Dockerfile .
@@ -393,7 +395,7 @@ build-spectral-docker:
 	$(DOCKER) build -t core-service-spectral -f ./docker/spectral/Dockerfile .
 
 infection: ## Run mutation testing with 100% MSI requirement
-	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j8 --min-msi=100 --min-covered-msi=100
+	$(EXEC_ENV) php -d memory_limit=-1 $(INFECTION) --initial-tests-php-options="-d memory_limit=-1" --test-framework-options="--testsuite=Unit" --show-mutations --log-verbosity=all -j$(INFECTION_JOBS) --min-msi=100 --min-covered-msi=100
 
 execute-load-tests-script: build-k6-docker ## Execute single load test scenario.
 	tests/Load/execute-load-test.sh $(scenario) $(or $(runSmoke),true) $(or $(runAverage),true) $(or $(runStress),true) $(or $(runSpike),true)

@@ -18,7 +18,7 @@ const customers = insertCustomersUtils.loadInsertedCustomers();
 const requestDuration = new Trend('cache_request_duration', true);
 const successRate = new Rate('cache_success_rate');
 const totalRequests = new Counter('cache_total_requests');
-const fastResponses = new Counter('cache_fast_responses'); // < 100ms suggests cache hit
+const fastResponseRate = new Rate('cache_fast_response_rate'); // < 100ms suggests cache hit
 
 // Threshold for "fast" response (likely cache hit)
 // Note: This is heuristic-based. Real cache verification is done in integration tests.
@@ -53,6 +53,13 @@ export function setup() {
 }
 
 export const options = scenarioUtils.getOptions();
+options.thresholds = {
+  ...options.thresholds,
+  http_req_failed: ['rate<0.01'],
+  cache_success_rate: ['rate>0.99'],
+  cache_fast_response_rate: ['rate>0.80'],
+  cache_request_duration: ['p(95)<200', 'p(99)<400'],
+};
 
 export default function cachePerformance(data) {
   const customerIndex = counter.up() % data.warmupCount;
@@ -73,21 +80,16 @@ export default function cachePerformance(data) {
   });
 
   successRate.add(isSuccess ? 1 : 0);
-
-  // Track fast responses (likely cache hits)
-  if (isSuccess && response.timings.duration < FAST_RESPONSE_THRESHOLD_MS) {
-    fastResponses.add(1);
-  }
+  fastResponseRate.add(isSuccess && response.timings.duration < FAST_RESPONSE_THRESHOLD_MS);
 }
 
 export function handleSummary(data) {
   const total = data.metrics.cache_total_requests
     ? data.metrics.cache_total_requests.values.count
     : 0;
-  const fast = data.metrics.cache_fast_responses
-    ? data.metrics.cache_fast_responses.values.count
-    : 0;
-  const fastRatio = total > 0 ? ((fast / total) * 100).toFixed(2) : 0;
+  const fastRatio = data.metrics.cache_fast_response_rate
+    ? (data.metrics.cache_fast_response_rate.values.rate * 100).toFixed(2)
+    : '0.00';
 
   const avgDuration = data.metrics.cache_request_duration
     ? data.metrics.cache_request_duration.values.avg.toFixed(2)
@@ -106,7 +108,7 @@ export function handleSummary(data) {
   console.log('\n=== CACHE PERFORMANCE LOAD TEST SUMMARY ===');
   console.log(`Total Requests: ${total}`);
   console.log(`Success Rate: ${successRateValue}%`);
-  console.log(`Fast Responses (<${FAST_RESPONSE_THRESHOLD_MS}ms): ${fast} (${fastRatio}%)`);
+  console.log(`Fast Response Rate (<${FAST_RESPONSE_THRESHOLD_MS}ms): ${fastRatio}%`);
   console.log(`Avg Duration: ${avgDuration}ms`);
   console.log(`P95 Duration: ${p95Duration}ms`);
   console.log(`P99 Duration: ${p99Duration}ms`);
@@ -114,9 +116,7 @@ export function handleSummary(data) {
   console.log('Note: Cache correctness is verified by integration tests.');
   console.log('This load test measures performance under concurrent load.\n');
 
-  // Fail only on actual errors, not on heuristic-based cache detection
   const httpFailRate = data.metrics.http_req_failed ? data.metrics.http_req_failed.values.rate : 0;
-
   if (httpFailRate > 0.01) {
     // More than 1% failure rate
     console.error(

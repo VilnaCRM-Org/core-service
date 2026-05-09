@@ -10,6 +10,7 @@ use App\Shared\Infrastructure\EventListener\ApiQueryParametersListener;
 use App\Shared\Infrastructure\EventListener\ApiQueryParametersParser;
 use App\Shared\Infrastructure\EventListener\ApiQueryParametersSanitizer;
 use App\Shared\Infrastructure\EventListener\ApiQueryRequestGuard;
+use App\Shared\Infrastructure\EventListener\ApiQueryStringNormalizer;
 use App\Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -57,6 +58,8 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
 
         self::assertSame(['page' => '99'], $request->attributes->get('_api_query_parameters'));
         self::assertSame(['page' => '99'], $request->attributes->get('_api_filters'));
+        self::assertSame(['page' => '99'], $request->query->all());
+        self::assertSame('/api/customer_statuses?page=99', $request->getRequestUri());
     }
 
     public function testDoesNotOverwriteExistingApiFilters(): void
@@ -70,6 +73,8 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
 
         self::assertSame(['page' => '88'], $request->attributes->get('_api_query_parameters'));
         self::assertSame(['page' => '88'], $request->attributes->get('_api_filters'));
+        self::assertSame(['page' => '88'], $request->query->all());
+        self::assertSame('/api/customer_statuses?page=88', $request->getRequestUri());
     }
 
     public function testRemovesMalformedTopLevelQueryKeys(): void
@@ -97,6 +102,40 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
             ],
             $request->attributes->get('_api_filters')
         );
+    }
+
+    public function testNormalizesRequestUriAndQueryBagBeforePaginationLinksAreBuilt(): void
+    {
+        $request = Request::create(
+            '/api/customer_statuses?%3B3%C2%858%24=O%3B%F3%96%9A%A5&order%5Bulid%5D=asc',
+            Request::METHOD_GET
+        );
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame(['order' => ['ulid' => 'asc']], $request->query->all());
+        self::assertSame('order%5Bulid%5D=asc', $request->server->get('QUERY_STRING'));
+        self::assertSame('/api/customer_statuses?order%5Bulid%5D=asc', $request->getRequestUri());
+    }
+
+    public function testResetsCachedRequestUriAfterNormalization(): void
+    {
+        $request = Request::create(
+            '/api/customer_statuses?%3Bbad=value&order%5Bulid%5D=asc',
+            Request::METHOD_GET
+        );
+        self::assertSame(
+            '/api/customer_statuses?%3Bbad=value&order%5Bulid%5D=asc',
+            $request->getRequestUri()
+        );
+        $event = $this->createRequestEvent($request);
+
+        $listener = $this->createListener();
+        $listener($event);
+
+        self::assertSame('/api/customer_statuses?order%5Bulid%5D=asc', $request->getRequestUri());
     }
 
     public function testIgnoresNonApiRequests(): void
@@ -235,6 +274,7 @@ final class ApiQueryParametersListenerTest extends UnitTestCase
             new ApiQueryRequestGuard(),
             new ApiQueryParametersParser(),
             new ApiQueryParametersSanitizer(new ApiQueryKeyValidator()),
+            new ApiQueryStringNormalizer(),
             new ApiQueryAttributesPopulator()
         );
     }

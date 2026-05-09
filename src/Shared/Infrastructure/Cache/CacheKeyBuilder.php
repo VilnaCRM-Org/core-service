@@ -26,6 +26,38 @@ final readonly class CacheKeyBuilder
         return $namespace . '.' . implode('.', $parts);
     }
 
+    public function buildContextFamilyKey(
+        string $context,
+        string $family,
+        string $identifierName,
+        string $identifierValue,
+        bool $caseInsensitive = true
+    ): string {
+        return $this->build(
+            $context,
+            $family,
+            $identifierName,
+            hash('sha256', $this->normalizeIdentifier($identifierValue, $caseInsensitive))
+        );
+    }
+
+    public function buildRefreshDedupeKey(
+        string $context,
+        string $family,
+        string $identifierName,
+        string $identifierValue,
+        string $source,
+        bool $caseInsensitive = true
+    ): string {
+        return hash('sha256', implode('|', array_map('rawurlencode', [
+            $context,
+            $family,
+            $identifierName,
+            $this->normalizeIdentifier($identifierValue, $caseInsensitive),
+            $source,
+        ])));
+    }
+
     /**
      * Build customer cache key by ID
      */
@@ -71,5 +103,14 @@ final readonly class CacheKeyBuilder
     public function hashEmail(string $email): string
     {
         return hash('sha256', strtolower($email));
+    }
+
+    private function normalizeIdentifier(string $identifierValue, bool $caseInsensitive): string
+    {
+        if ($caseInsensitive) {
+            return strtolower($identifierValue);
+        }
+
+        return $identifierValue;
     }
 }

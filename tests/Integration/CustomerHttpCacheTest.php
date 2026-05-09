@@ -30,7 +30,7 @@ final class CustomerHttpCacheTest extends ApiTestCase
         $client->request('GET', "{$this->baseUrl}/{$customer->getUlid()}");
 
         self::assertResponseIsSuccessful();
-        self::assertResponseHeaderSame('Cache-Control', 'max-age=600, public, s-maxage=600');
+        self::assertResponseHeaderSame('Cache-Control', 'max-age=600, private');
         self::assertResponseHasHeader('ETag');
     }
 
@@ -42,7 +42,7 @@ final class CustomerHttpCacheTest extends ApiTestCase
         $client->request('GET', $this->baseUrl);
 
         self::assertResponseIsSuccessful();
-        self::assertResponseHeaderSame('Cache-Control', 'max-age=300, public, s-maxage=600');
+        self::assertResponseHeaderSame('Cache-Control', 'max-age=300, private');
     }
 
     public function testETagChangesAfterModification(): void

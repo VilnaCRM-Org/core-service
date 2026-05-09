@@ -10,19 +10,22 @@ The load tests cover all major REST API endpoints:
 - **Customers API**: `/api/customers` (GET, POST, PATCH, PUT, DELETE)
 - **Customer Types API**: `/api/customer_types` (GET, POST, PATCH, PUT, DELETE)
 - **Customer Statuses API**: `/api/customer_statuses` (GET, POST, PATCH, PUT, DELETE)
+- **Cache behavior**: customer hot-read performance and read/write race coverage
 
 ## Test Scripts
 
 ### Individual Endpoint Tests
 
-- `health.js` - Health check endpoint testing
-- `customers.js` - Customer CRUD operations with realistic data
-- `customer-types.js` - Customer type management operations
-- `customer-statuses.js` - Customer status management operations
+- `scripts/rest-api/health.js` - Health check endpoint testing
+- `scripts/rest-api/createCustomer.js`, `getCustomer.js`, `getCustomers.js`, `updateCustomer.js`, `replaceCustomer.js`, `deleteCustomer.js` - Customer CRUD operations with realistic data
+- `scripts/rest-api/createCustomerType.js`, `getCustomerType.js`, `getCustomerTypes.js`, `updateCustomerType.js`, `deleteCustomerType.js` - Customer type management operations
+- `scripts/rest-api/createCustomerStatus.js`, `getCustomerStatus.js`, `getCustomerStatuses.js`, `updateCustomerStatus.js`, `deleteCustomerStatus.js` - Customer status management operations
+- `scripts/rest-api/cachePerformance.js` - Warmed customer cache read performance under concurrent load
+- `scripts/rest-api/cacheReadWriteRace.js` - Parallel customer read/write coverage for stale-read behavior after updates
 
 ### Comprehensive Tests
 
-- `api-comprehensive.js` - Mixed scenario testing all endpoints with realistic traffic distribution
+- Scripts are discovered from `scripts/rest-api/` and `scripts/graphql/`; run `./tests/Load/get-load-test-scenarios.sh` to list the current scenario inventory.
 
 ## Running Load Tests
 
@@ -43,11 +46,13 @@ make stress-load-tests   # High load
 make spike-load-tests    # Spike load
 
 # Run specific scenario with all load levels
-make execute-load-tests-script scenario=customers
+make execute-load-tests-script scenario=getCustomer
+make execute-load-tests-script scenario=cachePerformance
+make execute-load-tests-script scenario=cacheReadWriteRace
 
 # Run specific scenario with specific load type
-./tests/Load/execute-load-test.sh customers true false false false smoke-
-./tests/Load/execute-load-test.sh api-comprehensive false true false false average-
+./tests/Load/execute-load-test.sh getCustomer true false false false smoke-
+./tests/Load/execute-load-test.sh cacheReadWriteRace false true false false average-
 ```
 
 ### Available Test Types
@@ -79,6 +84,14 @@ Load test parameters are configured in `config.json.dist`:
 
 - Keep GraphQL collection benchmarks comparable by using the same page size and selection set when measuring similar resources.
 - The reference-data collection scripts for `customerTypes` and `customerStatuses` intentionally use `edges.node { id value ulid }` without `pageInfo` or `totalCount` so their latency can be compared directly.
+
+### Cache Invalidation and Refresh Coverage
+
+- `cachePerformance` warms up existing customers, then measures hot-cache read latency and the fast-response ratio under concurrent reads.
+- `cacheReadWriteRace` warms customer cache entries, mixes reads with updates, and checks whether reads after a short eventual-consistency grace period observe the updated customer values.
+- These scenarios reflect the production cache contract: writes perform best-effort tag invalidation and enqueue async refresh work, but they do not synchronously recompute cache entries.
+- A small transient stale-read rate can occur during parallel requests while the invalidation/refresh pipeline catches up. The race scenario threshold catches sustained stale reads while allowing the expected eventual-consistency window.
+- Deleted customer refresh commands are invalidate-only and should not warm deleted resources back into cache.
 
 ### Smart Resource Management
 

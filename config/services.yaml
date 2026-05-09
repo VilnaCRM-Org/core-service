@@ -4,6 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+  app.customer_cache.detail_ttl: '%env(int:CUSTOMER_CACHE_DETAIL_TTL)%'
+  app.customer_cache.lookup_ttl: '%env(int:CUSTOMER_CACHE_LOOKUP_TTL)%'
+  app.customer_cache.collection_ttl: '%env(int:CUSTOMER_CACHE_COLLECTION_TTL)%'
+  app.customer_cache.reference_ttl: '%env(int:CUSTOMER_CACHE_REFERENCE_TTL)%'
+  app.customer_cache.negative_lookup_ttl: '%env(int:CUSTOMER_CACHE_NEGATIVE_LOOKUP_TTL)%'
 
 services:
   # default configuration for services in *this* file
@@ -123,6 +128,22 @@ services:
           priority: 512,
         }
 
+  App\Core\Customer\Infrastructure\Collection\CustomerCachePolicyCollection:
+    arguments:
+      $detailTtl: '%app.customer_cache.detail_ttl%'
+      $lookupTtl: '%app.customer_cache.lookup_ttl%'
+      $collectionTtl: '%app.customer_cache.collection_ttl%'
+      $referenceTtl: '%app.customer_cache.reference_ttl%'
+      $negativeLookupTtl: '%app.customer_cache.negative_lookup_ttl%'
+
+  App\Shared\Infrastructure\Resolver\CachePoolResolver:
+    arguments:
+      $cachePools: !service_locator
+        customer: '@cache.customer'
+
+  App\Shared\Application\Resolver\CachePoolResolverInterface:
+    alias: App\Shared\Infrastructure\Resolver\CachePoolResolver
+
   App\Shared\Application\Validator\MutationInputValidatorInterface:
     alias: App\Shared\Application\Validator\MutationInputValidator
 
@@ -153,6 +174,43 @@ services:
       $inner: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
       $cache: '@cache.customer'
 
+  App\Core\Customer\Application\CommandHandler\CustomerCacheRefreshCommandHandler:
+    arguments:
+      $repository: '@App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository'
+      $cache: '@cache.customer'
+
+  App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler:
+    arguments:
+      $cachePoolResolver: '@App\Shared\Application\Resolver\CachePoolResolverInterface'
+      $messageBus: '@messenger.bus.default'
+
+  App\Shared\Application\CommandHandler\CacheRefreshCommandHandler:
+    tags:
+      - { name: 'messenger.message_handler', from_transport: 'cache-refresh' }
+
+  App\Shared\Infrastructure\EventListener\CacheInvalidationDoctrineEventListener:
+    tags:
+      - { name: 'doctrine_mongodb.odm.event_listener', event: 'onFlush' }
+      - { name: 'doctrine_mongodb.odm.event_listener', event: 'postFlush' }
+
+  App\Shared\Infrastructure\Resolver\CacheInvalidationTagResolver:
+    arguments:
+      $resolvers: !tagged_iterator 'app.cache_invalidation_resolver'
+
+  App\Shared\Infrastructure\Resolver\CacheRefreshCommandHandlerResolver:
+    arguments:
+      $handlers: !tagged_iterator 'app.cache_refresh_handler'
+
+  App\Shared\Application\Resolver\CacheRefreshCommandHandlerResolverInterface:
+    alias: App\Shared\Infrastructure\Resolver\CacheRefreshCommandHandlerResolver
+
+  App\Shared\Infrastructure\Resolver\CacheRefreshPolicyResolver:
+    arguments:
+      $resolvers: !tagged_iterator 'app.cache_refresh_policy_resolver'
+
+  App\Shared\Application\Resolver\CacheRefreshPolicyResolverInterface:
+    alias: App\Shared\Infrastructure\Resolver\CacheRefreshPolicyResolver
+
   # Alias interface to cached repository for dependency injection
   App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
@@ -176,6 +234,12 @@ services:
       tags: ['app.command_handler']
     App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface:
       tags: ['app.openapi_endpoint_factory']
+    App\Shared\Application\Resolver\DocumentCacheInvalidationResolverInterface:
+      tags: ['app.cache_invalidation_resolver']
+    App\Shared\Application\CommandHandler\CacheRefreshCommandHandlerBase:
+      tags: ['app.cache_refresh_handler']
+    App\Shared\Application\Resolver\CacheRefreshPolicyResolverInterface:
+      tags: ['app.cache_refresh_policy_resolver']
 
   # ===========================================
   # BUS CONFIGURATION (following user-service patterns)

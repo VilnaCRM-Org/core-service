@@ -29,9 +29,32 @@ framework:
         retry_strategy:
           service: 'App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy'
 
+      # Shared async transport for proactive cache refresh work.
+      cache-refresh:
+        dsn: '%env(CACHE_REFRESH_TRANSPORT_DSN)%'
+        options:
+          auto_setup: true
+
+        retry_strategy:
+          max_retries: 3
+          delay: 60000
+          multiplier: 2
+          max_delay: 0
+
+        failure_transport: failed-cache-refresh
+
+      failed-cache-refresh:
+        dsn: '%env(FAILED_CACHE_REFRESH_TRANSPORT_DSN)%'
+        retry_strategy:
+          max_retries: 3
+          delay: 300000
+          multiplier: 2
+          max_delay: 1800000
+
     routing:
       # Route domain event envelopes to async transport
       'App\Shared\Infrastructure\Bus\Event\Async\DomainEventEnvelope': domain-events
+      'App\Shared\Application\Command\CacheRefreshCommand': cache-refresh
 
 when@test:
   framework:
@@ -39,3 +62,5 @@ when@test:
       transports:
         domain-events: 'in-memory://'
         failed-domain-events: 'in-memory://'
+        cache-refresh: 'in-memory://'
+        failed-cache-refresh: 'in-memory://'
