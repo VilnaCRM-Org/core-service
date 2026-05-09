@@ -9,6 +9,10 @@ use App\Core\Customer\Domain\Entity\CustomerStatus;
 use App\Core\Customer\Domain\Entity\CustomerType;
 use App\Core\Customer\Domain\Event\CustomerCreatedEvent;
 use App\Core\Customer\Domain\Event\CustomerDeletedEvent;
+use App\Core\Customer\Domain\Event\CustomerStatusCreatedEvent;
+use App\Core\Customer\Domain\Event\CustomerStatusUpdatedEvent;
+use App\Core\Customer\Domain\Event\CustomerTypeCreatedEvent;
+use App\Core\Customer\Domain\Event\CustomerTypeUpdatedEvent;
 use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Core\Customer\Infrastructure\Collection\CustomerCacheInvalidationRuleCollection;
 use App\Core\Customer\Infrastructure\Collection\CustomerCachePolicyCollection;
@@ -27,7 +31,7 @@ final class CustomerCacheInvalidationRuleCollectionTest extends UnitTestCase
 
     public function testRulesExposeEveryDomainEventRule(): void
     {
-        self::assertCount(12, $this->rules->rules());
+        self::assertCount(16, $this->rules->rules());
 
         $this->assertContainsRule(
             CustomerCreatedEvent::class,
@@ -48,6 +52,34 @@ final class CustomerCacheInvalidationRuleCollectionTest extends UnitTestCase
             'domain_event',
             CustomerCacheInvalidationRuleCollection::OPERATION_DELETED,
             $this->customerFamilies(),
+            CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
+        );
+        $this->assertContainsRule(
+            CustomerStatusCreatedEvent::class,
+            'domain_event',
+            CustomerCacheInvalidationRuleCollection::OPERATION_CREATED,
+            $this->referenceFamilies(),
+            CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
+        );
+        $this->assertContainsRule(
+            CustomerStatusUpdatedEvent::class,
+            'domain_event',
+            CustomerCacheInvalidationRuleCollection::OPERATION_UPDATED,
+            $this->referenceFamilies(),
+            CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
+        );
+        $this->assertContainsRule(
+            CustomerTypeCreatedEvent::class,
+            'domain_event',
+            CustomerCacheInvalidationRuleCollection::OPERATION_CREATED,
+            $this->referenceFamilies(),
+            CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
+        );
+        $this->assertContainsRule(
+            CustomerTypeUpdatedEvent::class,
+            'domain_event',
+            CustomerCacheInvalidationRuleCollection::OPERATION_UPDATED,
+            $this->referenceFamilies(),
             CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
         );
     }
@@ -110,6 +142,29 @@ final class CustomerCacheInvalidationRuleCollectionTest extends UnitTestCase
         self::assertSame(
             CustomerCachePolicyCollection::REFRESH_SOURCE_REPOSITORY,
             $rules[0]['refresh_source']
+        );
+
+        $referenceRules = $this->rules->forDomainEvent(
+            CustomerStatusUpdatedEvent::class
+        );
+
+        self::assertCount(1, $referenceRules);
+        self::assertSame('domain_event', $referenceRules[0]['source']);
+        self::assertSame(
+            CustomerStatusUpdatedEvent::class,
+            $referenceRules[0]['subject']
+        );
+        self::assertSame(
+            CustomerCacheInvalidationRuleCollection::OPERATION_UPDATED,
+            $referenceRules[0]['operation']
+        );
+        self::assertSame(
+            $this->referenceFamilies(),
+            $referenceRules[0]['families']
+        );
+        self::assertSame(
+            CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY,
+            $referenceRules[0]['refresh_source']
         );
     }
 
