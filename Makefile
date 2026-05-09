@@ -105,6 +105,9 @@ BATS_ARGS ?=
 DOCKER_TTY_FLAG = $(if $(CI),-T,)
 BMALPH_PLATFORM ?= codex
 BMALPH_DRY_RUN ?= false
+DOCS_SOURCE_DIR ?= docs
+DOCS_BUILD_DIR ?= build/docs
+DOCS_PHPDOC_IMAGE ?= phpdoc/phpdoc:3
 LOAD_TEST_STACK_COMPOSE_FILE ?= docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
 LOAD_TEST_STACK_ENV = COMPOSE_FILE="$(LOAD_TEST_STACK_COMPOSE_FILE)" APP_DEBUG=0 FRANKENPHP_ENABLE_WATCH=0 FRANKENPHP_SITE_CONFIG= FRANKENPHP_WORKER_CONFIG=
 
@@ -152,6 +155,20 @@ bmalph-init: ## Initialize BMALPH for current project; set BMALPH_DRY_RUN=true t
 
 bmalph-setup: ## Install and initialize BMALPH for current project; defaults to BMALPH_PLATFORM=codex
 	@$(MAKE) bmalph-init BMALPH_PLATFORM="$(BMALPH_PLATFORM)" BMALPH_DRY_RUN="$(BMALPH_DRY_RUN)"
+
+docs: docs-check docs-api ## Validate docs and generate source API reference into build/docs
+
+docs-check: ## Validate documentation structure and local Markdown links
+	bash scripts/check-docs.sh
+
+docs-api: ## Generate PHP API reference with PHPDocumentor Docker image
+	mkdir -p "$(DOCS_BUILD_DIR)"
+	$(DOCKER) run --rm \
+		--user "$$(id -u):$$(id -g)" \
+		-v "$(CURDIR)":/data \
+		-w /data \
+		$(DOCS_PHPDOC_IMAGE) \
+		--config=phpdoc.dist.xml
 
 bats: ## Run tests for bash commands
 	$(BATS_BIN) $(BATS_ARGS) $(BATS_FILES)
