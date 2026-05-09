@@ -53,7 +53,7 @@ final class CustomerPatchPayloadDenormalizer implements
     ): mixed {
         $context[self::ALREADY_CALLED] = true;
 
-        if (is_array($data) && isset(self::FIELD_MAP[$type])) {
+        if ($this->shouldFilterUnsupportedFields($data, $type, $context)) {
             $data = array_intersect_key($data, self::FIELD_MAP[$type]);
         }
 
@@ -80,10 +80,6 @@ final class CustomerPatchPayloadDenormalizer implements
             return false;
         }
 
-        if (($context['allow_extra_attributes'] ?? false) !== true) {
-            return false;
-        }
-
         return is_array($data) && isset(self::FIELD_MAP[$type]);
     }
 
@@ -97,5 +93,20 @@ final class CustomerPatchPayloadDenormalizer implements
             StatusPatch::class => false,
             TypePatch::class => false,
         ];
+    }
+
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.DisallowMixedTypeHint
+     *
+     * @param array<string, mixed> $context
+     */
+    private function shouldFilterUnsupportedFields(
+        mixed $data,
+        string $type,
+        array $context
+    ): bool {
+        return is_array($data)
+            && isset(self::FIELD_MAP[$type])
+            && ($context['allow_extra_attributes'] ?? false) === true;
     }
 }

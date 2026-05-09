@@ -34,9 +34,9 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
         ));
     }
 
-    public function testDoesNotSupportPatchDtoWhenExtraAttributesAreStrict(): void
+    public function testSupportsPatchDtoWhenExtraAttributesAreStrict(): void
     {
-        self::assertFalse($this->denormalizer->supportsDenormalization(
+        self::assertTrue($this->denormalizer->supportsDenormalization(
             ['value' => 'VIP'],
             TypePatch::class,
             'json',
@@ -80,6 +80,38 @@ final class CustomerPatchPayloadDenormalizerTest extends UnitTestCase
                 TypePatch::class,
                 'json',
                 ['allow_extra_attributes' => true]
+            )
+        );
+    }
+
+    public function testDenormalizePreservesStrictPayloadKeys(): void
+    {
+        $payload = [
+            'value' => 'VIP',
+            'unknown' => 'rejected downstream',
+        ];
+        $expectedDto = new TypePatch('VIP');
+
+        $this->innerDenormalizer
+            ->expects($this->once())
+            ->method('denormalize')
+            ->with(
+                $payload,
+                TypePatch::class,
+                'json',
+                $this->callback(static fn (array $context): bool => (
+                    $context['customer_patch_payload_denormalizer_called'] ?? false
+                ) === true)
+            )
+            ->willReturn($expectedDto);
+
+        self::assertSame(
+            $expectedDto,
+            $this->denormalizer->denormalize(
+                $payload,
+                TypePatch::class,
+                'json',
+                ['allow_extra_attributes' => false]
             )
         );
     }
