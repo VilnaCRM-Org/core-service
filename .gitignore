@@ -47,6 +47,7 @@ infection.log
 summary.log
 .sandbox-poc/bin/
 /coverage/
+/build/
 .ralph/
 .ralph/logs/
 _bmad/
