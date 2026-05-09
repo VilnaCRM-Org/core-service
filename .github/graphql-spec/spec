@@ -82,6 +82,57 @@ type Query {
     "Returns the elements in the list that come after the specified cursor."
     after: String
   ): HealthCheckCursorConnection
+  onboardingStep(id: ID!): OnboardingStep
+  onboardingSteps(
+    "Returns the first n elements from the list."
+    first: Int
+
+    "Returns the last n elements from the list."
+    last: Int
+
+    "Returns the elements in the list that come before the specified cursor."
+    before: String
+
+    "Returns the elements in the list that come after the specified cursor."
+    after: String
+
+    order: [OnboardingStepFilter_order]
+    code: String
+    code_list: [String]
+    label: String
+    enabled: Boolean
+    ulid: [OnboardingStepFilter_ulid]
+  ): OnboardingStepCursorConnection
+  tariffPlan(id: ID!): TariffPlan
+  tariffPlans(
+    "Returns the first n elements from the list."
+    first: Int
+
+    "Returns the last n elements from the list."
+    last: Int
+
+    "Returns the elements in the list that come before the specified cursor."
+    before: String
+
+    "Returns the elements in the list that come after the specified cursor."
+    after: String
+
+    order: [TariffPlanFilter_order]
+    code: String
+    code_list: [String]
+    name: String
+    description: String
+    priceCurrency: String
+    priceCurrency_list: [String]
+    pricePeriod: String
+    pricePeriod_list: [String]
+    enabled: Boolean
+    functionalLimitations: Boolean
+    priceCents: [TariffPlanFilter_priceCents]
+    userLimit: [TariffPlanFilter_userLimit]
+    position: [TariffPlanFilter_position]
+    ulid: [TariffPlanFilter_ulid]
+  ): TariffPlanCursorConnection
 }
 
 "A node, according to the Relay specification."
@@ -262,6 +313,129 @@ type HealthCheckPageInfo {
   hasPreviousPage: Boolean!
 }
 
+type OnboardingStep implements Node {
+  id: ID!
+  code: String!
+  label: String!
+  position: Int!
+  enabled: Boolean!
+}
+
+input OnboardingStepFilter_order {
+  ulid: String
+  position: String
+  code: String
+  label: String
+}
+
+input OnboardingStepFilter_ulid {
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  between: String
+}
+
+"Cursor connection for OnboardingStep."
+type OnboardingStepCursorConnection {
+  edges: [OnboardingStepEdge]
+  pageInfo: OnboardingStepPageInfo!
+  totalCount: Int!
+}
+
+"Edge of OnboardingStep."
+type OnboardingStepEdge {
+  node: OnboardingStep
+  cursor: String!
+}
+
+"Information about the current page."
+type OnboardingStepPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type TariffPlan implements Node {
+  id: ID!
+  code: String!
+  name: String!
+  description: String!
+  deploymentOptions: Iterable!
+  functionalLimitations: Boolean!
+  userLimit: Int
+  priceCents: Int!
+  priceCurrency: String!
+  pricePeriod: String!
+  position: Int!
+  enabled: Boolean!
+}
+
+"The `Iterable` scalar type represents an array or a Traversable with any kind of data."
+scalar Iterable
+
+input TariffPlanFilter_order {
+  ulid: String
+  position: String
+  code: String
+  name: String
+  priceCents: String
+}
+
+input TariffPlanFilter_priceCents {
+  between: String
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+}
+
+input TariffPlanFilter_userLimit {
+  between: String
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+}
+
+input TariffPlanFilter_position {
+  between: String
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+}
+
+input TariffPlanFilter_ulid {
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  between: String
+}
+
+"Cursor connection for TariffPlan."
+type TariffPlanCursorConnection {
+  edges: [TariffPlanEdge]
+  pageInfo: TariffPlanPageInfo!
+  totalCount: Int!
+}
+
+"Edge of TariffPlan."
+type TariffPlanEdge {
+  node: TariffPlan
+  cursor: String!
+}
+
+"Information about the current page."
+type TariffPlanPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
 type Mutation {
   "Creates a Customer."
   createCustomer(input: createCustomerInput!): createCustomerPayload
@@ -298,6 +472,24 @@ type Mutation {
 
   "Creates a HealthCheck."
   createHealthCheck(input: createHealthCheckInput!): createHealthCheckPayload
+
+  "Creates a OnboardingStep."
+  createOnboardingStep(input: createOnboardingStepInput!): createOnboardingStepPayload
+
+  "Updates a OnboardingStep."
+  updateOnboardingStep(input: updateOnboardingStepInput!): updateOnboardingStepPayload
+
+  "Deletes a OnboardingStep."
+  deleteOnboardingStep(input: deleteOnboardingStepInput!): deleteOnboardingStepPayload
+
+  "Creates a TariffPlan."
+  createTariffPlan(input: createTariffPlanInput!): createTariffPlanPayload
+
+  "Updates a TariffPlan."
+  updateTariffPlan(input: updateTariffPlanInput!): updateTariffPlanPayload
+
+  "Deletes a TariffPlan."
+  deleteTariffPlan(input: deleteTariffPlanInput!): deleteTariffPlanPayload
 }
 
 "Creates a Customer."
@@ -474,4 +666,116 @@ input createHealthCheckInput {
 type createHealthCheckPayload {
   healthCheck: HealthCheck
   clientMutationId: String
+}
+
+"Creates a OnboardingStep."
+input createOnboardingStepInput {
+  code: String
+  label: String
+  position: Int
+  enabled: Boolean
+  clientMutationId: String
+}
+
+"Creates a OnboardingStep."
+type createOnboardingStepPayload {
+  onboardingStep: OnboardingStep
+  clientMutationId: String
+}
+
+"Updates a OnboardingStep."
+input updateOnboardingStepInput {
+  id: ID!
+  code: String
+  label: String
+  position: Int
+  enabled: Boolean
+  _id: String
+  clientMutationId: String
+}
+
+"Updates a OnboardingStep."
+type updateOnboardingStepPayload {
+  onboardingStep: OnboardingStep
+  clientMutationId: String
+}
+
+"Deletes a OnboardingStep."
+input deleteOnboardingStepInput {
+  id: ID!
+  clientMutationId: String
+}
+
+"Deletes a OnboardingStep."
+type deleteOnboardingStepPayload {
+  onboardingStep: deleteOnboardingStepPayloadData
+  clientMutationId: String
+}
+
+"Deletes a OnboardingStep."
+type deleteOnboardingStepPayloadData implements Node {
+  id: ID!
+}
+
+"Creates a TariffPlan."
+input createTariffPlanInput {
+  deploymentOptions: Iterable
+  code: String
+  name: String
+  description: String
+  functionalLimitations: Boolean
+  userLimit: Int
+  priceCents: Int
+  priceCurrency: String
+  pricePeriod: String
+  position: Int
+  enabled: Boolean
+  clientMutationId: String
+}
+
+"Creates a TariffPlan."
+type createTariffPlanPayload {
+  tariffPlan: TariffPlan
+  clientMutationId: String
+}
+
+"Updates a TariffPlan."
+input updateTariffPlanInput {
+  id: ID!
+  deploymentOptions: Iterable
+  code: String
+  name: String
+  description: String
+  functionalLimitations: Boolean
+  userLimit: Int
+  priceCents: Int
+  priceCurrency: String
+  pricePeriod: String
+  position: Int
+  enabled: Boolean
+  _id: String
+  clientMutationId: String
+}
+
+"Updates a TariffPlan."
+type updateTariffPlanPayload {
+  tariffPlan: TariffPlan
+  clientMutationId: String
+}
+
+"Deletes a TariffPlan."
+input deleteTariffPlanInput {
+  id: ID!
+  clientMutationId: String
+}
+
+"Deletes a TariffPlan."
+type deleteTariffPlanPayload {
+  tariffPlan: deleteTariffPlanPayloadData
+  clientMutationId: String
+}
+
+"Deletes a TariffPlan."
+type deleteTariffPlanPayloadData implements Node {
+  id: ID!
 }

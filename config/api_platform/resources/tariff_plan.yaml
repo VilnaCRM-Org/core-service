@@ -1,0 +1,67 @@
+App\Core\Onboarding\Domain\Entity\TariffPlan:
+  exceptionToStatus:
+    'App\Core\Onboarding\Domain\Exception\TariffPlanNotFoundException': 404
+  normalizationContext:
+    groups: ['output']
+  paginationViaCursor:
+    - { field: 'ulid', direction: 'DESC' }
+
+  operations:
+    ApiPlatform\Metadata\GetCollection:
+      filters:
+        - tariff_plan.mongodb.order
+        - tariff_plan.mongodb.search
+        - tariff_plan.mongodb.boolean
+        - tariff_plan.mongodb.range
+        - mongodb.range
+    ApiPlatform\Metadata\Get: ~
+    ApiPlatform\Metadata\Put:
+      input: App\Core\Onboarding\Application\DTO\TariffPlanPut
+      processor: App\Core\Onboarding\Application\Processor\TariffPlanPutProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+    ApiPlatform\Metadata\Patch:
+      input: App\Core\Onboarding\Application\DTO\TariffPlanPatch
+      processor: App\Core\Onboarding\Application\Processor\TariffPlanPatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: true
+    ApiPlatform\Metadata\Delete: ~
+    ApiPlatform\Metadata\Post:
+      input: App\Core\Onboarding\Application\DTO\TariffPlanCreate
+      processor: App\Core\Onboarding\Application\Processor\CreateTariffPlanProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+
+  graphQlOperations:
+    ApiPlatform\Metadata\GraphQl\Query:
+      filters:
+        - tariff_plan.mongodb.order
+        - tariff_plan.mongodb.search
+        - tariff_plan.mongodb.boolean
+        - tariff_plan.mongodb.range
+        - mongodb.range
+    ApiPlatform\Metadata\GraphQl\QueryCollection:
+      filters:
+        - tariff_plan.mongodb.order
+        - tariff_plan.mongodb.search
+        - tariff_plan.mongodb.boolean
+        - tariff_plan.mongodb.range
+        - mongodb.range
+      paginationType: cursor
+    ApiPlatform\Metadata\GraphQl\Mutation:
+      name: create
+      input: App\Core\Onboarding\Application\DTO\TariffPlanCreate
+      processor: App\Core\Onboarding\Application\Processor\CreateTariffPlanProcessor
+      denormalizationContext:
+        allow_extra_attributes: false
+    update_mutation:
+      class: ApiPlatform\Metadata\GraphQl\Mutation
+      name: update
+      input: App\Core\Onboarding\Application\DTO\TariffPlanPatch
+      processor: App\Core\Onboarding\Application\Processor\TariffPlanPatchProcessor
+      denormalizationContext:
+        allow_extra_attributes: true
+    ApiPlatform\Metadata\GraphQl\DeleteMutation:
+      name: delete
+      normalizationContext:
+        groups: ['deleteMutationOutput']

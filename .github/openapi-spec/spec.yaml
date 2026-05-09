@@ -3076,6 +3076,978 @@ paths:
           description: 'Health check failed.'
       summary: 'Retrieves a HealthCheck resource.'
       description: 'Retrieves a HealthCheck resource.'
+  /api/onboarding_steps:
+    get:
+      operationId: api_onboarding_steps_get_collection
+      tags:
+        - OnboardingStep
+      responses:
+        '200':
+          description: 'OnboardingStep collection'
+          content:
+            application/ld+json:
+              schema:
+                type: object
+                description: 'OnboardingStep.jsonld-output collection.'
+                allOf:
+                  - { $ref: '#/components/schemas/HydraCollectionBaseSchema' }
+                  - { type: object, required: [member], properties: { member: { type: array, items: { $ref: '#/components/schemas/OnboardingStep.jsonld-output' } } } }
+      summary: 'Retrieves the collection of OnboardingStep resources.'
+      description: 'Retrieves the collection of OnboardingStep resources.'
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'The collection page number'
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+            default: 1
+          style: form
+          explode: true
+        -
+          name: itemsPerPage
+          in: query
+          description: 'The number of items per page'
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+            default: 30
+            minimum: 0
+            maximum: 30
+          style: form
+          explode: true
+        -
+          name: 'order[ulid]'
+          in: query
+          description: 'Sort by customer unique identifier'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: desc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[position]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[code]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[label]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: code
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'code[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        -
+          name: label
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: enabled
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: boolean
+          style: form
+          explode: false
+        -
+          name: 'ulid[lt]'
+          in: query
+          description: 'Filter on the ulid property using the lt operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[lte]'
+          in: query
+          description: 'Filter on the ulid property using the lte operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[gt]'
+          in: query
+          description: 'Filter on the ulid property using the gt operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[gte]'
+          in: query
+          description: 'Filter on the ulid property using the gte operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[between]'
+          in: query
+          description: 'Filter on the ulid property using the between operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+    post:
+      operationId: api_onboarding_steps_post
+      tags:
+        - OnboardingStep
+      responses:
+        '201':
+          description: 'OnboardingStep resource created'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStep.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Creates a OnboardingStep resource.'
+      description: 'Creates a OnboardingStep resource.'
+      requestBody:
+        description: 'The new OnboardingStep resource'
+        content:
+          application/ld+json:
+            schema:
+              $ref: '#/components/schemas/OnboardingStep.OnboardingStepCreate'
+        required: true
+  '/api/onboarding_steps/{ulid}':
+    get:
+      operationId: api_onboarding_steps_ulid_get
+      tags:
+        - OnboardingStep
+      responses:
+        '200':
+          description: 'OnboardingStep resource'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStep.jsonld-output'
+      summary: 'Retrieves a OnboardingStep resource.'
+      description: 'Retrieves a OnboardingStep resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'OnboardingStep identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+    put:
+      operationId: api_onboarding_steps_ulid_put
+      tags:
+        - OnboardingStep
+      responses:
+        '200':
+          description: 'OnboardingStep resource updated'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStep.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Replaces the OnboardingStep resource.'
+      description: 'Replaces the OnboardingStep resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'OnboardingStep identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+      requestBody:
+        description: 'The updated OnboardingStep resource'
+        content:
+          application/ld+json:
+            schema:
+              $ref: '#/components/schemas/OnboardingStep.OnboardingStepPut'
+        required: true
+    delete:
+      operationId: api_onboarding_steps_ulid_delete
+      tags:
+        - OnboardingStep
+      responses:
+        '204':
+          description: 'OnboardingStep resource deleted'
+      summary: 'Removes the OnboardingStep resource.'
+      description: 'Removes the OnboardingStep resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'OnboardingStep identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+    patch:
+      operationId: api_onboarding_steps_ulid_patch
+      tags:
+        - OnboardingStep
+      responses:
+        '200':
+          description: 'OnboardingStep resource updated'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStep.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Updates the OnboardingStep resource.'
+      description: 'Updates the OnboardingStep resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'OnboardingStep identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+      requestBody:
+        description: 'The updated OnboardingStep resource'
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/OnboardingStep.OnboardingStepPatch.jsonMergePatch'
+        required: true
+  /api/tariff_plans:
+    get:
+      operationId: api_tariff_plans_get_collection
+      tags:
+        - TariffPlan
+      responses:
+        '200':
+          description: 'TariffPlan collection'
+          content:
+            application/ld+json:
+              schema:
+                type: object
+                description: 'TariffPlan.jsonld-output collection.'
+                allOf:
+                  - { $ref: '#/components/schemas/HydraCollectionBaseSchema' }
+                  - { type: object, required: [member], properties: { member: { type: array, items: { $ref: '#/components/schemas/TariffPlan.jsonld-output' } } } }
+      summary: 'Retrieves the collection of TariffPlan resources.'
+      description: 'Retrieves the collection of TariffPlan resources.'
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'The collection page number'
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+            default: 1
+          style: form
+          explode: true
+        -
+          name: itemsPerPage
+          in: query
+          description: 'The number of items per page'
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+            default: 30
+            minimum: 0
+            maximum: 30
+          style: form
+          explode: true
+        -
+          name: 'order[ulid]'
+          in: query
+          description: 'Sort by customer unique identifier'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: desc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[position]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[code]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[name]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: 'order[priceCents]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          style: form
+          explode: false
+        -
+          name: code
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'code[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        -
+          name: name
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: description
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: priceCurrency
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'priceCurrency[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        -
+          name: pricePeriod
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'pricePeriod[]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        -
+          name: enabled
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: boolean
+          style: form
+          explode: false
+        -
+          name: functionalLimitations
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: boolean
+          style: form
+          explode: false
+        -
+          name: 'priceCents[between]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'priceCents[gt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'priceCents[gte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'priceCents[lt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'priceCents[lte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'userLimit[between]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'userLimit[gt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'userLimit[gte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'userLimit[lt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'userLimit[lte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'position[between]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'position[gt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'position[gte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'position[lt]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'position[lte]'
+          in: query
+          description: ''
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[lt]'
+          in: query
+          description: 'Filter on the ulid property using the lt operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[lte]'
+          in: query
+          description: 'Filter on the ulid property using the lte operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[gt]'
+          in: query
+          description: 'Filter on the ulid property using the gt operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[gte]'
+          in: query
+          description: 'Filter on the ulid property using the gte operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+        -
+          name: 'ulid[between]'
+          in: query
+          description: 'Filter on the ulid property using the between operator'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          style: form
+          explode: false
+    post:
+      operationId: api_tariff_plans_post
+      tags:
+        - TariffPlan
+      responses:
+        '201':
+          description: 'TariffPlan resource created'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/TariffPlan.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Creates a TariffPlan resource.'
+      description: 'Creates a TariffPlan resource.'
+      requestBody:
+        description: 'The new TariffPlan resource'
+        content:
+          application/ld+json:
+            schema:
+              $ref: '#/components/schemas/TariffPlan.TariffPlanCreate'
+        required: true
+  '/api/tariff_plans/{ulid}':
+    get:
+      operationId: api_tariff_plans_ulid_get
+      tags:
+        - TariffPlan
+      responses:
+        '200':
+          description: 'TariffPlan resource'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/TariffPlan.jsonld-output'
+      summary: 'Retrieves a TariffPlan resource.'
+      description: 'Retrieves a TariffPlan resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'TariffPlan identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+    put:
+      operationId: api_tariff_plans_ulid_put
+      tags:
+        - TariffPlan
+      responses:
+        '200':
+          description: 'TariffPlan resource updated'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/TariffPlan.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Replaces the TariffPlan resource.'
+      description: 'Replaces the TariffPlan resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'TariffPlan identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+      requestBody:
+        description: 'The updated TariffPlan resource'
+        content:
+          application/ld+json:
+            schema:
+              $ref: '#/components/schemas/TariffPlan.TariffPlanPut'
+        required: true
+    delete:
+      operationId: api_tariff_plans_ulid_delete
+      tags:
+        - TariffPlan
+      responses:
+        '204':
+          description: 'TariffPlan resource deleted'
+      summary: 'Removes the TariffPlan resource.'
+      description: 'Removes the TariffPlan resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'TariffPlan identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+    patch:
+      operationId: api_tariff_plans_ulid_patch
+      tags:
+        - TariffPlan
+      responses:
+        '200':
+          description: 'TariffPlan resource updated'
+          content:
+            application/ld+json:
+              schema:
+                $ref: '#/components/schemas/TariffPlan.jsonld-output'
+        '400':
+          description: 'Invalid input'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 'An error occurred'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintViolation'
+      summary: 'Updates the TariffPlan resource.'
+      description: 'Updates the TariffPlan resource.'
+      parameters:
+        -
+          name: ulid
+          in: path
+          description: 'TariffPlan identifier'
+          required: true
+          deprecated: false
+          schema:
+            type: string
+          style: simple
+          explode: false
+      requestBody:
+        description: 'The updated TariffPlan resource'
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/TariffPlan.TariffPlanPatch.jsonMergePatch'
+        required: true
 components:
   schemas:
     ConstraintViolation:
@@ -3505,6 +4477,392 @@ components:
       required:
         - '@id'
         - '@type'
+    OnboardingStep.OnboardingStepCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - label
+        - position
+        - enabled
+      properties:
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        label:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+    OnboardingStep.OnboardingStepPatch.jsonMergePatch:
+      type: object
+      properties:
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        label:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+        id:
+          type:
+            - string
+            - 'null'
+    OnboardingStep.OnboardingStepPut:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - label
+        - position
+        - enabled
+      properties:
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        label:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+    OnboardingStep.jsonld-output:
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+          properties:
+            code:
+              type: string
+            label:
+              type: string
+            position:
+              type: integer
+            enabled:
+              type: boolean
+            ulid:
+              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+    TariffPlan.TariffPlanCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        deploymentOptions:
+          minItems: 1
+          maxItems: 10
+          type:
+            - array
+            - 'null'
+          items:
+            type:
+              - string
+              - 'null'
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        name:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        description:
+          maxLength: 1000
+          type:
+            - string
+            - 'null'
+        functionalLimitations:
+          type:
+            - boolean
+            - 'null'
+        userLimit:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCents:
+          minimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCurrency:
+          pattern: '^([A-Z]{3})$'
+          type:
+            - string
+            - 'null'
+        pricePeriod:
+          enum:
+            - none
+            - one_time
+            - monthly
+            - yearly
+            - per_user
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+      required:
+        - code
+        - name
+        - description
+        - functionalLimitations
+        - priceCents
+        - priceCurrency
+        - pricePeriod
+        - position
+        - enabled
+    TariffPlan.TariffPlanPatch.jsonMergePatch:
+      type: object
+      properties:
+        deploymentOptions:
+          minItems: 1
+          maxItems: 10
+          type:
+            - array
+            - 'null'
+          items:
+            type:
+              - string
+              - 'null'
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        name:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        description:
+          maxLength: 1000
+          type:
+            - string
+            - 'null'
+        functionalLimitations:
+          type:
+            - boolean
+            - 'null'
+        userLimit:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCents:
+          minimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCurrency:
+          pattern: '^([A-Z]{3})$'
+          type:
+            - string
+            - 'null'
+        pricePeriod:
+          enum:
+            - none
+            - one_time
+            - monthly
+            - yearly
+            - per_user
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+        id:
+          type:
+            - string
+            - 'null'
+    TariffPlan.TariffPlanPut:
+      type: object
+      additionalProperties: false
+      properties:
+        deploymentOptions:
+          minItems: 1
+          maxItems: 10
+          type:
+            - array
+            - 'null'
+          items:
+            type:
+              - string
+              - 'null'
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type:
+            - string
+            - 'null'
+        name:
+          maxLength: 255
+          type:
+            - string
+            - 'null'
+        description:
+          maxLength: 1000
+          type:
+            - string
+            - 'null'
+        functionalLimitations:
+          type:
+            - boolean
+            - 'null'
+        userLimit:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCents:
+          minimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCurrency:
+          pattern: '^([A-Z]{3})$'
+          type:
+            - string
+            - 'null'
+        pricePeriod:
+          enum:
+            - none
+            - one_time
+            - monthly
+            - yearly
+            - per_user
+          type:
+            - string
+            - 'null'
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        enabled:
+          type:
+            - boolean
+            - 'null'
+      required:
+        - code
+        - name
+        - description
+        - functionalLimitations
+        - priceCents
+        - priceCurrency
+        - pricePeriod
+        - position
+        - enabled
+    TariffPlan.jsonld-output:
+      allOf:
+        -
+          $ref: '#/components/schemas/HydraItemBaseSchema'
+        -
+          type: object
+          properties:
+            ulid:
+              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+            code:
+              readOnly: true
+              type: string
+            name:
+              readOnly: true
+              type: string
+            description:
+              readOnly: true
+              type: string
+            deploymentOptions:
+              readOnly: true
+              type: array
+              items:
+                type:
+                  - string
+                  - 'null'
+            functionalLimitations:
+              readOnly: true
+              type: boolean
+            userLimit:
+              readOnly: true
+              type:
+                - integer
+                - 'null'
+            priceCents:
+              readOnly: true
+              type: integer
+            priceCurrency:
+              readOnly: true
+              type: string
+            pricePeriod:
+              readOnly: true
+              type: string
+            position:
+              readOnly: true
+              type: integer
+            enabled:
+              readOnly: true
+              type: boolean
     UlidInterface.jsonld-output:
       type: object
       properties:
@@ -3524,4 +4882,10 @@ tags:
   -
     name: HealthCheck
     description: "Resource 'HealthCheck' operations."
+  -
+    name: OnboardingStep
+    description: "Resource 'OnboardingStep' operations."
+  -
+    name: TariffPlan
+    description: "Resource 'TariffPlan' operations."
 webhooks: {  }

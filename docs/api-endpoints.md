@@ -69,6 +69,34 @@ Learn more about [Developer Guide](developer-guide.md).
 | ------ | ------------- | --------------------------- |
 | GET    | `/api/health` | Check service health status |
 
+### Onboarding Step Endpoints
+
+| Method | Endpoint                     | Description                          |
+| ------ | ---------------------------- | ------------------------------------ |
+| GET    | `/api/onboarding_steps`      | Get onboarding setup steps           |
+| POST   | `/api/onboarding_steps`      | Create a new onboarding setup step   |
+| GET    | `/api/onboarding_steps/{id}` | Get a specific onboarding setup step |
+| PUT    | `/api/onboarding_steps/{id}` | Replace an onboarding setup step     |
+| PATCH  | `/api/onboarding_steps/{id}` | Update an onboarding setup step      |
+| DELETE | `/api/onboarding_steps/{id}` | Delete an onboarding setup step      |
+
+### Tariff Plan Endpoints
+
+| Method | Endpoint                 | Description                 |
+| ------ | ------------------------ | --------------------------- |
+| GET    | `/api/tariff_plans`      | Get onboarding tariff plans |
+| POST   | `/api/tariff_plans`      | Create a new tariff plan    |
+| GET    | `/api/tariff_plans/{id}` | Get a specific tariff plan  |
+| PUT    | `/api/tariff_plans/{id}` | Replace a tariff plan       |
+| PATCH  | `/api/tariff_plans/{id}` | Update a tariff plan        |
+| DELETE | `/api/tariff_plans/{id}` | Delete a tariff plan        |
+
+Default onboarding data can be seeded with:
+
+```bash
+bin/console app:onboarding:seed-defaults
+```
+
 ## Available GraphQL Operations
 
 ### Queries
@@ -79,6 +107,10 @@ Learn more about [Developer Guide](developer-guide.md).
 - `customerTypes(...)` - Get collection of customer types
 - `customerStatus(id: ID!)` - Get a specific customer status
 - `customerStatuses(...)` - Get collection of customer statuses
+- `onboardingStep(id: ID!)` - Get a specific onboarding setup step
+- `onboardingSteps(...)` - Get collection of onboarding setup steps
+- `tariffPlan(id: ID!)` - Get a specific tariff plan
+- `tariffPlans(...)` - Get collection of tariff plans
 
 ### Mutations
 
@@ -91,6 +123,12 @@ Learn more about [Developer Guide](developer-guide.md).
 - `createCustomerStatus(input: CreateCustomerStatusInput!)` - Create a new customer status
 - `updateCustomerStatus(input: UpdateCustomerStatusInput!)` - Update an existing customer status
 - `deleteCustomerStatus(input: DeleteCustomerStatusInput!)` - Delete a customer status
+- `createOnboardingStep(input: createOnboardingStepInput!)` - Create an onboarding setup step
+- `updateOnboardingStep(input: updateOnboardingStepInput!)` - Update an onboarding setup step
+- `deleteOnboardingStep(input: deleteOnboardingStepInput!)` - Delete an onboarding setup step
+- `createTariffPlan(input: createTariffPlanInput!)` - Create a tariff plan
+- `updateTariffPlan(input: updateTariffPlanInput!)` - Update a tariff plan
+- `deleteTariffPlan(input: deleteTariffPlanInput!)` - Delete a tariff plan
 
 ## Filtering and Sorting
 
@@ -112,7 +150,13 @@ Collections can be sorted using the `order` parameter:
 ```
 GET /api/customers?order[createdAt]=desc
 GET /api/customers?order[initials]=asc
+GET /api/onboarding_steps?order[position]=asc
+GET /api/tariff_plans?order[priceCents]=asc
 ```
+
+Onboarding steps can be filtered by `code`, `label`, and `enabled`.
+
+Tariff plans can be filtered by `code`, `name`, `description`, `priceCurrency`, `pricePeriod`, `enabled`, `functionalLimitations`, `priceCents`, `userLimit`, and `position`.
 
 ## Example GraphQL Queries
 

@@ -1,0 +1,12 @@
+App\Core\Onboarding\Domain\Entity\OnboardingStep:
+  attributes:
+    ulid:
+      groups: ['output']
+    code:
+      groups: ['output']
+    label:
+      groups: ['output']
+    position:
+      groups: ['output']
+    enabled:
+      groups: ['output']

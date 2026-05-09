@@ -17,3 +17,9 @@ doctrine_mongodb:
           dir: '%kernel.project_dir%/config/doctrine'
           prefix: 'App\Core\Customer\Domain\Entity'
           alias: App
+        Onboarding:
+          is_bundle: false
+          type: xml
+          dir: '%kernel.project_dir%/config/doctrine_onboarding'
+          prefix: 'App\Core\Onboarding\Domain\Entity'
+          alias: Onboarding

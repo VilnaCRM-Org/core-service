@@ -94,6 +94,66 @@ services:
     tags:
       - { name: 'api_platform.filter', id: 'customer.mongodb.status.partial_search' }
 
+  app.onboarding_step.order_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+    arguments: [{ 'ulid': 'desc', 'position': 'asc', 'code': 'asc', 'label': 'asc' }]
+    tags:
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.order' }
+
+  app.onboarding_step.search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments: [{ 'code': 'exact', 'label': 'partial' }]
+    tags:
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.search' }
+
+  app.onboarding_step.boolean_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
+    arguments: [{ 'enabled': ~ }]
+    tags:
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.boolean' }
+
+  app.tariff_plan.order_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.order_filter'
+    arguments:
+      [
+        {
+          'ulid': 'desc',
+          'position': 'asc',
+          'code': 'asc',
+          'name': 'asc',
+          'priceCents': 'asc',
+        },
+      ]
+    tags:
+      - { name: 'api_platform.filter', id: 'tariff_plan.mongodb.order' }
+
+  app.tariff_plan.search_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.search_filter'
+    arguments:
+      [
+        {
+          'code': 'exact',
+          'name': 'partial',
+          'description': 'partial',
+          'priceCurrency': 'exact',
+          'pricePeriod': 'exact',
+        },
+      ]
+    tags:
+      - { name: 'api_platform.filter', id: 'tariff_plan.mongodb.search' }
+
+  app.tariff_plan.boolean_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
+    arguments: [{ 'enabled': ~, 'functionalLimitations': ~ }]
+    tags:
+      - { name: 'api_platform.filter', id: 'tariff_plan.mongodb.boolean' }
+
+  app.tariff_plan.range_filter:
+    parent: 'api_platform.doctrine_mongodb.odm.range_filter'
+    arguments: [{ 'priceCents': ~, 'userLimit': ~, 'position': ~ }]
+    tags:
+      - { name: 'api_platform.filter', id: 'tariff_plan.mongodb.range' }
+
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
   App\:
@@ -214,6 +274,14 @@ services:
   # Alias interface to cached repository for dependency injection
   App\Core\Customer\Domain\Repository\CustomerRepositoryInterface:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
+    public: true
+
+  App\Core\Onboarding\Domain\Repository\OnboardingStepRepositoryInterface:
+    alias: App\Core\Onboarding\Infrastructure\Repository\OnboardingStepRepository
+    public: true
+
+  App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface:
+    alias: App\Core\Onboarding\Infrastructure\Repository\TariffPlanRepository
     public: true
 
   # Cache invalidation event subscribers - auto-bind cache.customer

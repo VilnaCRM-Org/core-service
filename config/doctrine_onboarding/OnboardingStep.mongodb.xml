@@ -1,0 +1,29 @@
+<doctrine-mongo-mapping
+  xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                                            http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd"
+>
+    <document name="App\Core\Onboarding\Domain\Entity\OnboardingStep" db="app" collection="onboarding_steps">
+        <id field-name="ulid" type="ulid" strategy="NONE" />
+
+        <field field-name="code" type="string" />
+        <field field-name="label" type="string" />
+        <field field-name="position" type="int" />
+        <field field-name="enabled" type="boolean" />
+
+        <indexes>
+            <index unique="true">
+                <key name="code" order="asc" />
+            </index>
+            <index>
+                <key name="position" order="asc" />
+                <key name="ulid" order="asc" />
+            </index>
+            <index>
+                <key name="enabled" order="asc" />
+                <key name="position" order="asc" />
+            </index>
+        </indexes>
+    </document>
+</doctrine-mongo-mapping>

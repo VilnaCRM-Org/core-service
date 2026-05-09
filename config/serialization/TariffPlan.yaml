@@ -1,0 +1,26 @@
+App\Core\Onboarding\Domain\Entity\TariffPlan:
+  attributes:
+    ulid:
+      groups: ['output']
+    code:
+      groups: ['output']
+    name:
+      groups: ['output']
+    description:
+      groups: ['output']
+    deploymentOptions:
+      groups: ['output']
+    functionalLimitations:
+      groups: ['output']
+    userLimit:
+      groups: ['output']
+    priceCents:
+      groups: ['output']
+    priceCurrency:
+      groups: ['output']
+    pricePeriod:
+      groups: ['output']
+    position:
+      groups: ['output']
+    enabled:
+      groups: ['output']
