@@ -4,10 +4,10 @@ Core Service persists customer-domain data in MongoDB through Doctrine MongoDB O
 
 ## Document Ownership
 
-| Domain concept | Mapping file | Owning context | Purpose |
-| --- | --- | --- | --- |
-| Customer | `config/doctrine/Customer.mongodb.xml` | `Core/Customer` | Main customer aggregate and contact fields |
-| Customer type | `config/doctrine/CustomerType.mongodb.xml` | `Core/Customer` | Classification values referenced by customers |
+| Domain concept  | Mapping file                                 | Owning context  | Purpose                                         |
+| --------------- | -------------------------------------------- | --------------- | ----------------------------------------------- |
+| Customer        | `config/doctrine/Customer.mongodb.xml`       | `Core/Customer` | Main customer aggregate and contact fields      |
+| Customer type   | `config/doctrine/CustomerType.mongodb.xml`   | `Core/Customer` | Classification values referenced by customers   |
 | Customer status | `config/doctrine/CustomerStatus.mongodb.xml` | `Core/Customer` | Lifecycle status values referenced by customers |
 
 The `Shared` and `Internal/HealthCheck` contexts do not own MongoDB collections directly. Shared classes provide cross-cutting abstractions, and health checks verify connectivity.
