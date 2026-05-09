@@ -67,10 +67,16 @@ final class OpenApiInputSchemaUpdater
         'CustomerStatus.StatusCreate' => [
             'value' => ['minLength' => 1],
         ],
+        'CustomerStatus.StatusPatch.jsonMergePatch' => [
+            'value' => ['minLength' => 1],
+        ],
         'CustomerStatus.StatusPut' => [
             'value' => ['minLength' => 1],
         ],
         'CustomerType.TypeCreate' => [
+            'value' => ['minLength' => 1],
+        ],
+        'CustomerType.TypePatch.jsonMergePatch' => [
             'value' => ['minLength' => 1],
         ],
         'CustomerType.TypePut' => [
@@ -80,6 +86,8 @@ final class OpenApiInputSchemaUpdater
 
     private const REQUIRED_PROPERTIES_TO_ENFORCE = [
         'Customer.CustomerPut' => ['confirmed'],
+        'CustomerStatus.StatusPatch.jsonMergePatch' => ['value'],
+        'CustomerType.TypePatch.jsonMergePatch' => ['value'],
     ];
 
     public function __construct(

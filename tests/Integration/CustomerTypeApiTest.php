@@ -93,6 +93,31 @@ final class CustomerTypeApiTest extends BaseApiCase
         $this->assertArrayNotHasKey('unknown', $data, 'Extra field is ignored');
     }
 
+    public function testPatchCustomerTypeWithMalformedExtraField(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+
+        $patch = [
+            'value' => 'VIP',
+            ".\x0E" => [[]],
+        ];
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode($patch),
+            ]
+        );
+
+        $this->assertResponseIsSuccessful();
+        $response = $client->request('GET', $iri);
+        $data = $response->toArray();
+        $this->assertSame('VIP', $data['value']);
+    }
+
     public function testCreateCustomerTypeWithInvalidContentType(): void
     {
         $value = $this->faker->word();

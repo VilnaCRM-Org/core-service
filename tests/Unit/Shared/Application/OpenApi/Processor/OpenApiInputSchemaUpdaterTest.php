@@ -128,6 +128,50 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         );
     }
 
+    public function testUpdateRequiresActionableSingleFieldPatchSchemas(): void
+    {
+        $schemas = new ArrayObject([
+            'CustomerStatus.StatusPatch.jsonMergePatch' => [
+                'properties' => [
+                    'value' => ['type' => ['string', 'null']],
+                ],
+            ],
+            'CustomerType.TypePatch.jsonMergePatch' => [
+                'properties' => [
+                    'value' => ['type' => ['string', 'null']],
+                ],
+            ],
+        ]);
+        $openApi = new OpenApi(
+            new Info('VilnaCRM', '1.0.0', 'Spec under test'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $updated = $this->createUpdater()->update($openApi);
+        $updatedSchemas = $updated->getComponents()->getSchemas();
+
+        self::assertInstanceOf(ArrayObject::class, $updatedSchemas);
+        foreach ([
+            'CustomerStatus.StatusPatch.jsonMergePatch',
+            'CustomerType.TypePatch.jsonMergePatch',
+        ] as $schemaName) {
+            self::assertSame(
+                ['value'],
+                SchemaNormalizer::normalize($updatedSchemas[$schemaName])['required']
+            );
+            self::assertSame(
+                'string',
+                $this->schemaProperty($updatedSchemas, $schemaName, 'value')['type']
+            );
+            self::assertSame(
+                1,
+                $this->schemaProperty($updatedSchemas, $schemaName, 'value')['minLength']
+            );
+        }
+    }
+
     public function testUpdateLeavesSchemasWithoutComponentDefinitionsUntouched(): void
     {
         $openApi = new OpenApi(

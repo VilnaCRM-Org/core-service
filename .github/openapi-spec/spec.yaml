@@ -3311,13 +3311,14 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         id:
           type:
             - string
             - 'null'
+      required:
+        - value
     CustomerStatus.StatusPut:
       type: object
       additionalProperties: false
@@ -3354,13 +3355,14 @@ components:
       properties:
         value:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
+          minLength: 1
         id:
           type:
             - string
             - 'null'
+      required:
+        - value
     CustomerType.TypePut:
       type: object
       additionalProperties: false
