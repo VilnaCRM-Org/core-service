@@ -6,6 +6,7 @@ namespace App\Core\Onboarding\Infrastructure\Repository;
 
 use App\Core\Onboarding\Domain\Entity\OnboardingStep;
 use App\Core\Onboarding\Domain\Repository\OnboardingStepRepositoryInterface;
+use App\Shared\Domain\ValueObject\UlidInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -26,16 +27,29 @@ final class OnboardingStepRepository extends ServiceDocumentRepository implement
         $this->documentManager = $this->getDocumentManager();
     }
 
-    public function save(OnboardingStep $step): void
+    public function save(OnboardingStep $step, bool $flush = true): void
     {
         $this->documentManager->persist($step);
+
+        if ($flush) {
+            $this->flush();
+        }
+    }
+
+    public function flush(): void
+    {
         $this->documentManager->flush();
+    }
+
+    public function findByUlid(UlidInterface $ulid): ?OnboardingStep
+    {
+        $step = parent::find($ulid);
+
+        return $step instanceof OnboardingStep ? $step : null;
     }
 
     public function findOneByCode(string $code): ?OnboardingStep
     {
-        $step = $this->findOneBy(['code' => $code]);
-
-        return $step instanceof OnboardingStep ? $step : null;
+        return $this->findOneBy(['code' => $code]);
     }
 }

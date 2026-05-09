@@ -6,11 +6,11 @@ namespace App\Core\Onboarding\Application\DTO;
 
 final class OnboardingStepCreate
 {
-    public ?string $code = null;
+    public string $code;
 
-    public ?string $label = null;
+    public string $label;
 
-    public ?int $position = null;
+    public int $position;
 
-    public ?bool $enabled = null;
+    public bool $enabled;
 }

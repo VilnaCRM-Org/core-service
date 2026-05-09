@@ -277,7 +277,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: 'Sort by customer unique identifier'
+          description: 'Sort by unique identifier'
           required: false
           deprecated: false
           schema:
@@ -1384,7 +1384,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: 'Sort by customer unique identifier'
+          description: 'Sort by unique identifier'
           required: false
           deprecated: false
           schema:
@@ -2289,7 +2289,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: 'Sort by customer unique identifier'
+          description: 'Sort by unique identifier'
           required: false
           deprecated: false
           schema:
@@ -3122,7 +3122,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: 'Sort by customer unique identifier'
+          description: 'Sort by unique identifier'
           required: false
           deprecated: false
           schema:
@@ -3136,7 +3136,7 @@ paths:
         -
           name: 'order[position]'
           in: query
-          description: ''
+          description: 'Sort by display position'
           required: false
           deprecated: false
           schema:
@@ -3150,7 +3150,7 @@ paths:
         -
           name: 'order[code]'
           in: query
-          description: ''
+          description: 'Sort by code'
           required: false
           deprecated: false
           schema:
@@ -3164,7 +3164,7 @@ paths:
         -
           name: 'order[label]'
           in: query
-          description: ''
+          description: 'Sort by label'
           required: false
           deprecated: false
           schema:
@@ -3178,7 +3178,7 @@ paths:
         -
           name: code
           in: query
-          description: ''
+          description: 'Filter by code (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3188,7 +3188,7 @@ paths:
         -
           name: 'code[]'
           in: query
-          description: ''
+          description: 'Filter by multiple codes (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3200,7 +3200,7 @@ paths:
         -
           name: label
           in: query
-          description: ''
+          description: 'Filter by label (partial match)'
           required: false
           deprecated: false
           schema:
@@ -3210,7 +3210,7 @@ paths:
         -
           name: enabled
           in: query
-          description: ''
+          description: 'Filter by enabled state (true/false)'
           required: false
           deprecated: false
           schema:
@@ -3494,7 +3494,7 @@ paths:
         -
           name: 'order[ulid]'
           in: query
-          description: 'Sort by customer unique identifier'
+          description: 'Sort by unique identifier'
           required: false
           deprecated: false
           schema:
@@ -3508,7 +3508,7 @@ paths:
         -
           name: 'order[position]'
           in: query
-          description: ''
+          description: 'Sort by display position'
           required: false
           deprecated: false
           schema:
@@ -3522,7 +3522,7 @@ paths:
         -
           name: 'order[code]'
           in: query
-          description: ''
+          description: 'Sort by code'
           required: false
           deprecated: false
           schema:
@@ -3536,7 +3536,7 @@ paths:
         -
           name: 'order[name]'
           in: query
-          description: ''
+          description: 'Sort by name'
           required: false
           deprecated: false
           schema:
@@ -3550,7 +3550,7 @@ paths:
         -
           name: 'order[priceCents]'
           in: query
-          description: ''
+          description: 'Sort by price amount'
           required: false
           deprecated: false
           schema:
@@ -3564,7 +3564,7 @@ paths:
         -
           name: code
           in: query
-          description: ''
+          description: 'Filter by code (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3574,7 +3574,7 @@ paths:
         -
           name: 'code[]'
           in: query
-          description: ''
+          description: 'Filter by multiple codes (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3586,7 +3586,7 @@ paths:
         -
           name: name
           in: query
-          description: ''
+          description: 'Filter by name (partial match)'
           required: false
           deprecated: false
           schema:
@@ -3596,7 +3596,7 @@ paths:
         -
           name: description
           in: query
-          description: ''
+          description: 'Filter by description (partial match)'
           required: false
           deprecated: false
           schema:
@@ -3606,7 +3606,7 @@ paths:
         -
           name: priceCurrency
           in: query
-          description: ''
+          description: 'Filter by price currency (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3616,7 +3616,7 @@ paths:
         -
           name: 'priceCurrency[]'
           in: query
-          description: ''
+          description: 'Filter by multiple price currencies (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3628,7 +3628,7 @@ paths:
         -
           name: pricePeriod
           in: query
-          description: ''
+          description: 'Filter by price period (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3638,7 +3638,7 @@ paths:
         -
           name: 'pricePeriod[]'
           in: query
-          description: ''
+          description: 'Filter by multiple price periods (exact match)'
           required: false
           deprecated: false
           schema:
@@ -3650,7 +3650,7 @@ paths:
         -
           name: enabled
           in: query
-          description: ''
+          description: 'Filter by enabled state (true/false)'
           required: false
           deprecated: false
           schema:
@@ -3660,7 +3660,7 @@ paths:
         -
           name: functionalLimitations
           in: query
-          description: ''
+          description: 'Filter by functional limitation state (true/false)'
           required: false
           deprecated: false
           schema:
@@ -3670,7 +3670,7 @@ paths:
         -
           name: 'priceCents[between]'
           in: query
-          description: ''
+          description: 'Filter by price amount range (comma-separated minimum and maximum)'
           required: false
           deprecated: false
           schema:
@@ -3680,7 +3680,7 @@ paths:
         -
           name: 'priceCents[gt]'
           in: query
-          description: ''
+          description: 'Filter by price amount greater than'
           required: false
           deprecated: false
           schema:
@@ -3690,7 +3690,7 @@ paths:
         -
           name: 'priceCents[gte]'
           in: query
-          description: ''
+          description: 'Filter by price amount greater than or equal to'
           required: false
           deprecated: false
           schema:
@@ -3700,7 +3700,7 @@ paths:
         -
           name: 'priceCents[lt]'
           in: query
-          description: ''
+          description: 'Filter by price amount less than'
           required: false
           deprecated: false
           schema:
@@ -3710,7 +3710,7 @@ paths:
         -
           name: 'priceCents[lte]'
           in: query
-          description: ''
+          description: 'Filter by price amount less than or equal to'
           required: false
           deprecated: false
           schema:
@@ -3720,7 +3720,7 @@ paths:
         -
           name: 'userLimit[between]'
           in: query
-          description: ''
+          description: 'Filter by user limit range (comma-separated minimum and maximum)'
           required: false
           deprecated: false
           schema:
@@ -3730,7 +3730,7 @@ paths:
         -
           name: 'userLimit[gt]'
           in: query
-          description: ''
+          description: 'Filter by user limit greater than'
           required: false
           deprecated: false
           schema:
@@ -3740,7 +3740,7 @@ paths:
         -
           name: 'userLimit[gte]'
           in: query
-          description: ''
+          description: 'Filter by user limit greater than or equal to'
           required: false
           deprecated: false
           schema:
@@ -3750,7 +3750,7 @@ paths:
         -
           name: 'userLimit[lt]'
           in: query
-          description: ''
+          description: 'Filter by user limit less than'
           required: false
           deprecated: false
           schema:
@@ -3760,7 +3760,7 @@ paths:
         -
           name: 'userLimit[lte]'
           in: query
-          description: ''
+          description: 'Filter by user limit less than or equal to'
           required: false
           deprecated: false
           schema:
@@ -3770,7 +3770,7 @@ paths:
         -
           name: 'position[between]'
           in: query
-          description: ''
+          description: 'Filter by display position range (comma-separated minimum and maximum)'
           required: false
           deprecated: false
           schema:
@@ -3780,7 +3780,7 @@ paths:
         -
           name: 'position[gt]'
           in: query
-          description: ''
+          description: 'Filter by display position greater than'
           required: false
           deprecated: false
           schema:
@@ -3790,7 +3790,7 @@ paths:
         -
           name: 'position[gte]'
           in: query
-          description: ''
+          description: 'Filter by display position greater than or equal to'
           required: false
           deprecated: false
           schema:
@@ -3800,7 +3800,7 @@ paths:
         -
           name: 'position[lt]'
           in: query
-          description: ''
+          description: 'Filter by display position less than'
           required: false
           deprecated: false
           schema:
@@ -3810,7 +3810,7 @@ paths:
         -
           name: 'position[lte]'
           in: query
-          description: ''
+          description: 'Filter by display position less than or equal to'
           required: false
           deprecated: false
           schema:
@@ -4489,24 +4489,16 @@ components:
         code:
           maxLength: 64
           pattern: '^([a-z][a-z0-9_]*)$'
-          type:
-            - string
-            - 'null'
+          type: string
         label:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
         position:
           minimum: 0
           exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
+          type: integer
         enabled:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
     OnboardingStep.OnboardingStepPatch.jsonMergePatch:
       type: object
       properties:
@@ -4547,24 +4539,16 @@ components:
         code:
           maxLength: 64
           pattern: '^([a-z][a-z0-9_]*)$'
-          type:
-            - string
-            - 'null'
+          type: string
         label:
           maxLength: 255
-          type:
-            - string
-            - 'null'
+          type: string
         position:
           minimum: 0
           exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
+          type: integer
         enabled:
-          type:
-            - boolean
-            - 'null'
+          type: boolean
     OnboardingStep.jsonld-output:
       allOf:
         -
@@ -4581,78 +4565,12 @@ components:
             enabled:
               type: boolean
             ulid:
-              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+              type: string
     TariffPlan.TariffPlanCreate:
       type: object
       additionalProperties: false
-      properties:
-        deploymentOptions:
-          minItems: 1
-          maxItems: 10
-          type:
-            - array
-            - 'null'
-          items:
-            type:
-              - string
-              - 'null'
-        code:
-          maxLength: 64
-          pattern: '^([a-z][a-z0-9_]*)$'
-          type:
-            - string
-            - 'null'
-        name:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
-        description:
-          maxLength: 1000
-          type:
-            - string
-            - 'null'
-        functionalLimitations:
-          type:
-            - boolean
-            - 'null'
-        userLimit:
-          minimum: 0
-          exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
-        priceCents:
-          minimum: 0
-          type:
-            - integer
-            - 'null'
-        priceCurrency:
-          pattern: '^([A-Z]{3})$'
-          type:
-            - string
-            - 'null'
-        pricePeriod:
-          enum:
-            - none
-            - one_time
-            - monthly
-            - yearly
-            - per_user
-          type:
-            - string
-            - 'null'
-        position:
-          minimum: 0
-          exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
-        enabled:
-          type:
-            - boolean
-            - 'null'
       required:
+        - deploymentOptions
         - code
         - name
         - description
@@ -4662,6 +4580,53 @@ components:
         - pricePeriod
         - position
         - enabled
+      properties:
+        deploymentOptions:
+          minItems: 1
+          maxItems: 10
+          type: array
+          items:
+            type:
+              - string
+              - 'null'
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type: string
+        name:
+          maxLength: 255
+          type: string
+        description:
+          maxLength: 1000
+          type: string
+        functionalLimitations:
+          type: boolean
+        userLimit:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCents:
+          minimum: 0
+          type: integer
+        priceCurrency:
+          pattern: '^([A-Z]{3})$'
+          type: string
+        pricePeriod:
+          enum:
+            - none
+            - one_time
+            - monthly
+            - yearly
+            - per_user
+          type: string
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type: integer
+        enabled:
+          type: boolean
     TariffPlan.TariffPlanPatch.jsonMergePatch:
       type: object
       properties:
@@ -4731,81 +4696,11 @@ components:
           type:
             - boolean
             - 'null'
-        id:
-          type:
-            - string
-            - 'null'
     TariffPlan.TariffPlanPut:
       type: object
       additionalProperties: false
-      properties:
-        deploymentOptions:
-          minItems: 1
-          maxItems: 10
-          type:
-            - array
-            - 'null'
-          items:
-            type:
-              - string
-              - 'null'
-        code:
-          maxLength: 64
-          pattern: '^([a-z][a-z0-9_]*)$'
-          type:
-            - string
-            - 'null'
-        name:
-          maxLength: 255
-          type:
-            - string
-            - 'null'
-        description:
-          maxLength: 1000
-          type:
-            - string
-            - 'null'
-        functionalLimitations:
-          type:
-            - boolean
-            - 'null'
-        userLimit:
-          minimum: 0
-          exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
-        priceCents:
-          minimum: 0
-          type:
-            - integer
-            - 'null'
-        priceCurrency:
-          pattern: '^([A-Z]{3})$'
-          type:
-            - string
-            - 'null'
-        pricePeriod:
-          enum:
-            - none
-            - one_time
-            - monthly
-            - yearly
-            - per_user
-          type:
-            - string
-            - 'null'
-        position:
-          minimum: 0
-          exclusiveMinimum: 0
-          type:
-            - integer
-            - 'null'
-        enabled:
-          type:
-            - boolean
-            - 'null'
       required:
+        - deploymentOptions
         - code
         - name
         - description
@@ -4815,6 +4710,53 @@ components:
         - pricePeriod
         - position
         - enabled
+      properties:
+        deploymentOptions:
+          minItems: 1
+          maxItems: 10
+          type: array
+          items:
+            type:
+              - string
+              - 'null'
+        code:
+          maxLength: 64
+          pattern: '^([a-z][a-z0-9_]*)$'
+          type: string
+        name:
+          maxLength: 255
+          type: string
+        description:
+          maxLength: 1000
+          type: string
+        functionalLimitations:
+          type: boolean
+        userLimit:
+          minimum: 0
+          exclusiveMinimum: 0
+          type:
+            - integer
+            - 'null'
+        priceCents:
+          minimum: 0
+          type: integer
+        priceCurrency:
+          pattern: '^([A-Z]{3})$'
+          type: string
+        pricePeriod:
+          enum:
+            - none
+            - one_time
+            - monthly
+            - yearly
+            - per_user
+          type: string
+        position:
+          minimum: 0
+          exclusiveMinimum: 0
+          type: integer
+        enabled:
+          type: boolean
     TariffPlan.jsonld-output:
       allOf:
         -
@@ -4823,7 +4765,7 @@ components:
           type: object
           properties:
             ulid:
-              $ref: '#/components/schemas/UlidInterface.jsonld-output'
+              type: string
             code:
               readOnly: true
               type: string

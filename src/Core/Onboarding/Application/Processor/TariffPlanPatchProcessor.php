@@ -9,9 +9,9 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Core\Onboarding\Application\DTO\TariffPlanPatch;
 use App\Core\Onboarding\Domain\Entity\TariffPlan;
 use App\Core\Onboarding\Domain\Exception\TariffPlanNotFoundException;
+use App\Core\Onboarding\Domain\Factory\TariffPlanDetailsFactory;
 use App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface;
 use App\Core\Onboarding\Domain\ValueObject\TariffPlanDetails;
-use App\Core\Onboarding\Domain\ValueObject\TariffPlanPrice;
 use App\Shared\Application\Extractor\PatchUlidExtractor;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
@@ -26,6 +26,7 @@ final readonly class TariffPlanPatchProcessor implements ProcessorInterface
         private TariffPlanRepositoryInterface $repository,
         private PatchUlidExtractor $patchUlidExtractor,
         private UlidFactory $ulidFactory,
+        private TariffPlanDetailsFactory $detailsFactory,
     ) {
     }
 
@@ -37,12 +38,12 @@ final readonly class TariffPlanPatchProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): TariffPlan {
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
-            $data->id,
+            null,
             static fn () => TariffPlanNotFoundException::withIri('/api/tariff_plans/unknown')
         );
         $plan = $this->findPlan($ulid);
@@ -58,29 +59,34 @@ final readonly class TariffPlanPatchProcessor implements ProcessorInterface
         TariffPlanPatch $data,
         TariffPlan $plan
     ): TariffPlanDetails {
-        return new TariffPlanDetails(
+        return $this->detailsFactory->create(
             $data->code ?? $plan->getCode(),
             $data->name ?? $plan->getName(),
             $data->description ?? $plan->getDescription(),
             $data->deploymentOptions ?? $plan->getDeploymentOptions(),
             $data->functionalLimitations ?? $plan->hasFunctionalLimitations(),
-            $data->userLimit ?? $plan->getUserLimit(),
-            new TariffPlanPrice(
-                $data->priceCents ?? $plan->getPriceCents(),
-                $data->priceCurrency ?? $plan->getPriceCurrency(),
-                $data->pricePeriod ?? $plan->getPricePeriod()
-            ),
+            $this->patchedUserLimit($data, $plan),
+            $data->priceCents ?? $plan->getPriceCents(),
+            $data->priceCurrency ?? $plan->getPriceCurrency(),
+            $data->pricePeriod ?? $plan->getPricePeriod(),
             $data->position ?? $plan->getPosition(),
             $data->enabled ?? $plan->isEnabled()
         );
     }
 
+    private function patchedUserLimit(TariffPlanPatch $data, TariffPlan $plan): ?int
+    {
+        return array_key_exists('userLimit', get_object_vars($data))
+            ? $data->userLimit
+            : $plan->getUserLimit();
+    }
+
     private function findPlan(string $ulid): TariffPlan
     {
-        $plan = $this->repository->find($this->ulidFactory->create($ulid));
+        $plan = $this->repository->findByUlid($this->ulidFactory->create($ulid));
 
-        return $plan instanceof TariffPlan
-            ? $plan
-            : throw TariffPlanNotFoundException::withIri(sprintf('/api/tariff_plans/%s', $ulid));
+        return $plan ?? throw TariffPlanNotFoundException::withIri(
+            sprintf('/api/tariff_plans/%s', $ulid)
+        );
     }
 }

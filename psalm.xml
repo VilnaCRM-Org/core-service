@@ -29,9 +29,6 @@
                 <directory name="src/Core/Customer/Application" />
                 <directory name="src/Core/Customer/Domain" />
                 <directory name="src/Core/Customer/Infrastructure" />
-                <directory name="src/Core/Onboarding/Application" />
-                <directory name="src/Core/Onboarding/Domain" />
-                <directory name="src/Core/Onboarding/Infrastructure" />
                 <directory name="src/Internal/HealthCheck/Application" />
                 <directory name="src/Shared/Application/Extractor" />
                 <directory name="src/Shared/Application/Observability" />

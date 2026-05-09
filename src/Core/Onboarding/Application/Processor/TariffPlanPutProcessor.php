@@ -9,9 +9,9 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Core\Onboarding\Application\DTO\TariffPlanPut;
 use App\Core\Onboarding\Domain\Entity\TariffPlan;
 use App\Core\Onboarding\Domain\Exception\TariffPlanNotFoundException;
+use App\Core\Onboarding\Domain\Factory\TariffPlanDetailsFactory;
 use App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface;
 use App\Core\Onboarding\Domain\ValueObject\TariffPlanDetails;
-use App\Core\Onboarding\Domain\ValueObject\TariffPlanPrice;
 use App\Shared\Infrastructure\Factory\UlidFactory;
 
 /**
@@ -24,6 +24,7 @@ final readonly class TariffPlanPutProcessor implements ProcessorInterface
     public function __construct(
         private TariffPlanRepositoryInterface $repository,
         private UlidFactory $ulidFactory,
+        private TariffPlanDetailsFactory $detailsFactory,
     ) {
     }
 
@@ -35,13 +36,13 @@ final readonly class TariffPlanPutProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): TariffPlan {
-        $ulid = $uriVariables['ulid'];
-        $plan = $this->repository->find($this->ulidFactory->create($ulid));
+        $ulid = $this->ulidFromUriVariables($uriVariables);
+        $plan = $this->repository->findByUlid($this->ulidFactory->create($ulid));
 
-        if (! $plan instanceof TariffPlan) {
+        if ($plan === null) {
             throw TariffPlanNotFoundException::withIri(sprintf('/api/tariff_plans/%s', $ulid));
         }
 
@@ -54,20 +55,30 @@ final readonly class TariffPlanPutProcessor implements ProcessorInterface
 
     private function createDetails(TariffPlanPut $data): TariffPlanDetails
     {
-        return new TariffPlanDetails(
-            (string) $data->code,
-            (string) $data->name,
-            (string) $data->description,
-            $data->deploymentOptions ?? [],
-            (bool) $data->functionalLimitations,
+        return $this->detailsFactory->create(
+            $data->code,
+            $data->name,
+            $data->description,
+            $data->deploymentOptions,
+            $data->functionalLimitations,
             $data->userLimit,
-            new TariffPlanPrice(
-                (int) $data->priceCents,
-                (string) $data->priceCurrency,
-                (string) $data->pricePeriod
-            ),
-            (int) $data->position,
-            (bool) $data->enabled
+            $data->priceCents,
+            $data->priceCurrency,
+            $data->pricePeriod,
+            $data->position,
+            $data->enabled
         );
+    }
+
+    /**
+     * @param array<string, string> $uriVariables
+     */
+    private function ulidFromUriVariables($uriVariables): string
+    {
+        $ulid = $uriVariables['ulid'] ?? null;
+
+        return $ulid !== null && $ulid !== ''
+            ? $ulid
+            : throw TariffPlanNotFoundException::withIri('/api/tariff_plans/unknown');
     }
 }

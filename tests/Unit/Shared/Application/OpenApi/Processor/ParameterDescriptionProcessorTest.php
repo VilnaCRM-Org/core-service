@@ -44,7 +44,7 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
             ->getParameters();
 
         self::assertSame(
-            'Sort by customer unique identifier',
+            'Sort by unique identifier',
             $updatedParameters[0]->getDescription()
         );
         self::assertSame('existing description', $updatedParameters[1]->getDescription());
@@ -152,6 +152,43 @@ final class ParameterDescriptionProcessorTest extends UnitTestCase
         self::assertSame(
             'Filter by customer initials (exact match)',
             $updatedParameters[0]->getDescription()
+        );
+    }
+
+    public function testProcessAddsOnboardingAndTariffDescriptions(): void
+    {
+        $parameters = [
+            new Parameter('order[position]', 'query'),
+            new Parameter('code', 'query'),
+            new Parameter('enabled', 'query'),
+            new Parameter('priceCents[gte]', 'query'),
+        ];
+
+        $paths = new Paths();
+        $paths->addPath(
+            '/tariff_plans',
+            (new PathItem())->withGet(new Operation(parameters: $parameters))
+        );
+
+        $openApi = new OpenApi(
+            new Info('title', '1.0', 'desc'),
+            [new Server('https://localhost')],
+            $paths
+        );
+
+        $processed = (new ParameterDescriptionProcessor())->process($openApi);
+        $updatedParameters = $processed
+            ->getPaths()
+            ->getPath('/tariff_plans')
+            ->getGet()
+            ->getParameters();
+
+        self::assertSame('Sort by display position', $updatedParameters[0]->getDescription());
+        self::assertSame('Filter by code (exact match)', $updatedParameters[1]->getDescription());
+        self::assertSame('Filter by enabled state (true/false)', $updatedParameters[2]->getDescription());
+        self::assertSame(
+            'Filter by price amount greater than or equal to',
+            $updatedParameters[3]->getDescription()
         );
     }
 }

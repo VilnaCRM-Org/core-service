@@ -35,8 +35,8 @@ final readonly class OnboardingStepPatchProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): OnboardingStep {
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
@@ -59,10 +59,10 @@ final readonly class OnboardingStepPatchProcessor implements ProcessorInterface
 
     private function findStep(string $ulid): OnboardingStep
     {
-        $step = $this->repository->find($this->ulidFactory->create($ulid));
+        $step = $this->repository->findByUlid($this->ulidFactory->create($ulid));
 
-        return $step instanceof OnboardingStep
-            ? $step
-            : throw OnboardingStepNotFoundException::withIri(sprintf('/api/onboarding_steps/%s', $ulid));
+        return $step ?? throw OnboardingStepNotFoundException::withIri(
+            sprintf('/api/onboarding_steps/%s', $ulid)
+        );
     }
 }

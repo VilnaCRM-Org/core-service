@@ -7,19 +7,25 @@ namespace App\Core\Onboarding\Domain\ValueObject;
 final readonly class TariffPlanDetails
 {
     /**
+     * @var list<string>
+     */
+    private iterable $deploymentOptions;
+
+    /**
      * @param list<string> $deploymentOptions
      */
     public function __construct(
         private string $code,
         private string $name,
         private string $description,
-        private array $deploymentOptions,
+        iterable $deploymentOptions,
         private bool $functionalLimitations,
         private ?int $userLimit,
         private TariffPlanPrice $price,
         private int $position,
         private bool $enabled,
     ) {
+        $this->deploymentOptions = $deploymentOptions;
     }
 
     public function getCode(): string
@@ -40,7 +46,7 @@ final readonly class TariffPlanDetails
     /**
      * @return list<string>
      */
-    public function getDeploymentOptions(): array
+    public function getDeploymentOptions(): iterable
     {
         return $this->deploymentOptions;
     }

@@ -25,7 +25,7 @@ final class TariffPlan
     /**
      * @var list<string>
      */
-    private array $deploymentOptions;
+    private iterable $deploymentOptions;
 
     private bool $functionalLimitations;
 
@@ -49,14 +49,6 @@ final class TariffPlan
         return (string) $this->ulid;
     }
 
-    /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    public function setUlid(UlidInterface $ulid): void
-    {
-        $this->ulid = $ulid;
-    }
-
     public function getCode(): string
     {
         return $this->code;
@@ -75,7 +67,7 @@ final class TariffPlan
     /**
      * @return list<string>
      */
-    public function getDeploymentOptions(): array
+    public function getDeploymentOptions(): iterable
     {
         return $this->deploymentOptions;
     }

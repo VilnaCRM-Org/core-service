@@ -25,14 +25,6 @@ final class OnboardingStep
         return (string) $this->ulid;
     }
 
-    /**
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    public function setUlid(UlidInterface $ulid): void
-    {
-        $this->ulid = $ulid;
-    }
-
     public function getCode(): string
     {
         return $this->code;

@@ -8,9 +8,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Onboarding\Application\DTO\TariffPlanCreate;
 use App\Core\Onboarding\Domain\Entity\TariffPlan;
+use App\Core\Onboarding\Domain\Factory\TariffPlanDetailsFactory;
+use App\Core\Onboarding\Domain\Factory\TariffPlanFactory;
 use App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface;
-use App\Core\Onboarding\Domain\ValueObject\TariffPlanDetails;
-use App\Core\Onboarding\Domain\ValueObject\TariffPlanPrice;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory as SymfonyUlidFactory;
 
@@ -25,6 +25,8 @@ final readonly class CreateTariffPlanProcessor implements ProcessorInterface
         private TariffPlanRepositoryInterface $repository,
         private SymfonyUlidFactory $symfonyUlidFactory,
         private UlidTransformer $ulidTransformer,
+        private TariffPlanDetailsFactory $detailsFactory,
+        private TariffPlanFactory $planFactory,
     ) {
     }
 
@@ -36,24 +38,22 @@ final readonly class CreateTariffPlanProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): TariffPlan {
-        $plan = new TariffPlan(
-            new TariffPlanDetails(
-                (string) $data->code,
-                (string) $data->name,
-                (string) $data->description,
-                $data->deploymentOptions ?? [],
-                (bool) $data->functionalLimitations,
+        $plan = $this->planFactory->create(
+            $this->detailsFactory->create(
+                $data->code,
+                $data->name,
+                $data->description,
+                $data->deploymentOptions,
+                $data->functionalLimitations,
                 $data->userLimit,
-                new TariffPlanPrice(
-                    (int) $data->priceCents,
-                    (string) $data->priceCurrency,
-                    (string) $data->pricePeriod
-                ),
-                (int) $data->position,
-                (bool) $data->enabled
+                $data->priceCents,
+                $data->priceCurrency,
+                $data->pricePeriod,
+                $data->position,
+                $data->enabled
             ),
             $this->ulidTransformer->transformFromSymfonyUlid(
                 $this->symfonyUlidFactory->create()

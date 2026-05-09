@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Core\Onboarding\Application\DTO\OnboardingStepCreate;
 use App\Core\Onboarding\Domain\Entity\OnboardingStep;
+use App\Core\Onboarding\Domain\Factory\OnboardingStepFactory;
 use App\Core\Onboarding\Domain\Repository\OnboardingStepRepositoryInterface;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
 use Symfony\Component\Uid\Factory\UlidFactory as SymfonyUlidFactory;
@@ -23,6 +24,7 @@ final readonly class CreateOnboardingStepProcessor implements ProcessorInterface
         private OnboardingStepRepositoryInterface $repository,
         private SymfonyUlidFactory $symfonyUlidFactory,
         private UlidTransformer $ulidTransformer,
+        private OnboardingStepFactory $stepFactory,
     ) {
     }
 
@@ -34,14 +36,14 @@ final readonly class CreateOnboardingStepProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): OnboardingStep {
-        $step = new OnboardingStep(
-            (string) $data->code,
-            (string) $data->label,
-            (int) $data->position,
-            (bool) $data->enabled,
+        $step = $this->stepFactory->create(
+            $data->code,
+            $data->label,
+            $data->position,
+            $data->enabled,
             $this->ulidTransformer->transformFromSymfonyUlid(
                 $this->symfonyUlidFactory->create()
             )

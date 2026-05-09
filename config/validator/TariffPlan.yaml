@@ -13,6 +13,7 @@ App\Core\Onboarding\Application\DTO\TariffPlanCreate:
       - NotBlank: { message: 'not.blank' }
       - Length: { max: 1000 }
     deploymentOptions:
+      - NotNull: { message: 'This value should not be null.' }
       - Count: { min: 1, max: 10 }
       - All:
           constraints:

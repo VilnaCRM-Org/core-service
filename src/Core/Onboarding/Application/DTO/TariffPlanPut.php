@@ -7,27 +7,27 @@ namespace App\Core\Onboarding\Application\DTO;
 final class TariffPlanPut
 {
     /**
-     * @var list<string>|null
+     * @var list<string>
      */
-    public ?array $deploymentOptions = null;
+    public iterable $deploymentOptions;
 
-    public ?string $code = null;
+    public string $code;
 
-    public ?string $name = null;
+    public string $name;
 
-    public ?string $description = null;
+    public string $description;
 
-    public ?bool $functionalLimitations = null;
+    public bool $functionalLimitations;
 
     public ?int $userLimit = null;
 
-    public ?int $priceCents = null;
+    public int $priceCents;
 
-    public ?string $priceCurrency = null;
+    public string $priceCurrency;
 
-    public ?string $pricePeriod = null;
+    public string $pricePeriod;
 
-    public ?int $position = null;
+    public int $position;
 
-    public ?bool $enabled = null;
+    public bool $enabled;
 }

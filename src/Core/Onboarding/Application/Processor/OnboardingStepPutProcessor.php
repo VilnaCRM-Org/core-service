@@ -33,25 +33,37 @@ final readonly class OnboardingStepPutProcessor implements ProcessorInterface
     public function process(
         mixed $data,
         Operation $operation,
-        array $uriVariables = [],
-        array $context = []
+        $uriVariables = [],
+        $context = []
     ): OnboardingStep {
-        $ulid = $uriVariables['ulid'];
-        $step = $this->repository->find($this->ulidFactory->create($ulid));
+        $ulid = $this->ulidFromUriVariables($uriVariables);
+        $step = $this->repository->findByUlid($this->ulidFactory->create($ulid));
 
-        if (! $step instanceof OnboardingStep) {
+        if ($step === null) {
             throw OnboardingStepNotFoundException::withIri(sprintf('/api/onboarding_steps/%s', $ulid));
         }
 
         $step->update(
-            (string) $data->code,
-            (string) $data->label,
-            (int) $data->position,
-            (bool) $data->enabled
+            $data->code,
+            $data->label,
+            $data->position,
+            $data->enabled
         );
 
         $this->repository->save($step);
 
         return $step;
+    }
+
+    /**
+     * @param array<string, string> $uriVariables
+     */
+    private function ulidFromUriVariables($uriVariables): string
+    {
+        $ulid = $uriVariables['ulid'] ?? null;
+
+        return $ulid !== null && $ulid !== ''
+            ? $ulid
+            : throw OnboardingStepNotFoundException::withIri('/api/onboarding_steps/unknown');
     }
 }

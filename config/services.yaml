@@ -98,19 +98,19 @@ services:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'
     arguments: [{ 'ulid': 'desc', 'position': 'asc', 'code': 'asc', 'label': 'asc' }]
     tags:
-      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.order' }
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.order', description: 'Sort onboarding steps by unique identifier, position, code, or label.' }
 
   app.onboarding_step.search_filter:
     parent: 'api_platform.doctrine_mongodb.odm.search_filter'
     arguments: [{ 'code': 'exact', 'label': 'partial' }]
     tags:
-      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.search' }
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.search', description: 'Filter onboarding steps by code or label.' }
 
   app.onboarding_step.boolean_filter:
     parent: 'api_platform.doctrine_mongodb.odm.boolean_filter'
     arguments: [{ 'enabled': ~ }]
     tags:
-      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.boolean' }
+      - { name: 'api_platform.filter', id: 'onboarding_step.mongodb.boolean', description: 'Filter onboarding steps by enabled state.' }
 
   app.tariff_plan.order_filter:
     parent: 'api_platform.doctrine_mongodb.odm.order_filter'

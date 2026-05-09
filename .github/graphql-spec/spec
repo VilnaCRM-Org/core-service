@@ -319,6 +319,7 @@ type OnboardingStep implements Node {
   label: String!
   position: Int!
   enabled: Boolean!
+  ulid: String!
 }
 
 input OnboardingStepFilter_order {
@@ -359,6 +360,7 @@ type OnboardingStepPageInfo {
 
 type TariffPlan implements Node {
   id: ID!
+  ulid: String!
   code: String!
   name: String!
   description: String!
@@ -670,10 +672,10 @@ type createHealthCheckPayload {
 
 "Creates a OnboardingStep."
 input createOnboardingStepInput {
-  code: String
-  label: String
-  position: Int
-  enabled: Boolean
+  code: String!
+  label: String!
+  position: Int!
+  enabled: Boolean!
   clientMutationId: String
 }
 
@@ -719,17 +721,17 @@ type deleteOnboardingStepPayloadData implements Node {
 
 "Creates a TariffPlan."
 input createTariffPlanInput {
-  deploymentOptions: Iterable
-  code: String
-  name: String
-  description: String
-  functionalLimitations: Boolean
+  deploymentOptions: Iterable!
+  code: String!
+  name: String!
+  description: String!
+  functionalLimitations: Boolean!
   userLimit: Int
-  priceCents: Int
-  priceCurrency: String
-  pricePeriod: String
-  position: Int
-  enabled: Boolean
+  priceCents: Int!
+  priceCurrency: String!
+  pricePeriod: String!
+  position: Int!
+  enabled: Boolean!
   clientMutationId: String
 }
 
@@ -753,7 +755,6 @@ input updateTariffPlanInput {
   pricePeriod: String
   position: Int
   enabled: Boolean
-  _id: String
   clientMutationId: String
 }
 

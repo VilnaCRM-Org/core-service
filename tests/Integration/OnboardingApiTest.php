@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface;
+use App\Shared\Infrastructure\Factory\UlidFactory;
+
 final class OnboardingApiTest extends BaseApiCase
 {
     public function testOnboardingStepRestCrudAndFiltering(): void
@@ -78,6 +82,32 @@ final class OnboardingApiTest extends BaseApiCase
         $this->assertSame('corporate', $data['member'][0]['code']);
     }
 
+    public function testTariffPlanPatchCanClearUserLimit(): void
+    {
+        $iri = $this->createEntity('/api/tariff_plans', $this->freePlanPayload());
+
+        $client = self::createClient();
+        self::assertSame(50, $client->request('GET', $iri)->toArray()['userLimit']);
+
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode(['userLimit' => null]),
+            ]
+        );
+
+        $this->assertResponseIsSuccessful();
+
+        $repository = self::getContainer()->get(TariffPlanRepositoryInterface::class);
+        $ulidFactory = self::getContainer()->get(UlidFactory::class);
+        $plan = $repository->findByUlid($ulidFactory->create(basename($iri)));
+
+        self::assertNotNull($plan);
+        self::assertNull($plan->getUserLimit());
+    }
+
     public function testTariffPlanValidationFailure(): void
     {
         $client = self::createClient();
@@ -94,6 +124,26 @@ final class OnboardingApiTest extends BaseApiCase
         $this->assertStringContainsString(
             'code: This value should not be blank',
             $client->getResponse()->toArray(false)['detail']
+        );
+    }
+
+    public function testTariffPlanValidationConstraints(): void
+    {
+        $client = self::createClient();
+
+        $this->assertInvalidTariffPlanPayload($client, ['code' => 'Invalid-Code'], 'code:');
+        $this->assertInvalidTariffPlanPayload($client, ['priceCurrency' => 'us'], 'priceCurrency:');
+        $this->assertInvalidTariffPlanPayload($client, ['pricePeriod' => 'weekly'], 'pricePeriod:');
+        $this->assertInvalidTariffPlanPayload($client, ['position' => 0], 'position:');
+        $this->assertInvalidTariffPlanPayload($client, ['userLimit' => 0], 'userLimit:');
+        $this->assertInvalidTariffPlanPayload($client, ['deploymentOptions' => []], 'deploymentOptions:');
+        $this->assertInvalidTariffPlanPayload(
+            $client,
+            ['deploymentOptions' => array_map(
+                static fn (int $number): string => sprintf('option_%d', $number),
+                range(1, 11)
+            )],
+            'deploymentOptions:'
         );
     }
 
@@ -135,5 +185,29 @@ final class OnboardingApiTest extends BaseApiCase
             'position' => 2,
             'enabled' => true,
         ];
+    }
+
+    /**
+     * @param array<string, int|string|bool|array|null> $overrides
+     */
+    private function assertInvalidTariffPlanPayload(
+        Client $client,
+        array $overrides,
+        string $detailFragment
+    ): void {
+        $client->request(
+            'POST',
+            '/api/tariff_plans',
+            [
+                'headers' => ['Content-Type' => 'application/ld+json'],
+                'body' => json_encode(array_replace($this->freePlanPayload(), $overrides)),
+            ]
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertStringContainsString(
+            $detailFragment,
+            $client->getResponse()->toArray(false)['detail']
+        );
     }
 }

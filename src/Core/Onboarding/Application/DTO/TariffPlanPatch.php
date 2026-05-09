@@ -9,7 +9,7 @@ final class TariffPlanPatch
     /**
      * @var list<string>|null
      */
-    public ?array $deploymentOptions = null;
+    public ?iterable $deploymentOptions = null;
 
     public ?string $code = null;
 
@@ -19,7 +19,7 @@ final class TariffPlanPatch
 
     public ?bool $functionalLimitations = null;
 
-    public ?int $userLimit = null;
+    public ?int $userLimit;
 
     public ?int $priceCents = null;
 
@@ -30,6 +30,4 @@ final class TariffPlanPatch
     public ?int $position = null;
 
     public ?bool $enabled = null;
-
-    public ?string $id = null;
 }

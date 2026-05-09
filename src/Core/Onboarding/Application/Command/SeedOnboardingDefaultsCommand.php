@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Core\Onboarding\Application\Command;
 
-use App\Core\Onboarding\Domain\Entity\OnboardingStep;
-use App\Core\Onboarding\Domain\Entity\TariffPlan;
+use App\Core\Onboarding\Domain\Factory\OnboardingStepFactory;
+use App\Core\Onboarding\Domain\Factory\TariffPlanDetailsFactory;
+use App\Core\Onboarding\Domain\Factory\TariffPlanFactory;
 use App\Core\Onboarding\Domain\Repository\OnboardingStepRepositoryInterface;
 use App\Core\Onboarding\Domain\Repository\TariffPlanRepositoryInterface;
 use App\Core\Onboarding\Domain\ValueObject\TariffPlanDetails;
-use App\Core\Onboarding\Domain\ValueObject\TariffPlanPrice;
 use App\Shared\Infrastructure\Transformer\UlidTransformer;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,10 +19,6 @@ use Symfony\Component\Uid\Factory\UlidFactory as SymfonyUlidFactory;
 /**
  * @psalm-suppress UnusedClass Wired as a Symfony console command.
  */
-#[AsCommand(
-    name: 'app:onboarding:seed-defaults',
-    description: 'Seed default onboarding steps and tariff plans.'
-)]
 final class SeedOnboardingDefaultsCommand extends Command
 {
     private const STEPS = [
@@ -70,16 +65,24 @@ final class SeedOnboardingDefaultsCommand extends Command
         private readonly TariffPlanRepositoryInterface $planRepository,
         private readonly SymfonyUlidFactory $symfonyUlidFactory,
         private readonly UlidTransformer $ulidTransformer,
+        private readonly OnboardingStepFactory $stepFactory,
+        private readonly TariffPlanDetailsFactory $planDetailsFactory,
+        private readonly TariffPlanFactory $planFactory,
     ) {
         parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setName('app:onboarding:seed-defaults')
+            ->setDescription('Seed default onboarding steps and tariff plans.');
     }
 
     protected function execute(
         InputInterface $input,
         OutputInterface $output
     ): int {
-        unset($input);
-
         foreach (self::STEPS as [$code, $label, $position]) {
             $this->upsertStep($code, $label, $position);
         }
@@ -87,6 +90,8 @@ final class SeedOnboardingDefaultsCommand extends Command
         foreach (self::PLANS as $plan) {
             $this->upsertPlan($plan);
         }
+
+        $this->planRepository->flush();
 
         $output->writeln('<info>Default onboarding data has been seeded.</info>');
 
@@ -98,8 +103,10 @@ final class SeedOnboardingDefaultsCommand extends Command
         string $label,
         int $position
     ): void {
-        $step = $this->stepRepository->findOneByCode($code)
-            ?? new OnboardingStep(
+        $step = $this->stepRepository->findOneByCode($code);
+
+        if ($step === null) {
+            $step = $this->stepFactory->create(
                 $code,
                 $label,
                 $position,
@@ -108,9 +115,11 @@ final class SeedOnboardingDefaultsCommand extends Command
                     $this->symfonyUlidFactory->create()
                 )
             );
+        } else {
+            $step->update($code, $label, $position, true);
+        }
 
-        $step->update($code, $label, $position, true);
-        $this->stepRepository->save($step);
+        $this->stepRepository->save($step, false);
     }
 
     /**
@@ -127,18 +136,23 @@ final class SeedOnboardingDefaultsCommand extends Command
      *     position: int
      * } $planData
      */
-    private function upsertPlan(array $planData): void
+    private function upsertPlan($planData): void
     {
-        $plan = $this->planRepository->findOneByCode($planData['code'])
-            ?? new TariffPlan(
-                $this->createDetails($planData),
+        $details = $this->createDetails($planData);
+        $plan = $this->planRepository->findOneByCode($planData['code']);
+
+        if ($plan === null) {
+            $plan = $this->planFactory->create(
+                $details,
                 $this->ulidTransformer->transformFromSymfonyUlid(
                     $this->symfonyUlidFactory->create()
                 )
             );
+        } else {
+            $plan->update($details);
+        }
 
-        $plan->update($this->createDetails($planData));
-        $this->planRepository->save($plan);
+        $this->planRepository->save($plan, false);
     }
 
     /**
@@ -155,20 +169,18 @@ final class SeedOnboardingDefaultsCommand extends Command
      *     position: int
      * } $planData
      */
-    private function createDetails(array $planData): TariffPlanDetails
+    private function createDetails($planData): TariffPlanDetails
     {
-        return new TariffPlanDetails(
+        return $this->planDetailsFactory->create(
             $planData['code'],
             $planData['name'],
             $planData['description'],
             $planData['deploymentOptions'],
             $planData['functionalLimitations'],
             $planData['userLimit'],
-            new TariffPlanPrice(
-                $planData['priceCents'],
-                $planData['priceCurrency'],
-                $planData['pricePeriod']
-            ),
+            $planData['priceCents'],
+            $planData['priceCurrency'],
+            $planData['pricePeriod'],
             $planData['position'],
             true
         );
