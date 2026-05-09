@@ -91,30 +91,6 @@ final class PatchPayloadGuardTest extends UnitTestCase
         ]);
     }
 
-    public function testAssertContainsAnyFieldAllowsNullSupportedField(): void
-    {
-        $this->expectNotToPerformAssertions();
-
-        $payload = new stdClass();
-        $payload->name = null;
-        $payload->email = null;
-
-        $this->guard->assertContainsAnyField($payload, [
-            'name',
-            'email',
-        ]);
-    }
-
-    public function testAssertContainsAnyFieldAllowsBlankStringField(): void
-    {
-        $this->expectNotToPerformAssertions();
-
-        $payload = new stdClass();
-        $payload->name = '   ';
-
-        $this->guard->assertContainsAnyField($payload, ['name']);
-    }
-
     public function testAssertContainsAnyFieldRejectsMissingFields(): void
     {
         $payload = new stdClass();
@@ -123,5 +99,42 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
 
         $this->guard->assertContainsAnyField($payload, ['name']);
+    }
+
+    public function testAssertContainsAnyFieldRejectsNullSupportedFields(): void
+    {
+        $payload = new stdClass();
+        $payload->name = null;
+        $payload->email = null;
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->guard->assertContainsAnyField($payload, [
+            'name',
+            'email',
+        ]);
+    }
+
+    public function testAssertContainsAnyFieldRejectsBlankStringField(): void
+    {
+        $payload = new stdClass();
+        $payload->name = '   ';
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->guard->assertContainsAnyField($payload, ['name']);
+    }
+
+    public function testAssertContainsAnyFieldRejectsArrayPayloadWithBlankField(): void
+    {
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->guard->assertContainsAnyField(
+            ['name' => '   '],
+            ['name']
+        );
     }
 }

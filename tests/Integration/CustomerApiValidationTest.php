@@ -277,6 +277,42 @@ final class CustomerApiValidationTest extends BaseApiCase
         );
     }
 
+    public function testPatchCustomerWithNullSupportedFieldOnlyReturnsBadRequest(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode(['email' => null]),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertSame(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerWithBlankSupportedFieldOnlyReturnsBadRequest(): void
+    {
+        $iri = $this->createEntity('/api/customers', $this->getCustomer());
+
+        $client = self::createClient();
+        $client->request('PATCH', $iri, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'body' => json_encode(['initials' => '   ']),
+        ]);
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertSame(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
+    }
+
     public function testPatchRepositorySeededCustomerWithScalarFieldsOnly(): void
     {
         $customerId = (string) $this->faker->ulid();

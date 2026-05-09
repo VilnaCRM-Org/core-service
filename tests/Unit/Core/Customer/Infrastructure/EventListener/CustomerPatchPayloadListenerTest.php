@@ -50,9 +50,10 @@ final class CustomerPatchPayloadListenerTest extends UnitTestCase
         ($this->listener)($this->createPatchEvent(Customer::class, '{"unknown":"value"}'));
     }
 
-    public function testAllowsBlankStatusPatchPayloadForValidation(): void
+    public function testRejectsBlankStatusPatchPayload(): void
     {
-        $this->expectNotToPerformAssertions();
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
 
         ($this->listener)($this->createPatchEvent(CustomerStatus::class, '{"value":"   "}'));
     }

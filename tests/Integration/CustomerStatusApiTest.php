@@ -277,6 +277,29 @@ final class CustomerStatusApiTest extends BaseApiCase
         );
     }
 
+    public function testPatchCustomerStatusWithBlankValueReturnsBadRequest(): void
+    {
+        $orig = $this->getStatusPayload();
+        $iri = $this->createEntity('/api/customer_statuses', $orig);
+
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode(['value' => '   ']),
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertSame(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
+    }
+
     public function testDeleteCustomerStatusSuccess(): void
     {
         $orig = $this->getStatusPayload();

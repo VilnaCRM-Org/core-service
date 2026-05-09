@@ -36,17 +36,57 @@ final class PatchPayloadGuard
     private function containsField(object|iterable $payload, string $field): bool
     {
         if (is_object($payload)) {
-            return property_exists($payload, $field);
+            return $this->objectContainsMeaningfulField($payload, $field);
         }
 
-        foreach ($payload as $payloadField => $_) {
+        foreach ($payload as $payloadField => $value) {
             if ($payloadField !== $field) {
                 continue;
             }
 
-            return true;
+            return $this->hasMeaningfulValue($value);
         }
 
         return false;
+    }
+
+    private function objectContainsMeaningfulField(object $payload, string $field): bool
+    {
+        if (! property_exists($payload, $field)) {
+            return false;
+        }
+
+        foreach ((array) $payload as $property => $value) {
+            if ($this->objectPropertyName($property) !== $field) {
+                continue;
+            }
+
+            return $this->hasMeaningfulValue($value);
+        }
+
+        return false;
+    }
+
+    private function objectPropertyName(string $property): string
+    {
+        $visibilityMarkerPosition = strrpos($property, "\0");
+        if ($visibilityMarkerPosition === false) {
+            return $property;
+        }
+
+        return substr($property, $visibilityMarkerPosition + 1);
+    }
+
+    /**
+     * @param PatchPayloadValue $value
+     */
+    private function hasMeaningfulValue(
+        object|iterable|string|int|float|bool|null $value
+    ): bool {
+        if ($value === null) {
+            return false;
+        }
+
+        return ! is_string($value) || trim($value) !== '';
     }
 }
