@@ -70,28 +70,19 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->assertSame($customerType, $result);
     }
 
-    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
+    public function testProcessRejectsBlankValuePatchPayload(): void
     {
-        $existingValue = $this->faker->word();
         $dto = $this->createDtoWithEmptyValue();
         $operation = $this->createMock(Operation::class);
-        $ulid = (string) $this->faker->ulid();
-        $customerType = $this->createMock(CustomerType::class);
-        $ulidMock = $this->createMock(Ulid::class);
 
-        $this->setupRepository($customerType, $ulidMock);
-        $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupCustomerType($customerType, $existingValue);
+        $this->repository->expects($this->never())->method('find');
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
 
-        // When value is empty string, no command should be dispatched (proper PATCH semantics)
-        $this->commandBus
-            ->expects($this->never())
-            ->method('dispatch');
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
 
-        $result = $this->processor
-            ->process($dto, $operation, ['ulid' => $ulid]);
-
-        $this->assertSame($customerType, $result);
+        $this->processor->process($dto, $operation);
     }
 
     public function testProcessRejectsEmptyPatchPayload(): void

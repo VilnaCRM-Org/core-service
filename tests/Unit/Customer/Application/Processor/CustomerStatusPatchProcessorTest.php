@@ -77,30 +77,19 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->assertSame($customerStatus, $result);
     }
 
-    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
+    public function testProcessRejectsBlankValuePatchPayload(): void
     {
         $dto = new StatusPatch(value: '', id: null);
         $operation = $this->createMock(Operation::class);
-        $customerStatus = $this->createMock(CustomerStatus::class);
-        $existingValue = $this->faker->word();
 
-        $customerStatus
-            ->method('getValue')
-            ->willReturn($existingValue);
+        $this->resolver->expects($this->never())->method('resolve');
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
 
-        $this->resolver
-            ->expects($this->once())
-            ->method('resolve')
-            ->willReturn($customerStatus);
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
 
-        // When value is empty string, no command should be dispatched (proper PATCH semantics)
-        $this->commandBus
-            ->expects($this->never())
-            ->method('dispatch');
-
-        $result = $this->processor->process($dto, $operation);
-
-        $this->assertSame($customerStatus, $result);
+        $this->processor->process($dto, $operation);
     }
 
     public function testProcessRejectsEmptyPatchPayload(): void
