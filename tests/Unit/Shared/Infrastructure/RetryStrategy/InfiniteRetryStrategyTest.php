@@ -111,6 +111,24 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
         );
     }
 
+    public function testRetryMetricReportsRootCauseForWrappedRetryableException(): void
+    {
+        $rootCause = new \Exception('connection reset');
+        $throwable = new RuntimeException('handler failed', 0, $rootCause);
+
+        $this->assertTrue($this->retryStrategy->isRetryable(
+            $this->envelope(),
+            $throwable
+        ));
+
+        $this->assertEmittedMetric(
+            RetryAttemptMetric::class,
+            'MessengerRetryAttempts',
+            'retry',
+            \Exception::class
+        );
+    }
+
     public function testIsRetryableReturnsTrueWithoutThrowable(): void
     {
         $this->assertTrue($this->retryStrategy->isRetryable($this->envelope()));
