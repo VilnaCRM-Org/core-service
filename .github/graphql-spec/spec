@@ -360,7 +360,6 @@ type OnboardingStepPageInfo {
 
 type TariffPlan implements Node {
   id: ID!
-  ulid: String!
   code: String!
   name: String!
   description: String!
@@ -372,6 +371,7 @@ type TariffPlan implements Node {
   pricePeriod: String!
   position: Int!
   enabled: Boolean!
+  ulid: String!
 }
 
 "The `Iterable` scalar type represents an array or a Traversable with any kind of data."
