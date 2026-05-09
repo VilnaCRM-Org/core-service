@@ -95,6 +95,24 @@ final readonly class CustomerCacheInvalidationRuleCollection
     private function domainEventRules(): array
     {
         return [
+            ...$this->customerDomainEventRules(),
+            ...$this->referenceDomainEventRules(),
+        ];
+    }
+
+    /**
+     * @return list<array{
+     *     context: string,
+     *     source: string,
+     *     subject: class-string,
+     *     operation: string,
+     *     families: list<string>,
+     *     refresh_source: string
+     * }>
+     */
+    private function customerDomainEventRules(): array
+    {
+        return [
             $this->domainEventRule(
                 CustomerCreatedEvent::class,
                 self::OPERATION_CREATED,
@@ -110,6 +128,22 @@ final readonly class CustomerCacheInvalidationRuleCollection
                 self::OPERATION_DELETED,
                 CustomerCachePolicyCollection::REFRESH_SOURCE_INVALIDATE_ONLY
             ),
+        ];
+    }
+
+    /**
+     * @return list<array{
+     *     context: string,
+     *     source: string,
+     *     subject: class-string,
+     *     operation: string,
+     *     families: list<string>,
+     *     refresh_source: string
+     * }>
+     */
+    private function referenceDomainEventRules(): array
+    {
+        return [
             $this->referenceDomainEventRule(
                 CustomerStatusCreatedEvent::class,
                 self::OPERATION_CREATED
