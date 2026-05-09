@@ -17,14 +17,14 @@
 
 ## BMAD Stage Log
 
-| Phase | BMALPH command | Artifact |
-| --- | --- | --- |
-| Research | `analyst` | `research.md` |
-| Product brief | `create-brief` | `product-brief.md`, `product-brief-distillate.md` |
-| PRD | `create-prd` | `prd.md` |
-| Architecture | `create-architecture` | `architecture.md` |
-| Epics and stories | `create-epics-stories` | `epics.md` |
-| Readiness | `implementation-readiness` | `implementation-readiness.md` |
+| Phase             | BMALPH command             | Artifact                                          |
+| ----------------- | -------------------------- | ------------------------------------------------- |
+| Research          | `analyst`                  | `research.md`                                     |
+| Product brief     | `create-brief`             | `product-brief.md`, `product-brief-distillate.md` |
+| PRD               | `create-prd`               | `prd.md`                                          |
+| Architecture      | `create-architecture`      | `architecture.md`                                 |
+| Epics and stories | `create-epics-stories`     | `epics.md`                                        |
+| Readiness         | `implementation-readiness` | `implementation-readiness.md`                     |
 
 ## Validation Rounds
 
