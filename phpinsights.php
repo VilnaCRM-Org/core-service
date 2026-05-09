@@ -20,6 +20,7 @@ return [
         'scripts',
         'CLI/bats/php',
         'src/Core/Customer/Application/DTO',
+        'src/Core/Onboarding/Application/DTO',
     ],
     'add' => [],
     'remove' => [
@@ -45,6 +46,15 @@ return [
                 'src/Shared/Application/Command/SchemathesisCustomerSeeder',
                 'src/Shared/Application/Command/SchemathesisCustomerStatusSeeder',
                 'src/Shared/Application/Command/SchemathesisCustomerTypeSeeder',
+                // Api Platform signatures and Psalm array-shape rules keep these array params docblock-only.
+                'src/Core/Onboarding/Application/Command/SeedOnboardingDefaultsCommand',
+                'src/Core/Onboarding/Application/Processor/CreateOnboardingStepProcessor',
+                'src/Core/Onboarding/Application/Processor/CreateTariffPlanProcessor',
+                'src/Core/Onboarding/Application/Processor/OnboardingStepPatchProcessor',
+                'src/Core/Onboarding/Application/Processor/OnboardingStepPutProcessor',
+                'src/Core/Onboarding/Application/Processor/TariffPlanPatchProcessor',
+                'src/Core/Onboarding/Application/Processor/TariffPlanPutProcessor',
+                'src/Core/Onboarding/Domain/Factory/TariffPlanDetailsFactory',
                 'tests/Unit/Shared/Infrastructure/Bus/CallableFirstParameterExtractorTest',
             ],
         ],

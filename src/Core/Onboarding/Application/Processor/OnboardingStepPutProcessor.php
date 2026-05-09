@@ -28,7 +28,7 @@ final readonly class OnboardingStepPutProcessor implements ProcessorInterface
     /**
      * @param OnboardingStepPut $data
      * @param array<string, string> $uriVariables
-     * @param array<string, mixed>  $context
+     * @param array<string, array<array-key, object|scalar|null>|object|scalar|null> $context
      */
     public function process(
         mixed $data,
@@ -40,7 +40,9 @@ final readonly class OnboardingStepPutProcessor implements ProcessorInterface
         $step = $this->repository->findByUlid($this->ulidFactory->create($ulid));
 
         if ($step === null) {
-            throw OnboardingStepNotFoundException::withIri(sprintf('/api/onboarding_steps/%s', $ulid));
+            throw OnboardingStepNotFoundException::withIri(
+                sprintf('/api/onboarding_steps/%s', $ulid)
+            );
         }
 
         $step->update(

@@ -37,7 +37,7 @@ final class SeedOnboardingDefaultsCommand extends Command
         [
             'code' => 'free',
             'name' => 'Free rate',
-            'description' => 'Cloud solution with no functional limitations for up to 50 users.',
+            'description' => 'Cloud solution for up to 50 users with no functional limitations.',
             'deploymentOptions' => ['cloud'],
             'functionalLimitations' => false,
             'userLimit' => 50,
@@ -49,7 +49,7 @@ final class SeedOnboardingDefaultsCommand extends Command
         [
             'code' => 'corporate',
             'name' => 'Corporate rate',
-            'description' => 'Cloud and box solutions with no functional limitations and no user limit.',
+            'description' => 'Cloud and box solutions with no user limit or functional limits.',
             'deploymentOptions' => ['cloud', 'box'],
             'functionalLimitations' => false,
             'userLimit' => null,
@@ -105,19 +105,22 @@ final class SeedOnboardingDefaultsCommand extends Command
     ): void {
         $step = $this->stepRepository->findOneByCode($code);
 
-        if ($step === null) {
-            $step = $this->stepFactory->create(
-                $code,
-                $label,
-                $position,
-                true,
-                $this->ulidTransformer->transformFromSymfonyUlid(
-                    $this->symfonyUlidFactory->create()
-                )
-            );
-        } else {
+        if ($step !== null) {
             $step->update($code, $label, $position, true);
+            $this->stepRepository->save($step, false);
+
+            return;
         }
+
+        $step = $this->stepFactory->create(
+            $code,
+            $label,
+            $position,
+            true,
+            $this->ulidTransformer->transformFromSymfonyUlid(
+                $this->symfonyUlidFactory->create()
+            )
+        );
 
         $this->stepRepository->save($step, false);
     }
@@ -141,16 +144,19 @@ final class SeedOnboardingDefaultsCommand extends Command
         $details = $this->createDetails($planData);
         $plan = $this->planRepository->findOneByCode($planData['code']);
 
-        if ($plan === null) {
-            $plan = $this->planFactory->create(
-                $details,
-                $this->ulidTransformer->transformFromSymfonyUlid(
-                    $this->symfonyUlidFactory->create()
-                )
-            );
-        } else {
+        if ($plan !== null) {
             $plan->update($details);
+            $this->planRepository->save($plan, false);
+
+            return;
         }
+
+        $plan = $this->planFactory->create(
+            $details,
+            $this->ulidTransformer->transformFromSymfonyUlid(
+                $this->symfonyUlidFactory->create()
+            )
+        );
 
         $this->planRepository->save($plan, false);
     }
@@ -178,9 +184,11 @@ final class SeedOnboardingDefaultsCommand extends Command
             $planData['deploymentOptions'],
             $planData['functionalLimitations'],
             $planData['userLimit'],
-            $planData['priceCents'],
-            $planData['priceCurrency'],
-            $planData['pricePeriod'],
+            [
+                'cents' => $planData['priceCents'],
+                'currency' => $planData['priceCurrency'],
+                'period' => $planData['pricePeriod'],
+            ],
             $planData['position'],
             true
         );

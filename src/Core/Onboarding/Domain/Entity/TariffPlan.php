@@ -9,13 +9,6 @@ use App\Shared\Domain\ValueObject\UlidInterface;
 
 final class TariffPlan
 {
-    public function __construct(
-        TariffPlanDetails $details,
-        private UlidInterface $ulid,
-    ) {
-        $this->applyDetails($details);
-    }
-
     private string $code;
 
     private string $name;
@@ -40,6 +33,13 @@ final class TariffPlan
     private int $position;
 
     private bool $enabled;
+
+    public function __construct(
+        TariffPlanDetails $details,
+        private UlidInterface $ulid,
+    ) {
+        $this->applyDetails($details);
+    }
 
     /**
      * @psalm-suppress PossiblyUnusedMethod

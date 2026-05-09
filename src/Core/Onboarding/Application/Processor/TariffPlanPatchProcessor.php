@@ -33,7 +33,7 @@ final readonly class TariffPlanPatchProcessor implements ProcessorInterface
     /**
      * @param TariffPlanPatch $data
      * @param array<string, string> $uriVariables
-     * @param array<string, mixed>  $context
+     * @param array<string, array<array-key, object|scalar|null>|object|scalar|null> $context
      */
     public function process(
         mixed $data,
@@ -66,9 +66,11 @@ final readonly class TariffPlanPatchProcessor implements ProcessorInterface
             $data->deploymentOptions ?? $plan->getDeploymentOptions(),
             $data->functionalLimitations ?? $plan->hasFunctionalLimitations(),
             $this->patchedUserLimit($data, $plan),
-            $data->priceCents ?? $plan->getPriceCents(),
-            $data->priceCurrency ?? $plan->getPriceCurrency(),
-            $data->pricePeriod ?? $plan->getPricePeriod(),
+            [
+                'cents' => $data->priceCents ?? $plan->getPriceCents(),
+                'currency' => $data->priceCurrency ?? $plan->getPriceCurrency(),
+                'period' => $data->pricePeriod ?? $plan->getPricePeriod(),
+            ],
             $data->position ?? $plan->getPosition(),
             $data->enabled ?? $plan->isEnabled()
         );

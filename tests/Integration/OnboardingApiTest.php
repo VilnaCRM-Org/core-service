@@ -142,7 +142,8 @@ final class OnboardingApiTest extends BaseApiCase
             ['deploymentOptions' => array_map(
                 static fn (int $number): string => sprintf('option_%d', $number),
                 range(1, 11)
-            )],
+            ),
+            ],
             'deploymentOptions:'
         );
     }

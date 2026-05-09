@@ -11,6 +11,7 @@ final class TariffPlanDetailsFactory
 {
     /**
      * @param list<string> $deploymentOptions
+     * @param array{cents: int, currency: string, period: string} $priceData
      */
     public function create(
         string $code,
@@ -19,9 +20,7 @@ final class TariffPlanDetailsFactory
         iterable $deploymentOptions,
         bool $functionalLimitations,
         ?int $userLimit,
-        int $priceCents,
-        string $priceCurrency,
-        string $pricePeriod,
+        $priceData,
         int $position,
         bool $enabled
     ): TariffPlanDetails {
@@ -32,7 +31,11 @@ final class TariffPlanDetailsFactory
             $deploymentOptions,
             $functionalLimitations,
             $userLimit,
-            new TariffPlanPrice($priceCents, $priceCurrency, $pricePeriod),
+            new TariffPlanPrice(
+                $priceData['cents'],
+                $priceData['currency'],
+                $priceData['period']
+            ),
             $position,
             $enabled
         );

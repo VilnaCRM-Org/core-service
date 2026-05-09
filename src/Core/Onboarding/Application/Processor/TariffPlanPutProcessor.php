@@ -31,7 +31,7 @@ final readonly class TariffPlanPutProcessor implements ProcessorInterface
     /**
      * @param TariffPlanPut $data
      * @param array<string, string> $uriVariables
-     * @param array<string, mixed>  $context
+     * @param array<string, array<array-key, object|scalar|null>|object|scalar|null> $context
      */
     public function process(
         mixed $data,
@@ -62,9 +62,11 @@ final readonly class TariffPlanPutProcessor implements ProcessorInterface
             $data->deploymentOptions,
             $data->functionalLimitations,
             $data->userLimit,
-            $data->priceCents,
-            $data->priceCurrency,
-            $data->pricePeriod,
+            [
+                'cents' => $data->priceCents,
+                'currency' => $data->priceCurrency,
+                'period' => $data->pricePeriod,
+            ],
             $data->position,
             $data->enabled
         );

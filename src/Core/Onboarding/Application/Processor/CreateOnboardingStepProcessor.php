@@ -31,7 +31,7 @@ final readonly class CreateOnboardingStepProcessor implements ProcessorInterface
     /**
      * @param OnboardingStepCreate $data
      * @param array<string, string> $uriVariables
-     * @param array<string, mixed>  $context
+     * @param array<string, array<array-key, object|scalar|null>|object|scalar|null> $context
      */
     public function process(
         mixed $data,
