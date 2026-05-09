@@ -35,6 +35,12 @@ final readonly class CustomerPatchPayloadListener
         ],
     ];
 
+    private const BLANK_STRING_FIELDS_BY_RESOURCE = [
+        Customer::class => [
+            'initials',
+        ],
+    ];
+
     public function __construct(
         private PatchPayloadGuard $guard
     ) {
@@ -52,8 +58,8 @@ final readonly class CustomerPatchPayloadListener
             return;
         }
 
-        $supportedFields = $this->supportedFields($request);
-        if ($supportedFields === null) {
+        $resourceClass = $this->resourceClass($request);
+        if ($resourceClass === null) {
             return;
         }
 
@@ -62,13 +68,14 @@ final readonly class CustomerPatchPayloadListener
             return;
         }
 
-        $this->guard->assertContainsAnyField($payload, $supportedFields);
+        $this->guard->assertContainsAnyField(
+            $payload,
+            self::SUPPORTED_FIELDS_BY_RESOURCE[$resourceClass],
+            self::BLANK_STRING_FIELDS_BY_RESOURCE[$resourceClass] ?? []
+        );
     }
 
-    /**
-     * @return iterable<non-empty-string>|null
-     */
-    private function supportedFields(Request $request): ?iterable
+    private function resourceClass(Request $request): ?string
     {
         $resourceClass = $request->attributes->get('_api_resource_class');
         if (
@@ -78,7 +85,7 @@ final readonly class CustomerPatchPayloadListener
             return null;
         }
 
-        return self::SUPPORTED_FIELDS_BY_RESOURCE[$resourceClass];
+        return $resourceClass;
     }
 
     /**

@@ -295,14 +295,14 @@ final class CustomerApiValidationTest extends BaseApiCase
         );
     }
 
-    public function testPatchCustomerWithBlankSupportedFieldOnlyReturnsBadRequest(): void
+    public function testPatchCustomerWithBlankNoOpFieldOnlyReturnsBadRequest(): void
     {
         $iri = $this->createEntity('/api/customers', $this->getCustomer());
 
         $client = self::createClient();
         $client->request('PATCH', $iri, [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'body' => json_encode(['initials' => '   ']),
+            'body' => json_encode(['phone' => '   ']),
         ]);
 
         $error = $client->getResponse()->toArray(false);

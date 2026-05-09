@@ -127,6 +127,32 @@ final class PatchPayloadGuardTest extends UnitTestCase
         $this->guard->assertContainsAnyField($payload, ['name']);
     }
 
+    public function testAssertContainsAnyFieldRejectsUninitializedObjectProperty(): void
+    {
+        $payload = new class() {
+            private string $name;
+        };
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage(PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE);
+
+        $this->guard->assertContainsAnyField($payload, ['name']);
+    }
+
+    public function testAssertContainsAnyFieldAllowsConfiguredBlankStringField(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $payload = new stdClass();
+        $payload->name = '   ';
+
+        $this->guard->assertContainsAnyField(
+            $payload,
+            ['name'],
+            ['name']
+        );
+    }
+
     public function testAssertContainsAnyFieldRejectsArrayPayloadWithBlankField(): void
     {
         $this->expectException(BadRequestHttpException::class);

@@ -58,6 +58,13 @@ final class CustomerPatchPayloadListenerTest extends UnitTestCase
         ($this->listener)($this->createPatchEvent(CustomerStatus::class, '{"value":"   "}'));
     }
 
+    public function testAllowsBlankCustomerInitialsPatchPayloadForValidation(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        ($this->listener)($this->createPatchEvent(Customer::class, '{"initials":"   "}'));
+    }
+
     public function testAllowsCustomerPatchPayloadWithSupportedField(): void
     {
         $this->expectNotToPerformAssertions();

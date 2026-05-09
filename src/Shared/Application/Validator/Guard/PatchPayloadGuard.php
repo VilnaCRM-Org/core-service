@@ -16,13 +16,20 @@ final class PatchPayloadGuard
     /**
      * @param object|iterable<array-key, PatchPayloadValue> $payload
      * @param iterable<non-empty-string> $fields
+     * @param iterable<non-empty-string> $blankStringFields
      */
     public function assertContainsAnyField(
         object|iterable $payload,
-        iterable $fields
+        iterable $fields,
+        iterable $blankStringFields = []
     ): void {
+        $blankStringFieldMap = array_fill_keys(
+            iterator_to_array($blankStringFields),
+            true
+        );
+
         foreach ($fields as $field) {
-            if ($this->containsField($payload, $field)) {
+            if ($this->containsField($payload, $field, $blankStringFieldMap)) {
                 return;
             }
         }
@@ -32,11 +39,19 @@ final class PatchPayloadGuard
 
     /**
      * @param object|iterable<array-key, PatchPayloadValue> $payload
+     * @param array<string, true> $blankStringFieldMap
      */
-    private function containsField(object|iterable $payload, string $field): bool
-    {
+    private function containsField(
+        object|iterable $payload,
+        string $field,
+        array $blankStringFieldMap
+    ): bool {
         if (is_object($payload)) {
-            return $this->objectContainsMeaningfulField($payload, $field);
+            return $this->objectContainsMeaningfulField(
+                $payload,
+                $field,
+                $blankStringFieldMap
+            );
         }
 
         foreach ($payload as $payloadField => $value) {
@@ -44,14 +59,23 @@ final class PatchPayloadGuard
                 continue;
             }
 
-            return $this->hasMeaningfulValue($value);
+            return $this->hasMeaningfulValue(
+                $value,
+                isset($blankStringFieldMap[$field])
+            );
         }
 
         return false;
     }
 
-    private function objectContainsMeaningfulField(object $payload, string $field): bool
-    {
+    /**
+     * @param array<string, true> $blankStringFieldMap
+     */
+    private function objectContainsMeaningfulField(
+        object $payload,
+        string $field,
+        array $blankStringFieldMap
+    ): bool {
         if (! property_exists($payload, $field)) {
             return false;
         }
@@ -61,7 +85,10 @@ final class PatchPayloadGuard
                 continue;
             }
 
-            return $this->hasMeaningfulValue($value);
+            return $this->hasMeaningfulValue(
+                $value,
+                isset($blankStringFieldMap[$field])
+            );
         }
 
         return false;
@@ -81,12 +108,15 @@ final class PatchPayloadGuard
      * @param PatchPayloadValue $value
      */
     private function hasMeaningfulValue(
-        object|iterable|string|int|float|bool|null $value
+        object|iterable|string|int|float|bool|null $value,
+        bool $allowBlankString
     ): bool {
         if ($value === null) {
             return false;
         }
 
-        return ! is_string($value) || trim($value) !== '';
+        return ! is_string($value)
+            || $allowBlankString
+            || trim($value) !== '';
     }
 }
