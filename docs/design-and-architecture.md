@@ -118,7 +118,7 @@ flowchart TD
 
 The source tree follows the repository's existing one-directory-per-class-type convention. There is no new bounded-context or Customer cache directory; shared cache helpers stay in the existing `Shared/Infrastructure/Cache` directory, while orchestration abstractions are placed with other application commands, DTOs, resolvers, handlers, infrastructure collections, and listeners.
 
-The async transports use Symfony Messenger with `symfony/amazon-sqs-messenger`. Local development uses LocalStack queue-name DSNs such as `sqs://localstack:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, allowing Messenger to auto-create queues without AWS metadata lookup.
+The async transports use Symfony Messenger with `symfony/amazon-sqs-messenger`. Local development uses Floci-backed AWS emulator queue-name DSNs such as `sqs://aws-emulator:4566/cache-refresh?sslmode=disable&region=us-east-1&access_key=fake&secret_key=fake`, allowing Messenger to auto-create queues without AWS metadata lookup.
 
 ```text
 src/

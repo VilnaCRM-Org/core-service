@@ -6,7 +6,7 @@ Ready to implement with scoped constraints.
 
 ## Strengths
 
-- The existing repository already has the core primitives: Redis tag-aware cache, cache key builder, cached repository decorator, SQS-backed Messenger event bus, LocalStack configuration, EMF metric infrastructure, and cache performance tests.
+- The existing repository already has the core primitives: Redis tag-aware cache, cache key builder, cached repository decorator, SQS-backed Messenger event bus, AWS emulator configuration, EMF metric infrastructure, and cache performance tests.
 - The issue can be delivered without API contract changes.
 - The reusable foundation can reuse existing class-type directories and deptrac-collected namespaces.
 - Automatic CRUD invalidation can use ODM UnitOfWork/change-set data, which avoids adding cache methods to Domain repository interfaces.
@@ -64,7 +64,7 @@ Ready to implement with scoped constraints.
   - refresh command dispatch failure does not break subscriber execution
 - Performance/load evidence:
   - `make cache-performance-tests`
-  - `make cache-performance-load-tests` if Docker/LocalStack services are available
+  - `make cache-performance-load-tests` if Docker/AWS-emulator services are available
 - Final validation:
   - `make ci`
 

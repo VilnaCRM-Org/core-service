@@ -120,7 +120,7 @@ load 'bats-assert/load'
   assert_output --partial 'ensure-test-services'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRIES:-5'
   assert_output --partial 'DOCKER_COMPOSE_UP_RETRY_DELAY_SECONDS:-5'
-  assert_output --partial 'up --detach --wait database redis php localstack'
+  assert_output --partial 'up --detach --wait database redis php aws-emulator'
 }
 
 @test "make start waits for required services before building k6" {
@@ -169,15 +169,14 @@ load 'bats-assert/load'
   assert_output $'run: make start\nrun: make memory-tests\nrun: make worker-mode-verification\nrun: make export-memory-coverage\nrun: make down'
 }
 
-@test "load test LocalStack healthcheck waits for SQS readiness" {
+@test "load test AWS emulator healthcheck waits for SQS readiness" {
   run awk '
-    /^  localstack:/ {in_block=1}
-    in_block && /^  [[:alnum:]_-]+:/ && $0 !~ /^  localstack:/ {exit}
+    /^  aws-emulator:/ {in_block=1}
+    in_block && /^  [[:alnum:]_-]+:/ && $0 !~ /^  aws-emulator:/ {exit}
     in_block {print}
   ' docker-compose.load_test.override.yml
   assert_success
-  assert_output --partial 'curl -fsS http://localhost:4566/_localstack/health'
-  assert_output --partial 'grep -Eq "\"sqs\": \"(available|running)\""'
+  assert_output --partial 'aws --endpoint-url=http://localhost:4566 sqs list-queues'
 }
 
 @test "dev and load-test FrankenPHP overrides keep the official automatic HTTPS flow" {

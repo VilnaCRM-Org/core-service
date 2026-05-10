@@ -2,7 +2,7 @@
 
 ## Issue Scope
 
-GitHub issue #176 asks for endpoint-grade cache consistency. The planned solution should create reusable layered invalidation plus an async cache refresh foundation, with Customer as the first adopter. The requested outcome is not just invalidation: writes, exposed domain events, and custom repository paths must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while LocalStack remains the local transport.
+GitHub issue #176 asks for endpoint-grade cache consistency. The planned solution should create reusable layered invalidation plus an async cache refresh foundation, with Customer as the first adopter. The requested outcome is not just invalidation: writes, exposed domain events, and custom repository paths must invalidate affected cache tags and enqueue dedicated cache refresh work that runs in Symfony Messenger workers backed by AWS SQS, while the Floci-backed AWS emulator remains the local transport.
 
 ## Current State
 
@@ -25,7 +25,7 @@ The current cache model is still method-local and partly hardcoded:
 The service already has async domain event delivery:
 
 - `config/packages/messenger.yaml` routes `DomainEventEnvelope` to the `domain-events` transport and failed envelopes to `failed-domain-events`.
-- `.env` configures SQS DSNs against LocalStack on port `4566`.
+- `.env` configures SQS DSNs against the local AWS emulator on port `4566`.
 - `src/Shared/Infrastructure/Bus/Event/Async/ResilientAsyncEventDispatcher.php` dispatches events through Messenger and isolates SQS dispatch failures from write requests.
 - `src/Shared/Infrastructure/Bus/Event/Async/DomainEventMessageHandler.php` invokes tagged domain event subscribers in workers, logs subscriber failures, emits metrics, and continues.
 - `config/services_test.yaml` swaps the event bus back to synchronous in-memory processing for integration tests.
@@ -122,7 +122,7 @@ Likely Customer production code changes:
   - `cache.customer.reference`
 - Update `CachedCustomerRepository` to use declared policies for customer detail and email lookup instead of method-local TTL constants.
 - Update create/update/delete invalidation so normal ODM writes are covered by the shared listener, exposed Customer domain events are covered by subscribers, and any custom repository method that bypasses ODM observation calls the shared invalidation command as a fallback.
-- Update docs for shared refresh orchestration, Customer policies, TTL defaults, LocalStack/SQS refresh routing, and operational metrics.
+- Update docs for shared refresh orchestration, Customer policies, TTL defaults, AWS emulator/SQS refresh routing, and operational metrics.
 
 Potential test changes:
 
@@ -147,7 +147,7 @@ Potential test changes:
 - API Platform collection caching is not currently repository-level, so adding full collection refresh for arbitrary filters may exceed a safe first implementation. Forward-safe policy classes can declare collection policies while the first worker refreshes known detail/email workloads and invalidates collection tags.
 - Customer type/status operations do not publish domain events today. Cache invalidation can still be covered through ODM listener rules for managed document changes; domain events are a follow-up only if business semantics or cross-context reactions require them.
 - Symfony cache `get()` does not expose simple hit/miss hooks; hit/miss metrics may require a wrapper service or conservative instrumentation around callback execution.
-- Messenger routing must keep the current domain event queue working and add a separate cache refresh route without breaking LocalStack.
+- Messenger routing must keep the current domain event queue working and add a separate cache refresh route without breaking local AWS emulation.
 - The repo requires `make ci`; that includes mutation testing and can be slow.
 
 ## Planning Assumptions
