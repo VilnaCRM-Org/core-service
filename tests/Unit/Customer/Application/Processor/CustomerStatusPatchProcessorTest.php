@@ -121,7 +121,7 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->resolver
             ->expects($this->once())
             ->method('resolve')
-            ->willThrowException(new CustomerStatusNotFoundException());
+            ->willThrowException(new CustomerStatusNotFoundException('unknown'));
 
         $this->factory->expects($this->never())->method('create');
         $this->commandBus->expects($this->never())->method('dispatch');

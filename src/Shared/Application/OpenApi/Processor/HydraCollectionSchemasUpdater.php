@@ -59,10 +59,10 @@ final class HydraCollectionSchemasUpdater
         string $schemaName,
         array|bool|float|int|string|ArrayObject|null $schema
     ): ?array {
-        return HydraCollectionSchemaCandidateResolver::resolve(
+        return (new HydraCollectionSchemaCandidateResolver())->resolve(
             $schemas,
             $schemaName,
-            SchemaNormalizer::normalize($schema),
+            (new SchemaNormalizer())->normalize($schema),
             $this->viewExampleUpdater
         );
     }

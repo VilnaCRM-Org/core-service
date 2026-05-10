@@ -21,26 +21,4 @@ final readonly class Parameter
     {
         return $this->requirement === Requirement::REQUIRED;
     }
-
-    public static function required(
-        string $name,
-        string $type,
-        string|int|array|bool|null $example,
-        ?int $maxLength = null,
-        ?string $format = null,
-        ?array $items = null
-    ): self {
-        return new self($name, $type, $example, $maxLength, $format, Requirement::REQUIRED, $items);
-    }
-
-    public static function optional(
-        string $name,
-        string $type,
-        string|int|array|bool|null $example,
-        ?int $maxLength = null,
-        ?string $format = null,
-        ?array $items = null
-    ): self {
-        return new self($name, $type, $example, $maxLength, $format, Requirement::OPTIONAL, $items);
-    }
 }

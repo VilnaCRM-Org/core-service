@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Shared\Infrastructure\EventListener;
 use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
 use App\Shared\Application\DTO\CacheInvalidationRule;
+use App\Shared\Application\Factory\CacheChangeSetFactory;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Shared\Infrastructure\EventListener\CacheInvalidationDoctrineEventListener;
 use App\Shared\Infrastructure\Resolver\CacheInvalidationTagResolver;
 use App\Tests\Unit\Shared\Infrastructure\EventListener\Stub as ListenerStub;
@@ -33,9 +35,13 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->documentResolver = new ListenerStub\DoctrineListenerTestDocumentCacheResolver();
         $this->listener = new CacheInvalidationDoctrineEventListener(
-            new CacheInvalidationTagResolver([$this->documentResolver]),
+            new CacheInvalidationTagResolver(
+                [$this->documentResolver],
+                new CacheInvalidationCommandFactory()
+            ),
             $this->handler,
-            $this->logger
+            $this->logger,
+            new CacheChangeSetFactory()
         );
     }
 
@@ -95,7 +101,7 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Post-flush cache invalidation failed',
-                $this->callback(self::assertPostFlushFailureContext(...))
+                $this->callback($this->assertPostFlushFailureContext(...))
             );
 
         $this->listener->onFlush(new OnFlushEventArgs($manager));
@@ -113,11 +119,13 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
         ]);
         $handler = $this->createMock(CacheInvalidationCommandHandler::class);
         $listener = new CacheInvalidationDoctrineEventListener(
-            new CacheInvalidationTagResolver([
-                new ListenerStub\UnsupportedDoctrineListenerTestDocumentCacheResolver(),
-            ]),
+            new CacheInvalidationTagResolver(
+                [new ListenerStub\UnsupportedDoctrineListenerTestDocumentCacheResolver()],
+                new CacheInvalidationCommandFactory()
+            ),
             $handler,
-            $this->logger
+            $this->logger,
+            new CacheChangeSetFactory()
         );
 
         $handler
@@ -139,11 +147,13 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
         ]);
         $handler = $this->createMock(CacheInvalidationCommandHandler::class);
         $listener = new CacheInvalidationDoctrineEventListener(
-            new CacheInvalidationTagResolver([
-                new ListenerStub\ThrowingDoctrineListenerTestDocumentCacheResolver(),
-            ]),
+            new CacheInvalidationTagResolver(
+                [new ListenerStub\ThrowingDoctrineListenerTestDocumentCacheResolver()],
+                new CacheInvalidationCommandFactory()
+            ),
             $handler,
-            $this->logger
+            $this->logger,
+            new CacheChangeSetFactory()
         );
 
         $handler
@@ -154,7 +164,7 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'On-flush cache invalidation command resolution failed',
-                $this->callback(self::assertOnFlushResolutionFailureContext(...))
+                $this->callback($this->assertOnFlushResolutionFailureContext(...))
             );
 
         $listener->onFlush(new OnFlushEventArgs($manager));
@@ -216,7 +226,7 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
     /**
      * @param array<string, mixed> $context
      */
-    private static function assertPostFlushFailureContext(array $context): bool
+    private function assertPostFlushFailureContext(array $context): bool
     {
         return $context['operation'] === 'cache.invalidation.error'
             && $context['source'] === 'odm_change_set'
@@ -228,7 +238,7 @@ final class CacheInvalidationDoctrineEventListenerTest extends UnitTestCase
     /**
      * @param array<string, mixed> $context
      */
-    private static function assertOnFlushResolutionFailureContext(array $context): bool
+    private function assertOnFlushResolutionFailureContext(array $context): bool
     {
         return $context['operation'] === 'cache.invalidation.error'
             && $context['source'] === 'odm_change_set'

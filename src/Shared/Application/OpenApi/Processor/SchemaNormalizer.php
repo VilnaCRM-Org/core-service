@@ -16,7 +16,7 @@ final class SchemaNormalizer
      *
      * @return array<int|string, SchemaValue>
      */
-    public static function normalize(object|array|string|int|float|bool|null $schema): array
+    public function normalize(object|array|string|int|float|bool|null $schema): array
     {
         return match (true) {
             $schema instanceof ArrayObject => $schema->getArrayCopy(),

@@ -9,6 +9,7 @@ use App\Shared\Application\Observability\Metric\EndpointInvocationsMetric;
 use App\Shared\Infrastructure\EventDispatcher\ResilientEventSubscriber;
 use App\Shared\Infrastructure\Observability\Resolver\ApiEndpointMetricDimensionsResolver;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -18,6 +19,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * IMPORTANT: Listener failures must not break the main HTTP response.
  * This is enforced by ResilientEventSubscriber with automatic error handling.
  */
+#[AsEventListener(event: KernelEvents::RESPONSE, method: 'onResponse')]
 final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEventSubscriber
 {
     public function __construct(
@@ -26,16 +28,6 @@ final readonly class ApiEndpointBusinessMetricsSubscriber extends ResilientEvent
         private ApiEndpointMetricDimensionsResolver $dimensionsResolver
     ) {
         parent::__construct($logger);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::RESPONSE => 'onResponse',
-        ];
     }
 
     public function onResponse(ResponseEvent $event): void

@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\EventSubscriber;
 use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
 use App\Shared\Application\DTO\CacheInvalidationTagSet;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Shared\Infrastructure\Collection\CacheRefreshCommandCollection;
 use App\Tests\Unit\Shared\Application\EventSubscriber\Stub\ExposedCacheInvalidationSubscriber;
 use App\Tests\Unit\UnitTestCase;
@@ -27,24 +28,25 @@ final class AbstractCacheInvalidationSubscriberTest extends UnitTestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->subscriber = new ExposedCacheInvalidationSubscriber(
             $this->handler,
-            $this->logger
+            $this->logger,
+            new CacheInvalidationCommandFactory()
         );
     }
 
     public function testInvalidateBuildsDomainEventInvalidationCommand(): void
     {
-        $tags = CacheInvalidationTagSet::create('customer.1');
+        $tags = new CacheInvalidationTagSet('customer.1');
 
         $this->handler
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->callback(self::assertDomainEventCommand(...)));
+            ->with($this->callback($this->assertDomainEventCommand(...)));
 
         $this->subscriber->callInvalidate(
             'customer',
             'updated',
             $tags,
-            CacheRefreshCommandCollection::create()
+            new CacheRefreshCommandCollection()
         );
     }
 
@@ -60,18 +62,18 @@ final class AbstractCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Domain-event cache invalidation failed',
-                $this->callback(self::assertFailureContext(...))
+                $this->callback($this->assertFailureContext(...))
             );
 
         $this->subscriber->callInvalidate(
             'customer',
             'updated',
-            CacheInvalidationTagSet::create('customer.1'),
-            CacheRefreshCommandCollection::create()
+            new CacheInvalidationTagSet('customer.1'),
+            new CacheRefreshCommandCollection()
         );
     }
 
-    private static function assertDomainEventCommand(CacheInvalidationCommand $command): bool
+    private function assertDomainEventCommand(CacheInvalidationCommand $command): bool
     {
         return $command->context() === 'customer'
             && $command->source() === 'domain_event'
@@ -82,7 +84,7 @@ final class AbstractCacheInvalidationSubscriberTest extends UnitTestCase
     /**
      * @param array<string, mixed> $context
      */
-    private static function assertFailureContext(array $context): bool
+    private function assertFailureContext(array $context): bool
     {
         return $context['operation'] === 'cache.invalidation.error'
             && $context['cache_operation'] === 'updated'

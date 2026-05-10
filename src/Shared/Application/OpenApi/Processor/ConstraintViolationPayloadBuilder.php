@@ -16,13 +16,13 @@ final class ConstraintViolationPayloadBuilder
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function build(array $properties): ?array
+    public function build(array $properties): ?array
     {
-        $payload = ConstraintViolationPayloadItemsCleaner::clean(
-            SchemaNormalizer::normalize($properties['payload'] ?? ['type' => 'array'])
+        $payload = (new ConstraintViolationPayloadItemsCleaner())->clean(
+            (new SchemaNormalizer())->normalize($properties['payload'] ?? ['type' => 'array'])
         );
 
-        return PayloadItemsRequirementChecker::shouldAddItems($payload)
+        return (new PayloadItemsRequirementChecker())->shouldAddItems($payload)
             ? ['items' => ['type' => 'object']] + $payload
             : null;
     }

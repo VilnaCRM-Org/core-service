@@ -8,6 +8,8 @@ use App\Internal\HealthCheck\Application\EventSub\BrokerCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use App\Tests\Integration\BaseApiCase;
 use Aws\Sqs\SqsClient;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class BrokerCheckSubscriberTest extends BaseApiCase
 {
@@ -35,11 +37,13 @@ final class BrokerCheckSubscriberTest extends BaseApiCase
         $this->assertNotEmpty($queueUrl, 'Queue URL should not be empty');
     }
 
-    public function testGetSubscribedEvents(): void
+    public function testRegistersHealthCheckListenerAttribute(): void
     {
-        $this->assertSame(
-            [HealthCheckEvent::class => 'onHealthCheck'],
-            BrokerCheckSubscriber::getSubscribedEvents()
-        );
+        $listener = (new ReflectionClass(BrokerCheckSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
+
+        $this->assertSame(HealthCheckEvent::class, $listener->event);
+        $this->assertSame('onHealthCheck', $listener->method);
     }
 }

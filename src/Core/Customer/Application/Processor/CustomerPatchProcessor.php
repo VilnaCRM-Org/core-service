@@ -46,7 +46,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
             $data->id,
-            static fn () => new CustomerNotFoundException()
+            static fn () => new CustomerNotFoundException('unknown')
         );
 
         $customer = $this->retrieveCustomer($ulid);
@@ -61,7 +61,7 @@ final readonly class CustomerPatchProcessor implements ProcessorInterface
         $ulidObject = $this->ulidTransformer->create($ulid);
 
         return $this->repository->findFresh($ulidObject)
-            ?? throw new CustomerNotFoundException();
+            ?? throw new CustomerNotFoundException($ulid);
     }
 
     private function dispatchUpdateCommand(

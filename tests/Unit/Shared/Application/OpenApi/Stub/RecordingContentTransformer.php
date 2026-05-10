@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Stub;
 
+use App\Shared\Application\OpenApi\Factory\IriReferenceMediaTypeDefinitionFactory;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformerInterface;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
@@ -19,7 +20,8 @@ final class RecordingContentTransformer implements IriReferenceContentTransforme
     {
         $this->inner = new IriReferenceContentTransformer(
             new IriReferenceMediaTypeTransformer(
-                new IriReferencePropertyTransformer()
+                new IriReferencePropertyTransformer(),
+                new IriReferenceMediaTypeDefinitionFactory()
             )
         );
     }

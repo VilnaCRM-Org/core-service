@@ -24,24 +24,7 @@ final class CustomerStatusUpdatedEvent extends DomainEvent
         );
     }
 
-    /**
-     * @param array<string, string|null> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            customerStatusId: $body['customer_status_id'],
-            currentValue: $body['current_value'],
-            previousValue: $body['previous_value'] ?? null,
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'customer_status.updated';
     }

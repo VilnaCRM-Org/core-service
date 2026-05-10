@@ -12,6 +12,7 @@ use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Core\Customer\Infrastructure\Collection\CustomerCachePolicyCollection;
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\DTO\CacheRefreshPolicy;
+use App\Shared\Application\Factory\CacheRefreshResultFactory;
 use App\Shared\Domain\ValueObject\Ulid;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use App\Tests\Unit\UnitTestCase;
@@ -268,6 +269,7 @@ final class CustomerCacheRefreshCommandHandlerTest extends UnitTestCase
             $this->cacheKeyBuilder,
             new CustomerCachePolicyCollection(),
             $this->logger,
+            new CacheRefreshResultFactory(),
             $this->cache
         );
     }
@@ -278,7 +280,8 @@ final class CustomerCacheRefreshCommandHandlerTest extends UnitTestCase
             $this->repository,
             $this->cacheKeyBuilder,
             new CustomerCachePolicyCollection(),
-            $this->logger
+            $this->logger,
+            new CacheRefreshResultFactory()
         );
     }
 
@@ -429,8 +432,8 @@ final class CustomerCacheRefreshCommandHandlerTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Customer cache refresh failed',
-                $this->callback(static function (array $context) use ($command, $error, $family): bool {
-                    self::assertRefreshErrorContext($command, $error, $family, $context);
+                $this->callback(function (array $context) use ($command, $error, $family): bool {
+                    $this->assertRefreshErrorContext($command, $error, $family, $context);
 
                     return true;
                 })
@@ -491,7 +494,7 @@ final class CustomerCacheRefreshCommandHandlerTest extends UnitTestCase
     /**
      * @param array{operation: string, family: string, dedupe_key: string, error: string} $context
      */
-    private static function assertRefreshErrorContext(
+    private function assertRefreshErrorContext(
         CacheRefreshCommand $command,
         string $error,
         string $family,
@@ -508,7 +511,7 @@ final class CustomerCacheRefreshCommandHandlerTest extends UnitTestCase
         string $identifierName,
         string $identifierValue
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             CustomerCachePolicyCollection::CONTEXT,
             $family,
             $identifierName,

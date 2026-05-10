@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\Bus\Event\Async;
 
+use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Infrastructure\Bus\Event\Async\DomainEventEnvelope;
+use App\Shared\Infrastructure\Bus\Event\Async\DomainEventFactory;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Event\Async\Stub\TestDomainEvent;
 use App\Tests\Unit\UnitTestCase;
 
@@ -17,7 +19,7 @@ final class DomainEventEnvelopeTest extends UnitTestCase
             eventId: 'event-456'
         );
 
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFromEvent($event);
 
         self::assertSame(TestDomainEvent::class, $envelope->eventClass());
         self::assertSame('event-456', $envelope->eventId());
@@ -32,8 +34,8 @@ final class DomainEventEnvelopeTest extends UnitTestCase
             occurredOn: '2024-01-15T10:30:00+00:00'
         );
 
-        $envelope = DomainEventEnvelope::fromEvent($originalEvent);
-        $restoredEvent = $envelope->toEvent();
+        $envelope = $this->envelopeFromEvent($originalEvent);
+        $restoredEvent = $this->eventFromEnvelope($envelope);
 
         self::assertInstanceOf(TestDomainEvent::class, $restoredEvent);
         self::assertSame('event-456', $restoredEvent->eventId());
@@ -50,7 +52,7 @@ final class DomainEventEnvelopeTest extends UnitTestCase
             occurredOn: $occurredOn
         );
 
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFromEvent($event);
 
         self::assertSame('event-456', $envelope->eventId());
         self::assertSame($occurredOn, $envelope->occurredOn());
@@ -64,11 +66,26 @@ final class DomainEventEnvelopeTest extends UnitTestCase
             occurredOn: '2024-01-15T10:30:00+00:00'
         );
 
-        $envelope = DomainEventEnvelope::fromEvent($event);
-        $restored = $envelope->toEvent();
+        $envelope = $this->envelopeFromEvent($event);
+        $restored = $this->eventFromEnvelope($envelope);
 
         self::assertSame($event->eventId(), $restored->eventId());
         self::assertSame($event->occurredOn(), $restored->occurredOn());
         self::assertSame($event->toPrimitives(), $restored->toPrimitives());
+    }
+
+    private function envelopeFromEvent(TestDomainEvent $event): DomainEventEnvelope
+    {
+        return new DomainEventEnvelope(
+            eventClass: $event::class,
+            body: $event->toPrimitives(),
+            eventId: $event->eventId(),
+            occurredOn: $event->occurredOn()
+        );
+    }
+
+    private function eventFromEnvelope(DomainEventEnvelope $envelope): DomainEvent
+    {
+        return (new DomainEventFactory())->fromEnvelope($envelope);
     }
 }

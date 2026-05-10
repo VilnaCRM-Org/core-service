@@ -9,20 +9,12 @@ use App\Shared\Application\Observability\Metric\ValueObject\RetryStrategyMetricD
 
 final readonly class RetryAttemptMetric extends BusinessMetric
 {
-    private function __construct(
+    public function __construct(
         private string $messageType,
         private string $exceptionType,
         float|int $value = 1
     ) {
         parent::__construct($value, new MetricUnit(MetricUnit::COUNT));
-    }
-
-    public static function create(
-        string $messageType,
-        string $exceptionType,
-        float|int $value = 1
-    ): self {
-        return new self($messageType, $exceptionType, $value);
     }
 
     public function name(): string

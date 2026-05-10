@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\CommandHandler;
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\CommandHandler\CacheRefreshCommandHandler;
 use App\Shared\Application\DTO\CacheRefreshPolicy;
+use App\Shared\Application\Observability\Factory\CacheRefreshMetricFactory;
 use App\Shared\Application\Observability\Metric\CacheRefreshFailedMetric;
 use App\Shared\Application\Observability\Metric\CacheRefreshSucceededMetric;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
@@ -45,7 +46,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
         $source = CacheRefreshPolicy::SOURCE_REPOSITORY_REFRESH;
         $command = $this->refreshCommand($context, $family, $source);
         $unsupportedHandler = new RecordingRefreshHandler(
-            self::unsupportedContext($context),
+            $this->unsupportedContext($context),
             false
         );
         $matchingHandler = new RecordingRefreshHandler($context, true);
@@ -140,7 +141,8 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
             new CacheRefreshCommandHandlerResolver([new FailingRefreshHandler($context)]),
             $this->cachePoolResolver,
             $this->logger,
-            $this->metricsEmitter
+            $this->metricsEmitter,
+            new CacheRefreshMetricFactory()
         );
 
         $this->expectDedupeClaim($command, releaseOnFailure: true);
@@ -163,7 +165,8 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
             new CacheRefreshCommandHandlerResolver([new FailingRefreshHandler($context)]),
             $this->cachePoolResolver,
             $this->logger,
-            $this->metricsEmitter
+            $this->metricsEmitter,
+            new CacheRefreshMetricFactory()
         );
 
         $this->expectDedupeClaimWithReleaseFailure($command);
@@ -178,7 +181,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
     {
         $context = $this->faker->word();
         $resolver = new CacheRefreshCommandHandlerResolver([
-            new RecordingRefreshHandler(self::unsupportedContext($context), true),
+            new RecordingRefreshHandler($this->unsupportedContext($context), true),
         ]);
 
         $this->expectException(\RuntimeException::class);
@@ -195,7 +198,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
         $context = $this->faker->word();
         $matchingHandler = new RecordingRefreshHandler($context, true);
         $resolver = new CacheRefreshCommandHandlerResolver([
-            new RecordingRefreshHandler(self::unsupportedContext($context), false),
+            new RecordingRefreshHandler($this->unsupportedContext($context), false),
             $matchingHandler,
         ]);
 
@@ -239,7 +242,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
         string $family,
         string $refreshSource
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             $context,
             $family,
             $this->faker->word(),
@@ -251,7 +254,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
         );
     }
 
-    private static function unsupportedContext(string $context): string
+    private function unsupportedContext(string $context): string
     {
         return $context . '_unsupported';
     }
@@ -262,7 +265,8 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
             new CacheRefreshCommandHandlerResolver($handlers),
             $this->cachePoolResolver,
             $this->logger,
-            $this->metricsEmitter
+            $this->metricsEmitter,
+            new CacheRefreshMetricFactory()
         );
     }
 
@@ -379,7 +383,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
             ->expects($this->exactly(2))
             ->method('warning')
             ->willReturnCallback(
-                static function (string $message, array $context) use ($command): void {
+                function (string $message, array $context) use ($command): void {
                     static $call = 0;
 
                     if ($call === 0) {
@@ -400,7 +404,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
 
                     ++$call;
                     self::assertSame('Cache refresh command failed', $message);
-                    self::assertTrue(self::failureContextMatches($context, $command));
+                    self::assertTrue($this->failureContextMatches($context, $command));
                 }
             );
     }
@@ -418,7 +422,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
             ->with(
                 'Cache refresh command failed',
                 $this->callback(
-                    static fn (array $context): bool => self::failureContextMatches(
+                    fn (array $context): bool => $this->failureContextMatches(
                         $context,
                         $command
                     )
@@ -429,7 +433,7 @@ final class CacheRefreshCommandHandlerTest extends UnitTestCase
     /**
      * @param array<string, string|null> $context
      */
-    private static function failureContextMatches(
+    private function failureContextMatches(
         array $context,
         CacheRefreshCommand $command
     ): bool {

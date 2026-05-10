@@ -18,14 +18,9 @@ final readonly class CacheRefreshCommandCollection implements IteratorAggregate,
     /** @var ArrayIterator<int, CacheRefreshCommand> */
     private ArrayIterator $commands;
 
-    private function __construct(CacheRefreshCommand ...$commands)
+    public function __construct(CacheRefreshCommand ...$commands)
     {
         $this->commands = new ArrayIterator($commands);
-    }
-
-    public static function create(CacheRefreshCommand ...$commands): self
-    {
-        return new self(...$commands);
     }
 
     public function with(CacheRefreshCommand ...$commands): self

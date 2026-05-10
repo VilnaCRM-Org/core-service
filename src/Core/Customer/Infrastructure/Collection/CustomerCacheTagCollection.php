@@ -22,11 +22,6 @@ final class CustomerCacheTagCollection implements IteratorAggregate, Countable
         $this->tags = new ArrayIterator(array_values(array_unique($tags)));
     }
 
-    public static function forCustomerCache(): self
-    {
-        return new self('customer', 'customer.collection');
-    }
-
     public function with(string ...$tags): self
     {
         return new self(...iterator_to_array($this->tags), ...$tags);

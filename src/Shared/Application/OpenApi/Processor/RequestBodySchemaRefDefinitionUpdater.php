@@ -17,7 +17,7 @@ final class RequestBodySchemaRefDefinitionUpdater
      */
     public function update(array $definition, string $schemaRef): ?array
     {
-        $schema = SchemaNormalizer::normalize($definition['schema'] ?? []);
+        $schema = (new SchemaNormalizer())->normalize($definition['schema'] ?? []);
 
         if ($schema === [] || $schema === ['$ref' => $schemaRef]) {
             return null;

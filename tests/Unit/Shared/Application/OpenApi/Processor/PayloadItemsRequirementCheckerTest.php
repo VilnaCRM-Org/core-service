@@ -12,55 +12,55 @@ final class PayloadItemsRequirementCheckerTest extends UnitTestCase
 {
     public function testShouldAddItemsReturnsFalseWhenPayloadIsNotArray(): void
     {
-        $this->assertFalse(PayloadItemsRequirementChecker::shouldAddItems(null));
+        $this->assertFalse((new PayloadItemsRequirementChecker())->shouldAddItems(null));
     }
 
     public function testShouldAddItemsReturnsFalseWhenNotArrayType(): void
     {
         $payload = ['type' => 'string'];
 
-        $this->assertFalse(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertFalse((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsFalseWhenItemsPresent(): void
     {
         $payload = ['type' => 'array', 'items' => ['type' => 'string']];
 
-        $this->assertFalse(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertFalse((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsTrueWhenItemsMissing(): void
     {
         $payload = ['type' => 'array'];
 
-        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertTrue((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsTrueWhenItemsIsNull(): void
     {
         $payload = ['type' => 'array', 'items' => null];
 
-        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertTrue((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsTrueWhenTypeIsArrayObject(): void
     {
         $payload = ['type' => new ArrayObject(['array']), 'items' => null];
 
-        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertTrue((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsTrueWhenTypeIsArrayObjectAndItemsMissing(): void
     {
         $payload = ['type' => new ArrayObject(['array'])];
 
-        $this->assertTrue(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertTrue((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 
     public function testShouldAddItemsReturnsFalseWhenTypeIsArrayObjectWithItems(): void
     {
         $payload = ['type' => new ArrayObject(['array']), 'items' => ['type' => 'string']];
 
-        $this->assertFalse(PayloadItemsRequirementChecker::shouldAddItems($payload));
+        $this->assertFalse((new PayloadItemsRequirementChecker())->shouldAddItems($payload));
     }
 }

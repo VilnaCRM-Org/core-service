@@ -10,6 +10,7 @@ use App\Core\Customer\Infrastructure\Collection\CustomerCachePolicyCollection;
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\CommandHandler\CacheRefreshCommandHandlerBase;
 use App\Shared\Application\DTO\CacheRefreshResult;
+use App\Shared\Application\Factory\CacheRefreshResultFactory;
 use App\Shared\Infrastructure\Cache\CacheKeyBuilder;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -27,8 +28,10 @@ final class CustomerCacheRefreshCommandHandler extends CacheRefreshCommandHandle
         private CacheKeyBuilder $cacheKeyBuilder,
         private CustomerCachePolicyCollection $policies,
         private LoggerInterface $logger,
+        CacheRefreshResultFactory $resultFactory,
         private ?TagAwareCacheInterface $cache = null
     ) {
+        parent::__construct($resultFactory);
     }
 
     public function context(): string
@@ -70,7 +73,7 @@ final class CustomerCacheRefreshCommandHandler extends CacheRefreshCommandHandle
         $customerId = $this->customerId($command);
 
         if ($customerId === null || $customerId === '') {
-            return $this->skip($command, 'missing_customer_id');
+            return $this->skipped($command, 'missing_customer_id');
         }
 
         $this->warmDetailCache($customerId, $cache);
@@ -111,7 +114,7 @@ final class CustomerCacheRefreshCommandHandler extends CacheRefreshCommandHandle
         $email = $this->email($command);
 
         if ($email === null || $email === '') {
-            return $this->skip($command, 'missing_email');
+            return $this->skipped($command, 'missing_email');
         }
 
         $this->warmLookupCache($email, $cache);
@@ -214,31 +217,17 @@ final class CustomerCacheRefreshCommandHandler extends CacheRefreshCommandHandle
             'family' => $command->family(),
         ]);
 
-        return $this->skip($command, 'cache_unavailable');
+        return $this->skipped($command, 'cache_unavailable');
     }
 
     private function skipUnsupportedFamily(CacheRefreshCommand $command): CacheRefreshResult
     {
-        return $this->skip($command, 'unsupported_family');
-    }
-
-    private function skip(CacheRefreshCommand $command, string $reason): CacheRefreshResult
-    {
-        return CacheRefreshResult::skipped(
-            $command->context(),
-            $command->family(),
-            $command->dedupeKey(),
-            $reason
-        );
+        return $this->skipped($command, 'unsupported_family');
     }
 
     private function success(CacheRefreshCommand $command): CacheRefreshResult
     {
-        return CacheRefreshResult::success(
-            $command->context(),
-            $command->family(),
-            $command->dedupeKey()
-        );
+        return $this->succeeded($command);
     }
 
     private function customerId(CacheRefreshCommand $command): ?string

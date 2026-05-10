@@ -6,8 +6,8 @@ namespace App\Core\Customer\Domain\Exception;
 
 final class CustomerNotFoundException extends \RuntimeException
 {
-    public static function withId(string $id): self
+    public function __construct(string $id)
     {
-        return new self(sprintf('Customer with id "%s" not found', $id));
+        parent::__construct(sprintf('Customer with id "%s" not found', $id));
     }
 }

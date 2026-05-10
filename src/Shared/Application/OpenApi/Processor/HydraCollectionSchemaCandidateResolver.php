@@ -17,7 +17,7 @@ final class HydraCollectionSchemaCandidateResolver
      *
      * @return array<int|string, SchemaValue>|null
      */
-    public static function resolve(
+    public function resolve(
         array $schemas,
         string $schemaName,
         array $normalizedSchema,
@@ -27,7 +27,7 @@ final class HydraCollectionSchemaCandidateResolver
 
         return match (true) {
             $updatedSchema !== null => $updatedSchema,
-            self::existingSchema(
+            $this->existingSchema(
                 $schemas,
                 $schemaName,
                 $normalizedSchema
@@ -42,13 +42,13 @@ final class HydraCollectionSchemaCandidateResolver
      *
      * @return array<int|string, SchemaValue>
      */
-    private static function existingSchema(
+    private function existingSchema(
         array $schemas,
         string $schemaName,
         array $normalizedSchema
     ): array {
         return match (true) {
-            array_key_exists($schemaName, $schemas) => SchemaNormalizer::normalize(
+            array_key_exists($schemaName, $schemas) => (new SchemaNormalizer())->normalize(
                 $schemas[$schemaName]
             ),
             default => $normalizedSchema,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
+use App\Shared\Application\OpenApi\Factory\IriReferenceMediaTypeDefinitionFactory;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceMediaTypeTransformer;
 use App\Shared\Application\OpenApi\Transformer\IriReferencePropertyTransformer;
 use App\Tests\Unit\Shared\Application\OpenApi\Stub\RecordingPropertyTransformer;
@@ -17,7 +18,8 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
     {
         parent::setUp();
         $this->transformer = new IriReferenceMediaTypeTransformer(
-            new IriReferencePropertyTransformer()
+            new IriReferencePropertyTransformer(),
+            new IriReferenceMediaTypeDefinitionFactory()
         );
     }
 
@@ -55,7 +57,10 @@ final class IriReferenceMediaTypeTransformerTest extends UnitTestCase
     public function testUsesInjectedPropertyTransformer(): void
     {
         $propertyTransformer = new RecordingPropertyTransformer();
-        $transformer = new IriReferenceMediaTypeTransformer($propertyTransformer);
+        $transformer = new IriReferenceMediaTypeTransformer(
+            $propertyTransformer,
+            new IriReferenceMediaTypeDefinitionFactory()
+        );
 
         $mediaType = [
             'schema' => [

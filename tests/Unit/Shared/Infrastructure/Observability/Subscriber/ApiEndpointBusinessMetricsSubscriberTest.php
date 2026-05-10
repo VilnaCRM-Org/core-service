@@ -10,19 +10,24 @@ use App\Shared\Infrastructure\Observability\Subscriber\ApiEndpointBusinessMetric
 use App\Tests\Unit\Shared\Infrastructure\Observability\BusinessMetricsEmitterSpy;
 use App\Tests\Unit\UnitTestCase;
 use Psr\Log\NullLogger;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
 {
-    public function testSubscribedEvents(): void
+    public function testRegistersKernelResponseListenerAttribute(): void
     {
-        $events = ApiEndpointBusinessMetricsSubscriber::getSubscribedEvents();
+        $listener = (new ReflectionClass(ApiEndpointBusinessMetricsSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
 
-        self::assertArrayHasKey('kernel.response', $events);
-        self::assertSame('onResponse', $events['kernel.response']);
+        self::assertSame(KernelEvents::RESPONSE, $listener->event);
+        self::assertSame('onResponse', $listener->method);
     }
 
     public function testEmitsMetricForApiPlatformRequest(): void
@@ -31,8 +36,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/customers', 'GET');
@@ -64,8 +68,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/health', 'GET');
@@ -90,8 +93,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/favicon.ico', 'GET');
@@ -114,8 +116,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/graphql', 'POST');
@@ -144,8 +145,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/something', 'PATCH');
@@ -175,8 +175,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/something', 'GET');
@@ -200,8 +199,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/something', 'GET');
@@ -225,8 +223,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             new NullLogger(),
             $spy,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/customers', 'GET');
@@ -263,8 +260,7 @@ final class ApiEndpointBusinessMetricsSubscriberTest extends UnitTestCase
         $subscriber = new ApiEndpointBusinessMetricsSubscriber(
             $logger,
             $emitter,
-            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory()),
-            new MetricDimensionsFactory()
+            new ApiEndpointMetricDimensionsResolver(new MetricDimensionsFactory())
         );
 
         $request = Request::create('/api/customers', 'GET');

@@ -66,7 +66,7 @@ final class ParameterDescriptionDictionary
     /**
      * @return array<string, string>
      */
-    public static function descriptions(): array
+    public function descriptions(): array
     {
         return self::DESCRIPTIONS;
     }

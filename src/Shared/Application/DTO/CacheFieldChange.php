@@ -13,11 +13,6 @@ final readonly class CacheFieldChange
     ) {
     }
 
-    public static function create(string $field, mixed $oldValue, mixed $newValue): self
-    {
-        return new self($field, $oldValue, $newValue);
-    }
-
     public function field(): string
     {
         return $this->field;

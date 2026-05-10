@@ -98,11 +98,11 @@ Infrastructure ───────> Domain + Application
 
 ### 0. No Static Methods in Production Source
 
-Do not add static method declarations in `src/`. Model behavior as injected services, listeners, factories, or regular value objects so dependencies remain explicit and testable.
+Do not add or keep static method declarations in project PHP files. Model behavior as injected services, listeners, factories, or regular value objects so dependencies remain explicit and testable.
 
 - HTTP request preconditions belong in kernel listeners, not static guards inside processors
 - Object creation belongs in factory services
-- Shared helpers should be injectable services unless they are being retired from the legacy baseline
+- Shared helpers should be injectable services
 - Run `make forbid-static-methods` or `make psalm` before finishing
 
 ### 1. Domain Layer Purity

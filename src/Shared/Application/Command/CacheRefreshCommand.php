@@ -6,7 +6,9 @@ namespace App\Shared\Application\Command;
 
 final readonly class CacheRefreshCommand
 {
-    private function __construct(
+    private string $dedupeKey;
+
+    public function __construct(
         private string $context,
         private string $family,
         private string $identifierName,
@@ -15,31 +17,12 @@ final readonly class CacheRefreshCommand
         private string $sourceName,
         private string $sourceId,
         private string $occurredOn,
-        private string $dedupeKey
+        bool $caseInsensitiveIdentifier = true,
+        string $dedupeKey = ''
     ) {
-    }
-
-    public static function create(
-        string $context,
-        string $family,
-        string $identifierName,
-        string $identifierValue,
-        string $refreshSource,
-        string $sourceName,
-        string $sourceId,
-        string $occurredOn,
-        bool $caseInsensitiveIdentifier = true
-    ): self {
-        return new self(
-            $context,
-            $family,
-            $identifierName,
-            $identifierValue,
-            $refreshSource,
-            $sourceName,
-            $sourceId,
-            $occurredOn,
-            self::buildDedupeKey(
+        $this->dedupeKey = $dedupeKey !== ''
+            ? $dedupeKey
+            : $this->buildDedupeKey(
                 $context,
                 $family,
                 $identifierName,
@@ -48,8 +31,7 @@ final readonly class CacheRefreshCommand
                 $sourceName,
                 $sourceId,
                 $caseInsensitiveIdentifier
-            )
-        );
+            );
     }
 
     public function context(): string
@@ -97,7 +79,7 @@ final readonly class CacheRefreshCommand
         return $this->dedupeKey;
     }
 
-    private static function buildDedupeKey(
+    private function buildDedupeKey(
         string $context,
         string $family,
         string $identifierName,
@@ -113,7 +95,7 @@ final readonly class CacheRefreshCommand
             'context' => $context,
             'family' => $family,
             'identifier_name' => $identifierName,
-            'identifier_value' => self::normalizeIdentifier(
+            'identifier_value' => $this->normalizeIdentifier(
                 $identifierValue,
                 $caseInsensitiveIdentifier
             ),
@@ -121,7 +103,7 @@ final readonly class CacheRefreshCommand
         ], \JSON_THROW_ON_ERROR));
     }
 
-    private static function normalizeIdentifier(
+    private function normalizeIdentifier(
         string $identifierValue,
         bool $caseInsensitiveIdentifier
     ): string {

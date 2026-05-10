@@ -13,7 +13,7 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, string|null>
      */
-    public static function forCallables(iterable $callables): array
+    public function forCallables(iterable $callables): array
     {
         $callableArray = iterator_to_array($callables);
         $extractor = new InvokeParameterExtractor();
@@ -36,26 +36,26 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, array<DomainEventSubscriberInterface>>
      */
-    public static function forPipedCallables(iterable $callables): array
+    public function forPipedCallables(iterable $callables): array
     {
         return array_reduce(
             iterator_to_array($callables),
-            self::pipedCallablesReducer(),
+            $this->pipedCallablesReducer(),
             []
         );
     }
 
-    private static function pipedCallablesReducer(): callable
+    private function pipedCallablesReducer(): callable
     {
-        return static fn (
+        return fn (
             array $subscribers,
             DomainEventSubscriberInterface $subscriber
         ): array => array_reduce(
             $subscriber->subscribedTo(),
-            static fn (
+            fn (
                 array $carry,
                 string $event
-            ) => self::addSubscriberToEvent($carry, $event, $subscriber),
+            ) => $this->addSubscriberToEvent($carry, $event, $subscriber),
             $subscribers
         );
     }
@@ -65,7 +65,7 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, array<DomainEventSubscriberInterface>>
      */
-    private static function addSubscriberToEvent(
+    private function addSubscriberToEvent(
         array $subscribers,
         string $event,
         DomainEventSubscriberInterface $subscriber

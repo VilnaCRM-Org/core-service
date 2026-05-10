@@ -47,7 +47,7 @@ The `make ci` command runs these checks in sequence:
 2. Security vulnerability analysis
 3. Code style fixes (PHP CS Fixer)
 4. Static analysis (Psalm)
-   - Runs `make forbid-static-methods` before Psalm to block new static method declarations in `src/`
+   - Runs `make forbid-static-methods` before Psalm to block static method declarations in project PHP files
    - Includes repository source-pattern guardrails for hardcoded `new` in `src/` and native `array` type declarations in `src/`
 5. Security taint analysis (Psalm)
 6. Code quality analysis (PHPInsights)

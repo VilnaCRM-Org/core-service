@@ -57,7 +57,7 @@ final readonly class CustomerPutProcessor implements ProcessorInterface
     {
         $customer = $this->customerRepository->findFresh($customerId);
         if (! $customer instanceof Customer) {
-            throw new CustomerNotFoundException();
+            throw new CustomerNotFoundException($customerId);
         }
 
         return $customer;

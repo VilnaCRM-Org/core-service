@@ -90,7 +90,7 @@ final class HydraDirectViewExampleUpdater
     private function normalizedSchemaValue(array $schema, string $key): array
     {
         return match (true) {
-            array_key_exists($key, $schema) => SchemaNormalizer::normalize($schema[$key]),
+            array_key_exists($key, $schema) => (new SchemaNormalizer())->normalize($schema[$key]),
             default => [],
         };
     }

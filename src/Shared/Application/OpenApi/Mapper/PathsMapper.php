@@ -13,15 +13,15 @@ final class PathsMapper
     /**
      * @param callable(PathItem, string): PathItem $callback
      */
-    public static function map(OpenApi $openApi, callable $callback): OpenApi
+    public function map(OpenApi $openApi, callable $callback): OpenApi
     {
-        $newPaths = self::createMappedPaths($openApi->getPaths(), $callback);
-        $newOpenApi = self::createOpenApiWithNewPaths($openApi, $newPaths);
+        $newPaths = $this->createMappedPaths($openApi->getPaths(), $callback);
+        $newOpenApi = $this->createOpenApiWithNewPaths($openApi, $newPaths);
 
-        return self::copyExtensionProperties($openApi, $newOpenApi);
+        return $this->copyExtensionProperties($openApi, $newOpenApi);
     }
 
-    private static function createMappedPaths(Paths $paths, callable $callback): Paths
+    private function createMappedPaths(Paths $paths, callable $callback): Paths
     {
         $newPaths = new Paths();
         $pathKeys = array_keys($paths->getPaths());
@@ -37,7 +37,7 @@ final class PathsMapper
         return $newPaths;
     }
 
-    private static function createOpenApiWithNewPaths(OpenApi $openApi, Paths $newPaths): OpenApi
+    private function createOpenApiWithNewPaths(OpenApi $openApi, Paths $newPaths): OpenApi
     {
         return new OpenApi(
             $openApi->getInfo(),
@@ -52,7 +52,7 @@ final class PathsMapper
         );
     }
 
-    private static function copyExtensionProperties(OpenApi $source, OpenApi $target): OpenApi
+    private function copyExtensionProperties(OpenApi $source, OpenApi $target): OpenApi
     {
         foreach ($source->getExtensionProperties() as $key => $value) {
             $target = $target->withExtensionProperty($key, $value);

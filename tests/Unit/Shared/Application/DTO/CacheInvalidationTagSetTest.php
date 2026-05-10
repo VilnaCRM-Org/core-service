@@ -11,7 +11,7 @@ final class CacheInvalidationTagSetTest extends UnitTestCase
 {
     public function testWithReturnsNewUniqueTagSet(): void
     {
-        $tags = CacheInvalidationTagSet::create('customer', 'customer.detail');
+        $tags = new CacheInvalidationTagSet('customer', 'customer.detail');
         $updated = $tags->with('customer.detail', 'customer.collection');
 
         self::assertSame(['customer', 'customer.detail'], iterator_to_array($tags));

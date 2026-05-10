@@ -202,7 +202,7 @@ load 'bats-assert/load'
   '
 
   assert_failure
-  assert_output --partial "Static methods are forbidden in src/."
+  assert_output --partial "Static methods are forbidden in project PHP files."
   assert_output --partial "App\\Shared\\Application\\SourcePatternGuardStaticMethodExample::create"
 }
 

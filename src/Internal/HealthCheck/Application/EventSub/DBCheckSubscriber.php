@@ -6,7 +6,9 @@ namespace App\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
+#[AsEventListener(event: HealthCheckEvent::class, method: 'onHealthCheck')]
 final class DBCheckSubscriber extends BaseHealthCheckSubscriber
 {
     private DocumentManager $documentManager;

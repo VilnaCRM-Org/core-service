@@ -18,17 +18,9 @@ final readonly class CacheRefreshTargetResolverCollection implements IteratorAgg
     /** @var ArrayIterator<int, CacheRefreshTargetResolverInterface> */
     private ArrayIterator $resolvers;
 
-    private function __construct(CacheRefreshTargetResolverInterface ...$resolvers)
+    public function __construct(CacheRefreshTargetResolverInterface ...$resolvers)
     {
         $this->resolvers = new ArrayIterator($resolvers);
-    }
-
-    /**
-     * @param iterable<CacheRefreshTargetResolverInterface> $resolvers
-     */
-    public static function fromIterable(iterable $resolvers): self
-    {
-        return new self(...iterator_to_array($resolvers));
     }
 
     public function getIterator(): Traversable

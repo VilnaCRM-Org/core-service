@@ -30,7 +30,7 @@ final readonly class CustomerReferenceResolver implements
             $idOrIri,
             $this->typeRepository->find(...),
             CustomerType::class,
-            CustomerTypeNotFoundException::withIri(...)
+            $this->typeNotFoundException(...)
         );
     }
 
@@ -40,7 +40,7 @@ final readonly class CustomerReferenceResolver implements
             $idOrIri,
             $this->statusRepository->find(...),
             CustomerStatus::class,
-            CustomerStatusNotFoundException::withIri(...)
+            $this->statusNotFoundException(...)
         );
     }
 
@@ -78,6 +78,16 @@ final readonly class CustomerReferenceResolver implements
                 sprintf('No route matches "%s".', $idOrIri)
             ),
         };
+    }
+
+    private function typeNotFoundException(string $iri): CustomerTypeNotFoundException
+    {
+        return new CustomerTypeNotFoundException($iri);
+    }
+
+    private function statusNotFoundException(string $iri): CustomerStatusNotFoundException
+    {
+        return new CustomerStatusNotFoundException($iri);
     }
 
     private function isIri(string $idOrIri): bool

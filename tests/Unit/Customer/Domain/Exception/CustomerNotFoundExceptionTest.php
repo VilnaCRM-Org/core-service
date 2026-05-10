@@ -12,7 +12,7 @@ final class CustomerNotFoundExceptionTest extends UnitTestCase
     public function testWithId(): void
     {
         $id = (string) $this->faker->ulid();
-        $exception = CustomerNotFoundException::withId($id);
+        $exception = new CustomerNotFoundException($id);
 
         $this->assertInstanceOf(CustomerNotFoundException::class, $exception);
         $this->assertSame(

@@ -170,27 +170,29 @@ final class UlidValueTransformerTest extends UnitTestCase
         }
     }
 
-    /**
-     * @dataProvider invalidPrimitiveValueProvider
-     */
-    public function testToUlidWithInvalidPrimitiveValueThrowsInvalidArgumentException(mixed $value): void
+    public function testToUlidWithInvalidPrimitiveValueThrowsInvalidArgumentException(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/Expected string after normalization, got .+/');
-
-        $this->converter->toUlid($value);
+        foreach ($this->invalidPrimitiveValues() as $value) {
+            try {
+                $this->converter->toUlid($value);
+                self::fail('Expected invalid primitive value to be rejected.');
+            } catch (\InvalidArgumentException $exception) {
+                self::assertMatchesRegularExpression(
+                    '/Expected string after normalization, got .+/',
+                    $exception->getMessage()
+                );
+            }
+        }
     }
 
     /**
-     * @return array<string, array{0: mixed}>
+     * @return iterable<string, mixed>
      */
-    public static function invalidPrimitiveValueProvider(): array
+    private function invalidPrimitiveValues(): iterable
     {
-        return [
-            'null' => [null],
-            'bool' => [true],
-            'int' => [123],
-            'float' => [1.23],
-        ];
+        yield 'null' => null;
+        yield 'bool' => true;
+        yield 'int' => 123;
+        yield 'float' => 1.23;
     }
 }

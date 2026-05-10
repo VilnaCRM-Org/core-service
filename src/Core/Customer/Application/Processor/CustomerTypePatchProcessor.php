@@ -46,13 +46,13 @@ final readonly class CustomerTypePatchProcessor implements ProcessorInterface
         $ulid = $this->patchUlidExtractor->extract(
             $uriVariables,
             $data->id,
-            static fn () => CustomerTypeNotFoundException::withIri('/api/customer_types/unknown')
+            static fn () => new CustomerTypeNotFoundException('/api/customer_types/unknown')
         );
         $iri = sprintf('/api/customer_types/%s', $ulid);
 
         $customerType = $this->repository->find(
             $this->ulidFactory->create($ulid)
-        ) ?? throw CustomerTypeNotFoundException::withIri($iri);
+        ) ?? throw new CustomerTypeNotFoundException($iri);
 
         // Only update if value is explicitly provided and not empty
         if ($data->value !== null && trim($data->value) !== '') {

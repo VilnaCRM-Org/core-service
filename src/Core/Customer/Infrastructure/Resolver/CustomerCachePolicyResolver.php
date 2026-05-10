@@ -19,12 +19,12 @@ final readonly class CustomerCachePolicyResolver implements CacheRefreshPolicyRe
     public function resolve(string $context, string $family): CacheRefreshPolicy
     {
         if ($context !== CustomerCachePolicyCollection::CONTEXT) {
-            throw UnsupportedCacheRefreshPolicyException::forContext($context);
+            throw new UnsupportedCacheRefreshPolicyException($context);
         }
 
         $policy = $this->policies->forFamily($family);
 
-        return CacheRefreshPolicy::create(
+        return new CacheRefreshPolicy(
             $policy['context'],
             $policy['family'],
             $policy['ttl'],

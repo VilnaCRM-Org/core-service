@@ -50,16 +50,16 @@ final class EmptyValueGuardTest extends UnitTestCase
 
     public function testIsEmptyReturnsTrueForNull(): void
     {
-        self::assertTrue(EmptyValueGuard::isEmpty(null));
+        self::assertTrue((new EmptyValueGuard())->isEmpty(null));
     }
 
     public function testIsEmptyReturnsTrueForEmptyString(): void
     {
-        self::assertTrue(EmptyValueGuard::isEmpty(''));
+        self::assertTrue((new EmptyValueGuard())->isEmpty(''));
     }
 
     public function testIsEmptyReturnsFalseForNonEmptyString(): void
     {
-        self::assertFalse(EmptyValueGuard::isEmpty('a'));
+        self::assertFalse((new EmptyValueGuard())->isEmpty('a'));
     }
 }

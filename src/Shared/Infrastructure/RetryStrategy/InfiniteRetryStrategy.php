@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\RetryStrategy;
 
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
+use App\Shared\Application\Observability\Factory\RetryStrategyMetricFactory;
 use App\Shared\Application\Observability\Metric\BusinessMetric;
-use App\Shared\Application\Observability\Metric\DlqRoutingMetric;
-use App\Shared\Application\Observability\Metric\RetryAttemptMetric;
 use DomainException;
 use InvalidArgumentException;
 use JsonException;
@@ -41,6 +40,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
     public function __construct(
         private readonly int $delayMs,
         private readonly BusinessMetricsEmitterInterface $metricsEmitter,
+        private readonly RetryStrategyMetricFactory $metricFactory,
     ) {
     }
 
@@ -109,7 +109,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
 
     private function emitRetryAttempt(Envelope $message, ?Throwable $throwable): void
     {
-        $this->emitMetric(RetryAttemptMetric::create(
+        $this->emitMetric($this->metricFactory->retryAttempt(
             $this->messageType($message),
             $this->exceptionType($throwable)
         ));
@@ -117,7 +117,7 @@ final class InfiniteRetryStrategy implements RetryStrategyInterface
 
     private function emitDlqRouting(Envelope $message, ?Throwable $throwable): void
     {
-        $this->emitMetric(DlqRoutingMetric::create(
+        $this->emitMetric($this->metricFactory->dlqRouting(
             $this->messageType($message),
             $this->matchedExceptionType($throwable)
         ));

@@ -16,9 +16,9 @@ final class ConstraintViolationPayloadItemsCleaner
      *
      * @return array<string, SchemaValue>
      */
-    public static function clean(array $payload): array
+    public function clean(array $payload): array
     {
-        return self::shouldRemoveItems($payload)
+        return $this->shouldRemoveItems($payload)
             ? array_diff_key($payload, ['items' => true])
             : $payload;
     }
@@ -26,9 +26,9 @@ final class ConstraintViolationPayloadItemsCleaner
     /**
      * @param array<string, SchemaValue> $payload
      */
-    private static function shouldRemoveItems(array $payload): bool
+    private function shouldRemoveItems(array $payload): bool
     {
-        return self::isArrayPayload($payload)
+        return $this->isArrayPayload($payload)
             && array_key_exists('items', $payload)
             && $payload['items'] === null;
     }
@@ -36,12 +36,12 @@ final class ConstraintViolationPayloadItemsCleaner
     /**
      * @param array<string, SchemaValue> $payload
      */
-    private static function isArrayPayload(array $payload): bool
+    private function isArrayPayload(array $payload): bool
     {
         $type = $payload['type'] ?? null;
         $types = match (true) {
             \is_string($type) => [$type],
-            default => SchemaNormalizer::normalize($type),
+            default => (new SchemaNormalizer())->normalize($type),
         };
 
         return in_array(

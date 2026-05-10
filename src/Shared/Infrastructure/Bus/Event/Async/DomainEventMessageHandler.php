@@ -25,19 +25,20 @@ final readonly class DomainEventMessageHandler
         private iterable $subscribers,
         private LoggerInterface $logger,
         private BusinessMetricsEmitterInterface $metricsEmitter,
-        private EventSubscriberFailureMetricFactoryInterface $metricFactory
+        private EventSubscriberFailureMetricFactoryInterface $metricFactory,
+        private DomainEventFactory $eventFactory
     ) {
     }
 
     public function __invoke(DomainEventEnvelope $envelope): void
     {
-        $event = $envelope->toEvent();
+        $event = $this->eventFactory->fromEnvelope($envelope);
         $eventClass = $event::class;
 
         $this->logger->debug('Processing domain event from queue', [
             'event_id' => $event->eventId(),
             'event_type' => $eventClass,
-            'event_name' => $event::eventName(),
+            'event_name' => $event->eventName(),
         ]);
 
         foreach ($this->subscribers as $subscriber) {
@@ -85,7 +86,7 @@ final readonly class DomainEventMessageHandler
             'subscriber' => $subscriber::class,
             'event_id' => $event->eventId(),
             'event_type' => $event::class,
-            'event_name' => $event::eventName(),
+            'event_name' => $event->eventName(),
             'error' => $exception->getMessage(),
             'exception_class' => $exception::class,
         ]);

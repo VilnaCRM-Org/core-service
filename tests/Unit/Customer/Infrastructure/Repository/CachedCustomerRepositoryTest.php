@@ -235,8 +235,8 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
             ->expects($this->once())
             ->method('tryHandle')
             ->with($this->callback(
-                static function (CacheInvalidationCommand $command) use ($emailHash): bool {
-                    self::assertRepositoryFallbackCommand($command, $emailHash);
+                function (CacheInvalidationCommand $command) use ($emailHash): bool {
+                    $this->assertRepositoryFallbackCommand($command, $emailHash);
 
                     return true;
                 }
@@ -643,7 +643,7 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         );
     }
 
-    private static function assertRepositoryFallbackCommand(
+    private function assertRepositoryFallbackCommand(
         CacheInvalidationCommand $command,
         string $emailHash
     ): void {

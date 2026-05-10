@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Application\OpenApi\Processor;
 
-use App\Shared\Application\OpenApi\ValueObject\IriReferenceMediaTypeDefinition;
+use App\Shared\Application\OpenApi\Factory\IriReferenceMediaTypeDefinitionFactory;
 use App\Tests\Unit\UnitTestCase;
 
 final class IriReferenceMediaTypeDefinitionTest extends UnitTestCase
 {
     public function testTransformWithReturnsNullWhenTransformerMakesNoChanges(): void
     {
-        $definition = IriReferenceMediaTypeDefinition::from($this->createMediaType());
+        $definition = (new IriReferenceMediaTypeDefinitionFactory())->create($this->createMediaType());
         self::assertNotNull($definition);
 
         $result = $definition->transformWith(static fn (array $property): array => $property);
@@ -21,7 +21,7 @@ final class IriReferenceMediaTypeDefinitionTest extends UnitTestCase
 
     public function testTransformWithReturnsUpdatedPropertiesWhenTransformerChangesData(): void
     {
-        $definition = IriReferenceMediaTypeDefinition::from($this->createMediaType());
+        $definition = (new IriReferenceMediaTypeDefinitionFactory())->create($this->createMediaType());
         self::assertNotNull($definition);
 
         $result = $definition->transformWith(static fn (array $property): array => [
@@ -36,7 +36,7 @@ final class IriReferenceMediaTypeDefinitionTest extends UnitTestCase
 
     public function testWithPropertiesReplacesSchemaProperties(): void
     {
-        $definition = IriReferenceMediaTypeDefinition::from($this->createMediaType());
+        $definition = (new IriReferenceMediaTypeDefinitionFactory())->create($this->createMediaType());
         self::assertNotNull($definition);
 
         $newProperties = [

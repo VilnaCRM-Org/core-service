@@ -36,7 +36,7 @@ final readonly class CustomerCacheRefreshTargetResolver implements
 
         return match ([$family, $identifierName]) {
             [CustomerCachePolicyCollection::FAMILY_DETAIL, 'customer_id'],
-            [CustomerCachePolicyCollection::FAMILY_LOOKUP, 'email'] => CacheRefreshTarget::create(
+            [CustomerCachePolicyCollection::FAMILY_LOOKUP, 'email'] => new CacheRefreshTarget(
                 $context,
                 $family,
                 $identifierName,

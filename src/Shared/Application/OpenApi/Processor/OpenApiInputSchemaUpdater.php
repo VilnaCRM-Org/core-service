@@ -172,7 +172,7 @@ final class OpenApiInputSchemaUpdater
     ): ?array {
         return $this->updatedSchema(
             $schemaName,
-            SchemaNormalizer::normalize($schemas[$schemaName] ?? []),
+            (new SchemaNormalizer())->normalize($schemas[$schemaName] ?? []),
             $propertySchemaUpdates
         );
     }
@@ -255,7 +255,7 @@ final class OpenApiInputSchemaUpdater
         array $schema,
         array $requiredProperties
     ): ?array {
-        $currentRequiredProperties = SchemaNormalizer::normalize($schema['required'] ?? []);
+        $currentRequiredProperties = (new SchemaNormalizer())->normalize($schema['required'] ?? []);
 
         if (array_diff($requiredProperties, $currentRequiredProperties) === []) {
             return null;
@@ -282,8 +282,8 @@ final class OpenApiInputSchemaUpdater
         string $propertyName,
         array $schemaPatch
     ): ?array {
-        $properties = SchemaNormalizer::normalize($schema['properties'] ?? []);
-        $propertySchema = SchemaNormalizer::normalize($properties[$propertyName] ?? []);
+        $properties = (new SchemaNormalizer())->normalize($schema['properties'] ?? []);
+        $propertySchema = (new SchemaNormalizer())->normalize($properties[$propertyName] ?? []);
 
         if ($propertySchema === []) {
             return null;

@@ -4,9 +4,21 @@
 declare(strict_types=1);
 
 $projectRoot = dirname(__DIR__);
-$sourceDirectory = $projectRoot . '/src';
-$baselineFile = $projectRoot . '/config/static-methods-baseline.txt';
-$staticMethods = collectStaticMethods($sourceDirectory, $projectRoot);
+$scanDirectories = [
+    $projectRoot . '/config',
+    $projectRoot . '/scripts',
+    $projectRoot . '/src',
+    $projectRoot . '/tests',
+];
+$excludedDirectories = [
+    'tests/CLI/bats/php',
+    'var',
+    'vendor',
+];
+$excludedFiles = [
+    'config/reference.php',
+];
+$staticMethods = collectStaticMethods($scanDirectories, $projectRoot, $excludedDirectories, $excludedFiles);
 $methodKeys = array_keys($staticMethods);
 
 if (($argv[1] ?? null) === '--dump-baseline') {
@@ -17,33 +29,17 @@ if (($argv[1] ?? null) === '--dump-baseline') {
     exit(0);
 }
 
-$baseline = readBaseline($baselineFile);
-$newMethods = array_values(array_diff($methodKeys, $baseline));
-$staleBaseline = array_values(array_diff($baseline, $methodKeys));
-
-if ($newMethods === [] && $staleBaseline === []) {
-    echo 'No new static methods found in src/.' . PHP_EOL;
+if ($methodKeys === []) {
+    echo 'No static methods found in project PHP files.' . PHP_EOL;
 
     exit(0);
 }
 
-if ($newMethods !== []) {
-    echo 'Static methods are forbidden in src/. Use injected services, listeners, factories, or value objects instead.' . PHP_EOL;
-    echo PHP_EOL . 'New static method declarations:' . PHP_EOL;
+echo 'Static methods are forbidden in project PHP files. Use injected services, listeners, factories, or value objects instead.' . PHP_EOL;
+echo PHP_EOL . 'Static method declarations:' . PHP_EOL;
 
-    foreach ($newMethods as $methodKey) {
-        echo ' - ' . $staticMethods[$methodKey] . PHP_EOL;
-    }
-}
-
-if ($staleBaseline !== []) {
-    echo PHP_EOL . 'Static method baseline contains entries that no longer exist:' . PHP_EOL;
-
-    foreach ($staleBaseline as $methodKey) {
-        echo ' - ' . $methodKey . PHP_EOL;
-    }
-
-    echo PHP_EOL . 'Remove stale entries from config/static-methods-baseline.txt.' . PHP_EOL;
+foreach ($methodKeys as $methodKey) {
+    echo ' - ' . $staticMethods[$methodKey] . PHP_EOL;
 }
 
 exit(1);
@@ -51,11 +47,15 @@ exit(1);
 /**
  * @return array<string, string>
  */
-function collectStaticMethods(string $sourceDirectory, string $projectRoot): array
-{
+function collectStaticMethods(
+    array $scanDirectories,
+    string $projectRoot,
+    array $excludedDirectories,
+    array $excludedFiles
+): array {
     $methods = [];
 
-    foreach (phpFiles($sourceDirectory) as $filePath) {
+    foreach (phpFiles($scanDirectories, $projectRoot, $excludedDirectories, $excludedFiles) as $filePath) {
         foreach (staticMethodsInFile($filePath, $projectRoot) as $methodKey => $description) {
             $methods[$methodKey] = $description;
         }
@@ -69,22 +69,56 @@ function collectStaticMethods(string $sourceDirectory, string $projectRoot): arr
 /**
  * @return list<string>
  */
-function phpFiles(string $sourceDirectory): array
-{
+function phpFiles(
+    array $scanDirectories,
+    string $projectRoot,
+    array $excludedDirectories,
+    array $excludedFiles
+): array {
     $files = [];
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceDirectory));
 
-    foreach ($iterator as $file) {
-        if (! $file instanceof SplFileInfo || $file->getExtension() !== 'php') {
+    foreach ($scanDirectories as $scanDirectory) {
+        if (!is_dir($scanDirectory)) {
             continue;
         }
 
-        $files[] = $file->getPathname();
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($scanDirectory));
+
+        foreach ($iterator as $file) {
+            if (! $file instanceof SplFileInfo || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $filePath = $file->getPathname();
+            $relativePath = relativePath($filePath, $projectRoot);
+            if (
+                in_array($relativePath, $excludedFiles, true)
+                || isExcludedPath($relativePath, $excludedDirectories)
+            ) {
+                continue;
+            }
+
+            $files[] = $filePath;
+        }
     }
 
     sort($files);
 
     return $files;
+}
+
+/**
+ * @param list<string> $excludedDirectories
+ */
+function isExcludedPath(string $relativePath, array $excludedDirectories): bool
+{
+    foreach ($excludedDirectories as $excludedDirectory) {
+        if ($relativePath === $excludedDirectory || str_starts_with($relativePath, $excludedDirectory . DIRECTORY_SEPARATOR)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -333,34 +367,4 @@ function relativePath(string $filePath, string $projectRoot): string
     }
 
     return $filePath;
-}
-
-/**
- * @return list<string>
- */
-function readBaseline(string $baselineFile): array
-{
-    if (! is_file($baselineFile)) {
-        return [];
-    }
-
-    $baseline = [];
-    $lines = file($baselineFile, FILE_IGNORE_NEW_LINES);
-    if ($lines === false) {
-        return [];
-    }
-
-    foreach ($lines as $line) {
-        $entry = trim($line);
-        if ($entry === '' || str_starts_with($entry, '#')) {
-            continue;
-        }
-
-        $baseline[] = $entry;
-    }
-
-    $baseline = array_values(array_unique($baseline));
-    sort($baseline);
-
-    return $baseline;
 }

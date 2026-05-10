@@ -28,24 +28,7 @@ final class CustomerUpdatedEvent extends DomainEvent
         );
     }
 
-    /**
-     * @param array<string, string|null> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            customerId: $body['customer_id'],
-            currentEmail: $body['current_email'],
-            previousEmail: $body['previous_email'] ?? null,
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'customer.updated';
     }

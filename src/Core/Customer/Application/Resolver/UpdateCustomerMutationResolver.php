@@ -74,7 +74,7 @@ final readonly class UpdateCustomerMutationResolver implements MutationResolver
         $customer = $this->repository->findFresh($ulid);
 
         if (! $customer instanceof Customer) {
-            throw CustomerNotFoundException::withId($id);
+            throw new CustomerNotFoundException($id);
         }
 
         return $customer;

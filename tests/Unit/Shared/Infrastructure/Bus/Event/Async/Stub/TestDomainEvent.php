@@ -16,22 +16,7 @@ final class TestDomainEvent extends DomainEvent
         parent::__construct($eventId, $occurredOn);
     }
 
-    /**
-     * @param array<string, string|object> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            aggregateId: (string) $body['aggregateId'],
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'test.domain_event';
     }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\EventSubscriber;
 
-use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
 use App\Shared\Application\DTO\CacheInvalidationTagSet;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
 use App\Shared\Infrastructure\Collection\CacheRefreshCommandCollection;
 use Psr\Log\LoggerInterface;
@@ -19,7 +19,8 @@ abstract readonly class AbstractCacheInvalidationSubscriber implements
 {
     public function __construct(
         private CacheInvalidationCommandHandler $handler,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private CacheInvalidationCommandFactory $commandFactory
     ) {
     }
 
@@ -30,7 +31,7 @@ abstract readonly class AbstractCacheInvalidationSubscriber implements
         CacheRefreshCommandCollection $refreshCommands
     ): void {
         try {
-            $this->handler->__invoke(CacheInvalidationCommand::create(
+            $this->handler->__invoke($this->commandFactory->create(
                 $context,
                 'domain_event',
                 $operation,

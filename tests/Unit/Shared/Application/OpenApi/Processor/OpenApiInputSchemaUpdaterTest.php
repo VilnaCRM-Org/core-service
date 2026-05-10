@@ -82,7 +82,7 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         );
         self::assertContains(
             'confirmed',
-            SchemaNormalizer::normalize($schemas['Customer.CustomerPut'])['required']
+            (new SchemaNormalizer())->normalize($schemas['Customer.CustomerPut'])['required']
         );
         self::assertSame(
             'boolean',
@@ -159,7 +159,7 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         ] as $schemaName) {
             self::assertSame(
                 ['value'],
-                SchemaNormalizer::normalize($updatedSchemas[$schemaName])['required']
+                (new SchemaNormalizer())->normalize($updatedSchemas[$schemaName])['required']
             );
             self::assertSame(
                 'string',
@@ -283,7 +283,7 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
 
         self::assertSame(
             'boolean',
-            SchemaNormalizer::normalize($result[0]['properties'])['confirmed']['type']
+            (new SchemaNormalizer())->normalize($result[0]['properties'])['confirmed']['type']
         );
         self::assertTrue($result[1]);
     }
@@ -367,9 +367,9 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
      */
     private function schemaProperty(ArrayObject $schemas, string $schemaName, string $propertyName): array
     {
-        return SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize(
-                SchemaNormalizer::normalize($schemas[$schemaName])['properties']
+        return (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize(
+                (new SchemaNormalizer())->normalize($schemas[$schemaName])['properties']
             )[$propertyName]
         );
     }

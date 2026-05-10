@@ -84,9 +84,9 @@ final class IriReferenceContentTransformer
 - Violates Dependency Inversion Principle
 - Makes circular dependencies possible
 
-## No Static Methods in src/
+## No Static Methods in Project PHP Files
 
-Do not add static method declarations in production source. Static methods hide dependencies, are hard to replace in tests, and bypass the service container patterns this project uses.
+Do not add or keep static method declarations in project PHP files. Static methods hide dependencies, are hard to replace in tests, and bypass the service container patterns this project uses.
 
 ✅ **CORRECT (Injected service or listener)**:
 
@@ -124,7 +124,7 @@ Use these alternatives instead:
 - Use a factory service for object creation
 - Keep value objects as regular instances
 
-CI enforces this through `make forbid-static-methods`, which is also run by `make psalm`. Existing legacy methods are listed in `config/static-methods-baseline.txt`; do not add to that file for new code.
+CI enforces this through `make forbid-static-methods`, which is also run by `make psalm`. There is no baseline; any static method declaration in project PHP files must be refactored before merge.
 
 ## Factory Pattern - No `new` in src/
 

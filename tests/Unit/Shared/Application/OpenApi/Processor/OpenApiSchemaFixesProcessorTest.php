@@ -70,12 +70,12 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $resultSchemas = $result->getComponents()->getSchemas();
         $this->assertInstanceOf(ArrayObject::class, $resultSchemas);
 
-        $hydraSchema = SchemaNormalizer::normalize(
+        $hydraSchema = (new SchemaNormalizer())->normalize(
             $resultSchemas['HydraCollectionBaseSchema']
         );
         $allOf = $hydraSchema['allOf'];
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($allOf[1])['properties']['view']
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($allOf[1])['properties']['view']
         );
         $example = $viewSchema['example'];
 
@@ -140,12 +140,12 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
-        $hydraSchema = SchemaNormalizer::normalize(
+        $hydraSchema = (new SchemaNormalizer())->normalize(
             $resultSchemas['HydraCollectionBaseSchema']
         );
         $allOf = $hydraSchema['allOf'];
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($allOf[2])['properties']['view']
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($allOf[2])['properties']['view']
         );
         $example = $viewSchema['example'];
 
@@ -176,12 +176,12 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
-        $hydraSchema = SchemaNormalizer::normalize(
+        $hydraSchema = (new SchemaNormalizer())->normalize(
             $resultSchemas['HydraCollectionBaseSchema']
         );
         $allOf = $hydraSchema['allOf'];
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($allOf[2])['properties']['view']
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($allOf[2])['properties']['view']
         );
         $example = $viewSchema['example'];
 
@@ -219,12 +219,12 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
-        $hydraSchema = SchemaNormalizer::normalize(
+        $hydraSchema = (new SchemaNormalizer())->normalize(
             $resultSchemas['HydraCollectionBaseSchema']
         );
         $allOf = $hydraSchema['allOf'];
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($allOf[0])['properties']['view']
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($allOf[0])['properties']['view']
         );
         $example = $viewSchema['example'];
 
@@ -262,12 +262,12 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
         $result = $processor->process($openApi);
 
         $resultSchemas = $result->getComponents()->getSchemas();
-        $hydraSchema = SchemaNormalizer::normalize(
+        $hydraSchema = (new SchemaNormalizer())->normalize(
             $resultSchemas['CustomerCollection.jsonld-output']
         );
         $allOf = $hydraSchema['allOf'];
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($allOf[0])['properties']['view']
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($allOf[0])['properties']['view']
         );
         $example = $viewSchema['example'];
 
@@ -330,9 +330,9 @@ final class OpenApiSchemaFixesProcessorTest extends UnitTestCase
 
         self::assertInstanceOf(MediaType::class, $content['application/ld+json']);
 
-        $schema = SchemaNormalizer::normalize($content['application/ld+json']->getSchema());
-        $viewSchema = SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize($schema['allOf'][1])['properties']['view']
+        $schema = (new SchemaNormalizer())->normalize($content['application/ld+json']->getSchema());
+        $viewSchema = (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize($schema['allOf'][1])['properties']['view']
         );
 
         self::assertSame('PartialCollectionView', $viewSchema['example']['@type']);

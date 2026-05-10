@@ -114,7 +114,7 @@ final class CustomerUlidRefReplacer
      */
     private function schemaList(ArrayObject|array|string|int|float|bool|null $value): array
     {
-        $items = SchemaNormalizer::normalize($value);
+        $items = (new SchemaNormalizer())->normalize($value);
 
         return array_values($items);
     }
@@ -126,7 +126,7 @@ final class CustomerUlidRefReplacer
      */
     private function toArray($value): array
     {
-        return SchemaNormalizer::normalize($value);
+        return (new SchemaNormalizer())->normalize($value);
     }
 
     private function isSupportedUlidReference(string $ref): bool

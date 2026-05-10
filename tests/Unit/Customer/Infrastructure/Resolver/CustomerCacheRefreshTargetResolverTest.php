@@ -99,30 +99,27 @@ final class CustomerCacheRefreshTargetResolverTest extends UnitTestCase
         self::assertSame(['customer_id' => 'customer-1'], $targets[0]['identifiers']);
     }
 
-    /**
-     * @dataProvider unsupportedTargetsProvider
-     */
-    public function testResolveRejectsUnsupportedTargets(
-        string $context,
-        string $family,
-        string $identifierName,
-        string $identifierValue
-    ): void {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf(
-            'Unsupported cache refresh target "%s.%s" for identifier "%s".',
-            $context,
-            $family,
-            $identifierName
-        ));
-
-        $this->resolver->resolve($context, $family, $identifierName, $identifierValue);
+    public function testResolveRejectsUnsupportedTargets(): void
+    {
+        foreach ($this->unsupportedTargetCases() as [$context, $family, $identifierName, $identifierValue]) {
+            try {
+                $this->resolver->resolve($context, $family, $identifierName, $identifierValue);
+                self::fail('Expected unsupported cache refresh target to be rejected.');
+            } catch (\InvalidArgumentException $exception) {
+                self::assertSame(sprintf(
+                    'Unsupported cache refresh target "%s.%s" for identifier "%s".',
+                    $context,
+                    $family,
+                    $identifierName
+                ), $exception->getMessage());
+            }
+        }
     }
 
     /**
      * @return iterable<string, array{string, string, string, string}>
      */
-    public static function unsupportedTargetsProvider(): iterable
+    private function unsupportedTargetCases(): iterable
     {
         yield 'empty identifier value' => [
             CustomerCachePolicyCollection::CONTEXT,

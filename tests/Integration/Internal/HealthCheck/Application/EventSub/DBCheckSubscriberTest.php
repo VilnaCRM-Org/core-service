@@ -8,6 +8,8 @@ use App\Internal\HealthCheck\Application\EventSub\DBCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use App\Tests\Integration\BaseApiCase;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class DBCheckSubscriberTest extends BaseApiCase
 {
@@ -37,11 +39,13 @@ final class DBCheckSubscriberTest extends BaseApiCase
         $this->subscriber->onHealthCheck($event);
     }
 
-    public function testGetSubscribedEvents(): void
+    public function testRegistersHealthCheckListenerAttribute(): void
     {
-        $this->assertSame(
-            [HealthCheckEvent::class => 'onHealthCheck'],
-            DBCheckSubscriber::getSubscribedEvents()
-        );
+        $listener = (new ReflectionClass(DBCheckSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
+
+        $this->assertSame(HealthCheckEvent::class, $listener->event);
+        $this->assertSame('onHealthCheck', $listener->method);
     }
 }

@@ -27,7 +27,7 @@ final class CacheRefreshCommandTest extends UnitTestCase
 
     public function testCreateKeepsInvalidateOnlyRefreshSource(): void
     {
-        $command = CacheRefreshCommand::create(
+        $command = new CacheRefreshCommand(
             $this->faker->word(),
             $this->faker->word(),
             $this->faker->word(),
@@ -43,7 +43,7 @@ final class CacheRefreshCommandTest extends UnitTestCase
 
     public function testDedupeKeyCollapsesEquivalentTargetsAcrossSources(): void
     {
-        $domainEventCommand = CacheRefreshCommand::create(
+        $domainEventCommand = new CacheRefreshCommand(
             'customer',
             'detail',
             'customer_id',
@@ -53,7 +53,7 @@ final class CacheRefreshCommandTest extends UnitTestCase
             'domain-event-1',
             '2026-01-01T00:00:00+00:00'
         );
-        $odmCommand = CacheRefreshCommand::create(
+        $odmCommand = new CacheRefreshCommand(
             'customer',
             'detail',
             'customer_id',
@@ -93,12 +93,29 @@ final class CacheRefreshCommandTest extends UnitTestCase
         self::assertSame($this->dedupeKey($mixedCaseCommand, false), $mixedCaseCommand->dedupeKey());
     }
 
+    public function testCreateKeepsExplicitDedupeKey(): void
+    {
+        $command = new CacheRefreshCommand(
+            'customer',
+            'detail',
+            'customer_id',
+            'customer-1',
+            CacheRefreshPolicy::SOURCE_REPOSITORY_REFRESH,
+            'domain_event',
+            'source-1',
+            '2026-01-01T00:00:00+00:00',
+            dedupeKey: 'explicit-dedupe-key'
+        );
+
+        self::assertSame('explicit-dedupe-key', $command->dedupeKey());
+    }
+
     private function repositoryRefreshCommand(
         string $identifierName = 'customer_id',
         string $identifierValue = 'customer-1',
         bool $caseInsensitiveIdentifier = true
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             'customer',
             'detail',
             $identifierName,

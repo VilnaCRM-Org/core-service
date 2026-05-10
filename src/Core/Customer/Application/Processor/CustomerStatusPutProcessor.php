@@ -42,7 +42,7 @@ final readonly class CustomerStatusPutProcessor implements ProcessorInterface
         $ulid = $uriVariables['ulid'];
         $customerStatus = $this->repository->find(
             $this->ulidFactory->create($ulid)
-        ) ?? throw new CustomerStatusNotFoundException();
+        ) ?? throw new CustomerStatusNotFoundException($ulid);
 
         $this->dispatchCommand($customerStatus, $data->value);
 

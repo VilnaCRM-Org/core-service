@@ -55,7 +55,7 @@ PHP;
 
     private function getTransformer(): UlidTransformer
     {
-        return $this->transformer ??= UlidTransformerFactory::create();
+        return $this->transformer ??= (new UlidTransformerFactory())->create();
     }
 
     private function extractBinaryData(mixed $value): mixed

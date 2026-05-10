@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Internal\HealthCheck\Application\EventSub;
 use App\Internal\HealthCheck\Application\EventSub\CacheCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use App\Tests\Unit\UnitTestCase;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Cache\CacheInterface;
 
 final class CacheCheckSubscriberTest extends UnitTestCase
@@ -39,11 +41,13 @@ final class CacheCheckSubscriberTest extends UnitTestCase
         $this->subscriber->onHealthCheck($event);
     }
 
-    public function testGetSubscribedEvents(): void
+    public function testRegistersHealthCheckListenerAttribute(): void
     {
-        $this->assertSame(
-            [HealthCheckEvent::class => 'onHealthCheck'],
-            CacheCheckSubscriber::getSubscribedEvents()
-        );
+        $listener = (new ReflectionClass(CacheCheckSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
+
+        $this->assertSame(HealthCheckEvent::class, $listener->event);
+        $this->assertSame('onHealthCheck', $listener->method);
     }
 }

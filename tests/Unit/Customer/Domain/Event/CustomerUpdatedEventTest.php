@@ -59,7 +59,9 @@ final class CustomerUpdatedEventTest extends UnitTestCase
 
     public function testEventNameReturnsCorrectValue(): void
     {
-        self::assertSame('customer.updated', CustomerUpdatedEvent::eventName());
+        $event = new CustomerUpdatedEvent('customer-id', 'customer@example.com');
+
+        self::assertSame('customer.updated', $event->eventName());
     }
 
     public function testToPrimitivesReturnsCorrectArray(): void
@@ -105,12 +107,10 @@ final class CustomerUpdatedEventTest extends UnitTestCase
         $eventId = 'event_123';
         $occurredOn = '2025-01-01 12:00:00';
 
-        $event = CustomerUpdatedEvent::fromPrimitives(
-            [
-                'customer_id' => $customerId,
-                'current_email' => $currentEmail,
-                'previous_email' => $previousEmail,
-            ],
+        $event = new CustomerUpdatedEvent(
+            $customerId,
+            $currentEmail,
+            $previousEmail,
             $eventId,
             $occurredOn
         );
@@ -129,11 +129,10 @@ final class CustomerUpdatedEventTest extends UnitTestCase
         $eventId = 'event_123';
         $occurredOn = '2025-01-01 12:00:00';
 
-        $event = CustomerUpdatedEvent::fromPrimitives(
-            [
-                'customer_id' => $customerId,
-                'current_email' => $currentEmail,
-            ],
+        $event = new CustomerUpdatedEvent(
+            $customerId,
+            $currentEmail,
+            null,
             $eventId,
             $occurredOn
         );

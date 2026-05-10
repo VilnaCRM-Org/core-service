@@ -17,15 +17,15 @@ final class ConstraintViolationPayloadItemsUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function update(array $constraintViolation): ?array
+    public function update(array $constraintViolation): ?array
     {
-        $properties = ConstraintViolationPropertiesExtractor::extract($constraintViolation);
-        $updatedProperties = self::updatedProperties($properties);
+        $properties = (new ConstraintViolationPropertiesExtractor())->extract($constraintViolation);
+        $updatedProperties = $this->updatedProperties($properties);
 
         return match (true) {
             $properties === null => null,
             $updatedProperties === null => null,
-            default => ConstraintViolationPropertiesWriter::write(
+            default => (new ConstraintViolationPropertiesWriter())->write(
                 $constraintViolation,
                 $updatedProperties
             ),
@@ -37,11 +37,11 @@ final class ConstraintViolationPayloadItemsUpdater
      *
      * @return array<string, SchemaValue>|null
      */
-    private static function updatedProperties(?array $properties): ?array
+    private function updatedProperties(?array $properties): ?array
     {
         return match ($properties) {
             null => null,
-            default => ConstraintViolationPayloadEnricher::enrich($properties),
+            default => (new ConstraintViolationPayloadEnricher())->enrich($properties),
         };
     }
 }

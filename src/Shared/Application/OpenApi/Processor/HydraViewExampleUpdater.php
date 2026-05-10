@@ -61,6 +61,6 @@ final class HydraViewExampleUpdater
      */
     private function normalizedAllOf(array $normalized): array
     {
-        return SchemaNormalizer::normalize($normalized['allOf']);
+        return (new SchemaNormalizer())->normalize($normalized['allOf']);
     }
 }

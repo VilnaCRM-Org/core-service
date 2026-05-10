@@ -12,7 +12,7 @@ final class ConstraintViolationPayloadItemsCleanerTest extends UnitTestCase
 {
     public function testCleanRemovesNullItemsFromStringArrayPayload(): void
     {
-        $cleaned = ConstraintViolationPayloadItemsCleaner::clean([
+        $cleaned = (new ConstraintViolationPayloadItemsCleaner())->clean([
             'type' => 'array',
             'items' => null,
         ]);
@@ -23,7 +23,7 @@ final class ConstraintViolationPayloadItemsCleanerTest extends UnitTestCase
     public function testCleanRemovesNullItemsFromArrayObjectArrayPayload(): void
     {
         $type = new ArrayObject(['array']);
-        $cleaned = ConstraintViolationPayloadItemsCleaner::clean([
+        $cleaned = (new ConstraintViolationPayloadItemsCleaner())->clean([
             'type' => $type,
             'items' => null,
         ]);

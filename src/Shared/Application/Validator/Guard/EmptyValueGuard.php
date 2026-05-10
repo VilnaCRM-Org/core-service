@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 
 final class EmptyValueGuard
 {
-    public static function isEmpty(mixed $value): bool
+    public function isEmpty(mixed $value): bool
     {
         return $value === null || $value === '';
     }

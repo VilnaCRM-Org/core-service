@@ -23,15 +23,15 @@ final class RequiredSchemaPropertyUpdater
     {
         if (! \in_array(
             $propertyName,
-            SchemaNormalizer::normalize($schema['required'] ?? []),
+            (new SchemaNormalizer())->normalize($schema['required'] ?? []),
             true
         )) {
             return null;
         }
 
-        $properties = SchemaNormalizer::normalize($schema['properties'] ?? []);
+        $properties = (new SchemaNormalizer())->normalize($schema['properties'] ?? []);
         $updatedProperty = $this->typeNormalizer->normalize(
-            SchemaNormalizer::normalize($properties[$propertyName] ?? [])
+            (new SchemaNormalizer())->normalize($properties[$propertyName] ?? [])
         );
 
         if ($updatedProperty === null) {

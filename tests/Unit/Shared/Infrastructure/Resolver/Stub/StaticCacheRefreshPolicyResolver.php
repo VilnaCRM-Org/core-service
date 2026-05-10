@@ -22,7 +22,7 @@ final class StaticCacheRefreshPolicyResolver implements CacheRefreshPolicyResolv
         ++$this->calls;
 
         if ($this->policy->context() !== $context || $this->policy->family() !== $family) {
-            throw UnsupportedCacheRefreshPolicyException::forContext($context);
+            throw new UnsupportedCacheRefreshPolicyException($context);
         }
 
         return $this->policy;

@@ -76,7 +76,7 @@ final readonly class CustomerCacheRefreshCommandFactory extends AbstractCacheRef
             $targets
         );
 
-        return CacheRefreshCommandCollection::create(...$commands);
+        return new CacheRefreshCommandCollection(...$commands);
     }
 
     /**
@@ -98,7 +98,7 @@ final readonly class CustomerCacheRefreshCommandFactory extends AbstractCacheRef
                 $identifierValue
             ),
             $refreshSource,
-            $event::eventName(),
+            $event->eventName(),
             $event->eventId(),
             $event->occurredOn()
         );

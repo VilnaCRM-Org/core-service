@@ -18,14 +18,9 @@ final readonly class CacheRefreshPolicyCollection implements IteratorAggregate, 
     /** @var ArrayIterator<int, CacheRefreshPolicy> */
     private ArrayIterator $policies;
 
-    private function __construct(CacheRefreshPolicy ...$policies)
+    public function __construct(CacheRefreshPolicy ...$policies)
     {
         $this->policies = new ArrayIterator($policies);
-    }
-
-    public static function create(CacheRefreshPolicy ...$policies): self
-    {
-        return new self(...$policies);
     }
 
     public function getIterator(): Traversable

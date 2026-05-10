@@ -38,14 +38,14 @@ final class HydraAllOfUpdater
      */
     private function updatedItem(mixed $item): mixed
     {
-        if (! self::isUpdatableItem($item)) {
+        if (! $this->isUpdatableItem($item)) {
             return $item;
         }
 
         return $this->itemUpdater->update($item) ?? $item;
     }
 
-    private static function isUpdatableItem(mixed $item): bool
+    private function isUpdatableItem(mixed $item): bool
     {
         return is_array($item) || $item instanceof ArrayObject;
     }

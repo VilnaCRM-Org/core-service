@@ -12,7 +12,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
 {
     public function testUpdateReturnsNullWhenViolationPropertiesAreMissing(): void
     {
-        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update([]));
+        $this->assertNull((new ConstraintViolationPayloadItemsUpdater())->update([]));
     }
 
     public function testUpdateReturnsNullWhenViolationsNodeIsMissing(): void
@@ -21,7 +21,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             'properties' => [],
         ];
 
-        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+        $this->assertNull((new ConstraintViolationPayloadItemsUpdater())->update($input));
     }
 
     public function testUpdateReturnsNullWhenItemsPropertiesNodeIsMissing(): void
@@ -34,7 +34,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+        $this->assertNull((new ConstraintViolationPayloadItemsUpdater())->update($input));
     }
 
     public function testUpdateReturnsNullWhenItemsNodeIsMissing(): void
@@ -45,7 +45,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+        $this->assertNull((new ConstraintViolationPayloadItemsUpdater())->update($input));
     }
 
     public function testUpdateReturnsNullWhenPayloadIsNotArrayWithoutItems(): void
@@ -62,7 +62,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $this->assertNull(ConstraintViolationPayloadItemsUpdater::update($input));
+        $this->assertNull((new ConstraintViolationPayloadItemsUpdater())->update($input));
     }
 
     public function testUpdateAddsItemsToArrayPayload(): void
@@ -79,7 +79,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+        $updated = (new ConstraintViolationPayloadItemsUpdater())->update($input);
 
         $this->assertNotNull($updated);
         $this->assertSame(
@@ -100,7 +100,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+        $updated = (new ConstraintViolationPayloadItemsUpdater())->update($input);
 
         $this->assertNotNull($updated);
         $this->assertSame(
@@ -127,7 +127,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+        $updated = (new ConstraintViolationPayloadItemsUpdater())->update($input);
 
         $this->assertNotNull($updated);
         $this->assertSame(
@@ -153,7 +153,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ],
         ];
 
-        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+        $updated = (new ConstraintViolationPayloadItemsUpdater())->update($input);
 
         $this->assertNotNull($updated);
         $this->assertSame(
@@ -176,7 +176,7 @@ final class ConstraintViolationPayloadItemsUpdaterTest extends UnitTestCase
             ]),
         ];
 
-        $updated = ConstraintViolationPayloadItemsUpdater::update($input);
+        $updated = (new ConstraintViolationPayloadItemsUpdater())->update($input);
 
         $this->assertNotNull($updated);
         $this->assertSame(

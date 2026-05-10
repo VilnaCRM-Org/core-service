@@ -6,8 +6,8 @@ namespace App\Shared\Application\Exception;
 
 final class UnsupportedCacheRefreshPolicyException extends \RuntimeException
 {
-    public static function forContext(string $context): self
+    public function __construct(string $context)
     {
-        return new self(sprintf('Unsupported cache context "%s".', $context));
+        parent::__construct(sprintf('Unsupported cache context "%s".', $context));
     }
 }

@@ -12,6 +12,8 @@ use Aws\Exception\AwsException;
 use Aws\Result;
 use Aws\Sqs\SqsClient;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class BrokerCheckSubscriberTest extends UnitTestCase
 {
@@ -68,12 +70,14 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
         }
     }
 
-    public function testGetSubscribedEvents(): void
+    public function testRegistersHealthCheckListenerAttribute(): void
     {
-        $this->assertSame(
-            [HealthCheckEvent::class => 'onHealthCheck'],
-            BrokerCheckSubscriber::getSubscribedEvents()
-        );
+        $listener = (new ReflectionClass(BrokerCheckSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
+
+        $this->assertSame(HealthCheckEvent::class, $listener->event);
+        $this->assertSame('onHealthCheck', $listener->method);
     }
 
     private function createQueueExistsException(

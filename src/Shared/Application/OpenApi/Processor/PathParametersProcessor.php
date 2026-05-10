@@ -24,7 +24,7 @@ final class PathParametersProcessor implements OpenApiProcessorInterface
 
     public function process(OpenApi $openApi): OpenApi
     {
-        return PathsMapper::map(
+        return (new PathsMapper())->map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this->processPathItem($pathItem)
         );
@@ -32,7 +32,7 @@ final class PathParametersProcessor implements OpenApiProcessorInterface
 
     private function processPathItem(PathItem $pathItem): PathItem
     {
-        return PathItemOperationMapper::map(
+        return (new PathItemOperationMapper())->map(
             $pathItem,
             fn (Operation $operation): Operation => $this
                 ->updateOperation($operation)

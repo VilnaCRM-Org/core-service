@@ -139,29 +139,27 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
         $this->assertInvalidUlidCollectionFilterIsIgnored('/api/customer_types', $validUlid);
     }
 
-    /**
-     * @dataProvider malformedLookupCollectionPathProvider
-     */
-    public function testSchemathesisMalformedLookupQueryDoesNotCrashCollection(
-        string $resourcePath
-    ): void {
-        $this->createEntity($resourcePath, ['value' => $this->faker->word()]);
+    public function testSchemathesisMalformedLookupQueryDoesNotCrashCollection(): void
+    {
+        foreach ($this->malformedLookupCollectionPaths() as $resourcePath) {
+            $this->createEntity($resourcePath, ['value' => $this->faker->word()]);
 
-        $client = self::createClient();
-        $response = $client->request(
-            'GET',
-            $resourcePath . implode('', self::SCHEMATHESIS_MALFORMED_LOOKUP_QUERY_PARTS)
-        );
+            $client = self::createClient();
+            $response = $client->request(
+                'GET',
+                $resourcePath . implode('', self::SCHEMATHESIS_MALFORMED_LOOKUP_QUERY_PARTS)
+            );
 
-        $this->assertResponseStatusCodeSame(400);
-        $this->assertResponseHeaderSame(
-            'content-type',
-            'application/problem+json; charset=utf-8'
-        );
-        $this->assertStringContainsString(
-            'Page should not be less than 1',
-            (string) $response->toArray(false)['detail']
-        );
+            $this->assertResponseStatusCodeSame(400);
+            $this->assertResponseHeaderSame(
+                'content-type',
+                'application/problem+json; charset=utf-8'
+            );
+            $this->assertStringContainsString(
+                'Page should not be less than 1',
+                (string) $response->toArray(false)['detail']
+            );
+        }
     }
 
     public function testDoctrineUlidTypeConversion(): void
@@ -220,13 +218,13 @@ final class SharedInfrastructureIntegrationTest extends BaseApiCase
     }
 
     /**
-     * @return array<string, array{0: string}>
+     * @return list<string>
      */
-    public static function malformedLookupCollectionPathProvider(): array
+    private function malformedLookupCollectionPaths(): array
     {
         return [
-            'customer statuses' => ['/api/customer_statuses'],
-            'customer types' => ['/api/customer_types'],
+            '/api/customer_statuses',
+            '/api/customer_types',
         ];
     }
 

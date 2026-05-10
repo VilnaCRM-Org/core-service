@@ -9,6 +9,7 @@ use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
 use App\Shared\Application\DTO\CacheInvalidationTagSet;
 use App\Shared\Application\DTO\CacheRefreshPolicy;
+use App\Shared\Application\Observability\Factory\CacheRefreshMetricFactory;
 use App\Shared\Application\Observability\Metric\CacheRefreshScheduledMetric;
 use App\Shared\Application\Observability\Metric\ValueObject\MetricDimension;
 use App\Shared\Application\Resolver\CachePoolResolverInterface;
@@ -43,7 +44,8 @@ final class CacheInvalidationCommandHandlerTest extends UnitTestCase
             $this->cachePoolResolver,
             $this->messageBus,
             $this->logger,
-            $this->metricsEmitter
+            $this->metricsEmitter,
+            new CacheRefreshMetricFactory()
         );
     }
 
@@ -59,12 +61,12 @@ final class CacheInvalidationCommandHandlerTest extends UnitTestCase
             CacheRefreshPolicy::SOURCE_INVALIDATE_ONLY
         );
         $tags = ['cache.first', 'cache.second'];
-        $command = CacheInvalidationCommand::create(
+        $command = new CacheInvalidationCommand(
             $context,
             $this->faker->word(),
             $this->faker->word(),
-            CacheInvalidationTagSet::create(...$tags),
-            CacheRefreshCommandCollection::create($invalidateOnlyCommand, $refreshCommand)
+            new CacheInvalidationTagSet(...$tags),
+            new CacheRefreshCommandCollection($invalidateOnlyCommand, $refreshCommand)
         );
 
         $this->expectTagInvalidation($tags, true, $context);
@@ -83,12 +85,12 @@ final class CacheInvalidationCommandHandlerTest extends UnitTestCase
             $this->faker->word(),
             CacheRefreshPolicy::SOURCE_EVENT_SNAPSHOT
         );
-        $command = CacheInvalidationCommand::create(
+        $command = new CacheInvalidationCommand(
             $this->faker->word(),
             $this->faker->word(),
             $this->faker->word(),
-            CacheInvalidationTagSet::create(),
-            CacheRefreshCommandCollection::create($refreshCommand)
+            new CacheInvalidationTagSet(),
+            new CacheRefreshCommandCollection($refreshCommand)
         );
 
         $this->cache->expects($this->never())->method('invalidateTags');
@@ -180,7 +182,7 @@ final class CacheInvalidationCommandHandlerTest extends UnitTestCase
         string $family,
         string $refreshSource
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             $context,
             $family,
             $this->faker->word(),
@@ -194,24 +196,24 @@ final class CacheInvalidationCommandHandlerTest extends UnitTestCase
 
     private function invalidationCommandWithTags(string ...$tags): CacheInvalidationCommand
     {
-        return CacheInvalidationCommand::create(
+        return new CacheInvalidationCommand(
             'customer',
             'domain_event',
             'updated',
-            CacheInvalidationTagSet::create(...$tags),
-            CacheRefreshCommandCollection::create()
+            new CacheInvalidationTagSet(...$tags),
+            new CacheRefreshCommandCollection()
         );
     }
 
     private function invalidationCommandWithRefresh(
         CacheRefreshCommand $refreshCommand
     ): CacheInvalidationCommand {
-        return CacheInvalidationCommand::create(
+        return new CacheInvalidationCommand(
             'customer',
             'domain_event',
             'updated',
-            CacheInvalidationTagSet::create(),
-            CacheRefreshCommandCollection::create($refreshCommand)
+            new CacheInvalidationTagSet(),
+            new CacheRefreshCommandCollection($refreshCommand)
         );
     }
 

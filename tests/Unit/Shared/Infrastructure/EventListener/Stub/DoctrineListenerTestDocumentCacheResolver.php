@@ -32,7 +32,7 @@ final class DoctrineListenerTestDocumentCacheResolver implements
     ): CacheInvalidationTagSet {
         $this->changeSets[] = $changeSet;
 
-        return CacheInvalidationTagSet::create(
+        return new CacheInvalidationTagSet(
             'document.' . spl_object_id($document),
             'operation.' . $operation
         );
@@ -43,7 +43,7 @@ final class DoctrineListenerTestDocumentCacheResolver implements
         string $operation,
         CacheChangeSet $changeSet
     ): CacheRefreshCommandCollection {
-        return CacheRefreshCommandCollection::create();
+        return new CacheRefreshCommandCollection();
     }
 
     /**

@@ -7,6 +7,7 @@ namespace App\Tests\Memory;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Tests\Integration\BaseApiCase;
 use App\Tests\Support\Memory\SameKernelRequestMemoryProbe;
+use App\Tests\Support\Memory\TrackedRequestHolder;
 use InvalidArgumentException;
 
 final class RestEndpointMemorySafetyTest extends BaseApiCase
@@ -34,36 +35,23 @@ final class RestEndpointMemorySafetyTest extends BaseApiCase
         'customerTypesDelete' => 'customer_types_delete',
     ];
 
-    /**
-     * @dataProvider restScenarioProvider
-     */
-    public function testRestScenarioDoesNotRetainMainRequestAcrossSameKernelRequests(string $scenario): void
+    public function testRestScenariosDoNotRetainMainRequestAcrossSameKernelRequests(): void
     {
-        $client = $this->createSameKernelClient();
-        $probe = SameKernelRequestMemoryProbe::fromClient($client);
+        foreach (array_values(self::REST_SCENARIOS) as $scenario) {
+            $client = $this->createSameKernelClient();
+            $trackedRequestHolder = $client->getContainer()->get(TrackedRequestHolder::class);
+            self::assertInstanceOf(TrackedRequestHolder::class, $trackedRequestHolder);
+            $probe = new SameKernelRequestMemoryProbe($trackedRequestHolder);
 
-        $probe->assertRequestIsReleasedBetweenSameKernelRequests(
-            $this,
-            $client,
-            $scenario,
-            function (Client $client) use ($scenario): void {
-                $this->exerciseRestScenario($scenario, $client);
-            },
-        );
-    }
-
-    /**
-     * @return array<string, array{0: string}>
-     */
-    public static function restScenarioProvider(): array
-    {
-        return array_combine(
-            array_values(self::REST_SCENARIOS),
-            array_map(
-                static fn (string $scenario): array => [$scenario],
-                array_values(self::REST_SCENARIOS)
-            )
-        );
+            $probe->assertRequestIsReleasedBetweenSameKernelRequests(
+                $this,
+                $client,
+                $scenario,
+                function (Client $client) use ($scenario): void {
+                    $this->exerciseRestScenario($scenario, $client);
+                },
+            );
+        }
     }
 
     private function exerciseRestScenario(string $scenario, Client $client): void
