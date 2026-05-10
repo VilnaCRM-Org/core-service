@@ -14,6 +14,8 @@ use App\Core\Customer\Domain\Event\CustomerUpdatedEvent;
 use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Infrastructure\Bus\Event\Async\DomainEventEnvelope;
 use App\Shared\Infrastructure\Bus\Event\Async\DomainEventFactory;
+use App\Tests\Unit\Shared\Infrastructure\Bus\Event\Async\Stub\StringablePayloadValue;
+use App\Tests\Unit\Shared\Infrastructure\Bus\Event\Async\Stub\TwoValueDomainEvent;
 use App\Tests\Unit\UnitTestCase;
 use InvalidArgumentException;
 use stdClass;
@@ -62,10 +64,35 @@ final class DomainEventFactoryTest extends UnitTestCase
         ));
     }
 
+    public function testRestoresGenericDomainEventFromConstructor(): void
+    {
+        $expectedEvent = new TwoValueDomainEvent(
+            first: 'first-value',
+            second: 'second-value',
+            eventId: self::EVENT_ID,
+            occurredOn: self::OCCURRED_ON
+        );
+
+        $event = $this->factory->fromEnvelope(new DomainEventEnvelope(
+            eventClass: TwoValueDomainEvent::class,
+            body: [
+                'first' => 'first-value',
+                'second' => 'second-value',
+            ],
+            eventId: self::EVENT_ID,
+            occurredOn: self::OCCURRED_ON
+        ));
+
+        self::assertInstanceOf(TwoValueDomainEvent::class, $event);
+        self::assertSame(self::EVENT_ID, $event->eventId());
+        self::assertSame(self::OCCURRED_ON, $event->occurredOn());
+        self::assertSame($expectedEvent->toPrimitives(), $event->toPrimitives());
+    }
+
     /**
      * @return list<array{
      *     class: class-string<DomainEvent>,
-     *     body: array<string, string>,
+     *     body: array<string, string|object|null>,
      *     expected: array<string, string|null>
      * }>
      */
@@ -75,8 +102,8 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerCreatedEvent::class,
                 'body' => [
-                    'customer_id' => 'customer-123',
                     'customer_email' => 'created@example.com',
+                    'customer_id' => 'customer-123',
                 ],
                 'expected' => [
                     'customer_id' => 'customer-123',
@@ -86,9 +113,9 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerUpdatedEvent::class,
                 'body' => [
-                    'customer_id' => 'customer-123',
+                    'previous_email' => new StringablePayloadValue('previous@example.com'),
                     'current_email' => 'current@example.com',
-                    'previous_email' => 'previous@example.com',
+                    'customer_id' => 'customer-123',
                 ],
                 'expected' => [
                     'customer_id' => 'customer-123',
@@ -99,8 +126,8 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerDeletedEvent::class,
                 'body' => [
-                    'customer_id' => 'customer-123',
                     'customer_email' => 'deleted@example.com',
+                    'customer_id' => 'customer-123',
                 ],
                 'expected' => [
                     'customer_id' => 'customer-123',
@@ -110,8 +137,8 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerStatusCreatedEvent::class,
                 'body' => [
-                    'customer_status_id' => 'status-123',
                     'customer_status_value' => 'Active',
+                    'customer_status_id' => 'status-123',
                 ],
                 'expected' => [
                     'customer_status_id' => 'status-123',
@@ -121,9 +148,9 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerStatusUpdatedEvent::class,
                 'body' => [
-                    'customer_status_id' => 'status-123',
+                    'previous_value' => new StringablePayloadValue('Inactive'),
                     'current_value' => 'Active',
-                    'previous_value' => 'Inactive',
+                    'customer_status_id' => 'status-123',
                 ],
                 'expected' => [
                     'customer_status_id' => 'status-123',
@@ -134,8 +161,8 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerTypeCreatedEvent::class,
                 'body' => [
-                    'customer_type_id' => 'type-123',
                     'customer_type_value' => 'Lead',
+                    'customer_type_id' => 'type-123',
                 ],
                 'expected' => [
                     'customer_type_id' => 'type-123',
@@ -145,9 +172,9 @@ final class DomainEventFactoryTest extends UnitTestCase
             [
                 'class' => CustomerTypeUpdatedEvent::class,
                 'body' => [
-                    'customer_type_id' => 'type-123',
+                    'previous_value' => new StringablePayloadValue('Prospect'),
                     'current_value' => 'Lead',
-                    'previous_value' => 'Prospect',
+                    'customer_type_id' => 'type-123',
                 ],
                 'expected' => [
                     'customer_type_id' => 'type-123',
