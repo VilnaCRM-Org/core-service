@@ -3400,7 +3400,7 @@ components:
             - 'null'
         status:
           type:
-            - number
+            - integer
             - 'null'
           examples:
             - 404
