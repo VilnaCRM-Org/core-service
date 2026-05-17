@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start application services
-        run: make start
+        run: make ensure-test-services
 
       - name: Run Psalm
         run: make psalm
