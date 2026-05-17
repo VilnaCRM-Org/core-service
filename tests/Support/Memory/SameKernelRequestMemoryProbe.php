@@ -14,14 +14,6 @@ final readonly class SameKernelRequestMemoryProbe
     ) {
     }
 
-    public static function fromClient(Client $client): self
-    {
-        $trackedRequestHolder = $client->getContainer()->get(TrackedRequestHolder::class);
-        TestCase::assertInstanceOf(TrackedRequestHolder::class, $trackedRequestHolder);
-
-        return new self($trackedRequestHolder);
-    }
-
     public function assertRequestIsReleasedBetweenSameKernelRequests(
         TestCase $testCase,
         Client $client,

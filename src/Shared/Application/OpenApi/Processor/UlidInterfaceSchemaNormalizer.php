@@ -34,6 +34,6 @@ final class UlidInterfaceSchemaNormalizer
      */
     private function toArray(ArrayObject|array|string|int|float|bool|null $value): array
     {
-        return SchemaNormalizer::normalize($value);
+        return (new SchemaNormalizer())->normalize($value);
     }
 }

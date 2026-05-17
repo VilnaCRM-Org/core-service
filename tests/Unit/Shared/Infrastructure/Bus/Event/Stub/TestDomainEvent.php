@@ -8,6 +8,9 @@ use App\Shared\Domain\Bus\Event\DomainEvent;
 
 final class TestDomainEvent extends DomainEvent
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(
         private readonly string $id,
         private readonly string $value,
@@ -20,7 +23,7 @@ final class TestDomainEvent extends DomainEvent
         );
     }
 
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'test.domain_event';
     }
@@ -31,19 +34,6 @@ final class TestDomainEvent extends DomainEvent
             'id' => $this->id,
             'value' => $this->value,
         ];
-    }
-
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            id: $body['id'],
-            value: $body['value'],
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
     }
 
     private function generateEventId(): string

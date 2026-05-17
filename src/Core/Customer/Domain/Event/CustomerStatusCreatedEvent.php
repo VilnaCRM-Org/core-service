@@ -23,23 +23,7 @@ final class CustomerStatusCreatedEvent extends DomainEvent
         );
     }
 
-    /**
-     * @param array<string, string> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            customerStatusId: $body['customer_status_id'],
-            customerStatusValue: $body['customer_status_value'],
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'customer_status.created';
     }

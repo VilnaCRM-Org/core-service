@@ -150,7 +150,7 @@ final class CustomerPatchUpdateResolverTest extends UnitTestCase
             ->expects(self::once())
             ->method('resolveType')
             ->with($dto->type)
-            ->willThrowException(CustomerTypeNotFoundException::withIri($dto->type));
+            ->willThrowException(new CustomerTypeNotFoundException($dto->type));
 
         $this->expectException(CustomerTypeNotFoundException::class);
 

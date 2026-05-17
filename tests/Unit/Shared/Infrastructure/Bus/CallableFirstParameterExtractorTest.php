@@ -17,7 +17,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     {
         $subscriber = $this->createDomainEventSubscriber();
 
-        $result = CallableFirstParameterExtractor::forCallables([$subscriber]);
+        $result = (new CallableFirstParameterExtractor())->forCallables([$subscriber]);
 
         self::assertArrayHasKey(DomainEvent::class, $result);
         self::assertIsArray($result[DomainEvent::class]);
@@ -28,7 +28,7 @@ final class CallableFirstParameterExtractorTest extends UnitTestCase
     {
         $subscriber = $this->createMultiEventSubscriber();
 
-        $result = CallableFirstParameterExtractor::forPipedCallables([$subscriber]);
+        $result = (new CallableFirstParameterExtractor())->forPipedCallables([$subscriber]);
 
         self::assertArrayHasKey(DomainEvent::class, $result);
         self::assertArrayHasKey(TestOtherEvent::class, $result);

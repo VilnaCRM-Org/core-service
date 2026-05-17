@@ -237,7 +237,7 @@ final class ResilientAsyncEventDispatcherTest extends UnitTestCase
 
         self::assertSame($event->eventId(), $capturedContext['event_id']);
         self::assertSame(TestDomainEvent::class, $capturedContext['event_type']);
-        self::assertSame(TestDomainEvent::eventName(), $capturedContext['event_name']);
+        self::assertSame($event->eventName(), $capturedContext['event_name']);
     }
 
     public function testLogsErrorWithContextOnDispatchFailure(): void
@@ -267,7 +267,7 @@ final class ResilientAsyncEventDispatcherTest extends UnitTestCase
 
         self::assertSame($event->eventId(), $capturedContext['event_id']);
         self::assertSame(TestDomainEvent::class, $capturedContext['event_type']);
-        self::assertSame(TestDomainEvent::eventName(), $capturedContext['event_name']);
+        self::assertSame($event->eventName(), $capturedContext['event_name']);
         self::assertSame('SQS unavailable', $capturedContext['error']);
         self::assertSame(\RuntimeException::class, $capturedContext['exception_class']);
     }

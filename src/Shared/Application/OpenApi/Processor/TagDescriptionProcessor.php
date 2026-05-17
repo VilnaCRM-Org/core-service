@@ -13,7 +13,7 @@ final class TagDescriptionProcessor implements OpenApiProcessorInterface
     public function process(OpenApi $openApi): OpenApi
     {
         $tags = array_reduce(
-            array_keys(TagDescriptionDictionary::descriptions()),
+            array_keys((new TagDescriptionDictionary())->descriptions()),
             fn (array $tags, string $name): array => [
                 ...$tags,
                 $name => $this->createOrUpdateTag($tags, $name),
@@ -30,7 +30,7 @@ final class TagDescriptionProcessor implements OpenApiProcessorInterface
     private function createOrUpdateTag(array $tags, string $tagName): Tag
     {
         $tag = $tags[$tagName] ?? new Tag($tagName);
-        $description = TagDescriptionDictionary::descriptions()[$tagName];
+        $description = (new TagDescriptionDictionary())->descriptions()[$tagName];
 
         return (string) $tag->getDescription() === ''
             ? $tag->withDescription($description)

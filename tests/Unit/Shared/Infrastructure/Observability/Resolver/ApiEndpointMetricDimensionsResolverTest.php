@@ -92,28 +92,15 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
         self::assertSame('delete', $dimensions->operation());
     }
 
-    /**
-     * @dataProvider httpMethodsProvider
-     */
-    public function testOperationLowercasesHttpMethod(string $method, string $expected): void
+    public function testOperationLowercasesHttpMethod(): void
     {
-        $request = Request::create('/api/test', $method);
+        foreach ($this->httpMethodCases() as [$method, $expected]) {
+            $request = Request::create('/api/test', $method);
 
-        $dimensions = $this->resolver->dimensions($request);
+            $dimensions = $this->resolver->dimensions($request);
 
-        self::assertSame($expected, $dimensions->operation());
-    }
-
-    /**
-     * @return iterable<string, array{0: string, 1: string}>
-     */
-    public static function httpMethodsProvider(): iterable
-    {
-        yield 'GET' => ['GET', 'get'];
-        yield 'POST' => ['POST', 'post'];
-        yield 'PUT' => ['PUT', 'put'];
-        yield 'PATCH' => ['PATCH', 'patch'];
-        yield 'DELETE' => ['DELETE', 'delete'];
+            self::assertSame($expected, $dimensions->operation());
+        }
     }
 
     public function testHandlesNestedResourceClass(): void
@@ -126,5 +113,17 @@ final class ApiEndpointMetricDimensionsResolverTest extends UnitTestCase
 
         self::assertSame('CustomerStatus', $dimensions->endpoint());
         self::assertSame('_api_/customer-statuses_get_collection', $dimensions->operation());
+    }
+
+    /**
+     * @return iterable<string, array{0: string, 1: string}>
+     */
+    private function httpMethodCases(): iterable
+    {
+        yield 'GET' => ['GET', 'get'];
+        yield 'POST' => ['POST', 'post'];
+        yield 'PUT' => ['PUT', 'put'];
+        yield 'PATCH' => ['PATCH', 'patch'];
+        yield 'DELETE' => ['DELETE', 'delete'];
     }
 }

@@ -18,14 +18,9 @@ final readonly class CacheInvalidationRuleCollection implements IteratorAggregat
     /** @var ArrayIterator<int, CacheInvalidationRule> */
     private ArrayIterator $rules;
 
-    private function __construct(CacheInvalidationRule ...$rules)
+    public function __construct(CacheInvalidationRule ...$rules)
     {
         $this->rules = new ArrayIterator($rules);
-    }
-
-    public static function create(CacheInvalidationRule ...$rules): self
-    {
-        return new self(...$rules);
     }
 
     public function getIterator(): Traversable

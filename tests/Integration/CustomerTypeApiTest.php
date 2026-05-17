@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use App\Shared\Application\Validator\Guard\PatchPayloadGuard;
+
 final class CustomerTypeApiTest extends BaseApiCase
 {
     public function testCreateCustomerTypeWithExtraFields(): void
@@ -89,6 +91,31 @@ final class CustomerTypeApiTest extends BaseApiCase
         $data = $response->toArray();
         $this->assertSame('VIP', $data['value']);
         $this->assertArrayNotHasKey('unknown', $data, 'Extra field is ignored');
+    }
+
+    public function testPatchCustomerTypeWithMalformedExtraField(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+
+        $patch = [
+            'value' => 'VIP',
+            ".\x0E" => [[]],
+        ];
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode($patch),
+            ]
+        );
+
+        $this->assertResponseIsSuccessful();
+        $response = $client->request('GET', $iri);
+        $data = $response->toArray();
+        $this->assertSame('VIP', $data['value']);
     }
 
     public function testCreateCustomerTypeWithInvalidContentType(): void
@@ -295,6 +322,52 @@ final class CustomerTypeApiTest extends BaseApiCase
         $error = $client->getResponse()->toArray(false);
         $this->assertResponseStatusCodeSame(404);
         $this->assertStringContainsString('Not Found', $error['detail']);
+    }
+
+    public function testPatchCustomerTypeWithEmptyPayloadReturnsBadRequest(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => '{}',
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertSame(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
+    }
+
+    public function testPatchCustomerTypeWithNullValueReturnsBadRequest(): void
+    {
+        $orig = $this->getTypePayload('Retail');
+        $iri = $this->createEntity('/api/customer_types', $orig);
+
+        $client = self::createClient();
+        $client->request(
+            'PATCH',
+            $iri,
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'body' => json_encode(['value' => null]),
+            ]
+        );
+
+        $error = $client->getResponse()->toArray(false);
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertSame(
+            PatchPayloadGuard::EMPTY_PAYLOAD_MESSAGE,
+            $error['detail']
+        );
     }
 
     public function testDeleteCustomerTypeSuccess(): void

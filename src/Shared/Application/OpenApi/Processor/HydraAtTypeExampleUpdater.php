@@ -17,15 +17,15 @@ final class HydraAtTypeExampleUpdater
     public function update(array $example): ?array
     {
         return match (true) {
-            ! self::hasKey($example, 'type') => null,
-            default => self::withHydraType($example),
+            ! $this->hasKey($example, 'type') => null,
+            default => $this->withHydraType($example),
         };
     }
 
     /**
      * @param array<string, SchemaValue> $example
      */
-    private static function hasKey(array $example, string $key): bool
+    private function hasKey(array $example, string $key): bool
     {
         return array_key_exists($key, $example);
     }
@@ -35,9 +35,9 @@ final class HydraAtTypeExampleUpdater
      *
      * @return array<string, SchemaValue>
      */
-    private static function withHydraType(array $example): array
+    private function withHydraType(array $example): array
     {
-        if (! self::hasKey($example, '@type')) {
+        if (! $this->hasKey($example, '@type')) {
             $example['@type'] = $example['type'];
         }
 

@@ -8,6 +8,7 @@ use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
 use App\Shared\Application\DTO\CacheChangeSet;
 use App\Shared\Application\DTO\CacheInvalidationRule;
+use App\Shared\Application\Factory\CacheChangeSetFactory;
 use App\Shared\Infrastructure\Resolver\CacheInvalidationTagResolver;
 use ArrayIterator;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
@@ -27,7 +28,8 @@ final class CacheInvalidationDoctrineEventListener
     public function __construct(
         private readonly CacheInvalidationTagResolver $resolver,
         private readonly CacheInvalidationCommandHandler $handler,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly CacheChangeSetFactory $changeSetFactory
     ) {
         $this->pendingCommands = new ArrayIterator();
     }
@@ -78,7 +80,7 @@ final class CacheInvalidationDoctrineEventListener
             $this->queueDocumentChange(
                 $document,
                 CacheInvalidationRule::OPERATION_UPDATED,
-                CacheChangeSet::fromDoctrineChangeSet(
+                $this->changeSetFactory->fromDoctrineChangeSet(
                     $unitOfWork->getDocumentChangeSet($document)
                 )
             );
@@ -94,7 +96,7 @@ final class CacheInvalidationDoctrineEventListener
             $this->queueDocumentChange(
                 $document,
                 CacheInvalidationRule::OPERATION_DELETED,
-                CacheChangeSet::empty()
+                $this->changeSetFactory->empty()
             );
         }
     }
@@ -144,7 +146,7 @@ final class CacheInvalidationDoctrineEventListener
             $this->queueDocumentChange(
                 $document,
                 CacheInvalidationRule::OPERATION_CREATED,
-                CacheChangeSet::empty()
+                $this->changeSetFactory->empty()
             );
         }
     }

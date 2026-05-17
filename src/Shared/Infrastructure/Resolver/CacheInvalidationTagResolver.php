@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Resolver;
 
 use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\DTO\CacheChangeSet;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Shared\Application\Resolver\DocumentCacheInvalidationResolverInterface;
 
 final readonly class CacheInvalidationTagResolver
@@ -14,7 +15,8 @@ final readonly class CacheInvalidationTagResolver
      * @param iterable<DocumentCacheInvalidationResolverInterface> $resolvers
      */
     public function __construct(
-        private iterable $resolvers
+        private iterable $resolvers,
+        private CacheInvalidationCommandFactory $commandFactory
     ) {
     }
 
@@ -28,7 +30,7 @@ final readonly class CacheInvalidationTagResolver
                 continue;
             }
 
-            return CacheInvalidationCommand::create(
+            return $this->commandFactory->create(
                 $resolver->context($document, $operation),
                 'odm_change_set',
                 $operation,

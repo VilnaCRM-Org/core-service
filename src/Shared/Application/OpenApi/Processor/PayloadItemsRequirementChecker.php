@@ -11,17 +11,17 @@ final class PayloadItemsRequirementChecker
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null>|null $payload
      */
-    public static function shouldAddItems(?array $payload): bool
+    public function shouldAddItems(?array $payload): bool
     {
-        return self::isArrayPayload($payload) && ($payload['items'] ?? null) === null;
+        return $this->isArrayPayload($payload) && ($payload['items'] ?? null) === null;
     }
 
     /**
      * @param array<string, array|bool|float|int|string|ArrayObject|null>|null $payload
      */
-    private static function isArrayPayload(?array $payload): bool
+    private function isArrayPayload(?array $payload): bool
     {
-        return in_array('array', self::types($payload), true);
+        return in_array('array', $this->types($payload), true);
     }
 
     /**
@@ -29,10 +29,10 @@ final class PayloadItemsRequirementChecker
      *
      * @return array<int|string, array|bool|float|int|string|ArrayObject|null>
      */
-    private static function types(?array $payload): array
+    private function types(?array $payload): array
     {
         $type = \is_array($payload) ? ($payload['type'] ?? []) : [];
 
-        return \is_string($type) ? [$type] : SchemaNormalizer::normalize($type);
+        return \is_string($type) ? [$type] : (new SchemaNormalizer())->normalize($type);
     }
 }

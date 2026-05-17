@@ -8,7 +8,7 @@ use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\DTO\CacheRefreshPolicy;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\CacheRefreshScheduledMetric;
+use App\Shared\Application\Observability\Factory\CacheRefreshMetricFactory;
 use App\Shared\Application\Resolver\CachePoolResolverInterface;
 use App\Shared\Domain\Bus\Command\CommandHandlerInterface;
 use Psr\Log\LoggerInterface;
@@ -21,7 +21,8 @@ final readonly class CacheInvalidationCommandHandler implements CommandHandlerIn
         private CachePoolResolverInterface $cachePoolResolver,
         private MessageBusInterface $messageBus,
         private LoggerInterface $logger,
-        private BusinessMetricsEmitterInterface $metricsEmitter
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private CacheRefreshMetricFactory $metricFactory
     ) {
     }
 
@@ -113,11 +114,7 @@ final readonly class CacheInvalidationCommandHandler implements CommandHandlerIn
 
     private function emitRefreshScheduled(CacheRefreshCommand $refreshCommand): void
     {
-        $this->metricsEmitter->emit(CacheRefreshScheduledMetric::create(
-            $refreshCommand->context(),
-            $refreshCommand->family(),
-            $refreshCommand->refreshSource()
-        ));
+        $this->metricsEmitter->emit($this->metricFactory->scheduled($refreshCommand));
     }
 
     private function logRefreshSchedulingFailed(

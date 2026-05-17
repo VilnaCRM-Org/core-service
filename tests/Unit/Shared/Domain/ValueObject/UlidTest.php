@@ -55,7 +55,7 @@ final class UlidTest extends UnitTestCase
         $ulid = new Ulid($uid);
         $binary = $ulid->toBinary();
 
-        $recreatedUlid = Ulid::fromBinary($binary);
+        $recreatedUlid = new Ulid($binary, fromBinary: true);
 
         $this->assertSame($uid, (string) $recreatedUlid);
     }
@@ -70,7 +70,7 @@ final class UlidTest extends UnitTestCase
             strlen($binary)
         ));
 
-        Ulid::fromBinary($binary);
+        new Ulid($binary, fromBinary: true);
     }
 
     public function testFromBinaryPreservesLeadingZeros(): void
@@ -79,7 +79,7 @@ final class UlidTest extends UnitTestCase
         $ulid = new Ulid($uid);
         $binary = $ulid->toBinary();
 
-        $recreatedUlid = Ulid::fromBinary($binary);
+        $recreatedUlid = new Ulid($binary, fromBinary: true);
 
         $this->assertSame($uid, (string) $recreatedUlid);
         $this->assertSame(26, strlen((string) $recreatedUlid));
@@ -93,7 +93,7 @@ final class UlidTest extends UnitTestCase
         $this->assertIsString($binary, 'hex2bin should return a binary string.');
 
         $expected = (string) SymfonyUlid::fromBinary($binary);
-        $actual = (string) Ulid::fromBinary($binary);
+        $actual = (string) new Ulid($binary, fromBinary: true);
 
         $this->assertSame($expected, $actual);
     }
@@ -107,7 +107,7 @@ final class UlidTest extends UnitTestCase
 
         $this->assertSame(
             '0024H36H2NCSVRH6DAQF6DVVQZ',
-            (string) Ulid::fromBinary($binary)
+            (string) new Ulid($binary, fromBinary: true)
         );
     }
 
@@ -119,7 +119,7 @@ final class UlidTest extends UnitTestCase
 
         $method = new \ReflectionMethod(Ulid::class, 'hexToBase32');
 
-        $actual = $method->invoke(null, $hex);
+        $actual = $method->invoke(new Ulid(str_repeat('0', 26)), $hex);
 
         // Expected calculation using exactly 5 chars from position 27
         $parts = [

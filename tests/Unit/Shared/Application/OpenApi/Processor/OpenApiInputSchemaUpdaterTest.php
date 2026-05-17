@@ -82,7 +82,7 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         );
         self::assertContains(
             'confirmed',
-            SchemaNormalizer::normalize($schemas['Customer.CustomerPut'])['required']
+            (new SchemaNormalizer())->normalize($schemas['Customer.CustomerPut'])['required']
         );
         self::assertSame(
             'boolean',
@@ -126,6 +126,50 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
             'iri-reference',
             $this->schemaProperty($updatedSchemas, 'Customer.CustomerPatch.jsonMergePatch', 'type')['format']
         );
+    }
+
+    public function testUpdateRequiresActionableSingleFieldPatchSchemas(): void
+    {
+        $schemas = new ArrayObject([
+            'CustomerStatus.StatusPatch.jsonMergePatch' => [
+                'properties' => [
+                    'value' => ['type' => ['string', 'null']],
+                ],
+            ],
+            'CustomerType.TypePatch.jsonMergePatch' => [
+                'properties' => [
+                    'value' => ['type' => ['string', 'null']],
+                ],
+            ],
+        ]);
+        $openApi = new OpenApi(
+            new Info('VilnaCRM', '1.0.0', 'Spec under test'),
+            [],
+            new Paths(),
+            new Components($schemas)
+        );
+
+        $updated = $this->createUpdater()->update($openApi);
+        $updatedSchemas = $updated->getComponents()->getSchemas();
+
+        self::assertInstanceOf(ArrayObject::class, $updatedSchemas);
+        foreach ([
+            'CustomerStatus.StatusPatch.jsonMergePatch',
+            'CustomerType.TypePatch.jsonMergePatch',
+        ] as $schemaName) {
+            self::assertSame(
+                ['value'],
+                (new SchemaNormalizer())->normalize($updatedSchemas[$schemaName])['required']
+            );
+            self::assertSame(
+                'string',
+                $this->schemaProperty($updatedSchemas, $schemaName, 'value')['type']
+            );
+            self::assertSame(
+                1,
+                $this->schemaProperty($updatedSchemas, $schemaName, 'value')['minLength']
+            );
+        }
     }
 
     public function testUpdateLeavesSchemasWithoutComponentDefinitionsUntouched(): void
@@ -239,7 +283,7 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
 
         self::assertSame(
             'boolean',
-            SchemaNormalizer::normalize($result[0]['properties'])['confirmed']['type']
+            (new SchemaNormalizer())->normalize($result[0]['properties'])['confirmed']['type']
         );
         self::assertTrue($result[1]);
     }
@@ -323,9 +367,9 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
      */
     private function schemaProperty(ArrayObject $schemas, string $schemaName, string $propertyName): array
     {
-        return SchemaNormalizer::normalize(
-            SchemaNormalizer::normalize(
-                SchemaNormalizer::normalize($schemas[$schemaName])['properties']
+        return (new SchemaNormalizer())->normalize(
+            (new SchemaNormalizer())->normalize(
+                (new SchemaNormalizer())->normalize($schemas[$schemaName])['properties']
             )[$propertyName]
         );
     }

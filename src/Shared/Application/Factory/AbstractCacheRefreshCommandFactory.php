@@ -19,7 +19,7 @@ abstract readonly class AbstractCacheRefreshCommandFactory
         string $sourceId,
         string $occurredOn
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             $target->context(),
             $target->family(),
             $target->identifierName(),

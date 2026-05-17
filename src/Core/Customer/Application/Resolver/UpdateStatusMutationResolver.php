@@ -48,7 +48,7 @@ final readonly class UpdateStatusMutationResolver implements MutationResolver
             : $this->repository->find($this->iriTransformer->transform($input['id']));
 
         if (! $customerStatus instanceof CustomerStatus) {
-            throw CustomerStatusNotFoundException::withIri($input['id']);
+            throw new CustomerStatusNotFoundException($input['id']);
         }
 
         $command = $this->factory->create(

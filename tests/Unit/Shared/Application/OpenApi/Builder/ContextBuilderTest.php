@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 use App\Shared\Application\OpenApi\Builder\ContextBuilder;
 use App\Shared\Application\OpenApi\Factory\ParameterSchemaFactory;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
+use App\Shared\Application\OpenApi\ValueObject\Requirement;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -29,7 +30,7 @@ final class ContextBuilderTest extends UnitTestCase
 
         $builder = new ContextBuilder($customFactory);
 
-        $params = [Parameter::required('test', 'string', 'value')];
+        $params = [new Parameter('test', 'string', 'value')];
         $result = $builder->build($params);
 
         $properties = $result['application/problem+json']['schema']['properties'];
@@ -89,9 +90,9 @@ final class ContextBuilderTest extends UnitTestCase
     public function testBuildWithMixedRequiredAndOptionalParams(): void
     {
         $params = [
-            Parameter::required('name', 'string', 'John'),
-            Parameter::optional('nickname', 'string', 'Johnny'),
-            Parameter::required('age', 'integer', 25),
+            new Parameter('name', 'string', 'John'),
+            new Parameter('nickname', 'string', 'Johnny', requirement: Requirement::OPTIONAL),
+            new Parameter('age', 'integer', 25),
         ];
 
         $content = $this->contextBuilder->build($params);
@@ -109,9 +110,9 @@ final class ContextBuilderTest extends UnitTestCase
     public function testBuildWithNullExamples(): void
     {
         $params = [
-            Parameter::required('field1', 'string', 'value1'),
-            Parameter::required('field2', 'string', null),
-            Parameter::required('field3', 'integer', 123),
+            new Parameter('field1', 'string', 'value1'),
+            new Parameter('field2', 'string', null),
+            new Parameter('field3', 'integer', 123),
         ];
 
         $content = $this->contextBuilder->build($params);
@@ -129,8 +130,8 @@ final class ContextBuilderTest extends UnitTestCase
     public function testBuildWithAllOptionalParams(): void
     {
         $params = [
-            Parameter::optional('opt1', 'string', 'value1'),
-            Parameter::optional('opt2', 'integer', 42),
+            new Parameter('opt1', 'string', 'value1', requirement: Requirement::OPTIONAL),
+            new Parameter('opt2', 'integer', 42, requirement: Requirement::OPTIONAL),
         ];
 
         $content = $this->contextBuilder->build($params);
@@ -144,8 +145,8 @@ final class ContextBuilderTest extends UnitTestCase
     public function testBuildWithAllNullExamples(): void
     {
         $params = [
-            Parameter::required('field1', 'string', null),
-            Parameter::required('field2', 'string', null),
+            new Parameter('field1', 'string', null),
+            new Parameter('field2', 'string', null),
         ];
 
         $content = $this->contextBuilder->build($params);
@@ -158,7 +159,7 @@ final class ContextBuilderTest extends UnitTestCase
 
     public function testBuildFiltersNullSchemaElements(): void
     {
-        $params = [Parameter::required('test', 'string', 'value')];
+        $params = [new Parameter('test', 'string', 'value')];
 
         $content = $this->contextBuilder->build($params);
         $result = $content['application/problem+json'];
@@ -174,8 +175,8 @@ final class ContextBuilderTest extends UnitTestCase
     public function testCollectPropertiesReturnsArray(): void
     {
         $params = [
-            Parameter::required('prop1', 'string', 'val1'),
-            Parameter::required('prop2', 'integer', 42),
+            new Parameter('prop1', 'string', 'val1'),
+            new Parameter('prop2', 'integer', 42),
         ];
 
         $content = $this->contextBuilder->build($params);
@@ -191,8 +192,8 @@ final class ContextBuilderTest extends UnitTestCase
     public function testCollectExamplesFiltersNulls(): void
     {
         $params = [
-            Parameter::required('with_example', 'string', 'example_value'),
-            Parameter::required('without_example', 'string', null),
+            new Parameter('with_example', 'string', 'example_value'),
+            new Parameter('without_example', 'string', null),
         ];
 
         $content = $this->contextBuilder->build($params);

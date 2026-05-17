@@ -20,6 +20,6 @@ final readonly class CollectionTestTargetResolver implements CacheRefreshTargetR
         string $identifierName,
         string $identifierValue
     ): CacheRefreshTarget {
-        return CacheRefreshTarget::create($context, $family, $identifierName, $identifierValue);
+        return new CacheRefreshTarget($context, $family, $identifierName, $identifierValue);
     }
 }

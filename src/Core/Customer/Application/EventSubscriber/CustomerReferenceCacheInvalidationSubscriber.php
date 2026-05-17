@@ -27,11 +27,11 @@ final readonly class CustomerReferenceCacheInvalidationSubscriber extends
         $this->invalidate(
             CustomerCachePolicyCollection::CONTEXT,
             $this->operationFor($event),
-            CacheInvalidationTagSet::create(
+            new CacheInvalidationTagSet(
                 'customer.collection',
                 'customer.reference'
             ),
-            CacheRefreshCommandCollection::create()
+            new CacheRefreshCommandCollection()
         );
     }
 

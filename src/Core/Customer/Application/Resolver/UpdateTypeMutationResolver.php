@@ -48,7 +48,7 @@ final readonly class UpdateTypeMutationResolver implements MutationResolver
             : $this->repository->find($this->iriTransformer->transform($input['id']));
 
         if (! $customerType instanceof CustomerType) {
-            throw CustomerTypeNotFoundException::withIri($input['id']);
+            throw new CustomerTypeNotFoundException($input['id']);
         }
 
         $command = $this->factory->create(

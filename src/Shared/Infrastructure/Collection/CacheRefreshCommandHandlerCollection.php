@@ -18,17 +18,9 @@ final readonly class CacheRefreshCommandHandlerCollection implements IteratorAgg
     /** @var ArrayIterator<int, CacheRefreshCommandHandlerBase> */
     private ArrayIterator $handlers;
 
-    private function __construct(CacheRefreshCommandHandlerBase ...$handlers)
+    public function __construct(CacheRefreshCommandHandlerBase ...$handlers)
     {
         $this->handlers = new ArrayIterator($handlers);
-    }
-
-    /**
-     * @param iterable<CacheRefreshCommandHandlerBase> $handlers
-     */
-    public static function fromIterable(iterable $handlers): self
-    {
-        return new self(...iterator_to_array($handlers));
     }
 
     public function getIterator(): Traversable

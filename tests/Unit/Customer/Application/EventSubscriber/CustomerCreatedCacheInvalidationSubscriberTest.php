@@ -78,8 +78,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('info')
             ->with(
                 'Cache invalidated after customer creation',
-                $this->callback(static function (array $context): bool {
-                    self::assertInfoContext($context);
+                $this->callback(function (array $context): bool {
+                    $this->assertInfoContext($context);
 
                     return true;
                 })
@@ -104,8 +104,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->expects($this->once())
             ->method('tryHandle')
             ->with($this->callback(
-                static function (CacheInvalidationCommand $command) use ($customerId): bool {
-                    self::assertSharedCommand($customerId, $command);
+                function (CacheInvalidationCommand $command) use ($customerId): bool {
+                    $this->assertSharedCommand($customerId, $command);
 
                     return true;
                 }
@@ -142,8 +142,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Cache invalidation failed after customer creation',
-                $this->callback(static function (array $context): bool {
-                    self::assertWarningContext('handler failed', $context);
+                $this->callback(function (array $context): bool {
+                    $this->assertWarningContext('handler failed', $context);
 
                     return true;
                 })
@@ -182,8 +182,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Cache invalidation failed after customer creation',
-                $this->callback(static function (array $context): bool {
-                    self::assertWarningContext(
+                $this->callback(function (array $context): bool {
+                    $this->assertWarningContext(
                         'Shared cache invalidation handler returned false',
                         $context
                     );
@@ -227,8 +227,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Cache invalidation failed after customer creation',
-                $this->callback(static function (array $context): bool {
-                    self::assertWarningContext('Redis connection failed', $context);
+                $this->callback(function (array $context): bool {
+                    $this->assertWarningContext('Redis connection failed', $context);
 
                     return true;
                 })
@@ -260,8 +260,8 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
             ->method('warning')
             ->with(
                 'Cache invalidation failed after customer creation',
-                $this->callback(static function (array $context): bool {
-                    self::assertWarningContext('Tag invalidation returned false', $context);
+                $this->callback(function (array $context): bool {
+                    $this->assertWarningContext('Tag invalidation returned false', $context);
 
                     return true;
                 })
@@ -291,14 +291,14 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
         );
     }
 
-    private static function assertInfoContext(array $context): void
+    private function assertInfoContext(array $context): void
     {
         self::assertSame('cache.invalidation', $context['operation']);
         self::assertSame('customer_created', $context['reason']);
         self::assertArrayHasKey('event_id', $context);
     }
 
-    private static function assertSharedCommand(
+    private function assertSharedCommand(
         string $customerId,
         CacheInvalidationCommand $command
     ): void {
@@ -309,7 +309,7 @@ final class CustomerCreatedCacheInvalidationSubscriberTest extends UnitTestCase
         self::assertCount(2, $command->refreshCommands());
     }
 
-    private static function assertWarningContext(string $error, array $context): void
+    private function assertWarningContext(string $error, array $context): void
     {
         self::assertSame('cache.invalidation.error', $context['operation']);
         self::assertSame('customer_created', $context['reason']);

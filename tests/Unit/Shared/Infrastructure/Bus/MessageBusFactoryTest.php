@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Bus;
 
 use App\Shared\Domain\Bus\Event\DomainEventSubscriberInterface;
+use App\Shared\Infrastructure\Bus\CallableFirstParameterExtractor;
 use App\Shared\Infrastructure\Bus\MessageBusFactory;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestMessage;
 use App\Tests\Unit\Shared\Infrastructure\Bus\Stub\TestOtherEvent;
@@ -25,7 +26,7 @@ final class MessageBusFactoryTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->factory = new MessageBusFactory();
+        $this->factory = new MessageBusFactory(new CallableFirstParameterExtractor());
     }
 
     public function testCreateReturnsMessageBus(): void

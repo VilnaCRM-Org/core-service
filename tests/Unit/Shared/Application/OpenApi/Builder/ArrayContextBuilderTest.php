@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Shared\Application\OpenApi\Builder;
 
 use App\Shared\Application\OpenApi\Builder\ArrayContextBuilder;
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
+use App\Shared\Application\OpenApi\ValueObject\Requirement;
 use App\Tests\Unit\UnitTestCase;
 use ArrayObject;
 
@@ -80,8 +81,13 @@ final class ArrayContextBuilderTest extends UnitTestCase
 
     public function testBuildDoesNotMarkOptionalParametersAsRequired(): void
     {
-        $requiredParam = Parameter::required('id', 'string', $this->faker->uuid());
-        $optionalParam = Parameter::optional('reference', 'string', $this->faker->uuid());
+        $requiredParam = new Parameter('id', 'string', $this->faker->uuid());
+        $optionalParam = new Parameter(
+            'reference',
+            'string',
+            $this->faker->uuid(),
+            requirement: Requirement::OPTIONAL
+        );
 
         $content = $this->contextBuilder->build([$requiredParam, $optionalParam]);
         $schema = $content['application/ld+json']['schema'];
@@ -92,9 +98,9 @@ final class ArrayContextBuilderTest extends UnitTestCase
 
     public function testBuildRequiredArrayHasSequentialKeys(): void
     {
-        $requiredName = Parameter::required('name', 'string', 'John');
-        $optionalEmail = Parameter::optional('email', 'string', 'john@example.com');
-        $requiredAge = Parameter::required('age', 'integer', '30');
+        $requiredName = new Parameter('name', 'string', 'John');
+        $optionalEmail = new Parameter('email', 'string', 'john@example.com', requirement: Requirement::OPTIONAL);
+        $requiredAge = new Parameter('age', 'integer', '30');
 
         $content = $this->contextBuilder->build([$requiredName, $optionalEmail, $requiredAge]);
         $schema = $content['application/ld+json']['schema'];

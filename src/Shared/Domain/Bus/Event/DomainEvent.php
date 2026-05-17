@@ -19,16 +19,7 @@ abstract class DomainEvent
             self::dateToString(new DateTimeImmutable());
     }
 
-    /**
-     * @param array<string, string|object> $body
-     */
-    abstract public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self;
-
-    abstract public static function eventName(): string;
+    abstract public function eventName(): string;
 
     /**
      * @return array<string, string|object>

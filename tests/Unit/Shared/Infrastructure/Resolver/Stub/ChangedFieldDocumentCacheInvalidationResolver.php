@@ -40,7 +40,7 @@ final class ChangedFieldDocumentCacheInvalidationResolver implements
 
         \assert($document instanceof CacheResolverTestDocument);
 
-        return CacheInvalidationTagSet::create(
+        return new CacheInvalidationTagSet(
             'document.' . $document->id(),
             'status.' . $statusChange?->oldValue(),
             'status.' . $statusChange?->newValue()
@@ -57,7 +57,7 @@ final class ChangedFieldDocumentCacheInvalidationResolver implements
 
         \assert($document instanceof CacheResolverTestDocument);
 
-        return CacheRefreshCommandCollection::create(CacheRefreshCommand::create(
+        return new CacheRefreshCommandCollection(new CacheRefreshCommand(
             'document',
             'detail',
             'document_id',

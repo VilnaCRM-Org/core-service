@@ -16,7 +16,7 @@ final class CacheRefreshPolicyResolverTest extends UnitTestCase
 {
     public function testResolvesFirstResolverThatSupportsContextAndFamily(): void
     {
-        $policy = CacheRefreshPolicy::create(
+        $policy = new CacheRefreshPolicy(
             'customer',
             'detail',
             600,
@@ -38,7 +38,7 @@ final class CacheRefreshPolicyResolverTest extends UnitTestCase
 
     public function testSkipsItselfWhenTaggedIteratorContainsOuterResolver(): void
     {
-        $policy = CacheRefreshPolicy::create(
+        $policy = new CacheRefreshPolicy(
             'customer',
             'lookup',
             300,

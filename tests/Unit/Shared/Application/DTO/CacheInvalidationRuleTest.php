@@ -12,7 +12,7 @@ final class CacheInvalidationRuleTest extends UnitTestCase
 {
     public function testCreateKeepsRulePayload(): void
     {
-        $rule = CacheInvalidationRule::create(
+        $rule = new CacheInvalidationRule(
             'customer',
             'odm_change_set',
             Customer::class,

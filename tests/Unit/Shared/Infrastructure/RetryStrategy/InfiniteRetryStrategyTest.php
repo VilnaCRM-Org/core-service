@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Shared\Infrastructure\RetryStrategy;
 
+use App\Shared\Application\Observability\Factory\RetryStrategyMetricFactory;
 use App\Shared\Application\Observability\Metric\DlqRoutingMetric;
 use App\Shared\Application\Observability\Metric\RetryAttemptMetric;
 use App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy;
@@ -41,7 +42,8 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
         $this->metricsEmitter = new BusinessMetricsEmitterSpy();
         $this->retryStrategy = new InfiniteRetryStrategy(
             self::DELAY_MS,
-            $this->metricsEmitter
+            $this->metricsEmitter,
+            new RetryStrategyMetricFactory()
         );
     }
 
@@ -141,23 +143,23 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
         );
     }
 
-    /**
-     * @dataProvider permanentFailureProvider
-     */
-    public function testIsRetryableReturnsFalseForPermanentFailure(
-        Throwable $throwable
-    ): void {
-        $this->assertFalse($this->retryStrategy->isRetryable(
-            $this->envelope(),
-            $throwable
-        ));
+    public function testIsRetryableReturnsFalseForPermanentFailure(): void
+    {
+        foreach ($this->permanentFailureCases() as $throwable) {
+            $this->metricsEmitter->clear();
 
-        $this->assertEmittedMetric(
-            DlqRoutingMetric::class,
-            'MessengerDlqRoutings',
-            'dlq',
-            $throwable::class
-        );
+            $this->assertFalse($this->retryStrategy->isRetryable(
+                $this->envelope(),
+                $throwable
+            ));
+
+            $this->assertEmittedMetric(
+                DlqRoutingMetric::class,
+                'MessengerDlqRoutings',
+                'dlq',
+                $throwable::class
+            );
+        }
     }
 
     public function testIsRetryableReturnsFalseForMessengerValidationFailure(): void
@@ -270,18 +272,18 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
     }
 
     /**
-     * @return iterable<string, array{0: Throwable}>
+     * @return iterable<string, Throwable>
      */
-    public static function permanentFailureProvider(): iterable
+    private function permanentFailureCases(): iterable
     {
-        yield 'domain exception' => [new DomainException('Domain rule failed')];
-        yield 'invalid argument' => [new InvalidArgumentException('Invalid input')];
-        yield 'json exception' => [new JsonException('Invalid JSON')];
-        yield 'logic exception' => [new LogicException('Programmer error')];
-        yield 'message decoding' => [new MessageDecodingFailedException('Bad envelope')];
-        yield 'serializer exception' => [new NotEncodableValueException('Bad schema')];
-        yield 'type error' => [new TypeError('Wrong type')];
-        yield 'value error' => [new ValueError('Wrong value')];
+        yield 'domain exception' => new DomainException('Domain rule failed');
+        yield 'invalid argument' => new InvalidArgumentException('Invalid input');
+        yield 'json exception' => new JsonException('Invalid JSON');
+        yield 'logic exception' => new LogicException('Programmer error');
+        yield 'message decoding' => new MessageDecodingFailedException('Bad envelope');
+        yield 'serializer exception' => new NotEncodableValueException('Bad schema');
+        yield 'type error' => new TypeError('Wrong type');
+        yield 'value error' => new ValueError('Wrong value');
     }
 
     private function envelope(): Envelope
@@ -308,12 +310,12 @@ final class InfiniteRetryStrategyTest extends UnitTestCase
         self::assertSame($operation, $metric->dimensions()->values()->get('Operation'));
         self::assertSame('stdClass', $metric->dimensions()->values()->get('MessageType'));
         self::assertSame(
-            self::shortClassName($exceptionType),
+            $this->shortClassName($exceptionType),
             $metric->dimensions()->values()->get('ExceptionType')
         );
     }
 
-    private static function shortClassName(string $className): string
+    private function shortClassName(string $className): string
     {
         $parts = explode('\\', $className);
 

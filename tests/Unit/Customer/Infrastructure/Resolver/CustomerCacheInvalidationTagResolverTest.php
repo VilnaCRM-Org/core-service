@@ -72,8 +72,8 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
     public function testResolveTagsIncludesCurrentAndPreviousEmailTags(): void
     {
         $customer = $this->customer('new@example.com');
-        $changeSet = CacheChangeSet::create(
-            CacheFieldChange::create('email', 'old@example.com', 'new@example.com')
+        $changeSet = new CacheChangeSet(
+            new CacheFieldChange('email', 'old@example.com', 'new@example.com')
         );
 
         $tags = iterator_to_array($this->resolver->resolveTags(
@@ -117,7 +117,7 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
         $commands = iterator_to_array($this->resolver->resolveRefreshCommands(
             $customer,
             CacheInvalidationRule::OPERATION_DELETED,
-            CacheChangeSet::empty()
+            new CacheChangeSet()
         ));
 
         self::assertCount(2, $commands);
@@ -144,7 +144,7 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
             $tags = iterator_to_array($this->resolver->resolveTags(
                 $referenceDocument,
                 CacheInvalidationRule::OPERATION_UPDATED,
-                CacheChangeSet::empty()
+                new CacheChangeSet()
             ));
 
             self::assertSame([
@@ -155,7 +155,7 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
             self::assertSame([], iterator_to_array($this->resolver->resolveRefreshCommands(
                 $referenceDocument,
                 CacheInvalidationRule::OPERATION_UPDATED,
-                CacheChangeSet::empty()
+                new CacheChangeSet()
             )));
         }
     }
@@ -163,8 +163,8 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
     public function testResolveRefreshCommandsUsesCurrentEmailFromChangeSet(): void
     {
         $customer = $this->customer('persisted@example.com');
-        $changeSet = CacheChangeSet::create(
-            CacheFieldChange::create('email', 'old@example.com', 'new@example.com')
+        $changeSet = new CacheChangeSet(
+            new CacheFieldChange('email', 'old@example.com', 'new@example.com')
         );
 
         $commands = iterator_to_array($this->resolver->resolveRefreshCommands(
@@ -200,8 +200,8 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
     public function testResolveTagsIgnoresNonStringPreviousEmailChange(): void
     {
         $customer = $this->customer('fallback@example.com');
-        $changeSet = CacheChangeSet::create(
-            CacheFieldChange::create('email', 123, 'current@example.com')
+        $changeSet = new CacheChangeSet(
+            new CacheFieldChange('email', 123, 'current@example.com')
         );
 
         $tags = iterator_to_array($this->resolver->resolveTags(
@@ -359,7 +359,7 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
         $commands = iterator_to_array($this->resolver->resolveRefreshCommands(
             $customer,
             CacheInvalidationRule::OPERATION_UPDATED,
-            CacheChangeSet::empty()
+            new CacheChangeSet()
         ));
 
         self::assertCount(1, $commands);
@@ -373,12 +373,12 @@ final class CustomerCacheInvalidationTagResolverTest extends UnitTestCase
         $updatedCommands = iterator_to_array($this->resolver->resolveRefreshCommands(
             $customer,
             CacheInvalidationRule::OPERATION_UPDATED,
-            CacheChangeSet::empty()
+            new CacheChangeSet()
         ));
         $deletedCommands = iterator_to_array($this->resolver->resolveRefreshCommands(
             $customer,
             CacheInvalidationRule::OPERATION_DELETED,
-            CacheChangeSet::empty()
+            new CacheChangeSet()
         ));
 
         self::assertSame(

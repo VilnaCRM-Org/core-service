@@ -20,7 +20,7 @@ final class CacheRefreshCollectionTest extends UnitTestCase
 {
     public function testRuleCollectionKeepsRules(): void
     {
-        $rule = CacheInvalidationRule::create(
+        $rule = new CacheInvalidationRule(
             'customer',
             'odm_change_set',
             self::class,
@@ -28,7 +28,7 @@ final class CacheRefreshCollectionTest extends UnitTestCase
             CacheRefreshPolicy::SOURCE_REPOSITORY_REFRESH
         );
 
-        $collection = CacheInvalidationRuleCollection::create($rule);
+        $collection = new CacheInvalidationRuleCollection($rule);
 
         self::assertCount(1, $collection);
         self::assertSame([$rule], iterator_to_array($collection));
@@ -38,7 +38,7 @@ final class CacheRefreshCollectionTest extends UnitTestCase
     {
         $first = $this->refreshCommand('first');
         $second = $this->refreshCommand('second');
-        $collection = CacheRefreshCommandCollection::create($first);
+        $collection = new CacheRefreshCommandCollection($first);
         $updated = $collection->with($second);
 
         self::assertCount(1, $collection);
@@ -47,10 +47,10 @@ final class CacheRefreshCollectionTest extends UnitTestCase
         self::assertSame([$first, $second], iterator_to_array($updated));
     }
 
-    public function testHandlerCollectionCanBeBuiltFromIterable(): void
+    public function testHandlerCollectionKeepsHandlers(): void
     {
         $handler = new CollectionTestRefreshHandler();
-        $collection = CacheRefreshCommandHandlerCollection::fromIterable([$handler]);
+        $collection = new CacheRefreshCommandHandlerCollection($handler);
 
         self::assertCount(1, $collection);
         self::assertSame([$handler], iterator_to_array($collection));
@@ -58,7 +58,7 @@ final class CacheRefreshCollectionTest extends UnitTestCase
 
     public function testPolicyCollectionKeepsPolicies(): void
     {
-        $policy = CacheRefreshPolicy::create(
+        $policy = new CacheRefreshPolicy(
             'customer',
             'detail',
             600,
@@ -66,16 +66,16 @@ final class CacheRefreshCollectionTest extends UnitTestCase
             'stale_while_revalidate',
             CacheRefreshPolicy::SOURCE_REPOSITORY_REFRESH
         );
-        $collection = CacheRefreshPolicyCollection::create($policy);
+        $collection = new CacheRefreshPolicyCollection($policy);
 
         self::assertCount(1, $collection);
         self::assertSame([$policy], iterator_to_array($collection));
     }
 
-    public function testTargetResolverCollectionCanBeBuiltFromIterable(): void
+    public function testTargetResolverCollectionKeepsResolvers(): void
     {
         $resolver = new CollectionTestTargetResolver();
-        $collection = CacheRefreshTargetResolverCollection::fromIterable([$resolver]);
+        $collection = new CacheRefreshTargetResolverCollection($resolver);
 
         self::assertCount(1, $collection);
         self::assertSame([$resolver], iterator_to_array($collection));
@@ -90,7 +90,7 @@ final class CacheRefreshCollectionTest extends UnitTestCase
 
     private function refreshCommand(string $sourceId): CacheRefreshCommand
     {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             'customer',
             'detail',
             'customer_id',

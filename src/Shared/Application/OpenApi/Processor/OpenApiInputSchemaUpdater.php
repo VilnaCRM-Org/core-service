@@ -67,10 +67,16 @@ final class OpenApiInputSchemaUpdater
         'CustomerStatus.StatusCreate' => [
             'value' => ['minLength' => 1],
         ],
+        'CustomerStatus.StatusPatch.jsonMergePatch' => [
+            'value' => ['minLength' => 1],
+        ],
         'CustomerStatus.StatusPut' => [
             'value' => ['minLength' => 1],
         ],
         'CustomerType.TypeCreate' => [
+            'value' => ['minLength' => 1],
+        ],
+        'CustomerType.TypePatch.jsonMergePatch' => [
             'value' => ['minLength' => 1],
         ],
         'CustomerType.TypePut' => [
@@ -80,6 +86,8 @@ final class OpenApiInputSchemaUpdater
 
     private const REQUIRED_PROPERTIES_TO_ENFORCE = [
         'Customer.CustomerPut' => ['confirmed'],
+        'CustomerStatus.StatusPatch.jsonMergePatch' => ['value'],
+        'CustomerType.TypePatch.jsonMergePatch' => ['value'],
     ];
 
     public function __construct(
@@ -164,7 +172,7 @@ final class OpenApiInputSchemaUpdater
     ): ?array {
         return $this->updatedSchema(
             $schemaName,
-            SchemaNormalizer::normalize($schemas[$schemaName] ?? []),
+            (new SchemaNormalizer())->normalize($schemas[$schemaName] ?? []),
             $propertySchemaUpdates
         );
     }
@@ -247,7 +255,7 @@ final class OpenApiInputSchemaUpdater
         array $schema,
         array $requiredProperties
     ): ?array {
-        $currentRequiredProperties = SchemaNormalizer::normalize($schema['required'] ?? []);
+        $currentRequiredProperties = (new SchemaNormalizer())->normalize($schema['required'] ?? []);
 
         if (array_diff($requiredProperties, $currentRequiredProperties) === []) {
             return null;
@@ -274,8 +282,8 @@ final class OpenApiInputSchemaUpdater
         string $propertyName,
         array $schemaPatch
     ): ?array {
-        $properties = SchemaNormalizer::normalize($schema['properties'] ?? []);
-        $propertySchema = SchemaNormalizer::normalize($properties[$propertyName] ?? []);
+        $properties = (new SchemaNormalizer())->normalize($schema['properties'] ?? []);
+        $propertySchema = (new SchemaNormalizer())->normalize($properties[$propertyName] ?? []);
 
         if ($propertySchema === []) {
             return null;

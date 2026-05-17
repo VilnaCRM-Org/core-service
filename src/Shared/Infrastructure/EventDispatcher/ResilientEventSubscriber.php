@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Infrastructure\EventDispatcher;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Base class for event subscribers with automatic error handling.
@@ -17,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * their event handling logic, which provides automatic try-catch
  * with detailed error logging.
  */
-abstract readonly class ResilientEventSubscriber implements EventSubscriberInterface
+abstract readonly class ResilientEventSubscriber
 {
     public function __construct(protected LoggerInterface $logger)
     {

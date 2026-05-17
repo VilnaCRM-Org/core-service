@@ -86,7 +86,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
             ->expects(self::once())
             ->method('resolveType')
             ->with($typeIri)
-            ->willThrowException(CustomerTypeNotFoundException::withIri($typeIri));
+            ->willThrowException(new CustomerTypeNotFoundException($typeIri));
 
         $this->expectException(CustomerTypeNotFoundException::class);
         $resolver->resolveType($typeIri, $customer);
@@ -163,7 +163,7 @@ final class CustomerRelationTransformerTest extends UnitTestCase
             ->expects(self::once())
             ->method('resolveStatus')
             ->with($statusIri)
-            ->willThrowException(CustomerStatusNotFoundException::withIri($statusIri));
+            ->willThrowException(new CustomerStatusNotFoundException($statusIri));
 
         $this->expectException(CustomerStatusNotFoundException::class);
         $resolver->resolveStatus($statusIri, $customer);

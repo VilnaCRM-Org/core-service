@@ -27,9 +27,9 @@ final class OpenApiSchemaFixesProcessor implements OpenApiProcessorInterface
         $schemas = $this->hydraCollectionSchemaFixer->apply($schemas);
         $openApi = $openApi->withComponents($components->withSchemas($schemas));
 
-        return PathsMapper::map(
+        return (new PathsMapper())->map(
             $openApi,
-            fn (PathItem $pathItem): PathItem => PathItemOperationMapper::map(
+            fn (PathItem $pathItem): PathItem => (new PathItemOperationMapper())->map(
                 $pathItem,
                 fn (Operation $operation): Operation => $this->operationSchemaFixer->fix($operation)
             )

@@ -86,7 +86,10 @@ final readonly class EmfMetricValueCollection implements IteratorAggregate, Coun
         ));
 
         if ($duplicates !== []) {
-            throw EmfKeyCollisionException::duplicateMetricNames($duplicates);
+            throw new EmfKeyCollisionException(sprintf(
+                'Duplicate metric names detected: %s',
+                implode(', ', $duplicates)
+            ));
         }
     }
 }

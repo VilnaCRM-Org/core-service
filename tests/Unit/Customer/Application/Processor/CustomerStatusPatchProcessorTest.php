@@ -75,26 +75,38 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->assertSame($customerStatus, $result);
     }
 
-    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
+    public function testProcessSkipsDispatchForBlankValuePatchPayload(): void
     {
         $dto = new StatusPatch(value: '', id: null);
         $operation = $this->createMock(Operation::class);
         $customerStatus = $this->createMock(CustomerStatus::class);
-        $existingValue = $this->faker->word();
-
-        $customerStatus
-            ->method('getValue')
-            ->willReturn($existingValue);
 
         $this->resolver
             ->expects($this->once())
             ->method('resolve')
+            ->with($dto, [], $operation)
             ->willReturn($customerStatus);
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
 
-        // When value is empty string, no command should be dispatched (proper PATCH semantics)
-        $this->commandBus
-            ->expects($this->never())
-            ->method('dispatch');
+        $result = $this->processor->process($dto, $operation);
+
+        $this->assertSame($customerStatus, $result);
+    }
+
+    public function testProcessSkipsDispatchForNullValuePatchPayload(): void
+    {
+        $dto = new StatusPatch(value: null, id: null);
+        $operation = $this->createMock(Operation::class);
+        $customerStatus = $this->createMock(CustomerStatus::class);
+
+        $this->resolver
+            ->expects($this->once())
+            ->method('resolve')
+            ->with($dto, [], $operation)
+            ->willReturn($customerStatus);
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
 
         $result = $this->processor->process($dto, $operation);
 
@@ -109,7 +121,7 @@ final class CustomerStatusPatchProcessorTest extends UnitTestCase
         $this->resolver
             ->expects($this->once())
             ->method('resolve')
-            ->willThrowException(new CustomerStatusNotFoundException());
+            ->willThrowException(new CustomerStatusNotFoundException('unknown'));
 
         $this->factory->expects($this->never())->method('create');
         $this->commandBus->expects($this->never())->method('dispatch');

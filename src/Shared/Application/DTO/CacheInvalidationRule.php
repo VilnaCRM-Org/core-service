@@ -13,26 +13,13 @@ final readonly class CacheInvalidationRule
     /**
      * @param class-string $subject
      */
-    private function __construct(
+    public function __construct(
         private string $context,
         private string $source,
         private string $subject,
         private string $operation,
         private string $refreshSource
     ) {
-    }
-
-    /**
-     * @param class-string $subject
-     */
-    public static function create(
-        string $context,
-        string $source,
-        string $subject,
-        string $operation,
-        string $refreshSource
-    ): self {
-        return new self($context, $source, $subject, $operation, $refreshSource);
     }
 
     public function context(): string

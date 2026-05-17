@@ -16,14 +16,14 @@ final class ConstraintViolationPayloadEnricher
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function enrich(array $properties): ?array
+    public function enrich(array $properties): ?array
     {
-        $payload = ConstraintViolationPayloadBuilder::build($properties);
+        $payload = (new ConstraintViolationPayloadBuilder())->build($properties);
         if ($payload === null) {
             return null;
         }
 
-        $properties += ['code' => self::defaultCodeProperty()];
+        $properties += ['code' => $this->defaultCodeProperty()];
         $properties['payload'] = $payload;
 
         return $properties;
@@ -32,7 +32,7 @@ final class ConstraintViolationPayloadEnricher
     /**
      * @return array<string, array<int, string>|string>
      */
-    private static function defaultCodeProperty(): array
+    private function defaultCodeProperty(): array
     {
         return [
             'type' => ['string', 'null'],

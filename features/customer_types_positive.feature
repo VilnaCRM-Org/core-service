@@ -212,25 +212,17 @@ Feature: CustomerType Collection and Resource Endpoints with Detailed JSON Valid
     Then the response status code should be equal to 200
     And the JSON node "value" should be equal to "Nurtured"
 
-  Scenario: Update customer type resource with an empty patch payload (resource remains unchanged)
+  Scenario: Update customer type resource with an empty patch payload is rejected
     Given create type with id "01JKX8XGHVDZ46MWYMZT94YER4"
     And I add "Content-Type" header equal to "application/merge-patch+json"
     When I send a PATCH request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4" with body:
     """
     { }
     """
-    Then the response status code should be equal to 200
+    Then the response status code should be equal to 400
     And the response should be in JSON
-    And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
-    And the response should be valid according to the operation id "api_customer_types_ulid_patch"
-    And the JSON node "@id" should exist
-    And the JSON node "@type" should contain "CustomerType"
-    And the JSON node "ulid" should contain "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "value" should exist
-    When I send a GET request to "/api/customer_types/01JKX8XGHVDZ46MWYMZT94YER4"
-    Then the response status code should be equal to 200
-    And the JSON node "ulid" should be equal to "01JKX8XGHVDZ46MWYMZT94YER4"
-    And the JSON node "value" should exist
+    And the header "Content-Type" should be equal to "application/problem+json; charset=utf-8"
+    And the JSON node "detail" should be equal to "PATCH payload must contain at least one supported field."
 
 # ----- DELETE /api/customer_types/{ulid} – Delete Resource (Positive Test) -----
 

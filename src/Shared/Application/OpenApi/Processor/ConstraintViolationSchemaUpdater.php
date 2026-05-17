@@ -62,8 +62,8 @@ final class ConstraintViolationSchemaUpdater
     private function updatedConstraintViolationSchema(
         object|array|bool|float|int|string|null $schema
     ): ?array {
-        return ConstraintViolationPayloadItemsUpdater::update(
-            SchemaNormalizer::normalize($schema)
+        return (new ConstraintViolationPayloadItemsUpdater())->update(
+            (new SchemaNormalizer())->normalize($schema)
         );
     }
 

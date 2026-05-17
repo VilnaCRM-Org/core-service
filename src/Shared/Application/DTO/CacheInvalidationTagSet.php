@@ -17,14 +17,9 @@ final readonly class CacheInvalidationTagSet implements IteratorAggregate, Count
     /** @var ArrayIterator<int, string> */
     private ArrayIterator $tags;
 
-    private function __construct(string ...$tags)
+    public function __construct(string ...$tags)
     {
         $this->tags = new ArrayIterator(array_values(array_unique($tags)));
-    }
-
-    public static function create(string ...$tags): self
-    {
-        return new self(...$tags);
     }
 
     public function with(string ...$tags): self

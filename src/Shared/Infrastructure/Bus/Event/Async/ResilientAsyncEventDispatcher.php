@@ -44,13 +44,18 @@ final readonly class ResilientAsyncEventDispatcher implements AsyncEventDispatch
     private function dispatchSingle(DomainEvent $event): bool
     {
         try {
-            $envelope = DomainEventEnvelope::fromEvent($event);
+            $envelope = new DomainEventEnvelope(
+                eventClass: $event::class,
+                body: $event->toPrimitives(),
+                eventId: $event->eventId(),
+                occurredOn: $event->occurredOn()
+            );
             $this->messageBus->dispatch($envelope);
 
             $this->logger->debug('Domain event dispatched to async queue', [
                 'event_id' => $event->eventId(),
                 'event_type' => $event::class,
-                'event_name' => $event::eventName(),
+                'event_name' => $event->eventName(),
             ]);
 
             return true;
@@ -67,7 +72,7 @@ final readonly class ResilientAsyncEventDispatcher implements AsyncEventDispatch
         $this->logger->error('Failed to dispatch domain event to async queue', [
             'event_id' => $event->eventId(),
             'event_type' => $event::class,
-            'event_name' => $event::eventName(),
+            'event_name' => $event->eventName(),
             'error' => $exception->getMessage(),
             'exception_class' => $exception::class,
         ]);

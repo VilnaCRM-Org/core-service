@@ -14,11 +14,11 @@ final class PathItemOperationMapper
     /**
      * @param callable(Operation, string): Operation $callback
      */
-    public static function map(PathItem $pathItem, callable $callback): PathItem
+    public function map(PathItem $pathItem, callable $callback): PathItem
     {
         $operations = array_filter(
             array_map(
-                static fn (string $operationName): ?array => self::buildOperationPayload(
+                fn (string $operationName): ?array => $this->buildOperationPayload(
                     $pathItem,
                     $operationName
                 ),
@@ -39,7 +39,7 @@ final class PathItemOperationMapper
     /**
      * @return array{name: string, operation: Operation}|null
      */
-    private static function buildOperationPayload(
+    private function buildOperationPayload(
         PathItem $pathItem,
         string $operationName
     ): ?array {

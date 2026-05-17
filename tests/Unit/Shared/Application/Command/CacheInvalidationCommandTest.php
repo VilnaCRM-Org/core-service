@@ -20,15 +20,15 @@ final class CacheInvalidationCommandTest extends UnitTestCase
         $operation = 'updated';
         $tagOne = 'cache.customer';
         $tagTwo = 'cache.customer.1';
-        $tags = CacheInvalidationTagSet::create($tagOne, $tagTwo, $tagOne);
+        $tags = new CacheInvalidationTagSet($tagOne, $tagTwo, $tagOne);
         $refreshCommand = $this->refreshCommand($context, $source);
 
-        $command = CacheInvalidationCommand::create(
+        $command = new CacheInvalidationCommand(
             $context,
             $source,
             $operation,
             $tags,
-            CacheRefreshCommandCollection::create($refreshCommand)
+            new CacheRefreshCommandCollection($refreshCommand)
         );
 
         $this->assertCommandPayload($command, $context, $source, $operation);
@@ -42,14 +42,14 @@ final class CacheInvalidationCommandTest extends UnitTestCase
         $context = $this->faker->word();
         $source = $this->faker->word();
         $operation = $this->faker->word();
-        $tags = CacheInvalidationTagSet::create();
+        $tags = new CacheInvalidationTagSet();
 
-        $command = CacheInvalidationCommand::create(
+        $command = new CacheInvalidationCommand(
             $context,
             $source,
             $operation,
             $tags,
-            CacheRefreshCommandCollection::create()
+            new CacheRefreshCommandCollection()
         );
 
         self::assertTrue($command->tags()->isEmpty());
@@ -59,27 +59,41 @@ final class CacheInvalidationCommandTest extends UnitTestCase
 
     public function testDedupeKeyIsIndependentFromTagOrder(): void
     {
-        $first = CacheInvalidationCommand::create(
+        $first = new CacheInvalidationCommand(
             'customer',
             'domain_event',
             'updated',
-            CacheInvalidationTagSet::create('customer.2', 'customer.1'),
-            CacheRefreshCommandCollection::create()
+            new CacheInvalidationTagSet('customer.2', 'customer.1'),
+            new CacheRefreshCommandCollection()
         );
-        $second = CacheInvalidationCommand::create(
+        $second = new CacheInvalidationCommand(
             'customer',
             'domain_event',
             'updated',
-            CacheInvalidationTagSet::create('customer.1', 'customer.2'),
-            CacheRefreshCommandCollection::create()
+            new CacheInvalidationTagSet('customer.1', 'customer.2'),
+            new CacheRefreshCommandCollection()
         );
 
         self::assertSame($first->dedupeKey(), $second->dedupeKey());
     }
 
+    public function testCreateKeepsExplicitDedupeKey(): void
+    {
+        $command = new CacheInvalidationCommand(
+            'customer',
+            'domain_event',
+            'updated',
+            new CacheInvalidationTagSet('customer.1'),
+            new CacheRefreshCommandCollection(),
+            'explicit-dedupe-key'
+        );
+
+        self::assertSame('explicit-dedupe-key', $command->dedupeKey());
+    }
+
     private function refreshCommand(string $context, string $source): CacheRefreshCommand
     {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             $context,
             $this->faker->word(),
             $this->faker->word(),

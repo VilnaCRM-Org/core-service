@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
+use App\Shared\Application\OpenApi\Factory\IriReferenceMediaTypeDefinitionFactory;
 use App\Shared\Application\OpenApi\Processor\IriReferenceTypeProcessor;
 use App\Shared\Application\OpenApi\Resolver\IriReferenceOperationContextResolver;
 use App\Shared\Application\OpenApi\Transformer\IriReferenceContentTransformer;
@@ -42,7 +43,8 @@ final class IriReferenceTypeProcessorTest extends UnitTestCase
         $processor = new IriReferenceTypeProcessor(
             new IriReferenceContentTransformer(
                 new IriReferenceMediaTypeTransformer(
-                    new IriReferencePropertyTransformer()
+                    new IriReferencePropertyTransformer(),
+                    new IriReferenceMediaTypeDefinitionFactory()
                 )
             ),
             new IriReferenceOperationContextResolver()

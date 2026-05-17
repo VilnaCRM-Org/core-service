@@ -18,8 +18,8 @@ final class CacheRefreshMetricTest extends UnitTestCase
 {
     public function testCacheHitMetricUsesReadHitDimensions(): void
     {
-        $metric = CacheHitMetric::create('customer', 'detail', 2);
-        $defaultMetric = CacheHitMetric::create('customer', 'detail');
+        $metric = new CacheHitMetric('customer', 'detail', 2);
+        $defaultMetric = new CacheHitMetric('customer', 'detail');
 
         self::assertSame('CacheHit', $metric->name());
         self::assertSame(2, $metric->value());
@@ -33,7 +33,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
 
     public function testCacheMissMetricUsesReadMissDimensions(): void
     {
-        $metric = CacheMissMetric::create('customer', 'lookup');
+        $metric = new CacheMissMetric('customer', 'lookup');
 
         self::assertSame('CacheMiss', $metric->name());
         self::assertSame(1, $metric->value());
@@ -51,7 +51,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
         $this->assertSucceededMetricWithCustomValue();
         $this->assertFailedMetric();
         $this->assertMetric(
-            CacheRefreshStaleServedMetric::create('customer', 'detail'),
+            new CacheRefreshStaleServedMetric('customer', 'detail'),
             'CacheRefreshStaleServed',
             'read',
             'stale_served'
@@ -61,7 +61,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
     private function assertScheduledMetric(): void
     {
         $this->assertMetric(
-            CacheRefreshScheduledMetric::create('customer', 'detail', 'repository_refresh'),
+            new CacheRefreshScheduledMetric('customer', 'detail', 'repository_refresh'),
             'CacheRefreshScheduled',
             'repository_refresh',
             'scheduled'
@@ -71,7 +71,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
     private function assertSucceededMetric(): void
     {
         $this->assertMetric(
-            CacheRefreshSucceededMetric::create('customer', 'detail', 'repository_refresh'),
+            new CacheRefreshSucceededMetric('customer', 'detail', 'repository_refresh'),
             'CacheRefreshSucceeded',
             'repository_refresh',
             'succeeded'
@@ -81,7 +81,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
     private function assertSucceededMetricWithCustomValue(): void
     {
         $this->assertMetric(
-            CacheRefreshSucceededMetric::create('customer', 'detail', 'repository_refresh', 3),
+            new CacheRefreshSucceededMetric('customer', 'detail', 'repository_refresh', 3),
             'CacheRefreshSucceeded',
             'repository_refresh',
             'succeeded',
@@ -92,7 +92,7 @@ final class CacheRefreshMetricTest extends UnitTestCase
     private function assertFailedMetric(): void
     {
         $this->assertMetric(
-            CacheRefreshFailedMetric::create('customer', 'detail', 'repository_refresh'),
+            new CacheRefreshFailedMetric('customer', 'detail', 'repository_refresh'),
             'CacheRefreshFailed',
             'repository_refresh',
             'failed'

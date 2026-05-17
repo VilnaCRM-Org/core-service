@@ -15,9 +15,9 @@ final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
 {
     public function process(OpenApi $openApi): OpenApi
     {
-        $parameterDescriptions = ParameterDescriptionDictionary::descriptions();
+        $parameterDescriptions = (new ParameterDescriptionDictionary())->descriptions();
 
-        return PathsMapper::map(
+        return (new PathsMapper())->map(
             $openApi,
             fn (PathItem $pathItem): PathItem => $this
                 ->processPathItem($pathItem, $parameterDescriptions)
@@ -29,7 +29,7 @@ final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
      */
     private function processPathItem(PathItem $pathItem, array $descriptions): PathItem
     {
-        return PathItemOperationMapper::map(
+        return (new PathItemOperationMapper())->map(
             $pathItem,
             fn ($operation) => $operation->withParameters(
                 $this->processParameters($operation->getParameters(), $descriptions)
@@ -46,7 +46,7 @@ final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
     private function processParameters(array $parameters, array $descriptions): array
     {
         return array_map(
-            static fn (Parameter $parameter): Parameter => self::processParameter(
+            fn (Parameter $parameter): Parameter => $this->processParameter(
                 $parameter,
                 $descriptions
             ),
@@ -57,23 +57,23 @@ final class ParameterDescriptionProcessor implements OpenApiProcessorInterface
     /**
      * @param array<string, string> $descriptions
      */
-    private static function processParameter(Parameter $parameter, array $descriptions): Parameter
+    private function processParameter(Parameter $parameter, array $descriptions): Parameter
     {
         $paramName = $parameter->getName();
 
         return match (true) {
             ! isset($descriptions[$paramName]) => $parameter,
-            self::hasDescription($parameter) => $parameter,
+            $this->hasDescription($parameter) => $parameter,
             default => $parameter->withDescription($descriptions[$paramName]),
         };
     }
 
-    private static function hasDescription(Parameter $parameter): bool
+    private function hasDescription(Parameter $parameter): bool
     {
-        return ! self::isDescriptionEmpty($parameter->getDescription());
+        return ! $this->isDescriptionEmpty($parameter->getDescription());
     }
 
-    private static function isDescriptionEmpty(?string $description): bool
+    private function isDescriptionEmpty(?string $description): bool
     {
         return $description === null || $description === '';
     }

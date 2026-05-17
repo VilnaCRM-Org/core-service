@@ -16,12 +16,12 @@ final class ConstraintViolationPropertiesExtractor
      *
      * @return array<string, SchemaValue>|null
      */
-    public static function extract(array $constraintViolation): ?array
+    public function extract(array $constraintViolation): ?array
     {
-        $items = self::normalizedItems($constraintViolation);
+        $items = $this->normalizedItems($constraintViolation);
 
         return array_key_exists('properties', $items)
-            ? SchemaNormalizer::normalize($items['properties'])
+            ? (new SchemaNormalizer())->normalize($items['properties'])
             : null;
     }
 
@@ -30,12 +30,12 @@ final class ConstraintViolationPropertiesExtractor
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedItems(array $constraintViolation): array
+    private function normalizedItems(array $constraintViolation): array
     {
-        $properties = self::normalizedSchemaValue($constraintViolation, 'properties');
-        $violations = self::normalizedSchemaValue($properties, 'violations');
+        $properties = $this->normalizedSchemaValue($constraintViolation, 'properties');
+        $violations = $this->normalizedSchemaValue($properties, 'violations');
 
-        return self::normalizedSchemaValue($violations, 'items');
+        return $this->normalizedSchemaValue($violations, 'items');
     }
 
     /**
@@ -43,10 +43,10 @@ final class ConstraintViolationPropertiesExtractor
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedSchemaValue(array $schema, string $key): array
+    private function normalizedSchemaValue(array $schema, string $key): array
     {
         return match (true) {
-            array_key_exists($key, $schema) => SchemaNormalizer::normalize($schema[$key]),
+            array_key_exists($key, $schema) => (new SchemaNormalizer())->normalize($schema[$key]),
             default => [],
         };
     }

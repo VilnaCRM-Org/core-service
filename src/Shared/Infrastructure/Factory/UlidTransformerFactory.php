@@ -12,7 +12,7 @@ use App\Shared\Infrastructure\Validator\UlidValidator;
 
 final class UlidTransformerFactory
 {
-    public static function create(): UlidTransformer
+    public function create(): UlidTransformer
     {
         $ulidFactory = new UlidFactory();
 

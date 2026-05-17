@@ -55,7 +55,12 @@ VilnaCRM Core Service is a PHP 8.4+ microservice built with Symfony 7, API Platf
    - Use a login shell (`bash -l`) before auth-dependent checks when the workspace was just created
    - Avoid non-login shells immediately after bootstrap because `~/.config/core-service/agent-secrets.env` is sourced from `~/.bashrc` and `~/.profile`
 
-4. **Optional: Use BMALPH When Needed**
+4. **CRITICAL: Do Not Add Static Methods**
+   - Static method declarations in project PHP files are forbidden
+   - Use injected services, listeners, factories, or regular value objects instead
+   - `make psalm` runs `make forbid-static-methods` first and fails on any declaration
+
+5. **Optional: Use BMALPH When Needed**
    - Coder CE bootstrap installs `bmalph` automatically for Codex and Claude-oriented workflows
    - For local setup, run `make bmalph-codex` or `make bmalph-claude`
    - To preview BMALPH repo initialization safely, use `make bmalph-init BMALPH_PLATFORM=codex BMALPH_DRY_RUN=true` or `make bmalph-init BMALPH_PLATFORM=claude-code BMALPH_DRY_RUN=true`
@@ -110,6 +115,7 @@ This project enforces **strict quality thresholds** that MUST NOT be lowered:
 |                  | `make sh`                    | Access PHP container    | -                          |
 |                  | `make build`                 | Build containers        | -                          |
 | **Quality**      | `make phpcsfixer`            | Fix code style          | -                          |
+|                  | `make forbid-static-methods` | Block static methods    | `code-organization`        |
 |                  | `make psalm`                 | Static analysis         | -                          |
 |                  | `make phpinsights`           | Quality checks          | `complexity-management`    |
 |                  | `make deptrac`               | Architecture validation | `deptrac-fixer`            |

@@ -8,6 +8,8 @@ use App\Tests\Support\Memory\TrackedRequestHolder;
 use App\Tests\Support\Memory\TrackedRequestSubscriber;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -15,12 +17,15 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class TrackedRequestSubscriberTest extends TestCase
 {
-    public function testGetSubscribedEventsRegistersKernelRequestHandler(): void
+    public function testAttributeRegistersKernelRequestHandler(): void
     {
-        self::assertSame(
-            [KernelEvents::REQUEST => 'onKernelRequest'],
-            TrackedRequestSubscriber::getSubscribedEvents()
-        );
+        $attributes = (new ReflectionClass(TrackedRequestSubscriber::class))
+            ->getAttributes(AsEventListener::class);
+
+        self::assertCount(1, $attributes);
+        $listener = $attributes[0]->newInstance();
+        self::assertSame(KernelEvents::REQUEST, $listener->event);
+        self::assertSame('onKernelRequest', $listener->method);
     }
 
     public function testOnKernelRequestIgnoresSubRequests(): void

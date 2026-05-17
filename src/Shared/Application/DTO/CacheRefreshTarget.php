@@ -6,21 +6,12 @@ namespace App\Shared\Application\DTO;
 
 final readonly class CacheRefreshTarget
 {
-    private function __construct(
+    public function __construct(
         private string $context,
         private string $family,
         private string $identifierName,
         private string $identifierValue
     ) {
-    }
-
-    public static function create(
-        string $context,
-        string $family,
-        string $identifierName,
-        string $identifierValue
-    ): self {
-        return new self($context, $family, $identifierName, $identifierValue);
     }
 
     public function context(): string

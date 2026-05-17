@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Application\OpenApi\ValueObject;
 
 use App\Shared\Application\OpenApi\ValueObject\Parameter;
+use App\Shared\Application\OpenApi\ValueObject\Requirement;
 use App\Tests\Unit\UnitTestCase;
 
 final class ParameterTest extends UnitTestCase
@@ -28,7 +29,7 @@ final class ParameterTest extends UnitTestCase
         $type = $this->faker->word();
         $example = $this->faker->word();
 
-        $parameter = Parameter::required($name, $type, $example);
+        $parameter = new Parameter($name, $type, $example);
 
         $this->assertEquals($name, $parameter->name);
         $this->assertEquals($type, $parameter->type);
@@ -42,7 +43,7 @@ final class ParameterTest extends UnitTestCase
         $type = $this->faker->word();
         $example = $this->faker->word();
 
-        $parameter = Parameter::optional($name, $type, $example);
+        $parameter = new Parameter($name, $type, $example, requirement: Requirement::OPTIONAL);
 
         $this->assertEquals($name, $parameter->name);
         $this->assertEquals($type, $parameter->type);

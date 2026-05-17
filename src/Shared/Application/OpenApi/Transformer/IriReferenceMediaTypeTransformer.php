@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\OpenApi\Transformer;
 
-use App\Shared\Application\OpenApi\ValueObject\IriReferenceMediaTypeDefinition;
+use App\Shared\Application\OpenApi\Factory\IriReferenceMediaTypeDefinitionFactory;
 
 use function is_array;
 
 final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTransformerInterface
 {
     public function __construct(
-        private readonly IriReferencePropertyTransformerInterface $propertyTransformer
+        private readonly IriReferencePropertyTransformerInterface $propertyTransformer,
+        private readonly IriReferenceMediaTypeDefinitionFactory $definitionFactory
     ) {
     }
 
@@ -22,7 +23,7 @@ final class IriReferenceMediaTypeTransformer implements IriReferenceMediaTypeTra
      */
     public function transform(array $mediaType): array
     {
-        $definition = IriReferenceMediaTypeDefinition::from($mediaType);
+        $definition = $this->definitionFactory->create($mediaType);
 
         return $definition?->transformMediaType($this->transformProperty(...))
             ?? $mediaType;

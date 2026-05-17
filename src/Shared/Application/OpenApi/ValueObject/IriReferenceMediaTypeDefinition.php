@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi\ValueObject;
 
 use function array_map;
-use function is_array;
 
 /**
  * @internal Extracts and mutates media type definitions without increasing transformer complexity.
@@ -16,21 +15,10 @@ final class IriReferenceMediaTypeDefinition
      * @param array<string, scalar|array<string, scalar|null>> $mediaType
      * @param array<string, scalar|array<string, scalar|null>> $properties
      */
-    private function __construct(
+    public function __construct(
         private readonly array $mediaType,
         private readonly array $properties
     ) {
-    }
-
-    /**
-     * @param array<string, scalar|array<string, scalar|null>> $mediaType
-     */
-    public static function from(array $mediaType): ?self
-    {
-        $properties = $mediaType['schema']['properties'] ?? null;
-
-        /** @psalm-suppress NoValue */
-        return is_array($properties) ? new self($mediaType, $properties) : null;
     }
 
     /**

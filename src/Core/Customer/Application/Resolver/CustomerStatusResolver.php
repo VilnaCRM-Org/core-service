@@ -45,7 +45,7 @@ final readonly class CustomerStatusResolver
         try {
             return $this->iriConverter->getResourceFromIri($iri, $context, $operation);
         } catch (ItemNotFoundException) {
-            throw CustomerStatusNotFoundException::withIri($iri);
+            throw new CustomerStatusNotFoundException($iri);
         }
     }
 
@@ -57,7 +57,7 @@ final readonly class CustomerStatusResolver
     private function requireResolvedIri(string $iri): string
     {
         return match ($iri) {
-            '' => throw new CustomerStatusNotFoundException(),
+            '' => throw new CustomerStatusNotFoundException('unknown'),
             default => $iri,
         };
     }
@@ -66,7 +66,7 @@ final readonly class CustomerStatusResolver
     {
         return match (true) {
             $resource instanceof CustomerStatus => $resource,
-            default => throw CustomerStatusNotFoundException::withIri($iri),
+            default => throw new CustomerStatusNotFoundException($iri),
         };
     }
 

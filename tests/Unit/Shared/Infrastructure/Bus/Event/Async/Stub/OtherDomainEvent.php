@@ -19,28 +19,7 @@ final class OtherDomainEvent extends DomainEvent
         parent::__construct($eventId, $occurredOn);
     }
 
-    /**
-     * @param array<string, mixed> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        if (! isset($body['data']) || ! is_scalar($body['data'])) {
-            throw new \InvalidArgumentException(
-                'Missing or invalid "data" field in event body'
-            );
-        }
-
-        return new self(
-            data: (string) $body['data'],
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'test.other_domain_event';
     }

@@ -16,7 +16,7 @@ final class FailingCacheRefreshPolicyResolver implements CacheRefreshPolicyResol
     {
         ++$this->calls;
 
-        throw UnsupportedCacheRefreshPolicyException::forContext($context);
+        throw new UnsupportedCacheRefreshPolicyException($context);
     }
 
     public function calls(): int

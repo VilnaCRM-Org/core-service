@@ -44,7 +44,7 @@ final class OpenApiInputContractProcessor implements OpenApiProcessorInterface
     {
         $openApi = $this->schemaUpdater->update($openApi);
 
-        return PathsMapper::map(
+        return (new PathsMapper())->map(
             $openApi,
             fn (PathItem $pathItem, string $path): PathItem => \is_array(
                 self::INPUT_REQUEST_BODY_SCHEMA_REFS[$path] ?? null

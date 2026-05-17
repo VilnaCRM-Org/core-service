@@ -23,9 +23,9 @@ final class OpenApiArrayContentSchemaUpdater
      */
     public function update(?array $definition): ?array
     {
-        $normalizedDefinition = SchemaNormalizer::normalize($definition);
+        $normalizedDefinition = (new SchemaNormalizer())->normalize($definition);
         $schema = $this->schemaValue($normalizedDefinition);
-        $normalizedSchema = SchemaNormalizer::normalize($schema);
+        $normalizedSchema = (new SchemaNormalizer())->normalize($schema);
         $updatedSchema = $this->hydraCollectionSchemaFixer->fixSchema($normalizedSchema);
 
         return match (true) {

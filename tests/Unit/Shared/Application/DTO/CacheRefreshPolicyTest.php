@@ -11,7 +11,7 @@ final class CacheRefreshPolicyTest extends UnitTestCase
 {
     public function testCreateKeepsPolicyPayload(): void
     {
-        $policy = CacheRefreshPolicy::create(
+        $policy = new CacheRefreshPolicy(
             'customer',
             'detail',
             600,

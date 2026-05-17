@@ -93,7 +93,7 @@ final readonly class CustomerCreatedCacheInvalidationSubscriber implements
 
         return $this->handleSharedInvalidationResult(
             $event,
-            $invalidationHandler->tryHandle(CacheInvalidationCommand::create(
+            $invalidationHandler->tryHandle(new CacheInvalidationCommand(
                 CustomerCachePolicyCollection::CONTEXT,
                 'domain_event',
                 'created',
@@ -134,7 +134,7 @@ final readonly class CustomerCreatedCacheInvalidationSubscriber implements
             $event->customerEmail()
         );
 
-        return CacheInvalidationTagSet::create(...iterator_to_array($tags));
+        return new CacheInvalidationTagSet(...iterator_to_array($tags));
     }
 
     private function invalidateDirectly(CustomerCreatedEvent $event): void

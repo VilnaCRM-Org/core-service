@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Shared\Infrastructure\Bus\Event\Async;
 
 use App\Shared\Application\Observability\Metric\EventSubscriberFailureMetric;
+use App\Shared\Domain\Bus\Event\DomainEvent;
 use App\Shared\Infrastructure\Bus\Event\Async\DomainEventEnvelope;
+use App\Shared\Infrastructure\Bus\Event\Async\DomainEventFactory;
 use App\Shared\Infrastructure\Bus\Event\Async\DomainEventMessageHandler;
 use App\Shared\Infrastructure\Observability\Factory\EventSubscriberFailureMetricFactory;
 use App\Shared\Infrastructure\Observability\Factory\MetricDimensionsFactory;
@@ -34,11 +36,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler($envelope);
 
@@ -53,12 +56,13 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         // Create envelope with OtherDomainEvent which TestDomainEventSubscriber doesn't subscribe to
         $otherEvent = new Stub\OtherDomainEvent('some-data', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($otherEvent);
+        $envelope = $this->envelopeFrom($otherEvent);
 
         $handler($envelope);
 
@@ -77,11 +81,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$failingSubscriber, $successSubscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         // Should not throw
         $handler($envelope);
@@ -100,11 +105,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler($envelope);
 
@@ -123,11 +129,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         // Should not throw
         $handler($envelope);
@@ -143,11 +150,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber1, $subscriber2],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler($envelope);
 
@@ -166,11 +174,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber1, $subscriber2],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler($envelope);
 
@@ -188,11 +197,12 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$subscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         // Should not throw even when metric emission fails
         $handler($envelope);
@@ -213,20 +223,21 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             });
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler = new DomainEventMessageHandler(
             [$subscriber],
             $logger,
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $handler($envelope);
 
         self::assertSame($event->eventId(), $capturedContext['event_id']);
         self::assertSame(TestDomainEvent::class, $capturedContext['event_type']);
-        self::assertSame(TestDomainEvent::eventName(), $capturedContext['event_name']);
+        self::assertSame($event->eventName(), $capturedContext['event_name']);
     }
 
     public function testContinuesToNextSubscriberWhenFirstDoesNotMatch(): void
@@ -240,12 +251,13 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             [$nonMatchingSubscriber, $matchingSubscriber],
             new NullLogger(),
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         // Send TestDomainEvent - first subscriber doesn't match, second does
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler($envelope);
 
@@ -269,13 +281,14 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
             });
 
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler = new DomainEventMessageHandler(
             [$subscriber],
             $logger,
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $handler($envelope);
@@ -298,13 +311,14 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
                 }
             });
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler = new DomainEventMessageHandler(
             [$subscriber],
             $logger,
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $handler($envelope);
@@ -312,7 +326,7 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
         self::assertSame(TestDomainEventSubscriber::class, $capturedContext['subscriber']);
         self::assertSame($event->eventId(), $capturedContext['event_id']);
         self::assertSame(TestDomainEvent::class, $capturedContext['event_type']);
-        self::assertSame(TestDomainEvent::eventName(), $capturedContext['event_name']);
+        self::assertSame($event->eventName(), $capturedContext['event_name']);
         self::assertSame('Subscriber failed', $capturedContext['error']);
         self::assertSame(\RuntimeException::class, $capturedContext['exception_class']);
     }
@@ -332,18 +346,29 @@ final class DomainEventMessageHandlerTest extends UnitTestCase
                 }
             });
         $event = new TestDomainEvent('aggregate-123', 'event-456');
-        $envelope = DomainEventEnvelope::fromEvent($event);
+        $envelope = $this->envelopeFrom($event);
 
         $handler = new DomainEventMessageHandler(
             [$subscriber],
             $logger,
             $this->metricsEmitter,
-            $this->metricFactory
+            $this->metricFactory,
+            new DomainEventFactory()
         );
 
         $handler($envelope);
 
         self::assertArrayHasKey('error', $capturedContext);
         self::assertSame('Metric emission failed', $capturedContext['error']);
+    }
+
+    private function envelopeFrom(DomainEvent $event): DomainEventEnvelope
+    {
+        return new DomainEventEnvelope(
+            $event::class,
+            $event->toPrimitives(),
+            $event->eventId(),
+            $event->occurredOn()
+        );
     }
 }

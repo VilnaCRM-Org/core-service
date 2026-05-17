@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Shared\Application\CommandHandler\Stub;
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\CommandHandler\CacheRefreshCommandHandlerBase;
 use App\Shared\Application\DTO\CacheRefreshResult;
+use App\Shared\Application\Factory\CacheRefreshResultFactory;
 
 final class RecordingRefreshHandler extends CacheRefreshCommandHandlerBase
 {
@@ -17,6 +18,7 @@ final class RecordingRefreshHandler extends CacheRefreshCommandHandlerBase
         private readonly string $context,
         private readonly bool $refreshed
     ) {
+        parent::__construct(new CacheRefreshResultFactory());
     }
 
     public function context(): string
@@ -40,18 +42,9 @@ final class RecordingRefreshHandler extends CacheRefreshCommandHandlerBase
         $this->lastCommand = $command;
 
         if (! $this->refreshed) {
-            return CacheRefreshResult::skipped(
-                $command->context(),
-                $command->family(),
-                $command->dedupeKey(),
-                'not_needed'
-            );
+            return $this->skipped($command, 'not_needed');
         }
 
-        return CacheRefreshResult::success(
-            $command->context(),
-            $command->family(),
-            $command->dedupeKey()
-        );
+        return $this->succeeded($command);
     }
 }

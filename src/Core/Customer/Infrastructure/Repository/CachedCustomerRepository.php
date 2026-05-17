@@ -525,12 +525,12 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
         CacheInvalidationCommandHandler $invalidationHandler,
         array $tags
     ): bool {
-        return $invalidationHandler->tryHandle(CacheInvalidationCommand::create(
+        return $invalidationHandler->tryHandle(new CacheInvalidationCommand(
             CustomerCachePolicyCollection::CONTEXT,
             'repository_fallback',
             'deleted',
-            CacheInvalidationTagSet::create(...$tags),
-            CacheRefreshCommandCollection::create()
+            new CacheInvalidationTagSet(...$tags),
+            new CacheRefreshCommandCollection()
         ));
     }
 }

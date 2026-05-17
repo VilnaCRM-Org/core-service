@@ -11,7 +11,13 @@ final class CacheRefreshResultTest extends UnitTestCase
 {
     public function testSuccessKeepsResultPayload(): void
     {
-        $result = CacheRefreshResult::success('customer', 'detail', 'dedupe-1');
+        $result = new CacheRefreshResult(
+            'customer',
+            'detail',
+            'dedupe-1',
+            true,
+            'refreshed'
+        );
 
         self::assertSame('customer', $result->context());
         self::assertSame('detail', $result->family());
@@ -22,10 +28,11 @@ final class CacheRefreshResultTest extends UnitTestCase
 
     public function testSkippedKeepsReason(): void
     {
-        $result = CacheRefreshResult::skipped(
+        $result = new CacheRefreshResult(
             'customer',
             'lookup',
             'dedupe-2',
+            false,
             'cache_unavailable'
         );
 

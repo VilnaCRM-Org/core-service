@@ -13,7 +13,7 @@ final class RetryStrategyMetricTest extends UnitTestCase
 {
     public function testRetryAttemptMetricUsesRetryDimensions(): void
     {
-        $metric = RetryAttemptMetric::create(
+        $metric = new RetryAttemptMetric(
             'App\Message\DomainEventEnvelope',
             'RuntimeException'
         );
@@ -35,7 +35,7 @@ final class RetryStrategyMetricTest extends UnitTestCase
 
     public function testDlqRoutingMetricUsesDlqDimensions(): void
     {
-        $metric = DlqRoutingMetric::create(
+        $metric = new DlqRoutingMetric(
             'App\Message\DomainEventEnvelope',
             'TypeError',
             2

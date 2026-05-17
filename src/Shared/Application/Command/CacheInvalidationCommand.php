@@ -10,31 +10,19 @@ use App\Shared\Infrastructure\Collection\CacheRefreshCommandCollection;
 
 final readonly class CacheInvalidationCommand implements CommandInterface
 {
-    private function __construct(
+    private string $dedupeKey;
+
+    public function __construct(
         private string $context,
         private string $source,
         private string $operation,
-        private string $dedupeKey,
         private CacheInvalidationTagSet $tags,
-        private CacheRefreshCommandCollection $refreshCommands
+        private CacheRefreshCommandCollection $refreshCommands,
+        string $dedupeKey = ''
     ) {
-    }
-
-    public static function create(
-        string $context,
-        string $source,
-        string $operation,
-        CacheInvalidationTagSet $tags,
-        CacheRefreshCommandCollection $refreshCommands
-    ): self {
-        return new self(
-            $context,
-            $source,
-            $operation,
-            self::buildDedupeKey($context, $source, $operation, $tags),
-            $tags,
-            $refreshCommands
-        );
+        $this->dedupeKey = $dedupeKey !== ''
+            ? $dedupeKey
+            : $this->buildDedupeKey($context, $source, $operation, $tags);
     }
 
     public function context(): string
@@ -67,7 +55,7 @@ final readonly class CacheInvalidationCommand implements CommandInterface
         return $this->refreshCommands;
     }
 
-    private static function buildDedupeKey(
+    private function buildDedupeKey(
         string $context,
         string $source,
         string $operation,

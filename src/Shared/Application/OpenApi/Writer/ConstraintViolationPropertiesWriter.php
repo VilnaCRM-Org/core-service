@@ -18,12 +18,13 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    public static function write(array $constraintViolation, array $properties): array
+    public function write(array $constraintViolation, array $properties): array
     {
-        $constraintViolation = SchemaNormalizer::normalize($constraintViolation);
-        $rootProperties = self::normalizedRootProperties($constraintViolation);
-        $violations = self::normalizedViolations($rootProperties);
-        $items = SchemaNormalizer::normalize($violations['items'] ?? null);
+        $schemaNormalizer = new SchemaNormalizer();
+        $constraintViolation = $schemaNormalizer->normalize($constraintViolation);
+        $rootProperties = $this->normalizedRootProperties($constraintViolation);
+        $violations = $this->normalizedViolations($rootProperties);
+        $items = $schemaNormalizer->normalize($violations['items'] ?? null);
         $items['properties'] = $properties;
         $violations['items'] = $items;
         $rootProperties['violations'] = $violations;
@@ -37,9 +38,9 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedRootProperties(array $constraintViolation): array
+    private function normalizedRootProperties(array $constraintViolation): array
     {
-        return SchemaNormalizer::normalize($constraintViolation['properties'] ?? null);
+        return (new SchemaNormalizer())->normalize($constraintViolation['properties'] ?? null);
     }
 
     /**
@@ -47,8 +48,8 @@ final class ConstraintViolationPropertiesWriter
      *
      * @return array<string, SchemaValue>
      */
-    private static function normalizedViolations(array $rootProperties): array
+    private function normalizedViolations(array $rootProperties): array
     {
-        return SchemaNormalizer::normalize($rootProperties['violations'] ?? null);
+        return (new SchemaNormalizer())->normalize($rootProperties['violations'] ?? null);
     }
 }

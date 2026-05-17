@@ -60,7 +60,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
         CacheChangeSet $changeSet
     ): CacheInvalidationTagSet {
         if (! $document instanceof Customer) {
-            return CacheInvalidationTagSet::create(
+            return new CacheInvalidationTagSet(
                 'customer',
                 'customer.collection',
                 'customer.reference'
@@ -73,7 +73,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
             previousEmail: $this->previousEmailFromChangeSet($changeSet)
         );
 
-        return CacheInvalidationTagSet::create(...iterator_to_array($tags));
+        return new CacheInvalidationTagSet(...iterator_to_array($tags));
     }
 
     public function resolveRefreshCommands(
@@ -82,7 +82,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
         CacheChangeSet $changeSet
     ): CacheRefreshCommandCollection {
         if (! $document instanceof Customer) {
-            return CacheRefreshCommandCollection::create();
+            return new CacheRefreshCommandCollection();
         }
 
         return $this->resolveCustomerRefreshCommands(
@@ -194,7 +194,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
             $this->detailRefreshCommand($customerId, $metadata),
         ];
 
-        return CacheRefreshCommandCollection::create(
+        return new CacheRefreshCommandCollection(
             ...$this->withLookupRefreshCommand(
                 $commands,
                 $currentEmail,
@@ -299,7 +299,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
         string $customerId,
         array $metadata
     ): CacheRefreshCommand {
-        return CacheRefreshCommand::create(
+        return new CacheRefreshCommand(
             CustomerCachePolicyCollection::CONTEXT,
             CustomerCachePolicyCollection::FAMILY_DETAIL,
             'customer_id',
@@ -323,7 +323,7 @@ final readonly class CustomerCacheInvalidationTagResolver implements
         array $metadata
     ): array {
         if ($currentEmail !== '') {
-            $commands[] = CacheRefreshCommand::create(
+            $commands[] = new CacheRefreshCommand(
                 CustomerCachePolicyCollection::CONTEXT,
                 CustomerCachePolicyCollection::FAMILY_LOOKUP,
                 'email',

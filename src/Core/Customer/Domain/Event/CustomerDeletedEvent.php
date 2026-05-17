@@ -26,23 +26,7 @@ final class CustomerDeletedEvent extends DomainEvent
         );
     }
 
-    /**
-     * @param array<string, string> $body
-     */
-    public static function fromPrimitives(
-        array $body,
-        string $eventId,
-        string $occurredOn
-    ): self {
-        return new self(
-            customerId: $body['customer_id'],
-            customerEmail: $body['customer_email'],
-            eventId: $eventId,
-            occurredOn: $occurredOn
-        );
-    }
-
-    public static function eventName(): string
+    public function eventName(): string
     {
         return 'customer.deleted';
     }

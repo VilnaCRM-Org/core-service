@@ -8,6 +8,7 @@ use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\DTO\CacheChangeSet;
 use App\Shared\Application\DTO\CacheFieldChange;
 use App\Shared\Application\DTO\CacheInvalidationRule;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Shared\Infrastructure\Resolver\CacheInvalidationTagResolver;
 use App\Tests\Unit\Shared\Infrastructure\Resolver\Stub as ResolverStub;
 use App\Tests\Unit\UnitTestCase;
@@ -18,12 +19,12 @@ final class CacheInvalidationTagResolverTest extends UnitTestCase
     {
         $resolver = new CacheInvalidationTagResolver([
             new ResolverStub\UnsupportedDocumentCacheInvalidationResolver(),
-        ]);
+        ], new CacheInvalidationCommandFactory());
 
         self::assertNull($resolver->resolveForDocumentChange(
             new ResolverStub\CacheResolverTestDocument((string) $this->faker->ulid()),
             CacheInvalidationRule::OPERATION_UPDATED,
-            CacheChangeSet::empty()
+            new CacheChangeSet()
         ));
     }
 
@@ -35,14 +36,14 @@ final class CacheInvalidationTagResolverTest extends UnitTestCase
         $oldStatus = 'old-status';
         $newStatus = 'new-status';
         $operation = CacheInvalidationRule::OPERATION_UPDATED;
-        $changeSet = CacheChangeSet::create(
-            CacheFieldChange::create('status', $oldStatus, $newStatus)
+        $changeSet = new CacheChangeSet(
+            new CacheFieldChange('status', $oldStatus, $newStatus)
         );
         $supportingResolver = new ResolverStub\ChangedFieldDocumentCacheInvalidationResolver();
         $resolver = new CacheInvalidationTagResolver([
             new ResolverStub\UnsupportedDocumentCacheInvalidationResolver(),
             $supportingResolver,
-        ]);
+        ], new CacheInvalidationCommandFactory());
 
         $command = $resolver->resolveForDocumentChange($document, $operation, $changeSet);
 

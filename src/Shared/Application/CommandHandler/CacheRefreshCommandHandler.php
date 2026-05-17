@@ -6,8 +6,7 @@ namespace App\Shared\Application\CommandHandler;
 
 use App\Shared\Application\Command\CacheRefreshCommand;
 use App\Shared\Application\Observability\Emitter\BusinessMetricsEmitterInterface;
-use App\Shared\Application\Observability\Metric\CacheRefreshFailedMetric;
-use App\Shared\Application\Observability\Metric\CacheRefreshSucceededMetric;
+use App\Shared\Application\Observability\Factory\CacheRefreshMetricFactory;
 use App\Shared\Application\Resolver\CachePoolResolverInterface;
 use App\Shared\Application\Resolver\CacheRefreshCommandHandlerResolverInterface;
 use Psr\Log\LoggerInterface;
@@ -26,7 +25,8 @@ final readonly class CacheRefreshCommandHandler
         private CacheRefreshCommandHandlerResolverInterface $resolver,
         private CachePoolResolverInterface $cachePoolResolver,
         private LoggerInterface $logger,
-        private BusinessMetricsEmitterInterface $metricsEmitter
+        private BusinessMetricsEmitterInterface $metricsEmitter,
+        private CacheRefreshMetricFactory $metricFactory
     ) {
     }
 
@@ -59,11 +59,7 @@ final readonly class CacheRefreshCommandHandler
 
     private function emitRefreshSucceeded(CacheRefreshCommand $command): void
     {
-        $this->metricsEmitter->emit(CacheRefreshSucceededMetric::create(
-            $command->context(),
-            $command->family(),
-            $command->refreshSource()
-        ));
+        $this->metricsEmitter->emit($this->metricFactory->succeeded($command));
     }
 
     private function handleRefreshFailure(
@@ -89,11 +85,7 @@ final readonly class CacheRefreshCommandHandler
 
     private function emitRefreshFailed(CacheRefreshCommand $command): void
     {
-        $this->metricsEmitter->emit(CacheRefreshFailedMetric::create(
-            $command->context(),
-            $command->family(),
-            $command->refreshSource()
-        ));
+        $this->metricsEmitter->emit($this->metricFactory->failed($command));
     }
 
     private function claimDedupeMarker(CacheRefreshCommand $command): bool

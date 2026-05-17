@@ -68,9 +68,8 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
         $this->assertSame($customerType, $result);
     }
 
-    public function testProcessPreservesExistingValueWhenNewValueIsEmpty(): void
+    public function testProcessSkipsDispatchForBlankValuePatchPayload(): void
     {
-        $existingValue = $this->faker->word();
         $dto = $this->createDtoWithEmptyValue();
         $operation = $this->createMock(Operation::class);
         $ulid = (string) $this->faker->ulid();
@@ -79,15 +78,28 @@ final class CustomerTypePatchProcessorTest extends UnitTestCase
 
         $this->setupRepository($customerType, $ulidMock);
         $this->setupUlidFactory($ulid, $ulidMock);
-        $this->setupCustomerType($customerType, $existingValue);
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
 
-        // When value is empty string, no command should be dispatched (proper PATCH semantics)
-        $this->commandBus
-            ->expects($this->never())
-            ->method('dispatch');
+        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
 
-        $result = $this->processor
-            ->process($dto, $operation, ['ulid' => $ulid]);
+        $this->assertSame($customerType, $result);
+    }
+
+    public function testProcessSkipsDispatchForNullValuePatchPayload(): void
+    {
+        $dto = new TypePatch(value: null, id: null);
+        $operation = $this->createMock(Operation::class);
+        $ulid = (string) $this->faker->ulid();
+        $customerType = $this->createMock(CustomerType::class);
+        $ulidMock = $this->createMock(Ulid::class);
+
+        $this->setupRepository($customerType, $ulidMock);
+        $this->setupUlidFactory($ulid, $ulidMock);
+        $this->factory->expects($this->never())->method('create');
+        $this->commandBus->expects($this->never())->method('dispatch');
+
+        $result = $this->processor->process($dto, $operation, ['ulid' => $ulid]);
 
         $this->assertSame($customerType, $result);
     }

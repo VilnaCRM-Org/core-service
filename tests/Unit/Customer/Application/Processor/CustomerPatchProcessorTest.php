@@ -84,22 +84,6 @@ final class CustomerPatchProcessorTest extends UnitTestCase
         $this->assertSame($customer, $result);
     }
 
-    public function testProcessPreservesExistingValuesWhenNull(): void
-    {
-        $dto = $this->createEmptyDto();
-        $exData = [
-            'initials' => 'Original Name',
-            'email' => 'original@example.com',
-            'phone' => '+123456789',
-            'leadSource' => 'Original Source',
-            'confirmed' => true,
-        ];
-        [$dto, $operation, $uriVars, $customer] = $this
-            ->prepareProcessPreserveData($dto, $exData);
-        $result = $this->processor->process($dto, $operation, $uriVars);
-        $this->assertSame($customer, $result);
-    }
-
     public function testProcessWithPartialData(): void
     {
         $partial = new CustomerPatch(
@@ -316,20 +300,6 @@ final class CustomerPatchProcessorTest extends UnitTestCase
             type: '/api/customer_types/' . $this->faker->ulid(),
             status: '/api/customer_statuses/' . $this->faker->ulid(),
             confirmed: $this->faker->boolean(),
-        );
-    }
-
-    private function createEmptyDto(): CustomerPatch
-    {
-        return new CustomerPatch(
-            id: null,
-            initials: null,
-            email: null,
-            phone: null,
-            leadSource: null,
-            type: null,
-            status: null,
-            confirmed: null,
         );
     }
 

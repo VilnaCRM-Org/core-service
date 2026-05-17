@@ -7,7 +7,9 @@ namespace App\Tests\Integration\Internal\HealthCheck\Application\EventSub;
 use App\Internal\HealthCheck\Application\EventSub\CacheCheckSubscriber;
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use App\Tests\Integration\BaseApiCase;
+use ReflectionClass;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Cache\CacheInterface;
 
 final class CacheCheckSubscriberTest extends BaseApiCase
@@ -56,14 +58,14 @@ final class CacheCheckSubscriberTest extends BaseApiCase
         );
     }
 
-    public function testGetSubscribedEvents(): void
+    public function testRegistersHealthCheckListenerAttribute(): void
     {
-        $exp = [HealthCheckEvent::class => 'onHealthCheck'];
-        $this->assertEquals(
-            $exp,
-            CacheCheckSubscriber::getSubscribedEvents(),
-            'Events array should bind HealthCheckEvent to onHealthCheck.'
-        );
+        $listener = (new ReflectionClass(CacheCheckSubscriber::class))
+            ->getAttributes(AsEventListener::class)[0]
+            ->newInstance();
+
+        $this->assertSame(HealthCheckEvent::class, $listener->event);
+        $this->assertSame('onHealthCheck', $listener->method);
     }
 
     private function getHealthCheckCacheValue(): string

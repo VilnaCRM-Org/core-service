@@ -12,6 +12,7 @@ use App\Core\Customer\Domain\Event\CustomerTypeUpdatedEvent;
 use App\Core\Customer\Infrastructure\Collection\CustomerCacheInvalidationRuleCollection;
 use App\Shared\Application\Command\CacheInvalidationCommand;
 use App\Shared\Application\CommandHandler\CacheInvalidationCommandHandler;
+use App\Shared\Application\Factory\CacheInvalidationCommandFactory;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
@@ -28,7 +29,8 @@ final class CustomerReferenceCacheInvalidationSubscriberTest extends UnitTestCas
         $this->handler = $this->createMock(CacheInvalidationCommandHandler::class);
         $this->subscriber = new CustomerReferenceCacheInvalidationSubscriber(
             $this->handler,
-            $this->createMock(LoggerInterface::class)
+            $this->createMock(LoggerInterface::class),
+            new CacheInvalidationCommandFactory()
         );
     }
 
@@ -48,7 +50,7 @@ final class CustomerReferenceCacheInvalidationSubscriberTest extends UnitTestCas
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(
-                self::assertInvalidationCommand(
+                $this->assertInvalidationCommand(
                     CustomerCacheInvalidationRuleCollection::OPERATION_CREATED
                 )
             ));
@@ -64,7 +66,7 @@ final class CustomerReferenceCacheInvalidationSubscriberTest extends UnitTestCas
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(
-                self::assertInvalidationCommand(
+                $this->assertInvalidationCommand(
                     CustomerCacheInvalidationRuleCollection::OPERATION_UPDATED
                 )
             ));
@@ -74,7 +76,7 @@ final class CustomerReferenceCacheInvalidationSubscriberTest extends UnitTestCas
         );
     }
 
-    private static function assertInvalidationCommand(string $operation): callable
+    private function assertInvalidationCommand(string $operation): callable
     {
         return static function (CacheInvalidationCommand $command) use ($operation): bool {
             return $command->context() === 'customer'
