@@ -13,17 +13,24 @@ jobs:
       contents: read
 
     steps:
+      - name: Dependabot skip
+        if: contains(toLower(github.actor), 'dependabot')
+        run: echo "Skipping Schemathesis validation for Dependabot PR"
+
       - name: Checkout Repository
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         uses: actions/checkout@v4
 
       - name: Start Application
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         run: make start
 
       - name: Run Schemathesis Validation
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         run: make schemathesis-validate
 
       - name: Upload Schemathesis Report
-        if: always()
+        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
         uses: actions/upload-artifact@v4
         with:
           name: schemathesis-report
@@ -31,5 +38,5 @@ jobs:
           if-no-files-found: ignore
 
       - name: Stop Application
-        if: always()
+        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
         run: make down
