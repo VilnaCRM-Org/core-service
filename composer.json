@@ -11,7 +11,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-mbstring": "*",
-    "ext-mongodb": "^2.1",
+    "ext-mongodb": "^2.3",
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "4.3.*",
@@ -55,7 +55,7 @@
     "sort-packages": true,
     "platform": {
       "php": "8.4.3",
-      "ext-mongodb": "2.1.8"
+      "ext-mongodb": "2.3.0"
     }
   },
   "autoload": {

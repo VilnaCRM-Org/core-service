@@ -25,7 +25,7 @@ RUN <<-EOF
 		@composer \
 		apcu \
 		intl \
-		mongodb-2.1.8 \
+		mongodb-2.3.0 \
 		opcache \
 		redis \
 		xsl \
