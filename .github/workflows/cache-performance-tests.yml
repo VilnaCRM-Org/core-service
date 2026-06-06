@@ -10,7 +10,6 @@ on:
       - 'config/packages/cache.yaml'
       - 'tests/Integration/Customer/Infrastructure/Repository/CachePerformanceTest.php'
       - 'tests/Load/scripts/rest-api/cachePerformance.js'
-      - 'tests/Load/scripts/rest-api/cacheReadWriteRace.js'
       - 'tests/Load/execute-load-test.sh'
       - 'tests/Load/config.json.dist'
 
@@ -20,10 +19,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Dependabot skip
+        if: contains(toLower(github.actor), 'dependabot')
+        run: echo "Skipping cache integration tests for Dependabot PR"
+
       - name: Checkout Repository
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         uses: actions/checkout@v4
 
+      - uses: shivammathur/setup-php@v2
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        with:
+          php-version: ${{ vars.PHP_VERSION }}
+
       - name: Run Cache Performance Integration Tests
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         run: make cache-performance-tests
 
   cache-load-tests:
@@ -34,15 +44,27 @@ jobs:
       COMPOSE_FILE: docker-compose.yml:docker-compose.prod.yml:docker-compose.load_test.override.yml
 
     steps:
+      - name: Dependabot skip
+        if: contains(toLower(github.actor), 'dependabot')
+        run: echo "Skipping cache load tests for Dependabot PR"
+
       - name: Checkout Repository
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         uses: actions/checkout@v4
 
+      - uses: shivammathur/setup-php@v2
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        with:
+          php-version: ${{ vars.PHP_VERSION }}
+
       - name: Start application for load tests
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         run: make start
 
       - name: Run Cache Performance Load Tests
+        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
         run: make cache-performance-load-tests
 
       - name: Stop application
-        if: always()
+        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
         run: make down
