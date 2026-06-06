@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7ce1570ae4f57cf690c09d29245633d1",
+    "content-hash": "59a76e86bff22f965bc7ec0a713ff3f4",
     "packages": [
         {
             "name": "api-platform/core",
-            "version": "v4.3.7",
+            "version": "v4.3.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/core.git",
-                "reference": "25f80814e1f9c849bae2bc17ed2e07f2461c72d8"
+                "reference": "77c87883e02dceeb34eb49eb8b0a888ce57e2916"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/core/zipball/25f80814e1f9c849bae2bc17ed2e07f2461c72d8",
-                "reference": "25f80814e1f9c849bae2bc17ed2e07f2461c72d8",
+                "url": "https://api.github.com/repos/api-platform/core/zipball/77c87883e02dceeb34eb49eb8b0a888ce57e2916",
+                "reference": "77c87883e02dceeb34eb49eb8b0a888ce57e2916",
                 "shasum": ""
             },
             "require": {
@@ -75,16 +75,11 @@
                 "api-platform/validator": "self.version"
             },
             "require-dev": {
-                "behat/behat": "^3.11",
-                "behat/mink": "^1.9",
                 "doctrine/common": "^3.2.2",
                 "doctrine/dbal": "^4.0",
                 "doctrine/doctrine-bundle": "^2.11 || ^3.1",
                 "doctrine/orm": "^2.17 || ^3.0",
                 "elasticsearch/elasticsearch": "^7.17 || ^8.4 || ^9.0",
-                "friends-of-behat/mink-browserkit-driver": "^1.3.1",
-                "friends-of-behat/mink-extension": "^2.2",
-                "friends-of-behat/symfony-extension": "^2.1",
                 "friendsofphp/php-cs-fixer": "^3.93",
                 "guzzlehttp/guzzle": "^6.0 || ^7.0",
                 "illuminate/config": "^11.0 || ^12.0 || ^13.0",
@@ -110,7 +105,6 @@
                 "psr/log": "^1.0 || ^2.0 || ^3.0",
                 "ramsey/uuid": "^4.7",
                 "ramsey/uuid-doctrine": "^2.0",
-                "soyuka/contexts": "^3.3.10",
                 "soyuka/pmu": "^0.2.0",
                 "soyuka/stubs-mongodb": "^1.0",
                 "symfony/asset": "^6.4 || ^7.0 || ^8.0",
@@ -226,9 +220,9 @@
             ],
             "support": {
                 "issues": "https://github.com/api-platform/core/issues",
-                "source": "https://github.com/api-platform/core/tree/v4.3.7"
+                "source": "https://github.com/api-platform/core/tree/v4.3.10"
             },
-            "time": "2026-05-29T07:17:00+00:00"
+            "time": "2026-06-05T15:24:51+00:00"
         },
         {
             "name": "async-aws/core",
@@ -420,16 +414,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.384.0",
+            "version": "3.384.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6de1120aa6138e8f007c3537be86c0e64337c53b"
+                "reference": "8e232a5703896541a7a34691a41ece5bd6170269"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6de1120aa6138e8f007c3537be86c0e64337c53b",
-                "reference": "6de1120aa6138e8f007c3537be86c0e64337c53b",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8e232a5703896541a7a34691a41ece5bd6170269",
+                "reference": "8e232a5703896541a7a34691a41ece5bd6170269",
                 "shasum": ""
             },
             "require": {
@@ -511,9 +505,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.384.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.384.4"
             },
-            "time": "2026-06-02T18:23:32+00:00"
+            "time": "2026-06-05T18:05:57+00:00"
         },
         {
             "name": "blackbonjour/stdlib",
@@ -4429,37 +4423,36 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v7.4.13",
+            "version": "v8.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "bc354f47c62301e990b7874fa662326368508e2c"
+                "reference": "af11474600f06718086c2cda4fa6fa8d0a672e7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/bc354f47c62301e990b7874fa662326368508e2c",
-                "reference": "bc354f47c62301e990b7874fa662326368508e2c",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/af11474600f06718086c2cda4fa6fa8d0a672e7e",
+                "reference": "af11474600f06718086c2cda4fa6fa8d0a672e7e",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.2",
+                "php": ">=8.4.1",
                 "symfony/deprecation-contracts": "^2.5|^3",
                 "symfony/polyfill-mbstring": "^1.1"
             },
             "conflict": {
-                "doctrine/dbal": "<3.6",
-                "symfony/cache": "<6.4.12|>=7.0,<7.1.5"
+                "doctrine/dbal": "<4.3"
             },
             "require-dev": {
-                "doctrine/dbal": "^3.6|^4",
+                "doctrine/dbal": "^4.3",
                 "predis/predis": "^1.1|^2.0",
-                "symfony/cache": "^6.4.12|^7.1.5|^8.0",
-                "symfony/clock": "^6.4|^7.0|^8.0",
-                "symfony/dependency-injection": "^6.4|^7.0|^8.0",
-                "symfony/expression-language": "^6.4|^7.0|^8.0",
-                "symfony/http-kernel": "^6.4|^7.0|^8.0",
-                "symfony/mime": "^6.4|^7.0|^8.0",
-                "symfony/rate-limiter": "^6.4|^7.0|^8.0"
+                "symfony/cache": "^7.4|^8.0",
+                "symfony/clock": "^7.4|^8.0",
+                "symfony/dependency-injection": "^7.4|^8.0",
+                "symfony/expression-language": "^7.4|^8.0",
+                "symfony/http-kernel": "^7.4|^8.0",
+                "symfony/mime": "^7.4|^8.0",
+                "symfony/rate-limiter": "^7.4|^8.0"
             },
             "type": "library",
             "autoload": {
@@ -4487,7 +4480,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v7.4.13"
+                "source": "https://github.com/symfony/http-foundation/tree/v8.1.0"
             },
             "funding": [
                 {
@@ -4507,7 +4500,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-24T11:20:33+00:00"
+            "time": "2026-05-29T05:06:50+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -8934,16 +8927,16 @@
         },
         {
             "name": "dg/bypass-finals",
-            "version": "v1.10.0",
+            "version": "v1.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dg/bypass-finals.git",
-                "reference": "03e27acff5aa4e1704db371505e7d3da915b4307"
+                "reference": "62d4ea18f8937af7d794b3358c125ecb52862e98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dg/bypass-finals/zipball/03e27acff5aa4e1704db371505e7d3da915b4307",
-                "reference": "03e27acff5aa4e1704db371505e7d3da915b4307",
+                "url": "https://api.github.com/repos/dg/bypass-finals/zipball/62d4ea18f8937af7d794b3358c125ecb52862e98",
+                "reference": "62d4ea18f8937af7d794b3358c125ecb52862e98",
                 "shasum": ""
             },
             "require": {
@@ -8981,9 +8974,9 @@
             ],
             "support": {
                 "issues": "https://github.com/dg/bypass-finals/issues",
-                "source": "https://github.com/dg/bypass-finals/tree/v1.10.0"
+                "source": "https://github.com/dg/bypass-finals/tree/v1.10.1"
             },
-            "time": "2026-06-01T16:48:55+00:00"
+            "time": "2026-06-04T15:48:46+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -9539,16 +9532,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.95.3",
+            "version": "v3.95.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "3d681493acc0e93283481b1c63c263737df78687"
+                "reference": "3f8f68856837a77e1f1d870354eca3c8747f2f72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/3d681493acc0e93283481b1c63c263737df78687",
-                "reference": "3d681493acc0e93283481b1c63c263737df78687",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/3f8f68856837a77e1f1d870354eca3c8747f2f72",
+                "reference": "3f8f68856837a77e1f1d870354eca3c8747f2f72",
                 "shasum": ""
             },
             "require": {
@@ -9632,7 +9625,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.3"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.4"
             },
             "funding": [
                 {
@@ -9640,7 +9633,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-29T20:35:26+00:00"
+            "time": "2026-06-03T18:02:44+00:00"
         },
         {
             "name": "infection/abstract-testframework-adapter",
@@ -16022,14 +16015,14 @@
         "ext-dom": "*",
         "ext-iconv": "*",
         "ext-mbstring": "*",
-        "ext-mongodb": "^2.1",
+        "ext-mongodb": "^2.3",
         "ext-simplexml": "*",
         "ext-xml": "*"
     },
     "platform-dev": {},
     "platform-overrides": {
         "php": "8.4.3",
-        "ext-mongodb": "2.1.8"
+        "ext-mongodb": "2.3.0"
     },
     "plugin-api-version": "2.9.0"
 }

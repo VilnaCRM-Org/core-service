@@ -11,7 +11,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-mbstring": "*",
-    "ext-mongodb": "^2.1",
+    "ext-mongodb": "^2.3",
     "ext-simplexml": "*",
     "ext-xml": "*",
     "api-platform/core": "4.3.*",
@@ -29,7 +29,7 @@
     "symfony/dotenv": "8.1.*",
     "symfony/flex": "^2.2",
     "symfony/framework-bundle": "7.4.*",
-    "symfony/http-foundation": "^7.4",
+    "symfony/http-foundation": "^8.1",
     "symfony/messenger": "7.4.*",
     "symfony/proxy-manager-bridge": "^6.4",
     "symfony/runtime": "8.1.*",
@@ -55,7 +55,7 @@
     "sort-packages": true,
     "platform": {
       "php": "8.4.3",
-      "ext-mongodb": "2.1.8"
+      "ext-mongodb": "2.3.0"
     }
   },
   "autoload": {
