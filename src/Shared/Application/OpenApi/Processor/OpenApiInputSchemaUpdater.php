@@ -40,6 +40,10 @@ final class OpenApiInputSchemaUpdater
             'confirmed' => [],
         ],
         'Customer.CustomerPatch.jsonMergePatch' => [
+            'initials' => ['minLength' => 1],
+            'email' => ['minLength' => 1],
+            'phone' => ['minLength' => 1],
+            'leadSource' => ['minLength' => 1],
             'type' => [
                 'format' => 'iri-reference',
                 'enum' => self::CUSTOMER_TYPE_IRIS,
@@ -82,6 +86,16 @@ final class OpenApiInputSchemaUpdater
         'CustomerType.TypePut' => [
             'value' => ['minLength' => 1],
         ],
+    ];
+
+    private const INPUT_SCHEMA_UPDATES = [
+        'Customer.CustomerPatch.jsonMergePatch' => [
+            'minProperties' => 1,
+        ],
+    ];
+
+    private const INPUT_PROPERTIES_TO_REMOVE = [
+        'Customer.CustomerPatch.jsonMergePatch' => ['id'],
     ];
 
     private const REQUIRED_PROPERTIES_TO_ENFORCE = [
@@ -148,15 +162,37 @@ final class OpenApiInputSchemaUpdater
             return null;
         }
 
-        [$updatedSchema, $requiredPropertiesChanged] = $this->updatedRequiredSchema(
+        [$updatedSchema, $changed] = $this->schemaWithInputUpdates(
             $schemaName,
-            $schema
-        );
-        [$updatedSchema, $propertySchemasChanged] = $this->updatedPropertySchemas(
-            $updatedSchema,
+            $schema,
             $propertySchemaUpdates
         );
-        return $requiredPropertiesChanged || $propertySchemasChanged ? $updatedSchema : null;
+
+        return $changed ? $updatedSchema : null;
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     * @param array<string, array<string, SchemaValue>> $propertySchemaUpdates
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function schemaWithInputUpdates(
+        string $schemaName,
+        array $schema,
+        array $propertySchemaUpdates
+    ): array {
+        $changed = false;
+        [$schema, $schemaChanged] = $this->updatedRequiredSchema($schemaName, $schema);
+        $changed = $changed || $schemaChanged;
+        [$schema, $schemaChanged] = $this->updatedSchemaKeywords($schemaName, $schema);
+        $changed = $changed || $schemaChanged;
+        [$schema, $schemaChanged] = $this->updatedPropertiesAfterRemoval($schemaName, $schema);
+        $changed = $changed || $schemaChanged;
+        [$schema, $schemaChanged] = $this->updatedPropertySchemas($schema, $propertySchemaUpdates);
+        $changed = $changed || $schemaChanged;
+
+        return [$schema, $changed];
     }
 
     /**
@@ -192,6 +228,46 @@ final class OpenApiInputSchemaUpdater
         return $updatedSchema === null
             ? [$schema, false]
             : [$updatedSchema, true];
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function updatedSchemaKeywords(string $schemaName, array $schema): array
+    {
+        $schemaPatch = self::INPUT_SCHEMA_UPDATES[$schemaName] ?? [];
+        $updatedSchema = array_replace($schema, $schemaPatch);
+
+        return $updatedSchema === $schema
+            ? [$schema, false]
+            : [$updatedSchema, true];
+    }
+
+    /**
+     * @param array<string, SchemaValue> $schema
+     *
+     * @return array{0: array<string, SchemaValue>, 1: bool}
+     */
+    private function updatedPropertiesAfterRemoval(
+        string $schemaName,
+        array $schema
+    ): array {
+        $propertiesToRemove = self::INPUT_PROPERTIES_TO_REMOVE[$schemaName] ?? [];
+        $properties = (new SchemaNormalizer())->normalize($schema['properties'] ?? []);
+
+        foreach ($propertiesToRemove as $propertyName) {
+            unset($properties[$propertyName]);
+        }
+
+        if ($properties === (new SchemaNormalizer())->normalize($schema['properties'] ?? [])) {
+            return [$schema, false];
+        }
+
+        $schema['properties'] = $properties;
+
+        return [$schema, true];
     }
 
     /**

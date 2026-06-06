@@ -17,32 +17,31 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3]
     timeout-minutes: 25
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
 
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping load tests for Dependabot PR"
 
       - name: Checkout Repository
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v4
-
-      - uses: shivammathur/setup-php@v2
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          persist-credentials: false
 
       - name: Start application
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        run: docker compose -f docker-compose.prod.yml -f docker-compose.load_test.override.yml up -d --wait database redis localstack php caddy
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        run: make start
 
       - name: Run sharded smoke load tests
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make smoke-load-tests SHARD_INDEX=${{ matrix.shard }} SHARD_TOTAL=4 K6_SMOKE_RETRIES=2 K6_SMOKE_RETRY_DELAY_SECONDS=1
+
+      - name: Stop application
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
+        run: make down
 
   load-tests:
     name: K6
@@ -52,11 +51,11 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping load test summary for Dependabot PR"
 
       - name: Validate all K6 shards succeeded
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: |
           if [ "${{ needs.load-tests-sharded.result }}" != "success" ]; then
             echo "At least one K6 shard failed."

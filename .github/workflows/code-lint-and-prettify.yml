@@ -6,31 +6,31 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: ${{ !contains(toLower(github.actor), 'dependabot') }}
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping lint checks for Dependabot PR"
 
       - name: Generate token with necessary permissions
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         id: generate_token
-        uses: tibdex/github-app-token@v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
         with:
-          app_id: ${{ secrets.VILNACRM_APP_ID }}
-          private_key: ${{ secrets.VILNACRM_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.VILNACRM_APP_ID }}
+          private-key: ${{ secrets.VILNACRM_APP_PRIVATE_KEY }}
 
       - name: Checkout code
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v4
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          token: ${{ !contains(toLower(github.actor), 'dependabot') && steps.generate_token.outputs.token || github.token }}
+          token: ${{ !startsWith(github.actor, 'dependabot') && steps.generate_token.outputs.token || github.token }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Import GPG key
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         id: import-gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -40,11 +40,12 @@ jobs:
           git_tag_gpgsign: true
 
       - name: Configure GPG for automated signing
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: |
-          export GPG_TTY=$(tty)
-          echo "GPG_TTY=$GPG_TTY" >> $GITHUB_ENV
-          echo "GPG_PASSPHRASE=${{ secrets.GPG_PASSPHRASE }}" >> $GITHUB_ENV
+          GPG_TTY="$(tty || true)"
+          export GPG_TTY
+          echo "GPG_TTY=$GPG_TTY" >> "$GITHUB_ENV"
+          echo "GPG_PASSPHRASE=${{ secrets.GPG_PASSPHRASE }}" >> "$GITHUB_ENV"
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           cat > ~/.gnupg/gpg.conf << EOF
@@ -61,7 +62,8 @@ jobs:
           gpg-connect-agent reloadagent /bye || true
           cat > ~/.gnupg/gpg-wrapper.sh << 'EOF'
           #!/bin/bash
-          export GPG_TTY=$(tty)
+          GPG_TTY="$(tty || true)"
+          export GPG_TTY
           case "$*" in
             *--detach-sign*|*--sign*)
               echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 "$@"
@@ -75,15 +77,15 @@ jobs:
           git config --global gpg.program ~/.gnupg/gpg-wrapper.sh
 
       - name: Test GPG signing
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: |
           echo "Testing GPG signing..."
           echo "test message" | ~/.gnupg/gpg-wrapper.sh --armor --detach-sign > /dev/null 2>&1 && echo "✅ GPG signing works" || echo "❌ GPG signing failed"
 
       - name: Run Super-Linter
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         continue-on-error: true
-        uses: super-linter/super-linter@v8.3.1
+        uses: super-linter/super-linter@47984f49b4e87383eed97890fe2dca6063bbd9c3
         env:
           FILTER_REGEX_EXCLUDE: '^\\.github/openapi-spec/'
           VALIDATE_JAVASCRIPT_ES: true
@@ -97,17 +99,17 @@ jobs:
           VALIDATE_JAVASCRIPT_PRETTIER: true
           FIX_JAVASCRIPT_PRETTIER: true
           VALIDATE_ALL_CODEBASE: true
-          GITHUB_TOKEN: ${{ !contains(toLower(github.actor), 'dependabot') && steps.generate_token.outputs.token || github.token }}
+          GITHUB_TOKEN: ${{ !startsWith(github.actor, 'dependabot') && steps.generate_token.outputs.token || github.token }}
 
       - name: Commit and push linting fixes
         if: >
-          !contains(toLower(github.actor), 'dependabot') &&
+          !startsWith(github.actor, 'dependabot') &&
           github.event_name == 'pull_request' && github.ref_name !=
           github.event.repository.default_branch
         env:
           GPG_TTY: ${{ env.GPG_TTY }}
           GPG_PASSPHRASE: ${{ env.GPG_PASSPHRASE }}
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403
         with:
           branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
           commit_message: 'chore(#${{ github.event.number }}): fix linting issues'

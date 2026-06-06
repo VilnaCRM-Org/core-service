@@ -20,20 +20,17 @@ jobs:
 
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping cache integration tests for Dependabot PR"
 
       - name: Checkout Repository
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v4
-
-      - uses: shivammathur/setup-php@v2
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          persist-credentials: false
 
       - name: Run Cache Performance Integration Tests
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make cache-performance-tests
 
   cache-load-tests:
@@ -45,26 +42,23 @@ jobs:
 
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping cache load tests for Dependabot PR"
 
       - name: Checkout Repository
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v4
-
-      - uses: shivammathur/setup-php@v2
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          php-version: ${{ vars.PHP_VERSION }}
+          persist-credentials: false
 
       - name: Start application for load tests
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
       - name: Run Cache Performance Load Tests
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make cache-performance-load-tests
 
       - name: Stop application
-        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
         run: make down

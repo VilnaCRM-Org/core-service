@@ -103,6 +103,8 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         $schemas = new ArrayObject([
             'Customer.CustomerPatch.jsonMergePatch' => [
                 'properties' => [
+                    'id' => ['type' => ['string', 'null']],
+                    'initials' => ['type' => ['string', 'null']],
                     'type' => ['type' => ['string', 'null']],
                 ],
             ],
@@ -121,6 +123,18 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
         self::assertSame(
             ['string', 'null'],
             $this->schemaProperty($updatedSchemas, 'Customer.CustomerPatch.jsonMergePatch', 'type')['type']
+        );
+        self::assertSame(
+            1,
+            (new SchemaNormalizer())->normalize($updatedSchemas['Customer.CustomerPatch.jsonMergePatch'])['minProperties']
+        );
+        self::assertArrayNotHasKey(
+            'id',
+            (new SchemaNormalizer())->normalize($updatedSchemas['Customer.CustomerPatch.jsonMergePatch'])['properties']
+        );
+        self::assertSame(
+            1,
+            $this->schemaProperty($updatedSchemas, 'Customer.CustomerPatch.jsonMergePatch', 'initials')['minLength']
         );
         self::assertSame(
             'iri-reference',
@@ -307,6 +321,137 @@ final class OpenApiInputSchemaUpdaterTest extends UnitTestCase
 
         self::assertSame($schema, $result[0]);
         self::assertFalse($result[1]);
+    }
+
+    public function testUpdatedSchemaKeywordsDoesNotReportChangesForNoOpSchemaPatch(): void
+    {
+        $schema = ['minProperties' => 1];
+
+        $result = $this->invokeUpdaterMethod('updatedSchemaKeywords', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            $schema,
+        ]);
+
+        self::assertSame($schema, $result[0]);
+        self::assertFalse($result[1]);
+    }
+
+    public function testUpdatedSchemaKeywordsReportsChangedSchemaPatch(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedSchemaKeywords', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            ['properties' => []],
+        ]);
+
+        self::assertSame(1, $result[0]['minProperties']);
+        self::assertTrue($result[1]);
+    }
+
+    public function testUpdatedSchemaReturnsSchemaWhenOnlySchemaKeywordsChange(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedSchema', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            [
+                'properties' => [
+                    'initials' => ['type' => 'string'],
+                ],
+            ],
+            [],
+        ]);
+
+        self::assertIsArray($result);
+        self::assertSame(1, $result['minProperties']);
+    }
+
+    public function testUpdatedSchemaReturnsSchemaWhenOnlyRequiredPropertiesChange(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedSchema', [
+            'Customer.CustomerPut',
+            [
+                'required' => ['initials'],
+                'properties' => [
+                    'confirmed' => ['type' => 'boolean'],
+                ],
+            ],
+            [],
+        ]);
+
+        self::assertIsArray($result);
+        self::assertSame(['initials', 'confirmed'], $result['required']);
+    }
+
+    public function testUpdatedSchemaReturnsSchemaWhenOnlyConfiguredPropertiesAreRemoved(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedSchema', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            [
+                'minProperties' => 1,
+                'properties' => [
+                    'id' => ['type' => 'string'],
+                    'initials' => ['type' => 'string'],
+                ],
+            ],
+            [],
+        ]);
+
+        self::assertIsArray($result);
+        self::assertArrayNotHasKey(
+            'id',
+            (new SchemaNormalizer())->normalize($result['properties'])
+        );
+    }
+
+    public function testUpdatedSchemaReturnsSchemaWhenOnlyPropertySchemaChanges(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedSchema', [
+            'CustomerType.TypeCreate',
+            [
+                'required' => ['value'],
+                'properties' => [
+                    'value' => ['type' => 'string'],
+                ],
+            ],
+            ['value' => ['minLength' => 1]],
+        ]);
+
+        self::assertIsArray($result);
+        self::assertSame(1, $result['properties']['value']['minLength']);
+    }
+
+    public function testUpdatedPropertiesAfterRemovalDoesNotReportChangesWhenPropertyIsAbsent(): void
+    {
+        $schema = [
+            'properties' => [
+                'initials' => ['type' => ['string', 'null']],
+            ],
+        ];
+
+        $result = $this->invokeUpdaterMethod('updatedPropertiesAfterRemoval', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            $schema,
+        ]);
+
+        self::assertSame($schema, $result[0]);
+        self::assertFalse($result[1]);
+    }
+
+    public function testUpdatedPropertiesAfterRemovalReportsChangedSchema(): void
+    {
+        $result = $this->invokeUpdaterMethod('updatedPropertiesAfterRemoval', [
+            'Customer.CustomerPatch.jsonMergePatch',
+            [
+                'properties' => [
+                    'id' => ['type' => 'string'],
+                    'initials' => ['type' => 'string'],
+                ],
+            ],
+        ]);
+
+        self::assertArrayNotHasKey(
+            'id',
+            (new SchemaNormalizer())->normalize($result[0]['properties'])
+        );
+        self::assertTrue($result[1]);
     }
 
     public function testEnsureRequiredPropertiesReturnsNullWhenNothingNeedsToBeAdded(): void
