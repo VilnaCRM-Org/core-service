@@ -20,7 +20,7 @@ jobs:
         if: ${{ !startsWith(github.actor, 'dependabot') }}
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Copy .env.test.local
         if: ${{ !startsWith(github.actor, 'dependabot') }}
