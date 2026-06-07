@@ -14,29 +14,31 @@ jobs:
 
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping Schemathesis validation for Dependabot PR"
 
       - name: Checkout Repository
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v4
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
 
       - name: Start Application
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
       - name: Run Schemathesis Validation
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make schemathesis-validate
 
       - name: Upload Schemathesis Report
-        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
-        uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: schemathesis-report
           path: /tmp/core-service-schemathesis-report
           if-no-files-found: ignore
 
       - name: Stop Application
-        if: ${{ !contains(toLower(github.actor), 'dependabot') && always() }}
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
         run: make down

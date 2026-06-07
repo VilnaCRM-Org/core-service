@@ -3174,15 +3174,12 @@ components:
       type: object
       additionalProperties: false
       properties:
-        id:
-          type:
-            - string
-            - 'null'
         initials:
           maxLength: 255
           type:
             - string
             - 'null'
+          minLength: 1
         email:
           format: email
           maxLength: 255
@@ -3191,16 +3188,19 @@ components:
           type:
             - string
             - 'null'
+          minLength: 1
         phone:
           maxLength: 255
           type:
             - string
             - 'null'
+          minLength: 1
         leadSource:
           maxLength: 255
           type:
             - string
             - 'null'
+          minLength: 1
         type:
           type:
             - string
@@ -3221,6 +3221,7 @@ components:
           type:
             - boolean
             - 'null'
+      minProperties: 1
     Customer.CustomerPut:
       type: object
       additionalProperties: false

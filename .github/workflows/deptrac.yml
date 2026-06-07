@@ -9,26 +9,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dependabot skip
-        if: contains(toLower(github.actor), 'dependabot')
+        if: startsWith(github.actor, 'dependabot')
         run: echo "Skipping Deptrac for Dependabot PR"
 
       - name: Checkout code
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
-        uses: actions/checkout@v3
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
 
-      - uses: shivammathur/setup-php@v2
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         with:
           php-version: ${{ vars.PHP_VERSION }}
 
       - name: Install Dependencies
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Start Application
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
       - name: Run Deptrac
-        if: ${{ !contains(toLower(github.actor), 'dependabot') }}
+        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make deptrac
