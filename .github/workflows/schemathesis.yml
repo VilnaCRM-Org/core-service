@@ -4,41 +4,33 @@ on:
   pull_request:
     branches: ['main']
 
+permissions:
+  contents: read
+
 jobs:
   schemathesis:
     name: Schemathesis
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-    permissions:
-      contents: read
 
     steps:
-      - name: Dependabot skip
-        if: startsWith(github.actor, 'dependabot')
-        run: echo "Skipping Schemathesis validation for Dependabot PR"
-
       - name: Checkout Repository
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start Application
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
+      - name: Wait for Application Readiness
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:8081/ping; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          docker compose logs php database localstack
+          exit 1
+
       - name: Run Schemathesis Validation
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make schemathesis-validate
-
-      - name: Upload Schemathesis Report
-        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: schemathesis-report
-          path: /tmp/core-service-schemathesis-report
-          if-no-files-found: ignore
-
-      - name: Stop Application
-        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
-        run: make down

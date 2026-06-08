@@ -2,32 +2,18 @@ name: Mutation testing
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   infection:
     name: Infection
     runs-on: ubuntu-latest
     steps:
-      - name: Dependabot skip
-        if: startsWith(github.actor, 'dependabot')
-        run: echo "Skipping Mutation testing for Dependabot PR"
-
       - name: Checkout code
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
-          submodules: recursive
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Start application
+        run: make start
 
       - name: Run infection
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: CI=1 make infection
+        run: make infection

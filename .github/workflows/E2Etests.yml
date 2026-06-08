@@ -2,6 +2,7 @@ name: E2E testing
 
 on:
   pull_request:
+    branches: ['main']
 
 jobs:
   behat:
@@ -9,29 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Dependabot skip
-        if: startsWith(github.actor, 'dependabot')
-        run: echo "Skipping E2E tests for Dependabot PR"
-
       - name: Checkout Repository
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
-
-      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start Application
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
+      - name: Setup Test Database
+        run: make setup-test-db
+
       - name: Run Behat Tests
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make behat

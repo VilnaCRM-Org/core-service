@@ -3,26 +3,29 @@
 load 'bats-support/load'
 load 'bats-assert/load'
 
+@test "make update command executes" {
+  run make update
+  assert_success
+}
+
 @test "make sh attempts to open a shell in the PHP container" {
-  skip "Requires Docker - skipped in CI environment"
+  run bash -c "make sh & sleep 2; kill $!"
+  assert_failure
+  assert_output --partial "php-service-template"
 }
 
 @test "make build command starts successfully and shows initial build output" {
-  skip "Requires Docker - skipped in CI environment"
+  run timeout 5 make build
+  assert_failure 124
+  assert_output --partial "docker compose build --pull --no-cache"
 }
 
 @test "make stop command executes" {
-  skip "Requires Docker - skipped in CI environment"
+  run make stop
+  assert_success
 }
 
 @test "make down command executes" {
-  skip "Requires Docker - skipped in CI environment"
-}
-
-@test "make up command starts containers" {
-  skip "Requires Docker - skipped in CI environment"
-}
-
-@test "make ps command lists running containers" {
-  skip "Requires Docker - skipped in CI environment"
+  run make down
+  assert_success
 }

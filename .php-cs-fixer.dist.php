@@ -7,7 +7,6 @@ $finder = (new PhpCsFixer\Finder())
 return (new PhpCsFixer\Config())
     ->setRules([
         '@PSR12' => true,
-        'function_typehint_space' => true,
         'phpdoc_align' => false,
         'yoda_style' => [
             'equal' => false,
