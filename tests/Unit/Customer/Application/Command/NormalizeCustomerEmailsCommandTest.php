@@ -228,6 +228,42 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
         self::assertStringContainsString('skipped 2 conflicting record(s)', $output);
     }
 
+    public function testSkipsCustomerWhenSaveHitsConcurrentConflict(): void
+    {
+        // A unique-index collision can slip past hasConflict() if another
+        // process inserts the canonical email first (TOCTOU); the driver throws
+        // a RuntimeException on save. The command must skip that record (count
+        // it as skipped) and keep going instead of crashing the backfill.
+        $customer = $this->mixedCaseCustomer('Race@Example.COM', 'ulid-race');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('race@example.com')
+            ->willReturn(null);
+
+        $customer->expects($this->once())->method('setEmail')->with('race@example.com');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('save')
+            ->with($customer)
+            ->willThrowException(new \RuntimeException('E11000 duplicate key'));
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        self::assertStringContainsString('conflicted', $output);
+        self::assertStringContainsString('Normalized 0 customer email(s)', $output);
+        self::assertStringContainsString('skipped 1 conflicting record(s)', $output);
+    }
+
     /**
      * @return Customer&MockObject
      */

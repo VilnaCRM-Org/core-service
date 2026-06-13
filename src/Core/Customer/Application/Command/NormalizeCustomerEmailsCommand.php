@@ -6,6 +6,7 @@ namespace App\Core\Customer\Application\Command;
 
 use App\Core\Customer\Domain\Entity\Customer;
 use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -85,7 +86,34 @@ final class NormalizeCustomerEmailsCommand extends Command
         }
 
         $customer->setEmail($canonicalEmail);
-        $this->customerRepository->save($customer);
+
+        return $this->persist($customer, $canonicalEmail, $io);
+    }
+
+    /**
+     * @return array{normalized: int, skipped: int}
+     */
+    private function persist(
+        Customer $customer,
+        string $canonicalEmail,
+        SymfonyStyle $io
+    ): array {
+        try {
+            $this->customerRepository->save($customer);
+        } catch (RuntimeException $exception) {
+            // A concurrent insert can win the unique-email race in the window
+            // between hasConflict() and this save (TOCTOU); the driver surfaces
+            // it as a write exception (a RuntimeException). Report and skip so a
+            // single collision cannot abort the whole backfill.
+            $io->warning(sprintf(
+                'Skipped customer "%s": saving "%s" conflicted (%s).',
+                $customer->getUlid(),
+                $canonicalEmail,
+                $exception->getMessage()
+            ));
+
+            return ['normalized' => 0, 'skipped' => 1];
+        }
 
         return ['normalized' => 1, 'skipped' => 0];
     }
