@@ -12,15 +12,22 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::TERMINATE)]
 final class SchemathesisCleanupListener
 {
+    private const PRODUCTION_ENVIRONMENT = 'prod';
+
     public function __construct(
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SchemathesisCleanupEvaluator $evaluator,
-        private readonly SchemathesisEmailExtractor $emailExtractor
+        private readonly SchemathesisEmailExtractor $emailExtractor,
+        private readonly string $environment
     ) {
     }
 
     public function __invoke(TerminateEvent $event): void
     {
+        if ($this->environment === self::PRODUCTION_ENVIRONMENT) {
+            return;
+        }
+
         $request = $event->getRequest();
         $response = $event->getResponse();
 
