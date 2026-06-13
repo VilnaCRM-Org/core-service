@@ -11,6 +11,8 @@ services:
       FRANKENPHP_WORKER_CONFIG: ${FRANKENPHP_WORKER_CONFIG-watch}
       XDEBUG_MODE: '${XDEBUG_MODE:-off}'
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+      # Relax the strict prod CSP locally so the GraphiQL IDE can load its assets.
+      CADDY_CSP: "${CADDY_CSP:-default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:}"
     volumes:
       - ./:/srv/app
       - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
