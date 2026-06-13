@@ -51,6 +51,6 @@ final class CustomerTypeCreatedEvent extends DomainEvent
 
     private function generateEventId(): string
     {
-        return uniqid('customer_type_created_', true);
+        return 'customer_type_created_' . bin2hex(random_bytes(16));
     }
 }

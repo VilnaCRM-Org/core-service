@@ -64,6 +64,6 @@ final class CustomerTypeUpdatedEvent extends DomainEvent
 
     private function generateEventId(): string
     {
-        return uniqid('customer_type_updated_', true);
+        return 'customer_type_updated_' . bin2hex(random_bytes(16));
     }
 }

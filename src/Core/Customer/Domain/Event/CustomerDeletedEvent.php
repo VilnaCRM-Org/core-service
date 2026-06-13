@@ -54,6 +54,6 @@ final class CustomerDeletedEvent extends DomainEvent
 
     private function generateEventId(): string
     {
-        return uniqid('customer_deleted_', true);
+        return 'customer_deleted_' . bin2hex(random_bytes(16));
     }
 }

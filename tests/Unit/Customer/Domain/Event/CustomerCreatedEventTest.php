@@ -75,4 +75,31 @@ final class CustomerCreatedEventTest extends UnitTestCase
         self::assertSame($eventId, $event->eventId());
         self::assertSame($occurredOn, $event->occurredOn());
     }
+
+    public function testGeneratedEventIdUsesPrefixedRandomHex(): void
+    {
+        $eventId = (new CustomerCreatedEvent(
+            (string) $this->faker->ulid(),
+            $this->faker->email()
+        ))->eventId();
+
+        self::assertStringStartsWith('customer_created_', $eventId);
+        self::assertMatchesRegularExpression(
+            '/^customer_created_[0-9a-f]{32}$/',
+            $eventId
+        );
+    }
+
+    public function testGeneratedEventIdsAreUnique(): void
+    {
+        $ids = [];
+        for ($i = 0; $i < 1000; ++$i) {
+            $ids[] = (new CustomerCreatedEvent(
+                (string) $this->faker->ulid(),
+                $this->faker->email()
+            ))->eventId();
+        }
+
+        self::assertCount(1000, array_unique($ids));
+    }
 }

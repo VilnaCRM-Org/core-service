@@ -174,4 +174,31 @@ final class CustomerUpdatedEventTest extends UnitTestCase
 
         self::assertFalse($event->emailChanged());
     }
+
+    public function testGeneratedEventIdUsesPrefixedRandomHex(): void
+    {
+        $eventId = (new CustomerUpdatedEvent(
+            (string) $this->faker->ulid(),
+            $this->faker->email()
+        ))->eventId();
+
+        self::assertStringStartsWith('customer_updated_', $eventId);
+        self::assertMatchesRegularExpression(
+            '/^customer_updated_[0-9a-f]{32}$/',
+            $eventId
+        );
+    }
+
+    public function testGeneratedEventIdsAreUnique(): void
+    {
+        $ids = [];
+        for ($i = 0; $i < 1000; ++$i) {
+            $ids[] = (new CustomerUpdatedEvent(
+                (string) $this->faker->ulid(),
+                $this->faker->email()
+            ))->eventId();
+        }
+
+        self::assertCount(1000, array_unique($ids));
+    }
 }
