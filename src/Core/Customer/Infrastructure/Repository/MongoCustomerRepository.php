@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use InvalidArgumentException;
 
@@ -19,12 +19,12 @@ use InvalidArgumentException;
  * Design:
  * - Focused on single responsibility (persistence)
  * - Wrapped by CachedCustomerRepository for caching
- * - Implements CustomerRepositoryInterface
+ * - Implements CustomerStreamRepositoryInterface
  *
  * @extends BaseRepository<Customer>
  */
 final class MongoCustomerRepository extends BaseRepository implements
-    CustomerRepositoryInterface
+    CustomerStreamRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

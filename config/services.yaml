@@ -217,6 +217,11 @@ services:
     alias: App\Core\Customer\Infrastructure\Repository\CachedCustomerRepository
     public: true
 
+  # Streaming repository (bulk admin scans) bypasses the cache decorator and
+  # autowires to the Mongo cursor implementation directly.
+  App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface:
+    alias: App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository
+
   # Cache invalidation event subscribers - auto-bind cache.customer
 
   # CacheKeyBuilder - auto-registered via App\ namespace

@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Command;
 
 use App\Core\Customer\Application\Command\NormalizeCustomerEmailsCommand;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Application;
@@ -14,14 +14,14 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 {
-    private CustomerRepositoryInterface&MockObject $repository;
+    private CustomerStreamRepositoryInterface&MockObject $repository;
     private CommandTester $tester;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
+        $this->repository = $this->createMock(CustomerStreamRepositoryInterface::class);
 
         $command = new NormalizeCustomerEmailsCommand($this->repository);
         $application = new Application();
@@ -101,7 +101,9 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 
         $this->tester->assertCommandIsSuccessful();
         $output = $this->tester->getDisplay();
+        // Already-canonical rows touch neither counter: pin both totals to 0.
         self::assertStringContainsString('Normalized 0 customer email(s)', $output);
+        self::assertStringContainsString('skipped 0 conflicting record(s)', $output);
     }
 
     public function testSkipsConflictingEmailWithoutCrashing(): void
@@ -132,6 +134,11 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
         $this->tester->assertCommandIsSuccessful();
         $output = $this->tester->getDisplay();
         self::assertStringContainsString('Skipped customer "ulid-source"', $output);
+        // Pin the conflict-only summary counts exactly: a conflicting record is
+        // skipped and NOTHING is normalized. Asserting the literal "Normalized 0"
+        // total kills the IncrementInteger (0 -> 1) and DecrementInteger
+        // (0 -> -1) mutants on the conflict-branch return value.
+        self::assertStringContainsString('Normalized 0 customer email(s)', $output);
         self::assertStringContainsString('skipped 1 conflicting record(s)', $output);
     }
 

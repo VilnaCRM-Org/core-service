@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Command;
 
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,7 +30,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class NormalizeCustomerEmailsCommand extends Command
 {
     public function __construct(
-        private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly CustomerStreamRepositoryInterface $customerRepository,
     ) {
         parent::__construct();
     }

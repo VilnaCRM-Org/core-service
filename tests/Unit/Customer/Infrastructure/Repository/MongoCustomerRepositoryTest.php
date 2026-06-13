@@ -10,9 +10,9 @@ use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Iterator\CachingIterator;
-use Doctrine\ODM\MongoDB\Iterator\IterableResult;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Query\Builder;
+use Doctrine\ODM\MongoDB\Query\Query;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
@@ -238,7 +238,11 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $first = $this->createMock(Customer::class);
         $second = $this->createMock(Customer::class);
 
-        $query = $this->createMock(IterableResult::class);
+        // Mirror production exactly: createQueryBuilder()->getQuery() yields the
+        // concrete ODM Query, whose getIterator() returns an ODM cursor
+        // (Doctrine\ODM\MongoDB\Iterator\Iterator). CachingIterator is the
+        // lightweight ODM Iterator used to stand in for that cursor.
+        $query = $this->createMock(Query::class);
         $query
             ->expects($this->once())
             ->method('getIterator')
