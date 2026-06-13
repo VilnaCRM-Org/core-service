@@ -52,3 +52,6 @@ summary.log
 .ralph/logs/
 _bmad/
 _bmad-output/
+
+# Claude Code agent worktrees (transient, harness-managed)
+/.claude/worktrees/
