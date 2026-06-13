@@ -35,7 +35,19 @@
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 
-	header ?Permissions-Policy "browsing-topics=()"
+	header {
+		?Permissions-Policy "browsing-topics=()"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Cross-Origin-Opener-Policy "same-origin"
+		# Strict by default (JSON/GraphQL API). The dev compose override relaxes
+		# CADDY_CSP so the GraphiQL IDE keeps working locally.
+		Content-Security-Policy "{$CADDY_CSP:default-src 'none'; frame-ancestors 'none'; base-uri 'none'}"
+		-X-Powered-By
+		-Server
+	}
 
 	@phpRoute {
 		not path /.well-known/mercure*
