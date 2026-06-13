@@ -87,6 +87,26 @@ final class CachedCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
+    public function testFindAllIterableDelegatesToInnerRepositoryWithoutCaching(): void
+    {
+        $first = $this->createMock(Customer::class);
+        $second = $this->createMock(Customer::class);
+
+        $this->cache->expects($this->never())->method('get');
+
+        $this->innerRepository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn((static function () use ($first, $second): \Generator {
+                yield $first;
+                yield $second;
+            })());
+
+        $result = iterator_to_array($this->repository->findAllIterable());
+
+        self::assertSame([$first, $second], $result);
+    }
+
     public function testFindByEmailUsesCacheWithCorrectKey(): void
     {
         $email = 'test@example.com';

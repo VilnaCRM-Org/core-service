@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Application\Command;
 
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,7 +30,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class NormalizeCustomerEmailsCommand extends Command
 {
     public function __construct(
-        private readonly MongoCustomerRepository $customerRepository,
+        private readonly CustomerRepositoryInterface $customerRepository,
     ) {
         parent::__construct();
     }
@@ -44,7 +44,7 @@ final class NormalizeCustomerEmailsCommand extends Command
         $normalized = 0;
         $skipped = 0;
 
-        foreach ($this->customerRepository->findAll() as $customer) {
+        foreach ($this->customerRepository->findAllIterable() as $customer) {
             $result = $this->normalizeCustomer($customer, $io);
 
             $normalized += $result['normalized'];

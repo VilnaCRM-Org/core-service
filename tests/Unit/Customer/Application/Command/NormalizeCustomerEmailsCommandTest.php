@@ -6,7 +6,7 @@ namespace App\Tests\Unit\Customer\Application\Command;
 
 use App\Core\Customer\Application\Command\NormalizeCustomerEmailsCommand;
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
+use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
 use App\Tests\Unit\UnitTestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Application;
@@ -14,14 +14,14 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 {
-    private MongoCustomerRepository&MockObject $repository;
+    private CustomerRepositoryInterface&MockObject $repository;
     private CommandTester $tester;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->repository = $this->createMock(MongoCustomerRepository::class);
+        $this->repository = $this->createMock(CustomerRepositoryInterface::class);
 
         $command = new NormalizeCustomerEmailsCommand($this->repository);
         $application = new Application();
@@ -32,6 +32,19 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
         );
     }
 
+    /**
+     * Wrap customers in a generator so the test asserts the command streams
+     * the cursor lazily rather than materialising an array.
+     *
+     * @param Customer ...$customers
+     *
+     * @return \Generator<int, Customer>
+     */
+    private function customerStream(Customer ...$customers): \Generator
+    {
+        yield from $customers;
+    }
+
     public function testNormalizesMixedCaseEmail(): void
     {
         $customer = $this->createMock(Customer::class);
@@ -40,8 +53,8 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$customer]);
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
 
         $this->repository
             ->expects($this->once())
@@ -74,8 +87,8 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$customer]);
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
 
         $this->repository
             ->expects($this->never())
@@ -102,8 +115,8 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$customer]);
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
 
         $this->repository
             ->expects($this->once())
@@ -132,8 +145,8 @@ final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
 
         $this->repository
             ->expects($this->once())
-            ->method('findAll')
-            ->willReturn([$customer]);
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
 
         $this->repository
             ->expects($this->once())

@@ -9,7 +9,10 @@ use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Iterator\CachingIterator;
+use Doctrine\ODM\MongoDB\Iterator\IterableResult;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+use Doctrine\ODM\MongoDB\Query\Builder;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
@@ -158,8 +161,11 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
-    public function testDeleteByEmailLowercasesLookup(): void
+    public function testDeleteByEmailDelegatesRawEmailToFindByEmail(): void
     {
+        // deleteByEmail no longer lowercases before delegating: findByEmail
+        // already canonicalises the address internally, so the raw value is
+        // forwarded verbatim.
         $customer = $this->createMock(Customer::class);
 
         $repository = $this->getMockBuilder(MongoCustomerRepository::class)
@@ -170,7 +176,7 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         $repository
             ->expects($this->once())
             ->method('findByEmail')
-            ->with('foo@bar.com')
+            ->with('FOO@BAR.COM')
             ->willReturn($customer);
 
         $repository
@@ -225,6 +231,40 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->method('delete');
 
         $repository->deleteByEmail($email);
+    }
+
+    public function testFindAllIterableStreamsCursorResults(): void
+    {
+        $first = $this->createMock(Customer::class);
+        $second = $this->createMock(Customer::class);
+
+        $query = $this->createMock(IterableResult::class);
+        $query
+            ->expects($this->once())
+            ->method('getIterator')
+            ->willReturn(new CachingIterator(
+                new \ArrayIterator([$first, $second])
+            ));
+
+        $builder = $this->createMock(Builder::class);
+        $builder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['createQueryBuilder'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($builder);
+
+        $result = iterator_to_array($repository->findAllIterable());
+
+        self::assertSame([$first, $second], $result);
     }
 
     public function testFindFreshDelegatesToFind(): void

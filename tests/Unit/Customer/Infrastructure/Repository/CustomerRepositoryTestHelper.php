@@ -28,6 +28,14 @@ final class CustomerRepositoryTestHelper implements CustomerRepositoryInterface
         return $this->inner->findByEmail($email);
     }
 
+    /**
+     * @return iterable<Customer>
+     */
+    public function findAllIterable(): iterable
+    {
+        return $this->inner->findAllIterable();
+    }
+
     public function find(mixed $id, int $lockMode = 0, ?int $lockVersion = null): ?object
     {
         return $this->inner->find($id, $lockMode, $lockVersion);

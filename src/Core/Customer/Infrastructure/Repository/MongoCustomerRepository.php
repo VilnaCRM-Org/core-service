@@ -40,6 +40,21 @@ final class MongoCustomerRepository extends BaseRepository implements
         return $this->findOneByCriteria(['email' => strtolower($email)]);
     }
 
+    /**
+     * Stream every customer through a MongoDB cursor.
+     *
+     * The query builder cursor hydrates documents lazily, so the backfill
+     * command never holds the full collection in memory at once.
+     *
+     * @return iterable<Customer>
+     */
+    public function findAllIterable(): iterable
+    {
+        yield from $this->createQueryBuilder()
+            ->getQuery()
+            ->getIterator();
+    }
+
     public function findFresh(
         mixed $id,
         int $lockMode = 0,
@@ -66,7 +81,7 @@ final class MongoCustomerRepository extends BaseRepository implements
 
     public function deleteByEmail(string $email): void
     {
-        $customer = $this->findByEmail(strtolower($email));
+        $customer = $this->findByEmail($email);
 
         if (! $customer instanceof Customer) {
             return;

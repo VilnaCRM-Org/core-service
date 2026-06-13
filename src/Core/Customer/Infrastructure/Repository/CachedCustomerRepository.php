@@ -108,6 +108,17 @@ final class CachedCustomerRepository implements CustomerRepositoryInterface
     }
 
     /**
+     * Bulk admin scans bypass caching: delegate straight to the inner
+     * repository's streaming cursor so memory stays bounded.
+     *
+     * @return iterable<Customer>
+     */
+    public function findAllIterable(): iterable
+    {
+        return $this->inner->findAllIterable();
+    }
+
+    /**
      * Cache Policy: findByEmail
      *
      * Key Pattern: customer.email.{hash}
