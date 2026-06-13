@@ -19,7 +19,7 @@ final class CustomerTypeUpdatedEvent extends DomainEvent
         ?string $occurredOn = null
     ) {
         parent::__construct(
-            $eventId ?? $this->generateEventId(),
+            $eventId ?? $this->generateEventId('customer_type_updated_'),
             $occurredOn
         );
     }
@@ -60,10 +60,5 @@ final class CustomerTypeUpdatedEvent extends DomainEvent
     {
         return $this->previousValue !== null
             && $this->previousValue !== $this->currentValue;
-    }
-
-    private function generateEventId(): string
-    {
-        return uniqid('customer_type_updated_', true);
     }
 }

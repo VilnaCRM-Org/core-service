@@ -123,8 +123,60 @@ final class CustomerReferenceEventTest extends UnitTestCase
         }
     }
 
+    public function testCreatedReferenceEventsGeneratePrefixedRandomHexIds(): void
+    {
+        foreach ($this->createdEventCases() as [$eventClass, , , , , , $prefix]) {
+            $eventId = (new $eventClass(
+                (string) $this->faker->ulid(),
+                $this->faker->word()
+            ))->eventId();
+
+            self::assertStringStartsWith($prefix, $eventId);
+            self::assertMatchesRegularExpression(
+                '/^' . preg_quote($prefix, '/') . '[0-9a-f]{32}$/',
+                $eventId
+            );
+
+            $ids = [];
+            for ($i = 0; $i < 1000; ++$i) {
+                $ids[] = (new $eventClass(
+                    (string) $this->faker->ulid(),
+                    $this->faker->word()
+                ))->eventId();
+            }
+
+            self::assertCount(1000, array_unique($ids));
+        }
+    }
+
+    public function testUpdatedReferenceEventsGeneratePrefixedRandomHexIds(): void
+    {
+        foreach ($this->updatedEventCases() as [$eventClass, , , , $prefix]) {
+            $eventId = (new $eventClass(
+                (string) $this->faker->ulid(),
+                'active'
+            ))->eventId();
+
+            self::assertStringStartsWith($prefix, $eventId);
+            self::assertMatchesRegularExpression(
+                '/^' . preg_quote($prefix, '/') . '[0-9a-f]{32}$/',
+                $eventId
+            );
+
+            $ids = [];
+            for ($i = 0; $i < 1000; ++$i) {
+                $ids[] = (new $eventClass(
+                    (string) $this->faker->ulid(),
+                    'active'
+                ))->eventId();
+            }
+
+            self::assertCount(1000, array_unique($ids));
+        }
+    }
+
     /**
-     * @return iterable<string, array{0: class-string, 1: string, 2: string, 3: string, 4: string, 5: string}>
+     * @return iterable<string, array{0: class-string, 1: string, 2: string, 3: string, 4: string, 5: string, 6: string}>
      */
     private function createdEventCases(): iterable
     {
@@ -135,6 +187,7 @@ final class CustomerReferenceEventTest extends UnitTestCase
             'customer_status_value',
             'customerStatusId',
             'customerStatusValue',
+            'customer_status_created_',
         ];
 
         yield 'type created' => [
@@ -144,11 +197,12 @@ final class CustomerReferenceEventTest extends UnitTestCase
             'customer_type_value',
             'customerTypeId',
             'customerTypeValue',
+            'customer_type_created_',
         ];
     }
 
     /**
-     * @return iterable<string, array{0: class-string, 1: string, 2: string, 3: string}>
+     * @return iterable<string, array{0: class-string, 1: string, 2: string, 3: string, 4: string}>
      */
     private function updatedEventCases(): iterable
     {
@@ -157,6 +211,7 @@ final class CustomerReferenceEventTest extends UnitTestCase
             'customer_status.updated',
             'customer_status_id',
             'customerStatusId',
+            'customer_status_updated_',
         ];
 
         yield 'type updated' => [
@@ -164,6 +219,7 @@ final class CustomerReferenceEventTest extends UnitTestCase
             'customer_type.updated',
             'customer_type_id',
             'customerTypeId',
+            'customer_type_updated_',
         ];
     }
 }
