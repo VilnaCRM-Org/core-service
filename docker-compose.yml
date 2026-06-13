@@ -16,11 +16,11 @@ services:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       HEALTHCHECK_URL: https://localhost/api/health
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?CADDY_MERCURE_JWT_SECRET must be set}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?CADDY_MERCURE_JWT_SECRET must be set}
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://localhost/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
-      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:?CADDY_MERCURE_JWT_SECRET must be set}
       DB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@database:27017
       REDIS_URL: redis://redis:6379/0
       FRANKENPHP_LOOP_MAX: ${FRANKENPHP_LOOP_MAX:-500}
@@ -51,7 +51,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - '${DB_PORT}:27017'
+      - '127.0.0.1:${DB_PORT}:27017'
     volumes:
       - db_data:/data/db
     healthcheck:
@@ -63,7 +63,7 @@ services:
   redis:
     image: redis:8.0.0-alpine
     ports:
-      - '${REDIS_PORT:-6379}:6379'
+      - '127.0.0.1:${REDIS_PORT:-6379}:6379'
 
 volumes:
   caddy_data:
