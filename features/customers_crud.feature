@@ -174,7 +174,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the response should be in JSON
     And the header "Content-Type" should be equal to "application/ld+json; charset=utf-8"
     And the response should be valid according to the operation id "api_customers_ulid_put"
-    And the JSON node "email" should be equal to "NEW.EMAIL@EXAMPLE.COM"
+    And the JSON node "email" should be equal to "new.email@example.com"
     And the JSON node "phone" should be equal to "0123456789"
     And the JSON node "initials" should be equal to "CA"
     And the JSON node "leadSource" should be equal to "Google"
@@ -185,7 +185,7 @@ Feature: Customers Collection and Resource Endpoints with Detailed JSON Validati
     And the JSON node "confirmed" should be true
     When I send a GET request to "/api/customers/01JKX8XGHVDZ46MWYMZT94YER4"
     Then the response status code should be equal to 200
-    And the JSON node "email" should be equal to "NEW.EMAIL@EXAMPLE.COM"
+    And the JSON node "email" should be equal to "new.email@example.com"
     And the JSON node "phone" should be equal to "0123456789"
     And the JSON node "initials" should be equal to "CA"
 

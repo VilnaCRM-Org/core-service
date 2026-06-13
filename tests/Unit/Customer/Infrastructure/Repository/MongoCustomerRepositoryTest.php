@@ -138,6 +138,49 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
+    public function testFindByEmailLowercasesCriteria(): void
+    {
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findOneByCriteria'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findOneByCriteria')
+            ->with(['email' => 'foo@bar.com'])
+            ->willReturn($customer);
+
+        $result = $repository->findByEmail('FOO@BAR.COM');
+
+        self::assertSame($customer, $result);
+    }
+
+    public function testDeleteByEmailLowercasesLookup(): void
+    {
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findByEmail', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('foo@bar.com')
+            ->willReturn($customer);
+
+        $repository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $repository->deleteByEmail('FOO@BAR.COM');
+    }
+
     public function testDeleteByEmailDeletesResolvedCustomer(): void
     {
         $email = 'test@example.com';

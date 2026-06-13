@@ -23,8 +23,14 @@ class Customer implements CustomerInterface
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTime $updatedAt = null,
     ) {
+        $this->email = $this->normalizeEmail($this->email);
         $this->createdAt ??= new DateTimeImmutable();
         $this->updatedAt ??= new DateTime();
+    }
+
+    private function normalizeEmail(string $email): string
+    {
+        return strtolower($email);
     }
 
     public function getUlid(): string
@@ -57,7 +63,7 @@ class Customer implements CustomerInterface
 
     public function setEmail(string $email): void
     {
-        $this->email = $email;
+        $this->email = $this->normalizeEmail($email);
     }
 
     public function getPhone(): string
@@ -155,7 +161,7 @@ class Customer implements CustomerInterface
     public function update(CustomerUpdate $updateData): void
     {
         $this->initials = $updateData->newInitials;
-        $this->email = $updateData->newEmail;
+        $this->email = $this->normalizeEmail($updateData->newEmail);
         $this->phone = $updateData->newPhone;
         $this->leadSource = $updateData->newLeadSource;
         $this->type = $updateData->newType;

@@ -73,6 +73,18 @@ final class UniqueEmailValidatorTest extends UnitTestCase
         $this->validator->validate($email, new UniqueEmail());
     }
 
+    public function testValidateRejectsCaseInsensitiveDuplicate(): void
+    {
+        // Uniqueness is case-insensitive: "Foo@x.com" must collide with the
+        // stored "foo@x.com". The repository canonicalises the lookup, so the
+        // mixed-case value passed to the validator still resolves a customer.
+        $storedCustomer = $this->createCustomer('foo@x.com');
+
+        $this->setupValidationExpectations('Foo@x.com', $storedCustomer);
+
+        $this->validator->validate('Foo@x.com', new UniqueEmail());
+    }
+
     public function testNull(): void
     {
         $this->context->expects($this->never())->method('buildViolation');

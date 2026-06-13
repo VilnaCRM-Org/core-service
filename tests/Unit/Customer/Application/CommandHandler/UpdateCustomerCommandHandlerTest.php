@@ -158,8 +158,8 @@ final class UpdateCustomerCommandHandlerTest extends UnitTestCase
         Customer $customer
     ): void {
         $customerId = (string) $this->faker->ulid();
-        $previousEmail = 'Old+Update@Example.COM';
-        $currentEmail = 'New+Update@Example.COM';
+        $previousEmail = 'old+update@example.com';
+        $currentEmail = 'new+update@example.com';
 
         $this->repository->expects($this->once())
             ->method('save')->with($customer);

@@ -37,7 +37,7 @@ final class MongoCustomerRepository extends BaseRepository implements
      */
     public function findByEmail(string $email): ?Customer
     {
-        return $this->findOneByCriteria(['email' => $email]);
+        return $this->findOneByCriteria(['email' => strtolower($email)]);
     }
 
     public function findFresh(
@@ -66,7 +66,7 @@ final class MongoCustomerRepository extends BaseRepository implements
 
     public function deleteByEmail(string $email): void
     {
-        $customer = $this->findByEmail($email);
+        $customer = $this->findByEmail(strtolower($email));
 
         if (! $customer instanceof Customer) {
             return;
