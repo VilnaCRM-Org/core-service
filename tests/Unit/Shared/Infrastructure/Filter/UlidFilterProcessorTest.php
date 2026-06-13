@@ -89,6 +89,14 @@ final class UlidFilterProcessorTest extends UnitTestCase
         $this->processor->process('ulid', 'gte', $ulid, $this->builder);
     }
 
+    public function testProcessSkipsUnknownOperator(): void
+    {
+        $ulid = (string) $this->faker->ulid();
+        $this->builder->expects($this->never())->method('match');
+
+        $this->processor->process('ulid', 'evil', $ulid, $this->builder);
+    }
+
     public function testProcessSkipsInvalidUlid(): void
     {
         $this->builder->expects($this->never())->method('match');

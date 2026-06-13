@@ -70,9 +70,19 @@ final class UlidFilterProcessor
         string $field,
         Builder $builder
     ): void {
-        $class = __NAMESPACE__ . '\\' . ucfirst($operator);
-        /** @var OperatorStrategyInterface $operatorStrategy */
-        $operatorStrategy = new $class();
-        $operatorStrategy->apply($builder, $field, $filterValue);
+        $strategies = [
+            'between' => new Between(),
+            'gt' => new Gt(),
+            'gte' => new Gte(),
+            'lt' => new Lt(),
+            'lte' => new Lte(),
+        ];
+
+        $strategy = $strategies[$operator] ?? null;
+        if ($strategy === null) {
+            return;
+        }
+
+        $strategy->apply($builder, $field, $filterValue);
     }
 }
