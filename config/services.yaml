@@ -165,6 +165,12 @@ services:
           description: 'Seed schemathesis reference data.',
         }
 
+  # Schemathesis cleanup listener is gated to non-prod environments only (#223).
+  # The destructive customer cleanup never runs when kernel.environment is "prod".
+  App\Core\Customer\Infrastructure\EventListener\SchemathesisCleanupListener:
+    arguments:
+      $environment: '%kernel.environment%'
+
   # Base repository - used by API Platform for collections
   App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository:
     public: true

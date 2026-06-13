@@ -31,8 +31,38 @@ final class SchemathesisCleanupListenerTest extends UnitTestCase
         $this->listener = new SchemathesisCleanupListener(
             $this->customerRepository,
             $this->evaluator,
-            $this->emailExtractor
+            $this->emailExtractor,
+            'test'
         );
+    }
+
+    public function testInvokeSkipsCleanupInProductionEnvironment(): void
+    {
+        $listener = new SchemathesisCleanupListener(
+            $this->customerRepository,
+            $this->evaluator,
+            $this->emailExtractor,
+            'prod'
+        );
+
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $request = $this->createMock(Request::class);
+        $response = $this->createMock(Response::class);
+        $event = new TerminateEvent($kernel, $request, $response);
+
+        $this->evaluator
+            ->expects($this->never())
+            ->method('shouldCleanup');
+
+        $this->emailExtractor
+            ->expects($this->never())
+            ->method('extract');
+
+        $this->customerRepository
+            ->expects($this->never())
+            ->method('deleteByEmail');
+
+        $listener($event);
     }
 
     public function testInvokeSkipsWhenShouldNotCleanup(): void
