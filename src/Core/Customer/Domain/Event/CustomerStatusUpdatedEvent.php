@@ -19,7 +19,7 @@ final class CustomerStatusUpdatedEvent extends DomainEvent
         ?string $occurredOn = null
     ) {
         parent::__construct(
-            $eventId ?? $this->generateEventId(),
+            $eventId ?? $this->generateEventId('customer_status_updated_'),
             $occurredOn
         );
     }
@@ -60,10 +60,5 @@ final class CustomerStatusUpdatedEvent extends DomainEvent
     {
         return $this->previousValue !== null
             && $this->previousValue !== $this->currentValue;
-    }
-
-    private function generateEventId(): string
-    {
-        return 'customer_status_updated_' . bin2hex(random_bytes(16));
     }
 }

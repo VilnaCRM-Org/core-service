@@ -36,6 +36,11 @@ abstract class DomainEvent
         return $this->occurredOn;
     }
 
+    protected function generateEventId(string $prefix): string
+    {
+        return $prefix . bin2hex(random_bytes(16));
+    }
+
     private function dateToString(DateTimeInterface $date): string
     {
         return $date->format(DateTimeInterface::ATOM);
