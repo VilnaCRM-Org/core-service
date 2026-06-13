@@ -57,7 +57,12 @@ api_platform:
 when@prod:
   api_platform:
     graphql:
+      # Close every interactive IDE surface in production, not just GraphiQL:
+      # no default IDE, and explicitly disable the (deprecated) Playground node.
+      default_ide: false
       graphiql:
+        enabled: false
+      graphql_playground:
         enabled: false
       introspection:
         enabled: false
