@@ -9,6 +9,10 @@ permissions:
   checks: write
   statuses: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   graphql-diff:
     name: Openapi-diff

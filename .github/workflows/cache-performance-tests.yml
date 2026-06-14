@@ -13,6 +13,10 @@ on:
       - 'tests/Load/execute-load-test.sh'
       - 'tests/Load/config.json.dist'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cache-integration-tests:
     name: Cache Integration Tests

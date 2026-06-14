@@ -3,6 +3,10 @@ name: E2E testing
 on:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   behat:
     name: Behat
@@ -19,15 +23,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install Dependencies
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
       - name: Start Application
         if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
@@ -35,3 +30,7 @@ jobs:
       - name: Run Behat Tests
         if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make behat
+
+      - name: Stop application
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
+        run: make down
