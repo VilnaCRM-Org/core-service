@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  worker-soak:
-    name: Memory soak (${{ matrix.app_env }} shard ${{ matrix.shard }})
+  worker-soak-dev:
+    name: Memory soak (dev shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 35
     permissions:
@@ -21,32 +21,126 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app_env: [dev, test, prod]
         shard: [0, 1, 2, 3]
-        include:
-          - app_env: dev
-            compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
-            worker_memory_warmup_iterations: '2'
-            soak_iterations: '2'
-          - app_env: test
-            compose_file: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
-            worker_memory_warmup_iterations: '1'
-            soak_iterations: '3'
-          - app_env: prod
-            compose_file: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml
-            worker_memory_warmup_iterations: '1'
-            soak_iterations: '2'
     env:
-      COMPOSE_FILE: ${{ matrix.compose_file }}
-      APP_ENV: ${{ matrix.app_env }}
+      COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+      APP_ENV: dev
       APP_DEBUG: '0'
       APP_SECRET: frankenphp-worker-mode-check
       FRANKENPHP_ENABLE_WATCH: '0'
       FRANKENPHP_SITE_CONFIG: ''
       FRANKENPHP_WORKER_CONFIG: ''
       FRANKENPHP_LOOP_MAX: 500
-      WORKER_MEMORY_WARMUP_ITERATIONS: ${{ matrix.worker_memory_warmup_iterations }}
-      SOAK_ITERATIONS: ${{ matrix.soak_iterations }}
+      WORKER_MEMORY_WARMUP_ITERATIONS: '2'
+      SOAK_ITERATIONS: '2'
+      SHARD_TOTAL: '4'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Start worker-mode stack
+        timeout-minutes: 15
+        run: make start
+
+      - name: Compute scenario shard
+        id: scenarios
+        run: |
+          scenarios="$(bash tests/Load/get-load-test-scenarios.sh \
+            | awk -v n="$SHARD_TOTAL" -v i="${{ matrix.shard }}" 'NR % n == i' \
+            | paste -sd, -)"
+          if [ -z "$scenarios" ]; then
+            echo "No scenarios resolved for shard ${{ matrix.shard }}." >&2
+            exit 1
+          fi
+          echo "list=$scenarios" >> "$GITHUB_OUTPUT"
+          echo "Shard ${{ matrix.shard }}/$SHARD_TOTAL scenarios: $scenarios"
+
+      - name: Execute worker-mode verification (sharded soak)
+        timeout-minutes: 25
+        env:
+          WORKER_MEMORY_SOAK_SCENARIOS: ${{ steps.scenarios.outputs.list }}
+        run: make worker-mode-verification
+
+      - name: Stop worker-mode stack
+        if: always()
+        timeout-minutes: 10
+        run: make down
+
+  worker-soak-test:
+    name: Memory soak (test shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.override.yml:docker-compose.load_test.override.yml
+      APP_ENV: test
+      APP_DEBUG: '0'
+      APP_SECRET: frankenphp-worker-mode-check
+      FRANKENPHP_ENABLE_WATCH: '0'
+      FRANKENPHP_SITE_CONFIG: ''
+      FRANKENPHP_WORKER_CONFIG: ''
+      FRANKENPHP_LOOP_MAX: 500
+      WORKER_MEMORY_WARMUP_ITERATIONS: '3'
+      SOAK_ITERATIONS: '3'
+      SHARD_TOTAL: '4'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Start worker-mode stack
+        timeout-minutes: 15
+        run: make start
+
+      - name: Compute scenario shard
+        id: scenarios
+        run: |
+          scenarios="$(bash tests/Load/get-load-test-scenarios.sh \
+            | awk -v n="$SHARD_TOTAL" -v i="${{ matrix.shard }}" 'NR % n == i' \
+            | paste -sd, -)"
+          if [ -z "$scenarios" ]; then
+            echo "No scenarios resolved for shard ${{ matrix.shard }}." >&2
+            exit 1
+          fi
+          echo "list=$scenarios" >> "$GITHUB_OUTPUT"
+          echo "Shard ${{ matrix.shard }}/$SHARD_TOTAL scenarios: $scenarios"
+
+      - name: Execute worker-mode verification (sharded soak)
+        timeout-minutes: 25
+        env:
+          WORKER_MEMORY_SOAK_SCENARIOS: ${{ steps.scenarios.outputs.list }}
+        run: make worker-mode-verification
+
+      - name: Stop worker-mode stack
+        if: always()
+        timeout-minutes: 10
+        run: make down
+
+  worker-soak-prod:
+    name: Memory soak (prod shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.load_test.override.yml:docker-compose.prod.yml
+      APP_ENV: prod
+      APP_DEBUG: '0'
+      APP_SECRET: frankenphp-worker-mode-check
+      FRANKENPHP_ENABLE_WATCH: '0'
+      FRANKENPHP_SITE_CONFIG: ''
+      FRANKENPHP_WORKER_CONFIG: ''
+      FRANKENPHP_LOOP_MAX: 500
+      WORKER_MEMORY_WARMUP_ITERATIONS: '1'
+      SOAK_ITERATIONS: '2'
       SHARD_TOTAL: '4'
     steps:
       - name: Checkout Repository
@@ -132,41 +226,41 @@ jobs:
   memory-tests-dev:
     name: Memory leak tests (dev env)
     runs-on: ubuntu-latest
-    needs: [worker-soak]
+    needs: [worker-soak-dev]
     if: ${{ always() }}
     steps:
       - name: Validate dev soak shards
         run: |
-          if [ "${{ needs.worker-soak.result }}" != "success" ]; then
-            echo "One or more memory soak shards failed."
+          if [ "${{ needs.worker-soak-dev.result }}" != "success" ]; then
+            echo "One or more dev memory soak shards failed."
             exit 1
           fi
-          echo "All memory soak shards succeeded."
+          echo "All dev memory soak shards succeeded."
 
   memory-tests-prod:
     name: Memory leak tests (prod env)
     runs-on: ubuntu-latest
-    needs: [worker-soak]
+    needs: [worker-soak-prod]
     if: ${{ always() }}
     steps:
       - name: Validate prod soak shards
         run: |
-          if [ "${{ needs.worker-soak.result }}" != "success" ]; then
-            echo "One or more memory soak shards failed."
+          if [ "${{ needs.worker-soak-prod.result }}" != "success" ]; then
+            echo "One or more prod memory soak shards failed."
             exit 1
           fi
-          echo "All memory soak shards succeeded."
+          echo "All prod memory soak shards succeeded."
 
   memory-tests-test:
     name: Memory leak tests (test env)
     runs-on: ubuntu-latest
-    needs: [worker-soak, memory-suite]
+    needs: [worker-soak-test, memory-suite]
     if: ${{ always() }}
     steps:
       - name: Validate test soak shards and memory suite
         run: |
-          if [ "${{ needs.worker-soak.result }}" != "success" ] || [ "${{ needs.memory-suite.result }}" != "success" ]; then
-            echo "Memory soak shards or memory suite failed."
+          if [ "${{ needs.worker-soak-test.result }}" != "success" ] || [ "${{ needs.memory-suite.result }}" != "success" ]; then
+            echo "Test memory soak shards or memory suite failed."
             exit 1
           fi
-          echo "Memory soak shards and memory suite succeeded."
+          echo "Test memory soak shards and memory suite succeeded."
