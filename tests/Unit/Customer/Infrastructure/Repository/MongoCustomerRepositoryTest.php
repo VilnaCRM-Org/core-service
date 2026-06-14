@@ -9,7 +9,10 @@ use App\Core\Customer\Infrastructure\Repository\MongoCustomerRepository;
 use App\Tests\Unit\UnitTestCase;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Iterator\CachingIterator;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+use Doctrine\ODM\MongoDB\Query\Builder;
+use Doctrine\ODM\MongoDB\Query\Query;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class MongoCustomerRepositoryTest extends UnitTestCase
@@ -138,6 +141,52 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
         self::assertSame($customer, $result);
     }
 
+    public function testFindByEmailLowercasesCriteria(): void
+    {
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findOneByCriteria'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findOneByCriteria')
+            ->with(['email' => 'foo@bar.com'])
+            ->willReturn($customer);
+
+        $result = $repository->findByEmail('FOO@BAR.COM');
+
+        self::assertSame($customer, $result);
+    }
+
+    public function testDeleteByEmailDelegatesRawEmailToFindByEmail(): void
+    {
+        // deleteByEmail no longer lowercases before delegating: findByEmail
+        // already canonicalises the address internally, so the raw value is
+        // forwarded verbatim.
+        $customer = $this->createMock(Customer::class);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['findByEmail', 'delete'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('FOO@BAR.COM')
+            ->willReturn($customer);
+
+        $repository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($customer);
+
+        $repository->deleteByEmail('FOO@BAR.COM');
+    }
+
     public function testDeleteByEmailDeletesResolvedCustomer(): void
     {
         $email = 'test@example.com';
@@ -182,6 +231,44 @@ final class MongoCustomerRepositoryTest extends UnitTestCase
             ->method('delete');
 
         $repository->deleteByEmail($email);
+    }
+
+    public function testFindAllIterableStreamsCursorResults(): void
+    {
+        $first = $this->createMock(Customer::class);
+        $second = $this->createMock(Customer::class);
+
+        // Mirror production exactly: createQueryBuilder()->getQuery() yields the
+        // concrete ODM Query, whose getIterator() returns an ODM cursor
+        // (Doctrine\ODM\MongoDB\Iterator\Iterator). CachingIterator is the
+        // lightweight ODM Iterator used to stand in for that cursor.
+        $query = $this->createMock(Query::class);
+        $query
+            ->expects($this->once())
+            ->method('getIterator')
+            ->willReturn(new CachingIterator(
+                new \ArrayIterator([$first, $second])
+            ));
+
+        $builder = $this->createMock(Builder::class);
+        $builder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $repository = $this->getMockBuilder(MongoCustomerRepository::class)
+            ->setConstructorArgs([$this->registry])
+            ->onlyMethods(['createQueryBuilder'])
+            ->getMock();
+
+        $repository
+            ->expects($this->once())
+            ->method('createQueryBuilder')
+            ->willReturn($builder);
+
+        $result = iterator_to_array($repository->findAllIterable());
+
+        self::assertSame([$first, $second], $result);
     }
 
     public function testFindFreshDelegatesToFind(): void

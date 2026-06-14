@@ -71,6 +71,54 @@ final class CustomerTest extends UnitTestCase
         $this->assertEquals($email, $this->customer->getEmail());
     }
 
+    public function testConstructorNormalizesEmailToLowercase(): void
+    {
+        $ulid = $this->ulidTransformer
+            ->transformFromSymfonyUlid($this->faker->ulid());
+        $type = $this->createMock(CustomerType::class);
+        $status = $this->createMock(CustomerStatus::class);
+
+        $customer = new Customer(
+            $this->faker->name(),
+            'MiXeD@Example.COM',
+            $this->faker->phoneNumber(),
+            $this->faker->word(),
+            $type,
+            $status,
+            false,
+            $ulid
+        );
+
+        $this->assertSame('mixed@example.com', $customer->getEmail());
+    }
+
+    public function testSetEmailNormalizesToLowercase(): void
+    {
+        $this->customer->setEmail('MiXeD@Example.COM');
+
+        $this->assertSame('mixed@example.com', $this->customer->getEmail());
+    }
+
+    public function testUpdateNormalizesEmailToLowercase(): void
+    {
+        $newType = $this->createMock(CustomerType::class);
+        $newStatus = $this->createMock(CustomerStatus::class);
+
+        $updateData = new CustomerUpdate(
+            newInitials: 'New Name',
+            newEmail: 'MiXeD@Example.COM',
+            newPhone: '+1234567890',
+            newLeadSource: 'newsletter',
+            newType: $newType,
+            newStatus: $newStatus,
+            newConfirmed: true,
+        );
+
+        $this->customer->update($updateData);
+
+        $this->assertSame('mixed@example.com', $this->customer->getEmail());
+    }
+
     public function testGetAndSetInitials(): void
     {
         $initials = $this->faker->name();

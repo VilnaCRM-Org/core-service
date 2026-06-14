@@ -1,0 +1,280 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Customer\Application\Command;
+
+use App\Core\Customer\Application\Command\NormalizeCustomerEmailsCommand;
+use App\Core\Customer\Domain\Entity\Customer;
+use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
+use App\Tests\Unit\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Tester\CommandTester;
+
+final class NormalizeCustomerEmailsCommandTest extends UnitTestCase
+{
+    private CustomerStreamRepositoryInterface&MockObject $repository;
+    private CommandTester $tester;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->repository = $this->createMock(CustomerStreamRepositoryInterface::class);
+
+        $command = new NormalizeCustomerEmailsCommand($this->repository);
+        $application = new Application();
+        $application->add($command);
+
+        $this->tester = new CommandTester(
+            $application->find('customer:emails:normalize')
+        );
+    }
+
+    /**
+     * Wrap customers in a generator so the test asserts the command streams
+     * the cursor lazily rather than materialising an array.
+     *
+     * @param Customer ...$customers
+     *
+     * @return \Generator<int, Customer>
+     */
+    private function customerStream(Customer ...$customers): \Generator
+    {
+        yield from $customers;
+    }
+
+    public function testNormalizesMixedCaseEmail(): void
+    {
+        $customer = $this->createMock(Customer::class);
+        $customer->method('getEmail')->willReturn('MiXeD@Example.COM');
+        $customer->method('getUlid')->willReturn('ulid-1');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('mixed@example.com')
+            ->willReturn(null);
+
+        $customer
+            ->expects($this->once())
+            ->method('setEmail')
+            ->with('mixed@example.com');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('save')
+            ->with($customer);
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        self::assertStringContainsString('Normalized 1 customer email(s)', $output);
+        self::assertStringContainsString('skipped 0 conflicting record(s)', $output);
+    }
+
+    public function testSkipsAlreadyNormalizedEmail(): void
+    {
+        $customer = $this->createMock(Customer::class);
+        $customer->method('getEmail')->willReturn('already@example.com');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->never())
+            ->method('findByEmail');
+
+        $customer->expects($this->never())->method('setEmail');
+        $this->repository->expects($this->never())->method('save');
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        // Already-canonical rows touch neither counter: pin both totals to 0.
+        self::assertStringContainsString('Normalized 0 customer email(s)', $output);
+        self::assertStringContainsString('skipped 0 conflicting record(s)', $output);
+    }
+
+    public function testSkipsConflictingEmailWithoutCrashing(): void
+    {
+        $customer = $this->createMock(Customer::class);
+        $customer->method('getEmail')->willReturn('Clash@Example.COM');
+        $customer->method('getUlid')->willReturn('ulid-source');
+
+        $conflicting = $this->createMock(Customer::class);
+        $conflicting->method('getUlid')->willReturn('ulid-other');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('clash@example.com')
+            ->willReturn($conflicting);
+
+        $customer->expects($this->never())->method('setEmail');
+        $this->repository->expects($this->never())->method('save');
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        self::assertStringContainsString('Skipped customer "ulid-source"', $output);
+        // Pin the conflict-only summary counts exactly: a conflicting record is
+        // skipped and NOTHING is normalized. Asserting the literal "Normalized 0"
+        // total kills the IncrementInteger (0 -> 1) and DecrementInteger
+        // (0 -> -1) mutants on the conflict-branch return value.
+        self::assertStringContainsString('Normalized 0 customer email(s)', $output);
+        self::assertStringContainsString('skipped 1 conflicting record(s)', $output);
+    }
+
+    public function testNormalizesWhenLookupResolvesSameCustomer(): void
+    {
+        // findByEmail may resolve the very record being normalised (e.g. when a
+        // stale lowercase row points at the same ULID); that is NOT a conflict.
+        $customer = $this->createMock(Customer::class);
+        $customer->method('getEmail')->willReturn('Self@Example.COM');
+        $customer->method('getUlid')->willReturn('ulid-self');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('self@example.com')
+            ->willReturn($customer);
+
+        $customer
+            ->expects($this->once())
+            ->method('setEmail')
+            ->with('self@example.com');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('save')
+            ->with($customer);
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        self::assertStringContainsString(
+            'Normalized 1 customer email(s)',
+            $this->tester->getDisplay()
+        );
+    }
+
+    public function testAccumulatesNormalizedAndSkippedCountsAcrossCustomers(): void
+    {
+        // Two customers normalize and two conflict. A mutated "$normalized = ..."
+        // / "$skipped = ..." (assignment instead of "+=") would collapse to the
+        // last iteration's value (0 / 1) rather than the running totals (2 / 2),
+        // so pinning both totals to 2 kills those Assignment mutants in the loop.
+        $first = $this->mixedCaseCustomer('A@Example.COM', 'ulid-1');
+        $conflictOne = $this->mixedCaseCustomer('B@Example.COM', 'ulid-2');
+        $second = $this->mixedCaseCustomer('C@Example.COM', 'ulid-3');
+        $conflictTwo = $this->mixedCaseCustomer('D@Example.COM', 'ulid-4');
+
+        $other = $this->createMock(Customer::class);
+        $other->method('getUlid')->willReturn('ulid-other');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream(
+                $first,
+                $conflictOne,
+                $second,
+                $conflictTwo
+            ));
+
+        $this->repository
+            ->method('findByEmail')
+            ->willReturnMap([
+                ['a@example.com', null],
+                ['b@example.com', $other],
+                ['c@example.com', null],
+                ['d@example.com', $other],
+            ]);
+
+        $first->expects($this->once())->method('setEmail')->with('a@example.com');
+        $second->expects($this->once())->method('setEmail')->with('c@example.com');
+        $conflictOne->expects($this->never())->method('setEmail');
+        $conflictTwo->expects($this->never())->method('setEmail');
+
+        $this->repository->expects($this->exactly(2))->method('save');
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        self::assertStringContainsString('Normalized 2 customer email(s)', $output);
+        self::assertStringContainsString('skipped 2 conflicting record(s)', $output);
+    }
+
+    public function testSkipsCustomerWhenSaveHitsConcurrentConflict(): void
+    {
+        // A unique-index collision can slip past hasConflict() if another
+        // process inserts the canonical email first (TOCTOU); the driver throws
+        // a RuntimeException on save. The command must skip that record (count
+        // it as skipped) and keep going instead of crashing the backfill.
+        $customer = $this->mixedCaseCustomer('Race@Example.COM', 'ulid-race');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findAllIterable')
+            ->willReturn($this->customerStream($customer));
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findByEmail')
+            ->with('race@example.com')
+            ->willReturn(null);
+
+        $customer->expects($this->once())->method('setEmail')->with('race@example.com');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('save')
+            ->with($customer)
+            ->willThrowException(new \RuntimeException('E11000 duplicate key'));
+
+        $this->tester->execute([]);
+
+        $this->tester->assertCommandIsSuccessful();
+        $output = $this->tester->getDisplay();
+        self::assertStringContainsString('conflicted', $output);
+        self::assertStringContainsString('Normalized 0 customer email(s)', $output);
+        self::assertStringContainsString('skipped 1 conflicting record(s)', $output);
+    }
+
+    /**
+     * @return Customer&MockObject
+     */
+    private function mixedCaseCustomer(
+        string $email,
+        string $ulid
+    ): Customer&MockObject {
+        $customer = $this->createMock(Customer::class);
+        $customer->method('getEmail')->willReturn($email);
+        $customer->method('getUlid')->willReturn($ulid);
+
+        return $customer;
+    }
+}

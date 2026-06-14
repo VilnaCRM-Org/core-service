@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core\Customer\Infrastructure\Repository;
 
 use App\Core\Customer\Domain\Entity\Customer;
-use App\Core\Customer\Domain\Repository\CustomerRepositoryInterface;
+use App\Core\Customer\Domain\Repository\CustomerStreamRepositoryInterface;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use InvalidArgumentException;
 
@@ -19,12 +19,12 @@ use InvalidArgumentException;
  * Design:
  * - Focused on single responsibility (persistence)
  * - Wrapped by CachedCustomerRepository for caching
- * - Implements CustomerRepositoryInterface
+ * - Implements CustomerStreamRepositoryInterface
  *
  * @extends BaseRepository<Customer>
  */
 final class MongoCustomerRepository extends BaseRepository implements
-    CustomerRepositoryInterface
+    CustomerStreamRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -37,7 +37,22 @@ final class MongoCustomerRepository extends BaseRepository implements
      */
     public function findByEmail(string $email): ?Customer
     {
-        return $this->findOneByCriteria(['email' => $email]);
+        return $this->findOneByCriteria(['email' => strtolower($email)]);
+    }
+
+    /**
+     * Stream every customer through a MongoDB cursor.
+     *
+     * The query builder cursor hydrates documents lazily, so the backfill
+     * command never holds the full collection in memory at once.
+     *
+     * @return iterable<Customer>
+     */
+    public function findAllIterable(): iterable
+    {
+        yield from $this->createQueryBuilder()
+            ->getQuery()
+            ->getIterator();
     }
 
     public function findFresh(

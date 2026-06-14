@@ -75,8 +75,8 @@ Feature: GraphQL Customers Validation - Comprehensive Tests
     """
     Then the GraphQL response status code should be 200
     And the GraphQL response should not have errors
-    And the GraphQL response "data.createCustomer.customer.email" should be "UPPERCASE@EXAMPLE.COM"
-    Then delete customer with email "UPPERCASE@EXAMPLE.COM"
+    And the GraphQL response "data.createCustomer.customer.email" should be "uppercase@example.com"
+    Then delete customer with email "uppercase@example.com"
 
   Scenario: Attempt to create customer with duplicate email
     Given create customer with email "duplicate@example.com"

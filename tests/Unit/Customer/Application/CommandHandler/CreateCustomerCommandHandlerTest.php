@@ -37,7 +37,7 @@ final class CreateCustomerCommandHandlerTest extends UnitTestCase
     {
         $customer = $this->createMock(Customer::class);
         $customerId = (string) $this->faker->ulid();
-        $email = 'TeSt+Create@Example.COM';
+        $email = 'test+create@example.com';
         $customer->method('getUlid')->willReturn($customerId);
         $customer->method('getEmail')->willReturn($email);
 
