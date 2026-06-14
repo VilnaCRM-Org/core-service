@@ -3,6 +3,10 @@ name: code quality
 on:
   pull_request:
 
+concurrency:
+  group: psalm-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   psalm:
     name: Psalm

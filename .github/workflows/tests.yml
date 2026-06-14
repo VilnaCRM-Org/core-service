@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: ['main']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: PHPUnit
@@ -18,15 +22,6 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           persist-credentials: false
-
-      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        with:
-          php-version: ${{ vars.PHP_VERSION }}
-
-      - name: Install dependencies
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: composer self-update && composer install --dev --no-scripts --no-progress && composer dump-autoload
 
       - name: Start application
         if: ${{ !startsWith(github.actor, 'dependabot') }}
@@ -50,3 +45,7 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
+
+      - name: Stop application
+        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
+        run: make down
