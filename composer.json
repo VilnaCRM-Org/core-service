@@ -114,7 +114,7 @@
     "fakerphp/faker": "^1.23.0",
     "friends-of-behat/symfony-extension": "^2.4",
     "friendsofphp/php-cs-fixer": "^3.14",
-    "infection/infection": "^0.33.2",
+    "infection/infection": "^0.34.0",
     "marcocesarato/php-conventional-changelog": "^1.16",
     "nunomaduro/phpinsights": "^2.7",
     "pheromone/phpcs-security-audit": "^2.0",
