@@ -1,72 +1,12 @@
 framework:
   messenger:
-    # Serialization for domain events
-    serializer:
-      default_serializer: messenger.transport.symfony_serializer
-      symfony_serializer:
-        format: json
-        context: {}
-
     transports:
-      # Main transport for async domain events (AP from CAP - resilient dispatch)
-      domain-events:
-        dsn: '%env(DOMAIN_EVENTS_TRANSPORT_DSN)%'
-        options:
-          auto_setup: true
-
-        retry_strategy:
-          max_retries: 3
-          # milliseconds delay
-          delay: 60000
-          multiplier: 2
-          max_delay: 0
-
-        failure_transport: failed-domain-events
-
-      # Infinite retry transport for failed domain events (AP theorem - eventual delivery)
-      failed-domain-events:
-        dsn: '%env(FAILED_DOMAIN_EVENTS_TRANSPORT_DSN)%'
-        retry_strategy:
-          service: 'App\Shared\Infrastructure\RetryStrategy\InfiniteRetryStrategy'
-        failure_transport: dead-domain-events
-
-      # Terminal DLQ for domain events that cannot be retried safely.
-      dead-domain-events:
-        dsn: '%env(DEAD_DOMAIN_EVENTS_TRANSPORT_DSN)%'
-
-      # Shared async transport for proactive cache refresh work.
-      cache-refresh:
-        dsn: '%env(CACHE_REFRESH_TRANSPORT_DSN)%'
-        options:
-          auto_setup: true
-
-        retry_strategy:
-          max_retries: 3
-          delay: 60000
-          multiplier: 2
-          max_delay: 0
-
-        failure_transport: failed-cache-refresh
-
-      failed-cache-refresh:
-        dsn: '%env(FAILED_CACHE_REFRESH_TRANSPORT_DSN)%'
-        retry_strategy:
-          max_retries: 3
-          delay: 300000
-          multiplier: 2
-          max_delay: 1800000
+      dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
 
     routing:
-      # Route domain event envelopes to async transport
-      'App\Shared\Infrastructure\Bus\Event\Async\DomainEventEnvelope': domain-events
-      'App\Shared\Application\Command\CacheRefreshCommand': cache-refresh
 
 when@test:
   framework:
     messenger:
       transports:
-        domain-events: 'in-memory://'
-        failed-domain-events: 'in-memory://'
-        dead-domain-events: 'in-memory://'
-        cache-refresh: 'in-memory://'
-        failed-cache-refresh: 'in-memory://'
+        - in-memory

@@ -13,18 +13,17 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, string|null>
      */
-    public function forCallables(iterable $callables): array
+    public static function forCallables(iterable $callables): array
     {
         $callableArray = iterator_to_array($callables);
-        $extractor = new InvokeParameterExtractor();
 
         $keys = array_map(
-            static fn (object $handler): ?string => $extractor->extract($handler),
+            self::classExtractor(new self()),
             $callableArray
         );
 
         $values = array_map(
-            static fn ($value) => [$value],
+            self::unflatten(),
             $callableArray
         );
 
@@ -36,26 +35,55 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, array<DomainEventSubscriberInterface>>
      */
-    public function forPipedCallables(iterable $callables): array
+    public static function forPipedCallables(iterable $callables): array
     {
         return array_reduce(
             iterator_to_array($callables),
-            $this->pipedCallablesReducer(),
+            self::pipedCallablesReducer(),
             []
         );
     }
 
-    private function pipedCallablesReducer(): callable
+    public function extract(object|string $class): ?string
     {
-        return fn (
+        $reflector = new \ReflectionClass($class);
+        $method = $reflector->getMethod('__invoke');
+
+        if ($this->hasOnlyOneParameter($method)) {
+            return $this->firstParameterClassFrom($method);
+        }
+
+        return null;
+    }
+
+    private static function classExtractor(self $parameterExtractor): callable
+    {
+        return static fn (
+            callable $handler
+        ): ?string => self::extractHandler(
+            $parameterExtractor,
+            $handler
+        );
+    }
+
+    private static function extractHandler(
+        self $parameterExtractor,
+        callable $handler
+    ): ?string {
+        return $parameterExtractor->extract($handler);
+    }
+
+    private static function pipedCallablesReducer(): callable
+    {
+        return static fn (
             array $subscribers,
             DomainEventSubscriberInterface $subscriber
         ): array => array_reduce(
             $subscriber->subscribedTo(),
-            fn (
+            static fn (
                 array $carry,
                 string $event
-            ) => $this->addSubscriberToEvent($carry, $event, $subscriber),
+            ) => self::addSubscriberToEvent($carry, $event, $subscriber),
             $subscribers
         );
     }
@@ -65,13 +93,36 @@ final class CallableFirstParameterExtractor
      *
      * @return array<int, array<DomainEventSubscriberInterface>>
      */
-    private function addSubscriberToEvent(
+    private static function addSubscriberToEvent(
         array $subscribers,
         string $event,
         DomainEventSubscriberInterface $subscriber
     ): array {
         $subscribers[$event][] = $subscriber;
-
         return $subscribers;
+    }
+
+    private static function unflatten(): callable
+    {
+        return static fn ($value) => [$value];
+    }
+
+    private function firstParameterClassFrom(\ReflectionMethod $method): string
+    {
+        /** @var \ReflectionNamedType $firstParameterType */
+        $firstParameterType = $method->getParameters()[0]->getType();
+
+        if ($firstParameterType === null) {
+            throw new \LogicException(
+                'Missing type hint for the first parameter of __invoke'
+            );
+        }
+
+        return $firstParameterType->getName();
+    }
+
+    private function hasOnlyOneParameter(\ReflectionMethod $method): bool
+    {
+        return $method->getNumberOfParameters() === 1;
     }
 }

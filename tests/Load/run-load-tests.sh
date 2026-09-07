@@ -1,11 +1,17 @@
 #!/bin/bash
-set -euo pipefail
+set -e -x
+
+echo "Running load tests..."
+echo "Current directory: $(pwd)"
+echo "----------------------------------------"
+echo "Listing files:"
+ls -l
+echo "----------------------------------------"
 
 LOAD_TEST_SCENARIOS=$(./tests/Load/get-load-test-scenarios.sh)
+echo "Scenarios: $LOAD_TEST_SCENARIOS"
 
-while IFS= read -r scenario; do
-  [[ -z "$scenario" ]] && continue
-  echo "Running load test scenario: $scenario"
-  # Parameters: scenario name, setup, teardown, wait, print-summary, result-prefix
+for scenario in $LOAD_TEST_SCENARIOS; do
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Running scenario: $scenario"
   ./tests/Load/execute-load-test.sh "$scenario" true true true true all-
-done <<< "$LOAD_TEST_SCENARIOS"
+done

@@ -1,248 +1,84 @@
 import { check } from 'k6';
-import http from 'k6/http';
 
+/**
+ * Shared helpers for the k6 load-test scenarios.
+ */
 export default class Utils {
+  /**
+   * Builds the base API URLs from environment overrides or load-test config.
+   */
   constructor() {
     const config = this.getConfig();
-    const scheme = __ENV.LOAD_TEST_API_SCHEME || config.apiScheme || 'http';
-    const host = __ENV.LOAD_TEST_API_HOST || config.apiHost;
-    const port = __ENV.LOAD_TEST_API_PORT || config.apiPort;
+    const host = this.getEnv('API_HOST') ?? config.apiHost;
+    const port = this.getEnv('API_PORT') ?? config.apiPort;
 
-    this.baseDomain = `${scheme}://${host}:${port}`;
-    this.baseUrl = `${this.baseDomain}/api`;
-    this.baseHttpUrl = this.baseUrl + '/customers';
-    this.baseGraphQLUrl = this.baseUrl + '/graphql';
-    this.graphQLIdPrefix = '/api/customers/';
+    this.baseUrl = `http://${host}:${port}/api`;
+    this.baseHttpUrl = this.baseUrl;
   }
 
+  /**
+   * Loads the primary load-test config and falls back to the distributed template.
+   *
+   * @returns {{apiHost: string, apiPort: string|number}}
+   */
   getConfig() {
-    const candidatePaths = [
-      '../../config.json',
-      '../config.json',
-      '../../config.json.dist',
-      '../config.json.dist',
-    ];
-
-    for (const path of candidatePaths) {
+    try {
+      return JSON.parse(open('../config.json'));
+    } catch (configError) {
       try {
-        return this.applyFixtureSuffix(JSON.parse(open(path)));
-      } catch (error) {
-        // Try next candidate
+        return JSON.parse(open('../config.json.dist'));
+      } catch (fallbackError) {
+        throw new Error(
+          `Failed to load configuration from config.json and config.json.dist: ${configError.message}; ${fallbackError.message}`,
+        );
       }
     }
-
-    throw new Error('Unable to load load-test configuration (config.json or config.json.dist)');
   }
 
-  applyFixtureSuffix(config) {
-    const fixtureSuffix = this.getOptionalCLIVariable('LOAD_TEST_FIXTURE_SUFFIX');
-
-    if (!fixtureSuffix) {
-      return config;
-    }
-
-    ['customersFileName', 'customerStatusesFileName', 'customerTypesFileName'].forEach(key => {
-      const fileName = config[key];
-      const extensionIndex = fileName.lastIndexOf('.');
-
-      if (extensionIndex === -1) {
-        config[key] = `${fileName}-${fixtureSuffix}`;
-        return;
-      }
-
-      config[key] =
-        `${fileName.slice(0, extensionIndex)}-${fixtureSuffix}${fileName.slice(extensionIndex)}`;
-    });
-
-    return config;
-  }
-
-  getBaseDomain() {
-    return this.baseDomain;
-  }
-
-  getBaseUrl() {
-    return this.baseUrl;
-  }
-
+  /**
+   * Returns the computed base HTTP URL used by the k6 scenarios.
+   *
+   * @returns {string}
+   */
   getBaseHttpUrl() {
     return this.baseHttpUrl;
   }
 
-  getBaseGraphQLUrl() {
-    return this.baseGraphQLUrl;
+  /**
+   * Reads an optional k6 environment variable and normalizes empty values.
+   *
+   * @param {string} variable
+   * @returns {string|undefined}
+   */
+  getEnv(variable) {
+    const value = typeof __ENV === 'undefined' ? undefined : __ENV[variable];
+
+    if (value === undefined || value === null || value === '' || value === 'undefined') {
+      return undefined;
+    }
+
+    return value;
   }
 
-  getGraphQLIdPrefix() {
-    return this.graphQLIdPrefix;
-  }
-
-  getJsonHeader() {
-    return {
-      headers: {
-        Accept: 'application/ld+json',
-        'Content-Type': 'application/ld+json',
-      },
-    };
-  }
-
-  getGraphQLHeader() {
-    return {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-  }
-
-  getMergePatchHeader() {
-    return {
-      headers: {
-        'Content-Type': 'application/merge-patch+json',
-      },
-    };
-  }
-
-  getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
+  /**
+   * Returns the raw CLI variable value that k6 injected into the environment.
+   *
+   * @param {string} variable
+   * @returns {string}
+   */
   getCLIVariable(variable) {
     return `${__ENV[variable]}`;
   }
 
-  getOptionalCLIVariable(variable) {
-    return __ENV[variable];
-  }
-
-  getIntCLIVariable(variable, fallback) {
-    const rawValue = this.getOptionalCLIVariable(variable);
-    const parsedValue = Number.parseInt(rawValue ?? '', 10);
-
-    return Number.isNaN(parsedValue) ? fallback : parsedValue;
-  }
-
-  isCLIVariableTrue(variable) {
-    return ['1', 'true', 'yes'].includes(
-      `${this.getOptionalCLIVariable(variable) ?? ''}`.toLowerCase()
-    );
-  }
-
-  checkCustomerIsDefined(customer) {
-    check(customer, { 'customer is defined': c => c !== undefined });
-  }
-
-  generateCustomer(types, statuses) {
-    // Generate unique email using multiple entropy sources
-    const email = this.generateUniqueEmail();
-
-    const firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Lisa', 'Robert', 'Emily'];
-    const lastNames = [
-      'Smith',
-      'Johnson',
-      'Williams',
-      'Brown',
-      'Jones',
-      'Garcia',
-      'Miller',
-      'Davis',
-    ];
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const initials = `${firstName} ${lastName}`;
-
-    const leadSources = ['Website', 'Referral', 'Social Media', 'Email Campaign'];
-    const leadSource = leadSources[Math.floor(Math.random() * leadSources.length)];
-
-    const customerData = {
-      initials,
-      email,
-      phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
-      leadSource,
-      confirmed: Math.random() > 0.5,
-    };
-
-    // Add type and status if available
-    if (types && types.length > 0) {
-      const randomType = types[Math.floor(Math.random() * types.length)];
-      customerData.type = randomType['@id'];
-    }
-
-    if (statuses && statuses.length > 0) {
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      customerData.status = randomStatus['@id'];
-    }
-
-    return customerData;
-  }
-
-  generateUniqueEmail() {
-    // Get K6 runtime information for uniqueness
-    const vuId = typeof __VU !== 'undefined' ? __VU : 1;
-    const iteration = typeof __ITER !== 'undefined' ? __ITER : 0;
-
-    // High-precision timestamp components
-    const timestamp = Date.now();
-    const microseconds =
-      typeof performance !== 'undefined' && performance.now
-        ? performance.now().toString().replace('.', '').substring(0, 8)
-        : Math.random().toString().replace('.', '').substring(0, 8);
-
-    // Additional entropy sources
-    const randomString1 = Math.random().toString(36).substring(2, 10); // 8 chars
-    const randomString2 = Math.random().toString(36).substring(2, 8); // 6 chars
-    const processEntropy =
-      typeof process !== 'undefined' && process.hrtime
-        ? process.hrtime()[1].toString().substring(0, 6)
-        : Math.floor(Math.random() * 1000000)
-            .toString()
-            .padStart(6, '0');
-
-    // Domain selection
-    const domains = ['example.com', 'test.org', 'demo.net'];
-    const domain = domains[Math.floor(Math.random() * domains.length)];
-
-    // Construct unique email with multiple entropy sources
-    const uniqueId = `${vuId}_${iteration}_${timestamp}_${microseconds}_${randomString1}_${randomString2}_${processEntropy}`;
-
-    return `customer_${uniqueId}@${domain}`;
-  }
-
+  /**
+   * Runs a named k6 response assertion against the provided response.
+   *
+   * @param {import('k6/http').RefinedResponse<'text'>} response
+   * @param {string} checkName
+   * @param {(response: import('k6/http').RefinedResponse<'text'>) => boolean} checkFunction
+   * @returns {void}
+   */
   checkResponse(response, checkName, checkFunction) {
     check(response, { [checkName]: res => checkFunction(res) });
-  }
-
-  createCustomer(customerData) {
-    const payload = JSON.stringify(customerData);
-    return http.post(this.getBaseHttpUrl(), payload, this.getJsonHeader());
-  }
-
-  createCustomerType(typeData) {
-    const payload = JSON.stringify(typeData);
-    return http.post(`${this.baseUrl}/customer_types`, payload, this.getJsonHeader());
-  }
-
-  createCustomerStatus(statusData) {
-    const payload = JSON.stringify(statusData);
-    return http.post(`${this.baseUrl}/customer_statuses`, payload, this.getJsonHeader());
-  }
-
-  getCustomerTypes() {
-    return http.get(`${this.baseUrl}/customer_types?itemsPerPage=100`, this.getJsonHeader());
-  }
-
-  getCustomerStatuses() {
-    return http.get(`${this.baseUrl}/customer_statuses?itemsPerPage=100`, this.getJsonHeader());
-  }
-
-  executeGraphQL(query) {
-    const payload = JSON.stringify(query);
-    return http.post(this.getBaseGraphQLUrl(), payload, this.getGraphQLHeader());
-  }
-
-  createDependency(dependencyData) {
-    // Generic method to create any dependency resource
-    // Can be used for types, statuses, or other dependencies
-    const payload = JSON.stringify(dependencyData);
-    return http.post(this.getBaseHttpUrl(), payload, this.getJsonHeader());
   }
 }
