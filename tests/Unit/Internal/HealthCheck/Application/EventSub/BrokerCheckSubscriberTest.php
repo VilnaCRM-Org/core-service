@@ -12,8 +12,6 @@ use Aws\Exception\AwsException;
 use Aws\Result;
 use Aws\Sqs\SqsClient;
 use PHPUnit\Framework\MockObject\MockObject;
-use ReflectionClass;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class BrokerCheckSubscriberTest extends UnitTestCase
 {
@@ -36,12 +34,9 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
 
         $this->sqsClient->expects($this->once())
             ->method('__call')
-            ->with(
-                $this->equalTo(
-                    'createQueue'
-                ),
-                $this->equalTo([['QueueName' => 'health-check-queue']])
-            )
+            ->with($this->equalTo(
+                'createQueue'
+            ), $this->equalTo([['QueueName' => 'health-check-queue']]))
             ->willReturn($result);
 
         $event = new HealthCheckEvent();
@@ -51,15 +46,19 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
     public function testOnHealthCheckHandlesQueueAlreadyExistsException(): void
     {
         $command = $this->createMock(CommandInterface::class);
-        $exception = $this->createQueueExistsException($command);
 
         $this->sqsClient->expects($this->once())
             ->method('__call')
-            ->with(
-                $this->equalTo('createQueue'),
-                $this->equalTo([['QueueName' => 'health-check-queue']])
-            )
-            ->willThrowException($exception);
+            ->with($this->equalTo(
+                'createQueue'
+            ), $this->equalTo([['QueueName' => 'health-check-queue']]))
+            ->willThrowException(new AwsException(
+                'Queue already exists',
+                $command,
+                [
+                    'code' => 'QueueAlreadyExists',
+                ]
+            ));
 
         try {
             $event = new HealthCheckEvent();
@@ -70,23 +69,11 @@ final class BrokerCheckSubscriberTest extends UnitTestCase
         }
     }
 
-    public function testRegistersHealthCheckListenerAttribute(): void
+    public function testGetSubscribedEvents(): void
     {
-        $listener = (new ReflectionClass(BrokerCheckSubscriber::class))
-            ->getAttributes(AsEventListener::class)[0]
-            ->newInstance();
-
-        $this->assertSame(HealthCheckEvent::class, $listener->event);
-        $this->assertSame('onHealthCheck', $listener->method);
-    }
-
-    private function createQueueExistsException(
-        CommandInterface $command
-    ): AwsException {
-        return new AwsException(
-            'Queue already exists',
-            $command,
-            ['code' => 'QueueAlreadyExists']
+        $this->assertSame(
+            [HealthCheckEvent::class => 'onHealthCheck'],
+            BrokerCheckSubscriber::getSubscribedEvents()
         );
     }
 }

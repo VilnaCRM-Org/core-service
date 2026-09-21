@@ -6,9 +6,7 @@ namespace App\Internal\HealthCheck\Application\EventSub;
 
 use App\Internal\HealthCheck\Domain\Event\HealthCheckEvent;
 use Aws\Sqs\SqsClient;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-#[AsEventListener(event: HealthCheckEvent::class, method: 'onHealthCheck')]
 final class BrokerCheckSubscriber extends BaseHealthCheckSubscriber
 {
     private SqsClient $sqsClient;
