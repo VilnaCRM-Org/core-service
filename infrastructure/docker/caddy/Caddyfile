@@ -1,0 +1,52 @@
+{
+    {$CADDY_GLOBAL_OPTIONS}
+
+    frankenphp {
+        {$FRANKENPHP_CONFIG}
+    }
+
+    {$CADDY_DEBUG}
+    auto_https disable_redirects
+}
+
+{$SERVER_NAME} {
+    log
+    {$CADDY_EXTRA_CONFIG}
+
+    handle /ping {
+        respond "pong" 200
+    }
+
+    root * /srv/app/public
+    encode zstd gzip
+
+    mercure {
+        transport_url {$MERCURE_TRANSPORT_URL:bolt:///data/mercure.db}
+        publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+        subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+        anonymous
+        subscriptions
+        {$MERCURE_EXTRA_DIRECTIVES}
+    }
+
+    vulcain
+    php_server
+    file_server
+}
+
+:8081 {
+    log
+
+    handle /ping {
+        respond "pong" 200
+    }
+
+    root * /srv/app/public
+    encode zstd gzip
+
+    vulcain
+    php_server {
+        env APP_ENV {$APP_RUNTIME_HTTP_ENV:test}
+    }
+    file_server
+}

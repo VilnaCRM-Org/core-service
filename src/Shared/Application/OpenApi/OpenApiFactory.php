@@ -5,91 +5,48 @@ declare(strict_types=1);
 namespace App\Shared\Application\OpenApi;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
-use App\Shared\Application\OpenApi\Applier\OpenApiExtensionsApplier;
-use App\Shared\Application\OpenApi\Factory\Endpoint\EndpointFactoryInterface;
-use App\Shared\Application\OpenApi\Processor\OpenApiProcessorInterface;
-use ArrayObject;
 
 final class OpenApiFactory implements OpenApiFactoryInterface
 {
-    /** @var list<EndpointFactoryInterface> */
-    private array $endpointFactories;
+    private const TAG_DESCRIPTIONS = [
+        'ExampleApiResource' => 'Template example resource endpoints.',
+        'HealthCheck' => 'Runtime health-check endpoints.',
+    ];
 
-    /** @var list<OpenApiProcessorInterface> */
-    private array $processors;
-
-    /**
-     * @param iterable<EndpointFactoryInterface> $endpointFactories
-     * @param iterable<OpenApiProcessorInterface> $processors
-     */
     public function __construct(
-        private OpenApiFactoryInterface $decorated,
-        iterable $endpointFactories,
-        iterable $processors,
-        private OpenApiExtensionsApplier $extensionsApplier
+        private OpenApiFactoryInterface $decorated
     ) {
-        $this->endpointFactories = is_array($endpointFactories)
-            ? $endpointFactories
-            : iterator_to_array($endpointFactories);
-        $this->processors = is_array($processors)
-            ? $processors
-            : iterator_to_array($processors);
     }
 
     /**
-     * @param array<string, string> $context
+     * @param array<string, array|bool|float|int|object|string|null> $context
      */
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-        $this->applyEndpointFactories($openApi);
-        $openApi = $this->applyProcessors($openApi);
 
-        return $this->normalizeOpenApi($openApi);
+        return $openApi->withTags($this->describeTags($openApi->getTags()));
     }
 
-    private function applyEndpointFactories(OpenApi $openApi): void
+    /**
+     * @param array<int, Tag> $tags
+     *
+     * @return array<int, Tag>
+     */
+    private function describeTags(array $tags): array
     {
-        array_walk(
-            $this->endpointFactories,
-            static function (
-                EndpointFactoryInterface $factory
-            ) use ($openApi): void {
-                $factory->createEndpoint($openApi);
-            }
-        );
+        return array_map($this->describeTag(...), $tags);
     }
 
-    private function applyProcessors(OpenApi $openApi): OpenApi
+    private function describeTag(Tag $tag): Tag
     {
-        foreach ($this->processors as $processor) {
-            $openApi = $processor->process($openApi);
-        }
+        $description = self::TAG_DESCRIPTIONS[$tag->getName()]
+            ?? $tag->getDescription();
 
-        return $openApi;
-    }
-
-    private function normalizeOpenApi(OpenApi $openApi): OpenApi
-    {
-        return $this->extensionsApplier->apply(
-            new OpenApi(
-                $openApi->getInfo(),
-                $openApi->getServers(),
-                $openApi->getPaths(),
-                $openApi->getComponents(),
-                $openApi->getSecurity(),
-                $openApi->getTags(),
-                $openApi->getExternalDocs(),
-                $openApi->getJsonSchemaDialect(),
-                $this->normalizeWebhooks($openApi->getWebhooks())
-            ),
-            $openApi->getExtensionProperties()
-        );
-    }
-
-    private function normalizeWebhooks(?ArrayObject $webhooks): ArrayObject
-    {
-        return $webhooks ?? new ArrayObject();
+        return $description === null
+            ? $tag
+            : $tag->withDescription($description);
     }
 }

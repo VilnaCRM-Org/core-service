@@ -19,6 +19,7 @@ updates:
     directory: '/tests/Load'
     schedule:
       interval: 'monthly'
+    open-pull-requests-limit: 5
     reviewers:
       - 'Kravalg'
     groups:

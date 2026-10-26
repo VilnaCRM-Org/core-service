@@ -34,6 +34,7 @@ Scan through our [existing issues](https://github.com/VilnaCRM-Org/php-service-t
 1. Fork the repository.
 
 - Using GitHub Desktop:
+
   - [Getting started with GitHub Desktop](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/getting-started-with-github-desktop) will guide you through setting up Desktop.
   - Once Desktop is set up, you can use it to [fork the repo](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/cloning-and-forking-repositories-from-github-desktop)!
 
@@ -46,7 +47,9 @@ Scan through our [existing issues](https://github.com/VilnaCRM-Org/php-service-t
 
 ### Commit your update
 
-Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process:zap:.
+Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process :zap:
+
+**Note:** This project uses an auto-release workflow based on Conventional Commits. Please refer to the [Auto-Release Documentation](https://github.com/VilnaCRM-Org/php-service-template/blob/main/.github/AUTORELEASE.md#updating-versions) for guidance on writing commit messages that follow the required format.
 
 ### Pull Request
 
