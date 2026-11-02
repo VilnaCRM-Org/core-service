@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class FailingTest extends TestCase
 {
-    public function testFailure(): void
+    public function testFailure()
     {
         $this->assertTrue(false);
     }
