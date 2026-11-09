@@ -2,10 +2,7 @@ name: E2E testing
 
 on:
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: ['main']
 
 jobs:
   behat:
@@ -13,24 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Dependabot skip
-        if: startsWith(github.actor, 'dependabot')
-        run: echo "Skipping E2E tests for Dependabot PR"
-
       - name: Checkout Repository
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Start Application
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make start
 
-      - name: Run Behat Tests
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        run: make behat
+      - name: Setup Test Database
+        run: make setup-test-db
 
-      - name: Stop application
-        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
-        run: make down
+      - name: Run Behat Tests
+        run: make behat

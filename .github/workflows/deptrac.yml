@@ -2,34 +2,18 @@ name: Architecture static analysis tool
 
 on:
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: ['main']
 
 jobs:
   deptrac:
     name: Deptrac
     runs-on: ubuntu-latest
     steps:
-      - name: Dependabot skip
-        if: startsWith(github.actor, 'dependabot')
-        run: echo "Skipping Deptrac for Dependabot PR"
-
       - name: Checkout code
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          persist-credentials: false
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Start Application
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
+      - name: Start application
         run: make start
 
       - name: Run Deptrac
-        if: ${{ !startsWith(github.actor, 'dependabot') }}
         run: make deptrac
-
-      - name: Stop application
-        if: ${{ !startsWith(github.actor, 'dependabot') && always() }}
-        run: make down

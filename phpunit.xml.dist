@@ -6,6 +6,7 @@
          backupGlobals="false"
          colors="true"
          bootstrap="tests/bootstrap.php"
+         convertDeprecationsToExceptions="false"
 >
     <php>
         <ini name="display_errors" value="1" />
@@ -13,7 +14,7 @@
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
-        <server name="SYMFONY_PHPUNIT_VERSION" value="10.5" />
+        <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
         <server name="KERNEL_CLASS" value="App\Shared\Kernel" />
     </php>
 
@@ -22,24 +23,18 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Integration">
-            <exclude>tests/Integration/Negative</exclude>
             <directory>tests/Integration</directory>
-        </testsuite>
-        <testsuite name="Negative">
-            <directory>tests/Integration/Negative</directory>
         </testsuite>
     </testsuites>
 
-    <source>
+    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">src</directory>
         </include>
-    </source>
+    </coverage>
 
-    <coverage includeUncoveredFiles="true" />
-
-    <extensions>
-        <bootstrap class="Symfony\Bridge\PhpUnit\SymfonyExtension" />
-    </extensions>
+    <listeners>
+        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
+    </listeners>
 
 </phpunit>
