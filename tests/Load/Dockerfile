@@ -1,25 +1,20 @@
-ARG XK6_VERSION=v1.3.7
-ARG K6_VERSION=v1.7.1
-ARG XK6_FILE_VERSION=v1.6.1
-ARG XK6_COUNTER_VERSION=v0.0.1
+FROM golang:1.24-alpine AS builder
 
-FROM golang:1.25-alpine AS builder
+WORKDIR /app
 
-ARG XK6_VERSION
-ARG K6_VERSION
-ARG XK6_FILE_VERSION
-ARG XK6_COUNTER_VERSION
+ENV CGO_ENABLED=0
 
 RUN apk add --no-cache git
 
-RUN go install go.k6.io/xk6/cmd/xk6@${XK6_VERSION} && \
-    xk6 build --k6-version ${K6_VERSION} \
-              --with github.com/avitalique/xk6-file@${XK6_FILE_VERSION} \
-              --with github.com/mstoykov/xk6-counter@${XK6_COUNTER_VERSION}
+RUN go install go.k6.io/xk6/cmd/xk6@v0.11.0
 
-FROM grafana/k6:1.7.1
+RUN xk6 build \
+    --with github.com/grafana/xk6-dashboard@v0.8.1 \
+    --with github.com/mstoykov/xk6-counter@v0.0.1  \
+    --with github.com/grafana/xk6-exec@v0.3.0
 
-COPY --from=builder /go/k6 /usr/bin/k6
+FROM alpine
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD k6 version || exit 1
+COPY --from=builder /app/k6 /bin/
+
+ENTRYPOINT [ "k6" ]
